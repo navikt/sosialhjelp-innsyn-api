@@ -11,7 +11,7 @@ const val APPLICATION_READY = "Application is ready!"
 
 @RestController
 @RequestMapping(value = ["/internal"])
-class SelftestController {
+class HealthController {
 
     val isAlive: String
         @ResponseBody

@@ -22,7 +22,7 @@
         <kotlin.version>1.3.31</kotlin.version>
         <logstash-logback-encoder.version>5.2</logstash-logback-encoder.version>
 
-        <soknadsosialhjelp-filformat.version>1.20190506.1608</soknadsosialhjelp-filformat.version>
+        <soknadsosialhjelp-filformat.version>1.2019.05.08-16.27-0a95b4468f3d</soknadsosialhjelp-filformat.version>
     </properties>
 
     <dependencies>

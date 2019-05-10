@@ -68,11 +68,11 @@ repositories {
 }
 
 val fatJar = task("fatJar", type = Jar::class) {
-    baseName = "${project.name}-all"
+    archiveClassifier.set("all")
     manifest {
-        attributes["Main-Class"] = mainClass
+        attributes("Main-Class" to mainClass)
     }
-    from(configurations.runtime.map({if (it.isDirectory) it else zipTree(it)}))
+    from(Callable { configurations["runtimeClasspath"].map { if (it.isDirectory) it else zipTree(it) } })
     with(tasks["jar"] as CopySpec)
 }
 

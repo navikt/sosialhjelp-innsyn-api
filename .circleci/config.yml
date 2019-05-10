@@ -7,18 +7,22 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-#      - run:
-#          name: Run tests
-#          command: ./gradlew test
       - run:
           name: Create workspace
           command: mkdir -p /tmp/workspace
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle.kts" }}
       - run:
-          name: Build JAR file
-          command: ./gradlew shadowJar
+          name: build
+          command: gradle test build
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle.kts" }}
       - run:
           name: Copy jars to workspace
-          command: cp build/libs/*.jar /tmp/workspace
+          command: cp build/libs/*-all.jar /tmp/workspace
       - persist_to_workspace:
           root: /tmp/workspace
           paths: "*.jar"

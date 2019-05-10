@@ -4,9 +4,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class SosialhjelpInnsynApplication
+class Application
 
     fun main(args: Array<String>) {
-        runApplication<SosialhjelpInnsynApplication>(*args)
+        runApplication<Application>(*args)
     }
 

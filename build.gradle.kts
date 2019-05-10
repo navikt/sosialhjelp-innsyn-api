@@ -1,4 +1,8 @@
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+group = "no.nav.sbl"
+version = "1.0-SNAPSHOT"
 
 val kotlinVersion = "1.3.31"
 val springBootVersion = "2.1.4.RELEASE"
@@ -8,13 +12,13 @@ val junitJupiterVersion = "5.3.2"
 val filformatVersion = "1.2019.05.08-16.27-0a95b4468f3d"
 val micrometerRegistryVersion = "1.1.2"
 
-val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.SosialhjelpInnsynApplicationKt"
+val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
 plugins {
     application
     kotlin("jvm") version "1.3.31"
 
-    id("com.github.johnrengelman.shadow") version "4.0.4"
+//    id("com.github.johnrengelman.shadow") version "4.0.4"
     id("org.jetbrains.kotlin.plugin.spring") version "1.3.31"
     id("org.springframework.boot") version "2.1.4.RELEASE"
     id("io.spring.dependency-management") version "1.0.7.RELEASE"
@@ -63,6 +67,15 @@ repositories {
     mavenCentral()
 }
 
+val fatJar = task("fatJar", type = Jar::class) {
+    baseName = "${project.name}-all"
+    manifest {
+        attributes["Main-Class"] = mainClass
+    }
+    from(configurations.runtime.map({if (it.isDirectory) it else zipTree(it)}))
+    with(tasks["jar"] as CopySpec)
+}
+
 tasks {
     create("printVersion") {
         doLast {
@@ -81,5 +94,8 @@ tasks {
         testLogging {
             events("passed", "skipped", "failed")
         }
+    }
+    "build" {
+        dependsOn(fatJar)
     }
 }

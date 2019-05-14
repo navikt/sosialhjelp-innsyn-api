@@ -18,16 +18,12 @@ plugins {
     application
     kotlin("jvm") version "1.3.31"
 
-//    id("com.github.johnrengelman.shadow") version "4.0.4"
     id("org.jetbrains.kotlin.plugin.spring") version "1.3.31"
     id("org.springframework.boot") version "2.1.4.RELEASE"
     id("io.spring.dependency-management") version "1.0.7.RELEASE"
 }
 
 buildscript {
-    repositories {
-        maven("https://repo.adeo.no/repository/maven-central")
-    }
     dependencies {
         classpath("org.junit.platform:junit-platform-gradle-plugin:1.2.0")
     }
@@ -35,6 +31,11 @@ buildscript {
 
 application {
     mainClassName = mainClass
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {
@@ -60,11 +61,10 @@ dependencies {
 }
 
 repositories {
-    maven("https://repo.adeo.no/repository/maven-central")
+    mavenCentral()
+    jcenter()
     maven("https://plugins.gradle.org/m2/")
     maven("http://repo.spring.io/plugins-release/")
-    jcenter()
-    mavenCentral()
 }
 
 val fatJar = task("fatJar", type = Jar::class) {

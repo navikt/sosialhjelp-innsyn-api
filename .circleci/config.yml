@@ -52,6 +52,18 @@ jobs:
             docker push "navikt/sosialhjelp-innsyn-api:latest"
             docker push "navikt/sosialhjelp-innsyn-api:$VERSION"
             docker push "navikt/sosialhjelp-innsyn-api:$GIT_HASH"
+  deploy-preprod:
+    docker:
+      - image: navikt/deployment-cli:v0.1.3
+    environment:
+      DOCKER_IMG_NAME: navikt/sosialhjelp-innsyn-api
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Create deployment request for development
+          command: |
+            deployment-cli deploy create --environment=dev-sbs --repository=$DOCKER_IMG_NAME --team=digisos -r=deploy/preprod.yaml --version=${CIRCLE_SHA1}
 workflows:
   version: 2
   build_and_deploy:
@@ -60,6 +72,12 @@ workflows:
       - release:
           requires:
             - build
+          filters:
+            branches:
+              only: master
+      - deploy-preprod:
+          requires:
+            - release
           filters:
             branches:
               only: master

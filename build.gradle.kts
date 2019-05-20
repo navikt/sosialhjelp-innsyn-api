@@ -1,4 +1,4 @@
-import org.gradle.jvm.tasks.Jar
+//import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.sbl"
@@ -21,6 +21,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.spring") version "1.3.31"
     id("org.springframework.boot") version "2.1.4.RELEASE"
     id("io.spring.dependency-management") version "1.0.7.RELEASE"
+//    id("com.github.johnrengelman.shadow") version "5.0.0"
 }
 
 buildscript {
@@ -40,6 +41,7 @@ java {
 
 dependencies {
     compile(kotlin("stdlib"))
+    compile(kotlin("reflect"))
 
     compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion") {
         exclude(module="spring-boot-starter-tomcat")
@@ -67,14 +69,14 @@ repositories {
     maven("http://repo.spring.io/plugins-release/")
 }
 
-val fatJar = task("fatJar", type = Jar::class) {
-    archiveClassifier.set("all")
-    manifest {
-        attributes("Main-Class" to mainClass)
-    }
-    from(Callable { configurations["runtimeClasspath"].map { if (it.isDirectory) it else zipTree(it) } })
-    with(tasks["jar"] as CopySpec)
-}
+//val fatJar = task("fatJar", type = Jar::class) {
+//    archiveClassifier.set("all")
+//    manifest {
+//        attributes("Main-Class" to mainClass)
+//    }
+//    from(Callable { configurations["runtimeClasspath"].map { if (it.isDirectory) it else zipTree(it) } })
+//    with(tasks["jar"] as CopySpec)
+//}
 
 tasks {
     create("printVersion") {
@@ -95,7 +97,7 @@ tasks {
             events("passed", "skipped", "failed")
         }
     }
-    "build" {
-        dependsOn(fatJar)
-    }
+//    "build" {
+//        dependsOn(fatJar)
+//    }
 }

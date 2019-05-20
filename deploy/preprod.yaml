@@ -26,6 +26,8 @@ spec:
     max: 4
   vault:
     enabled: false
+  ingresses:
+    - "https://sosialhjelp-innsyn-api.nais.oera-q.local"
   resources:
     limits:
       cpu: 500m

@@ -5,5 +5,3 @@ ENV LANG="no_NB.UTF-8"
 ENV TZ="Europe/Oslo"
 
 COPY sosialhjelp-innsyn-api-*.jar app.jar
-
-ENV JAVA_OPTS='-Dlogback.configurationFile=logback-remote.xml'

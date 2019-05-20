@@ -11,6 +11,7 @@ val logstashVersion = "5.3"
 val junitJupiterVersion = "5.3.2"
 val filformatVersion = "1.2019.05.08-16.27-0a95b4468f3d"
 val micrometerRegistryVersion = "1.1.2"
+val tokenSupportVersion = "0.2.18"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -57,9 +58,12 @@ dependencies {
 
     compile("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:$filformatVersion")
 
+    compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
+
     testCompile("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testCompile("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion")
 }
 
 repositories {

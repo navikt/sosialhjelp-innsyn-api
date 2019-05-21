@@ -29,6 +29,7 @@ spec:
     enabled: false
   ingresses:
     - "https://sosialhjelp-innsyn-api.nais.oera-q.local"
+    - "https://www.nav-q0.no/sosialhjelp/innsyn-api/"
   resources:
     limits:
       cpu: 500m

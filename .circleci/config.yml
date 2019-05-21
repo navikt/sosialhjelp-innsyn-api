@@ -81,7 +81,7 @@ jobs:
       - run:
           name: Create deployment request for development
           command: |
-            deployment-cli deploy create --environment=dev-sbs --repository=$DOCKER_IMG_NAME --team=digisos -r=deploy/<< miljo >>.yaml --version=${CIRCLE_SHA1}
+            deployment-cli deploy create --environment=dev-sbs --repository=$DOCKER_IMG_NAME --team=digisos -r=deploy/${miljo}.yaml --version=${CIRCLE_SHA1}
 
 workflows:
   version: 2

@@ -53,12 +53,6 @@ jobs:
             docker push "navikt/sosialhjelp-innsyn-api:$VERSION"
             docker push "navikt/sosialhjelp-innsyn-api:$GIT_HASH"
   deploy-preprod:
-    parameters:
-      miljo:
-        description: "To where shall we deploy this application?"
-        default: "default"
-        type: enum
-        enum: ["default", "q0", "q1"]
     docker:
       - image: navikt/deployment-cli:v0.1.3
     environment:
@@ -69,8 +63,25 @@ jobs:
       - run:
           name: Create deployment request for development
           command: |
-            deployment-cli deploy create --environment=dev-sbs --repository=$DOCKER_IMG_NAME --team=digisos -r=deploy/${miljo}.yaml --version=${CIRCLE_SHA1}
-
+            deployment-cli deploy create --environment=dev-sbs --repository=$DOCKER_IMG_NAME --team=digisos -r=deploy/default.yaml --version=${CIRCLE_SHA1}
+    deploy-miljo:
+      parameters:
+        miljo:
+          description: "To where shall we deploy this application?"
+          default: "default"
+          type: enum
+          enum: ["default", "q0", "q1"]
+      docker:
+        - image: navikt/deployment-cli:v0.1.3
+      environment:
+        DOCKER_IMG_NAME: navikt/sosialhjelp-innsyn-api
+      steps:
+        - checkout
+        - setup_remote_docker
+        - run:
+            name: Create deployment request for development
+            command: |
+              deployment-cli deploy create --environment=dev-sbs --repository=$DOCKER_IMG_NAME --team=digisos -r=deploy/${miljo}.yaml --version=${CIRCLE_SHA1}
 workflows:
   version: 2
   build_and_deploy:

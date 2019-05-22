@@ -58,7 +58,9 @@ dependencies {
 
     compile("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:$filformatVersion")
 
-    compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
+    compile("no.nav.security:oidc-spring-support:$tokenSupportVersion"){
+        exclude(module="spring-boot-starter-tomcat")
+    }
 
     testCompile("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testCompile("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")

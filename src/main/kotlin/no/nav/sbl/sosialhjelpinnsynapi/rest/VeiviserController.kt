@@ -23,7 +23,7 @@ class VeiviserController {
         try {
             val urlConnection = URL("https://register.geonorge.no/api/subregister/sosi-kodelister/kartverket/kommunenummer-alle.json").openConnection() as HttpsURLConnection
             try {
-                val kommunenr = urlConnection.inputStream.use { inputStream -> IOUtils.toString(inputStream) }
+                val kommunenr = urlConnection.inputStream.use { inputStream -> IOUtils.toString(inputStream, Charsets.UTF_8) }
                 return ResponseEntity.ok(kommunenr)
             } catch (e: IOException) {
                 e.printStackTrace()

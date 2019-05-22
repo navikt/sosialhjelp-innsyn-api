@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import io.micrometer.core.instrument.util.IOUtils
+import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
@@ -12,6 +13,7 @@ import java.io.IOException
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
+@Unprotected
 @RestController
 @RequestMapping("/api/veiviser/")
 class VeiviserController {

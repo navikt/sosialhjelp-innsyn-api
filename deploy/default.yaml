@@ -9,13 +9,13 @@ spec:
   image: "navikt/sosialhjelp-innsyn-api:{{version}}"
   port: 8080
   liveness:
-    path: /internal/isAlive
+    path: /sosialhjelp/innsyn-api/internal/isAlive
     initialDelay: 20
     timeout: 1
     periodSeconds: 5
     failureThreshold: 10
   readiness:
-    path: /internal/isReady
+    path: /sosialhjelp/innsyn-api/internal/isReady
     initialDelay: 20
     timeout: 1
   prometheus:

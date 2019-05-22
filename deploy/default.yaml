@@ -28,8 +28,8 @@ spec:
   vault:
     enabled: false
   ingresses:
-    - "https://sosialhjelp-innsyn-api.nais.oera-q.local"
-    - "https://www-q0.nav.no/sosialhjelp/innsyn-api/"
+    - "https://sosialhjelp-innsyn-api.nais.oera-q.local/sosialhjelp/innsyn-api"
+    - "https://www-q0.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
       cpu: 500m

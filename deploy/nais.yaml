@@ -27,8 +27,7 @@ spec:
   webproxy: true
   vault:
     enabled: false
-  ingresses: # todo: endre til dynamisk config
-    - {{{ingresses}}}
+  ingresses: {{{ingresses}}}
   resources:
     limits:
       cpu: 500m

@@ -61,6 +61,20 @@ jobs:
       - deploy:
           miljo: "default"
 
+  deploy_miljo:
+    parameters:
+      version:
+        type: string
+      namespace:
+        type: string
+    docker:
+      - image: navikt/deployment-cli:v0.1.5
+    steps:
+      - checkout
+      - deploy_version_to_miljo:
+          miljo: << parameters.namespace >>
+          version: << parameters.version >>
+
 commands:
   deploy:
     description: "Deploy til et gitt miljø"
@@ -74,6 +88,21 @@ commands:
           name: Deploy til << parameters.miljo >>
           command: |
             deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos --resource=deploy/nais.yaml --version=$CIRCLE_SHA1 --vars=nais/dev/<< parameters.miljo >>.json
+
+  deploy_version_to_miljo:
+    description: "Deploy gitt versjon til et gitt miljø"
+    parameters:
+      miljo:
+        type: enum
+        default: "default"
+        enum: ["default", "q0", "q1"]
+      version:
+        type: string
+    steps:
+      - run: # Brukernavn og passord til Github ligger i miljøvariablene DEPLOYMENT_USERNAME og DEPLOYMENT_PASSWORD.
+          name: Deploy til << parameters.miljo >>
+          command: |
+            deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos --resource=deploy/nais.yaml --version=<< parameters.version >> --vars=nais/dev/<< parameters.miljo >>.json
 
 workflows:
   version: 2.1

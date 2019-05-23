@@ -1,0 +1,4 @@
+{
+  "namespace": "q0",
+  "ingresses": ["https://sosialhjelp-innsyn-api-q0.nais.oera-q.local/sosialhjelp/innsyn-api", "https://www-q0.nav.no/sosialhjelp/innsyn-api"]
+}

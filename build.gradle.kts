@@ -1,4 +1,3 @@
-//import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.sbl"
@@ -75,15 +74,6 @@ repositories {
     maven("http://repo.spring.io/plugins-release/")
 }
 
-//val fatJar = task("fatJar", type = Jar::class) {
-//    archiveClassifier.set("all")
-//    manifest {
-//        attributes("Main-Class" to mainClass)
-//    }
-//    from(Callable { configurations["runtimeClasspath"].map { if (it.isDirectory) it else zipTree(it) } })
-//    with(tasks["jar"] as CopySpec)
-//}
-
 tasks {
     create("printVersion") {
         doLast {
@@ -103,7 +93,4 @@ tasks {
             events("passed", "skipped", "failed")
         }
     }
-//    "build" {
-//        dependsOn(fatJar)
-//    }
 }

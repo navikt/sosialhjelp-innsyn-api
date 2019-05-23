@@ -28,8 +28,7 @@ spec:
   vault:
     enabled: false
   ingresses: # todo: endre til dynamisk config
-    - {{{ingress_local}}}
-    - {{{ingress_q0}}}
+    - {{{ingresses}}}
   resources:
     limits:
       cpu: 500m

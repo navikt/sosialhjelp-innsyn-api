@@ -2,20 +2,20 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: sosialhjelp-innsyn-api
-  namespace: q1
+  namespace: "{{namespace}}"
   labels:
     team: digisos
 spec:
   image: "navikt/sosialhjelp-innsyn-api:{{version}}"
   port: 8080
   liveness:
-    path: /internal/isAlive
+    path: /sosialhjelp/innsyn-api/internal/isAlive
     initialDelay: 20
     timeout: 1
     periodSeconds: 5
     failureThreshold: 10
   readiness:
-    path: /internal/isReady
+    path: /sosialhjelp/innsyn-api/internal/isReady
     initialDelay: 20
     timeout: 1
   prometheus:
@@ -27,8 +27,9 @@ spec:
   webproxy: true
   vault:
     enabled: false
-  ingresses:
-    - "https://sosialhjelp-innsyn-api-q1.nais.oera-q.local"
+  ingresses: # todo: endre til dynamisk config
+    - {{{ingress_local}}}
+    - {{{ingress_q0}}}
   resources:
     limits:
       cpu: 500m

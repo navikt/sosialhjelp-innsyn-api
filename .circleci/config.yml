@@ -62,18 +62,13 @@ jobs:
           miljo: "default"
 
   deploy_miljo:
-    parameters:
-      version:
-        type: string
-      namespace:
-        type: string
     docker:
       - image: navikt/deployment-cli:v0.1.5
     steps:
       - checkout
       - deploy_version_to_miljo:
-          miljo: << parameters.namespace >>
-          version: << parameters.version >>
+          miljo: $namespace
+          version: $versjon
 
 commands:
   deploy:

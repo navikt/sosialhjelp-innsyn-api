@@ -1,4 +1,4 @@
-version: 2.1
+version: 2
 defaults: &defaults
   docker:
     - image: "circleci/openjdk:11-jdk"
@@ -58,49 +58,25 @@ jobs:
       - image: navikt/deployment-cli:v0.1.5
     steps:
       - checkout
-      - deploy:
-          miljo: "default"
+      - setup_remote_docker
+      - run: # Brukernavn og passord til Github ligger i miljøvariablene DEPLOYMENT_USERNAME og DEPLOYMENT_PASSWORD. TODO: legge til støtte for deploy til prod
+          name: Deploy til default dev-sbs
+          command: |
+            deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=deploy/nais.yaml --version=${CIRCLE_SHA1} --vars=nais/dev/default.json
 
   deploy_miljo:
     docker:
       - image: navikt/deployment-cli:v0.1.5
     steps:
       - checkout
-      - deploy_version_to_miljo:
-          miljo: $namespace
-          version: $versjon
-
-commands:
-  deploy:
-    description: "Deploy til et gitt miljø"
-    parameters:
-      miljo:
-        type: enum
-        default: "default"
-        enum: ["default", "q0", "q1"]
-    steps:
-      - run: # Brukernavn og passord til Github ligger i miljøvariablene DEPLOYMENT_USERNAME og DEPLOYMENT_PASSWORD. TODO: legge til støtte for deploy til prod
-          name: Deploy til << parameters.miljo >>
-          command: |
-            deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos --resource=deploy/nais.yaml --version=$CIRCLE_SHA1 --vars=nais/dev/<< parameters.miljo >>.json
-
-  deploy_version_to_miljo:
-    description: "Deploy gitt versjon til et gitt miljø"
-    parameters:
-      miljo:
-        type: enum
-        default: "default"
-        enum: ["default", "q0", "q1"]
-      version:
-        type: string
-    steps:
+      - setup_remote_docker
       - run: # Brukernavn og passord til Github ligger i miljøvariablene DEPLOYMENT_USERNAME og DEPLOYMENT_PASSWORD.
-          name: Deploy til << parameters.miljo >>
+          name: Deploy til ${MILJO} dev-sbs
           command: |
-            deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos --resource=deploy/nais.yaml --version=<< parameters.version >> --vars=nais/dev/<< parameters.miljo >>.json
+            deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=deploy/nais.yaml --version=${VERSION} --vars=nais/dev/${MILJO}.json
 
 workflows:
-  version: 2.1
+  version: 2
   build_and_deploy:
     jobs:
       - build

@@ -20,6 +20,9 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 - Velg 'Set up project', og følg guiden.
 - Environment-variabelen DOCKER_USERNAME settes med verdi `naviktdocker`
 - Environment-variabelen DOCKER_PASSWORD må settes. Ligger på vault, og fåes av noen med tilgang.
+- Dersom man benytter seg av versjon 2.0 av CircleCi kan man deploye en gitt versjon til miljø (eks q0), ved bruk av CircleCis API som nedenfor:
+
+`curl -d 'build_parameters[CIRCLE_JOB]=deploy_miljo' -d 'build_parameters[VERSION]=ditt_versjonsnummer' -d 'build_parameters[MILJO]=ditt_miljø' 'https://circleci.com/api/v1.1/project/github/navikt/sosialhjelp-innsyn-api?circle-token=ditt_token' `
 
 ### Github deployment
 - Krever at appen bruker naiserator
@@ -29,6 +32,6 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 
 
 ### Vault
-- Lag PR til `vault-iac`. 
-- Denne må godkjennes før man kan opprette secrets
+- Lag PR til `vault-iac` slik at man kan lagre secrets i eksempelvis `kv/preprod/sbs/sosialhjelp-innsyn-api/q0`
+- Denne må godkjennes og merges før man kan opprette secrets i overnevnte katalog.
 - mer kommer

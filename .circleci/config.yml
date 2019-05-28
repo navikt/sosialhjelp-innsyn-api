@@ -76,6 +76,7 @@ jobs:
             deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=deploy/nais.yaml --version=${VERSION} --vars=nais/dev/${MILJO}.json
 
   deploy_prod:
+    type: approval
     docker:
       - image: navikt/deployment-cli:v0.1.5
     steps:

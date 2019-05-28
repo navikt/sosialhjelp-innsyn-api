@@ -75,6 +75,17 @@ jobs:
           command: |
             deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=deploy/nais.yaml --version=${VERSION} --vars=nais/dev/${MILJO}.json
 
+  deploy_prod:
+    docker:
+      - image: navikt/deployment-cli:v0.1.5
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: # Brukernavn og passord til Github ligger i miljøvariablene DEPLOYMENT_USERNAME og DEPLOYMENT_PASSWORD.
+          name: Deploy til prod
+          command: |
+            deployment-cli deploy create --cluster=prod-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=deploy/nais.yaml --version=${VERSION} --vars=nais/prod/default.json
+
 workflows:
   version: 2
   build_and_deploy:

@@ -7,7 +7,8 @@ val kotlinVersion = "1.3.31"
 val springBootVersion = "2.1.4.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
-val junitJupiterVersion = "5.3.2"
+val junitJupiterVersion = "5.4.2"
+val mockkVersion = "1.9.3"
 val filformatVersion = "1.2019.05.08-16.27-0a95b4468f3d"
 val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
@@ -61,9 +62,8 @@ dependencies {
         exclude(module="spring-boot-starter-tomcat")
     }
 
-    testCompile("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-    testCompile("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    testCompile("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
     testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion")
 }
 
@@ -88,7 +88,9 @@ tasks {
     }
 
     withType<Test> {
-        useJUnitPlatform()
+        useJUnitPlatform{
+            includeEngines("junit-jupiter")
+        }
         testLogging {
             events("passed", "skipped", "failed")
         }

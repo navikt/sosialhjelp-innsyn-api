@@ -3,19 +3,16 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 import io.micrometer.core.instrument.util.IOUtils
 import no.nav.security.oidc.api.Unprotected
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 import java.util.concurrent.atomic.AtomicReference
 import javax.net.ssl.HttpsURLConnection
 

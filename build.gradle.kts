@@ -47,6 +47,7 @@ dependencies {
         exclude(module="spring-boot-starter-tomcat")
     }
     compile("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
     compile("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryVersion")
     compile("org.springframework.boot:spring-boot-starter-logging:$springBootVersion") {

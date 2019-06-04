@@ -1,12 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.innsyn
 
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.springframework.stereotype.Component
 
 @Component
-class InnsynService {
+class InnsynService(val fiksClient: FiksClient) {
 
     fun execute(soknadId: Long): String {
-        // todo kalle FIKS
+//        fiksClient.hentDigisosSak(soknadId)
         return "ok"
     }
 }

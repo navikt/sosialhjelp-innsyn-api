@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.config
 import no.nav.security.spring.oidc.api.EnableOIDCTokenValidation
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
@@ -16,6 +15,7 @@ private val ALLOWED_ORIGINS = arrayOf(
         "https://sosialhjelp-innsyn-q1.nais.oera-q.local",
         "https://veivisersosialhjelp-q0.nais.oera-q.local",
         "https://veivisersosialhjelp-q1.nais.oera-q.local"
+// TODO: legg til origin for prod?
 )
 
 class ApiConfig : WebMvcConfigurer {
@@ -31,10 +31,9 @@ class ApiConfig : WebMvcConfigurer {
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableOIDCTokenValidation(ignore = ["org.springframework"])
 @Import(ApiConfig::class)
-class MethodSecurityConfig : WebSecurityConfigurerAdapter() {
+class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {

@@ -12,11 +12,9 @@ import org.springframework.web.server.ResponseStatusException
 private val log = LoggerFactory.getLogger(FiksClient::class.java)
 
 @Component
-class FiksClient {
+class FiksClient(private val restTemplate: RestTemplate = RestTemplate()) {
 
 //    TODO: headers og bruk env variabler til å hente riktig url
-
-    private val restTemplate = RestTemplate()
 
     fun hentDigisosSak(digisosId: String): DigisosSak {
         val response = restTemplate.getForEntity("http://fiksurl.no" + "/digisos/api/v1/soknader/$digisosId", DigisosSak::class.java)

@@ -39,3 +39,15 @@ data class DigisosSoker(
         val metadata: String,
         val dokumenter: List<DokumentInfo>
 )
+
+data class KommuneInfo(
+        val kommunenummer: String,
+        val kanMottaSoknader: Boolean,
+        val kanOppdatereStatus: Boolean,
+        val kontaktPersoner: Kontaktpersoner
+)
+
+data class Kontaktpersoner(
+        val fagansvarligEpost: List<String>,
+        val tekniskAnsvarligEpost: List<String>
+)

@@ -24,7 +24,7 @@ class ApiConfig : WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedOrigins(*ALLOWED_ORIGINS)
-                .allowedHeaders("*")
+                .allowedHeaders("Origin", "Content-Type", "Accept", "Authorization")
                 .allowCredentials(true)
     }
 }

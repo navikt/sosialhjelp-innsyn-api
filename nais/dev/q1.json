@@ -1,4 +1,7 @@
 {
   "namespace": "q1",
-  "ingresses": ["https://sosialhjelp-innsyn-api-q1.nais.oera-q.local/sosialhjelp/innsyn-api", "https://www-q1.nav.no/sosialhjelp/innsyn-api"]
+  "ingresses": [
+    "https://sosialhjelp-innsyn-api-q1.nais.oera-q.local/sosialhjelp/innsyn-api",
+    "https://www-q1.nav.no/sosialhjelp/innsyn-api"
+  ]
 }

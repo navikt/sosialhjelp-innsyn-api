@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpStatus.BAD_REQUEST
@@ -19,9 +20,9 @@ class InnsynController(val innsynService: InnsynService) {
     // todo:  returnere ResponseEntity med JsonDigisosSoker på sikt
 
     @GetMapping("/{soknadId}", produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun getInnsynForSoknad(@PathVariable soknadId: Long): ResponseEntity<String> {
+    fun getInnsynForSoknad(@PathVariable soknadId: String): ResponseEntity<DigisosSak> {
         try {
-            return ResponseEntity.ok(innsynService.execute(soknadId))
+            return ResponseEntity.ok(innsynService.hentDigisosSak(soknadId))
         } catch (e: Exception) {
             throw ResponseStatusException(BAD_REQUEST)
         }

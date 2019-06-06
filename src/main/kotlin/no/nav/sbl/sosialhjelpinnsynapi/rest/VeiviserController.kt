@@ -2,36 +2,57 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import io.micrometer.core.instrument.util.IOUtils
 import no.nav.security.oidc.api.Unprotected
-import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.URL
+import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.atomic.AtomicReference
 import javax.net.ssl.HttpsURLConnection
 
 @Unprotected
 @RestController
 @RequestMapping("/api/veiviser/")
 class VeiviserController {
-
+    private val kommunenummerCache = KommunenummerCache()
     @GetMapping("kommunenummer", produces = [APPLICATION_JSON_UTF8_VALUE])
     fun getInnsynForSoknad(): ResponseEntity<String> {
-        try {
-            val urlConnection = URL("https://register.geonorge.no/api/subregister/sosi-kodelister/kartverket/kommunenummer-alle.json").openConnection() as HttpsURLConnection
-            try {
-                val kommunenr = urlConnection.inputStream.use { inputStream -> IOUtils.toString(inputStream, Charsets.UTF_8) }
-                return ResponseEntity.ok(kommunenr)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+        return ResponseEntity.ok(kommunenummerCache.getKommunenr())
+    }
+}
 
-            return ResponseEntity.notFound().build()
-        } catch (e: Exception) {
-            throw ResponseStatusException(BAD_REQUEST)
+private class KommunenummerCache {
+    private val log = LoggerFactory.getLogger(this.javaClass)
+    private val referanse = AtomicReference(Intern())
+
+    private class Intern {
+        internal var data = ""
+        internal var tidspunkt = OffsetDateTime.MIN
+    }
+
+    fun getKommunenr(): String {
+        if (referanse.get().tidspunkt.isBefore(OffsetDateTime.now().truncatedTo(ChronoUnit.DAYS))) {
+            try {
+                val urlConnection = URL("https://register.geonorge.no/api/subregister/sosi-kodelister/kartverket/kommunenummer-alle.json").openConnection() as HttpsURLConnection
+                if (urlConnection.responseCode != HttpURLConnection.HTTP_OK) {
+                    return referanse.get().data
+                }
+                val kommunenr = urlConnection.inputStream.use { inputStream -> IOUtils.toString(inputStream, Charsets.UTF_8) }
+
+                val intern = Intern()
+                intern.tidspunkt = OffsetDateTime.now()
+                intern.data = kommunenr
+                referanse.set(intern)
+            } catch (e: IOException) {
+                log.warn("Kunne ikke hente fra https://register.geonorge.no/api/subregister/sosi-kodelister/kartverket/kommunenummer-alle.json", e)
+            }
         }
+        return referanse.get().data
     }
 }

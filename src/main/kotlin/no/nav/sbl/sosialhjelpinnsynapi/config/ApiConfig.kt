@@ -9,21 +9,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
-private val ALLOWED_ORIGINS = arrayOf(
-        "http://localhost:3000",
-        "https://sosialhjelp-innsyn-q0.nais.oera-q.local",
-        "https://sosialhjelp-innsyn-q1.nais.oera-q.local",
-        "https://veivisersosialhjelp-q0.nais.oera-q.local",
-        "https://veivisersosialhjelp-q1.nais.oera-q.local"
-// TODO: legg til origin for prod?
-)
-
-class ApiConfig : WebMvcConfigurer {
+class ApiConfig(private val corsProperties: CorsProperties) : WebMvcConfigurer {
 
     override fun addCorsMappings(registry: CorsRegistry) {
+
         registry.addMapping("/**")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowedOrigins(*ALLOWED_ORIGINS)
+                .allowedOrigins(*corsProperties.allowedOrigins)
                 .allowedHeaders("Origin", "Content-Type", "Accept", "Authorization")
                 .allowCredentials(true)
     }

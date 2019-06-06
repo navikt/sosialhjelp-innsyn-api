@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
+import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import org.slf4j.LoggerFactory
@@ -12,12 +13,13 @@ import org.springframework.web.server.ResponseStatusException
 private val log = LoggerFactory.getLogger(FiksClient::class.java)
 
 @Component
-class FiksClient(private val restTemplate: RestTemplate = RestTemplate()) {
+class FiksClient(private val clientProperties: ClientProperties,
+                 private val restTemplate: RestTemplate = RestTemplate()) {
 
-//    TODO: headers og bruk env variabler til å hente riktig url
+    private val baseUrl = clientProperties.fiksDigisosEndpointUrl
 
     fun hentDigisosSak(digisosId: String): DigisosSak {
-        val response = restTemplate.getForEntity("http://fiksurl.no" + "/digisos/api/v1/soknader/$digisosId", DigisosSak::class.java)
+        val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/soknader/$digisosId", DigisosSak::class.java)
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!
         } else {
@@ -27,7 +29,7 @@ class FiksClient(private val restTemplate: RestTemplate = RestTemplate()) {
     }
 
     fun hentAlleDigisosSaker(): List<DigisosSak> {
-        val response = restTemplate.exchange("http://fiksurl.no" + "/digisos/api/v1/soknader", HttpMethod.GET, null, typeRef<List<DigisosSak>>())
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, null, typeRef<List<DigisosSak>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!
         } else {
@@ -37,7 +39,7 @@ class FiksClient(private val restTemplate: RestTemplate = RestTemplate()) {
     }
 
     fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo {
-        val response = restTemplate.getForEntity("http://fiksurl.no" + "/digisos/api/v1/nav/kommune/$kommunenummer", KommuneInfo::class.java)
+        val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", KommuneInfo::class.java)
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!
         } else {
@@ -47,4 +49,4 @@ class FiksClient(private val restTemplate: RestTemplate = RestTemplate()) {
     }
 }
 
-inline fun <reified T: Any> typeRef(): ParameterizedTypeReference<T> = object: ParameterizedTypeReference<T>(){}
+inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}

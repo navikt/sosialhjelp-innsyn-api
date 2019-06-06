@@ -13,3 +13,6 @@ spring:
 server:
   servlet:
     context-path: '/soknadsosialhjelp/innsyn-api'
+
+client:
+  fiks_digisos_endpoint_url: 'some url'

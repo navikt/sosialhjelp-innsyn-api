@@ -5,8 +5,8 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import org.junit.jupiter.api.AfterAll
@@ -22,6 +22,8 @@ import org.springframework.web.client.RestTemplate
 internal class FiksClientTest {
 
     // ta i bruk wiremock og response i integrasjonstester
+//        WireMock.stubFor(WireMock.get(WireMock.urlMatching("/digisos/api/v1/soknader/123"))
+//                .willReturn(WireMock.ok(ok_digisossak_response)))
     companion object {
         val server: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
 
@@ -38,8 +40,8 @@ internal class FiksClientTest {
         }
     }
 
-    @MockK
-    lateinit var testRestTemplate: RestTemplate
+    val clientProperties = mockk<ClientProperties>(relaxed = true)
+    val restTemplate = mockk<RestTemplate>()
 
     @InjectMockKs
     lateinit var fiksclient: FiksClient
@@ -51,10 +53,7 @@ internal class FiksClientTest {
     }
 
     @Test
-    fun `should return exactly one digisosSak`() {
-//        WireMock.stubFor(WireMock.get(WireMock.urlMatching("/digisos/api/v1/soknader/123"))
-//                .willReturn(WireMock.ok(ok_digisossak_response)))
-
+    fun `GET eksakt 1 DigisosSak`() {
         val mockResponse = mockk<ResponseEntity<DigisosSak>>()
         val mockDigisosSak = mockk<DigisosSak>()
 
@@ -62,7 +61,7 @@ internal class FiksClientTest {
         every { mockResponse.body } returns mockDigisosSak
 
         every {
-            testRestTemplate.getForEntity(
+            restTemplate.getForEntity(
                     any<String>(),
                     DigisosSak::class.java)
         } returns mockResponse
@@ -73,7 +72,7 @@ internal class FiksClientTest {
     }
 
     @Test
-    fun `should return list of digisosSaker`() {
+    fun `GET alle DigisosSaker for søker`() {
         val mockResponse = mockk<ResponseEntity<List<DigisosSak>>>()
         val mockDigisosSak1 = mockk<DigisosSak>()
         val mockDigisosSak2 = mockk<DigisosSak>()
@@ -82,7 +81,7 @@ internal class FiksClientTest {
         every { mockResponse.body } returns listOf(mockDigisosSak1, mockDigisosSak2)
 
         every {
-            testRestTemplate.exchange(
+            restTemplate.exchange(
                     any<String>(),
                     any(),
                     null,
@@ -96,7 +95,7 @@ internal class FiksClientTest {
     }
 
     @Test
-    fun `should return exactly one kommuneInfo`() {
+    fun `GET KommuneInfo for kommunenummer`() {
         val mockResponse = mockk<ResponseEntity<KommuneInfo>>()
         val mockKommuneInfo = mockk<KommuneInfo>()
 
@@ -104,7 +103,7 @@ internal class FiksClientTest {
         every { mockResponse.body } returns mockKommuneInfo
 
         every {
-            testRestTemplate.getForEntity(
+            restTemplate.getForEntity(
                     any<String>(),
                     KommuneInfo::class.java)
         } returns mockResponse

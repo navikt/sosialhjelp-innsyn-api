@@ -12,4 +12,4 @@ spring:
 
 server:
   servlet:
-    context-path: '/sosialhjelp/innsyn-api'
+    context-path: '/soknadsosialhjelp/innsyn-api'

@@ -2,9 +2,10 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -13,17 +14,24 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
+@ExtendWith(MockKExtension::class)
 internal class FiksClientTest {
 
     // ta i bruk wiremock og response i integrasjonstester
 //        WireMock.stubFor(WireMock.get(WireMock.urlMatching("/digisos/api/v1/soknader/123"))
 //                .willReturn(WireMock.ok(ok_digisossak_response)))
+
+//    @BeforeEach
+//    fun setUp() {
+//        WireMock.configureFor(server.port())
+//    }
+
     companion object {
         val server: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
 
@@ -40,17 +48,14 @@ internal class FiksClientTest {
         }
     }
 
-    val clientProperties = mockk<ClientProperties>(relaxed = true)
-    val restTemplate = mockk<RestTemplate>()
+    @MockK(relaxed = true)
+    lateinit var clientProperties: ClientProperties
+
+    @MockK
+    lateinit var restTemplate: RestTemplate
 
     @InjectMockKs
     lateinit var fiksclient: FiksClient
-
-    @BeforeEach
-    fun setUp() {
-        MockKAnnotations.init(this)
-//        WireMock.configureFor(server.port())
-    }
 
     @Test
     fun `GET eksakt 1 DigisosSak`() {
@@ -72,7 +77,7 @@ internal class FiksClientTest {
     }
 
     @Test
-    fun `GET alle DigisosSaker for søker`() {
+    fun `GET alle DigisosSaker`() {
         val mockResponse = mockk<ResponseEntity<List<DigisosSak>>>()
         val mockDigisosSak1 = mockk<DigisosSak>()
         val mockDigisosSak2 = mockk<DigisosSak>()

@@ -9,4 +9,6 @@ server:
     context-path: '/soknadsosialhjelp/innsyn-api'
 
 client:
-  fiks_digisos_endpoint_url: 'example.url'
+  fiks_digisos_endpoint_url: 'example.url' #
+  fiks_svar_ut_endpoint_url: 'svar-ut.com' # https://test.svarut.ks.no/forsendelse/{id}/{nr}
+  fiks_dokumentlager_endpoint_url: 'dokumentlager.com' # https://api.fiks.test.ks.no/dokumentlager/api/v1/{fiksOrganisasjonId}/kontoer/{kontoId}/dokumenter/

@@ -16,3 +16,5 @@ server:
 
 client:
   fiks_digisos_endpoint_url: 'some url'
+  fiks_svar_ut_endpoint_url: 'real svar-ut.com'
+  fiks_dokumentlager_endpoint_url: 'real dokumentlager.com'

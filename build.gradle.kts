@@ -74,6 +74,7 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
     testCompile("com.github.tomakehurst:wiremock:$wireMockVersion")
     testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion")
+    testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
 }
 
 repositories {

@@ -1,7 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -10,10 +8,8 @@ import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.core.ParameterizedTypeReference
@@ -22,31 +18,6 @@ import org.springframework.web.client.RestTemplate
 
 @ExtendWith(MockKExtension::class)
 internal class FiksClientTest {
-
-    // ta i bruk wiremock og response i integrasjonstester
-//        WireMock.stubFor(WireMock.get(WireMock.urlMatching("/digisos/api/v1/soknader/123"))
-//                .willReturn(WireMock.ok(ok_digisossak_response)))
-
-//    @BeforeEach
-//    fun setUp() {
-//        WireMock.configureFor(server.port())
-//    }
-
-    companion object {
-        val server: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
-
-        @BeforeAll
-        @JvmStatic
-        fun start() {
-            server.start()
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun stop() {
-            server.stop()
-        }
-    }
 
     @MockK(relaxed = true)
     lateinit var clientProperties: ClientProperties

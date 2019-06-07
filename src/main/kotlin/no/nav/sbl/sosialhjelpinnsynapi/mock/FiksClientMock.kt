@@ -12,17 +12,27 @@ import java.time.LocalDate
 @Component
 class FiksClientMock: FiksClient {
 
+    private val innsynMap = mutableMapOf<Long, JsonDigisosSoker>()
+
     override fun getInnsynForSoknad(soknadId: Long): JsonDigisosSoker {
+        return innsynMap.getOrDefault(soknadId, getDefaultInnsynForSoknad())
+    }
+
+    fun postInnsynForSoknad(soknadId: Long, jsonDigisosSoker: JsonDigisosSoker) {
+        innsynMap.put(soknadId, jsonDigisosSoker)
+    }
+
+    private fun getDefaultInnsynForSoknad(): JsonDigisosSoker {
         val avsender = JsonAvsender()
             .withSystemnavn("Mocksystemet")
-            .withSystemversjon("1.0.0")
+            .withSystemversjon("mock")
         val hendelser = listOf(
             JsonHendelse()
                 .withType(JsonHendelse.Type.NY_STATUS)
                 .withHendelsestidspunkt(LocalDate.now().toString())
         )
         return JsonDigisosSoker()
-            .withVersion("1.0.0")
+            .withVersion("mock")
             .withAvsender(avsender)
             .withHendelser(hendelser)
     }

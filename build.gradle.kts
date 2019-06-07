@@ -14,6 +14,7 @@ val filformatVersion = "1.2019.06.25-15.05-3ae88a2966e3"
 val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.9"
+val swaggerVersion = "2.9.2"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -65,6 +66,8 @@ dependencies {
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
+    compile("io.springfox:springfox-swagger2:$swaggerVersion")
+    compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
 
 //    Test dependencies
     testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {

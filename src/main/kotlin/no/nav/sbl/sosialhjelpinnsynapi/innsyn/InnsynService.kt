@@ -13,7 +13,7 @@ class InnsynService(private val fiksClient: FiksClient,
         val digisosSak = fiksClient.hentDigisosSak(soknadId)
 
 //        Hent digisos_soker.json, og map om?
-        val string = dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata)
+        val inputStream = dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata)
 
         return digisosSak
     }

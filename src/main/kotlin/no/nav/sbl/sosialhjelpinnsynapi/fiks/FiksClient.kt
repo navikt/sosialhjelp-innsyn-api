@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException
 private val log = LoggerFactory.getLogger(FiksClient::class.java)
 
 @Component
-class FiksClient(private val clientProperties: ClientProperties,
+class FiksClient(clientProperties: ClientProperties,
                  private val restTemplate: RestTemplate = RestTemplate()) {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl

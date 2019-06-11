@@ -26,12 +26,6 @@ plugins {
     id("io.spring.dependency-management") version "1.0.7.RELEASE"
 }
 
-buildscript {
-    dependencies {
-        classpath("org.junit.platform:junit-platform-gradle-plugin:1.2.0")
-    }
-}
-
 application {
     mainClassName = mainClass
 }

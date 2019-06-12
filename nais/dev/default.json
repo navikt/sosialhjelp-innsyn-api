@@ -1,4 +1,6 @@
 {
   "namespace": "default",
-  "ingresses": ["https://sosialhjelp-innsyn-api.nais.oera-q.local/sosialhjelp/innsyn-api"]
+  "ingresses": [
+    "https://sosialhjelp-innsyn-api.nais.oera-q.local/soknadsosialhjelp/innsyn-api"
+  ]
 }

@@ -18,8 +18,7 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 - Hvis Github-brukeren din er medlem i `navikt`, burde `navikt` dukke opp automatisk på CircleCi.
 - Under 'Add projects' kan du finne ditt github-repo.
 - Velg 'Set up project', og følg guiden.
-- Environment-variabelen DOCKER_USERNAME settes med verdi `naviktdocker`
-- Environment-variabelen DOCKER_PASSWORD må settes. Ligger på vault, og fåes av noen med tilgang.
+- Tar i bruk `context` `NAIS DEPLOYMENT`, som henter credentials til navikts dockerhub-bruker for å pushe image. 
 - Dersom man benytter seg av versjon 2.0 av CircleCi kan man deploye en gitt versjon til miljø (eks q0), ved bruk av CircleCis API som nedenfor:
 
 `curl -d 'build_parameters[CIRCLE_JOB]=deploy_miljo' -d 'build_parameters[VERSION]=ditt_versjonsnummer' -d 'build_parameters[MILJO]=ditt_miljø' 'https://circleci.com/api/v1.1/project/github/navikt/sosialhjelp-innsyn-api?circle-token=ditt_token' `

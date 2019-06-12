@@ -15,6 +15,5 @@ server:
     context-path: '/soknadsosialhjelp/innsyn-api'
 
 client:
-  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:some url}
-  fiks_svar_ut_endpoint_url: 'real svar-ut.com'
-  fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:real dokumentlager}
+  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:fiks-digisos-url}
+  fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:dokumentlager-url}

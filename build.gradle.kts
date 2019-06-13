@@ -63,7 +63,9 @@ dependencies {
     testCompile("com.github.tomakehurst:wiremock:$wireMockVersion") {
         exclude(group = "junit")
     }
-    testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion")
+    testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion") {
+        exclude(module = "spring-boot-starter-tomcat")
+    }
 }
 
 repositories {

@@ -17,12 +17,10 @@ class DokumentlagerClient(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDokumentlagerEndpointUrl
 
     fun hentDokument(dokumentlagerId: String): JsonDigisosSoker {
-        val dokumentAsInputStream = hentDokumentAsString(dokumentlagerId)
-        val objectMapper = ObjectMapper()
-        return objectMapper.readValue(dokumentAsInputStream, JsonDigisosSoker::class.java)
+        val dokumentString = hentDokumentAsString(dokumentlagerId)
+        return ObjectMapper().readValue(dokumentString, JsonDigisosSoker::class.java)
     }
 
-    // String or inputStream
     private fun hentDokumentAsString(dokumentlagerId: String): String {
         val response = restTemplate.getForEntity("$baseUrl/dokumentlager/nedlasting/$dokumentlagerId", String::class.java)
         if (response.statusCode.is2xxSuccessful) {

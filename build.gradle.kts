@@ -51,6 +51,7 @@ dependencies {
 
     compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
 

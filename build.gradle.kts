@@ -35,37 +35,44 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+configurations {
+    "compile" {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
+    }
+    "testCompile" {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
+        exclude(group = "junit", module = "junit")
+    }
+}
+
 dependencies {
     compile(kotlin("stdlib"))
     compile(kotlin("reflect"))
 
-    compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion") {
-        exclude(module = "spring-boot-starter-tomcat")
-    }
+    compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
+    compile("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
+
     compile("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryVersion")
-    compile("org.springframework.boot:spring-boot-starter-logging:$springBootVersion") {
-        exclude(module = "commons-logging")
-    }
+
     compile("ch.qos.logback:logback-classic:$logbackVersion")
     compile("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
 
     compile("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:$filformatVersion")
+
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
-    compile("no.nav.security:oidc-spring-support:$tokenSupportVersion") {
-        exclude(module = "spring-boot-starter-tomcat")
-    }
+    compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
 
+//    Test dependencies
+    testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
+        exclude(group = "org.mockito", module = "mockito-core")
+    }
     testCompile("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testCompile("com.github.tomakehurst:wiremock:$wireMockVersion") {
-        exclude(group = "junit")
-    }
-    testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion") {
-        exclude(module = "spring-boot-starter-tomcat")
-    }
+    testCompile("com.github.tomakehurst:wiremock:$wireMockVersion")
+    testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion")
 }
 
 repositories {

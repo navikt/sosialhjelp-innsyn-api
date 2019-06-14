@@ -6,10 +6,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.core.ParameterizedTypeReference
@@ -30,16 +29,15 @@ internal class FiksClientTest {
 
     @Test
     fun `GET eksakt 1 DigisosSak`() {
-        val mockResponse = mockk<ResponseEntity<DigisosSak>>()
-        val mockDigisosSak = mockk<DigisosSak>()
+        val mockResponse = mockk<ResponseEntity<String>>()
 
         every { mockResponse.statusCode.is2xxSuccessful } returns true
-        every { mockResponse.body } returns mockDigisosSak
+        every { mockResponse.body } returns ok_digisossak_response
 
         every {
             restTemplate.getForEntity(
                     any<String>(),
-                    DigisosSak::class.java)
+                    String::class.java)
         } returns mockResponse
 
         val result = fiksclient.hentDigisosSak("123")
@@ -49,19 +47,17 @@ internal class FiksClientTest {
 
     @Test
     fun `GET alle DigisosSaker`() {
-        val mockResponse = mockk<ResponseEntity<List<DigisosSak>>>()
-        val mockDigisosSak1 = mockk<DigisosSak>()
-        val mockDigisosSak2 = mockk<DigisosSak>()
+        val mockResponse = mockk<ResponseEntity<List<String>>>()
 
         every { mockResponse.statusCode.is2xxSuccessful } returns true
-        every { mockResponse.body } returns listOf(mockDigisosSak1, mockDigisosSak2)
+        every { mockResponse.body } returns listOf(ok_digisossak_response, ok_digisossak_response)
 
         every {
             restTemplate.exchange(
                     any<String>(),
                     any(),
                     null,
-                    any<ParameterizedTypeReference<List<DigisosSak>>>())
+                    any<ParameterizedTypeReference<List<String>>>())
         } returns mockResponse
 
         val result = fiksclient.hentAlleDigisosSaker()
@@ -89,55 +85,3 @@ internal class FiksClientTest {
         assertNotNull(result)
     }
 }
-
-private val ok_digisossak_response = """
-{
-  "fiksDigisosId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "sokerFnr": "string",
-  "fiksOrgId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "kommunenummer": "string",
-  "sistEndret": 0,
-  "orginalSoknadNAV": {
-    "navEksternRefId": "string",
-    "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "soknadDokument": {
-      "filnavn": "string",
-      "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "storrelse": 0
-    },
-    "vedlegg": [
-      {
-        "filnavn": "string",
-        "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "storrelse": 0
-      }
-    ]
-  },
-  "ettersendtInfoNAV": {
-    "ettersendelser": [
-      {
-        "navEksternRefId": "string",
-        "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "vedlegg": [
-          {
-            "filnavn": "string",
-            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "storrelse": 0
-          }
-        ]
-      }
-    ]
-  },
-  "digisosSoker": {
-    "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "dokumenter": [
-      {
-        "filnavn": "string",
-        "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "storrelse": 0
-      }
-    ]
-  }
-}
-""".trimIndent()

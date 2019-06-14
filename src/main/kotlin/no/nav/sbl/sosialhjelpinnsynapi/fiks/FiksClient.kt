@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
@@ -17,11 +18,12 @@ class FiksClient(clientProperties: ClientProperties,
                  private val restTemplate: RestTemplate = RestTemplate()) {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
+    private val mapper = jacksonObjectMapper()
 
     fun hentDigisosSak(digisosId: String): DigisosSak {
-        val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/soknader/$digisosId", DigisosSak::class.java)
+        val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/soknader/$digisosId", String::class.java)
         if (response.statusCode.is2xxSuccessful) {
-            return response.body!!
+            return mapper.readValue(response.body!!, DigisosSak::class.java)
         } else {
             log.warn("Noe feilet ved kall til Fiks")
             throw ResponseStatusException(response.statusCode, "something went wrong")
@@ -29,9 +31,9 @@ class FiksClient(clientProperties: ClientProperties,
     }
 
     fun hentAlleDigisosSaker(): List<DigisosSak> {
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, null, typeRef<List<DigisosSak>>())
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, null, typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
-            return response.body!!
+            return response.body!!.map { s: String -> mapper.readValue(s, DigisosSak::class.java) }
         } else {
             log.warn("Noe feilet ved kall til Fiks")
             throw ResponseStatusException(response.statusCode, "something went wrong")

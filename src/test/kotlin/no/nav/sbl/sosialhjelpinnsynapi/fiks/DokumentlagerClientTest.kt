@@ -28,7 +28,7 @@ internal class DokumentlagerClientTest {
     lateinit var dokumentlagerClient: DokumentlagerClient
 
     @Test
-    fun `GET dokument fra dokumentlager`() {
+    fun `GET JsonDigisosSoker fra dokumentlager`() {
         val mockResponse = mockk<ResponseEntity<String>>()
 
         every { mockResponse.statusCode.is2xxSuccessful } returns true

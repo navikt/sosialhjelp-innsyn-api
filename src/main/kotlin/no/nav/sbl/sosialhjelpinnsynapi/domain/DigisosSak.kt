@@ -5,18 +5,19 @@ data class DigisosSak(
         val sokerFnr: String,
         val fiksOrgId: String,
         val kommunenummer: String,
-        val sistEndret: Int,
-        val originalSoknadNav: OriginalSoknadNav,
-        val ettersendtInfoNav: EttersendtInfoNav,
+        val sistEndret: Long,
+        val orginalSoknadNAV: OrginalSoknadNAV,
+        val ettersendtInfoNAV: EttersendtInfoNAV,
         val digisosSoker: DigisosSoker
 )
 
-data class OriginalSoknadNav(
+data class OrginalSoknadNAV(
         val navEksternRefId: String,
         val metadata: String,
         val vedleggMetadata: String,
         val soknadDokument: DokumentInfo,
-        val vedlegg: List<DokumentInfo>
+        val vedlegg: List<DokumentInfo>,
+        val timestampSendt: Long
 )
 
 data class DokumentInfo(
@@ -25,19 +26,21 @@ data class DokumentInfo(
         val storrelse: Int
 )
 
-data class EttersendtInfoNav(
+data class EttersendtInfoNAV(
         val ettersendelser: List<Ettersendelse>
 )
 
 data class Ettersendelse(
         val navEksternRefId: String,
         val vedleggMetadata: String,
-        val vedlegg: List<DokumentInfo>
+        val vedlegg: List<DokumentInfo>,
+        val timestampSendt: Long
 )
 
 data class DigisosSoker(
         val metadata: String,
-        val dokumenter: List<DokumentInfo>
+        val dokumenter: List<DokumentInfo>,
+        val timestampSistOppdatert: Long
 )
 
 data class KommuneInfo(

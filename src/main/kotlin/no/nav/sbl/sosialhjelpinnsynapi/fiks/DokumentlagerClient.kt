@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -15,16 +14,12 @@ class DokumentlagerClient(clientProperties: ClientProperties,
                           private val restTemplate: RestTemplate = RestTemplate()) {
 
     private val baseUrl = clientProperties.fiksDokumentlagerEndpointUrl
+    private val mapper = jacksonObjectMapper()
 
-    fun hentDokument(dokumentlagerId: String): JsonDigisosSoker {
-        val dokumentString = hentDokumentAsString(dokumentlagerId)
-        return ObjectMapper().readValue(dokumentString, JsonDigisosSoker::class.java)
-    }
-
-    private fun hentDokumentAsString(dokumentlagerId: String): String {
+    fun hentDokument(dokumentlagerId: String, requestedClass: Class<out Any>): Any {
         val response = restTemplate.getForEntity("$baseUrl/dokumentlager/nedlasting/$dokumentlagerId", String::class.java)
         if (response.statusCode.is2xxSuccessful) {
-            return response.body!!
+            return mapper.readValue(response.body!!, requestedClass)
         } else {
             log.warn("Noe feilet ved kall til Dokumentlager")
             throw ResponseStatusException(response.statusCode, "something went wrong")

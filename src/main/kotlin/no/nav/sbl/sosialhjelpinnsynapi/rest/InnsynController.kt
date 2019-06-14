@@ -17,12 +17,11 @@ import org.springframework.web.server.ResponseStatusException
 @RequestMapping("/api/v1/innsyn")
 class InnsynController(val innsynService: InnsynService) {
 
-    // todo:  returnere ResponseEntity med JsonDigisosSoker på sikt
-
     @GetMapping("/{soknadId}", produces = [APPLICATION_JSON_UTF8_VALUE])
     fun getInnsynForSoknad(@PathVariable soknadId: String): ResponseEntity<JsonDigisosSoker> {
         try {
-            return ResponseEntity.ok(innsynService.hentDigisosSak(soknadId))
+            val jsonDigisosSoker = innsynService.hentDigisosSak(soknadId)
+            return ResponseEntity.ok(jsonDigisosSoker)
         } catch (e: Exception) {
             throw ResponseStatusException(BAD_REQUEST)
         }

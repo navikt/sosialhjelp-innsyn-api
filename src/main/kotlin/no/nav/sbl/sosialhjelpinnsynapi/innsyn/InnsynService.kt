@@ -12,6 +12,6 @@ class InnsynService(private val fiksClient: FiksClient,
     fun hentDigisosSak(soknadId: String): JsonDigisosSoker {
         val digisosSak = fiksClient.hentDigisosSak(soknadId)
 
-        return dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata)
+        return dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java) as JsonDigisosSoker
     }
 }

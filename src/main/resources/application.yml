@@ -14,6 +14,10 @@ server:
   servlet:
     context-path: '/soknadsosialhjelp/innsyn-api'
 
+client:
+  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:fiks-digisos-url}
+  fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:dokumentlager-url}
+
 cors:
   allowed_origins:
     - "https://tjenester.nav.no/veivisersosialhjelp/"

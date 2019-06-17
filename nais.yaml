@@ -26,7 +26,7 @@ spec:
     max: 4
   webproxy: true
   vault:
-    enabled: false
+    enabled: true
   ingresses: {{{ingresses}}}
   resources:
     limits:

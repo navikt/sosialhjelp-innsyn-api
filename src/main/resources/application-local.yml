@@ -1,18 +1,10 @@
-# Prometheus
-management:
-  endpoints:
-    metrics.enabled: true
-    web.exposure.include: prometheus
-    export.prometheus.enabled: true
-    prometheus.enabled: true
-
 spring:
   main:
     banner-mode: 'off'
 
 server:
   servlet:
-    context-path: '/sosialhjelp/innsyn-api'
+    context-path: '/soknadsosialhjelp/innsyn-api'
 
 cors:
   allowed_origins:

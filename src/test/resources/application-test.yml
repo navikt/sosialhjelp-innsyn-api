@@ -1,0 +1,14 @@
+#properties to use in integration tests
+
+spring:
+  main:
+    banner-mode: 'off'
+
+server:
+  servlet:
+    context-path: '/soknadsosialhjelp/innsyn-api'
+
+client:
+  fiks_digisos_endpoint_url: 'http://localhost:51234'
+  fiks_svar_ut_endpoint_url: 'svar-ut.com' # https://test.svarut.ks.no/forsendelse/{id}/{nr}
+  fiks_dokumentlager_endpoint_url: 'http://localhost:51234' # https://minside.fiks.test.ks.no/dokumentlager/nedlasting/{id}

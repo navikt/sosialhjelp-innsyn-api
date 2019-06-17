@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
+import no.nav.sbl.sosialhjelpinnsynapi.config.CorsProperties
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -7,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -14,7 +16,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.util.*
 
 @ExtendWith(SpringExtension::class)
-@WebMvcTest(MockController::class)
+@WebMvcTest(secure = false)
+@ContextConfiguration(classes = [MockController::class, CorsProperties::class])
 @ActiveProfiles(profiles = ["mock"])
 class MockControllerTest(@Autowired val mvc: MockMvc) {
 

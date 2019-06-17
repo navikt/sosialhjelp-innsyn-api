@@ -8,7 +8,7 @@ val springBootVersion = "2.1.4.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
 val junitJupiterVersion = "5.3.2"
-val filformatVersion = "1.2019.05.08-16.27-0a95b4468f3d"
+val filformatVersion = "1.2019.06.12-16.28-a7aa85a680f3"
 val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
 

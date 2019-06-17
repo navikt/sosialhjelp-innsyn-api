@@ -13,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException
 
 private val log = LoggerFactory.getLogger(FiksClient::class.java)
 
+private const val digisos_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+
 @Component
 class FiksClient(clientProperties: ClientProperties,
                  private val restTemplate: RestTemplate = RestTemplate()) {
@@ -20,7 +22,12 @@ class FiksClient(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val mapper = jacksonObjectMapper()
 
+
     fun hentDigisosSak(digisosId: String): DigisosSak {
+        if (digisosId.equals(digisos_stub_id)) {
+            return mapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        }
+
         val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/soknader/$digisosId", String::class.java)
         if (response.statusCode.is2xxSuccessful) {
             return mapper.readValue(response.body!!, DigisosSak::class.java)

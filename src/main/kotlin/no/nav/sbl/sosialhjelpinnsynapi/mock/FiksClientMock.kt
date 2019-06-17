@@ -1,39 +1,39 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.FiksClient
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 @Profile("mock")
 @Component
-class FiksClientMock: FiksClient {
+class FiksClientMock : FiksClient {
 
-    private val innsynMap = mutableMapOf<Long, JsonDigisosSoker>()
+    private val innsynMap = mutableMapOf<String, DigisosSak>()
+    private val mapper = jacksonObjectMapper()
+    private val digisosSak: String = this.javaClass.classLoader
+            .getResourceAsStream("mock/digisos_sak.json")
+            .bufferedReader().use { it.readText() }
 
-    override fun getInnsynForSoknad(soknadId: Long): JsonDigisosSoker {
-        return innsynMap.getOrDefault(soknadId, getDefaultInnsynForSoknad())
+    override fun hentDigisosSak(digisosId: String): DigisosSak {
+        return innsynMap.getOrDefault(digisosId, getDefaultDigisosSak())
     }
 
-    fun postInnsynForSoknad(soknadId: Long, jsonDigisosSoker: JsonDigisosSoker) {
-        innsynMap.put(soknadId, jsonDigisosSoker)
+    override fun hentAlleDigisosSaker(): List<DigisosSak> {
+        return innsynMap.values.toList()
     }
 
-    private fun getDefaultInnsynForSoknad(): JsonDigisosSoker {
-        val avsender = JsonAvsender()
-            .withSystemnavn("Mocksystemet")
-            .withSystemversjon("mock")
-        val hendelser = listOf(
-            JsonHendelse()
-                .withType(JsonHendelse.Type.NY_STATUS)
-                .withHendelsestidspunkt(LocalDate.now().toString())
-        )
-        return JsonDigisosSoker()
-            .withVersion("mock")
-            .withAvsender(avsender)
-            .withHendelser(hendelser)
+    override fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    fun postDigisosSak(digisosId: String, digisosSak: DigisosSak) {
+        innsynMap.put(digisosId, digisosSak)
+    }
+
+    private fun getDefaultDigisosSak(): DigisosSak {
+        return mapper.readValue(digisosSak, DigisosSak::class.java)
     }
 }

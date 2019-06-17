@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.security.oidc.api.Unprotected
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -37,9 +37,9 @@ class MockController(val fiksClientMock: FiksClientMock) {
     @PostMapping("/innsyn/{soknadId}",
             consumes = [APPLICATION_JSON_UTF8_VALUE],
             produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun postInnsynForSoknad(@PathVariable soknadId: Long, @RequestBody jsonDigisosSoker: JsonDigisosSoker) {
-        log.info("soknadId: $soknadId, jsonDigisosSoker: $jsonDigisosSoker")
-        fiksClientMock.postInnsynForSoknad(soknadId, jsonDigisosSoker)
+    fun postDigisosSak(@PathVariable digisosId: String, @RequestBody digisosSak: DigisosSak) {
+        log.info("digisosId: $digisosId, digisosSak: $digisosSak")
+        fiksClientMock.postDigisosSak(digisosId, digisosSak)
     }
 
     @GetMapping("/nedlasting/{uuid}", produces = [MediaType.APPLICATION_PDF_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE])

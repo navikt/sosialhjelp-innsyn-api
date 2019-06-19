@@ -19,7 +19,7 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 - Under 'Add projects' kan du finne ditt github-repo.
 - Velg 'Set up project', og følg guiden.
 - Tar i bruk `context` `NAIS deployment`, som henter credentials til navikts dockerhub-bruker for å pushe image. 
-- Dersom man benytter seg av versjon 2.0 av CircleCi kan man deploye en gitt versjon til miljø (eks q0), ved bruk av CircleCis API som nedenfor:
+- Dersom man benytter seg av versjon 2.0 av CircleCi kan man deploye en gitt versjon til miljø (eks q0), ved bruk av CircleCis API som nedenfor: (warning - fungerer ikke for versjon 2.1 av CircleCi)
 
 `curl -d 'build_parameters[CIRCLE_JOB]=deploy_miljo' -d 'build_parameters[VERSION]=ditt_versjonsnummer' -d 'build_parameters[MILJO]=ditt_miljø' 'https://circleci.com/api/v1.1/project/github/navikt/sosialhjelp-innsyn-api?circle-token=ditt_token' `
 

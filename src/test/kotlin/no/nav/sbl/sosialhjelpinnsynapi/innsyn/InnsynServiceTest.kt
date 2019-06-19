@@ -23,10 +23,10 @@ internal class InnsynServiceTest {
         val mockJsonDigisosSoker = mockk<JsonDigisosSoker>()
 
         every { fiksClient.hentDigisosSak("123") } returns mockDigisosSak
-        every { mockDigisosSak.digisosSoker.metadata } returns "some id"
+        every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns mockJsonDigisosSoker
 
-        val jsonDigisosSoker: JsonDigisosSoker = service.hentJsonDigisosSoker("123")
+        val jsonDigisosSoker: JsonDigisosSoker? = service.hentJsonDigisosSoker("123")
 
         assertNotNull(jsonDigisosSoker)
     }

@@ -21,7 +21,7 @@ class InnsynController(val innsynService: InnsynService) {
     fun getInnsynForSoknad(@PathVariable soknadId: String): ResponseEntity<JsonDigisosSoker> {
         try {
             val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(soknadId)
-            return ResponseEntity.ok(jsonDigisosSoker)
+            return ResponseEntity.ok(jsonDigisosSoker!!)
         } catch (e: Exception) {
             throw ResponseStatusException(BAD_REQUEST)
         }

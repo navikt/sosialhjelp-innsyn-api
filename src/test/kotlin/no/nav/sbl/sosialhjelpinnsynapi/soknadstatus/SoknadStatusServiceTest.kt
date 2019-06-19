@@ -1,0 +1,69 @@
+package no.nav.sbl.sosialhjelpinnsynapi.soknadstatus
+
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatus
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+internal class SoknadStatusServiceTest {
+
+    val fiksClient: FiksClient = mockk()
+    val dokumentlagerClient: DokumentlagerClient = mockk()
+
+    val service = SoknadStatusService(fiksClient, dokumentlagerClient)
+
+    @Test
+    fun `Should get most recent SoknadsStatus`() {
+        val mockDigisosSak: DigisosSak = mockk()
+
+        every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        every { mockDigisosSak.digisosSoker?.metadata } returns "123"
+        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker
+
+        val soknadStatus: SoknadStatus = service.hentSoknadStatus("123")
+
+        assertNotNull(soknadStatus)
+        assertEquals(SoknadStatus.UNDER_BEHANDLING, soknadStatus)
+    }
+
+    @Test
+    fun `Should return SENDT if DigisosSak_digisosSoker is null`() {
+        val mockDigisosSak: DigisosSak = mockk()
+        every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        every { mockDigisosSak.digisosSoker } returns null
+
+        val soknadStatus = service.hentSoknadStatus("123")
+
+        assertNotNull(soknadStatus)
+        assertEquals(SoknadStatus.SENDT, soknadStatus)
+    }
+
+    private val jsonDigisosSoker: JsonDigisosSoker = JsonDigisosSoker()
+            .withAvsender(JsonAvsender().withSystemnavn("test"))
+            .withVersion("1.2.3")
+            .withHendelser(listOf(
+                    JsonHendelse()
+                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
+                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME))
+                            .withAdditionalProperty("status", "MOTTATT"),
+                    JsonHendelse()
+                            .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
+                            .withHendelsestidspunkt(LocalDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME))
+                            .withAdditionalProperty("navKontor", "01234"),
+                    JsonHendelse()
+                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
+                            .withHendelsestidspunkt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
+                            .withAdditionalProperty("status", "UNDER_BEHANDLING")
+
+            ))
+}

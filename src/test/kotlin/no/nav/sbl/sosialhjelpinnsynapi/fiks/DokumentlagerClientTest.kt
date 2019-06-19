@@ -20,7 +20,7 @@ internal class DokumentlagerClientTest {
 
     @Test
     fun `GET JsonDigisosSoker fra dokumentlager`() {
-        val mockResponse = mockk<ResponseEntity<String>>()
+        val mockResponse: ResponseEntity<String> = mockk()
 
         every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_komplett_jsondigisossoker_response

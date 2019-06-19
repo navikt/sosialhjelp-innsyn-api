@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.soknadstatus
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
@@ -11,6 +12,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -22,10 +24,15 @@ internal class SoknadStatusServiceTest {
 
     val service = SoknadStatusService(fiksClient, dokumentlagerClient)
 
+    val mockDigisosSak: DigisosSak = mockk()
+
+    @BeforeEach
+    fun init() {
+        clearMocks(fiksClient, dokumentlagerClient, mockDigisosSak)
+    }
+
     @Test
     fun `Should get most recent SoknadsStatus`() {
-        val mockDigisosSak: DigisosSak = mockk()
-
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker
@@ -38,7 +45,6 @@ internal class SoknadStatusServiceTest {
 
     @Test
     fun `Should return SENDT if DigisosSak_digisosSoker is null`() {
-        val mockDigisosSak: DigisosSak = mockk()
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker } returns null
 

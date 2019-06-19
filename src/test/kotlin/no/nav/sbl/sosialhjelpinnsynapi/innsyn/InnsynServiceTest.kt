@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.innsyn
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
@@ -8,6 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class InnsynServiceTest {
@@ -17,10 +19,16 @@ internal class InnsynServiceTest {
 
     val service = InnsynService(fiksClient, dokumentlagerClient)
 
+    val mockDigisosSak: DigisosSak = mockk()
+
+    @BeforeEach
+    fun init() {
+        clearMocks(fiksClient, dokumentlagerClient, mockDigisosSak)
+    }
+
     @Test
     fun `Should gather innsyn data`() {
-        val mockDigisosSak = mockk<DigisosSak>()
-        val mockJsonDigisosSoker = mockk<JsonDigisosSoker>()
+        val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
 
         every { fiksClient.hentDigisosSak("123") } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
@@ -33,8 +41,6 @@ internal class InnsynServiceTest {
 
     @Test
     fun `Should return null if DigisosSoker is null`() {
-        val mockDigisosSak = mockk<DigisosSak>()
-
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker } returns null
 

@@ -4,7 +4,7 @@ spring:
 
 server:
   servlet:
-    context-path: '/soknadsosialhjelp/innsyn-api'
+    context-path: ''
 
 cors:
   allowed_origins:

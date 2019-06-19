@@ -20,11 +20,13 @@ class DokumentlagerClient(clientProperties: ClientProperties,
 
     fun hentDokument(dokumentlagerId: String, requestedClass: Class<out Any>): Any {
         if (dokumentlagerId.equals(dokumentlager_stub_id) && requestedClass.simpleName.equals("JsonDigisosSoker")) {
+            log.info("Henter stub - dokumentlagerId $dokumentlagerId")
             return mapper.readValue(ok_komplett_jsondigisossoker_response, requestedClass)
         }
 
         val response = restTemplate.getForEntity("$baseUrl/dokumentlager/nedlasting/$dokumentlagerId", String::class.java)
         if (response.statusCode.is2xxSuccessful) {
+            log.info("Hentet dokument (${requestedClass.simpleName}) fra dokumentlager, dokumentlagerId $dokumentlagerId")
             return mapper.readValue(response.body!!, requestedClass)
         } else {
             log.warn("Noe feilet ved kall til Dokumentlager")

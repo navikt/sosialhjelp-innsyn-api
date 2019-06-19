@@ -25,11 +25,13 @@ class FiksClient(clientProperties: ClientProperties,
 
     fun hentDigisosSak(digisosId: String): DigisosSak {
         if (digisosId.equals(digisos_stub_id)) {
+            log.info("Hentet stub - digisosId $digisosId")
             return mapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         }
 
         val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/soknader/$digisosId", String::class.java)
         if (response.statusCode.is2xxSuccessful) {
+            log.info("Hentet DigisosSak $digisosId fra Fiks")
             return mapper.readValue(response.body!!, DigisosSak::class.java)
         } else {
             log.warn("Noe feilet ved kall til Fiks")

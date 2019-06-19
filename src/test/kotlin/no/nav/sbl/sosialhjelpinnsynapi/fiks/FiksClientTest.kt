@@ -1,31 +1,23 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
-@ExtendWith(MockKExtension::class)
 internal class FiksClientTest {
 
-    @MockK(relaxed = true)
-    lateinit var clientProperties: ClientProperties
+    val clientProperties: ClientProperties = mockk(relaxed = true)
+    val restTemplate: RestTemplate = mockk()
 
-    @MockK
-    lateinit var restTemplate: RestTemplate
-
-    @InjectMockKs
-    lateinit var fiksclient: FiksClient
+    val fiksClient = FiksClient(clientProperties, restTemplate)
 
     @Test
     fun `GET eksakt 1 DigisosSak`() {
@@ -40,7 +32,7 @@ internal class FiksClientTest {
                     String::class.java)
         } returns mockResponse
 
-        val result = fiksclient.hentDigisosSak("123")
+        val result = fiksClient.hentDigisosSak("123")
 
         assertNotNull(result)
     }
@@ -60,7 +52,7 @@ internal class FiksClientTest {
                     any<ParameterizedTypeReference<List<String>>>())
         } returns mockResponse
 
-        val result = fiksclient.hentAlleDigisosSaker()
+        val result = fiksClient.hentAlleDigisosSaker()
 
         assertNotNull(result)
         assertEquals(2, result.size)
@@ -80,7 +72,7 @@ internal class FiksClientTest {
                     KommuneInfo::class.java)
         } returns mockResponse
 
-        val result = fiksclient.hentInformasjonOmKommuneErPaakoblet("1234")
+        val result = fiksClient.hentInformasjonOmKommuneErPaakoblet("1234")
 
         assertNotNull(result)
     }

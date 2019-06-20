@@ -6,8 +6,11 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatus
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.lang.RuntimeException
+
+private val log = LoggerFactory.getLogger(SoknadStatusService::class.java)
 
 @Component
 class SoknadStatusService(private val fiksClient: FiksClient,
@@ -29,13 +32,14 @@ class SoknadStatusService(private val fiksClient: FiksClient,
 
         when {
             mestNyligeHendelse == null -> {
-                throw RuntimeException("Hendelseslisten må inneholde minst 1 element av typen SOKNADS_STATUS")
+                throw RuntimeException("Ingen hendelser av typen SOKNADS_STATUS")
             }
             !mestNyligeHendelse.additionalProperties.containsKey("status") -> {
-                throw RuntimeException("Feltet status må være satt")
+                throw RuntimeException("Feltet status må være satt for hendelser av typen SOKNADS_STATUS")
             }
             else -> {
                 val status = JsonSoknadsStatus.Status.valueOf(mestNyligeHendelse.additionalProperties["status"] as String)
+                log.info("Hentet nåværende søknadsstatus=${status.name} for $fiksDigisosId")
                 return SoknadStatus.valueOf(status.name)
             }
         }

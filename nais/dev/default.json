@@ -2,5 +2,7 @@
   "namespace": "default",
   "ingresses": [
     "https://sosialhjelp-innsyn-api.nais.oera-q.local/soknadsosialhjelp/innsyn-api"
-  ]
+  ],
+  "fiks_digisos_endpoint_url": "some url",
+  "fiks_dokumentlager_endpoint_url": "https://minside.fiks.test.ks.no/"
 }

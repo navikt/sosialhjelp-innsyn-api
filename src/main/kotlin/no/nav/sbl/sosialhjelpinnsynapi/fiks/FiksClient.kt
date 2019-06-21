@@ -24,6 +24,7 @@ class FiksClient(clientProperties: ClientProperties,
 
 
     fun hentDigisosSak(digisosId: String): DigisosSak {
+        log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId.equals(digisos_stub_id)) {
             log.info("Hentet stub - digisosId $digisosId")
             return mapper.readValue(ok_digisossak_response, DigisosSak::class.java)

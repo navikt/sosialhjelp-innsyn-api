@@ -11,4 +11,6 @@ class ClientProperties {
 
     lateinit var fiksDokumentlagerEndpointUrl: String
 
+    lateinit var fiksSvarUtEndpointUrl: String
+
 }

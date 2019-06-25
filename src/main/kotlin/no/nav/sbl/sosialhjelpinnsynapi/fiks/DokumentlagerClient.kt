@@ -100,7 +100,7 @@ class JsonFilreferanseDeserializer : JsonDeserializer<JsonFilreferanse>() {
         // Get value of the "type" property
         val type = JsonFilreferanse.Type.fromValue((node.get("type") as TextNode).textValue())
 
-        // Check the "type" property and map JsonHendelse to correct subclass
+        // Check the "type" property and map JsonFilreferanse to correct subclass
         return when (type) {
             JsonFilreferanse.Type.DOKUMENTLAGER -> codec.treeToValue(node, JsonDokumentlagerFilreferanse::class.java)
             JsonFilreferanse.Type.SVARUT -> codec.treeToValue(node, JsonSvarUtFilreferanse::class.java)

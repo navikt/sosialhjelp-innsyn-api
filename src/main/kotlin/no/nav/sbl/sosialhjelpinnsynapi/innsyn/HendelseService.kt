@@ -19,7 +19,7 @@ class HendelseService(private val innsynService: InnsynService) {
 
     private fun createHendelserList(jsonDigisosSoker: JsonDigisosSoker, jsonSoknad: JsonSoknad, timestampSendt: String): List<HendelseFrontend> {
         val hendelser = mutableListOf<HendelseFrontend>()
-        hendelser.add(HendelseFrontend(timestampSendt, jsonSoknad.mottaker.navEnhetsnavn))
+        hendelser.add(HendelseFrontend(timestampSendt, "Søknaden med vedlegg er sendt til " + jsonSoknad.mottaker.navEnhetsnavn))
         hendelser.addAll(jsonDigisosSoker.hendelser.map { mapToHendelseFrontend(it) })
         hendelser.sortBy { it.timestamp }
         return hendelser

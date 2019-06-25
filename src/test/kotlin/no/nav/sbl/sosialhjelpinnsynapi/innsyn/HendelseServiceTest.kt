@@ -6,9 +6,10 @@ import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import org.junit.jupiter.api.Assertions.assertEquals
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -20,56 +21,34 @@ internal class HendelseServiceTest {
 
     val service = HendelseService(innsynService)
 
-    val mockDigisosSak: DigisosSak = mockk()
+    val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
+    val mockJsonSoknad: JsonSoknad = mockk()
 
     @BeforeEach
     fun init() {
-        clearMocks(innsynService, mockDigisosSak)
+        clearMocks(innsynService, mockJsonDigisosSoker, mockJsonSoknad)
     }
 
     @Test
-    fun `Should get most recent SoknadsStatus`() {
-        every { mockDigisosSak.digisosSoker?.metadata } returns "123"
-        every { mockDigisosSak.orginalSoknadNAV?.metadata } returns "456"
-        every { innsynService.hentDigisosSak(any()) } returns mockDigisosSak
-        every { innsynService.hentOriginalSoknad(any()) } returns mockDigisosSak
-        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns mockDigisosSak
-        every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
-        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker
+    fun `Should return hendelser with first element being soknad sendt`() {
+        every { innsynService.hentDigisosSak(any()) } returns jsonDigisosSoker_med_soknadsstatus
+        every { mockJsonSoknad.mottaker.navEnhetsnavn } returns "Nav Testhus, Test Kommune"
+        every { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
+        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns 12345L
 
-        val soknadStatus: SoknadStatus = service.hentSoknadStatus("123")
+        val hendelser = service.getHendelserForSoknad("123")
 
-        assertNotNull(soknadStatus)
-        assertEquals(SoknadStatus.UNDER_BEHANDLING, soknadStatus)
+        assertNotNull(hendelser)
+        assertTrue(hendelser[0].beskrivelse.contains("Søknaden med vedlegg er sendt til ", ignoreCase = true))
+        assertTrue(hendelser[0].timestamp.contains("12345"))
     }
 
-    @Test
-    fun `Should return SENDT if DigisosSak_digisosSoker is null`() {
-        every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
-        every { mockDigisosSak.digisosSoker } returns null
-
-        val soknadStatus = service.hentSoknadStatus("123")
-
-        assertNotNull(soknadStatus)
-        assertEquals(SoknadStatus.SENDT, soknadStatus)
-    }
-
-    private val jsonDigisosSoker: JsonDigisosSoker = JsonDigisosSoker()
+    private val jsonDigisosSoker_med_soknadsstatus: JsonDigisosSoker = JsonDigisosSoker()
             .withAvsender(JsonAvsender().withSystemnavn("test"))
             .withVersion("1.2.3")
             .withHendelser(listOf(
-                    JsonHendelse()
+                    JsonSoknadsStatus()
                             .withType(JsonHendelse.Type.SOKNADS_STATUS)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withAdditionalProperty("status", "MOTTATT"),
-                    JsonHendelse()
-                            .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withAdditionalProperty("navKontor", "01234"),
-                    JsonHendelse()
-                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-                            .withHendelsestidspunkt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withAdditionalProperty("status", "UNDER_BEHANDLING")
-
-            ))
+                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
+                            .withStatus(JsonSoknadsStatus.Status.MOTTATT)))
 }

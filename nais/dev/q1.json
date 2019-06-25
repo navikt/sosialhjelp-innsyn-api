@@ -3,5 +3,7 @@
   "ingresses": [
     "https://sosialhjelp-innsyn-api-q1.nais.oera-q.local/soknadsosialhjelp/innsyn-api",
     "https://www-q1.nav.no/soknadsosialhjelp/innsyn-api"
-  ]
+  ],
+  "fiks_digisos_endpoint_url": "some q1-specific url",
+  "fiks_dokumentlager_endpoint_url": "https://minside.fiks.test.ks.no/"
 }

@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.soknadstatus.SoknadStatusService
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.ResponseEntity
@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RestController
 class SoknadStatusController(private val soknadStatusService: SoknadStatusService) {
 
     @GetMapping("{fiksDigisosId}/soknadStatus")
-    fun hentSoknadStatus(@PathVariable fiksDigisosId: String): ResponseEntity<String> {
+    fun hentSoknadStatus(@PathVariable fiksDigisosId: String): ResponseEntity<SoknadStatusResponse> {
         // Gitt innlogget bruker
-        val soknadStatus: SoknadStatus = soknadStatusService.hentSoknadStatus(fiksDigisosId)
+        val soknadStatus: SoknadStatusResponse = soknadStatusService.hentSoknadStatus(fiksDigisosId)
         return ResponseEntity.ok()
                 .header("a", "b") // some headers
-                .body(soknadStatus.name)
+                .body(soknadStatus)
     }
 
 }

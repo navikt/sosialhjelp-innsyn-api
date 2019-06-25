@@ -36,7 +36,7 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Should get most recent SoknadsStatus`() {
+    fun `Skal returnere mest nylige SoknadStatus`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_underbehandling
@@ -48,7 +48,7 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Should return SENDT if DigisosSak_digisosSoker is null`() {
+    fun `Skal returnere response uten vedtaksinformasjon HVIS digisosSoker er null`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker } returns null
 
@@ -60,7 +60,20 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Should not return vedtaksinformasjon if SaksStatus is present`() {
+    fun `Skal returnere Response med vedtaksinformasjon HVIS VedtakFattet finnes UTEN referanse`() {
+        every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        every { mockDigisosSak.digisosSoker?.metadata } returns "123"
+        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_vedtakFattet
+
+        val response: SoknadStatusResponse = service.hentSoknadStatus("123")
+
+        assertThat(response).isNotNull
+        assertThat(response.status).isEqualTo(SoknadStatus.UNDER_BEHANDLING)
+        assertThat(response.vedtaksinfo).contains("/dokumentlager/nedlasting/")
+    }
+
+    @Test
+    fun `Skal returnere Response uten vedtaksinformasjon HVIS SaksStatus finnes`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_saksstatus
@@ -103,6 +116,29 @@ internal class SoknadStatusServiceTest {
                             .withType(JsonHendelse.Type.SAKS_STATUS)
                             .withHendelsestidspunkt(LocalDateTime.now().minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME))
                             .withStatus(JsonSaksStatus.Status.UNDER_BEHANDLING),
+                    JsonVedtakFattet()
+                            .withType(JsonHendelse.Type.VEDTAK_FATTET)
+                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME))
+                            .withVedtaksfil(JsonVedtaksfil()
+                                    .withReferanse(JsonDokumentlagerFilreferanse()
+                                            .withId("123")))
+                            .withReferanse(null)
+                            .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.INNVILGET))
+
+            ))
+
+    private val jsonDigisosSoker_med_vedtakFattet: JsonDigisosSoker = JsonDigisosSoker()
+            .withAvsender(JsonAvsender().withSystemnavn("test"))
+            .withVersion("1.2.3")
+            .withHendelser(listOf(
+                    JsonSoknadsStatus()
+                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
+                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
+                            .withStatus(JsonSoknadsStatus.Status.MOTTATT),
+                    JsonSoknadsStatus()
+                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
+                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME))
+                            .withStatus(JsonSoknadsStatus.Status.UNDER_BEHANDLING),
                     JsonVedtakFattet()
                             .withType(JsonHendelse.Type.VEDTAK_FATTET)
                             .withHendelsestidspunkt(LocalDateTime.now().minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME))

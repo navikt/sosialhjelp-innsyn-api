@@ -2,14 +2,14 @@ package no.nav.sbl.sosialhjelpinnsynapi.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsondigisossoker_response
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 
-class SoknadStatusIT: AbstractIT() {
+class SoknadStatusIT : AbstractIT() {
 
     @Test
     fun `GET SoknadStatus - happy path`() {
@@ -20,10 +20,11 @@ class SoknadStatusIT: AbstractIT() {
                 .willReturn(WireMock.ok(ok_minimal_jsondigisossoker_response)))
 
         val id = "123"
-        val responseEntity = testRestTemplate.getForEntity("/api/v1/innsyn/$id/soknadStatus", String::class.java)
+        val responseEntity = testRestTemplate.getForEntity("/api/v1/innsyn/$id/soknadStatus", SoknadStatusResponse::class.java)
 
-        assertNotNull(responseEntity)
-        assertEquals(HttpStatus.OK, responseEntity.statusCode)
-        assertEquals(SoknadStatus.MOTTATT.name, responseEntity.body)
+        assertThat(responseEntity).isNotNull
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(responseEntity.body!!.status).isEqualTo(SoknadStatus.MOTTATT)
+        assertThat(responseEntity.body!!.vedtaksinfo).isNull()
     }
 }

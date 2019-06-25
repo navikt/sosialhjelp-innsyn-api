@@ -11,10 +11,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse.Type.DOKUMENTLAGER
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse.Type.SVARUT
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse.Type.*
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
@@ -78,15 +75,14 @@ class JsonHendelseDeserializer : JsonDeserializer<JsonHendelse>() {
 
         // Check the "type" property and map JsonHendelse to correct subclass
         return when (type) {
-            SOKNADS_STATUS -> codec.treeToValue(node, JsonSoknadsStatus::class.java)
-            SAKS_STATUS -> codec.treeToValue(node, JsonSaksStatus::class.java)
-            VEDTAK_FATTET -> codec.treeToValue(node, JsonVedtakFattet::class.java)
-            TILDELT_NAV_KONTOR -> codec.treeToValue(node, JsonTildeltNavKontor::class.java)
-            DOKUMENTASJON_ETTERSPURT -> codec.treeToValue(node, JsonDokumentasjonEtterspurt::class.java)
-            FORELOPIG_SVAR -> codec.treeToValue(node, JsonForelopigSvar::class.java)
+            JsonHendelse.Type.SOKNADS_STATUS -> codec.treeToValue(node, JsonSoknadsStatus::class.java)
+            JsonHendelse.Type.SAKS_STATUS -> codec.treeToValue(node, JsonSaksStatus::class.java)
+            JsonHendelse.Type.VEDTAK_FATTET -> codec.treeToValue(node, JsonVedtakFattet::class.java)
+            JsonHendelse.Type.TILDELT_NAV_KONTOR -> codec.treeToValue(node, JsonTildeltNavKontor::class.java)
+            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> codec.treeToValue(node, JsonDokumentasjonEtterspurt::class.java)
+            JsonHendelse.Type.FORELOPIG_SVAR -> codec.treeToValue(node, JsonForelopigSvar::class.java)
 
-            else -> throw JsonMappingException(jp,
-                    "Invalid value for JsonHendelse's \"type\" property")
+            else -> throw JsonMappingException(jp, "Invalid value for JsonHendelse's \"type\" property")
         }
     }
 }
@@ -106,11 +102,10 @@ class JsonFilreferanseDeserializer : JsonDeserializer<JsonFilreferanse>() {
 
         // Check the "type" property and map JsonHendelse to correct subclass
         return when (type) {
-            DOKUMENTLAGER -> codec.treeToValue(node, JsonDokumentlagerFilreferanse::class.java)
-            SVARUT -> codec.treeToValue(node, JsonSvarUtFilreferanse::class.java)
+            JsonFilreferanse.Type.DOKUMENTLAGER -> codec.treeToValue(node, JsonDokumentlagerFilreferanse::class.java)
+            JsonFilreferanse.Type.SVARUT -> codec.treeToValue(node, JsonSvarUtFilreferanse::class.java)
 
-            else -> throw JsonMappingException(jp,
-                    "Invalid value for JsonFilreferanse's \"type\" property")
+            else -> throw JsonMappingException(jp, "Invalid value for JsonFilreferanse's \"type\" property")
         }
     }
 }

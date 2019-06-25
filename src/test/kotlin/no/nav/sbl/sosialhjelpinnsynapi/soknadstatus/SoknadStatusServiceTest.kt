@@ -20,6 +20,13 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+private val JSON_AVSENDER = JsonAvsender().withSystemnavn("test")
+private val VERSION = "1.2.3"
+private val SOKNAD_MOTTATT = JsonSoknadsStatus()
+        .withType(JsonHendelse.Type.SOKNADS_STATUS)
+        .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
+        .withStatus(JsonSoknadsStatus.Status.MOTTATT)
+
 internal class SoknadStatusServiceTest {
 
     val clientProperties: ClientProperties = mockk(relaxed = true)
@@ -48,7 +55,7 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Skal returnere response uten vedtaksinformasjon HVIS digisosSoker er null`() {
+    fun `Skal returnere response uten vedtaksinfo HVIS digisosSoker er null`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker } returns null
 
@@ -60,7 +67,7 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Skal returnere Response med vedtaksinformasjon HVIS VedtakFattet finnes UTEN referanse`() {
+    fun `Skal returnere Response med vedtaksinfo HVIS VedtakFattet finnes UTEN referanse`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_vedtakFattet
@@ -68,12 +75,12 @@ internal class SoknadStatusServiceTest {
         val response: SoknadStatusResponse = service.hentSoknadStatus("123")
 
         assertThat(response).isNotNull
-        assertThat(response.status).isEqualTo(SoknadStatus.UNDER_BEHANDLING)
+        assertThat(response.status).isEqualTo(SoknadStatus.MOTTATT)
         assertThat(response.vedtaksinfo).contains("/dokumentlager/nedlasting/")
     }
 
     @Test
-    fun `Skal returnere Response uten vedtaksinformasjon HVIS SaksStatus finnes`() {
+    fun `Skal returnere Response uten vedtaksinfo HVIS SaksStatus finnes`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_saksstatus
@@ -85,18 +92,24 @@ internal class SoknadStatusServiceTest {
         assertThat(response.vedtaksinfo).isNull()
     }
 
+    @Test
+    fun `Skal returnere Response uten vedtaksinfo HVIS VedtakFattet har referanse satt OG `() {
+        every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        every { mockDigisosSak.digisosSoker?.metadata } returns "123"
+        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_vedtakFattet_og_referanse_ulik_null
+
+        val response: SoknadStatusResponse = service.hentSoknadStatus("123")
+
+        assertThat(response).isNotNull
+        assertThat(response.status).isEqualTo(SoknadStatus.MOTTATT)
+        assertThat(response.vedtaksinfo).isNull()
+    }
+
     private val jsonDigisosSoker_underbehandling: JsonDigisosSoker = JsonDigisosSoker()
-            .withAvsender(JsonAvsender().withSystemnavn("test"))
-            .withVersion("1.2.3")
+            .withAvsender(JSON_AVSENDER)
+            .withVersion(VERSION)
             .withHendelser(listOf(
-                    JsonSoknadsStatus()
-                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withStatus(JsonSoknadsStatus.Status.MOTTATT),
-                    JsonTildeltNavKontor()
-                            .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withNavKontor("01234"),
+                    SOKNAD_MOTTATT,
                     JsonSoknadsStatus()
                             .withType(JsonHendelse.Type.SOKNADS_STATUS)
                             .withHendelsestidspunkt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
@@ -105,13 +118,10 @@ internal class SoknadStatusServiceTest {
             ))
 
     private val jsonDigisosSoker_med_saksstatus: JsonDigisosSoker = JsonDigisosSoker()
-            .withAvsender(JsonAvsender().withSystemnavn("test"))
-            .withVersion("1.2.3")
+            .withAvsender(JSON_AVSENDER)
+            .withVersion(VERSION)
             .withHendelser(listOf(
-                    JsonSoknadsStatus()
-                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withStatus(JsonSoknadsStatus.Status.MOTTATT),
+                    SOKNAD_MOTTATT,
                     JsonSaksStatus()
                             .withType(JsonHendelse.Type.SAKS_STATUS)
                             .withHendelsestidspunkt(LocalDateTime.now().minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME))
@@ -128,17 +138,10 @@ internal class SoknadStatusServiceTest {
             ))
 
     private val jsonDigisosSoker_med_vedtakFattet: JsonDigisosSoker = JsonDigisosSoker()
-            .withAvsender(JsonAvsender().withSystemnavn("test"))
-            .withVersion("1.2.3")
+            .withAvsender(JSON_AVSENDER)
+            .withVersion(VERSION)
             .withHendelser(listOf(
-                    JsonSoknadsStatus()
-                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withStatus(JsonSoknadsStatus.Status.MOTTATT),
-                    JsonSoknadsStatus()
-                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withStatus(JsonSoknadsStatus.Status.UNDER_BEHANDLING),
+                    SOKNAD_MOTTATT,
                     JsonVedtakFattet()
                             .withType(JsonHendelse.Type.VEDTAK_FATTET)
                             .withHendelsestidspunkt(LocalDateTime.now().minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME))
@@ -146,6 +149,22 @@ internal class SoknadStatusServiceTest {
                                     .withReferanse(JsonDokumentlagerFilreferanse()
                                             .withId("123")))
                             .withReferanse(null)
+                            .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.INNVILGET))
+
+            ))
+
+    private val jsonDigisosSoker_med_vedtakFattet_og_referanse_ulik_null: JsonDigisosSoker = JsonDigisosSoker()
+            .withAvsender(JSON_AVSENDER)
+            .withVersion(VERSION)
+            .withHendelser(listOf(
+                    SOKNAD_MOTTATT,
+                    JsonVedtakFattet()
+                            .withType(JsonHendelse.Type.VEDTAK_FATTET)
+                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME))
+                            .withVedtaksfil(JsonVedtaksfil()
+                                    .withReferanse(JsonDokumentlagerFilreferanse()
+                                            .withId("123")))
+                            .withReferanse("ReferanseTilSak")
                             .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.INNVILGET))
 
             ))

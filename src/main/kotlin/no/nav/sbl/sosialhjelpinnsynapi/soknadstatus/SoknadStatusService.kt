@@ -53,13 +53,11 @@ class SoknadStatusService(private val clientProperties: ClientProperties,
                 .filter { it is JsonVedtakFattet }
                 .maxBy { it.hendelsestidspunkt }
 
-        if (mestNyligeVedtakFattet != null && hendelser.none { it is JsonSaksStatus }) {
-            val vedtakfattet: JsonVedtakFattet = mestNyligeVedtakFattet as JsonVedtakFattet
-
-            val referanse = vedtakfattet.vedtaksfil.referanse
-            return when (referanse) {
-                is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${referanse.id}"
-                is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${referanse.id}/${referanse.nr}"
+        if (mestNyligeVedtakFattet != null && mestNyligeVedtakFattet is JsonVedtakFattet && mestNyligeVedtakFattet.referanse == null && hendelser.none { it is JsonSaksStatus }) {
+            val filreferanse = mestNyligeVedtakFattet.vedtaksfil.referanse
+            return when (filreferanse) {
+                is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"
+                is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}"
                 else -> throw RuntimeException("123")
             }
         }

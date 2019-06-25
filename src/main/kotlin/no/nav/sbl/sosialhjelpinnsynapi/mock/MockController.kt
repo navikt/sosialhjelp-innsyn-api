@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.security.oidc.api.Unprotected
 import org.slf4j.LoggerFactory
@@ -24,7 +25,7 @@ val PNG_UUID: UUID = UUID.fromString("c577a9d4-4765-4d6f-8149-6a7c80456cd8")
 @Unprotected
 @RestController
 @RequestMapping("/api/v1/mock")
-class MockController(val fiksClientMock: FiksClientMock) {
+class MockController(val fiksClientMock: FiksClientMock, val dokumentlagerClientMock: DokumentlagerClientMock) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
@@ -37,9 +38,10 @@ class MockController(val fiksClientMock: FiksClientMock) {
     @PostMapping("/innsyn/{soknadId}",
             consumes = [APPLICATION_JSON_UTF8_VALUE],
             produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun postDigisosSak(@PathVariable digisosId: String, @RequestBody digisosSak: DigisosSak) {
-        log.info("digisosId: $digisosId, digisosSak: $digisosSak")
-        fiksClientMock.postDigisosSak(digisosId, digisosSak)
+    fun postJsonDigisosSoker(@PathVariable soknadId: String, @RequestBody jsonDigisosSoker: JsonDigisosSoker) {
+        log.info("soknadId: $soknadId, jsonDigisosSoker: $jsonDigisosSoker")
+        val digisosSak = fiksClientMock.hentDigisosSak(soknadId)
+        dokumentlagerClientMock.postDokument(digisosSak.digisosSoker.metadata, jsonDigisosSoker)
     }
 
     @GetMapping("/nedlasting/{uuid}", produces = [MediaType.APPLICATION_PDF_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE])

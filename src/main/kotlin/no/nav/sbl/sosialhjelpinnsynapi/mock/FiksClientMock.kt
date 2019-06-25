@@ -30,10 +30,11 @@ class FiksClientMock : FiksClient {
     }
 
     fun postDigisosSak(digisosId: String, digisosSak: DigisosSak) {
-        innsynMap.put(digisosId, digisosSak)
+        innsynMap[digisosId] = digisosSak
     }
 
     private fun getDefaultDigisosSak(): DigisosSak {
+        // TODO: Assign random digisosSak.digisosSoker.metadata
         return mapper.readValue(digisosSak, DigisosSak::class.java)
     }
 }

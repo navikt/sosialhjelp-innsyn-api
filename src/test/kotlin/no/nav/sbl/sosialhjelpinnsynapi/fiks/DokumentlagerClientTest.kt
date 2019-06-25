@@ -3,8 +3,13 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -35,5 +40,10 @@ internal class DokumentlagerClientTest {
 
         assertNotNull(jsonDigisosSoker)
         assertEquals("Testsystemet", jsonDigisosSoker.avsender.systemnavn)
+        assertThat(jsonDigisosSoker.hendelser).hasAtLeastOneElementOfType(JsonSoknadsStatus::class.java)
+        assertThat(jsonDigisosSoker.hendelser).hasAtLeastOneElementOfType(JsonTildeltNavKontor::class.java)
+
+        val jsonVedtakFattet = jsonDigisosSoker.hendelser.first { it is JsonVedtakFattet } as JsonVedtakFattet
+        assertThat(jsonVedtakFattet.vedtaksfil.referanse).isExactlyInstanceOf(JsonDokumentlagerFilreferanse::class.java)
     }
 }

@@ -10,17 +10,21 @@ import org.springframework.stereotype.Component
 @Component
 class DokumentlagerClientMock: DokumentlagerClient {
 
-    private val dokumentMap = mutableMapOf<String, JsonDigisosSoker>()
+    private val dokumentMap = mutableMapOf<String, Any>()
     private val mapper = jacksonObjectMapper()
     private val jsonDigisosSoker: String = this.javaClass.classLoader
             .getResourceAsStream("mock/json_digisos_soker.json")
             .bufferedReader().use { it.readText() }
 
     override fun hentDokument(dokumentlagerId: String, requestedClass: Class<out Any>): Any {
-        if (requestedClass == JsonDigisosSoker::class.java) {
-            return dokumentMap.getOrDefault(dokumentlagerId, getDefaultJsonDigisosSoker())
+        return when (requestedClass) {
+            JsonDigisosSoker::class.java -> dokumentMap.getOrElse(dokumentlagerId, {
+                val default = getDefaultJsonDigisosSoker()
+                dokumentMap[dokumentlagerId] = default
+                default
+            })
+            else -> requestedClass.newInstance()
         }
-        return requestedClass.newInstance()
     }
 
     fun postDokument(dokumentlagerId: String, jsonDigisosSoker: JsonDigisosSoker) {

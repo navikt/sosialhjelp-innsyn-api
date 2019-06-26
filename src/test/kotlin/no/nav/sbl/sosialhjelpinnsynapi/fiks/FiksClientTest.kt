@@ -25,7 +25,7 @@ internal class FiksClientTest {
     lateinit var restTemplate: RestTemplate
 
     @InjectMockKs
-    lateinit var fiksclient: FiksClient
+    lateinit var fiksclient: FiksClientImpl
 
     @Test
     fun `GET eksakt 1 DigisosSak`() {

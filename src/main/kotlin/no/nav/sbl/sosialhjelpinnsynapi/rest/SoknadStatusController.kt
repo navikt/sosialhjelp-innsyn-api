@@ -18,9 +18,7 @@ class SoknadStatusController(private val soknadStatusService: SoknadStatusServic
     fun hentSoknadStatus(@PathVariable fiksDigisosId: String): ResponseEntity<SoknadStatusResponse> {
         // Gitt innlogget bruker
         val soknadStatus: SoknadStatusResponse = soknadStatusService.hentSoknadStatus(fiksDigisosId)
-        return ResponseEntity.ok()
-                .header("a", "b") // some headers
-                .body(soknadStatus)
+        return ResponseEntity.ok().body(soknadStatus)
     }
 
 }

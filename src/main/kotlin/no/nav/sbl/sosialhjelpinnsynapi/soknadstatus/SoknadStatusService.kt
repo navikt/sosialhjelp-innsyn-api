@@ -33,7 +33,7 @@ class SoknadStatusService(private val clientProperties: ClientProperties,
 
         // hendelser-listen _skal_ inneholde minst ett element av typen SOKNADS_STATUS
         val mestNyligeHendelse = jsonDigisosSoker.hendelser
-                .filter { it is JsonSoknadsStatus }
+                .filterIsInstance<JsonSoknadsStatus>()
                 .maxBy { it.hendelsestidspunkt }
 
         when {
@@ -50,10 +50,10 @@ class SoknadStatusService(private val clientProperties: ClientProperties,
 
     fun appendWithVedtaksinformasjon(hendelser: List<JsonHendelse>): String? {
         val mestNyligeVedtakFattet = hendelser
-                .filter { it is JsonVedtakFattet }
+                .filterIsInstance<JsonVedtakFattet>()
                 .maxBy { it.hendelsestidspunkt }
 
-        if (mestNyligeVedtakFattet != null && mestNyligeVedtakFattet is JsonVedtakFattet && mestNyligeVedtakFattet.referanse == null && hendelser.none { it is JsonSaksStatus }) {
+        if (mestNyligeVedtakFattet != null && mestNyligeVedtakFattet.referanse == null && hendelser.none { it is JsonSaksStatus }) {
             val filreferanse = mestNyligeVedtakFattet.vedtaksfil.referanse
             return when (filreferanse) {
                 is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"

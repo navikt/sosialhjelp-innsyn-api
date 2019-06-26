@@ -67,7 +67,7 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Skal returnere Response med vedtaksinfo HVIS VedtakFattet finnes UTEN referanse`() {
+    fun `Skal returnere Response med vedtaksinfo HVIS VedtakFattet_referanse == null`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_vedtakFattet
@@ -80,10 +80,10 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Skal returnere Response uten vedtaksinfo HVIS SaksStatus finnes`() {
+    fun `Skal returnere Response uten vedtaksinfo HVIS VedtakFattet_referanse == null OG SaksStatus finnes`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
-        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_saksstatus
+        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_vedtakfattet_og_saksstatus
 
         val response: SoknadStatusResponse = service.hentSoknadStatus("123")
 
@@ -93,7 +93,7 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Skal returnere Response uten vedtaksinfo HVIS VedtakFattet har referanse satt OG `() {
+    fun `Skal returnere Response uten vedtaksinfo HVIS VedtakFattet_referanse != null`() {
         every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_vedtakFattet_og_referanse_ulik_null
@@ -117,7 +117,7 @@ internal class SoknadStatusServiceTest {
 
             ))
 
-    private val jsonDigisosSoker_med_saksstatus: JsonDigisosSoker = JsonDigisosSoker()
+    private val jsonDigisosSoker_med_vedtakfattet_og_saksstatus: JsonDigisosSoker = JsonDigisosSoker()
             .withAvsender(JSON_AVSENDER)
             .withVersion(VERSION)
             .withHendelser(listOf(

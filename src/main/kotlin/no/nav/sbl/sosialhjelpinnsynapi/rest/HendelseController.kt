@@ -29,5 +29,8 @@ class HendelseController(val hendelseService: HendelseService) {
 
 data class HendelseFrontend(
         val timestamp: String,
-        val beskrivelse: String
+        val beskrivelse: String,
+        val referanse: String?,
+        val nr: Int?,
+        val refErTilSvarUt: Boolean?
 )

@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.soknadstatus
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
@@ -55,12 +56,17 @@ class SoknadStatusService(private val clientProperties: ClientProperties,
 
         if (mestNyligeVedtakFattet != null && mestNyligeVedtakFattet.referanse == null && hendelser.none { it is JsonSaksStatus }) {
             val filreferanse = mestNyligeVedtakFattet.vedtaksfil.referanse
-            return when (filreferanse) {
-                is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"
-                is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}"
-                else -> throw RuntimeException("Noe uventet skjedde. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
-            }
+            return hentUrlFraFilreferanse(clientProperties, filreferanse)
         }
         return null
+    }
+
+}
+
+fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse?): String {
+    return when (filreferanse) {
+        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"
+        is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}"
+        else -> throw RuntimeException("Noe uventet skjedde. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
     }
 }

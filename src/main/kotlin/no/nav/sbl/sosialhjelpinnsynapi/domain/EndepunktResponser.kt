@@ -13,3 +13,14 @@ enum class SoknadStatus {
     UNDER_BEHANDLING,
     FERDIGBEHANDLET
 }
+
+data class SaksStatusResponse(
+        val tittel: String,
+        val status: UtfallEllerSaksStatus,
+        val vedtaksfilUrl: String?,
+        val vedtaksfilNavn: String?
+)
+
+enum class UtfallEllerSaksStatus {
+    UNDER_BEHANDLING, IKKE_INNSYN, INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST
+}

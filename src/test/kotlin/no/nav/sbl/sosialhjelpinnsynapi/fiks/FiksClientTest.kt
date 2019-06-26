@@ -19,7 +19,7 @@ internal class FiksClientTest {
     val clientProperties: ClientProperties = mockk(relaxed = true)
     val restTemplate: RestTemplate = mockk()
 
-    val fiksClient = FiksClient(clientProperties, restTemplate)
+    val fiksClient = FiksClientImpl(clientProperties, restTemplate)
 
     @BeforeEach
     fun init() {

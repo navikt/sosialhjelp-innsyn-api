@@ -21,7 +21,7 @@ internal class DokumentlagerClientTest {
     val clientProperties: ClientProperties = mockk(relaxed = true)
     val restTemplate: RestTemplate = mockk()
 
-    val dokumentlagerClient = DokumentlagerClient(clientProperties, restTemplate)
+    val dokumentlagerClient: DokumentlagerClient = DokumentlagerClientImpl(clientProperties, restTemplate)
 
     @Test
     fun `GET JsonDigisosSoker fra dokumentlager`() {

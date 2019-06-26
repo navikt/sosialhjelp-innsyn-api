@@ -50,6 +50,7 @@ class HendelseService(private val innsynService: InnsynService) {
             JsonHendelse.Type.FORELOPIG_SVAR -> return ForelopigSvarHendelse(jsonHendelse)
             JsonHendelse.Type.SAKS_STATUS -> return SaksStatusHendelse(jsonHendelse)
         }
+        throw RuntimeException("Hendelsestype" + jsonHendelse.type.value() + "mangler mapping")
     }
 
     private fun tildeltNavKontorHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseFrontend? {

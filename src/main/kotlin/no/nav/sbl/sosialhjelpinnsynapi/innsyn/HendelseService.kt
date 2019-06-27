@@ -49,7 +49,7 @@ class HendelseService(private val innsynService: InnsynService) {
             JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> DokumentasjonEtterspurtHendelse(jsonHendelse)
             JsonHendelse.Type.FORELOPIG_SVAR -> ForelopigSvarHendelse(jsonHendelse)
             JsonHendelse.Type.SAKS_STATUS -> SaksStatusHendelse(jsonHendelse)
-            else -> throw RuntimeException("Hendelsestype " + jsonHendelse.type.value() + " mangler mapping")
+            else -> throw RuntimeException("Hendelsestype ${jsonHendelse.type.value()} mangler mapping")
         }
     }
 

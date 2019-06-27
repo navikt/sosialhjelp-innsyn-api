@@ -19,7 +19,7 @@ private const val digisos_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 @Profile("!mock")
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
-                     private val restTemplate: RestTemplate = RestTemplate()): FiksClient {
+                     private val restTemplate: RestTemplate) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val mapper = jacksonObjectMapper()

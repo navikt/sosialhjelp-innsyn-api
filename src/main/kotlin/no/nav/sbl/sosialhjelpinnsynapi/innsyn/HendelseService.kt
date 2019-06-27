@@ -42,15 +42,17 @@ class HendelseService(private val innsynService: InnsynService) {
         if (jsonHendelse.type == null) {
             throw RuntimeException("Hendelse mangler type")
         }
+        val hendelseFrontend: HendelseFrontend?
         when (jsonHendelse.type) {
-            JsonHendelse.Type.TILDELT_NAV_KONTOR -> return tildeltNavKontorHendelse(jsonHendelse, soknadsmottaker)
-            JsonHendelse.Type.SOKNADS_STATUS -> return soknadsStatusHendelse(jsonHendelse, soknadsmottaker)
-            JsonHendelse.Type.VEDTAK_FATTET -> return vedtakFattetHendelse(jsonHendelse, saker)
-            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> return DokumentasjonEtterspurtHendelse(jsonHendelse)
-            JsonHendelse.Type.FORELOPIG_SVAR -> return ForelopigSvarHendelse(jsonHendelse)
-            JsonHendelse.Type.SAKS_STATUS -> return SaksStatusHendelse(jsonHendelse)
+            JsonHendelse.Type.TILDELT_NAV_KONTOR -> hendelseFrontend = tildeltNavKontorHendelse(jsonHendelse, soknadsmottaker)
+            JsonHendelse.Type.SOKNADS_STATUS -> hendelseFrontend = soknadsStatusHendelse(jsonHendelse, soknadsmottaker)
+            JsonHendelse.Type.VEDTAK_FATTET -> hendelseFrontend = vedtakFattetHendelse(jsonHendelse, saker)
+            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> hendelseFrontend = DokumentasjonEtterspurtHendelse(jsonHendelse)
+            JsonHendelse.Type.FORELOPIG_SVAR -> hendelseFrontend = ForelopigSvarHendelse(jsonHendelse)
+            JsonHendelse.Type.SAKS_STATUS -> hendelseFrontend = SaksStatusHendelse(jsonHendelse)
+            else -> throw RuntimeException("Hendelsestype " + jsonHendelse.type.value() + " mangler mapping")
         }
-        throw RuntimeException("Hendelsestype" + jsonHendelse.type.value() + "mangler mapping")
+        return hendelseFrontend
     }
 
     private fun tildeltNavKontorHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseFrontend? {

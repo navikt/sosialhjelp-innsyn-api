@@ -13,7 +13,7 @@ import java.util.*
 class HendelseIT: AbstractIT() {
 
     @Test
-    fun `GET OriginalSoknad - happy path`() {
+    fun `GET Hendelser - happy path`() {
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/digisos/api/v1/soknader/(.*)"))
                 .willReturn(WireMock.ok(ok_digisossak_response)))
 

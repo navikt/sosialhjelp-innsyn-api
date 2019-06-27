@@ -30,7 +30,7 @@ internal class DokumentlagerClientTest {
     lateinit var restTemplate: RestTemplate
 
     @InjectMockKs
-    lateinit var dokumentlagerClient: DokumentlagerClient
+    lateinit var dokumentlagerClient: DokumentlagerClientImpl
 
     @Test
     fun `GET JsonDigisosSoker fra dokumentlager`() {

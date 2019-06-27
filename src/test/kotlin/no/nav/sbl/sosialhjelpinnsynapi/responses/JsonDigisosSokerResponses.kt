@@ -1,5 +1,22 @@
 package no.nav.sbl.sosialhjelpinnsynapi.responses
 
+val ok_minimal_jsondigisossoker_response = """
+{
+	"version": "1.0.0",
+	"avsender": {
+		"systemnavn": "Testsystemet",
+		"systemversjon": "1.0.0"
+	},
+	"hendelser": [
+		{
+			"type": "soknadsStatus",
+			"hendelsestidspunkt": "2018-10-04T13:37:00.134Z",
+			"status": "MOTTATT"
+		}
+	]
+}
+""".trimIndent()
+
 val ok_komplett_jsondigisossoker_response = """
 {
 	"version": "1.0.0",

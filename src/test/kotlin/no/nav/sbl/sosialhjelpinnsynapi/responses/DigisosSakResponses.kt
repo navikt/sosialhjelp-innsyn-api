@@ -9,7 +9,7 @@ val ok_digisossak_response = """
   "sistEndret": 0,
   "orginalSoknadNAV": {
     "navEksternRefId": "string",
-    "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa0",
     "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "soknadDokument": {
       "filnavn": "string",
@@ -42,7 +42,7 @@ val ok_digisossak_response = """
     ]
   },
   "digisosSoker": {
-    "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa1",
     "dokumenter": [
       {
         "filnavn": "string",

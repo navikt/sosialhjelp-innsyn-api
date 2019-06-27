@@ -25,8 +25,8 @@ class HendelseService(private val innsynService: InnsynService) {
         val hendelser = mutableListOf<HendelseFrontend>()
         val soknadsmottaker = jsonSoknad.mottaker
         val saker: MutableMap<String, String> = mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker)
-        hendelser.add(HendelseFrontend(timestampSendt, "Søknaden med vedlegg er sendt til " + soknadsmottaker.navEnhetsnavn, null, null, null))
-        hendelser.addAll(jsonDigisosSoker.hendelser.map { mapToHendelseFrontend(it, soknadsmottaker, saker) }.filterNotNull())
+        hendelser.add(HendelseFrontend(timestampSendt, "Søknaden med vedlegg er sendt til ${soknadsmottaker.navEnhetsnavn}", null, null, null))
+        hendelser.addAll(jsonDigisosSoker.hendelser.mapNotNull { mapToHendelseFrontend(it, soknadsmottaker, saker) })
         hendelser.sortBy { it.timestamp }
         return hendelser
     }
@@ -34,7 +34,7 @@ class HendelseService(private val innsynService: InnsynService) {
     private fun mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker: JsonDigisosSoker): MutableMap<String, String> {
         val saker: MutableMap<String, String> = mutableMapOf()
         jsonDigisosSoker.hendelser.filter { jsonHendelse -> jsonHendelse.type == JsonHendelse.Type.SAKS_STATUS }
-                .forEach { jsonHendelse -> saker.put((jsonHendelse as JsonSaksStatus).referanse, jsonHendelse.tittel) }
+                .forEach { jsonHendelse -> saker[(jsonHendelse as JsonSaksStatus).referanse] = jsonHendelse.tittel }
         return saker
     }
 
@@ -46,9 +46,9 @@ class HendelseService(private val innsynService: InnsynService) {
             JsonHendelse.Type.TILDELT_NAV_KONTOR -> tildeltNavKontorHendelse(jsonHendelse, soknadsmottaker)
             JsonHendelse.Type.SOKNADS_STATUS -> soknadsStatusHendelse(jsonHendelse, soknadsmottaker)
             JsonHendelse.Type.VEDTAK_FATTET -> vedtakFattetHendelse(jsonHendelse, saker)
-            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> DokumentasjonEtterspurtHendelse(jsonHendelse)
-            JsonHendelse.Type.FORELOPIG_SVAR -> ForelopigSvarHendelse(jsonHendelse)
-            JsonHendelse.Type.SAKS_STATUS -> SaksStatusHendelse(jsonHendelse)
+            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> dokumentasjonEtterspurtHendelse(jsonHendelse)
+            JsonHendelse.Type.FORELOPIG_SVAR -> forelopigSvarHendelse(jsonHendelse)
+            JsonHendelse.Type.SAKS_STATUS -> saksStatusHendelse(jsonHendelse)
             else -> throw RuntimeException("Hendelsestype ${jsonHendelse.type.value()} mangler mapping")
         }
     }
@@ -58,7 +58,7 @@ class HendelseService(private val innsynService: InnsynService) {
         if (jsonHendelse.navKontor == soknadsmottaker.enhetsnummer) {
             return null
         }
-        val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt hos " + jsonHendelse.navKontor
+        val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt hos ${jsonHendelse.navKontor}"
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
     }
 
@@ -71,6 +71,7 @@ class HendelseService(private val innsynService: InnsynService) {
             JsonSoknadsStatus.Status.MOTTATT -> "Søknaden med vedlegg er mottatt hos ${soknadsmottaker.navEnhetsnavn}"
             JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling"
             JsonSoknadsStatus.Status.FERDIGBEHANDLET -> "Søknaden er ferdig behandlet"
+            else -> throw RuntimeException("Statustype ${jsonHendelse.status.value()} mangler mapping")
         }
 
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
@@ -79,32 +80,32 @@ class HendelseService(private val innsynService: InnsynService) {
     private fun vedtakFattetHendelse(jsonHendelse: JsonHendelse, saker: MutableMap<String, String>): HendelseFrontend {
         jsonHendelse as JsonVedtakFattet
         val utfall = jsonHendelse.utfall.utfall.value().toLowerCase().replace('_', ' ')
-        val beskrivelse = saker[jsonHendelse.referanse] + " er " + utfall
+        val beskrivelse = "${saker[jsonHendelse.referanse]} er $utfall"
         val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.vedtaksfil.referanse)
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, id, nr, refErTilSvarUt)
     }
 
-    private fun DokumentasjonEtterspurtHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
+    private fun dokumentasjonEtterspurtHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
         jsonHendelse as JsonDokumentasjonEtterspurt
         val beskrivelse = "Du må laste opp mer dokumentasjon"
         val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.forvaltningsbrev.referanse)
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, id, nr, refErTilSvarUt)
     }
 
-    private fun ForelopigSvarHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
+    private fun forelopigSvarHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
         jsonHendelse as JsonForelopigSvar
         val beskrivelse = "Du har fått et brev om saksbehandlingstiden for søknaden din"
         val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.forvaltningsbrev.referanse)
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, id, nr, refErTilSvarUt)
     }
 
-    private fun SaksStatusHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
+    private fun saksStatusHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
         jsonHendelse as JsonSaksStatus
         val status = jsonHendelse.status.value().toLowerCase().replace('_', ' ')
         val beskrivelse = if (jsonHendelse.status == JsonSaksStatus.Status.IKKE_INNSYN) {
-            "Saken " + jsonHendelse.tittel + " har " + status
+            "Saken ${jsonHendelse.tittel} har $status"
         } else {
-            "Saken " + jsonHendelse.tittel + " er " + status
+            "Saken ${jsonHendelse.tittel} er $status"
         }
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
     }

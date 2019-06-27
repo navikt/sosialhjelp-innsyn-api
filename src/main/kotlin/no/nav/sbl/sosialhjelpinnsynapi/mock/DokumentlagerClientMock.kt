@@ -23,7 +23,7 @@ class DokumentlagerClientMock: DokumentlagerClient {
                 dokumentMap[dokumentlagerId] = default
                 default
             })
-            else -> requestedClass.newInstance()
+            else -> requestedClass.getDeclaredConstructor(requestedClass).newInstance()
         }
     }
 

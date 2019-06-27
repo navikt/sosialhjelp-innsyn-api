@@ -25,6 +25,5 @@ class SoknadStatusIT : AbstractIT() {
         assertThat(responseEntity).isNotNull
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body!!.status).isEqualTo(SoknadStatus.MOTTATT)
-        assertThat(responseEntity.body!!.vedtaksinfo).isNull()
     }
 }

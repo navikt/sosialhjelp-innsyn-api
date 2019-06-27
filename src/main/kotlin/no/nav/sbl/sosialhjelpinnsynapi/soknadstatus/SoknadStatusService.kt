@@ -39,28 +39,12 @@ class SoknadStatusService(private val clientProperties: ClientProperties,
         when {
             mestNyligeHendelse == null ->
                 throw RuntimeException("Ingen hendelser av typen SOKNADS_STATUS")
-            (mestNyligeHendelse as JsonSoknadsStatus).status == null ->
+            mestNyligeHendelse.status == null ->
                 throw RuntimeException("Feltet status må være satt for hendelser av typen SOKNADS_STATUS")
             else -> {
                 log.info("Hentet nåværende søknadsstatus=${mestNyligeHendelse.status.name} for $fiksDigisosId")
-                return SoknadStatusResponse(SoknadStatus.valueOf(mestNyligeHendelse.status.name), appendWithVedtaksinformasjon(jsonDigisosSoker.hendelser))
+                return SoknadStatusResponse(SoknadStatus.valueOf(mestNyligeHendelse.status.name))
             }
         }
-    }
-
-    fun appendWithVedtaksinformasjon(hendelser: List<JsonHendelse>): String? {
-        val mestNyligeVedtakFattet = hendelser
-                .filterIsInstance<JsonVedtakFattet>()
-                .maxBy { it.hendelsestidspunkt }
-
-        if (mestNyligeVedtakFattet != null && mestNyligeVedtakFattet.referanse == null && hendelser.none { it is JsonSaksStatus }) {
-            val filreferanse = mestNyligeVedtakFattet.vedtaksfil.referanse
-            return when (filreferanse) {
-                is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"
-                is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}"
-                else -> throw RuntimeException("Noe uventet skjedde. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
-            }
-        }
-        return null
     }
 }

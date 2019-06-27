@@ -1,11 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
 data class SoknadStatusResponse(
-        val status: SoknadStatus,
-        val vedtaksinfo: String?
-) {
-    constructor(status: SoknadStatus) : this(status, null)
-}
+        val status: SoknadStatus
+)
 
 enum class SoknadStatus {
     SENDT,

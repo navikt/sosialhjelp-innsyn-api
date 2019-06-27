@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 @Profile("mock")
 @Component
-class DokumentlagerClientMock: DokumentlagerClient {
+class DokumentlagerClientMock : DokumentlagerClient {
 
     private val dokumentMap = mutableMapOf<String, Any>()
     private val mapper = jacksonObjectMapper()

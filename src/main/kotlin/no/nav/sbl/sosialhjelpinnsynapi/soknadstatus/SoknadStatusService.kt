@@ -1,13 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.soknadstatus
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
-import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
@@ -18,8 +12,7 @@ import org.springframework.stereotype.Component
 private val log = LoggerFactory.getLogger(SoknadStatusService::class.java)
 
 @Component
-class SoknadStatusService(private val clientProperties: ClientProperties,
-                          private val fiksClient: FiksClient,
+class SoknadStatusService(private val fiksClient: FiksClient,
                           private val dokumentlagerClient: DokumentlagerClient) {
 
     fun hentSoknadStatus(fiksDigisosId: String): SoknadStatusResponse {

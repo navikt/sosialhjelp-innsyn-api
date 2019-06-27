@@ -7,7 +7,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatusResponse
@@ -28,11 +27,10 @@ private val SOKNAD_MOTTATT = JsonSoknadsStatus()
 
 internal class SoknadStatusServiceTest {
 
-    private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val fiksClient: FiksClient = mockk()
     private val dokumentlagerClient: DokumentlagerClient = mockk()
 
-    private val service = SoknadStatusService(clientProperties, fiksClient, dokumentlagerClient)
+    private val service = SoknadStatusService(fiksClient, dokumentlagerClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
 

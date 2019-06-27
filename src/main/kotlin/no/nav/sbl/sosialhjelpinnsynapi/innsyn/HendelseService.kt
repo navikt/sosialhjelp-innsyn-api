@@ -42,17 +42,15 @@ class HendelseService(private val innsynService: InnsynService) {
         if (jsonHendelse.type == null) {
             throw RuntimeException("Hendelse mangler type")
         }
-        val hendelseFrontend: HendelseFrontend?
-        when (jsonHendelse.type) {
-            JsonHendelse.Type.TILDELT_NAV_KONTOR -> hendelseFrontend = tildeltNavKontorHendelse(jsonHendelse, soknadsmottaker)
-            JsonHendelse.Type.SOKNADS_STATUS -> hendelseFrontend = soknadsStatusHendelse(jsonHendelse, soknadsmottaker)
-            JsonHendelse.Type.VEDTAK_FATTET -> hendelseFrontend = vedtakFattetHendelse(jsonHendelse, saker)
-            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> hendelseFrontend = DokumentasjonEtterspurtHendelse(jsonHendelse)
-            JsonHendelse.Type.FORELOPIG_SVAR -> hendelseFrontend = ForelopigSvarHendelse(jsonHendelse)
-            JsonHendelse.Type.SAKS_STATUS -> hendelseFrontend = SaksStatusHendelse(jsonHendelse)
+        return when (jsonHendelse.type) {
+            JsonHendelse.Type.TILDELT_NAV_KONTOR -> tildeltNavKontorHendelse(jsonHendelse, soknadsmottaker)
+            JsonHendelse.Type.SOKNADS_STATUS -> soknadsStatusHendelse(jsonHendelse, soknadsmottaker)
+            JsonHendelse.Type.VEDTAK_FATTET -> vedtakFattetHendelse(jsonHendelse, saker)
+            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> DokumentasjonEtterspurtHendelse(jsonHendelse)
+            JsonHendelse.Type.FORELOPIG_SVAR -> ForelopigSvarHendelse(jsonHendelse)
+            JsonHendelse.Type.SAKS_STATUS -> SaksStatusHendelse(jsonHendelse)
             else -> throw RuntimeException("Hendelsestype " + jsonHendelse.type.value() + " mangler mapping")
         }
-        return hendelseFrontend
     }
 
     private fun tildeltNavKontorHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseFrontend? {
@@ -66,14 +64,13 @@ class HendelseService(private val innsynService: InnsynService) {
 
     private fun soknadsStatusHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseFrontend {
         jsonHendelse as JsonSoknadsStatus
-        val beskrivelse: String
         if (jsonHendelse.status == null) {
             throw RuntimeException("JsonSoknadsStatus mangler status")
         }
-        when (jsonHendelse.status) {
-            JsonSoknadsStatus.Status.MOTTATT -> beskrivelse = "Søknaden med vedlegg er mottatt hos ${soknadsmottaker.navEnhetsnavn}"
-            JsonSoknadsStatus.Status.UNDER_BEHANDLING -> beskrivelse = "Søknaden er under behandling"
-            JsonSoknadsStatus.Status.FERDIGBEHANDLET -> beskrivelse = "Søknaden er ferdig behandlet"
+        val beskrivelse = when (jsonHendelse.status) {
+            JsonSoknadsStatus.Status.MOTTATT -> "Søknaden med vedlegg er mottatt hos ${soknadsmottaker.navEnhetsnavn}"
+            JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling"
+            JsonSoknadsStatus.Status.FERDIGBEHANDLET -> "Søknaden er ferdig behandlet"
         }
 
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
@@ -103,12 +100,11 @@ class HendelseService(private val innsynService: InnsynService) {
 
     private fun SaksStatusHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
         jsonHendelse as JsonSaksStatus
-        val beskrivelse: String
         val status = jsonHendelse.status.value().toLowerCase().replace('_', ' ')
-        if (jsonHendelse.status == JsonSaksStatus.Status.IKKE_INNSYN) {
-            beskrivelse = "Saken " + jsonHendelse.tittel + " har " + status
+        val beskrivelse = if (jsonHendelse.status == JsonSaksStatus.Status.IKKE_INNSYN) {
+            "Saken " + jsonHendelse.tittel + " har " + status
         } else {
-            beskrivelse = "Saken " + jsonHendelse.tittel + " er " + status
+            "Saken " + jsonHendelse.tittel + " er " + status
         }
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
     }

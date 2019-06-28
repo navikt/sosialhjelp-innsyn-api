@@ -9,10 +9,13 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
 import no.nav.sbl.sosialhjelpinnsynapi.rest.HendelseFrontend
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class HendelseService(private val innsynService: InnsynService) {
+
+    private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun getHendelserForSoknad(fiksDigisosId: String): List<HendelseFrontend> {
         val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId) ?: return emptyList()
@@ -26,15 +29,20 @@ class HendelseService(private val innsynService: InnsynService) {
         val soknadsmottaker = jsonSoknad.mottaker
         val saker: MutableMap<String, String> = mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker)
         hendelser.add(HendelseFrontend(timestampSendt, "Søknaden med vedlegg er sendt til ${soknadsmottaker.navEnhetsnavn}", null, null, null))
-        hendelser.addAll(jsonDigisosSoker.hendelser.mapNotNull { mapToHendelseFrontend(it, soknadsmottaker, saker) })
+        hendelser.addAll(jsonDigisosSoker.hendelser
+                .filterNot { it.type == JsonHendelse.Type.UTBETALING || it.type == JsonHendelse.Type.VILKAR }
+                .mapNotNull { mapToHendelseFrontend(it, soknadsmottaker, saker) })
         hendelser.sortBy { it.timestamp }
         return hendelser
     }
 
     private fun mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker: JsonDigisosSoker): MutableMap<String, String> {
         val saker: MutableMap<String, String> = mutableMapOf()
-        jsonDigisosSoker.hendelser.filter { jsonHendelse -> jsonHendelse.type == JsonHendelse.Type.SAKS_STATUS }
-                .forEach { jsonHendelse -> saker[(jsonHendelse as JsonSaksStatus).referanse] = jsonHendelse.tittel }
+        jsonDigisosSoker.hendelser.filterIsInstance<JsonSaksStatus>()
+                .forEach { jsonHendelse ->
+                    val tittel = if (jsonHendelse.tittel != null) jsonHendelse.tittel else ""
+                    saker[jsonHendelse.referanse] = tittel
+                }
         return saker
     }
 
@@ -58,7 +66,7 @@ class HendelseService(private val innsynService: InnsynService) {
         if (jsonHendelse.navKontor == soknadsmottaker.enhetsnummer) {
             return null
         }
-        val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt hos ${jsonHendelse.navKontor}"
+        val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt ved ${jsonHendelse.navKontor}. Videresendingen vil ikke påvirke saksbehandlingstiden"
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
     }
 
@@ -79,8 +87,18 @@ class HendelseService(private val innsynService: InnsynService) {
 
     private fun vedtakFattetHendelse(jsonHendelse: JsonHendelse, saker: MutableMap<String, String>): HendelseFrontend {
         jsonHendelse as JsonVedtakFattet
+        if (jsonHendelse.utfall == null) {
+            val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.vedtaksfil.referanse)
+            return HendelseFrontend(jsonHendelse.hendelsestidspunkt, "Vedtak fattet", id, nr, refErTilSvarUt)
+        }
+
         val utfall = jsonHendelse.utfall.utfall.value().toLowerCase().replace('_', ' ')
-        val beskrivelse = "${saker[jsonHendelse.referanse]} er $utfall"
+        val beskrivelse = if (saker.containsKey(jsonHendelse.referanse) && saker[jsonHendelse.referanse] != "") {
+            "${saker[jsonHendelse.referanse]} er $utfall"
+        } else {
+            log.warn("Tilhørende SaksstatusHendelse manglet eller manglet tittel på saksstatus")
+            "En sak har fått utfallet: $utfall"
+        }
         val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.vedtaksfil.referanse)
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, id, nr, refErTilSvarUt)
     }
@@ -99,8 +117,12 @@ class HendelseService(private val innsynService: InnsynService) {
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, id, nr, refErTilSvarUt)
     }
 
-    private fun saksStatusHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
+    private fun saksStatusHendelse(jsonHendelse: JsonHendelse): HendelseFrontend? {
         jsonHendelse as JsonSaksStatus
+        if (jsonHendelse.status == null) {
+            return null
+        }
+
         val status = jsonHendelse.status.value().toLowerCase().replace('_', ' ')
         val beskrivelse = if (jsonHendelse.status == JsonSaksStatus.Status.IKKE_INNSYN) {
             "Saken ${jsonHendelse.tittel} har $status"

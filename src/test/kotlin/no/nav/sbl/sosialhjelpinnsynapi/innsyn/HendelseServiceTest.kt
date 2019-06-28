@@ -31,7 +31,7 @@ internal class HendelseServiceTest {
 
     @Test
     fun `Should return hendelser with first element being soknad sendt`() {
-        every { innsynService.hentDigisosSak(any()) } returns jsonDigisosSoker_med_soknadsstatus
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_soknadsstatus
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns "Nav Testhus, Test Kommune"
         every { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns 12345L

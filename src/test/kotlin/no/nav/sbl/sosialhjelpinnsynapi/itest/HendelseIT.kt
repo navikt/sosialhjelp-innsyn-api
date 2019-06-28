@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 
-class SoknadStatusIT: AbstractIT() {
+class HendelseIT: AbstractIT() {
 
     @Test
     fun `GET OriginalSoknad - happy path`() {

@@ -8,7 +8,7 @@ data class DigisosSak(
         val sistEndret: Long,
         val orginalSoknadNAV: OrginalSoknadNAV,
         val ettersendtInfoNAV: EttersendtInfoNAV,
-        val digisosSoker: DigisosSoker
+        val digisosSoker: DigisosSoker?
 )
 
 data class OrginalSoknadNAV(

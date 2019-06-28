@@ -21,6 +21,6 @@ class MockController(val fiksClientMock: FiksClientMock, val dokumentlagerClient
     fun postJsonDigisosSoker(@PathVariable soknadId: String, @RequestBody jsonDigisosSoker: JsonDigisosSoker) {
         log.info("soknadId: $soknadId, jsonDigisosSoker: $jsonDigisosSoker")
         val digisosSak = fiksClientMock.hentDigisosSak(soknadId)
-        dokumentlagerClientMock.postDokument(digisosSak.digisosSoker.metadata, jsonDigisosSoker)
+        digisosSak.digisosSoker?.metadata?.let { dokumentlagerClientMock.postDokument(it, jsonDigisosSoker) }
     }
 }

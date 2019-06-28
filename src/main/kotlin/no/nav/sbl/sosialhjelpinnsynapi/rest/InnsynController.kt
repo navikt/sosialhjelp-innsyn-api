@@ -20,8 +20,8 @@ class InnsynController(val innsynService: InnsynService) {
     @GetMapping("/{soknadId}", produces = [APPLICATION_JSON_UTF8_VALUE])
     fun getInnsynForSoknad(@PathVariable soknadId: String): ResponseEntity<JsonDigisosSoker> {
         try {
-            val jsonDigisosSoker = innsynService.hentDigisosSak(soknadId)
-            return ResponseEntity.ok(jsonDigisosSoker)
+            val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(soknadId)
+            return ResponseEntity.ok(jsonDigisosSoker!!)
         } catch (e: Exception) {
             throw ResponseStatusException(BAD_REQUEST)
         }

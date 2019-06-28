@@ -10,9 +10,13 @@ import org.springframework.stereotype.Component
 class InnsynService(private val fiksClient: FiksClient,
                     private val dokumentlagerClient: DokumentlagerClient) {
 
-    fun hentDigisosSak(soknadId: String): JsonDigisosSoker {
+    fun hentJsonDigisosSoker(soknadId: String): JsonDigisosSoker? {
         val digisosSak = fiksClient.hentDigisosSak(soknadId)
-        return dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java) as JsonDigisosSoker
+        return if (digisosSak.digisosSoker != null) {
+            dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java) as JsonDigisosSoker
+        } else {
+            null
+        }
     }
 
     fun hentOriginalSoknad(soknadId: String): JsonSoknad {

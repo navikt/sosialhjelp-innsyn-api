@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
@@ -16,7 +17,6 @@ internal class InnsynServiceTest {
 
     val fiksClient: FiksClient = mockk()
     val dokumentlagerClient: DokumentlagerClient = mockk()
-
     val service = InnsynService(fiksClient, dokumentlagerClient)
 
     val mockDigisosSak: DigisosSak = mockk()
@@ -47,5 +47,18 @@ internal class InnsynServiceTest {
         val jsonDigisosSoker = service.hentJsonDigisosSoker("123")
 
         assertNull(jsonDigisosSoker)
+    }
+
+    @Test
+    fun `Should return originalSoknad`() {
+        val mockJsonSoknad: JsonSoknad = mockk()
+
+        every { fiksClient.hentDigisosSak("123") } returns mockDigisosSak
+        every { mockDigisosSak.orginalSoknadNAV?.metadata } returns "some id"
+        every { dokumentlagerClient.hentDokument(any(), JsonSoknad::class.java) } returns mockJsonSoknad
+
+        val jsonSoknad: JsonSoknad = service.hentOriginalSoknad("123")
+
+        assertNotNull(jsonSoknad)
     }
 }

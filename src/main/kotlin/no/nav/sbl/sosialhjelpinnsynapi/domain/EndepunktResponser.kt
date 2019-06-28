@@ -14,8 +14,7 @@ enum class SoknadStatus {
 data class SaksStatusResponse(
         val tittel: String,
         val status: UtfallEllerSaksStatus,
-        val vedtaksfilUrl: String?,
-        val vedtaksfilNavn: String?
+        val vedtaksfilUrl: String?
 )
 
 enum class UtfallEllerSaksStatus {

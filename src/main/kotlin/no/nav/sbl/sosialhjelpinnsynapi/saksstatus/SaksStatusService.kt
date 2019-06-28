@@ -1,6 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
@@ -8,9 +11,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallEllerSaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.soknadstatus.hentUrlFraFilreferanse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+
+const val DEFAULT_TITTEL: String = "Søknaden"
 
 private val log = LoggerFactory.getLogger(SaksStatusService::class.java)
 
@@ -19,6 +23,13 @@ class SaksStatusService(private val clientProperties: ClientProperties,
                         private val fiksClient: FiksClient,
                         private val dokumentlagerClient: DokumentlagerClient) {
 
+    /* TODO:
+        - Kan man ha flere saksStatuser med samme referanse?
+        - Kan man ha flere vedtakFattet med samme referanse (også hvis referanse == null)?
+        - Skal IKKE_INNSYN filtreres vekk i backend eller frontend?
+        -
+        - Foreløpig antagelse: Det finnes ingen vedtakFattet med referanse, hvor referanse ikke har en tilhørende saksstatus
+     */
     fun hentSaksStatuser(fiksDigisosId: String): List<SaksStatusResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
 
@@ -33,25 +44,47 @@ class SaksStatusService(private val clientProperties: ClientProperties,
                 .sortedByDescending { it.hendelsestidspunkt }
                 .distinctBy { it.referanse }
 
-        if (saksStatusList.isEmpty()) {
+        val vedtakFattetUtenReferanse = jsonDigisosSoker.hendelser
+                .filterIsInstance<JsonVedtakFattet>()
+                .filter { it.referanse.isNullOrBlank() }
+
+        if (saksStatusList.isEmpty() && vedtakFattetUtenReferanse.isEmpty()) {
+            log.info("Ingen saksStatuser for $fiksDigisosId")
             return emptyList()
-        } else {
-
-            val vedtakFattetList = jsonDigisosSoker.hendelser
-                    .filterIsInstance<JsonVedtakFattet>()
-                    .sortedByDescending { it.hendelsestidspunkt } // sorter fra nyeste til eldste
-                    .distinctBy { it.referanse } // hent ut de nyeste med unik referanse
-
-            val saksStatusVedtakFattetPairList: List<Pair<JsonSaksStatus, JsonVedtakFattet?>> = saksStatusList.map { it to vedtakFattetList.firstOrNull { vedtakFattet -> vedtakFattet.referanse == it.referanse } }.toList()
-
-            return saksStatusVedtakFattetPairList.map { mapToSaksStatusResponse(it.first, it.second) }.toList()
         }
+
+        val vedtakFattetHendelser = jsonDigisosSoker.hendelser.filterIsInstance<JsonVedtakFattet>()
+
+        // Linke SaksStatuser til VedtakFattet hvis referanse-felter er like
+        val saksStatusVedtakFattetPairList: MutableList<Pair<JsonSaksStatus?, JsonVedtakFattet?>> = saksStatusList
+                .map { it to vedtakFattetHendelser.firstOrNull { vedtakFattet -> vedtakFattet.referanse == it.referanse } }
+                .toMutableList()
+
+        saksStatusVedtakFattetPairList.addAll(vedtakFattetUtenReferanse.map { null to it })
+
+        log.info("Hentet ${saksStatusVedtakFattetPairList.size} saksStatuser")
+        return saksStatusVedtakFattetPairList.map { mapToSaksStatusResponse(it.first, it.second) }
     }
 
-    fun mapToSaksStatusResponse(saksStatus: JsonSaksStatus, vedtakFattet: JsonVedtakFattet?): SaksStatusResponse {
-        // TODO: figure out status
-        val responseStatus = vedtakFattet?.utfall?.utfall?.name?.let { UtfallEllerSaksStatus.valueOf(it) }
+    private fun mapToSaksStatusResponse(saksStatus: JsonSaksStatus?, vedtakFattet: JsonVedtakFattet?): SaksStatusResponse {
+        val statusName = hentStatusNavn(saksStatus, vedtakFattet)
 
-        return SaksStatusResponse(saksStatus.tittel, responseStatus ?: UtfallEllerSaksStatus.AVSLATT, hentUrlFraFilreferanse(clientProperties, vedtakFattet?.vedtaksfil?.referanse), null)
+        val filreferanseUrl = vedtakFattet?.vedtaksfil?.referanse?.let { hentUrlFraFilreferanse(clientProperties, it) }
+
+        return SaksStatusResponse(saksStatus?.tittel
+                ?: DEFAULT_TITTEL, UtfallEllerSaksStatus.valueOf(statusName), filreferanseUrl)
+    }
+
+    private fun hentStatusNavn(saksStatus: JsonSaksStatus?, vedtakFattet: JsonVedtakFattet?): String {
+        return vedtakFattet?.utfall?.utfall?.name ?: saksStatus?.status?.name
+        ?: throw RuntimeException("Oh no. Både SaksStatus og VedtakFattet kan ikke være null")
+    }
+
+    private fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
+        return when (filreferanse) {
+            is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"
+            is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}"
+            else -> throw RuntimeException("Noe uventet skjedde. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
+        }
     }
 }

@@ -6,10 +6,7 @@ import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 
 @Unprotected
@@ -20,8 +17,11 @@ class SaksStatusController(private val saksStatusService: SaksStatusService) {
     @GetMapping("/{fiksDigisosId}/saksStatus", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
     fun getInfoOmSplittetSak(@PathVariable fiksDigisosId: String): ResponseEntity<List<SaksStatusResponse>> {
         try {
-            saksStatusService.hentSaksStatuser(fiksDigisosId)
-            return ResponseEntity.ok(emptyList())
+            val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId)
+            if (saksStatuser.isEmpty()) {
+                return ResponseEntity(HttpStatus.NO_CONTENT)
+            }
+            return ResponseEntity.ok(saksStatuser)
         } catch (e: Exception) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }

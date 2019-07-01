@@ -13,4 +13,6 @@ class ClientProperties {
 
     lateinit var fiksSvarUtEndpointUrl: String
 
+    lateinit var norgEndpointUrl: String
+
 }

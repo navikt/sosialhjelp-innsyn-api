@@ -3,5 +3,6 @@
   "ingresses": [
     "https://sosialhjelp-innsyn-api.nais.oera.no/soknadsosialhjelp/innsyn-api",
     "https://www.nav.no/soknadsosialhjelp/innsyn-api"
-  ]
+  ],
+  "norg_endpoint_url": "https://api-gw.oera.no/norg2/api/v1/"
 }

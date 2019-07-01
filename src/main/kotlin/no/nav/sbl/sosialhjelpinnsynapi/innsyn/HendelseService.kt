@@ -8,27 +8,37 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilrefe
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
+import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.rest.HendelseFrontend
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 @Component
-class HendelseService(private val innsynService: InnsynService) {
+class HendelseService(private val innsynService: InnsynService,
+                      private val norgClient: NorgClient) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun getHendelserForSoknad(fiksDigisosId: String): List<HendelseFrontend> {
-        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId) ?: return emptyList()
+        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId)
         val jsonSoknad = innsynService.hentOriginalSoknad(fiksDigisosId)
-        val timestampSendt = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId).toString()
+        val timestampSendtUnix = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId)
+        val timestampSendt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestampSendtUnix), ZoneOffset.UTC).toString()
         return createHendelserList(jsonDigisosSoker, jsonSoknad, timestampSendt)
     }
 
-    private fun createHendelserList(jsonDigisosSoker: JsonDigisosSoker, jsonSoknad: JsonSoknad, timestampSendt: String): List<HendelseFrontend> {
+    private fun createHendelserList(jsonDigisosSoker: JsonDigisosSoker?, jsonSoknad: JsonSoknad, timestampSendt: String): List<HendelseFrontend> {
         val hendelser = mutableListOf<HendelseFrontend>()
         val soknadsmottaker = jsonSoknad.mottaker
-        val saker: MutableMap<String, String> = mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker)
         hendelser.add(HendelseFrontend(timestampSendt, "Søknaden med vedlegg er sendt til ${soknadsmottaker.navEnhetsnavn}", null, null, null))
+        if (jsonDigisosSoker == null) {
+            return hendelser
+        }
+
+        val saker: MutableMap<String, String> = mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker)
         hendelser.addAll(jsonDigisosSoker.hendelser
                 .filterNot { it.type == JsonHendelse.Type.UTBETALING || it.type == JsonHendelse.Type.VILKAR }
                 .mapNotNull { mapToHendelseFrontend(it, soknadsmottaker, saker) })
@@ -39,10 +49,7 @@ class HendelseService(private val innsynService: InnsynService) {
     private fun mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker: JsonDigisosSoker): MutableMap<String, String> {
         val saker: MutableMap<String, String> = mutableMapOf()
         jsonDigisosSoker.hendelser.filterIsInstance<JsonSaksStatus>()
-                .forEach { jsonHendelse ->
-                    val tittel = if (jsonHendelse.tittel != null) jsonHendelse.tittel else ""
-                    saker[jsonHendelse.referanse] = tittel
-                }
+                .forEach { jsonHendelse -> saker[jsonHendelse.referanse] = jsonHendelse.tittel ?: "" }
         return saker
     }
 
@@ -66,7 +73,8 @@ class HendelseService(private val innsynService: InnsynService) {
         if (jsonHendelse.navKontor == soknadsmottaker.enhetsnummer) {
             return null
         }
-        val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt ved ${jsonHendelse.navKontor}. Videresendingen vil ikke påvirke saksbehandlingstiden"
+        val navKontorNavn = norgClient.hentNavEnhet(jsonHendelse.navKontor).navn
+        val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt ved $navKontorNavn. Videresendingen vil ikke påvirke saksbehandlingstiden"
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
     }
 

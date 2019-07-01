@@ -11,23 +11,28 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
+import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.rest.HendelseFrontend
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 internal class HendelseServiceTest {
 
     val innsynService: InnsynService = mockk()
+    val norgClient: NorgClient = mockk()
 
-    val service = HendelseService(innsynService)
+    val service = HendelseService(innsynService, norgClient)
 
     val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
     val mockJsonSoknad: JsonSoknad = mockk()
+    val mockNavEnhet: NavEnhet = mockk()
 
+    val tidspunkt0 = LocalDateTime.now().minusHours(11).atZone(ZoneOffset.UTC).toEpochSecond()*1000L
     val tidspunkt1 = LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME)
     val tidspunkt2 = LocalDateTime.now().minusHours(9).format(DateTimeFormatter.ISO_DATE_TIME)
     val tidspunkt3 = LocalDateTime.now().minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)
@@ -39,9 +44,8 @@ internal class HendelseServiceTest {
     val tidspunkt9 = LocalDateTime.now().minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME)
     val tidspunkt10 = LocalDateTime.now().plusDays(5).format(DateTimeFormatter.ISO_DATE_TIME)
 
-    val soknadsmottaker = "Nav Testhus, Test Kommune"
+    val soknadsmottaker = "The Office"
     val enhetsnr = "2317"
-    val navkontor = "The Office"
     val referanseSvarUt = JsonSvarUtFilreferanse()
             .withType(JsonFilreferanse.Type.SVARUT)
             .withId("12345")
@@ -55,40 +59,96 @@ internal class HendelseServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(innsynService, mockJsonDigisosSoker, mockJsonSoknad)
+        clearMocks(innsynService, norgClient, mockJsonDigisosSoker, mockJsonSoknad)
+        every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
+        every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
+        every { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
+        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns tidspunkt0
     }
 
     @Test
-    fun `Should return hendelser with first element being soknad sendt`() {
-        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_soknadsstatus
-
-        every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
-        every { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
-        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns 12345L
+    fun `Should only return sendt hendelse if jsonDigisosSoker is null`() {
+        every { innsynService.hentJsonDigisosSoker(any()) } returns null
 
         val hendelser = service.getHendelserForSoknad("123")
 
-        assertNotNull(hendelser)
+        assertTrue(hendelser.size == 1)
         assertTrue(hendelser[0].beskrivelse.contains("Søknaden med vedlegg er sendt til $soknadsmottaker", ignoreCase = true))
-        assertTrue(hendelser[0].timestamp.contains("12345"))
+    }
+
+    @Test
+    fun `Should return hendelser sendt and mottatt`() {
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_soknadsstatus
+
+        val hendelser = service.getHendelserForSoknad("123")
+
+        assertTrue(hendelser.size == 2)
+        assertTrue(hendelser[0].beskrivelse.contains("Søknaden med vedlegg er sendt til $soknadsmottaker", ignoreCase = true))
+        assertTrue(hendelser[1].beskrivelse.contains("Søknaden med vedlegg er mottatt hos $soknadsmottaker", ignoreCase = true))
     }
 
     @Test
     fun `Should return hendelser with minimal info and elements ordered by tidspunkt`() {
         every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_alle_hendelser_minimale
-        every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
-        every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
-        every { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
-        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns 12345L
 
         val hendelser = service.getHendelserForSoknad("123")
 
-        assertNotNull(hendelser)
         assertTrue(hendelser == hendelser.sortedBy { it.timestamp })
         for (hendelse: HendelseFrontend in hendelser) {
             assertNotNull(hendelse.beskrivelse)
             assertNotNull(hendelse.timestamp)
         }
+    }
+
+    @Test
+    fun `Should return tildeltNavkontor-hendelse with navkontor info`() {
+        val tildeltKontorNavn = "Testerløkka"
+        val tildeltKontorEnhetsnr = "1234"
+        val jsonTildeltNavKontor: JsonTildeltNavKontor = JsonTildeltNavKontor()
+                .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
+                .withHendelsestidspunkt(tidspunkt2)
+                .withNavKontor(tildeltKontorEnhetsnr)
+        val jsonDigisosSoker: JsonDigisosSoker = createJsonDigisosSokerWithSoknadsstatus()
+        jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], jsonTildeltNavKontor))
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker
+        every { mockNavEnhet.navn } returns tildeltKontorNavn
+        every { norgClient.hentNavEnhet(tildeltKontorEnhetsnr) } returns mockNavEnhet
+
+        val tildeltNavKontorHendelse = service.getHendelserForSoknad("123")[2]
+
+        assertTrue(tildeltNavKontorHendelse.beskrivelse.contains(tildeltKontorNavn, ignoreCase = true))
+        assertTrue(tildeltNavKontorHendelse.beskrivelse.contains("videresendt", ignoreCase = true))
+        assertNull(tildeltNavKontorHendelse.referanse)
+        assertNull(tildeltNavKontorHendelse.nr)
+        assertNull(tildeltNavKontorHendelse.refErTilSvarUt)
+    }
+
+    @Test
+    fun `Should not return tildeltNavkontor-hendelse if same as originalSoknad`() {
+        val jsonTildeltNavKontor: JsonTildeltNavKontor = JsonTildeltNavKontor()
+                .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
+                .withHendelsestidspunkt(tidspunkt2)
+                .withNavKontor(enhetsnr)
+        val jsonDigisosSoker: JsonDigisosSoker = createJsonDigisosSokerWithSoknadsstatus()
+        jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], jsonTildeltNavKontor))
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker
+        every { mockNavEnhet.navn } returns soknadsmottaker
+        every { norgClient.hentNavEnhet(soknadsmottaker) } returns mockNavEnhet
+
+        val hendelser = service.getHendelserForSoknad("123")
+
+        assertTrue(hendelser.size == 2)
+    }
+
+    private fun createJsonDigisosSokerWithSoknadsstatus(): JsonDigisosSoker {
+        return JsonDigisosSoker()
+                .withAvsender(JsonAvsender().withSystemnavn("test"))
+                .withVersion("1.2.3")
+                .withHendelser(listOf(
+                        JsonSoknadsStatus()
+                                .withType(JsonHendelse.Type.SOKNADS_STATUS)
+                                .withHendelsestidspunkt(tidspunkt1)
+                                .withStatus(JsonSoknadsStatus.Status.MOTTATT)))
     }
 
     private val jsonDigisosSoker_med_soknadsstatus: JsonDigisosSoker = JsonDigisosSoker()
@@ -112,7 +172,7 @@ internal class HendelseServiceTest {
                     JsonTildeltNavKontor()
                             .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
                             .withHendelsestidspunkt(tidspunkt2)
-                            .withNavKontor(navkontor),
+                            .withNavKontor(enhetsnr),
                     JsonVedtakFattet()
                             .withType(JsonHendelse.Type.VEDTAK_FATTET)
                             .withHendelsestidspunkt(tidspunkt3)
@@ -153,7 +213,7 @@ internal class HendelseServiceTest {
                     JsonTildeltNavKontor()
                             .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
                             .withHendelsestidspunkt(tidspunkt2)
-                            .withNavKontor(navkontor),
+                            .withNavKontor(enhetsnr),
                     JsonVedtakFattet()
                             .withType(JsonHendelse.Type.VEDTAK_FATTET)
                             .withHendelsestidspunkt(tidspunkt3)

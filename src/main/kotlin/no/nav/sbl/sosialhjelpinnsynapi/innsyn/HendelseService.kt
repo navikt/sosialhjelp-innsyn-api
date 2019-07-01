@@ -101,7 +101,8 @@ class HendelseService(private val innsynService: InnsynService,
         }
 
         val utfall = jsonHendelse.utfall.utfall.value().toLowerCase().replace('_', ' ')
-        val beskrivelse = if (saker.containsKey(jsonHendelse.referanse) && saker[jsonHendelse.referanse] != "") {
+        val beskrivelse = if (jsonHendelse.referanse != null && saker.containsKey(jsonHendelse.referanse)
+                && saker[jsonHendelse.referanse] != "") {
             "${saker[jsonHendelse.referanse]} er $utfall"
         } else {
             log.warn("Tilhørende SaksstatusHendelse manglet eller manglet tittel på saksstatus")
@@ -129,6 +130,8 @@ class HendelseService(private val innsynService: InnsynService,
         jsonHendelse as JsonSaksStatus
         if (jsonHendelse.status == null) {
             return null
+        } else if (jsonHendelse.tittel == null) {
+            return HendelseFrontend(jsonHendelse.hendelsestidspunkt, "En sak har ikke innsyn", null, null, null)
         }
 
         val status = jsonHendelse.status.value().toLowerCase().replace('_', ' ')

@@ -10,12 +10,10 @@ class OppgaveService(private val innsynService: InnsynService) {
 
     fun getOppgaverForSoknad(fiksDigisosId: String): List<OppgaveFrontend> {
         val jsonDigisosSoker = innsynService.hentDigisosSak(fiksDigisosId)
-        val oppgaver = mutableListOf<OppgaveFrontend>()
-        jsonDigisosSoker.hendelser
-                .filter { jsonhendelse -> jsonhendelse.type == JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT }
-                .forEach {jsonHendelse -> oppgaver.addAll(getOppgaverFromHendelse(jsonHendelse)) }
-        oppgaver.sortBy { it.innsendelsesfrist }
-        return oppgaver
+        return jsonDigisosSoker.hendelser
+                .filterIsInstance<JsonDokumentasjonEtterspurt>()
+                .flatMap { getOppgaverFromHendelse(it) }
+                .sortedBy { it.innsendelsesfrist }
     }
 
     private fun getOppgaverFromHendelse(jsonHendelse: JsonHendelse?) =

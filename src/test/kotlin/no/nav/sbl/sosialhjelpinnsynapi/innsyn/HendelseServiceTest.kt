@@ -13,7 +13,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
-import no.nav.sbl.sosialhjelpinnsynapi.rest.HendelseFrontend
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -57,6 +56,11 @@ internal class HendelseServiceTest {
     val saksTittel = "Sko og skolisser"
     val utbetalingsRefereanse = "12321"
 
+    val dokumentKrav = JsonDokumenter()
+            .withInnsendelsesfrist("2020-10-04T13:37:00.134Z")
+            .withDokumenttype("kravark")
+            .withTilleggsinformasjon("tilleggellit")
+
     @BeforeEach
     fun init() {
         clearMocks(innsynService, norgClient, mockJsonDigisosSoker, mockJsonSoknad)
@@ -68,9 +72,9 @@ internal class HendelseServiceTest {
 
     @Test
     fun `Should only return sendt hendelse if jsonDigisosSoker is null`() {
-        every { innsynService.hentJsonDigisosSoker(any()) } returns null
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns null
 
-        val hendelser = service.getHendelserForSoknad("123")
+        val hendelser = service.getHendelserForSoknad("123", "Token")
 
         assertTrue(hendelser.size == 1)
         assertTrue(hendelser[0].beskrivelse.contains("Søknaden med vedlegg er sendt til $soknadsmottaker", ignoreCase = true))
@@ -78,7 +82,7 @@ internal class HendelseServiceTest {
 
     @Test
     fun `Should return hendelser sendt and mottatt`() {
-        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker_med_soknadsstatus
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns createJsonDigisosSokerWithStatusMottatt()
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
@@ -94,7 +98,20 @@ internal class HendelseServiceTest {
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
         assertTrue(hendelser == hendelser.sortedBy { it.timestamp })
-        for (hendelse: HendelseFrontend in hendelser) {
+        for (hendelse in hendelser) {
+            assertNotNull(hendelse.beskrivelse)
+            assertNotNull(hendelse.timestamp)
+        }
+    }
+
+    @Test
+    fun `Should return hendelser with complete info and elements ordered by tidspunkt`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker_alle_hendelser_komplette
+
+        val hendelser = service.getHendelserForSoknad("123", "Token")
+
+        assertTrue(hendelser == hendelser.sortedBy { it.timestamp })
+        for (hendelse in hendelser) {
             assertNotNull(hendelse.beskrivelse)
             assertNotNull(hendelse.timestamp)
         }
@@ -104,17 +121,20 @@ internal class HendelseServiceTest {
     fun `Should return tildeltNavkontor-hendelse with navkontor info`() {
         val tildeltKontorNavn = "Testerløkka"
         val tildeltKontorEnhetsnr = "1234"
-        val jsonTildeltNavKontor: JsonTildeltNavKontor = JsonTildeltNavKontor()
+        val jsonTildeltNavKontor = JsonTildeltNavKontor()
                 .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
                 .withHendelsestidspunkt(tidspunkt2)
                 .withNavKontor(tildeltKontorEnhetsnr)
-        val jsonDigisosSoker: JsonDigisosSoker = createJsonDigisosSokerWithSoknadsstatus()
+        val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], jsonTildeltNavKontor))
-        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
         every { mockNavEnhet.navn } returns tildeltKontorNavn
         every { norgClient.hentNavEnhet(tildeltKontorEnhetsnr) } returns mockNavEnhet
 
-        val tildeltNavKontorHendelse = service.getHendelserForSoknad("123")[2]
+        val hendelser = service.getHendelserForSoknad("123", "Token")
+        val tildeltNavKontorHendelse = hendelser[2]
+
+        assertTrue(hendelser.size == 3)
 
         assertTrue(tildeltNavKontorHendelse.beskrivelse.contains(tildeltKontorNavn, ignoreCase = true))
         assertTrue(tildeltNavKontorHendelse.beskrivelse.contains("videresendt", ignoreCase = true))
@@ -125,22 +145,155 @@ internal class HendelseServiceTest {
 
     @Test
     fun `Should not return tildeltNavkontor-hendelse if same as originalSoknad`() {
-        val jsonTildeltNavKontor: JsonTildeltNavKontor = JsonTildeltNavKontor()
+        val jsonTildeltNavKontor = JsonTildeltNavKontor()
                 .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
                 .withHendelsestidspunkt(tidspunkt2)
                 .withNavKontor(enhetsnr)
-        val jsonDigisosSoker: JsonDigisosSoker = createJsonDigisosSokerWithSoknadsstatus()
+        val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], jsonTildeltNavKontor))
-        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
         every { mockNavEnhet.navn } returns soknadsmottaker
         every { norgClient.hentNavEnhet(soknadsmottaker) } returns mockNavEnhet
 
-        val hendelser = service.getHendelserForSoknad("123")
+        val hendelser = service.getHendelserForSoknad("123", "Token")
 
         assertTrue(hendelser.size == 2)
     }
 
-    private fun createJsonDigisosSokerWithSoknadsstatus(): JsonDigisosSoker {
+    @Test
+    fun `Should return hendelser with under behandling and ferdig behandlet`() {
+        val statusUnderBehandling = JsonSoknadsStatus()
+                .withType(JsonHendelse.Type.SOKNADS_STATUS)
+                .withHendelsestidspunkt(tidspunkt2)
+                .withStatus(JsonSoknadsStatus.Status.UNDER_BEHANDLING)
+        val statusFerdigBehandlet = JsonSoknadsStatus()
+                .withType(JsonHendelse.Type.SOKNADS_STATUS)
+                .withHendelsestidspunkt(tidspunkt3)
+                .withStatus(JsonSoknadsStatus.Status.FERDIGBEHANDLET)
+        val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
+        jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], statusUnderBehandling, statusFerdigBehandlet))
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+
+        val hendelser = service.getHendelserForSoknad("123", "Token")
+
+        assertTrue(hendelser.size == 4)
+        assertTrue(hendelser[2].beskrivelse.contains("under behandling", ignoreCase = true))
+        assertTrue(hendelser[3].beskrivelse.contains("ferdig behandlet", ignoreCase = true))
+    }
+
+    @Test
+    fun `Should return hendelser with saksstatus ikke innsyn`() {
+        val saksStatus = JsonSaksStatus()
+                .withType(JsonHendelse.Type.SAKS_STATUS)
+                .withHendelsestidspunkt(tidspunkt2)
+                .withStatus(JsonSaksStatus.Status.IKKE_INNSYN)
+                .withTittel(saksTittel)
+                .withReferanse(saksRefereanse)
+        val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
+        jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], saksStatus))
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+
+        val hendelser = service.getHendelserForSoknad("123", "Token")
+
+        assertTrue(hendelser.size == 3)
+        assertTrue(hendelser[2].beskrivelse.contains("Saken $saksTittel har ikke innsyn", ignoreCase = true))
+    }
+
+    @Test
+    fun `Should return hendelser with vedtak fattet knyttet til en sak`() {
+        val saksStatus = JsonSaksStatus()
+                .withType(JsonHendelse.Type.SAKS_STATUS)
+                .withHendelsestidspunkt(tidspunkt2)
+                .withStatus(JsonSaksStatus.Status.UNDER_BEHANDLING)
+                .withTittel(saksTittel)
+                .withReferanse(saksRefereanse)
+        val vedtakFattet = JsonVedtakFattet()
+                .withType(JsonHendelse.Type.VEDTAK_FATTET)
+                .withHendelsestidspunkt(tidspunkt3)
+                .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.INNVILGET))
+                .withReferanse(saksRefereanse)
+                .withVedtaksfil(JsonVedtaksfil().withReferanse(referanseSvarUt))
+        val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
+        jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], saksStatus, vedtakFattet))
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+
+        val hendelser = service.getHendelserForSoknad("123", "Token")
+        val saksstatusHendelse = hendelser[2]
+        val vedtakFattetHendelse = hendelser[3]
+
+        assertTrue(hendelser.size == 4)
+        assertTrue(saksstatusHendelse.beskrivelse.contains("Saken $saksTittel er under behandling", ignoreCase = true))
+        assertTrue(vedtakFattetHendelse.beskrivelse.contains("$saksTittel er innvilget", ignoreCase = true))
+        assertTrue(vedtakFattetHendelse.referanse == referanseSvarUt.id)
+        assertTrue(vedtakFattetHendelse.nr == referanseSvarUt.nr)
+        assertTrue(vedtakFattetHendelse.refErTilSvarUt!!)
+    }
+
+    @Test
+    fun `Should return hendelser with vedtak fattet without saksreferanse`() {
+        val vedtakFattet = JsonVedtakFattet()
+                .withType(JsonHendelse.Type.VEDTAK_FATTET)
+                .withHendelsestidspunkt(tidspunkt3)
+                .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.DELVIS_INNVILGET))
+                .withVedtaksfil(JsonVedtaksfil().withReferanse(referanseSvarUt))
+        val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
+        jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], vedtakFattet))
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+
+        val hendelser = service.getHendelserForSoknad("123", "Token")
+        val vedtakFattetHendelse = hendelser[2]
+
+        assertTrue(hendelser.size == 3)
+        assertTrue(vedtakFattetHendelse.beskrivelse.contains("En sak har fått utfallet: delvis innvilget", ignoreCase = true))
+        assertTrue(vedtakFattetHendelse.referanse == referanseSvarUt.id)
+        assertTrue(vedtakFattetHendelse.nr == referanseSvarUt.nr)
+        assertTrue(vedtakFattetHendelse.refErTilSvarUt!!)
+    }
+
+    @Test
+    fun `Should return hendelser with dokumentasjon etterspurt`() {
+        val dokumentasjonEtterspurt = JsonDokumentasjonEtterspurt()
+                .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
+                .withHendelsestidspunkt(tidspunkt2)
+                .withDokumenter(listOf(dokumentKrav))
+                .withForvaltningsbrev(JsonForvaltningsbrev()
+                        .withReferanse(referanseDokumentlager))
+        val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
+        jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], dokumentasjonEtterspurt))
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+
+        val hendelser = service.getHendelserForSoknad("123", "Token")
+        val dokEtterspurtHendelse = hendelser[2]
+
+        assertTrue(hendelser.size == 3)
+        assertTrue(dokEtterspurtHendelse.beskrivelse.contains("Du må laste opp mer dokumentasjon", ignoreCase = true))
+        assertTrue(dokEtterspurtHendelse.referanse == referanseDokumentlager.id)
+        assertNull(dokEtterspurtHendelse.nr)
+        assertFalse(dokEtterspurtHendelse.refErTilSvarUt!!)
+    }
+
+    @Test
+    fun `Should return hendelser with forelopig svar`() {
+        val forelopigSvar = JsonForelopigSvar()
+                .withType(JsonHendelse.Type.FORELOPIG_SVAR)
+                .withHendelsestidspunkt(tidspunkt2)
+                .withForvaltningsbrev(JsonForvaltningsbrev_()
+                        .withReferanse(referanseDokumentlager))
+        val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
+        jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], forelopigSvar))
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+
+        val hendelser = service.getHendelserForSoknad("123", "Token")
+        val forelopigSvarHendelse = hendelser[2]
+
+        assertTrue(hendelser.size == 3)
+        assertTrue(forelopigSvarHendelse.beskrivelse.contains("Du har fått et brev om saksbehandlingstiden for søknaden din", ignoreCase = true))
+        assertTrue(forelopigSvarHendelse.referanse == referanseDokumentlager.id)
+        assertNull(forelopigSvarHendelse.nr)
+        assertFalse(forelopigSvarHendelse.refErTilSvarUt!!)
+    }
+
+    private fun createJsonDigisosSokerWithStatusMottatt(): JsonDigisosSoker {
         return JsonDigisosSoker()
                 .withAvsender(JsonAvsender().withSystemnavn("test"))
                 .withVersion("1.2.3")
@@ -151,17 +304,7 @@ internal class HendelseServiceTest {
                                 .withStatus(JsonSoknadsStatus.Status.MOTTATT)))
     }
 
-    private val jsonDigisosSoker_med_soknadsstatus: JsonDigisosSoker = JsonDigisosSoker()
-            .withAvsender(JsonAvsender().withSystemnavn("test"))
-            .withVersion("1.2.3")
-            .withHendelser(listOf(
-                    JsonSoknadsStatus()
-                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-                            .withHendelsestidspunkt(tidspunkt1)
-                            .withStatus(JsonSoknadsStatus.Status.MOTTATT)))
-
-
-    private val jsonDigisosSoker_alle_hendelser_minimale: JsonDigisosSoker = JsonDigisosSoker()
+    private val jsonDigisosSoker_alle_hendelser_minimale = JsonDigisosSoker()
             .withAvsender(JsonAvsender().withSystemnavn("test"))
             .withVersion("1.2.3")
             .withHendelser(listOf(
@@ -202,7 +345,7 @@ internal class HendelseServiceTest {
                             .withType(JsonHendelse.Type.VILKAR)
                             .withHendelsestidspunkt(tidspunkt8)))
 
-    private val jsonDigisosSoker_alle_hendelser_komplette: JsonDigisosSoker = JsonDigisosSoker()
+    private val jsonDigisosSoker_alle_hendelser_komplette = JsonDigisosSoker()
             .withAvsender(JsonAvsender().withSystemnavn("test"))
             .withVersion("1.2.3")
             .withHendelser(listOf(
@@ -226,7 +369,7 @@ internal class HendelseServiceTest {
                             .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
                             .withHendelsestidspunkt(tidspunkt4)
                             .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(referanseSvarUt))
-                            .withDokumenter(listOf())
+                            .withDokumenter(listOf(dokumentKrav))
                             .withVedlegg(listOf()),
                     JsonForelopigSvar()
                             .withType(JsonHendelse.Type.FORELOPIG_SVAR)

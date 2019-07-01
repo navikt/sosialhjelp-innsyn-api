@@ -58,7 +58,7 @@ class SaksStatusService(private val clientProperties: ClientProperties,
     private fun mapToResponse(saksStatus: JsonSaksStatus?, vedtakFattetList: List<JsonVedtakFattet>?): SaksStatusResponse {
         val statusName = hentStatusNavn(saksStatus, vedtakFattetList)
 
-        val filreferanseUrlList = vedtakFattetList?.map { it.vedtaksfil.referanse.let { filreferanse -> hentUrlFraFilreferanse(clientProperties, filreferanse) } }
+        val filreferanseUrlList = vedtakFattetList?.map { hentUrlFraFilreferanse(clientProperties, it.vedtaksfil.referanse) }
 
         return SaksStatusResponse(saksStatus?.tittel ?: DEFAULT_TITTEL, UtfallEllerSaksStatus.valueOf(statusName), filreferanseUrlList)
     }

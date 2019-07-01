@@ -15,11 +15,11 @@ import org.junit.jupiter.api.Test
 
 internal class InnsynServiceTest {
 
-    val fiksClient: FiksClient = mockk()
-    val dokumentlagerClient: DokumentlagerClient = mockk()
-    val service = InnsynService(fiksClient, dokumentlagerClient)
+    private val fiksClient: FiksClient = mockk()
+    private val dokumentlagerClient: DokumentlagerClient = mockk()
+    private val service = InnsynService(fiksClient, dokumentlagerClient)
 
-    val mockDigisosSak: DigisosSak = mockk()
+    private val mockDigisosSak: DigisosSak = mockk()
 
     @BeforeEach
     fun init() {

@@ -16,10 +16,10 @@ import org.springframework.web.client.RestTemplate
 
 internal class FiksClientTest {
 
-    val clientProperties: ClientProperties = mockk(relaxed = true)
-    val restTemplate: RestTemplate = mockk()
+    private val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val restTemplate: RestTemplate = mockk()
 
-    val fiksClient = FiksClientImpl(clientProperties, restTemplate)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate)
 
     @BeforeEach
     fun init() {

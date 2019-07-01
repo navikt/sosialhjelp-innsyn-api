@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 
 private val JSON_AVSENDER = JsonAvsender().withSystemnavn("test")
 private val VERSION = "1.2.3"
-val SOKNAD_MOTTATT = JsonSoknadsStatus()
+val SOKNAD_MOTTATT: JsonSoknadsStatus = JsonSoknadsStatus()
         .withType(JsonHendelse.Type.SOKNADS_STATUS)
         .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
         .withStatus(JsonSoknadsStatus.Status.MOTTATT)

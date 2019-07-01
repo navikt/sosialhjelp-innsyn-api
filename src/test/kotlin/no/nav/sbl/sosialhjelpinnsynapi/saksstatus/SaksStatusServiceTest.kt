@@ -16,8 +16,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallEllerSaksStatus
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.soknadstatus.SOKNAD_MOTTATT
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -33,6 +32,12 @@ private val SAKS_STATUS_UNDER_BEHANDLING = JsonSaksStatus()
         .withStatus(JsonSaksStatus.Status.UNDER_BEHANDLING)
         .withTittel("Tittel")
         .withReferanse("Referanse")
+private val SAKS_STATUS_2 = JsonSaksStatus()
+        .withType(JsonHendelse.Type.SAKS_STATUS)
+        .withHendelsestidspunkt(LocalDateTime.now().minusHours(9).format(DateTimeFormatter.ISO_DATE_TIME))
+        .withStatus(JsonSaksStatus.Status.UNDER_BEHANDLING)
+        .withTittel("Tittel")
+        .withReferanse("B")
 private val SAKS_STATUS_IKKE_INNSYN = JsonSaksStatus()
         .withType(JsonHendelse.Type.SAKS_STATUS)
         .withHendelsestidspunkt(LocalDateTime.now().minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME))
@@ -45,22 +50,24 @@ private val VEDTAK_FATTET = JsonVedtakFattet()
         .withReferanse("Referanse")
         .withVedtaksfil(JsonVedtaksfil().withReferanse(JsonDokumentlagerFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId("dokumentlagerId")))
         .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.INNVILGET))
+private val VEDTAK_FATTET_REFERANSE_null = JsonVedtakFattet()
+        .withType(JsonHendelse.Type.VEDTAK_FATTET)
+        .withHendelsestidspunkt(LocalDateTime.now().minusHours(4).format(DateTimeFormatter.ISO_DATE_TIME))
+        .withReferanse(null)
+        .withVedtaksfil(JsonVedtaksfil().withReferanse(JsonDokumentlagerFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId("dokumentlagerId")))
+        .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.INNVILGET))
 
 internal class SaksStatusServiceTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
-    private val fiksClient: FiksClient = mockk()
-    private val dokumentlagerClient: DokumentlagerClient = mockk()
+    private val innsynService: InnsynService = mockk()
 
-    private val service = SaksStatusService(clientProperties, fiksClient, dokumentlagerClient)
+    private val service = SaksStatusService(clientProperties, innsynService)
 
     private val mockDigisosSak: DigisosSak = mockk()
 
     @BeforeEach
     fun init() {
-        clearMocks(fiksClient, dokumentlagerClient, mockDigisosSak)
-
-        every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
-        every { mockDigisosSak.digisosSoker?.metadata } returns "123"
+        clearMocks(innsynService, mockDigisosSak)
     }
 
     @Test
@@ -70,7 +77,7 @@ internal class SaksStatusServiceTest {
                 .withVersion(VERSION)
                 .withHendelser(listOf(SAKS_STATUS_UNDER_BEHANDLING))
 
-        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_saksStatus
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_saksStatus
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
@@ -78,7 +85,7 @@ internal class SaksStatusServiceTest {
         assertThat(response).hasSize(1)
         assertThat(response[0].status).isEqualTo(UtfallEllerSaksStatus.UNDER_BEHANDLING)
         assertThat(response[0].tittel).isEqualTo("Tittel")
-        assertThat(response[0].vedtaksfilUrl).isNull()
+        assertThat(response[0].vedtaksfilUrlList).isNull()
     }
 
     @Test
@@ -90,7 +97,7 @@ internal class SaksStatusServiceTest {
                         SAKS_STATUS_UNDER_BEHANDLING,
                         VEDTAK_FATTET))
 
-        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_saksStatus_og_vedtakfattet_samme_referanse
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_saksStatus_og_vedtakfattet_samme_referanse
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
@@ -98,7 +105,9 @@ internal class SaksStatusServiceTest {
         assertThat(response).hasSize(1)
         assertThat(response[0].status).isEqualTo(UtfallEllerSaksStatus.INNVILGET)
         assertThat(response[0].tittel).isEqualTo("Tittel")
-        assertThat(response[0].vedtaksfilUrl).contains("/dokumentlager/nedlasting")
+        assertThat(response[0].vedtaksfilUrlList).isNotNull
+        assertThat(response[0].vedtaksfilUrlList).hasSize(1)
+        assertThat(response[0].vedtaksfilUrlList?.get(0)).contains("/dokumentlager/nedlasting")
     }
 
     @Test
@@ -106,9 +115,9 @@ internal class SaksStatusServiceTest {
         val jsonDigisosSoker_med_vedtakfattet_uten_saksStatus = JsonDigisosSoker()
                 .withAvsender(JSON_AVSENDER)
                 .withVersion(VERSION)
-                .withHendelser(listOf(VEDTAK_FATTET.withReferanse(null)))
+                .withHendelser(listOf(VEDTAK_FATTET_REFERANSE_null))
 
-        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_vedtakfattet_uten_saksStatus
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_vedtakfattet_uten_saksStatus
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
@@ -116,7 +125,7 @@ internal class SaksStatusServiceTest {
         assertThat(response).hasSize(1)
         assertThat(response[0].status).isEqualTo(UtfallEllerSaksStatus.INNVILGET)
         assertThat(response[0].tittel).isEqualTo(DEFAULT_TITTEL)
-        assertThat(response[0].vedtaksfilUrl).contains("/dokumentlager/nedlasting")
+        assertThat(response[0].vedtaksfilUrlList?.get(0)).contains("/dokumentlager/nedlasting")
     }
 
     @Test
@@ -126,7 +135,7 @@ internal class SaksStatusServiceTest {
                 .withVersion(VERSION)
                 .withHendelser(listOf(SOKNAD_MOTTATT))
 
-        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_uten_saksStatus_eller_vedtakFattet
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_uten_saksStatus_eller_vedtakFattet
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
@@ -136,7 +145,7 @@ internal class SaksStatusServiceTest {
 
     @Test
     fun `Skal returnere emptyList når JsonDigisosSoker er null`() {
-        every { mockDigisosSak.digisosSoker } returns null
+        every { innsynService.hentJsonDigisosSoker(any()) } returns null
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
@@ -150,16 +159,23 @@ internal class SaksStatusServiceTest {
                 .withAvsender(JSON_AVSENDER)
                 .withVersion(VERSION)
                 .withHendelser(listOf(
-                        SAKS_STATUS_UNDER_BEHANDLING.withReferanse("A"),
-                        VEDTAK_FATTET.withReferanse("A"),
-                        SAKS_STATUS_UNDER_BEHANDLING.withReferanse("B"),
-                        VEDTAK_FATTET.withReferanse(null)))
+                        SAKS_STATUS_UNDER_BEHANDLING,
+                        VEDTAK_FATTET,
+                        SAKS_STATUS_2,
+                        VEDTAK_FATTET_REFERANSE_null))
 
-        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_med_2_vedtakfattet_og_2_saksStatuser
+        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_2_vedtakfattet_og_2_saksStatuser
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(3)
+        assertThat(response[0].tittel).isNotEqualTo(DEFAULT_TITTEL)
+        assertThat(response[1].tittel).isNotEqualTo(DEFAULT_TITTEL)
+        assertThat(response[2].tittel).isEqualTo(DEFAULT_TITTEL)
+
+        assertThat(response[0].vedtaksfilUrlList).isNull()
+        assertThat(response[1].vedtaksfilUrlList).hasSize(1)
+        assertThat(response[2].vedtaksfilUrlList).hasSize(1)
     }
 }

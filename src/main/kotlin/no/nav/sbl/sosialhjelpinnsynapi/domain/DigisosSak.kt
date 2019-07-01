@@ -6,12 +6,12 @@ data class DigisosSak(
         val fiksOrgId: String,
         val kommunenummer: String,
         val sistEndret: Long,
-        val orginalSoknadNAV: OrginalSoknadNAV,
+        val originalSoknadNAV: OriginalSoknadNAV,
         val ettersendtInfoNAV: EttersendtInfoNAV,
         val digisosSoker: DigisosSoker?
 )
 
-data class OrginalSoknadNAV(
+data class OriginalSoknadNAV(
         val navEksternRefId: String,
         val metadata: String,
         val vedleggMetadata: String,

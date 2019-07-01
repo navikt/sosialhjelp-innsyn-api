@@ -7,7 +7,7 @@ val ok_digisossak_response = """
   "fiksOrgId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "kommunenummer": "string",
   "sistEndret": 0,
-  "orginalSoknadNAV": {
+  "originalSoknadNAV": {
     "navEksternRefId": "string",
     "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa0",
     "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",

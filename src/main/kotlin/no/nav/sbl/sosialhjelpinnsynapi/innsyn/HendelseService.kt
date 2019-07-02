@@ -38,7 +38,7 @@ class HendelseService(private val innsynService: InnsynService,
             return hendelser
         }
 
-        val saker: MutableMap<String, String> = mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker)
+        val saker: Map<String, List<JsonSaksStatus>> = mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker)
         hendelser.addAll(jsonDigisosSoker.hendelser
                 .filterNot { it.type == JsonHendelse.Type.UTBETALING || it.type == JsonHendelse.Type.VILKAR }
                 .mapNotNull { mapToHendelseFrontend(it, soknadsmottaker, saker) })
@@ -46,14 +46,15 @@ class HendelseService(private val innsynService: InnsynService,
         return hendelser
     }
 
-    private fun mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker: JsonDigisosSoker): MutableMap<String, String> {
-        val saker: MutableMap<String, String> = mutableMapOf()
-        jsonDigisosSoker.hendelser.filterIsInstance<JsonSaksStatus>()
-                .forEach { jsonHendelse -> saker[jsonHendelse.referanse] = jsonHendelse.tittel ?: "" }
-        return saker
+    private fun mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker: JsonDigisosSoker): Map<String, List<JsonSaksStatus>> {
+        return jsonDigisosSoker.hendelser.asSequence().filterIsInstance<JsonSaksStatus>()
+                .filterNot { it.tittel.isNullOrBlank() }
+                .sortedByDescending { it.hendelsestidspunkt }
+                .distinctBy { it.referanse }
+                .groupBy { it.referanse }
     }
 
-    private fun mapToHendelseFrontend(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker, saker: MutableMap<String, String>): HendelseFrontend? {
+    private fun mapToHendelseFrontend(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker, saker: Map<String, List<JsonSaksStatus>>): HendelseFrontend? {
         if (jsonHendelse.type == null) {
             throw RuntimeException("Hendelse mangler type")
         }
@@ -93,7 +94,7 @@ class HendelseService(private val innsynService: InnsynService,
         return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
     }
 
-    private fun vedtakFattetHendelse(jsonHendelse: JsonHendelse, saker: MutableMap<String, String>): HendelseFrontend {
+    private fun vedtakFattetHendelse(jsonHendelse: JsonHendelse, saker: Map<String, List<JsonSaksStatus>>): HendelseFrontend {
         jsonHendelse as JsonVedtakFattet
         if (jsonHendelse.utfall == null) {
             val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.vedtaksfil.referanse)
@@ -101,9 +102,8 @@ class HendelseService(private val innsynService: InnsynService,
         }
 
         val utfall = jsonHendelse.utfall.utfall.value().toLowerCase().replace('_', ' ')
-        val beskrivelse = if (jsonHendelse.referanse != null && saker.containsKey(jsonHendelse.referanse)
-                && saker[jsonHendelse.referanse] != "") {
-            "${saker[jsonHendelse.referanse]} er $utfall"
+        val beskrivelse = if (jsonHendelse.referanse != null && saker.containsKey(jsonHendelse.referanse)) {
+            "${saker.getValue(jsonHendelse.referanse)[0].tittel} er $utfall"
         } else {
             log.warn("Tilhørende SaksstatusHendelse manglet eller manglet tittel på saksstatus")
             "En sak har fått utfallet: $utfall"

@@ -7,7 +7,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsondigisossoker_response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 
 class SoknadStatusIT : AbstractIT() {
 
@@ -20,7 +23,7 @@ class SoknadStatusIT : AbstractIT() {
                 .willReturn(WireMock.ok(ok_minimal_jsondigisossoker_response)))
 
         val id = "123"
-        val responseEntity = testRestTemplate.getForEntity("/api/v1/innsyn/$id/soknadStatus", SoknadStatusResponse::class.java)
+        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/soknadStatus", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), SoknadStatusResponse::class.java)
 
         assertThat(responseEntity).isNotNull
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)

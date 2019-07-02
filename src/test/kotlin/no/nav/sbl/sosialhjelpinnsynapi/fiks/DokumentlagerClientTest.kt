@@ -18,10 +18,10 @@ import org.springframework.web.client.RestTemplate
 
 internal class DokumentlagerClientTest {
 
-    val clientProperties: ClientProperties = mockk(relaxed = true)
-    val restTemplate: RestTemplate = mockk()
+    private val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val restTemplate: RestTemplate = mockk()
 
-    val dokumentlagerClient: DokumentlagerClient = DokumentlagerClientImpl(clientProperties, restTemplate)
+    private val dokumentlagerClient: DokumentlagerClient = DokumentlagerClientImpl(clientProperties, restTemplate)
 
     @Test
     fun `GET JsonDigisosSoker fra dokumentlager`() {

@@ -22,41 +22,41 @@ import java.time.format.DateTimeFormatter
 
 internal class HendelseServiceTest {
 
-    val innsynService: InnsynService = mockk()
-    val norgClient: NorgClient = mockk()
+    private val innsynService: InnsynService = mockk()
+    private val norgClient: NorgClient = mockk()
 
-    val service = HendelseService(innsynService, norgClient)
+    private val service = HendelseService(innsynService, norgClient)
 
-    val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
-    val mockJsonSoknad: JsonSoknad = mockk()
-    val mockNavEnhet: NavEnhet = mockk()
+    private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
+    private val mockJsonSoknad: JsonSoknad = mockk()
+    private val mockNavEnhet: NavEnhet = mockk()
 
-    val tidspunkt0 = LocalDateTime.now().minusHours(11).atZone(ZoneOffset.UTC).toEpochSecond()*1000L
-    val tidspunkt1 = LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt2 = LocalDateTime.now().minusHours(9).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt3 = LocalDateTime.now().minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt4 = LocalDateTime.now().minusHours(7).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt5 = LocalDateTime.now().minusHours(6).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt6 = LocalDateTime.now().minusHours(5).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt7 = LocalDateTime.now().minusHours(4).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt8 = LocalDateTime.now().minusHours(3).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt9 = LocalDateTime.now().minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME)
-    val tidspunkt10 = LocalDateTime.now().plusDays(5).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt0 = LocalDateTime.now().minusHours(11).atZone(ZoneOffset.UTC).toEpochSecond()*1000L
+    private val tidspunkt1 = LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt2 = LocalDateTime.now().minusHours(9).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt3 = LocalDateTime.now().minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt4 = LocalDateTime.now().minusHours(7).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt5 = LocalDateTime.now().minusHours(6).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt6 = LocalDateTime.now().minusHours(5).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt7 = LocalDateTime.now().minusHours(4).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt8 = LocalDateTime.now().minusHours(3).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt9 = LocalDateTime.now().minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME)
+    private val tidspunkt10 = LocalDateTime.now().plusDays(5).format(DateTimeFormatter.ISO_DATE_TIME)
 
-    val soknadsmottaker = "The Office"
-    val enhetsnr = "2317"
-    val referanseSvarUt = JsonSvarUtFilreferanse()
+    private val soknadsmottaker = "The Office"
+    private val enhetsnr = "2317"
+    private val referanseSvarUt = JsonSvarUtFilreferanse()
             .withType(JsonFilreferanse.Type.SVARUT)
             .withId("12345")
             .withNr(2)
-    var referanseDokumentlager = JsonDokumentlagerFilreferanse()
+    private val referanseDokumentlager = JsonDokumentlagerFilreferanse()
             .withType(JsonFilreferanse.Type.DOKUMENTLAGER)
             .withId("54321")
-    val saksRefereanse = "12321"
-    val saksTittel = "Sko og skolisser"
-    val utbetalingsRefereanse = "12321"
+    private val saksRefereanse = "12321"
+    private val saksTittel = "Sko og skolisser"
+    private val utbetalingsRefereanse = "12321"
 
-    val dokumentKrav = JsonDokumenter()
+    private val dokumentKrav = JsonDokumenter()
             .withInnsendelsesfrist("2020-10-04T13:37:00.134Z")
             .withDokumenttype("kravark")
             .withTilleggsinformasjon("tilleggellit")

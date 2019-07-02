@@ -4,7 +4,7 @@ Innsyn i egen sosialhjelp sak.
 
 
 ## Henvendelser
-Interne henvendelser kan sendes via Slack i kanalen #digisos.
+Henvendelser kan sendes via Slack i kanalen #digisos.
 
 ## Oppsett av nytt prosjekt
 Dette prosjektet bygger og deployer vha CircleCi og Github deployment
@@ -19,7 +19,7 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 - Under 'Add projects' kan du finne ditt github-repo.
 - Velg 'Set up project', og følg guiden.
 - Tar i bruk `context` `NAIS deployment`, som henter credentials til navikts dockerhub-bruker for å pushe image. 
-- Dersom man benytter seg av versjon 2.0 av CircleCi kan man deploye en gitt versjon til miljø (eks q0), ved bruk av CircleCis API som nedenfor: (warning - fungerer ikke for versjon 2.1 av CircleCi)
+- Dersom man benytter seg av versjon 2.0 av CircleCi kan man deploye en gitt versjon til miljø (eks q0), ved bruk av CircleCis API som nedenfor: (warning - denne funksjonaliteten i APIet er deprecated i versjon 2.1 av CircleCi)
 
 `curl -d 'build_parameters[CIRCLE_JOB]=deploy_miljo' -d 'build_parameters[VERSION]=ditt_versjonsnummer' -d 'build_parameters[MILJO]=ditt_miljø' 'https://circleci.com/api/v1.1/project/github/navikt/sosialhjelp-innsyn-api?circle-token=ditt_token' `
 
@@ -33,4 +33,3 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 ### Vault
 - Lag PR til `vault-iac` slik at man kan lagre secrets i eksempelvis `kv/preprod/sbs/sosialhjelp-innsyn-api/q0`
 - Denne må godkjennes og merges før man kan opprette secrets i overnevnte katalog.
-- mer kommer

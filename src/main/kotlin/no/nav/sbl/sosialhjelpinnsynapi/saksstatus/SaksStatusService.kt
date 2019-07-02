@@ -1,13 +1,11 @@
 package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallEllerSaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -46,7 +44,7 @@ class SaksStatusService(private val clientProperties: ClientProperties,
 
         val saksStatusVedtakFattetMap: Map<JsonSaksStatus?, List<JsonVedtakFattet>?> = saksStatusList
                 .plus(listOf(null)) // muliggjøre å koble null til vedtakFattet som ikke har referanse
-                .associateBy( {it} , {vedtakFattetPrReferanse[it?.referanse]} )
+                .associateBy({ it }, { vedtakFattetPrReferanse[it?.referanse] })
                 .filterNot { it.key == null && it.value == null } // fjerne feilaktige <null, null>-koblinger
                 .toMap()
 
@@ -60,20 +58,14 @@ class SaksStatusService(private val clientProperties: ClientProperties,
 
         val filreferanseUrlList = vedtakFattetList?.map { hentUrlFraFilreferanse(clientProperties, it.vedtaksfil.referanse) }
 
-        return SaksStatusResponse(saksStatus?.tittel ?: DEFAULT_TITTEL, UtfallEllerSaksStatus.valueOf(statusName), filreferanseUrlList)
+        return SaksStatusResponse(saksStatus?.tittel
+                ?: DEFAULT_TITTEL, UtfallEllerSaksStatus.valueOf(statusName), filreferanseUrlList)
     }
 
     private fun hentStatusNavn(saksStatus: JsonSaksStatus?, vedtakFattetList: List<JsonVedtakFattet>?): String {
         // Hvordan håndtere potensielt 2 eller flere ulike VedtakFattet.utfall pr saksStatus?
         val firstVedtakFattet = vedtakFattetList?.first { it.utfall.utfall != null }
-        return firstVedtakFattet?.utfall?.utfall?.name ?: saksStatus?.status?.name ?: throw RuntimeException("Noe uventet feilet. Både SaksStatus og VedtakFattet kan ikke være null")
-    }
-
-    private fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
-        return when (filreferanse) {
-            is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"
-            is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}"
-            else -> throw RuntimeException("Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
-        }
+        return firstVedtakFattet?.utfall?.utfall?.name ?: saksStatus?.status?.name
+        ?: throw RuntimeException("Noe uventet feilet. Både SaksStatus og VedtakFattet kan ikke være null")
     }
 }

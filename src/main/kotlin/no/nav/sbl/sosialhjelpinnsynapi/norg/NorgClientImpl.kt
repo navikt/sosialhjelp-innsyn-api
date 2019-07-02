@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.norg
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -14,7 +14,7 @@ private val log = LoggerFactory.getLogger(NorgClient::class.java)
 @Profile("!mock")
 @Component
 class NorgClientImpl(clientProperties: ClientProperties,
-                              private val restTemplate: RestTemplate = RestTemplate()): NorgClient {
+                     private val restTemplate: RestTemplate = RestTemplate()): NorgClient {
 
     private val baseUrl = clientProperties.norgEndpointUrl
     private val mapper = ObjectMapper()

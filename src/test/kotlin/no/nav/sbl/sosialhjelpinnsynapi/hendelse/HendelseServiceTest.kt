@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.innsyn
+package no.nav.sbl.sosialhjelpinnsynapi.hendelse
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -11,7 +11,9 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
+import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -21,11 +23,11 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 internal class HendelseServiceTest {
-
+    private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val norgClient: NorgClient = mockk()
 
-    private val service = HendelseService(innsynService, norgClient)
+    private val service = HendelseService(clientProperties, innsynService, norgClient)
 
     private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
@@ -97,10 +99,10 @@ internal class HendelseServiceTest {
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
-        assertTrue(hendelser == hendelser.sortedByDescending { it.timestamp })
+        assertTrue(hendelser == hendelser.sortedByDescending { it.tidspunkt })
         for (hendelse in hendelser) {
             assertNotNull(hendelse.beskrivelse)
-            assertNotNull(hendelse.timestamp)
+            assertNotNull(hendelse.tidspunkt)
         }
     }
 
@@ -110,10 +112,10 @@ internal class HendelseServiceTest {
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
-        assertTrue(hendelser == hendelser.sortedByDescending { it.timestamp })
+        assertTrue(hendelser == hendelser.sortedByDescending { it.tidspunkt })
         for (hendelse in hendelser) {
             assertNotNull(hendelse.beskrivelse)
-            assertNotNull(hendelse.timestamp)
+            assertNotNull(hendelse.tidspunkt)
         }
     }
 
@@ -138,9 +140,7 @@ internal class HendelseServiceTest {
 
         assertTrue(tildeltNavKontorHendelse.beskrivelse.contains(tildeltKontorNavn, ignoreCase = true))
         assertTrue(tildeltNavKontorHendelse.beskrivelse.contains("videresendt", ignoreCase = true))
-        assertNull(tildeltNavKontorHendelse.referanse)
-        assertNull(tildeltNavKontorHendelse.nr)
-        assertNull(tildeltNavKontorHendelse.refErTilSvarUt)
+        assertNull(tildeltNavKontorHendelse.filUrl)
     }
 
     @Test
@@ -224,9 +224,8 @@ internal class HendelseServiceTest {
         assertTrue(hendelser.size == 4)
         assertTrue(saksstatusHendelse.beskrivelse.contains("Saken $saksTittel er under behandling", ignoreCase = true))
         assertTrue(vedtakFattetHendelse.beskrivelse.contains("$saksTittel er innvilget", ignoreCase = true))
-        assertTrue(vedtakFattetHendelse.referanse == referanseSvarUt.id)
-        assertTrue(vedtakFattetHendelse.nr == referanseSvarUt.nr)
-        assertTrue(vedtakFattetHendelse.refErTilSvarUt!!)
+        assertTrue(vedtakFattetHendelse.filUrl!!.contains(referanseSvarUt.id.toString()))
+        assertTrue(vedtakFattetHendelse.filUrl!!.contains(referanseSvarUt.nr.toString()))
     }
 
     @Test
@@ -245,9 +244,8 @@ internal class HendelseServiceTest {
 
         assertTrue(hendelser.size == 3)
         assertTrue(vedtakFattetHendelse.beskrivelse.contains("En sak har fått utfallet: delvis innvilget", ignoreCase = true))
-        assertTrue(vedtakFattetHendelse.referanse == referanseSvarUt.id)
-        assertTrue(vedtakFattetHendelse.nr == referanseSvarUt.nr)
-        assertTrue(vedtakFattetHendelse.refErTilSvarUt!!)
+        assertTrue(vedtakFattetHendelse.filUrl!!.contains(referanseSvarUt.id.toString()))
+        assertTrue(vedtakFattetHendelse.filUrl!!.contains(referanseSvarUt.nr.toString()))
     }
 
     @Test
@@ -267,9 +265,7 @@ internal class HendelseServiceTest {
 
         assertTrue(hendelser.size == 3)
         assertTrue(dokEtterspurtHendelse.beskrivelse.contains("Du må laste opp mer dokumentasjon", ignoreCase = true))
-        assertTrue(dokEtterspurtHendelse.referanse == referanseDokumentlager.id)
-        assertNull(dokEtterspurtHendelse.nr)
-        assertFalse(dokEtterspurtHendelse.refErTilSvarUt!!)
+        assertTrue(dokEtterspurtHendelse.filUrl!!.contains(referanseDokumentlager.id.toString()))
     }
 
     @Test
@@ -288,9 +284,7 @@ internal class HendelseServiceTest {
 
         assertTrue(hendelser.size == 3)
         assertTrue(forelopigSvarHendelse.beskrivelse.contains("Du har fått et brev om saksbehandlingstiden for søknaden din", ignoreCase = true))
-        assertTrue(forelopigSvarHendelse.referanse == referanseDokumentlager.id)
-        assertNull(forelopigSvarHendelse.nr)
-        assertFalse(forelopigSvarHendelse.refErTilSvarUt!!)
+        assertTrue(forelopigSvarHendelse.filUrl!!.contains(referanseDokumentlager.id.toString()))
     }
 
     private fun createJsonDigisosSokerWithStatusMottatt(): JsonDigisosSoker {

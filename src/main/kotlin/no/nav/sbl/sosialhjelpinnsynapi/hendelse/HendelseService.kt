@@ -1,15 +1,15 @@
-package no.nav.sbl.sosialhjelpinnsynapi.innsyn
+package no.nav.sbl.sosialhjelpinnsynapi.hendelse
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
+import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
+import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
+import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
-import no.nav.sbl.sosialhjelpinnsynapi.rest.HendelseFrontend
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -17,12 +17,13 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
 @Component
-class HendelseService(private val innsynService: InnsynService,
+class HendelseService(private val clientProperties: ClientProperties,
+                      private val innsynService: InnsynService,
                       private val norgClient: NorgClient) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
-    fun getHendelserForSoknad(fiksDigisosId: String, token: String): List<HendelseFrontend> {
+    fun getHendelserForSoknad(fiksDigisosId: String, token: String): List<HendelseResponse> {
         val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token)
         val jsonSoknad = innsynService.hentOriginalSoknad(fiksDigisosId)
         val timestampSendtUnix = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId)
@@ -30,10 +31,9 @@ class HendelseService(private val innsynService: InnsynService,
         return createHendelserList(jsonDigisosSoker, jsonSoknad, timestampSendt)
     }
 
-    private fun createHendelserList(jsonDigisosSoker: JsonDigisosSoker?, jsonSoknad: JsonSoknad, timestampSendt: String): List<HendelseFrontend> {
-        val hendelser = mutableListOf<HendelseFrontend>()
+    private fun createHendelserList(jsonDigisosSoker: JsonDigisosSoker?, jsonSoknad: JsonSoknad, timestampSendt: String): List<HendelseResponse> {
         val soknadsmottaker = jsonSoknad.mottaker
-        hendelser.add(HendelseFrontend(timestampSendt, "Søknaden med vedlegg er sendt til ${soknadsmottaker.navEnhetsnavn}", null, null, null))
+        val hendelser = mutableListOf(HendelseResponse(timestampSendt, "Søknaden med vedlegg er sendt til ${soknadsmottaker.navEnhetsnavn}", null))
         if (jsonDigisosSoker == null) {
             return hendelser
         }
@@ -41,8 +41,8 @@ class HendelseService(private val innsynService: InnsynService,
         val saker: Map<String, List<JsonSaksStatus>> = mapSaksStatusHendelserToMapOfReferanser(jsonDigisosSoker)
         hendelser.addAll(jsonDigisosSoker.hendelser
                 .filterNot { it.type == JsonHendelse.Type.UTBETALING || it.type == JsonHendelse.Type.VILKAR }
-                .mapNotNull { mapToHendelseFrontend(it, soknadsmottaker, saker) })
-        hendelser.sortByDescending { it.timestamp }
+                .mapNotNull { mapToHendelseResponse(it, soknadsmottaker, saker) })
+        hendelser.sortByDescending { it.tidspunkt }
         return hendelser
     }
 
@@ -54,7 +54,7 @@ class HendelseService(private val innsynService: InnsynService,
                 .groupBy { it.referanse }
     }
 
-    private fun mapToHendelseFrontend(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker, saker: Map<String, List<JsonSaksStatus>>): HendelseFrontend? {
+    private fun mapToHendelseResponse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker, saker: Map<String, List<JsonSaksStatus>>): HendelseResponse? {
         if (jsonHendelse.type == null) {
             throw RuntimeException("Hendelse mangler type")
         }
@@ -69,17 +69,17 @@ class HendelseService(private val innsynService: InnsynService,
         }
     }
 
-    private fun tildeltNavKontorHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseFrontend? {
+    private fun tildeltNavKontorHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseResponse? {
         jsonHendelse as JsonTildeltNavKontor
         if (jsonHendelse.navKontor == soknadsmottaker.enhetsnummer) {
             return null
         }
         val navKontorNavn = norgClient.hentNavEnhet(jsonHendelse.navKontor).navn
         val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt ved $navKontorNavn. Videresendingen vil ikke påvirke saksbehandlingstiden"
-        return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
+        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, null)
     }
 
-    private fun soknadsStatusHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseFrontend {
+    private fun soknadsStatusHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseResponse {
         jsonHendelse as JsonSoknadsStatus
         if (jsonHendelse.status == null) {
             throw RuntimeException("JsonSoknadsStatus mangler status")
@@ -91,14 +91,13 @@ class HendelseService(private val innsynService: InnsynService,
             else -> throw RuntimeException("Statustype ${jsonHendelse.status.value()} mangler mapping")
         }
 
-        return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
+        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, null)
     }
 
-    private fun vedtakFattetHendelse(jsonHendelse: JsonHendelse, saker: Map<String, List<JsonSaksStatus>>): HendelseFrontend {
+    private fun vedtakFattetHendelse(jsonHendelse: JsonHendelse, saker: Map<String, List<JsonSaksStatus>>): HendelseResponse {
         jsonHendelse as JsonVedtakFattet
         if (jsonHendelse.utfall == null) {
-            val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.vedtaksfil.referanse)
-            return HendelseFrontend(jsonHendelse.hendelsestidspunkt, "Vedtak fattet", id, nr, refErTilSvarUt)
+            return HendelseResponse(jsonHendelse.hendelsestidspunkt, "Vedtak fattet", hentUrlFraFilreferanse(clientProperties, jsonHendelse.vedtaksfil.referanse))
         }
 
         val utfall = jsonHendelse.utfall.utfall.value().toLowerCase().replace('_', ' ')
@@ -108,30 +107,27 @@ class HendelseService(private val innsynService: InnsynService,
             log.warn("Tilhørende SaksstatusHendelse manglet eller manglet tittel på saksstatus")
             "En sak har fått utfallet: $utfall"
         }
-        val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.vedtaksfil.referanse)
-        return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, id, nr, refErTilSvarUt)
+        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, jsonHendelse.vedtaksfil.referanse))
     }
 
-    private fun dokumentasjonEtterspurtHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
+    private fun dokumentasjonEtterspurtHendelse(jsonHendelse: JsonHendelse): HendelseResponse {
         jsonHendelse as JsonDokumentasjonEtterspurt
         val beskrivelse = "Du må laste opp mer dokumentasjon"
-        val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.forvaltningsbrev.referanse)
-        return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, id, nr, refErTilSvarUt)
+        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, jsonHendelse.forvaltningsbrev.referanse))
     }
 
-    private fun forelopigSvarHendelse(jsonHendelse: JsonHendelse): HendelseFrontend {
+    private fun forelopigSvarHendelse(jsonHendelse: JsonHendelse): HendelseResponse {
         jsonHendelse as JsonForelopigSvar
         val beskrivelse = "Du har fått et brev om saksbehandlingstiden for søknaden din"
-        val (refErTilSvarUt, id: String, nr: Int?) = getReferanseInfo(jsonHendelse.forvaltningsbrev.referanse)
-        return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, id, nr, refErTilSvarUt)
+        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, jsonHendelse.forvaltningsbrev.referanse))
     }
 
-    private fun saksStatusHendelse(jsonHendelse: JsonHendelse): HendelseFrontend? {
+    private fun saksStatusHendelse(jsonHendelse: JsonHendelse): HendelseResponse? {
         jsonHendelse as JsonSaksStatus
         if (jsonHendelse.status == null) {
             return null
         } else if (jsonHendelse.tittel == null) {
-            return HendelseFrontend(jsonHendelse.hendelsestidspunkt, "En sak har ikke innsyn", null, null, null)
+            return HendelseResponse(jsonHendelse.hendelsestidspunkt, "En sak har ikke innsyn", null)
         }
 
         val status = jsonHendelse.status.value().toLowerCase().replace('_', ' ')
@@ -140,32 +136,6 @@ class HendelseService(private val innsynService: InnsynService,
         } else {
             "Saken ${jsonHendelse.tittel} er $status"
         }
-        return HendelseFrontend(jsonHendelse.hendelsestidspunkt, beskrivelse, null, null, null)
-    }
-
-    private fun getReferanseInfo(referanse: JsonFilreferanse): Triple<Boolean, String, Int?> {
-        val refErTilSvarUt = referanse.type == JsonFilreferanse.Type.SVARUT
-        val id: String = getIdFromReferanse(referanse, refErTilSvarUt)
-        val nr: Int? = getNrFromReferanse(referanse, refErTilSvarUt)
-        return Triple(refErTilSvarUt, id, nr)
-    }
-
-    private fun getIdFromReferanse(referanse: JsonFilreferanse?, refErTilSvarUt: Boolean): String {
-        return if (refErTilSvarUt) {
-            referanse as JsonSvarUtFilreferanse
-            referanse.id
-        } else {
-            referanse as JsonDokumentlagerFilreferanse
-            referanse.id
-        }
-    }
-
-    private fun getNrFromReferanse(referanse: JsonFilreferanse?, refErTilSvarUt: Boolean): Int? {
-        return if (refErTilSvarUt) {
-            referanse as JsonSvarUtFilreferanse
-            referanse.nr
-        } else {
-            null
-        }
+        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, null)
     }
 }

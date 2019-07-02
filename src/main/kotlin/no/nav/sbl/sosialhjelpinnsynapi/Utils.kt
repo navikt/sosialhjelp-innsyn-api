@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 
 fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
     return when (filreferanse) {

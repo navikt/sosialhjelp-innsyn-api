@@ -1,19 +1,22 @@
 package no.nav.sbl.sosialhjelpinnsynapi.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsonsoknad_response
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.springframework.http.*
-import java.util.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 
 class HendelseIT: AbstractIT() {
 
     @Test
-    fun `GET OriginalSoknad - happy path`() {
+    fun `GET Hendelser - happy path`() {
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/digisos/api/v1/soknader/(.*)"))
                 .willReturn(WireMock.ok(ok_digisossak_response)))
 
@@ -24,7 +27,7 @@ class HendelseIT: AbstractIT() {
                 .willReturn(WireMock.ok(ok_minimal_jsonsoknad_response)))
         val id = "123"
 
-        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), String::class.java)
+        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<HendelseResponse>>())
 
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)

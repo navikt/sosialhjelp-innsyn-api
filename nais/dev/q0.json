@@ -4,7 +4,7 @@
     "https://sosialhjelp-innsyn-api-q0.nais.oera-q.local/soknadsosialhjelp/innsyn-api",
     "https://www-q0.nav.no/soknadsosialhjelp/innsyn-api"
   ],
-  "fiks_digisos_endpoint_url": "some q0-specific url",
+  "fiks_digisos_endpoint_url": "https://api.fiks.test.ks.no",
   "fiks_dokumentlager_endpoint_url": "https://minside.fiks.test.ks.no/",
   "fiks_svar_ut_endpoint_url": "https://test.svarut.ks.no/"
 }

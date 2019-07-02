@@ -7,7 +7,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsonsoknad_response
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
+import org.springframework.http.*
+import java.util.*
 
 class HendelseIT: AbstractIT() {
 
@@ -22,7 +23,8 @@ class HendelseIT: AbstractIT() {
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa0"))
                 .willReturn(WireMock.ok(ok_minimal_jsonsoknad_response)))
         val id = "123"
-        val responseEntity = testRestTemplate.getForEntity("/api/v1/innsyn/$id/hendelser", String::class.java)
+
+        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), String::class.java)
 
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)

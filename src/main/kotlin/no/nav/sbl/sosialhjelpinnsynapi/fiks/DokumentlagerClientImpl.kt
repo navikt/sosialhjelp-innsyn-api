@@ -13,7 +13,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
-import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -28,7 +28,7 @@ private const val dokumentlager_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 @Profile("!mock")
 @Component
 class DokumentlagerClientImpl(clientProperties: ClientProperties,
-                          private val restTemplate: RestTemplate = RestTemplate()): DokumentlagerClient {
+                              private val restTemplate: RestTemplate) : DokumentlagerClient {
 
     private val baseUrl = clientProperties.fiksDokumentlagerEndpointUrl
     private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()

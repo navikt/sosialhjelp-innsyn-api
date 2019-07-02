@@ -2,7 +2,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.innsyn
 
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
@@ -13,16 +12,14 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 internal class InnsynServiceTest {
 
-    val fiksClient: FiksClient = mockk()
-    val dokumentlagerClient: DokumentlagerClient = mockk()
-    val service = InnsynService(fiksClient, dokumentlagerClient)
+    private val fiksClient: FiksClient = mockk()
+    private val dokumentlagerClient: DokumentlagerClient = mockk()
+    private val service = InnsynService(fiksClient, dokumentlagerClient)
 
-    val mockDigisosSak: DigisosSak = mockk()
+    private val mockDigisosSak: DigisosSak = mockk()
 
     @BeforeEach
     fun init() {
@@ -31,23 +28,32 @@ internal class InnsynServiceTest {
 
     @Test
     fun `Should gather innsyn data`() {
-        val mockDigisosSak = mockk<DigisosSak>()
-        val mockJsonDigisosSoker = mockk<JsonDigisosSoker>()
+        val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
 
-        every { fiksClient.hentDigisosSak("123") } returns mockDigisosSak
-        every { mockDigisosSak.digisosSoker.metadata } returns "some id"
+        every { fiksClient.hentDigisosSak("123", "Token") } returns mockDigisosSak
+        every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns mockJsonDigisosSoker
 
-        val jsonDigisosSoker: JsonDigisosSoker = service.hentDigisosSak("123")
+        val jsonDigisosSoker: JsonDigisosSoker? = service.hentJsonDigisosSoker("123", "Token")
 
         assertNotNull(jsonDigisosSoker)
+    }
+
+    @Test
+    fun `Should return null if DigisosSoker is null`() {
+        every { fiksClient.hentDigisosSak(any(), "Token") } returns mockDigisosSak
+        every { mockDigisosSak.digisosSoker } returns null
+
+        val jsonDigisosSoker = service.hentJsonDigisosSoker("123", "Token")
+
+        assertNull(jsonDigisosSoker)
     }
 
     @Test
     fun `Should return originalSoknad`() {
         val mockJsonSoknad: JsonSoknad = mockk()
 
-        every { fiksClient.hentDigisosSak("123") } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak("123", "Token") } returns mockDigisosSak
         every { mockDigisosSak.orginalSoknadNAV?.metadata } returns "some id"
         every { dokumentlagerClient.hentDokument(any(), JsonSoknad::class.java) } returns mockJsonSoknad
 

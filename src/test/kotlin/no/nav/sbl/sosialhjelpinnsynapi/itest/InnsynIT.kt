@@ -7,7 +7,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_re
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
+import org.springframework.http.*
+import java.util.*
 
 class InnsynIT : AbstractIT() {
 
@@ -20,7 +21,8 @@ class InnsynIT : AbstractIT() {
                 .willReturn(WireMock.ok(ok_komplett_jsondigisossoker_response)))
 
         val id = "123"
-        val responseEntity = testRestTemplate.getForEntity("/api/v1/innsyn/$id", JsonDigisosSoker::class.java)
+
+        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), String::class.java)
 
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)

@@ -1,66 +1,66 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
+import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
-@ExtendWith(MockKExtension::class)
 internal class FiksClientTest {
 
-    @MockK(relaxed = true)
-    lateinit var clientProperties: ClientProperties
+    private val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val restTemplate: RestTemplate = mockk()
 
-    @MockK
-    lateinit var restTemplate: RestTemplate
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate)
 
-    @InjectMockKs
-    lateinit var fiksclient: FiksClientImpl
+    @BeforeEach
+    fun init() {
+        clearMocks(restTemplate)
+    }
 
     @Test
     fun `GET eksakt 1 DigisosSak`() {
-        val mockResponse = mockk<ResponseEntity<String>>()
+        val mockResponse: ResponseEntity<String> = mockk()
 
         every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_digisossak_response
 
         every {
-            restTemplate.getForEntity(
+            restTemplate.exchange(
                     any<String>(),
+                    any(),
+                    any(),
                     String::class.java)
         } returns mockResponse
 
-        val result = fiksclient.hentDigisosSak("123")
+        val result = fiksClient.hentDigisosSak("123", "Token")
 
         assertNotNull(result)
     }
 
     @Test
     fun `GET alle DigisosSaker`() {
-        val mockResponse = mockk<ResponseEntity<List<String>>>()
-
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
-        every { mockResponse.body } returns listOf(ok_digisossak_response, ok_digisossak_response)
+        val mockListResponse: ResponseEntity<List<String>> = mockk()
+        every { mockListResponse.statusCode.is2xxSuccessful } returns true
+        every { mockListResponse.body } returns listOf(ok_digisossak_response, ok_digisossak_response)
 
         every {
             restTemplate.exchange(
                     any<String>(),
                     any(),
-                    null,
+                    any(),
                     any<ParameterizedTypeReference<List<String>>>())
-        } returns mockResponse
+        } returns mockListResponse
 
-        val result = fiksclient.hentAlleDigisosSaker()
+        val result = fiksClient.hentAlleDigisosSaker("Token")
 
         assertNotNull(result)
         assertEquals(2, result.size)
@@ -68,19 +68,19 @@ internal class FiksClientTest {
 
     @Test
     fun `GET KommuneInfo for kommunenummer`() {
-        val mockResponse = mockk<ResponseEntity<KommuneInfo>>()
-        val mockKommuneInfo = mockk<KommuneInfo>()
+        val mockKommuneResponse: ResponseEntity<KommuneInfo> = mockk()
+        val mockKommuneInfo: KommuneInfo = mockk()
 
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
-        every { mockResponse.body } returns mockKommuneInfo
+        every { mockKommuneResponse.statusCode.is2xxSuccessful } returns true
+        every { mockKommuneResponse.body } returns mockKommuneInfo
 
         every {
             restTemplate.getForEntity(
                     any<String>(),
                     KommuneInfo::class.java)
-        } returns mockResponse
+        } returns mockKommuneResponse
 
-        val result = fiksclient.hentInformasjonOmKommuneErPaakoblet("1234")
+        val result = fiksClient.hentInformasjonOmKommuneErPaakoblet("1234")
 
         assertNotNull(result)
     }

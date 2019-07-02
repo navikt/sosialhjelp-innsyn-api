@@ -1,40 +1,31 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
-import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
-@ExtendWith(MockKExtension::class)
 internal class DokumentlagerClientTest {
 
-    @MockK(relaxed = true)
-    lateinit var clientProperties: ClientProperties
+    private val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val restTemplate: RestTemplate = mockk()
 
-    @MockK
-    lateinit var restTemplate: RestTemplate
-
-    @InjectMockKs
-    lateinit var dokumentlagerClient: DokumentlagerClientImpl
+    private val dokumentlagerClient: DokumentlagerClient = DokumentlagerClientImpl(clientProperties, restTemplate)
 
     @Test
     fun `GET JsonDigisosSoker fra dokumentlager`() {
-        val mockResponse = mockk<ResponseEntity<String>>()
+        val mockResponse: ResponseEntity<String> = mockk()
 
         every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_komplett_jsondigisossoker_response

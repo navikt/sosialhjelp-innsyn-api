@@ -19,7 +19,7 @@ class FiksClientMock : FiksClient {
             .getResourceAsStream("mock/digisos_sak.json")
             .bufferedReader().use { it.readText() }
 
-    override fun hentDigisosSak(digisosId: String): DigisosSak {
+    override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         return innsynMap.getOrElse(digisosId, {
             val default = getDefaultDigisosSak()
             innsynMap[digisosId] = default
@@ -27,7 +27,7 @@ class FiksClientMock : FiksClient {
         })
     }
 
-    override fun hentAlleDigisosSaker(): List<DigisosSak> {
+    override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         return innsynMap.values.toList()
     }
 

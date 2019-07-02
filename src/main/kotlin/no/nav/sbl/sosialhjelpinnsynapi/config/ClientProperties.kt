@@ -1,6 +1,8 @@
-package no.nav.sbl.sosialhjelpinnsynapi
+package no.nav.sbl.sosialhjelpinnsynapi.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 
 @Component
@@ -10,5 +12,9 @@ class ClientProperties {
     lateinit var fiksDigisosEndpointUrl: String
 
     lateinit var fiksDokumentlagerEndpointUrl: String
+
+    lateinit var fiksSvarUtEndpointUrl: String
+
+    lateinit var fiksIntegrasjonpassord: String
 
 }

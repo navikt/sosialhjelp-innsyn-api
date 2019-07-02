@@ -17,12 +17,12 @@ import java.time.format.DateTimeFormatter
 
 internal class HendelseServiceTest {
 
-    val innsynService: InnsynService = mockk()
+    private val innsynService: InnsynService = mockk()
 
-    val service = HendelseService(innsynService)
+    private val service = HendelseService(innsynService)
 
-    val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
-    val mockJsonSoknad: JsonSoknad = mockk()
+    private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
+    private val mockJsonSoknad: JsonSoknad = mockk()
 
     @BeforeEach
     fun init() {
@@ -31,12 +31,12 @@ internal class HendelseServiceTest {
 
     @Test
     fun `Should return hendelser with first element being soknad sendt`() {
-        every { innsynService.hentDigisosSak(any()) } returns jsonDigisosSoker_med_soknadsstatus
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker_med_soknadsstatus
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns "Nav Testhus, Test Kommune"
         every { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns 12345L
 
-        val hendelser = service.getHendelserForSoknad("123")
+        val hendelser = service.getHendelserForSoknad("123", "Token")
 
         assertNotNull(hendelser)
         assertTrue(hendelser[0].beskrivelse.contains("Søknaden med vedlegg er sendt til ", ignoreCase = true))

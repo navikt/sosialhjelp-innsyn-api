@@ -10,18 +10,22 @@ import org.springframework.stereotype.Component
 class InnsynService(private val fiksClient: FiksClient,
                     private val dokumentlagerClient: DokumentlagerClient) {
 
-    fun hentDigisosSak(soknadId: String): JsonDigisosSoker {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId)
-        return dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java) as JsonDigisosSoker
+    fun hentJsonDigisosSoker(soknadId: String, token: String): JsonDigisosSoker? {
+        val digisosSak = fiksClient.hentDigisosSak(soknadId, token)
+        return if (digisosSak.digisosSoker != null) {
+            dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java) as JsonDigisosSoker
+        } else {
+            null
+        }
     }
 
     fun hentOriginalSoknad(soknadId: String): JsonSoknad {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId)
+        val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
         return dokumentlagerClient.hentDokument(digisosSak.orginalSoknadNAV.metadata, JsonSoknad::class.java) as JsonSoknad
     }
 
     fun hentInnsendingstidspunktForOriginalSoknad(soknadId: String): Long {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId)
+        val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
         return digisosSak.orginalSoknadNAV.timestampSendt
     }
 }

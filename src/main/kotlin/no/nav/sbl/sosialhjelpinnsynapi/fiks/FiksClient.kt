@@ -5,9 +5,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 
 interface FiksClient {
 
-    fun hentDigisosSak(digisosId: String): DigisosSak
+    fun hentDigisosSak(digisosId: String, token: String): DigisosSak
 
-    fun hentAlleDigisosSaker(): List<DigisosSak>
+    fun hentAlleDigisosSaker(token: String): List<DigisosSak>
 
     fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo
 }

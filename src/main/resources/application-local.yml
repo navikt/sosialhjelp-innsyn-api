@@ -1,7 +1,3 @@
-spring:
-  main:
-    banner-mode: 'off'
-
 server:
   servlet:
     context-path: '/soknadsosialhjelp/innsyn-api'

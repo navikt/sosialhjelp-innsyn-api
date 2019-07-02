@@ -4,7 +4,7 @@ group = "no.nav.sbl"
 version = "1.0-SNAPSHOT"
 
 val kotlinVersion = "1.3.31"
-val springBootVersion = "2.1.4.RELEASE"
+val springBootVersion = "2.1.6.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
 val junitJupiterVersion = "5.4.2"
@@ -23,8 +23,8 @@ plugins {
     kotlin("jvm") version "1.3.31"
 
     id("org.jetbrains.kotlin.plugin.spring") version "1.3.31"
-    id("org.springframework.boot") version "2.1.4.RELEASE"
-    id("io.spring.dependency-management") version "1.0.7.RELEASE"
+    id("org.springframework.boot") version "2.1.6.RELEASE"
+    id("io.spring.dependency-management") version "1.0.8.RELEASE"
 }
 
 application {
@@ -87,12 +87,6 @@ repositories {
 }
 
 tasks {
-    create("printVersion") {
-        doLast {
-            println(project.version)
-        }
-    }
-
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"

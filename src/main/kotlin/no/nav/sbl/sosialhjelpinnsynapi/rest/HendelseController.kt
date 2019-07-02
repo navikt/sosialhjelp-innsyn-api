@@ -5,10 +5,7 @@ import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 
 @Unprotected
@@ -16,10 +13,10 @@ import org.springframework.web.server.ResponseStatusException
 @RequestMapping("/api/v1/innsyn")
 class HendelseController(val hendelseService: HendelseService) {
 
-    @GetMapping("/{fiksDigisosId}/hendelser", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-    fun getHendelserForSoknad(@PathVariable fiksDigisosId: String): ResponseEntity<List<HendelseFrontend>> {
+    @GetMapping("/{fiksDigisosId}/hendelser",  produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
+    fun getHendelserForSoknad(@PathVariable fiksDigisosId: String,@RequestHeader(value = "Authorization") token: String): ResponseEntity<List<HendelseFrontend>> {
         try {
-            val hendelserForSoknad = hendelseService.getHendelserForSoknad(fiksDigisosId)
+            val hendelserForSoknad = hendelseService.getHendelserForSoknad(fiksDigisosId, token)
             return ResponseEntity.ok(hendelserForSoknad)
         } catch (e: Exception) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)

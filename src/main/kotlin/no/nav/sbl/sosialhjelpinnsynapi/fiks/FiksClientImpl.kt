@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -30,10 +31,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val mapper = jacksonObjectMapper()
 
 
-    override fun hentDigisosSak(digisosId: String): DigisosSak {
+    override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.setBearerAuth("Token fra silje")
+        headers.set(AUTHORIZATION, token)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId.equals(digisos_stub_id)) {
@@ -50,10 +51,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun hentAlleDigisosSaker(): List<DigisosSak> {
+    override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.setBearerAuth("Token fra silje")
+        headers.set(AUTHORIZATION, token)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> mapper.readValue(s, DigisosSak::class.java) }

@@ -41,7 +41,7 @@ internal class FiksClientTest {
                     String::class.java)
         } returns mockResponse
 
-        val result = fiksClient.hentDigisosSak("123")
+        val result = fiksClient.hentDigisosSak("123", "Token")
 
         assertNotNull(result)
     }
@@ -60,7 +60,7 @@ internal class FiksClientTest {
                     any<ParameterizedTypeReference<List<String>>>())
         } returns mockListResponse
 
-        val result = fiksClient.hentAlleDigisosSaker()
+        val result = fiksClient.hentAlleDigisosSaker("Token")
 
         assertNotNull(result)
         assertEquals(2, result.size)

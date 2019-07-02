@@ -26,3 +26,9 @@ data class HendelseResponse(
         val beskrivelse: String,
         val filUrl: String?
 )
+
+data class OppgaveResponse(
+        val innsendelsesfrist: String,
+        val dokumenttype: String,
+        val tilleggsinformasjon: String?
+)

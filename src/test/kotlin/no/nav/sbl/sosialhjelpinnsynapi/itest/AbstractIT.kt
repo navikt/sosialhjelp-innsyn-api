@@ -10,7 +10,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import java.util.*
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -18,6 +21,13 @@ abstract class AbstractIT {
 
     @Autowired
     var testRestTemplate: TestRestTemplate = TestRestTemplate()
+
+    fun getHeaders(): HttpHeaders {
+        val headers = HttpHeaders()
+        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
+        headers.set(HttpHeaders.AUTHORIZATION, "Token")
+        return headers
+    }
 
     @BeforeEach
     internal fun setUp() {

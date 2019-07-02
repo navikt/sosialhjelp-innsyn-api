@@ -27,8 +27,8 @@ class SaksStatusService(private val clientProperties: ClientProperties,
         -
         - Foreløpig antagelse: Det finnes ingen vedtakFattet med referanse, hvor referanse ikke har en tilhørende saksstatus
      */
-    fun hentSaksStatuser(fiksDigisosId: String): List<SaksStatusResponse> {
-        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId) ?: return emptyList()
+    fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {
+        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token) ?: return emptyList()
 
         val saksStatusList = jsonDigisosSoker.hendelser
                 .filterIsInstance<JsonSaksStatus>()

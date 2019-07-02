@@ -24,10 +24,7 @@ class HendelseIT: AbstractIT() {
                 .willReturn(WireMock.ok(ok_minimal_jsonsoknad_response)))
         val id = "123"
 
-        val headers = HttpHeaders()
-        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-        headers.set(HttpHeaders.AUTHORIZATION, "Token")
-        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), String::class.java)
 
         assertNotNull(responseEntity)
         assertEquals(HttpStatus.OK, responseEntity.statusCode)

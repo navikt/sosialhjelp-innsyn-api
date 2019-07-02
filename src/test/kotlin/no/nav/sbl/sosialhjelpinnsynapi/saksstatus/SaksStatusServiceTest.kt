@@ -38,12 +38,6 @@ private val SAKS_STATUS_2 = JsonSaksStatus()
         .withStatus(JsonSaksStatus.Status.UNDER_BEHANDLING)
         .withTittel("Tittel")
         .withReferanse("B")
-private val SAKS_STATUS_IKKE_INNSYN = JsonSaksStatus()
-        .withType(JsonHendelse.Type.SAKS_STATUS)
-        .withHendelsestidspunkt(LocalDateTime.now().minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME))
-        .withStatus(JsonSaksStatus.Status.IKKE_INNSYN)
-        .withTittel("Tittel - 2")
-        .withReferanse("Referanse - 2")
 private val VEDTAK_FATTET = JsonVedtakFattet()
         .withType(JsonHendelse.Type.VEDTAK_FATTET)
         .withHendelsestidspunkt(LocalDateTime.now().minusHours(6).format(DateTimeFormatter.ISO_DATE_TIME))
@@ -65,6 +59,8 @@ internal class SaksStatusServiceTest {
 
     private val mockDigisosSak: DigisosSak = mockk()
 
+    private val token = "token"
+
     @BeforeEach
     fun init() {
         clearMocks(innsynService, mockDigisosSak)
@@ -77,9 +73,9 @@ internal class SaksStatusServiceTest {
                 .withVersion(VERSION)
                 .withHendelser(listOf(SAKS_STATUS_UNDER_BEHANDLING))
 
-        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_saksStatus
+        every { innsynService.hentJsonDigisosSoker(any(), token) } returns jsonDigisosSoker_med_saksStatus
 
-        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
+        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
@@ -97,9 +93,9 @@ internal class SaksStatusServiceTest {
                         SAKS_STATUS_UNDER_BEHANDLING,
                         VEDTAK_FATTET))
 
-        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_saksStatus_og_vedtakfattet_samme_referanse
+        every { innsynService.hentJsonDigisosSoker(any(), token) } returns jsonDigisosSoker_med_saksStatus_og_vedtakfattet_samme_referanse
 
-        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
+        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
@@ -117,9 +113,9 @@ internal class SaksStatusServiceTest {
                 .withVersion(VERSION)
                 .withHendelser(listOf(VEDTAK_FATTET_REFERANSE_null))
 
-        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_vedtakfattet_uten_saksStatus
+        every { innsynService.hentJsonDigisosSoker(any(), token) } returns jsonDigisosSoker_med_vedtakfattet_uten_saksStatus
 
-        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
+        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
@@ -135,9 +131,9 @@ internal class SaksStatusServiceTest {
                 .withVersion(VERSION)
                 .withHendelser(listOf(SOKNAD_MOTTATT))
 
-        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_uten_saksStatus_eller_vedtakFattet
+        every { innsynService.hentJsonDigisosSoker(any(), token) } returns jsonDigisosSoker_uten_saksStatus_eller_vedtakFattet
 
-        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
+        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(0)
@@ -145,9 +141,9 @@ internal class SaksStatusServiceTest {
 
     @Test
     fun `Skal returnere emptyList når JsonDigisosSoker er null`() {
-        every { innsynService.hentJsonDigisosSoker(any()) } returns null
+        every { innsynService.hentJsonDigisosSoker(any(), token) } returns null
 
-        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
+        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(0)
@@ -164,9 +160,9 @@ internal class SaksStatusServiceTest {
                         SAKS_STATUS_2,
                         VEDTAK_FATTET_REFERANSE_null))
 
-        every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker_med_2_vedtakfattet_og_2_saksStatuser
+        every { innsynService.hentJsonDigisosSoker(any(), token) } returns jsonDigisosSoker_med_2_vedtakfattet_og_2_saksStatuser
 
-        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
+        val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(3)

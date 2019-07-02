@@ -9,6 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsondigisossoker_res
 import org.assertj.core.api.Assertions.assertThat
 
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 
@@ -23,7 +24,7 @@ class SaksStatusIT : AbstractIT() {
                 .willReturn(WireMock.ok(ok_komplett_jsondigisossoker_response)))
 
         val id = "123"
-        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/saksStatus", HttpMethod.GET, null, typeRef<List<SaksStatusResponse>>())
+        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/saksStatus", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<SaksStatusResponse>>())
 
         assertThat(responseEntity).isNotNull
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
@@ -44,7 +45,7 @@ class SaksStatusIT : AbstractIT() {
                 .willReturn(WireMock.ok(ok_minimal_jsondigisossoker_response)))
 
         val id = "123"
-        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/saksStatus", HttpMethod.GET, null, typeRef<List<SaksStatusResponse>>())
+        val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/saksStatus", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<SaksStatusResponse>>())
 
         assertThat(responseEntity).isNotNull
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.NO_CONTENT)

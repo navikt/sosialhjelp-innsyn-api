@@ -34,6 +34,8 @@ internal class SoknadStatusServiceTest {
 
     private val mockDigisosSak: DigisosSak = mockk()
 
+    private val token = "token"
+
     @BeforeEach
     fun init() {
         clearMocks(fiksClient, dokumentlagerClient, mockDigisosSak)
@@ -41,11 +43,11 @@ internal class SoknadStatusServiceTest {
 
     @Test
     fun `Skal returnere mest nylige SoknadStatus`() {
-        every { fiksClient.hentDigisosSak(any(), "Token") } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak(any(), token) } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_underbehandling
 
-        val response: SoknadStatusResponse = service.hentSoknadStatus("123")
+        val response: SoknadStatusResponse = service.hentSoknadStatus("123", token)
 
         assertThat(response).isNotNull
         assertThat(response.status).isEqualTo(SoknadStatus.UNDER_BEHANDLING)

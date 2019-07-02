@@ -17,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException
 import java.util.Collections.singletonList
 
 
-
 private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
 
 private const val digisos_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
@@ -25,7 +24,7 @@ private const val digisos_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 @Profile("!mock")
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
-                     private val restTemplate: RestTemplate = RestTemplate()): FiksClient {
+                     private val restTemplate: RestTemplate = RestTemplate()) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val mapper = jacksonObjectMapper()
@@ -41,7 +40,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.info("Hentet stub - digisosId $digisosId")
             return mapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         }
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>( headers), String::class.java)
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         if (response.statusCode.is2xxSuccessful) {
             log.info("Hentet DigisosSak $digisosId fra Fiks")
             return mapper.readValue(response.body!!, DigisosSak::class.java)
@@ -54,7 +53,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun hentAlleDigisosSaker(): List<DigisosSak> {
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>( headers), typeRef<List<String>>())
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> mapper.readValue(s, DigisosSak::class.java) }
         } else {

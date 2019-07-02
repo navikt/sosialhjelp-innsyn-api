@@ -87,12 +87,6 @@ repositories {
 }
 
 tasks {
-    create("printVersion") {
-        doLast {
-            println(project.version)
-        }
-    }
-
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"

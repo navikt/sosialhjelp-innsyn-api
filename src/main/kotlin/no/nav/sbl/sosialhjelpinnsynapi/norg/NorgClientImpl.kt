@@ -14,7 +14,7 @@ private val log = LoggerFactory.getLogger(NorgClient::class.java)
 @Profile("!mock")
 @Component
 class NorgClientImpl(clientProperties: ClientProperties,
-                              private val restTemplate: RestTemplate = RestTemplate()): NorgClient {
+                     private val restTemplate: RestTemplate = RestTemplate()): NorgClient {
 
     private val baseUrl = clientProperties.norgEndpointUrl
     private val mapper = ObjectMapper()

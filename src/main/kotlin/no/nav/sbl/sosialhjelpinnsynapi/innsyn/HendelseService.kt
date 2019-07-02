@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component
 @Component
 class HendelseService(private val innsynService: InnsynService) {
 
-    fun getHendelserForSoknad(fiksDigisosId: String): List<HendelseFrontend> {
-        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId) ?: return emptyList()
+    fun getHendelserForSoknad(fiksDigisosId: String, token: String): List<HendelseFrontend> {
+        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token) ?: return emptyList()
         val jsonSoknad = innsynService.hentOriginalSoknad(fiksDigisosId)
         val timestampSendt = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId).toString()
         return createHendelserList(jsonDigisosSoker, jsonSoknad, timestampSendt)

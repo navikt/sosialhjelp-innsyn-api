@@ -53,6 +53,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun hentAlleDigisosSaker(): List<DigisosSak> {
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
+        headers.setBearerAuth("Token fra silje")
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> mapper.readValue(s, DigisosSak::class.java) }

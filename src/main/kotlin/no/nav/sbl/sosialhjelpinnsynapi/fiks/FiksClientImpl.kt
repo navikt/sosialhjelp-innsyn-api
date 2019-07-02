@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import org.slf4j.LoggerFactory
@@ -28,6 +28,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
+    private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
     private val mapper = jacksonObjectMapper()
 
 
@@ -35,6 +36,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
+        headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
+        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId == digisos_stub_id) {
@@ -55,6 +58,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
+        headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
+        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> mapper.readValue(s, DigisosSak::class.java) }

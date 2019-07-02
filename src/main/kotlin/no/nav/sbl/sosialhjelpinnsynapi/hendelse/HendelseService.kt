@@ -54,88 +54,82 @@ class HendelseService(private val clientProperties: ClientProperties,
                 .groupBy { it.referanse }
     }
 
-    private fun mapToHendelseResponse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker, saker: Map<String, List<JsonSaksStatus>>): HendelseResponse? {
-        if (jsonHendelse.type == null) {
+    private fun mapToHendelseResponse(hendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker, saker: Map<String, List<JsonSaksStatus>>): HendelseResponse? {
+        if (hendelse.type == null) {
             throw RuntimeException("Hendelse mangler type")
         }
-        return when (jsonHendelse.type) {
-            JsonHendelse.Type.TILDELT_NAV_KONTOR -> tildeltNavKontorHendelse(jsonHendelse, soknadsmottaker)
-            JsonHendelse.Type.SOKNADS_STATUS -> soknadsStatusHendelse(jsonHendelse, soknadsmottaker)
-            JsonHendelse.Type.VEDTAK_FATTET -> vedtakFattetHendelse(jsonHendelse, saker)
-            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> dokumentasjonEtterspurtHendelse(jsonHendelse)
-            JsonHendelse.Type.FORELOPIG_SVAR -> forelopigSvarHendelse(jsonHendelse)
-            JsonHendelse.Type.SAKS_STATUS -> saksStatusHendelse(jsonHendelse)
-            else -> throw RuntimeException("Hendelsestype ${jsonHendelse.type.value()} mangler mapping")
+        return when (hendelse.type) {
+            JsonHendelse.Type.TILDELT_NAV_KONTOR -> tildeltNavKontorHendelse(hendelse as JsonTildeltNavKontor, soknadsmottaker)
+            JsonHendelse.Type.SOKNADS_STATUS -> soknadsStatusHendelse(hendelse as JsonSoknadsStatus, soknadsmottaker)
+            JsonHendelse.Type.VEDTAK_FATTET -> vedtakFattetHendelse(hendelse as JsonVedtakFattet, saker)
+            JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT -> dokumentasjonEtterspurtHendelse(hendelse as JsonDokumentasjonEtterspurt)
+            JsonHendelse.Type.FORELOPIG_SVAR -> forelopigSvarHendelse(hendelse as JsonForelopigSvar)
+            JsonHendelse.Type.SAKS_STATUS -> saksStatusHendelse(hendelse as JsonSaksStatus)
+            else -> throw RuntimeException("Hendelsestype ${hendelse.type.value()} mangler mapping")
         }
     }
 
-    private fun tildeltNavKontorHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseResponse? {
-        jsonHendelse as JsonTildeltNavKontor
-        if (jsonHendelse.navKontor == soknadsmottaker.enhetsnummer) {
+    private fun tildeltNavKontorHendelse(hendelse: JsonTildeltNavKontor, soknadsmottaker: JsonSoknadsmottaker): HendelseResponse? {
+        if (hendelse.navKontor == soknadsmottaker.enhetsnummer) {
             return null
         }
-        val navKontorNavn = norgClient.hentNavEnhet(jsonHendelse.navKontor).navn
+        val navKontorNavn = norgClient.hentNavEnhet(hendelse.navKontor).navn
         val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt ved $navKontorNavn. Videresendingen vil ikke påvirke saksbehandlingstiden"
-        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, null)
+        return HendelseResponse(hendelse.hendelsestidspunkt, beskrivelse, null)
     }
 
-    private fun soknadsStatusHendelse(jsonHendelse: JsonHendelse, soknadsmottaker: JsonSoknadsmottaker): HendelseResponse {
-        jsonHendelse as JsonSoknadsStatus
-        if (jsonHendelse.status == null) {
+    private fun soknadsStatusHendelse(hendelse: JsonSoknadsStatus, soknadsmottaker: JsonSoknadsmottaker): HendelseResponse {
+        if (hendelse.status == null) {
             throw RuntimeException("JsonSoknadsStatus mangler status")
         }
-        val beskrivelse = when (jsonHendelse.status) {
+        val beskrivelse = when (hendelse.status) {
             JsonSoknadsStatus.Status.MOTTATT -> "Søknaden med vedlegg er mottatt hos ${soknadsmottaker.navEnhetsnavn}"
             JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling"
             JsonSoknadsStatus.Status.FERDIGBEHANDLET -> "Søknaden er ferdig behandlet"
-            else -> throw RuntimeException("Statustype ${jsonHendelse.status.value()} mangler mapping")
+            else -> throw RuntimeException("Statustype ${hendelse.status.value()} mangler mapping")
         }
 
-        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, null)
+        return HendelseResponse(hendelse.hendelsestidspunkt, beskrivelse, null)
     }
 
-    private fun vedtakFattetHendelse(jsonHendelse: JsonHendelse, saker: Map<String, List<JsonSaksStatus>>): HendelseResponse {
-        jsonHendelse as JsonVedtakFattet
-        if (jsonHendelse.utfall == null) {
-            return HendelseResponse(jsonHendelse.hendelsestidspunkt, "Vedtak fattet", hentUrlFraFilreferanse(clientProperties, jsonHendelse.vedtaksfil.referanse))
+    private fun vedtakFattetHendelse(hendelse: JsonVedtakFattet, saker: Map<String, List<JsonSaksStatus>>): HendelseResponse {
+        if (hendelse.utfall == null) {
+            return HendelseResponse(hendelse.hendelsestidspunkt, "Vedtak fattet", hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse))
         }
 
-        val utfall = jsonHendelse.utfall.utfall.value().toLowerCase().replace('_', ' ')
-        val beskrivelse = if (jsonHendelse.referanse != null && saker.containsKey(jsonHendelse.referanse)) {
-            "${saker.getValue(jsonHendelse.referanse)[0].tittel} er $utfall"
+        val utfall = hendelse.utfall.utfall.value().toLowerCase().replace('_', ' ')
+        val beskrivelse = if (hendelse.referanse != null && saker.containsKey(hendelse.referanse)) {
+            "${saker.getValue(hendelse.referanse)[0].tittel} er $utfall"
         } else {
             log.warn("Tilhørende SaksstatusHendelse manglet eller manglet tittel på saksstatus")
             "En sak har fått utfallet: $utfall"
         }
-        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, jsonHendelse.vedtaksfil.referanse))
+        return HendelseResponse(hendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse))
     }
 
-    private fun dokumentasjonEtterspurtHendelse(jsonHendelse: JsonHendelse): HendelseResponse {
-        jsonHendelse as JsonDokumentasjonEtterspurt
+    private fun dokumentasjonEtterspurtHendelse(hendelse: JsonDokumentasjonEtterspurt): HendelseResponse {
         val beskrivelse = "Du må laste opp mer dokumentasjon"
-        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, jsonHendelse.forvaltningsbrev.referanse))
+        return HendelseResponse(hendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse))
     }
 
-    private fun forelopigSvarHendelse(jsonHendelse: JsonHendelse): HendelseResponse {
-        jsonHendelse as JsonForelopigSvar
+    private fun forelopigSvarHendelse(hendelse: JsonForelopigSvar): HendelseResponse {
         val beskrivelse = "Du har fått et brev om saksbehandlingstiden for søknaden din"
-        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, jsonHendelse.forvaltningsbrev.referanse))
+        return HendelseResponse(hendelse.hendelsestidspunkt, beskrivelse, hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse))
     }
 
-    private fun saksStatusHendelse(jsonHendelse: JsonHendelse): HendelseResponse? {
-        jsonHendelse as JsonSaksStatus
-        if (jsonHendelse.status == null) {
+    private fun saksStatusHendelse(hendelse: JsonSaksStatus): HendelseResponse? {
+        if (hendelse.status == null) {
             return null
-        } else if (jsonHendelse.tittel == null) {
-            return HendelseResponse(jsonHendelse.hendelsestidspunkt, "En sak har ikke innsyn", null)
+        } else if (hendelse.tittel == null) {
+            return HendelseResponse(hendelse.hendelsestidspunkt, "En sak har ikke innsyn", null)
         }
 
-        val status = jsonHendelse.status.value().toLowerCase().replace('_', ' ')
-        val beskrivelse = if (jsonHendelse.status == JsonSaksStatus.Status.IKKE_INNSYN) {
-            "Saken ${jsonHendelse.tittel} har $status"
+        val status = hendelse.status.value().toLowerCase().replace('_', ' ')
+        val beskrivelse = if (hendelse.status == JsonSaksStatus.Status.IKKE_INNSYN) {
+            "Saken ${hendelse.tittel} har $status"
         } else {
-            "Saken ${jsonHendelse.tittel} er $status"
+            "Saken ${hendelse.tittel} er $status"
         }
-        return HendelseResponse(jsonHendelse.hendelsestidspunkt, beskrivelse, null)
+        return HendelseResponse(hendelse.hendelsestidspunkt, beskrivelse, null)
     }
 }

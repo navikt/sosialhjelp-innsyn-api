@@ -16,7 +16,7 @@ class SoknadStatusService(private val fiksClient: FiksClient,
                           private val dokumentlagerClient: DokumentlagerClient) {
 
     fun hentSoknadStatus(fiksDigisosId: String): SoknadStatusResponse {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "Token")
 
         if (digisosSak.digisosSoker == null) {
             return SoknadStatusResponse(SoknadStatus.SENDT)

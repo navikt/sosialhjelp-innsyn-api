@@ -49,19 +49,16 @@ jobs:
           command: |
             cp /tmp/workspace/*.jar .
       - run:
-          name: Build and push to docker hub
+          name: Build docker image
           command: |
-            VERSION="$(./gradlew -q printVersion)"
-            GIT_HASH="$(git rev-parse HEAD)"
-            echo "Extracted version = \"$VERSION\""
-            echo "Extracted git hash = \"$GIT_HASH\""
             docker build -t navikt/sosialhjelp-innsyn-api:latest -f Dockerfile .
-            docker tag navikt/sosialhjelp-innsyn-api:latest "navikt/sosialhjelp-innsyn-api:$VERSION"
-            docker tag navikt/sosialhjelp-innsyn-api:latest "navikt/sosialhjelp-innsyn-api:$GIT_HASH"
+            docker tag navikt/sosialhjelp-innsyn-api:latest "navikt/sosialhjelp-innsyn-api:$CIRCLE_SHA1"
+      - run:
+          name: Push docker image
+          command: |
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_LOGIN" --password-stdin
             docker push "navikt/sosialhjelp-innsyn-api:latest"
-            docker push "navikt/sosialhjelp-innsyn-api:$VERSION"
-            docker push "navikt/sosialhjelp-innsyn-api:$GIT_HASH"
+            docker push "navikt/sosialhjelp-innsyn-api:$CIRCLE_SHA1"
 
   deploy_dev:
     docker:
@@ -81,7 +78,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Deploy til ${MILJO} dev-sbs
+          name: Deploy versjon=${VERSION} til miljø=${MILJO} i dev-sbs
           command: |
             deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=nais.yaml --version=${VERSION} --vars=nais/dev/${MILJO}.json
 
@@ -92,7 +89,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Deploy til prod
+          name: Deploy versjon=${VERSION} til prod
           command: |
             deployment-cli deploy create --cluster=prod-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=nais.yaml --version=${VERSION} --vars=nais/prod/default.json
 

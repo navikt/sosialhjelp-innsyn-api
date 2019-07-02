@@ -41,7 +41,7 @@ internal class SoknadStatusServiceTest {
 
     @Test
     fun `Skal returnere mest nylige SoknadStatus`() {
-        every { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak(any(), "Token") } returns mockDigisosSak
         every { mockDigisosSak.digisosSoker?.metadata } returns "123"
         every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_underbehandling
 

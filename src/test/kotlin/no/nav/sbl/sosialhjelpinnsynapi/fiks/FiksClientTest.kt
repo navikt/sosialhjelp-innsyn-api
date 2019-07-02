@@ -34,12 +34,14 @@ internal class FiksClientTest {
         every { mockResponse.body } returns ok_digisossak_response
 
         every {
-            restTemplate.getForEntity(
+            restTemplate.exchange(
                     any<String>(),
+                    any(),
+                    any(),
                     String::class.java)
         } returns mockResponse
 
-        val result = fiksClient.hentDigisosSak("123")
+        val result = fiksClient.hentDigisosSak("123", "Token")
 
         assertNotNull(result)
     }
@@ -54,11 +56,11 @@ internal class FiksClientTest {
             restTemplate.exchange(
                     any<String>(),
                     any(),
-                    null,
+                    any(),
                     any<ParameterizedTypeReference<List<String>>>())
         } returns mockListResponse
 
-        val result = fiksClient.hentAlleDigisosSaker()
+        val result = fiksClient.hentAlleDigisosSaker("Token")
 
         assertNotNull(result)
         assertEquals(2, result.size)

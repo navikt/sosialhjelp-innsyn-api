@@ -12,3 +12,4 @@ client:
   fiks_digisos_endpoint_url: 'http://localhost:51234'
   fiks_svar_ut_endpoint_url: 'svar-ut.com' # https://test.svarut.ks.no/forsendelse/{id}/{nr}
   fiks_dokumentlager_endpoint_url: 'http://localhost:51234' # https://minside.fiks.test.ks.no/dokumentlager/nedlasting/{id}
+  norg_enpoint_url: 'http://localhost:51234'

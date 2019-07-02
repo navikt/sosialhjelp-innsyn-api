@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component
 class InnsynService(private val fiksClient: FiksClient,
                     private val dokumentlagerClient: DokumentlagerClient) {
 
-    fun hentJsonDigisosSoker(soknadId: String): JsonDigisosSoker? {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId)
+    fun hentJsonDigisosSoker(soknadId: String, token: String): JsonDigisosSoker? {
+        val digisosSak = fiksClient.hentDigisosSak(soknadId, token)
         return if (digisosSak.digisosSoker != null) {
             dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java) as JsonDigisosSoker
         } else {
@@ -20,13 +20,13 @@ class InnsynService(private val fiksClient: FiksClient,
     }
 
     fun hentOriginalSoknad(soknadId: String): JsonSoknad {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId)
+        val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
         return dokumentlagerClient.hentDokument(digisosSak.originalSoknadNAV.metadata, JsonSoknad::class.java) as JsonSoknad
     }
 
     // Returnerer UNIX tid med millisekunder
     fun hentInnsendingstidspunktForOriginalSoknad(soknadId: String): Long {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId)
+        val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
         return digisosSak.originalSoknadNAV.timestampSendt
     }
 }

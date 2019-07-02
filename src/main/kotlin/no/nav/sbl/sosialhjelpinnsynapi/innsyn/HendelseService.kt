@@ -22,8 +22,8 @@ class HendelseService(private val innsynService: InnsynService,
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
-    fun getHendelserForSoknad(fiksDigisosId: String): List<HendelseFrontend> {
-        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId)
+    fun getHendelserForSoknad(fiksDigisosId: String, token: String): List<HendelseFrontend> {
+        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token)
         val jsonSoknad = innsynService.hentOriginalSoknad(fiksDigisosId)
         val timestampSendtUnix = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId)
         val timestampSendt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestampSendtUnix), ZoneOffset.UTC).toString()

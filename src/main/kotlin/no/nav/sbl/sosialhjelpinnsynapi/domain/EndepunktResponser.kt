@@ -21,6 +21,12 @@ enum class UtfallEllerSaksStatus {
     UNDER_BEHANDLING, IKKE_INNSYN, FEILREGISTRERT, INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST, OMGJORT
 }
 
+data class HendelseResponse(
+        val tidspunkt: String,
+        val beskrivelse: String,
+        val filUrl: String?
+)
+
 data class OppgaveResponse(
         val innsendelsesfrist: String,
         val dokumenttype: String,

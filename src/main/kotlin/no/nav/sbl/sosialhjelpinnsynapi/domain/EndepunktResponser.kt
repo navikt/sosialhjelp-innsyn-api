@@ -20,3 +20,9 @@ data class SaksStatusResponse(
 enum class UtfallEllerSaksStatus {
     UNDER_BEHANDLING, IKKE_INNSYN, FEILREGISTRERT, INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST, OMGJORT
 }
+
+data class OppgaveResponse(
+        val innsendelsesfrist: String,
+        val dokumenttype: String,
+        val tilleggsinformasjon: String?
+)

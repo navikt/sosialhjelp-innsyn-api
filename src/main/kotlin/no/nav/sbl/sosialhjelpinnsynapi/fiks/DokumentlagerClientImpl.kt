@@ -28,7 +28,7 @@ private const val dokumentlager_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 @Profile("!mock")
 @Component
 class DokumentlagerClientImpl(clientProperties: ClientProperties,
-                          private val restTemplate: RestTemplate = RestTemplate()): DokumentlagerClient {
+                              private val restTemplate: RestTemplate) : DokumentlagerClient {
 
     private val baseUrl = clientProperties.fiksDokumentlagerEndpointUrl
     private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()

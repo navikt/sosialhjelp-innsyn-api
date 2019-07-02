@@ -87,8 +87,8 @@ internal class HendelseServiceTest {
         val hendelser = service.getHendelserForSoknad("123")
 
         assertTrue(hendelser.size == 2)
-        assertTrue(hendelser[0].beskrivelse.contains("Søknaden med vedlegg er sendt til $soknadsmottaker", ignoreCase = true))
-        assertTrue(hendelser[1].beskrivelse.contains("Søknaden med vedlegg er mottatt hos $soknadsmottaker", ignoreCase = true))
+        assertTrue(hendelser[0].beskrivelse.contains("Søknaden med vedlegg er mottatt hos $soknadsmottaker", ignoreCase = true))
+        assertTrue(hendelser[1].beskrivelse.contains("Søknaden med vedlegg er sendt til $soknadsmottaker", ignoreCase = true))
     }
 
     @Test
@@ -97,7 +97,7 @@ internal class HendelseServiceTest {
 
         val hendelser = service.getHendelserForSoknad("123")
 
-        assertTrue(hendelser == hendelser.sortedBy { it.timestamp })
+        assertTrue(hendelser == hendelser.sortedByDescending { it.timestamp })
         for (hendelse in hendelser) {
             assertNotNull(hendelse.beskrivelse)
             assertNotNull(hendelse.timestamp)
@@ -110,7 +110,7 @@ internal class HendelseServiceTest {
 
         val hendelser = service.getHendelserForSoknad("123")
 
-        assertTrue(hendelser == hendelser.sortedBy { it.timestamp })
+        assertTrue(hendelser == hendelser.sortedByDescending { it.timestamp })
         for (hendelse in hendelser) {
             assertNotNull(hendelse.beskrivelse)
             assertNotNull(hendelse.timestamp)
@@ -132,7 +132,7 @@ internal class HendelseServiceTest {
         every { norgClient.hentNavEnhet(tildeltKontorEnhetsnr) } returns mockNavEnhet
 
         val hendelser = service.getHendelserForSoknad("123")
-        val tildeltNavKontorHendelse = hendelser[2]
+        val tildeltNavKontorHendelse = hendelser[0]
 
         assertTrue(hendelser.size == 3)
 
@@ -177,8 +177,8 @@ internal class HendelseServiceTest {
         val hendelser = service.getHendelserForSoknad("123")
 
         assertTrue(hendelser.size == 4)
-        assertTrue(hendelser[2].beskrivelse.contains("under behandling", ignoreCase = true))
-        assertTrue(hendelser[3].beskrivelse.contains("ferdig behandlet", ignoreCase = true))
+        assertTrue(hendelser[0].beskrivelse.contains("ferdig behandlet", ignoreCase = true))
+        assertTrue(hendelser[1].beskrivelse.contains("under behandling", ignoreCase = true))
     }
 
     @Test
@@ -196,7 +196,7 @@ internal class HendelseServiceTest {
         val hendelser = service.getHendelserForSoknad("123")
 
         assertTrue(hendelser.size == 3)
-        assertTrue(hendelser[2].beskrivelse.contains("Saken $saksTittel har ikke innsyn", ignoreCase = true))
+        assertTrue(hendelser[0].beskrivelse.contains("Saken $saksTittel har ikke innsyn", ignoreCase = true))
     }
 
     @Test
@@ -218,8 +218,8 @@ internal class HendelseServiceTest {
         every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker
 
         val hendelser = service.getHendelserForSoknad("123")
-        val saksstatusHendelse = hendelser[2]
-        val vedtakFattetHendelse = hendelser[3]
+        val vedtakFattetHendelse = hendelser[0]
+        val saksstatusHendelse = hendelser[1]
 
         assertTrue(hendelser.size == 4)
         assertTrue(saksstatusHendelse.beskrivelse.contains("Saken $saksTittel er under behandling", ignoreCase = true))
@@ -241,7 +241,7 @@ internal class HendelseServiceTest {
         every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker
 
         val hendelser = service.getHendelserForSoknad("123")
-        val vedtakFattetHendelse = hendelser[2]
+        val vedtakFattetHendelse = hendelser[0]
 
         assertTrue(hendelser.size == 3)
         assertTrue(vedtakFattetHendelse.beskrivelse.contains("En sak har fått utfallet: delvis innvilget", ignoreCase = true))
@@ -263,7 +263,7 @@ internal class HendelseServiceTest {
         every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker
 
         val hendelser = service.getHendelserForSoknad("123")
-        val dokEtterspurtHendelse = hendelser[2]
+        val dokEtterspurtHendelse = hendelser[0]
 
         assertTrue(hendelser.size == 3)
         assertTrue(dokEtterspurtHendelse.beskrivelse.contains("Du må laste opp mer dokumentasjon", ignoreCase = true))
@@ -284,7 +284,7 @@ internal class HendelseServiceTest {
         every { innsynService.hentJsonDigisosSoker(any()) } returns jsonDigisosSoker
 
         val hendelser = service.getHendelserForSoknad("123")
-        val forelopigSvarHendelse = hendelser[2]
+        val forelopigSvarHendelse = hendelser[0]
 
         assertTrue(hendelser.size == 3)
         assertTrue(forelopigSvarHendelse.beskrivelse.contains("Du har fått et brev om saksbehandlingstiden for søknaden din", ignoreCase = true))

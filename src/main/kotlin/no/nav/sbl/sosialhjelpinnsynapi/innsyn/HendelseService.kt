@@ -42,7 +42,7 @@ class HendelseService(private val innsynService: InnsynService,
         hendelser.addAll(jsonDigisosSoker.hendelser
                 .filterNot { it.type == JsonHendelse.Type.UTBETALING || it.type == JsonHendelse.Type.VILKAR }
                 .mapNotNull { mapToHendelseFrontend(it, soknadsmottaker, saker) })
-        hendelser.sortBy { it.timestamp }
+        hendelser.sortByDescending { it.timestamp }
         return hendelser
     }
 

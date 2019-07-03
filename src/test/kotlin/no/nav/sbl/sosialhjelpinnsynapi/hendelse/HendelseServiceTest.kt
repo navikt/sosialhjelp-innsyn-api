@@ -74,7 +74,11 @@ internal class HendelseServiceTest {
 
     @Test
     fun `Should only return sendt hendelse if jsonDigisosSoker is null`() {
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns null
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns null
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
@@ -95,7 +99,11 @@ internal class HendelseServiceTest {
 
     @Test
     fun `Should return hendelser with minimal info and elements ordered by tidspunkt`() {
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker_alle_hendelser_minimale
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker_alle_hendelser_minimale
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
@@ -108,7 +116,11 @@ internal class HendelseServiceTest {
 
     @Test
     fun `Should return hendelser with complete info and elements ordered by tidspunkt`() {
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker_alle_hendelser_komplette
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker_alle_hendelser_komplette
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
@@ -129,7 +141,11 @@ internal class HendelseServiceTest {
                 .withNavKontor(tildeltKontorEnhetsnr)
         val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], jsonTildeltNavKontor))
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
         every { mockNavEnhet.navn } returns tildeltKontorNavn
         every { norgClient.hentNavEnhet(tildeltKontorEnhetsnr) } returns mockNavEnhet
 
@@ -151,7 +167,11 @@ internal class HendelseServiceTest {
                 .withNavKontor(enhetsnr)
         val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], jsonTildeltNavKontor))
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
         every { mockNavEnhet.navn } returns soknadsmottaker
         every { norgClient.hentNavEnhet(soknadsmottaker) } returns mockNavEnhet
 
@@ -172,7 +192,11 @@ internal class HendelseServiceTest {
                 .withStatus(JsonSoknadsStatus.Status.FERDIGBEHANDLET)
         val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], statusUnderBehandling, statusFerdigBehandlet))
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
@@ -191,7 +215,11 @@ internal class HendelseServiceTest {
                 .withReferanse(saksRefereanse)
         val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], saksStatus))
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
 
@@ -215,7 +243,11 @@ internal class HendelseServiceTest {
                 .withVedtaksfil(JsonVedtaksfil().withReferanse(referanseSvarUt))
         val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], saksStatus, vedtakFattet))
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
         val vedtakFattetHendelse = hendelser[0]
@@ -237,7 +269,11 @@ internal class HendelseServiceTest {
                 .withVedtaksfil(JsonVedtaksfil().withReferanse(referanseSvarUt))
         val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], vedtakFattet))
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
         val vedtakFattetHendelse = hendelser[0]
@@ -258,7 +294,11 @@ internal class HendelseServiceTest {
                         .withReferanse(referanseDokumentlager))
         val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], dokumentasjonEtterspurt))
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
         val dokEtterspurtHendelse = hendelser[0]
@@ -277,7 +317,11 @@ internal class HendelseServiceTest {
                         .withReferanse(referanseDokumentlager))
         val jsonDigisosSoker = createJsonDigisosSokerWithStatusMottatt()
         jsonDigisosSoker.withHendelser(listOf(jsonDigisosSoker.hendelser[0], forelopigSvar))
+<<<<<<< HEAD
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns jsonDigisosSoker
+=======
+        every { innsynService.hentJsonDigisosSoker(any(), "Token") } returns jsonDigisosSoker
+>>>>>>> ea8b650bde14fe3830a57e77bc6b95cd5ffe4a82
 
         val hendelser = service.getHendelserForSoknad("123", "Token")
         val forelopigSvarHendelse = hendelser[0]

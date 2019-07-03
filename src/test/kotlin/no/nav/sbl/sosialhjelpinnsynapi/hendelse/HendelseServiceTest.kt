@@ -11,7 +11,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
-import no.nav.sbl.sosialhjelpinnsynapi.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient

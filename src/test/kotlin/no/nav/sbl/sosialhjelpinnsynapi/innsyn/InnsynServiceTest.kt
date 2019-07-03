@@ -54,7 +54,7 @@ internal class InnsynServiceTest {
         val mockJsonSoknad: JsonSoknad = mockk()
 
         every { fiksClient.hentDigisosSak("123", "Token") } returns mockDigisosSak
-        every { mockDigisosSak.orginalSoknadNAV?.metadata } returns "some id"
+        every { mockDigisosSak.originalSoknadNAV.metadata } returns "some id"
         every { dokumentlagerClient.hentDokument(any(), JsonSoknad::class.java) } returns mockJsonSoknad
 
         val jsonSoknad: JsonSoknad = service.hentOriginalSoknad("123")

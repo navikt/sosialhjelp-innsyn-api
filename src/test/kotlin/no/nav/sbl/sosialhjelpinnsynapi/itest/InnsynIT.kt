@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
 import org.junit.jupiter.api.Assertions.assertEquals

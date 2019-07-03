@@ -1,7 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.HendelseService
+import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
+import no.nav.sbl.sosialhjelpinnsynapi.hendelse.HendelseService
 import no.nav.security.oidc.api.Unprotected
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -14,7 +16,7 @@ import org.springframework.web.server.ResponseStatusException
 class HendelseController(val hendelseService: HendelseService) {
 
     @GetMapping("/{fiksDigisosId}/hendelser",  produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-    fun getHendelserForSoknad(@PathVariable fiksDigisosId: String,@RequestHeader(value = "Authorization") token: String): ResponseEntity<List<HendelseFrontend>> {
+    fun getHendelserForSoknad(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<HendelseResponse>> {
         try {
             val hendelserForSoknad = hendelseService.getHendelserForSoknad(fiksDigisosId, token)
             return ResponseEntity.ok(hendelserForSoknad)
@@ -23,11 +25,3 @@ class HendelseController(val hendelseService: HendelseService) {
         }
     }
 }
-
-data class HendelseFrontend(
-        val timestamp: String,
-        val beskrivelse: String,
-        val referanse: String?,
-        val nr: Int?,
-        val refErTilSvarUt: Boolean?
-)

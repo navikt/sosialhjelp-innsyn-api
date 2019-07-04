@@ -1,15 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
-data class SoknadStatusResponse(
-        val status: SoknadStatus
+data class SoknadsStatusResponse(
+        val status: SoknadsStatus
 )
-
-enum class SoknadStatus {
-    SENDT,
-    MOTTATT,
-    UNDER_BEHANDLING,
-    FERDIGBEHANDLET
-}
 
 data class SaksStatusResponse(
         val tittel: String,

@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.soknadstatus
+package no.nav.sbl.sosialhjelpinnsynapi.soknadsstatus
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -8,8 +8,8 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatusResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
@@ -25,12 +25,12 @@ val SOKNAD_MOTTATT: JsonSoknadsStatus = JsonSoknadsStatus()
         .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
         .withStatus(JsonSoknadsStatus.Status.MOTTATT)
 
-internal class SoknadStatusServiceTest {
+internal class SoknadsStatusServiceTest {
 
     private val fiksClient: FiksClient = mockk()
     private val dokumentlagerClient: DokumentlagerClient = mockk()
 
-    private val service = SoknadStatusService(fiksClient, dokumentlagerClient)
+    private val service = SoknadsStatusService(fiksClient, dokumentlagerClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
 
@@ -42,15 +42,12 @@ internal class SoknadStatusServiceTest {
     }
 
     @Test
-    fun `Skal returnere mest nylige SoknadStatus`() {
-        every { fiksClient.hentDigisosSak(any(), token) } returns mockDigisosSak
-        every { mockDigisosSak.digisosSoker?.metadata } returns "123"
-        every { dokumentlagerClient.hentDokument(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker_underbehandling
+    fun `Skal returnere mest nylige SoknadsStatus`() {
 
-        val response: SoknadStatusResponse = service.hentSoknadStatus("123", token)
+        val response: SoknadsStatusResponse = service.hentSoknadsStatus("123", token)
 
         assertThat(response).isNotNull
-        assertThat(response.status).isEqualTo(SoknadStatus.UNDER_BEHANDLING)
+        assertThat(response.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
     }
 
     private val jsonDigisosSoker_underbehandling: JsonDigisosSoker = JsonDigisosSoker()

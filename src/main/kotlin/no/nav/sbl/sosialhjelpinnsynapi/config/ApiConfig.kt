@@ -32,6 +32,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
+        http.cors()
 //        http.csrf().disable()
     }
 }
@@ -44,6 +45,7 @@ class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.antMatcher("/api/v1/mock/**").csrf().disable()
+        http.cors()
     }
 
 }

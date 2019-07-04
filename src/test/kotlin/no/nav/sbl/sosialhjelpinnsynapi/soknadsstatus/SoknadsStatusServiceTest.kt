@@ -4,14 +4,12 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatusResponse
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,38 +25,27 @@ val SOKNAD_MOTTATT: JsonSoknadsStatus = JsonSoknadsStatus()
 
 internal class SoknadsStatusServiceTest {
 
-    private val fiksClient: FiksClient = mockk()
-    private val dokumentlagerClient: DokumentlagerClient = mockk()
+    private val eventService: EventService = mockk()
 
-    private val service = SoknadsStatusService(fiksClient, dokumentlagerClient)
+    private val service = SoknadsStatusService(eventService)
 
-    private val mockDigisosSak: DigisosSak = mockk()
+    private val mockInternalDigisosSoker: InternalDigisosSoker = mockk()
 
     private val token = "token"
 
     @BeforeEach
     fun init() {
-        clearMocks(fiksClient, dokumentlagerClient, mockDigisosSak)
+        clearMocks(eventService, mockInternalDigisosSoker)
     }
 
     @Test
     fun `Skal returnere mest nylige SoknadsStatus`() {
+        every { eventService.createModel(any()) } returns mockInternalDigisosSoker
+        every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
 
         val response: SoknadsStatusResponse = service.hentSoknadsStatus("123", token)
 
         assertThat(response).isNotNull
         assertThat(response.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
     }
-
-    private val jsonDigisosSoker_underbehandling: JsonDigisosSoker = JsonDigisosSoker()
-            .withAvsender(JSON_AVSENDER)
-            .withVersion(VERSION)
-            .withHendelser(listOf(
-                    SOKNAD_MOTTATT,
-                    JsonSoknadsStatus()
-                            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-                            .withHendelsestidspunkt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withStatus(JsonSoknadsStatus.Status.UNDER_BEHANDLING)
-
-            ))
 }

@@ -13,7 +13,11 @@ class ClientProperties {
 
     lateinit var fiksSvarUtEndpointUrl: String
 
+    lateinit var fiksIntegrasjonId: String
+    lateinit var fiksIntegrasjonIdKommune: String
+
     lateinit var fiksIntegrasjonpassord: String
+    lateinit var fiksIntegrasjonPassordKommune: String
 
     lateinit var norgEndpointUrl: String
 

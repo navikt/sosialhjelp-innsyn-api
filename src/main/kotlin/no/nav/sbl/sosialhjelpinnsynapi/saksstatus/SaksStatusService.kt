@@ -19,11 +19,11 @@ class SaksStatusService(private val clientProperties: ClientProperties,
                         private val innsynService: InnsynService) {
 
     /* TODO:
-        - Kan man ha flere saksStatuser med samme referanse?
-        - Kan man ha flere vedtakFattet med samme referanse (også hvis referanse == null)?
-        - Skal IKKE_INNSYN filtreres vekk i backend eller frontend?
+        - Kan man ha flere saksStatuser med samme referanse? ja
+        - Kan man ha flere vedtakFattet med samme referanse (også hvis referanse == null)? ja, kan ikke være null
+        - Skal IKKE_INNSYN filtreres vekk i backend eller frontend? skal ikke filtreres vekk
         -
-        - Foreløpig antagelse: Det finnes ingen vedtakFattet med referanse, hvor referanse ikke har en tilhørende saksstatus
+        - Foreløpig antagelse: Det finnes ingen vedtakFattet med referanse, hvor referanse ikke har en tilhørende saksstatus: stemmer
      */
     fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {
         val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token) ?: return emptyList()

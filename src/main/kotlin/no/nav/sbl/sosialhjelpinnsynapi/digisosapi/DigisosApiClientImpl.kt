@@ -45,6 +45,8 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
     override fun postDigisosSakMedInnsynNy(digisosSak: DigisosSak) {
         val headers = HttpHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
+        headers.set("IntegrasjonId", fiksIntegrasjonIdKommune)
+        headers.set("IntegrasjonPassord", fiksIntegrasjonPassordKommune)
 
         val httpEntity = HttpEntity(mapper.writeValueAsString(digisosSak), headers)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/${digisosSak.fiksOrgId}/ny", HttpMethod.POST, httpEntity, String::class.java)

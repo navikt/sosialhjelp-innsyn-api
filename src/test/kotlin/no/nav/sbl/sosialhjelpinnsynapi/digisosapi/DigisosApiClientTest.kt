@@ -34,7 +34,7 @@ internal class DigisosApiClientTest {
         } returns mockResponse
 
         val digisosSak = DigisosSak("id", "12345678901", "111222333", "0301", OffsetDateTime.now().toEpochSecond(),
-                OrginalSoknadNAV("", "", "", DokumentInfo("", "", 1), Collections.emptyList(), 0),
+                OriginalSoknadNAV("", "", "", DokumentInfo("", "", 1), Collections.emptyList(), 0),
                 EttersendtInfoNAV(Collections.emptyList()), DigisosSoker("meta", Collections.emptyList(), OffsetDateTime.now().toEpochSecond()))
 
         digisosApiClient.postDigisosSakMedInnsyn(digisosSak)

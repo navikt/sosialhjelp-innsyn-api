@@ -2,52 +2,72 @@ package no.nav.sbl.sosialhjelpinnsynapi.domain
 
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 
-data class Soknad(
-        val referanse: String,
-        val status: String,
-        val saker: Collection<Sak>,
-        val forvaltninsbrev: Collection<Forvaltningsbrev>
-)
+data class InternalDigisosSoker(
+        var referanse: String?,
+        var status: SoknadsStatus?,
+        var saker: MutableCollection<Sak>,
+        var forvaltningsbrev: MutableCollection<Forvaltningsbrev>,
+        var soknadsmottaker: Soknadsmottaker?,
+        var historikk: MutableCollection<Hendelse>
+) {
+    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, mutableListOf())
+}
 
 data class Forvaltningsbrev(
-        val referanse: String,
-        val tittel: String
+        var referanse: String,
+        var tittel: String
+)
+
+data class Soknadsmottaker(
+        val navEnhetsnummer: String,
+        val navEnhetsnavn: String
 )
 
 data class Sak(
-        val referanse: String,
-        val saksStatus: SaksStatus,
-        val tittel: String,
-        val vedtak: Collection<Vedtak>,
-        val utbetalinger: Collection<Utbetaling>
+        var referanse: String,
+        var saksStatus: SaksStatus,
+        var tittel: String,
+        var vedtak: MutableCollection<Vedtak>,
+        var utbetalinger: MutableCollection<Utbetaling>
 )
 
 data class Vedtak(
-        val utfall: UtfallVedtak
+        var utfall: UtfallVedtak,
+        var vedtaksFilUrl: String
 )
 
 data class Utbetaling(
-        val referanse: String,
-        val status: UtbetalingsStatus,
-        val belop: BigDecimal,
-        val beskrivelse: String,
-        val posteringsDato: LocalDate,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val mottaker: String,
-        val utbetalingsform: String
+        var referanse: String,
+        var status: UtbetalingsStatus,
+        var belop: BigDecimal,
+        var beskrivelse: String,
+        var posteringsDato: LocalDate,
+        var fom: LocalDate,
+        var tom: LocalDate,
+        var mottaker: String,
+        var utbetalingsform: String
 )
 
 data class Vilkar(
-        val referanse: String,
-        val utbetalinger: Collection<Utbetaling>,
-        val beskrivelse: String
+        var referanse: String,
+        var utbetalinger: MutableCollection<Utbetaling>,
+        var beskrivelse: String
 )
 
-enum class SoknadsStatus {
-    MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET
+data class Hendelse(
+        val tittel: String,
+        val tidspunkt: LocalDateTime,
+        val url: String?
+) {
+    constructor(tittel: String, tidspunkt: LocalDateTime) : this(tittel, tidspunkt, null)
 }
+
+enum class SoknadsStatus {
+    SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET
+}
+
 enum class SaksStatus {
     UNDER_BEHANDLING, IKKE_INNSYN
 }

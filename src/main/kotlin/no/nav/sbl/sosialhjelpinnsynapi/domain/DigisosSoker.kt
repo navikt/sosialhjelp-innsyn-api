@@ -7,10 +7,10 @@ import java.time.LocalDateTime
 data class InternalDigisosSoker(
         var referanse: String?,
         var status: SoknadsStatus?,
-        var saker: MutableCollection<Sak>,
-        var forvaltningsbrev: MutableCollection<Forvaltningsbrev>,
+        var saker: MutableList<Sak>,
+        var forvaltningsbrev: MutableList<Forvaltningsbrev>,
         var soknadsmottaker: Soknadsmottaker?,
-        var historikk: MutableCollection<Hendelse>
+        var historikk: MutableList<Hendelse>
 ) {
     constructor() : this(null, null, mutableListOf(), mutableListOf(), null, mutableListOf())
 }
@@ -29,8 +29,8 @@ data class Sak(
         var referanse: String,
         var saksStatus: SaksStatus,
         var tittel: String,
-        var vedtak: MutableCollection<Vedtak>,
-        var utbetalinger: MutableCollection<Utbetaling>
+        var vedtak: MutableList<Vedtak>,
+        var utbetalinger: MutableList<Utbetaling>
 )
 
 data class Vedtak(
@@ -52,7 +52,7 @@ data class Utbetaling(
 
 data class Vilkar(
         var referanse: String,
-        var utbetalinger: MutableCollection<Utbetaling>,
+        var utbetalinger: MutableList<Utbetaling>,
         var beskrivelse: String
 )
 

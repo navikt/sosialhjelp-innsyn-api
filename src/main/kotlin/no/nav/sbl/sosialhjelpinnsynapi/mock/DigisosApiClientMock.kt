@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component
 
 @Profile("mock")
 @Component
-class DigisosApiClientMock : DigisosApiClient {
+class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : DigisosApiClient {
     override fun postDigisosSakMedInnsyn(digisosSak: DigisosSak) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        fiksClientMock.postDigisosSak(digisosSak)
     }
 
     override fun postDigisosSakMedInnsynNy(digisosSak: DigisosSak) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        fiksClientMock.postDigisosSak(digisosSak)
     }
 
 }

@@ -35,8 +35,8 @@ class FiksClientMock : FiksClient {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    fun postDigisosSak(digisosId: String, digisosSak: DigisosSak) {
-        innsynMap[digisosId] = digisosSak
+    fun postDigisosSak(digisosSak: DigisosSak) {
+        innsynMap[digisosSak.fiksDigisosId] = digisosSak
     }
 
     private fun getDefaultDigisosSak(): DigisosSak {

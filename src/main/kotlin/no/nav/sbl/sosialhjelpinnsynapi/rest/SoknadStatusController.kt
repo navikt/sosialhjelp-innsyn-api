@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.soknadstatus.SoknadStatusService
 import no.nav.security.oidc.api.Unprotected
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

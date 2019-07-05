@@ -3,11 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.itest
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.typeRef
-import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
-import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
-import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsondigisossoker_response
 import org.assertj.core.api.Assertions.assertThat
-
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -18,10 +14,16 @@ class SaksStatusIT : AbstractIT() {
     @Test
     fun `GET SaksStatus - happy path`() {
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/digisos/api/v1/soknader/(.*)"))
-                .willReturn(WireMock.ok(ok_digisossak_response)))
+                .willReturn(WireMock.ok("/digisossak/ok_default.json".asResource())))
 
-        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/(.*)"))
-                .willReturn(WireMock.ok(ok_komplett_jsondigisossoker_response)))
+        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa1"))
+                .willReturn(WireMock.ok("/dokumentlager/digisossoker_ok_komplett.json".asResource())))
+
+        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa0"))
+                .willReturn(WireMock.ok("/dokumentlager/soknad_ok_default.json".asResource())))
+
+        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/enhet/(.*)"))
+                .willReturn(WireMock.ok("/norg/ok_default.json".asResource())))
 
         val id = "123"
         val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/saksStatus", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<SaksStatusResponse>>())
@@ -39,10 +41,10 @@ class SaksStatusIT : AbstractIT() {
     @Test
     fun `GET SaksStatus - no content`() {
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/digisos/api/v1/soknader/(.*)"))
-                .willReturn(WireMock.ok(ok_digisossak_response)))
+                .willReturn(WireMock.ok("/digisossak/ok_default.json".asResource())))
 
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/(.*)"))
-                .willReturn(WireMock.ok(ok_minimal_jsondigisossoker_response)))
+                .willReturn(WireMock.ok("/dokumentlager/digisossoker_ok_minimal.json".asResource())))
 
         val id = "123"
         val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/saksStatus", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<SaksStatusResponse>>())

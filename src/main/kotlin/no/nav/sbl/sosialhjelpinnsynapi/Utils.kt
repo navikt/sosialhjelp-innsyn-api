@@ -24,3 +24,7 @@ fun toLocalDateTime(hendelsetidspunkt: String): LocalDateTime {
 fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime {
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneOffset.UTC)
 }
+
+fun enumNameToLowercase(string: String): String {
+    return string.toLowerCase().replace('_', ' ')
+}

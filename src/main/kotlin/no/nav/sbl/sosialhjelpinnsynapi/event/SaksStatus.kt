@@ -7,15 +7,14 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 
 fun InternalDigisosSoker.applySaksStatus(hendelse: JsonSaksStatus) {
 
-    // TODO: håndter historikk
+    val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.referanse }
 
-    val filtered = saker.filter { it.referanse == hendelse.referanse }
-    if (filtered.isNotEmpty() && filtered.size == 1) {
-        // Oppdater felter som _kan_ oppdateres
-        val existingSak = filtered[0]
-        existingSak.saksStatus = SaksStatus.valueOf(hendelse.status.name)
-        existingSak.tittel = hendelse.tittel
+    if (sakForReferanse != null) {
+        // Oppdater felter
+        sakForReferanse.saksStatus = SaksStatus.valueOf(hendelse.status.name)
+        sakForReferanse.tittel = hendelse.tittel
     } else {
+        // Opprett ny Sak
         saker.add(Sak(
                 hendelse.referanse,
                 SaksStatus.valueOf(hendelse.status.name),
@@ -24,5 +23,9 @@ fun InternalDigisosSoker.applySaksStatus(hendelse: JsonSaksStatus) {
                 mutableListOf()
         ))
     }
+
+    // TODO:
+    //  Hvis vedtakFattet kommer FØR SaksStatus -> Sak.tittel = DEFAULT_TITTEL og DEFAULT_TITTEL blir skrevet til historikk
+    //  Når SaksStatus-hendelse med korrekt tittel kommer, skal vi da overskrive tittel i historikk?
 
 }

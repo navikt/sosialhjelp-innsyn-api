@@ -51,7 +51,6 @@ val ok_minimal_jsonsoknad_response = """
 		}
 	},
 	"mottaker": {
-		"organisasjonsnummer": "910229567",
 		"navEnhetsnavn": "Eiganes og Tasta, Stavanger kommune",
         "enhetsnummer": "0301"
 	},

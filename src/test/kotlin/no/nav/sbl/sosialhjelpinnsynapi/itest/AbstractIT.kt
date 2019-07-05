@@ -29,6 +29,8 @@ abstract class AbstractIT {
         return headers
     }
 
+    fun String.asResource(): String? = object {}.javaClass.getResource(this).readText()
+
     @BeforeEach
     internal fun setUp() {
         WireMock.configureFor(server.port())

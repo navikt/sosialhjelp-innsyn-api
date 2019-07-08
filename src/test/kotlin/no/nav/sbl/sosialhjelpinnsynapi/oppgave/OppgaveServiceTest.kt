@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.oppgave
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
@@ -17,8 +16,6 @@ internal class OppgaveServiceTest {
     private val eventService: EventService = mockk()
 
     private val service = OppgaveService(eventService)
-
-    private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
 
     private val type = "brukskonto"
     private val tillegg = "fraarm"
@@ -37,7 +34,7 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService, mockJsonDigisosSoker)
+        clearMocks(eventService)
     }
 
     @Test

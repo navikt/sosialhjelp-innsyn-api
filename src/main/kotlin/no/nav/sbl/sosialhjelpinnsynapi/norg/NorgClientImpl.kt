@@ -1,9 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.norg
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.generateCallId
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -19,10 +18,10 @@ private val log = LoggerFactory.getLogger(NorgClient::class.java)
 @Profile("!mock")
 @Component
 class NorgClientImpl(clientProperties: ClientProperties,
-                     private val restTemplate: RestTemplate = RestTemplate()): NorgClient {
+                     private val restTemplate: RestTemplate) : NorgClient {
 
     private val baseUrl = clientProperties.norgEndpointUrl
-    private val mapper = ObjectMapper()
+    private val mapper = jacksonObjectMapper()
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
         val norgApiKey = System.getProperty("NORG_PASSWORD")
@@ -30,7 +29,7 @@ class NorgClientImpl(clientProperties: ClientProperties,
         headers.set("Nav-Call-Id", generateCallId())
         headers.set("Nav-Consumer-Id", "srvsoknadsosialhje") // TODO: endre denne når vi har fått generert egen consumer-id for innsyn
         headers.set("x-nav-apiKey", norgApiKey)
-        val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<String>())
+        val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         if (response.statusCode.is2xxSuccessful) {
             log.info("Hentet NAV-enhet fra NORG")
             return mapper.readValue(response.body!!, NavEnhet::class.java)

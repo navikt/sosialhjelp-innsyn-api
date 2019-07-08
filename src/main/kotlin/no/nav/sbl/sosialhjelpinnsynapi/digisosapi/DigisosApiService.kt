@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 class DigisosApiService(private val digisosApiClient: DigisosApiClient) {
 
-    fun OpprettDigisosSak(digisosSak: DigisosSak){
+    fun opprettDigisosSak(digisosSak: DigisosSak){
         digisosApiClient.postDigisosSakMedInnsynNy(digisosSak)
     }
 

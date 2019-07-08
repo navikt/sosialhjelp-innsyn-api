@@ -34,6 +34,16 @@ abstract class AbstractIT {
     @BeforeEach
     internal fun setUp() {
         WireMock.configureFor(server.port())
+
+        // default responser (overskrives i tester der det er nødvendig)
+        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa0"))
+                .willReturn(WireMock.ok("/dokumentlager/soknad_ok_default.json".asResource())))
+
+        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/digisos/api/v1/soknader/(.*)"))
+                .willReturn(WireMock.ok("/digisossak/ok_default.json".asResource())))
+
+        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/enhet/(.*)"))
+                .willReturn(WireMock.ok("/norg/ok_default.json".asResource())))
     }
 
     companion object {

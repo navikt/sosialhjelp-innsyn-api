@@ -1,0 +1,11 @@
+server:
+  servlet:
+    context-path: '/soknadsosialhjelp/innsyn-api'
+
+cors:
+  allowed_origins:
+    - "http://localhost:3000"
+    - "https://tjenester.nav.no/veivisersosialhjelp/"
+    - "https://tjenester-q0.nav.no/veivisersosialhjelp/"
+    - "https://tjenester-q1.nav.no/veivisersosialhjelp/"
+    - "https://tjenester-t1.nav.no/veivisersosialhjelp/"

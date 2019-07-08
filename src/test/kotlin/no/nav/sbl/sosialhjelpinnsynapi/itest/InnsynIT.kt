@@ -13,11 +13,8 @@ class InnsynIT : AbstractIT() {
 
     @Test
     fun `GET innsyn - happy path`() {
-        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/digisos/api/v1/soknader/(.*)"))
-                .willReturn(WireMock.ok(ok_digisossak_response)))
-
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/(.*)"))
-                .willReturn(WireMock.ok(ok_komplett_jsondigisossoker_response)))
+                .willReturn(WireMock.ok("/dokumentlager/digisossoker_ok_komplett.json".asResource())))
 
         val id = "123"
 

@@ -17,14 +17,9 @@ class HendelseIT: AbstractIT() {
 
     @Test
     fun `GET Hendelser - happy path`() {
-        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/digisos/api/v1/soknader/(.*)"))
-                .willReturn(WireMock.ok(ok_digisossak_response)))
-
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa1"))
-                .willReturn(WireMock.ok(ok_minimal_jsondigisossoker_response)))
+                .willReturn(WireMock.ok("/dokumentlager/digisossoker_ok_minimal.json".asResource())))
 
-        WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa0"))
-                .willReturn(WireMock.ok(ok_minimal_jsonsoknad_response)))
         val id = "123"
 
         val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<HendelseResponse>>())

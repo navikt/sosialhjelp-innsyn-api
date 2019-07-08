@@ -55,6 +55,7 @@ internal class EventServiceTest {
     private val dokumentlagerId_1 = "1"
     private val dokumentlagerId_2 = "2"
     private val svarUtId = "42"
+    private val svarUtNr = 42
 
     private val dokumenttype = "dokumentasjonstype"
     private val tilleggsinfo = "ekstra info"
@@ -104,8 +105,9 @@ internal class EventServiceTest {
  [x] vedtakFattet før saksStatus
  [ ] saksStatus med 2 vedtakFattet
  [x] dokumentasjonEtterspurt
- [ ] flere caser med dokumentasjonEtterspurt?
- [ ] forelopigSvar
+ [ ] dokumentasjonEtterspurt - flere caser?
+ [x] forelopigSvar
+ [ ] forelopigSvar - flere caser?
  ...
  [ ] komplett case
 */
@@ -345,38 +347,61 @@ internal class EventServiceTest {
         }
     }
 
-    @Nested
-    inner class oppgaver {
-        @Test
-        fun `dokumentasjonEtterspurt`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
-                    JsonDigisosSoker()
-                            .withAvsender(avsender)
-                            .withVersion("123")
-                            .withHendelser(listOf(
-                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                    DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
-                            ))
 
-            val model = service.createModel("123")
+    @Test
+    fun `dokumentasjonEtterspurt`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
+                        ))
 
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-            assertThat(model.saker).isEmpty()
-            assertThat(model.oppgaver).hasSize(1)
-            assertThat(model.historikk).hasSize(4)
+        val model = service.createModel("123")
 
-            val oppgave = model.oppgaver.last()
-            assertThat(oppgave.tittel).isEqualTo(dokumenttype)
-            assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
-            assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+        assertThat(model.saker).isEmpty()
+        assertThat(model.oppgaver).hasSize(1)
+        assertThat(model.historikk).hasSize(4)
 
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-            assertThat(hendelse.tittel).contains("Du må laste opp mer dokumentasjon")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
-        }
+        val oppgave = model.oppgaver.last()
+        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
+        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+        assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+        assertThat(hendelse.tittel).contains("Du må laste opp mer dokumentasjon")
+        assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+    }
+
+    @Test
+    fun `forelopigSvar`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                FORELOPIGSVAR.withHendelsestidspunkt(tidspunkt_3)
+                        ))
+
+        val model = service.createModel("123")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+        assertThat(model.saker).isEmpty()
+        assertThat(model.historikk).hasSize(4)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+        assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
+        assertThat(hendelse.url).contains("/forsendelse/$svarUtId/$svarUtNr")
     }
 
     fun resetHendelser() {
@@ -396,7 +421,7 @@ internal class EventServiceTest {
 
     private val DOKUMENTLAGER_1 = JsonDokumentlagerFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId(dokumentlagerId_1)
     private val DOKUMENTLAGER_2 = JsonDokumentlagerFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId(dokumentlagerId_2)
-    private val SVARUT_1 = JsonSvarUtFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId(svarUtId).withNr(42)
+    private val SVARUT_1 = JsonSvarUtFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId(svarUtId).withNr(svarUtNr)
 
     private val SOKNADS_STATUS_MOTTATT = JsonSoknadsStatus()
             .withType(JsonHendelse.Type.SOKNADS_STATUS)

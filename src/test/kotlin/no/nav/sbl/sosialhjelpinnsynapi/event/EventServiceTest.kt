@@ -56,6 +56,9 @@ internal class EventServiceTest {
     private val dokumentlagerId_2 = "2"
     private val svarUtId = "42"
 
+    private val dokumenttype = "dokumentasjonstype"
+    private val tilleggsinfo = "ekstra info"
+
     private val navKontor = "1337"
 
     private val now = LocalDateTime.now()
@@ -100,7 +103,8 @@ internal class EventServiceTest {
  [x] vedtakFattet uten saksStatus
  [x] vedtakFattet før saksStatus
  [ ] saksStatus med 2 vedtakFattet
- [ ] dokumentasjonEtterspurt
+ [x] dokumentasjonEtterspurt
+ [ ] flere caser med dokumentasjonEtterspurt?
  [ ] forelopigSvar
  ...
  [ ] komplett case
@@ -260,6 +264,7 @@ internal class EventServiceTest {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
             assertThat(hendelse.tittel).contains("$tittel_1 er ${enumNameToLowercase(vedtak.utfall.name)}")
+            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -295,6 +300,7 @@ internal class EventServiceTest {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ${enumNameToLowercase(vedtak.utfall.name)}")
+            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -330,6 +336,7 @@ internal class EventServiceTest {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
 //            assertThat(hendelse.tittel).contains("$tittel_1 er ${enumNameToLowercase(vedtak.utfall.name)}") // TODO: se VedtakFattet.kt
+            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -338,6 +345,39 @@ internal class EventServiceTest {
         }
     }
 
+    @Nested
+    inner class oppgaver {
+        @Test
+        fun `dokumentasjonEtterspurt`() {
+            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                    JsonDigisosSoker()
+                            .withAvsender(avsender)
+                            .withVersion("123")
+                            .withHendelser(listOf(
+                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                    DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
+                            ))
+
+            val model = service.createModel("123")
+
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(model.saker).isEmpty()
+            assertThat(model.oppgaver).hasSize(1)
+            assertThat(model.historikk).hasSize(4)
+
+            val oppgave = model.oppgaver.last()
+            assertThat(oppgave.tittel).isEqualTo(dokumenttype)
+            assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+            assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+
+            val hendelse = model.historikk.last()
+            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+            assertThat(hendelse.tittel).contains("Du må laste opp mer dokumentasjon")
+            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+        }
+    }
 
     fun resetHendelser() {
         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(null)
@@ -412,7 +452,7 @@ internal class EventServiceTest {
 
     private val DOKUMENTASJONETTERSPURT = JsonDokumentasjonEtterspurt()
             .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
-            .withDokumenter(mutableListOf(JsonDokumenter().withInnsendelsesfrist(innsendelsesfrist).withDokumenttype("dokumentasjonstype").withTilleggsinformasjon("ekstra info")))
+            .withDokumenter(mutableListOf(JsonDokumenter().withInnsendelsesfrist(innsendelsesfrist).withDokumenttype(dokumenttype).withTilleggsinformasjon(tilleggsinfo)))
             .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(DOKUMENTLAGER_1))
 
     private val FORELOPIGSVAR = JsonForelopigSvar()

@@ -47,7 +47,7 @@ class EventService(private val clientProperties: ClientProperties,
             is JsonTildeltNavKontor -> applyTildeltNavKontor(hendelse, norgClient)
             is JsonSaksStatus -> applySaksStatus(hendelse)
             is JsonVedtakFattet -> applyVedtakFattet(hendelse, clientProperties)
-            is JsonDokumentasjonEtterspurt -> applyDokumentasjonEtterspurt(hendelse)
+            is JsonDokumentasjonEtterspurt -> applyDokumentasjonEtterspurt(hendelse, clientProperties)
             is JsonForelopigSvar -> applyForelopigSvar(hendelse)
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }

@@ -18,6 +18,9 @@ class OppgaveController(val oppgaveService: OppgaveService) {
     fun getOppgaverForSoknad(@PathVariable fiksDigisosId: String, @RequestHeader(value = "Authorization") token: String): ResponseEntity<List<OppgaveResponse>> {
         try {
             val oppgaverForSoknad = oppgaveService.getOppgaverForSoknad(fiksDigisosId, token)
+            if (oppgaverForSoknad.isEmpty()){
+                return ResponseEntity(HttpStatus.NO_CONTENT)
+            }
             return ResponseEntity.ok(oppgaverForSoknad)
         } catch (e: Exception) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)

@@ -37,7 +37,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", fiksIntegrasjonpassord)
+        headers.set("IntegrasjonId", fiksIntegrasjonid)
         headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
@@ -59,7 +59,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", fiksIntegrasjonpassord)
+        headers.set("IntegrasjonId", fiksIntegrasjonid)
         headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {

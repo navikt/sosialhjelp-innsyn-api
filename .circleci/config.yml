@@ -74,7 +74,7 @@ jobs:
 
   deploy_dev:
     docker:
-      - image: navikt/deployment-cli:v0.1.5
+      - image: navikt/deployment-cli:v0.1.8
     steps:
       - checkout
       - setup_remote_docker
@@ -89,7 +89,7 @@ jobs:
 
   deploy_miljo:
     docker:
-      - image: navikt/deployment-cli:v0.1.5
+      - image: navikt/deployment-cli:v0.1.8
     steps:
       - checkout
       - setup_remote_docker
@@ -100,7 +100,7 @@ jobs:
 
   deploy_prod:
     docker:
-      - image: navikt/deployment-cli:v0.1.5
+      - image: navikt/deployment-cli:v0.1.8
     steps:
       - checkout
       - setup_remote_docker

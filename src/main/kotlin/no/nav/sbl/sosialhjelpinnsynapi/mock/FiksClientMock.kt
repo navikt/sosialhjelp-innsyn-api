@@ -35,6 +35,10 @@ class FiksClientMock : FiksClient {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, navEksternRefId: String, token: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     fun postDigisosSak(digisosId: String, digisosSak: DigisosSak) {
         innsynMap[digisosId] = digisosSak
     }

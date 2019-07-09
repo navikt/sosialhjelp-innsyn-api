@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
@@ -83,5 +84,16 @@ internal class FiksClientTest {
         val result = fiksClient.hentInformasjonOmKommuneErPaakoblet("1234")
 
         assertNotNull(result)
+    }
+
+    @Test
+    fun `POST ny ettersendelse`() {
+        val response: ResponseEntity<String> = mockk()
+
+        every {
+            restTemplate.exchange(any<String>(), HttpMethod.POST, any(), String::class.java)
+        } returns response
+
+        // assertions
     }
 }

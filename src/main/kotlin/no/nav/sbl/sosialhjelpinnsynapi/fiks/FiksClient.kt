@@ -10,4 +10,6 @@ interface FiksClient {
     fun hentAlleDigisosSaker(token: String): List<DigisosSak>
 
     fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo
+
+    fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, navEksternRefId: String, token: String)
 }

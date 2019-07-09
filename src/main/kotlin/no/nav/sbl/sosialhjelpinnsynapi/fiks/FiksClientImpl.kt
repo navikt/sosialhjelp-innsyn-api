@@ -10,6 +10,7 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.HttpHeaders.TRANSFER_ENCODING
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -77,6 +78,41 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Noe feilet ved kall til fiks")
             throw ResponseStatusException(response.statusCode, "something went wrong")
         }
+    }
+
+    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, navEksternRefId: String, token: String) {
+//        Innsending av ny ettersendelse til Fiks Digisos bruker også multipart streaming request.
+//          {kommunenummer} er kommunenummer søknaden tilhører,
+//          {soknadId} er Fiks DigisosId-en for søknaden det skal ettersendes til og
+//          {navEkseternRefId} er en unik id fra NAV for denne ettersendelsen.
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.MULTIPART_FORM_DATA
+        headers.set(TRANSFER_ENCODING, "chunked")
+        headers.set(AUTHORIZATION, token)
+        headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
+        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+
+
+        val requestEntity = HttpEntity<Nothing>(headers)
+        // TODO:
+        //  Endepunktet tar inn påkrevde felter for innsending av ny ettersendelse:
+        //  - metadataen vedlegg.json (String)
+        //  - liste med vedlegg (metadata + base64-encodet blokk)
+
+        // Base64-blokkene for filene må krypteres (på lik linje som for søknad)
+        // For hvert vedlegg som skal lastes opp legger man til en metadatablokk som inneholder informasjon om filen
+        // (samme som innsending av søknad) og en base64-encodet blokk som inneholder selve filen
+
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId", HttpMethod.POST, requestEntity, String::class.java)
+
+//      Det er ingen returtype på dette endepunktet.
+//      Ved feil ved opplasting får man 400 Bad Request når multipart-requesten ikke er definert med riktige data.
+        if (response.statusCode.is4xxClientError) {
+            log.warn("Opplasting av ettersendelse feilet")
+            throw ResponseStatusException(response.statusCode, "something went wrong")
+        }
+
     }
 }
 

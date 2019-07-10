@@ -49,6 +49,7 @@ class EventService(private val clientProperties: ClientProperties,
             is JsonVedtakFattet -> applyVedtakFattet(hendelse, clientProperties)
             is JsonDokumentasjonEtterspurt -> applyDokumentasjonEtterspurt(hendelse, clientProperties)
             is JsonForelopigSvar -> applyForelopigSvar(hendelse, clientProperties)
+            is JsonUtbetaling -> applyUtbetaling(hendelse, clientProperties)
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }
     }

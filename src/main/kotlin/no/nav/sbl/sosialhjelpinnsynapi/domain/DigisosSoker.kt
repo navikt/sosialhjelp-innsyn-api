@@ -51,6 +51,7 @@ data class Utbetaling(
         var belop: BigDecimal,
         var beskrivelse: String,
         var posteringsDato: LocalDate,
+        var utbetalingsDato: LocalDate,
         var fom: LocalDate,
         var tom: LocalDate,
         var mottaker: String,

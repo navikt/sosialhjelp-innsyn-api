@@ -1,5 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
+import java.time.LocalDate
+
 data class SoknadsStatusResponse(
         val status: SoknadsStatus
 )
@@ -24,4 +26,20 @@ data class OppgaveResponse(
         val innsendelsesfrist: String,
         val dokumenttype: String,
         val tilleggsinformasjon: String?
+)
+
+data class UtbetalingerResponse(
+        val maned: MutableList<UtbetalingerManedResponse>
+)
+
+data class UtbetalingerManedResponse(
+        val tittel: String,
+        val utbetalinger: MutableList<UtbetalingResponse>,
+        val belop: Double
+)
+
+data class UtbetalingResponse(
+        val tittel: String,
+        val belop: Double,
+        val utbetalingsdato: LocalDate
 )

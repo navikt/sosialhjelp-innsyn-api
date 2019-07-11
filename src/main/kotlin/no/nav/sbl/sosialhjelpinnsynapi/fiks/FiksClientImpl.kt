@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
 import java.util.Collections.singletonList
+import java.util.UUID.randomUUID
 
 
 private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
@@ -80,11 +81,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, navEksternRefId: String, token: String) {
+    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
 //        Innsending av ny ettersendelse til Fiks Digisos bruker også multipart streaming request.
-//          {kommunenummer} er kommunenummer søknaden tilhører,
-//          {soknadId} er Fiks DigisosId-en for søknaden det skal ettersendes til og
-//          {navEkseternRefId} er en unik id fra NAV for denne ettersendelsen.
+//          {kommunenummer} er kommunenummer søknaden tilhører
+//          {soknadId} er Fiks DigisosId-en for søknaden det skal ettersendes til
+//          {navEkseternRefId} er en unik id fra NAV for denne ettersendelsen
+
+        val navEksternRefId = randomUUID().toString()
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.MULTIPART_FORM_DATA
@@ -95,14 +98,14 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
 
         val requestEntity = HttpEntity<Nothing>(headers)
+
         // TODO:
         //  Endepunktet tar inn påkrevde felter for innsending av ny ettersendelse:
-        //  - metadataen vedlegg.json (String)
+        //  - metadataen vedlegg.json (String) --> { filnavn, mimetype, storrelse }
         //  - liste med vedlegg (metadata + base64-encodet blokk)
 
-        // Base64-blokkene for filene må krypteres (på lik linje som for søknad)
-        // For hvert vedlegg som skal lastes opp legger man til en metadatablokk som inneholder informasjon om filen
-        // (samme som innsending av søknad) og en base64-encodet blokk som inneholder selve filen
+        val vedleggMetadata = VedleggMetadata("filnavn", "mimetype", 123)
+        // val base64Encodet: ByteArray
 
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId", HttpMethod.POST, requestEntity, String::class.java)
 
@@ -115,5 +118,11 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     }
 }
+
+data class VedleggMetadata(
+        val filnavn: String,
+        val mimetype: String,
+        val storrelse: Long
+)
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}

@@ -35,7 +35,7 @@ class FiksClientMock : FiksClient {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, navEksternRefId: String, token: String) {
+    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

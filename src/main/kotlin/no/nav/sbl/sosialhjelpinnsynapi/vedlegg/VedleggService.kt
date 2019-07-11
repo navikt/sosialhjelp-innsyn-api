@@ -9,8 +9,13 @@ class VedleggService(private val fiksClient: FiksClient) {
 
     fun handleVedlegg(fiksDigisosId: String, file: Any): VedleggOpplastingResponse {
 
+        // Hent digisosSak
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
+
+        val kommunenummer = digisosSak.kommunenummer
+
         // Kall fiksClient.lastOppNyEttersendlse(...)
-        fiksClient.lastOppNyEttersendelse(file, "kommunenummer", fiksDigisosId, "navEksternRefId", "token")
+        fiksClient.lastOppNyEttersendelse(file, kommunenummer, fiksDigisosId, "token")
 
         return VedleggOpplastingResponse("a", 1337)
     }

@@ -11,5 +11,5 @@ interface FiksClient {
 
     fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo
 
-    fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, navEksternRefId: String, token: String)
+    fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String)
 }

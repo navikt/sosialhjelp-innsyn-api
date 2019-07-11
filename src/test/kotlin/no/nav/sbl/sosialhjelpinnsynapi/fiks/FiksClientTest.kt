@@ -6,12 +6,13 @@ import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
@@ -21,6 +22,10 @@ internal class FiksClientTest {
     private val restTemplate: RestTemplate = mockk()
 
     private val fiksClient = FiksClientImpl(clientProperties, restTemplate)
+
+    private val id = "123"
+    private val kommunenummer = "1337"
+    private val navEksternRefId = "42"
 
     @BeforeEach
     fun init() {
@@ -42,9 +47,9 @@ internal class FiksClientTest {
                     String::class.java)
         } returns mockResponse
 
-        val result = fiksClient.hentDigisosSak("123", "Token")
+        val result = fiksClient.hentDigisosSak(id, "Token")
 
-        assertNotNull(result)
+        assertThat(result).isNotNull
     }
 
     @Test
@@ -63,8 +68,8 @@ internal class FiksClientTest {
 
         val result = fiksClient.hentAlleDigisosSaker("Token")
 
-        assertNotNull(result)
-        assertEquals(2, result.size)
+        assertThat(result).isNotNull
+        assertThat(result).hasSize(2)
     }
 
     @Test
@@ -83,17 +88,16 @@ internal class FiksClientTest {
 
         val result = fiksClient.hentInformasjonOmKommuneErPaakoblet("1234")
 
-        assertNotNull(result)
+        assertThat(result).isNotNull
     }
 
     @Test
     fun `POST ny ettersendelse`() {
         val response: ResponseEntity<String> = mockk()
+        every { response.statusCode } returns HttpStatus.OK
 
-        every {
-            restTemplate.exchange(any<String>(), HttpMethod.POST, any(), String::class.java)
-        } returns response
+        every { restTemplate.exchange(any<String>(), HttpMethod.POST, any(), String::class.java) } returns response
 
-        // assertions
+        assertThatCode { fiksClient.lastOppNyEttersendelse("any file", kommunenummer, id, "token") }.doesNotThrowAnyException()
     }
 }

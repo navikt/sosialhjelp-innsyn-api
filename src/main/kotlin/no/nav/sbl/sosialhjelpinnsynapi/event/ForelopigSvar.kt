@@ -11,9 +11,5 @@ fun InternalDigisosSoker.applyForelopigSvar(hendelse: JsonForelopigSvar, clientP
 
     val beskrivelse = "Du har fått et brev om saksbehandlingstiden for søknaden din"
 
-    // TODO:
-    //  skal frontend viser varsel når dette er nyeste hendelse?
-    //  legge til noe i modellen?
-
     historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)))
 }

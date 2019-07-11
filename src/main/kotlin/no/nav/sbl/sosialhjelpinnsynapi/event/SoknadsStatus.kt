@@ -18,5 +18,4 @@ fun InternalDigisosSoker.applySoknadsStatus(hendelse: JsonSoknadsStatus) {
     }
 
     historikk.add(Hendelse(tittel, toLocalDateTime(hendelse.hendelsestidspunkt)))
-
 }

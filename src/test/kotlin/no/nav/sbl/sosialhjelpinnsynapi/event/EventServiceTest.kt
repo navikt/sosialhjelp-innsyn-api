@@ -103,7 +103,7 @@ internal class EventServiceTest {
  [x] saksStatus før vedtakFattet
  [x] vedtakFattet uten saksStatus
  [x] vedtakFattet før saksStatus
- [ ] saksStatus med 2 vedtakFattet
+ [x] saksStatus med 2 vedtakFattet
  [x] dokumentasjonEtterspurt
  [ ] dokumentasjonEtterspurt - flere caser?
  [x] forelopigSvar
@@ -329,6 +329,7 @@ internal class EventServiceTest {
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
             assertThat(sak.referanse).isEqualTo(referanse_1)
             assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.tittel).isNotEqualTo(DEFAULT_TITTEL)
             assertThat(sak.vedtak).hasSize(1)
 
             val vedtak = sak.vedtak.last()
@@ -337,13 +338,44 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-//            assertThat(hendelse.tittel).contains("$tittel_1 er ${enumNameToLowercase(vedtak.utfall.name)}") // TODO: se VedtakFattet.kt
+            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ${enumNameToLowercase(vedtak.utfall.name)}")
             assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
-        internal fun `saksStatus med 2 vedtakFattet`() {
-//            TODO: implement
+        fun `saksStatus med 2 vedtakFattet`() {
+            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                    JsonDigisosSoker()
+                            .withAvsender(avsender)
+                            .withVersion("123")
+                            .withHendelser(listOf(
+                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                    SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
+                                    SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
+                                    SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5)
+                            ))
+
+            val model = service.createModel("123")
+
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(model.saker).hasSize(1)
+            assertThat(model.historikk).hasSize(5)
+
+            val sak = model.saker.last()
+            assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
+            assertThat(sak.referanse).isEqualTo(referanse_1)
+            assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.vedtak).hasSize(2)
+
+            val vedtak = sak.vedtak[0]
+            assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
+            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+
+            val vedtak2 = sak.vedtak[1]
+            assertThat(vedtak2.utfall).isEqualTo(UtfallVedtak.AVSLATT)
+            assertThat(vedtak2.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_2")
         }
     }
 

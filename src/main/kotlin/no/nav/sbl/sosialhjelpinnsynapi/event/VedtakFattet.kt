@@ -19,8 +19,7 @@ fun InternalDigisosSoker.applyVedtakFattet(hendelse: JsonVedtakFattet, clientPro
     if (sakForReferanse != null) {
         sakForReferanse.vedtak.add(vedtakFattet)
     } else {
-        // TODO: lag ny sak med "default" verdier dersom vedtakFattet mottas _før_ saksStatus?
-
+        // Ny Sak opprettes med default-verdier
         val sak = Sak(
                 hendelse.referanse,
                 SaksStatus.UNDER_BEHANDLING, //TODO: midlertidig SaksStatus for disse tilfellene?

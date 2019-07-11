@@ -13,8 +13,9 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/api/v1/innsyn")
 class VedleggController(private val vedleggService: VedleggService) {
 
+    // Last opp vedlegg for mellomlagring
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun lastOppVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("file") files: Array<MultipartFile>): ResponseEntity<VedleggOpplastingResponse> {
+    fun lastOppVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("file") files: Array<MultipartFile>): ResponseEntity<Any> {
         // Sjekk om fileSize overskrider MAKS_FILSTORRELSE
 
         files.forEach { println("file name: ${it.name}") }
@@ -23,9 +24,16 @@ class VedleggController(private val vedleggService: VedleggService) {
         val inputStream = files[0].inputStream
 
         // hva bør input være? inputStream / bytes / files ?
-        val response = vedleggService.handleVedlegg(fiksDigisosId, files)
+        val response = vedleggService.mellomlagreVedlegg(fiksDigisosId, files)
 
         return ResponseEntity.ok(response)
     }
 
+    // Send til veileder
+    @PostMapping("/{fiksDigisosId}/send")
+    fun sendTilVeileder(@PathVariable fiksDigisosId: String): ResponseEntity<VedleggOpplastingResponse> {
+        val response = vedleggService.lastOppVedleggTilFiks(fiksDigisosId)
+
+        return ResponseEntity.ok(response)
+    }
 }

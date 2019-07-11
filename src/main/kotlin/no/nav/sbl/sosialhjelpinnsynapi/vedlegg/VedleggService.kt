@@ -7,15 +7,21 @@ import org.springframework.stereotype.Component
 @Component
 class VedleggService(private val fiksClient: FiksClient) {
 
-    fun handleVedlegg(fiksDigisosId: String, file: Any): VedleggOpplastingResponse {
+    // TODO: mellomlagring av vedlegg
 
+    fun mellomlagreVedlegg(fiksDigisosId: String, file: Any) {
+
+    }
+
+    fun lastOppVedleggTilFiks(fiksDigisosId: String): VedleggOpplastingResponse {
         // Hent digisosSak
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
-
         val kommunenummer = digisosSak.kommunenummer
 
-        // Kall fiksClient.lastOppNyEttersendlse(...)
-        fiksClient.lastOppNyEttersendelse(file, kommunenummer, fiksDigisosId, "token")
+        // Hent ut vedlegg fra mellomlagring
+
+
+        fiksClient.lastOppNyEttersendelse("file from mellomlager", kommunenummer, fiksDigisosId, "token")
 
         return VedleggOpplastingResponse("a", 1337)
     }

@@ -26,10 +26,16 @@ internal class VedleggServiceTest {
     }
 
     @Test
-    fun `Skal kalle FiksClient`() {
+    fun `handleVedlegg skal mellomlagre vedlegg`() {
+        // implement
+        service.mellomlagreVedlegg(id, "any file.any")
+    }
+
+    @Test
+    fun `lastOppNyEttersendelse skal kalle FiksClient`() {
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } just runs
 
-        val response = service.handleVedlegg(id, "file.pdf or something")
+        val response = service.lastOppVedleggTilFiks(id)
 
         verify(exactly = 1) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 

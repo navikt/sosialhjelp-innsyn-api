@@ -36,13 +36,13 @@ class SaksStatusService(private val eventService: EventService) {
             sak.vedtak.isEmpty() -> null
             else -> sak.vedtak.map { it.vedtaksFilUrl }
         }
-        return SaksStatusResponse(sak.tittel, UtfallEllerSaksStatus.valueOf(utfallEllerStatus), vedtakfilUrlList)
+        return SaksStatusResponse(sak.tittel,  utfallEllerStatus, vedtakfilUrlList)
     }
 
-    private fun hentStatusNavn(sak: Sak): String {
+    private fun hentStatusNavn(sak: Sak): UtfallEllerSaksStatus? {
         return when {
-            sak.vedtak.size > 1 -> ""
-            else -> sak.vedtak.firstOrNull()?.utfall?.name ?: sak.saksStatus.name
+            sak.vedtak.size > 1 -> null
+            else -> UtfallEllerSaksStatus.valueOf(sak.vedtak.firstOrNull()?.utfall?.name ?: sak.saksStatus.name)
         }
     }
 }

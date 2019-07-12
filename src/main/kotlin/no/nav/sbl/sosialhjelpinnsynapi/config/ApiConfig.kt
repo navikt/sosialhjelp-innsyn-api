@@ -11,10 +11,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.servlet.config.annotation.EnableWebMvc
 
 @Configuration
 @EnableWebSecurity
-@EnableOIDCTokenValidation(ignore = ["org.springframework"])
+@EnableWebMvc
+@EnableOIDCTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController"])
 class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
@@ -46,5 +48,4 @@ class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {
         http.antMatcher("/api/v1/mock/**").csrf().disable()
         http.cors()
     }
-
 }

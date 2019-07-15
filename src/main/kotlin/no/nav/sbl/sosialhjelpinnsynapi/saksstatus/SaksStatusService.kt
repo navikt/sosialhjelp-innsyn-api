@@ -7,7 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-const val DEFAULT_TITTEL: String = "Søknaden"
+const val DEFAULT_TITTEL: String = "Saken"
 
 private val log = LoggerFactory.getLogger(SaksStatusService::class.java)
 
@@ -36,11 +36,13 @@ class SaksStatusService(private val eventService: EventService) {
             sak.vedtak.isEmpty() -> null
             else -> sak.vedtak.map { it.vedtaksFilUrl }
         }
-        return SaksStatusResponse(sak.tittel, UtfallEllerSaksStatus.valueOf(utfallEllerStatus), vedtakfilUrlList)
+        return SaksStatusResponse(sak.tittel,  utfallEllerStatus, vedtakfilUrlList)
     }
 
-    private fun hentStatusNavn(sak: Sak): String {
-        // TODO: Hva hvis 2 vedtakFattet med ulike utfall?
-        return sak.vedtak.firstOrNull()?.utfall?.name ?: sak.saksStatus.name
+    private fun hentStatusNavn(sak: Sak): UtfallEllerSaksStatus? {
+        return when {
+            sak.vedtak.size > 1 -> null
+            else -> UtfallEllerSaksStatus.valueOf(sak.vedtak.firstOrNull()?.utfall?.name ?: sak.saksStatus.name)
+        }
     }
 }

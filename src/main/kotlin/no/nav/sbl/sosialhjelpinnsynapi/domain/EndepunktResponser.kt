@@ -6,7 +6,7 @@ data class SoknadsStatusResponse(
 
 data class SaksStatusResponse(
         val tittel: String,
-        val status: UtfallEllerSaksStatus,
+        val status: UtfallEllerSaksStatus?,
         val vedtaksfilUrlList: List<String>?
 )
 

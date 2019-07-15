@@ -37,7 +37,7 @@ class VedleggServiceMock(private val fiksClient: FiksClient) : VedleggService {
         // Hent ut vedlegg fra mellomlagring
         val files: List<ByteArray> = vedleggMap[fiksDigisosId]!!
 
-        val list: List<VedleggSendtResponse> = files.map { fiksClient.lastOppNyEttersendelse(it, kommunenummer, fiksDigisosId, "token") }
+        files.forEach{ fiksClient.lastOppNyEttersendelse(it, kommunenummer, fiksDigisosId, "token") }
 
         return VedleggSendtResponse("a", 1337)
     }

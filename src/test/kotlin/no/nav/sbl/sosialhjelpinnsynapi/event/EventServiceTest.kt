@@ -3,10 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.*
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
@@ -381,7 +378,7 @@ internal class EventServiceTest {
 
 
     @Test
-    fun `dokumentasjonEtterspurt`() {
+    fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -412,7 +409,7 @@ internal class EventServiceTest {
     }
 
     @Test
-    fun `forelopigSvar`() {
+    fun `forelopigSvar skal gi historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -514,6 +511,5 @@ internal class EventServiceTest {
 
     private val FORELOPIGSVAR = JsonForelopigSvar()
             .withType(JsonHendelse.Type.FORELOPIG_SVAR)
-            .withForvaltningsbrev(JsonForvaltningsbrev_().withReferanse(SVARUT_1))
-
+            .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(SVARUT_1))
 }

@@ -40,15 +40,14 @@ class HendelseIT : AbstractIT() {
         assertThat(responseEntity).isNotNull
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         val hendelser = responseEntity.body as List<HendelseResponse>
-        assertThat(hendelser).hasSize(9)
+        assertThat(hendelser).hasSize(8)
         assertThat(hendelser[0].beskrivelse).contains("sendt")
         assertThat(hendelser[1].beskrivelse).contains("mottatt")
         assertThat(hendelser[2].beskrivelse).contains("videresendt")
-        assertThat(hendelser[3].beskrivelse).contains("videresendt")
-        assertThat(hendelser[4].beskrivelse).contains("under behandling")
-        assertThat(hendelser[5].beskrivelse).contains("laste opp mer dokumentasjon")
-        assertThat(hendelser[6].beskrivelse).contains("saksbehandlingstiden for søknaden")
-        assertThat(hendelser[7].beskrivelse).contains("innvilget")
-        assertThat(hendelser[8].beskrivelse).contains("ferdig behandlet")
+        assertThat(hendelser[3].beskrivelse).contains("under behandling")
+        assertThat(hendelser[4].beskrivelse).contains("laste opp mer dokumentasjon")
+        assertThat(hendelser[5].beskrivelse).contains("saksbehandlingstiden for søknaden")
+        assertThat(hendelser[6].beskrivelse).contains("innvilget")
+        assertThat(hendelser[7].beskrivelse).contains("ferdig behandlet")
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggSendtResponse
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.MediaType
@@ -15,10 +16,11 @@ class VedleggController(private val vedleggService: VedleggService) {
 
     // Last opp vedlegg for mellomlagring
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun lastOppVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("file") files: Array<MultipartFile>): ResponseEntity<Any> {
+    fun lastOppVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("file") files: List<MultipartFile>): ResponseEntity<List<VedleggOpplastingResponse>> {
+
         // Sjekk om fileSize overskrider MAKS_FILSTORRELSE
 
-        files.forEach { println("file name: ${it.name}") }
+        files.forEach { println("file name: ${it.originalFilename}") }
 
         val bytes = files[0].bytes
         val inputStream = files[0].inputStream
@@ -31,7 +33,7 @@ class VedleggController(private val vedleggService: VedleggService) {
 
     // Send til veileder
     @PostMapping("/{fiksDigisosId}/send")
-    fun sendTilVeileder(@PathVariable fiksDigisosId: String): ResponseEntity<VedleggOpplastingResponse> {
+    fun sendTilVeileder(@PathVariable fiksDigisosId: String): ResponseEntity<VedleggSendtResponse> {
         val response = vedleggService.lastOppVedleggTilFiks(fiksDigisosId)
 
         return ResponseEntity.ok(response)

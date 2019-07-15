@@ -1,10 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
-import io.mockk.clearMocks
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggSendtResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -16,7 +13,6 @@ internal class VedleggServiceTest {
     private val service = VedleggServiceImpl(fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
-    private val mockResponse: VedleggSendtResponse = mockk()
 
     private val id = "123"
     private val kommunenummer = "1337"
@@ -39,7 +35,7 @@ internal class VedleggServiceTest {
 
     @Test
     fun `lastOppNyEttersendelse skal kalle FiksClient`() {
-        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } returns mockResponse
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } just runs
 
         val response = service.lastOppVedleggTilFiks(id)
 

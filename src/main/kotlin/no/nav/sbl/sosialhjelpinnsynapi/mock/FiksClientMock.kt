@@ -36,7 +36,7 @@ class FiksClientMock : FiksClient {
     }
 
     override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return
     }
 
     fun postDigisosSak(digisosId: String, digisosSak: DigisosSak) {

@@ -1,28 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import org.springframework.stereotype.Component
+import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggSendtResponse
 
-@Component
-class VedleggService(private val fiksClient: FiksClient) {
+interface VedleggService {
+    fun mellomlagreVedlegg(fiksDigisosId: String, files: List<Any>): List<VedleggOpplastingResponse>
 
-    // TODO: mellomlagring av vedlegg
-
-    fun mellomlagreVedlegg(fiksDigisosId: String, file: Any) {
-
-    }
-
-    fun lastOppVedleggTilFiks(fiksDigisosId: String): VedleggOpplastingResponse {
-        // Hent digisosSak
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
-        val kommunenummer = digisosSak.kommunenummer
-
-        // Hent ut vedlegg fra mellomlagring
-
-
-        fiksClient.lastOppNyEttersendelse("file from mellomlager", kommunenummer, fiksDigisosId, "token")
-
-        return VedleggOpplastingResponse("a", 1337)
-    }
+    fun lastOppVedleggTilFiks(fiksDigisosId: String): VedleggSendtResponse
 }

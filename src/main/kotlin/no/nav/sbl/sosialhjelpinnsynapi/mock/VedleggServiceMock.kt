@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggSendtResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.springframework.context.annotation.Profile
@@ -29,7 +28,7 @@ class VedleggServiceMock(private val fiksClient: FiksClient) : VedleggService {
         return arrayOfMultipartFiles.map { VedleggOpplastingResponse(it.originalFilename, it.size) }
     }
 
-    override fun lastOppVedleggTilFiks(fiksDigisosId: String): VedleggSendtResponse {
+    override fun lastOppVedleggTilFiks(fiksDigisosId: String): String {
         // Hent digisosSak
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
         val kommunenummer = digisosSak.kommunenummer
@@ -39,6 +38,6 @@ class VedleggServiceMock(private val fiksClient: FiksClient) : VedleggService {
 
         files.forEach{ fiksClient.lastOppNyEttersendelse(it, kommunenummer, fiksDigisosId, "token") }
 
-        return VedleggSendtResponse("a", 1337)
+        return "OK"
     }
 }

@@ -30,8 +30,3 @@ data class VedleggOpplastingResponse(
         val filnavn: String?,
         val storrelse: Long
 )
-
-data class VedleggSendtResponse ( // TODO endre
-        val filnavn: String,
-        val storrelse: Long
-)

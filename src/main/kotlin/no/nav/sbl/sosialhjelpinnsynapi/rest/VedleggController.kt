@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggSendtResponse
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.MediaType
@@ -33,7 +32,7 @@ class VedleggController(private val vedleggService: VedleggService) {
 
     // Send til veileder
     @PostMapping("/{fiksDigisosId}/send")
-    fun sendTilVeileder(@PathVariable fiksDigisosId: String): ResponseEntity<VedleggSendtResponse> {
+    fun sendTilVeileder(@PathVariable fiksDigisosId: String): ResponseEntity<String> {
         val response = vedleggService.lastOppVedleggTilFiks(fiksDigisosId)
 
         return ResponseEntity.ok(response)

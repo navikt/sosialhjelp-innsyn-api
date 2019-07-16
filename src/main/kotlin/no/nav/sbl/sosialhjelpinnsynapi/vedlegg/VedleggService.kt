@@ -1,10 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggSendtResponse
 
 interface VedleggService {
     fun mellomlagreVedlegg(fiksDigisosId: String, files: List<Any>): List<VedleggOpplastingResponse>
 
-    fun lastOppVedleggTilFiks(fiksDigisosId: String): VedleggSendtResponse
+    fun lastOppVedleggTilFiks(fiksDigisosId: String): String
 }

@@ -39,6 +39,6 @@ internal class VedleggServiceTest {
 
         val response = service.lastOppVedleggTilFiks(id)
 
-        assertThat(response).isNotNull
+        assertThat(response).isEqualTo("OK")
     }
 }

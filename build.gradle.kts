@@ -68,6 +68,13 @@ dependencies {
     compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
+    
+    //selftest
+    compile("io.github.resilience4j:resilience4j-spring-boot2:0.16.0")
+    compile("io.github.resilience4j:resilience4j-timelimiter:0.16.0")
+    compile("io.github.resilience4j:resilience4j-rxjava2:0.16.0")
+    compile("io.reactivex.rxjava2:rxjava:2.2.10")
+    compile("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
 
 //    Test dependencies
     testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {

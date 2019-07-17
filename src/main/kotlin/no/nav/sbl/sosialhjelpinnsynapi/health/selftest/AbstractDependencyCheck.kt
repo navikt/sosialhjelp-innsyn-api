@@ -15,9 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Supplier
 
 abstract class AbstractDependencyCheck(
-        val type: DependencyType,
+        protected val type: DependencyType,
         private val name: String,
-        private val address: String,
+        protected val address: String,
         private val importance: Importance) {
 
     private val circuitBreakerRegistry: CircuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()

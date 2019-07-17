@@ -10,8 +10,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
@@ -38,10 +36,11 @@ internal class DokumentlagerClientTest {
 
         val jsonDigisosSoker = dokumentlagerClient.hentDokument("123", JsonDigisosSoker::class.java) as JsonDigisosSoker
 
-        assertNotNull(jsonDigisosSoker)
-        assertEquals("Testsystemet", jsonDigisosSoker.avsender.systemnavn)
-        assertThat(jsonDigisosSoker.hendelser).hasAtLeastOneElementOfType(JsonSoknadsStatus::class.java)
-        assertThat(jsonDigisosSoker.hendelser).hasAtLeastOneElementOfType(JsonTildeltNavKontor::class.java)
+        assertThat(jsonDigisosSoker).isNotNull
+        assertThat(jsonDigisosSoker.avsender.systemnavn).isEqualTo("Testsystemet")
+        assertThat(jsonDigisosSoker.hendelser)
+                .hasAtLeastOneElementOfType(JsonSoknadsStatus::class.java)
+                .hasAtLeastOneElementOfType(JsonTildeltNavKontor::class.java)
 
         val jsonVedtakFattet = jsonDigisosSoker.hendelser.first { it is JsonVedtakFattet } as JsonVedtakFattet
         assertThat(jsonVedtakFattet.vedtaksfil.referanse).isExactlyInstanceOf(JsonDokumentlagerFilreferanse::class.java)

@@ -6,8 +6,7 @@ import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
@@ -43,7 +42,7 @@ internal class FiksClientTest {
 
         val result = fiksClient.hentDigisosSak("123", "Token")
 
-        assertNotNull(result)
+        assertThat(result).isNotNull
     }
 
     @Test
@@ -62,8 +61,8 @@ internal class FiksClientTest {
 
         val result = fiksClient.hentAlleDigisosSaker("Token")
 
-        assertNotNull(result)
-        assertEquals(2, result.size)
+        assertThat(result).isNotNull
+        assertThat(result).hasSize(2)
     }
 
     @Test
@@ -82,6 +81,6 @@ internal class FiksClientTest {
 
         val result = fiksClient.hentInformasjonOmKommuneErPaakoblet("1234")
 
-        assertNotNull(result)
+        assertThat(result).isNotNull
     }
 }

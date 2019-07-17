@@ -1,27 +1,25 @@
 package no.nav.sbl.sosialhjelpinnsynapi.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
-import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.http.*
-import java.util.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 
 class InnsynIT : AbstractIT() {
+
+    private val id = "123"
 
     @Test
     fun `GET innsyn - happy path`() {
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/(.*)"))
                 .willReturn(WireMock.ok("/dokumentlager/digisossoker_ok_komplett.json".asResource())))
 
-        val id = "123"
-
         val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), String::class.java)
 
-        assertNotNull(responseEntity)
-        assertEquals(HttpStatus.OK, responseEntity.statusCode)
+        assertThat(responseEntity).isNotNull
+        assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
     }
 }
 

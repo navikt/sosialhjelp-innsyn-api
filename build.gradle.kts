@@ -43,6 +43,8 @@ configurations {
     "testCompile" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
         exclude(group = "junit", module = "junit")
+        exclude(group = "org.hamcrest", module = "hamcrest-library")
+        exclude(group = "org.hamcrest", module = "hamcrest-core")
     }
 }
 

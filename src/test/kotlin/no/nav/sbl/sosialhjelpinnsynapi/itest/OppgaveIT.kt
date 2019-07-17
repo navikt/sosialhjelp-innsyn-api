@@ -22,9 +22,11 @@ class OppgaveIT : AbstractIT() {
         assertThat(responseEntity).isNotNull
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(responseEntity.body).isNotNull
-        assertThat(responseEntity.body).hasSize(2)
-        assertThat(responseEntity.body?.get(0)?.dokumenttype).isEqualTo("Strømfaktura")
-        assertThat(responseEntity.body?.get(1)?.dokumenttype).isEqualTo("Kopi av depositumskonto")
+
+        val oppgaver = responseEntity.body as List<OppgaveResponse>
+        assertThat(oppgaver).hasSize(2)
+        assertThat(oppgaver[0].dokumenttype).isEqualTo("Strømfaktura")
+        assertThat(oppgaver[1].dokumenttype).isEqualTo("Kopi av depositumskonto")
     }
 
     @Test

@@ -67,12 +67,6 @@ internal class EventServiceTest {
     private val tidspunkt_3 = now.minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)
     private val tidspunkt_4 = now.minusHours(7).format(DateTimeFormatter.ISO_DATE_TIME)
     private val tidspunkt_5 = now.minusHours(6).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_6 = now.minusHours(5).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_7 = now.minusHours(4).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_8 = now.minusHours(3).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_9 = now.minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_10 = now.minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_11 = now.minusHours(0).format(DateTimeFormatter.ISO_DATE_TIME)
 
     private val innsendelsesfrist = now.plusDays(7).format(DateTimeFormatter.ISO_DATE_TIME)
 
@@ -325,8 +319,9 @@ internal class EventServiceTest {
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
             assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isEqualTo(tittel_1)
-            assertThat(sak.tittel).isNotEqualTo(DEFAULT_TITTEL)
+            assertThat(sak.tittel)
+                    .isEqualTo(tittel_1)
+                    .isNotEqualTo(DEFAULT_TITTEL)
             assertThat(sak.vedtak).hasSize(1)
 
             val vedtak = sak.vedtak.last()

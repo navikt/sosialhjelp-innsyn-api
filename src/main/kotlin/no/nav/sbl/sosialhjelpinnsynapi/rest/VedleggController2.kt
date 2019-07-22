@@ -17,7 +17,7 @@ class VedleggController2 (private val vedleggService: VedleggService) {
 
     @GetMapping("/{fiksDigisosId}/vedlegg")
     fun hentVedlegg(@PathVariable fiksDigisosId: String): ResponseEntity<List<VedleggResponse>> {
-        val vedleggResponses: List<VedleggResponse> = vedleggService.execute(fiksDigisosId)
+        val vedleggResponses: List<VedleggResponse> = vedleggService.hentAlleVedlegg(fiksDigisosId)
         if (vedleggResponses.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }

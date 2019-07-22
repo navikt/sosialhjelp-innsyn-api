@@ -4,34 +4,43 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraDokumentlagerId
+import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 @Component
 class VedleggService(private val fiksClient: FiksClient,
                      private val clientProperties: ClientProperties) {
 
-    // hent alle vedlegg fra digisosSak
-
-    fun execute(fiksDigisosId: String): List<VedleggResponse> {
-
-        // DigisosSak.DigisosSoker.Dokumenter eller DigisosSak.EttersendtInfoNAV.ettersendelser ???
-
+    fun hentAlleVedlegg(fiksDigisosId: String): List<VedleggResponse> {
+        // DigisosSak.EttersendtInfoNAV.ettersendelser eller DigisosSak.DigisosSoker.Dokumenter???
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
 
-        if (digisosSak.digisosSoker == null) {
+//        if (digisosSak.digisosSoker == null) {
+//            return emptyList()
+//        }
+//        val vedleggResponses = digisosSak.digisosSoker.dokumenter
+//                .map {
+//                    VedleggResponse(
+//                            it.filnavn,
+//                            it.storrelse.toLong(),
+//                            hentUrlFraDokumentlagerId(clientProperties, it.dokumentlagerDokumentId),
+//                            "beskrivelse", // Hvor kommer beskrivelse fra?
+//                            LocalDateTime.now() // Hvor kommer datoLagtTil fra?
+//                    )
+//                }
+
+        if (digisosSak.ettersendtInfoNAV.ettersendelser.isEmpty()) {
             return emptyList()
         }
 
-        val vedleggResponses = digisosSak.digisosSoker.dokumenter
-                .map {
-                    VedleggResponse(
-                            it.filnavn,
-                            it.storrelse.toLong(),
-                            hentUrlFraDokumentlagerId(clientProperties, it.dokumentlagerDokumentId),
+        val vedleggResponses = digisosSak.ettersendtInfoNAV.ettersendelser
+                .flatMap {
+                    it.vedlegg.map {vedlegg -> VedleggResponse(
+                            vedlegg.filnavn,
+                            vedlegg.storrelse.toLong(),
+                            hentUrlFraDokumentlagerId(clientProperties, vedlegg.dokumentlagerDokumentId),
                             "beskrivelse", // Hvor kommer beskrivelse fra?
-                            LocalDateTime.now() // datoLagtTil - Hvor er dennne satt?
-                    )
+                            unixToLocalDateTime(it.timestampSendt)) }
                 }
 
         return vedleggResponses

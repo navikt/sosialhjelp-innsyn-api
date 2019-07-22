@@ -1,5 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
+import java.time.LocalDateTime
+
 data class SoknadsStatusResponse(
         val status: SoknadsStatus
 )
@@ -24,4 +26,12 @@ data class OppgaveResponse(
         val innsendelsesfrist: String,
         val dokumenttype: String,
         val tilleggsinformasjon: String?
+)
+
+data class VedleggResponse(
+        val filnavn: String,
+        val storrelse: Long,
+        val url: String,
+        val beskrivelse: String,
+        val datoLagtTil: LocalDateTime
 )

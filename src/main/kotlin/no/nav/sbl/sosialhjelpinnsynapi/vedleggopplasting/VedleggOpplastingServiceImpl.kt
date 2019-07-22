@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
+package no.nav.sbl.sosialhjelpinnsynapi.vedleggopplasting
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 
 @Profile("!mock")
 @Component
-class VedleggServiceImpl(private val fiksClient: FiksClient): VedleggService {
+class VedleggOpplastingServiceImpl(private val fiksClient: FiksClient): VedleggOpplastingService {
 
     // TODO: mellomlagring av vedlegg
 

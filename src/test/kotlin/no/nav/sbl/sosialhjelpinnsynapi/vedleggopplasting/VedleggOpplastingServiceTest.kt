@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
+package no.nav.sbl.sosialhjelpinnsynapi.vedleggopplasting
 
 import io.mockk.*
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -7,10 +7,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class VedleggServiceTest {
+internal class VedleggOpplastingServiceTest {
 
     private val fiksClient: FiksClient = mockk()
-    private val service = VedleggServiceImpl(fiksClient)
+    private val service = VedleggOpplastingServiceImpl(fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
 
@@ -26,7 +26,7 @@ internal class VedleggServiceTest {
     }
 
     @Test
-    fun `handleVedlegg skal mellomlagre vedlegg`() {
+    fun `mellomlagreVedlegg skal mellomlagre vedlegg`() {
         // implement
         val list = service.mellomlagreVedlegg(id, listOf("any file.any"))
 
@@ -34,7 +34,7 @@ internal class VedleggServiceTest {
     }
 
     @Test
-    fun `lastOppNyEttersendelse skal kalle FiksClient`() {
+    fun `lastOppVedleggTilFiks skal kalle FiksClient`() {
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } just runs
 
         val response = service.lastOppVedleggTilFiks(id)

@@ -14,7 +14,11 @@ import org.springframework.http.HttpHeaders.TRANSFER_ENCODING
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.util.Base64Utils
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import java.util.Collections.singletonList
 import java.util.UUID.randomUUID
@@ -81,6 +85,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
+    // Ta inn ett vedlegg eller alle vedlegg tilknyttet en digisosId?
     override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
 //        Innsending av ny ettersendelse til Fiks Digisos bruker også multipart streaming request.
 //          {kommunenummer} er kommunenummer søknaden tilhører
@@ -96,16 +101,23 @@ class FiksClientImpl(clientProperties: ClientProperties,
         headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
         headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
 
-
-        val requestEntity = HttpEntity<Nothing>(headers)
-
         // TODO:
         //  Endepunktet tar inn påkrevde felter for innsending av ny ettersendelse:
         //  - metadataen vedlegg.json (String) --> { filnavn, mimetype, storrelse }
-        //  - liste med vedlegg (metadata + base64-encodet blokk)
+        //  - liste med vedlegg (metadata + base64-encodet blokk av selve vedlegget)
 
-        val vedleggMetadata = VedleggMetadata("filnavn", "mimetype", 123)
-        // val base64Encodet: ByteArray
+        // endre til det man nå enn vil få fra DB
+        file as MultipartFile
+        val vedleggMetadata = VedleggMetadata(file.originalFilename, file.contentType, file.size)
+
+        val base64EncodetVedlegg: ByteArray = Base64Utils.encode(file.bytes) // ??
+
+        val body = LinkedMultiValueMap<String, Any>()
+        body.add("files", vedleggMetadata)
+        body.add("files", base64EncodetVedlegg)
+        // flere
+
+        val requestEntity = HttpEntity<MultiValueMap<String, Any>>(body, headers)
 
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId", HttpMethod.POST, requestEntity, String::class.java)
 
@@ -115,13 +127,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Opplasting av ettersendelse feilet")
             throw ResponseStatusException(response.statusCode, "something went wrong")
         }
-
     }
 }
 
 data class VedleggMetadata(
-        val filnavn: String,
-        val mimetype: String,
+        val filnavn: String?,
+        val mimetype: String?,
         val storrelse: Long
 )
 

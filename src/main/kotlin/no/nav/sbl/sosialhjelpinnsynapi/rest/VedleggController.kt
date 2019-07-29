@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile
 class VedleggController(private val vedleggOpplastingService: VedleggOpplastingService) {
 
     // Last opp vedlegg for mellomlagring
-    @PostMapping("/{fiksDigisosId}/lastOppVedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{fiksDigisosId}/vedlegg/lastOpp", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun lastOppVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("file") files: List<MultipartFile>): ResponseEntity<List<VedleggOpplastingResponse>> {
 
         // Sjekk om fileSize overskrider MAKS_FILSTORRELSE
@@ -31,7 +31,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     }
 
     // Send til veileder
-    @PostMapping("/{fiksDigisosId}/send")
+    @PostMapping("/{fiksDigisosId}/vedlegg/send")
     fun sendTilVeileder(@PathVariable fiksDigisosId: String): ResponseEntity<String> {
         val response = vedleggOpplastingService.lastOppVedleggTilFiks(fiksDigisosId)
 

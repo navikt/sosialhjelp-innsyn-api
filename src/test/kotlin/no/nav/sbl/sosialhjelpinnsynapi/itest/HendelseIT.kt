@@ -11,17 +11,18 @@ import org.springframework.http.HttpStatus
 
 class HendelseIT : AbstractIT() {
 
+    private val id = "123"
+
     @Test
     fun `GET Hendelser - happy path`() {
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa1"))
                 .willReturn(WireMock.ok("/dokumentlager/digisossoker_ok_minimal.json".asResource())))
 
-        val id = "123"
-
         val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<HendelseResponse>>())
 
         assertThat(responseEntity).isNotNull
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+
         val hendelser = responseEntity.body as List<HendelseResponse>
         assertThat(hendelser).hasSize(2)
         assertThat(hendelser[0].beskrivelse).contains("sendt")
@@ -33,12 +34,11 @@ class HendelseIT : AbstractIT() {
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa1"))
                 .willReturn(WireMock.ok("/dokumentlager/digisossoker_ok_komplett.json".asResource())))
 
-        val id = "123"
-
         val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<HendelseResponse>>())
 
         assertThat(responseEntity).isNotNull
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+
         val hendelser = responseEntity.body as List<HendelseResponse>
         assertThat(hendelser).hasSize(8)
         assertThat(hendelser[0].beskrivelse).contains("sendt")

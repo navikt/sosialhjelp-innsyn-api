@@ -15,6 +15,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.multipart.MultipartFile
 
 internal class FiksClientTest {
 
@@ -98,6 +99,12 @@ internal class FiksClientTest {
 
         every { restTemplate.exchange(any<String>(), HttpMethod.POST, any(), String::class.java) } returns response
 
-        assertThatCode { fiksClient.lastOppNyEttersendelse("any file", kommunenummer, id, "token") }.doesNotThrowAnyException()
+        val file: MultipartFile = mockk()
+        every { file.originalFilename } returns "filnavn.pdf"
+        every { file.contentType } returns "application/pdf"
+        every { file.size } returns 42
+        every { file.bytes } returns "fil".toByteArray()
+
+        assertThatCode { fiksClient.lastOppNyEttersendelse(file, kommunenummer, id, "token") }.doesNotThrowAnyException()
     }
 }

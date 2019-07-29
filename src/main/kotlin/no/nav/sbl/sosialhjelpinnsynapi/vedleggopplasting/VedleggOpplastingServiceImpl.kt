@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class VedleggOpplastingServiceImpl(private val fiksClient: FiksClient): VedleggOpplastingService {
 
-    // TODO: mellomlagring av vedlegg
+    // TODO: mellomlagring av vedlegg når DB er oppe
 
     override fun mellomlagreVedlegg(fiksDigisosId: String, files: List<Any>): List<VedleggOpplastingResponse> {
         return emptyList()
@@ -20,7 +20,7 @@ class VedleggOpplastingServiceImpl(private val fiksClient: FiksClient): VedleggO
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
         val kommunenummer = digisosSak.kommunenummer
 
-        // Hent ut vedlegg fra mellomlagring
+        // Hent ut vedlegg fra DB
 
         fiksClient.lastOppNyEttersendelse("file from mellomlager", kommunenummer, fiksDigisosId, "token")
 

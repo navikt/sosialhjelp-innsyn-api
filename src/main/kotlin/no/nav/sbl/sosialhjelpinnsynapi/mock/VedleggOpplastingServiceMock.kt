@@ -39,6 +39,6 @@ class VedleggOpplastingServiceMock(private val fiksClient: FiksClient) : Vedlegg
 
         files.forEach { fiksClient.lastOppNyEttersendelse(it, kommunenummer, fiksDigisosId, "token") }
 
-        return "OK - sendt til Fiks (mock)"
+        return "OK - ikke sendt til Fiks fordi dette er en mock"
     }
 }

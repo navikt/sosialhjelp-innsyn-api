@@ -15,7 +15,7 @@ class VedleggOpplastingServiceImpl(private val fiksClient: FiksClient): VedleggO
         return emptyList()
     }
 
-    override fun lastOppVedleggTilFiks(fiksDigisosId: String): String {
+    override fun sendVedleggTilFiks(fiksDigisosId: String): String {
         // Hent digisosSak
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
         val kommunenummer = digisosSak.kommunenummer

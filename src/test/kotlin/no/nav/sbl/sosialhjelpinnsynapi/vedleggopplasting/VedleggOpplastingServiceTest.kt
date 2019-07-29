@@ -37,7 +37,7 @@ internal class VedleggOpplastingServiceTest {
     fun `lastOppVedleggTilFiks skal kalle FiksClient`() {
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } just runs
 
-        val response = service.lastOppVedleggTilFiks(id)
+        val response = service.sendVedleggTilFiks(id)
 
         assertThat(response).isEqualTo("OK")
     }

@@ -15,7 +15,8 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 
 ### Github package registry
 - NB: Fungerer foreløpig kun med personal access token, og tokenet må ha read og write access til packages.
-- Docker image blir pushet til github package registry, og releases vises [her](https://github.com/navikt/sosialhjelp-innsyn-api/releases)
+- Docker image bygges på CircleCi og pushes til github package registry
+- Releaser vises [her](https://github.com/navikt/sosialhjelp-innsyn-api/releases)
 
 ### CircleCi
 - Logg inn på circleci.com med din Github-bruker. 
@@ -28,11 +29,11 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 `curl -d 'build_parameters[CIRCLE_JOB]=deploy_miljo' -d 'build_parameters[VERSION]=ditt_versjonsnummer' -d 'build_parameters[MILJO]=ditt_miljø' 'https://circleci.com/api/v1.1/project/github/navikt/sosialhjelp-innsyn-api?circle-token=ditt_token' `
 
 ### Github deployment
-- Krever at appen bruker naiserator
+- Krever at appen bruker naiserator (ikke naisd)
 - Github deployments - registrer ditt github-repo [her](https://deployment.prod-sbs.nais.io/auth/form)
-- Deployments vil dukke opp [her](https://github.com/navikt/sosialhjelp-innsyn-api/deployments)
-- Her blir [deployment-cli](https://github.com/navikt/deployment-cli) brukt sammen med CircleCi.
+- Deployments vises [her](https://github.com/navikt/sosialhjelp-innsyn-api/deployments)
+- [deployment-cli](https://github.com/navikt/deployment-cli) blir brukt i CircleCi.
 
 ### Vault
-- Lag PR til `vault-iac` slik at man kan lagre secrets i eksempelvis `kv/preprod/sbs/sosialhjelp-innsyn-api/q0`
-- Denne må godkjennes og merges før man kan opprette secrets i overnevnte katalog.
+- Lag PR til `vault-iac` slik at man kan lagre secrets på vault.
+- Denne må godkjennes og merges før man kan opprette secrets i din apps katalog `.../app/namespace`.

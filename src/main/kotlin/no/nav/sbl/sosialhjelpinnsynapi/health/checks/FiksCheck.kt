@@ -30,7 +30,7 @@ class FiksCheck (private val restTemplate: RestTemplate,
             headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
             headers.set("IntegrasjonPassord", clientProperties.fiksIntegrasjonpassord)
 
-            restTemplate.exchange("$address/digisos/api/v1/soknader/0", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java) // soknadId ?
+            restTemplate.exchange("$address/digisos/api/v1/soknader/0", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java) // må ha ett reelt endepunkt å kalle
         } catch (e: Exception) {
             throw RuntimeException("Kunne ikke pinge Dokumentlager", e)
         }

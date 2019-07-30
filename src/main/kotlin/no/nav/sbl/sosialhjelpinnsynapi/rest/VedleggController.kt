@@ -30,9 +30,9 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         return ResponseEntity.ok(response)
     }
 
-    // Send til veileder
+    // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg/send")
-    fun sendTilVeileder(@PathVariable fiksDigisosId: String): ResponseEntity<String> {
+    fun sendVedleggTilFiks(@PathVariable fiksDigisosId: String): ResponseEntity<String> {
         val response = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId)
 
         return ResponseEntity.ok(response)

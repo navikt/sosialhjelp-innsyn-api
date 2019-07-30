@@ -90,7 +90,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
 //        Innsending av ny ettersendelse til Fiks Digisos bruker også multipart streaming request.
 //          {kommunenummer} er kommunenummer søknaden tilhører
 //          {soknadId} er Fiks DigisosId-en for søknaden det skal ettersendes til
-//          {navEkseternRefId} er en unik id fra NAV for denne ettersendelsen
+//          {navEksternRefId} er en unik id fra NAV for denne ettersendelsen
 
         val navEksternRefId = randomUUID().toString()
 

@@ -61,9 +61,25 @@ internal class VedleggServiceTest {
         val list = service.hentAlleVedlegg(id)
 
         assertThat(list).hasSize(3)
+
         // nano-presisjon lacking
+
+        assertThat(list[0].filnavn).isEqualTo(filnavn_1)
+        assertThat(list[0].storrelse).isEqualTo(42)
+        assertThat(list[0].url).contains(dokumentlagerId_1)
+        assertThat(list[0].beskrivelse).isEqualTo("beskrivelse") // må endres
         assertThat(list[0].datoLagtTil).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+
+        assertThat(list[1].filnavn).isEqualTo(filnavn_2)
+        assertThat(list[1].storrelse).isEqualTo(42)
+        assertThat(list[1].url).isEqualTo(dokumentlagerId_2)
+        assertThat(list[1].beskrivelse).isEqualTo("beskrivelse") // må endres
         assertThat(list[1].datoLagtTil).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+
+        assertThat(list[2].filnavn).isEqualTo(filnavn_3)
+        assertThat(list[2].storrelse).isEqualTo(42)
+        assertThat(list[2].url).isEqualTo(dokumentlagerId_3)
+        assertThat(list[2].beskrivelse).isEqualTo("beskrivelse") // må endres
         assertThat(list[2].datoLagtTil).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
     }
 }

@@ -15,7 +15,7 @@ class VedleggService(private val fiksClient: FiksClient,
     //  - Skal vedleggoversikt vise _alle_ bruker-innsendte vedlegg (ifm med innsending av søknad + ettersendelser i form av oppgaver i innsyn)? Antar ja
 
     fun hentAlleVedlegg(fiksDigisosId: String): List<VedleggResponse> {
-        // DigisosSak.EttersendtInfoNAV.ettersendelser eller DigisosSak.DigisosSoker.Dokumenter???
+        // DigisosSak.EttersendtInfoNAV.ettersendelser og/eller DigisosSak.DigisosSoker.Dokumenter???
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
 
 /*        if (digisosSak.digisosSoker == null) {
@@ -46,7 +46,7 @@ class VedleggService(private val fiksClient: FiksClient,
                             unixToLocalDateTime(it.timestampSendt)) }
                 }
 
-        // Havner ettersendte vedlegg ifm oppgaver i innsyn "samme sted" eller ett annet sted?
+        // Havner ettersendte vedlegg ifm oppgaver i innsyn "samme sted" eller ett annet sted i DigisosSak'en?
 
         return vedleggResponses
     }

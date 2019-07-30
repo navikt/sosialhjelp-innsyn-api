@@ -15,6 +15,8 @@ val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.9"
 val swaggerVersion = "2.9.2"
+val resilience4jVersion = "0.16.0"
+val rxjavaVersion = "2.2.10"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -72,10 +74,10 @@ dependencies {
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
     
     //selftest
-    compile("io.github.resilience4j:resilience4j-spring-boot2:0.16.0")
-    compile("io.github.resilience4j:resilience4j-timelimiter:0.16.0")
-    compile("io.github.resilience4j:resilience4j-rxjava2:0.16.0")
-    compile("io.reactivex.rxjava2:rxjava:2.2.10")
+    compile("io.github.resilience4j:resilience4j-spring-boot2:$resilience4jVersion")
+    compile("io.github.resilience4j:resilience4j-timelimiter:$resilience4jVersion")
+    compile("io.github.resilience4j:resilience4j-rxjava2:$resilience4jVersion")
+    compile("io.reactivex.rxjava2:rxjava:$rxjavaVersion")
     compile("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
 
 //    Test dependencies

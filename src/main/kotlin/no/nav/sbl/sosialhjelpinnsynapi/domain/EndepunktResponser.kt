@@ -25,3 +25,8 @@ data class OppgaveResponse(
         val dokumenttype: String,
         val tilleggsinformasjon: String?
 )
+
+data class VedleggOpplastingResponse(
+        val filnavn: String?,
+        val storrelse: Long
+)

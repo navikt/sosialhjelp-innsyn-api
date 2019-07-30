@@ -1,8 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
-import no.nav.sbl.sosialhjelpinnsynapi.vedleggopplasting.VedleggOpplastingService
+import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.security.oidc.api.Unprotected
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -11,7 +15,8 @@ import org.springframework.web.multipart.MultipartFile
 @Unprotected
 @RestController
 @RequestMapping("/api/v1/innsyn")
-class VedleggController(private val vedleggOpplastingService: VedleggOpplastingService) {
+class VedleggController(private val vedleggOpplastingService: VedleggOpplastingService,
+                        private val vedleggService: VedleggService) {
 
     // Last opp vedlegg for mellomlagring
     @PostMapping("/{fiksDigisosId}/vedlegg/lastOpp", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -36,5 +41,15 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         val response = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId)
 
         return ResponseEntity.ok(response)
+    }
+
+
+    @GetMapping("/{fiksDigisosId}/vedlegg", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
+    fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
+        val vedleggResponses: List<VedleggResponse> = vedleggService.hentAlleVedlegg(fiksDigisosId)
+        if (vedleggResponses.isEmpty()) {
+            return ResponseEntity(HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.ok(vedleggResponses)
     }
 }

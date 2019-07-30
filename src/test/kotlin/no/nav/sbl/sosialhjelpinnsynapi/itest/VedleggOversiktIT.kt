@@ -52,13 +52,13 @@ class VedleggOversiktIT : AbstractIT() {
         val vedleggList = responseEntity.body as List<VedleggResponse>
         assertThat(vedleggList).hasSize(2)
 
-        assertThat(vedleggList[0].datoLagtTil).isEqualToIgnoringNanos(unixToLocalDateTime(1546473600000))
+        assertThat(vedleggList[0].datoLagtTil).isEqualTo(unixToLocalDateTime(1546473600000))
         assertThat(vedleggList[0].filnavn).isEqualTo("fil 1")
         assertThat(vedleggList[0].storrelse).isEqualTo(1337)
         assertThat(vedleggList[0].url).contains("3fa85f64-5717-4562-b3fc-bbb111bbb222")
         assertThat(vedleggList[0].beskrivelse).isEqualTo("beskrivelse") // endres
 
-        assertThat(vedleggList[1].datoLagtTil).isEqualToIgnoringNanos(unixToLocalDateTime(1546300800000))
+        assertThat(vedleggList[1].datoLagtTil).isEqualTo(unixToLocalDateTime(1546300800000))
         assertThat(vedleggList[1].filnavn).isEqualTo("fil 2")
         assertThat(vedleggList[1].storrelse).isEqualTo(42)
         assertThat(vedleggList[1].url).contains("3fa85f64-5717-4562-b3fc-bbb111bbb333")

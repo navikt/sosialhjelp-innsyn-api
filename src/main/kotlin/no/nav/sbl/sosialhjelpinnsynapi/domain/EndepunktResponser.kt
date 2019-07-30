@@ -35,3 +35,8 @@ data class VedleggResponse(
         val beskrivelse: String,
         val datoLagtTil: LocalDateTime
 )
+
+data class VedleggOpplastingResponse(
+        val filnavn: String?,
+        val storrelse: Long
+)

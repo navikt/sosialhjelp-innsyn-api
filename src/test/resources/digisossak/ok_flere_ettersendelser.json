@@ -1,0 +1,64 @@
+{
+  "fiksDigisosId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "sokerFnr": "string",
+  "fiksOrgId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "kommunenummer": "string",
+  "sistEndret": 0,
+  "originalSoknadNAV": {
+    "navEksternRefId": "string",
+    "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa0",
+    "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "soknadDokument": {
+      "filnavn": "string",
+      "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "storrelse": 0
+    },
+    "vedlegg": [
+      {
+        "filnavn": "string",
+        "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "storrelse": 0
+      }
+    ],
+    "timestampSendt": 0
+  },
+  "ettersendtInfoNAV": {
+    "ettersendelser": [
+      {
+        "navEksternRefId": "navEksternId-1",
+        "vedleggMetadata": "3fa85f64-5717-4562-b3fc-aaa111aaa222",
+        "vedlegg": [
+          {
+            "filnavn": "fil 1",
+            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-bbb111bbb222",
+            "storrelse": 1337
+          }
+        ],
+        "timestampSendt": 1546473600000
+      },
+      {
+        "navEksternRefId": "navEksternId-2",
+        "vedleggMetadata": "3fa85f64-5717-4562-b3fc-aaa111aaa333",
+        "vedlegg": [
+          {
+            "filnavn": "fil 2",
+            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-bbb111bbb333",
+            "storrelse": 42
+          }
+        ],
+        "timestampSendt": 1546300800000
+      }
+    ]
+  },
+  "digisosSoker": {
+    "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa1",
+    "dokumenter": [
+      {
+        "filnavn": "string",
+        "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "storrelse": 0
+      }
+    ],
+    "timestampSistOppdatert": 0
+  }
+}

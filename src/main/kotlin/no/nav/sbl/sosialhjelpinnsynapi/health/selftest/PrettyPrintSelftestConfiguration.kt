@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 class PrettyPrintSelftestConfiguration : WebMvcConfigurer {
 
+    // print selftestsiden (json) på en litt mer lettleselig måte
     override fun extendMessageConverters(converters: List<HttpMessageConverter<*>>) {
         converters
                 .filterIsInstance<MappingJackson2HttpMessageConverter>()

@@ -19,7 +19,7 @@ class DokumentlagerCheck(private val restTemplate: RestTemplate,
     override fun doCheck() {
         try {
             // potensielt headers etc her
-            restTemplate.getForEntity("$address/ping", Any::class.java)
+            restTemplate.getForEntity("$address/ping", Any::class.java) // må ha ett reelt endepunkt å kalle
         } catch (e: Exception) {
             throw RuntimeException("Kunne ikke pinge Dokumentlager", e)
         }

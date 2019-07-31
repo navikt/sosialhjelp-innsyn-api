@@ -13,7 +13,7 @@ data class InternalDigisosSoker(
         var oppgaver: MutableList<Oppgave>,
         var historikk: MutableList<Hendelse>
 ) {
-    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, mutableListOf(),  mutableListOf())
+    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, mutableListOf(), mutableListOf())
 }
 
 data class Forvaltningsbrev(

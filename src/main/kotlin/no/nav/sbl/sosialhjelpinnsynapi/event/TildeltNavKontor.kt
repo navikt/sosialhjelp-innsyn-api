@@ -6,7 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
-fun InternalDigisosSoker.applyTildeltNavKontor(hendelse: JsonTildeltNavKontor, norgClient: NorgClient) {
+fun InternalDigisosSoker.apply(hendelse: JsonTildeltNavKontor, norgClient: NorgClient) {
 
     if (hendelse.navKontor == soknadsmottaker?.navEnhetsnummer) {
         return

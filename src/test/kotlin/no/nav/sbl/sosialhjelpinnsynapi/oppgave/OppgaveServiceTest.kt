@@ -43,7 +43,7 @@ internal class OppgaveServiceTest {
 
         every { eventService.createModel(any()) } returns model
 
-        val oppgaver = service.getOppgaverForSoknad("123", token)
+        val oppgaver = service.hentOppgaver("123", token)
 
         assertThat(oppgaver).isNotNull
         assertThat(oppgaver).isEmpty()
@@ -56,7 +56,7 @@ internal class OppgaveServiceTest {
 
         every { eventService.createModel(any()) } returns model
 
-        val oppgaver = service.getOppgaverForSoknad("123", token)
+        val oppgaver = service.hentOppgaver("123", token)
 
         assertThat(oppgaver).isNotNull
         assertThat(oppgaver[0].dokumenttype).isEqualTo(type)
@@ -71,7 +71,7 @@ internal class OppgaveServiceTest {
 
         every { eventService.createModel(any()) } returns model
 
-        val oppgaver = service.getOppgaverForSoknad("123", token)
+        val oppgaver = service.hentOppgaver("123", token)
 
         assertThat(oppgaver).isNotNull
         assertThat(oppgaver[0].dokumenttype).isEqualTo(type)
@@ -90,7 +90,7 @@ internal class OppgaveServiceTest {
 
         every { eventService.createModel(any()) } returns model
 
-        val oppgaver = service.getOppgaverForSoknad("123", token)
+        val oppgaver = service.hentOppgaver("123", token)
 
         assertThat(oppgaver).isNotNull
         assertThat(oppgaver.size == 4)

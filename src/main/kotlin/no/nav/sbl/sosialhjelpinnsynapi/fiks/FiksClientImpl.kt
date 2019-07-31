@@ -37,7 +37,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
     private val mapper = jacksonObjectMapper()
 
-
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
@@ -75,7 +74,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo {
+    override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
         val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", KommuneInfo::class.java)
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!

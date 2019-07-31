@@ -23,7 +23,7 @@ class VeiviserController {
     private val kommunenummerCache = KommunenummerCache()
 
     @GetMapping("kommunenummer", produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun hentKommunenummer(): ResponseEntity<String> {
+    fun getKommunenummer(): ResponseEntity<String> {
         return ResponseEntity.ok(kommunenummerCache.getKommunenr())
     }
 }

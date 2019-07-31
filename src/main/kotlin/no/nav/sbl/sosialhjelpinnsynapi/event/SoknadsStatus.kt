@@ -6,7 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
-fun InternalDigisosSoker.applySoknadsStatus(hendelse: JsonSoknadsStatus) {
+fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
 
     status = SoknadsStatus.valueOf(hendelse.status.name)
 

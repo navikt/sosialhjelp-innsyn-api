@@ -23,7 +23,6 @@ class MockController(private val fiksClientMock: FiksClientMock,
                      private val innsynService: InnsynService) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
-
     private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
     @PostMapping("/{soknadId}",

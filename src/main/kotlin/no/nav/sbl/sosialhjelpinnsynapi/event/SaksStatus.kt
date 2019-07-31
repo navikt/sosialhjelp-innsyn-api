@@ -5,7 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 
-fun InternalDigisosSoker.applySaksStatus(hendelse: JsonSaksStatus) {
+fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
 
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.referanse }
 

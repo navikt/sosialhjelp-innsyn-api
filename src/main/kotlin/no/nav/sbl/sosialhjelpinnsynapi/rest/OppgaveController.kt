@@ -16,13 +16,13 @@ import org.springframework.web.server.ResponseStatusException
 class OppgaveController(val oppgaveService: OppgaveService) {
 
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-    fun getOppgaverForSoknad(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+    fun getOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
         try {
-            val oppgaverForSoknad = oppgaveService.getOppgaverForSoknad(fiksDigisosId, token)
-            if (oppgaverForSoknad.isEmpty()) {
+            val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
+            if (oppgaver.isEmpty()) {
                 return ResponseEntity(HttpStatus.NO_CONTENT)
             }
-            return ResponseEntity.ok(oppgaverForSoknad)
+            return ResponseEntity.ok(oppgaver)
         } catch (e: Exception) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }

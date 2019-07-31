@@ -14,6 +14,8 @@ val filformatVersion = "1.2019.07.09-13.14-92d3aa4f71f5"
 val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.9"
+val jacksonDatabindVersion = "2.9.9.2"
+val guavaVersion = "28.0-jre"
 val swaggerVersion = "2.9.2"
 val resilience4jVersion = "0.16.0"
 val rxjavaVersion = "2.2.10"
@@ -72,7 +74,11 @@ dependencies {
     compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
-    
+
+    //spesifikke versjoner oppgradert etter ønske fra snyk
+    compile("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
+    compile("com.google.guava:guava:$guavaVersion")
+
     //selftest
     compile("io.github.resilience4j:resilience4j-spring-boot2:$resilience4jVersion")
     compile("io.github.resilience4j:resilience4j-timelimiter:$resilience4jVersion")

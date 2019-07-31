@@ -16,7 +16,7 @@ import org.springframework.web.server.ResponseStatusException
 class OppgaveController(val oppgaveService: OppgaveService) {
 
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-    fun getOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+    fun hentOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
         try {
             val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
             if (oppgaver.isEmpty()) {

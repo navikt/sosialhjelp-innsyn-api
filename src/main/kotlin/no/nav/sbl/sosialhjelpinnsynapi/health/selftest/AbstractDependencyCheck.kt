@@ -32,24 +32,26 @@ abstract class AbstractDependencyCheck(
     protected abstract fun doCheck()
 
     fun check(): Try<DependencyCheckResult> {
-        val futureSupplier:  Supplier<Future<DependencyCheckResult>> =  Supplier{ executor.submit(getCheckCallable()) }
+        val futureSupplier: Supplier<Future<DependencyCheckResult>> = Supplier { executor.submit(getCheckCallable()) }
         val timeRestrictedCall = TimeLimiter.decorateFutureSupplier(timeLimiter, futureSupplier)
         val circuitBreaker = circuitBreakerRegistry.circuitBreaker(name)
         val chainedCallable = CircuitBreaker.decorateCallable(circuitBreaker, timeRestrictedCall)
         return Try.ofCallable(chainedCallable)
                 .onSuccess { dependency_status.set(1) }
                 .onFailure { dependency_status.set(0) }
-        //                    log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", name, type, address, throwable)
+                //                    log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", name, type, address, throwable)
 
-                .recover { throwable -> DependencyCheckResult(
-                        endpoint = name,
-                        result = if (importance == Importance.CRITICAL) Result.ERROR else Result.WARNING,
-                        address = address,
-                        errorMessage = "Call to dependency=$name timed out or circuitbreaker tripped. Errormessage=${getErrorMessageFromThrowable(throwable)}",
-                        type = type,
-                        importance = importance,
-                        responseTime = null,
-                        throwable = throwable) }
+                .recover { throwable ->
+                    DependencyCheckResult(
+                            endpoint = name,
+                            result = if (importance == Importance.CRITICAL) Result.ERROR else Result.WARNING,
+                            address = address,
+                            errorMessage = "Call to dependency=$name timed out or circuitbreaker tripped. Errormessage=${getErrorMessageFromThrowable(throwable)}",
+                            type = type,
+                            importance = importance,
+                            responseTime = null,
+                            throwable = throwable)
+                }
     }
 
     private fun getCheckCallable(): Callable<DependencyCheckResult> {

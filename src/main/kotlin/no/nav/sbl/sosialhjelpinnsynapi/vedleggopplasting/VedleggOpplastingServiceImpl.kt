@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 
 @Profile("!mock")
 @Component
-class VedleggOpplastingServiceImpl(private val fiksClient: FiksClient): VedleggOpplastingService {
+class VedleggOpplastingServiceImpl(private val fiksClient: FiksClient) : VedleggOpplastingService {
 
     // TODO: mellomlagring av vedlegg når DB er oppe
 

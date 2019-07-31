@@ -36,7 +36,7 @@ class SaksStatusService(private val eventService: EventService) {
             sak.vedtak.isEmpty() -> null
             else -> sak.vedtak.map { it.vedtaksFilUrl }
         }
-        return SaksStatusResponse(sak.tittel,  utfallEllerStatus, vedtakfilUrlList)
+        return SaksStatusResponse(sak.tittel, utfallEllerStatus, vedtakfilUrlList)
     }
 
     private fun hentStatusNavn(sak: Sak): UtfallEllerSaksStatus? {

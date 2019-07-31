@@ -87,7 +87,7 @@ internal class FiksClientTest {
                     KommuneInfo::class.java)
         } returns mockKommuneResponse
 
-        val result = fiksClient.hentInformasjonOmKommuneErPaakoblet("1234")
+        val result = fiksClient.hentKommuneInfo("1234")
 
         assertThat(result).isNotNull
     }

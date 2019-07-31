@@ -40,7 +40,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any()) } returns model
 
-        val hendelser = service.getHendelserForSoknad("123", "Token")
+        val hendelser = service.hentHendelser("123", "Token")
 
         assertThat(hendelser).hasSize(1)
         assertThat(hendelser[0].beskrivelse).isEqualTo(tittel)
@@ -58,7 +58,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any()) } returns model
 
-        val hendelser = service.getHendelserForSoknad("123", "Token")
+        val hendelser = service.hentHendelser("123", "Token")
 
         assertThat(hendelser).hasSize(3)
     }

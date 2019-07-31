@@ -8,7 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
-fun InternalDigisosSoker.applyVedtakFattet(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
+fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
 
     val utfall = UtfallVedtak.valueOf(hendelse.utfall.utfall.name)
     val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)

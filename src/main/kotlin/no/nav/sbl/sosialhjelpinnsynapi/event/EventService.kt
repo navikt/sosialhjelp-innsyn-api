@@ -43,12 +43,12 @@ class EventService(private val clientProperties: ClientProperties,
 
     fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {
         when (hendelse) {
-            is JsonSoknadsStatus -> applySoknadsStatus(hendelse)
-            is JsonTildeltNavKontor -> applyTildeltNavKontor(hendelse, norgClient)
-            is JsonSaksStatus -> applySaksStatus(hendelse)
-            is JsonVedtakFattet -> applyVedtakFattet(hendelse, clientProperties)
-            is JsonDokumentasjonEtterspurt -> applyDokumentasjonEtterspurt(hendelse, clientProperties)
-            is JsonForelopigSvar -> applyForelopigSvar(hendelse, clientProperties)
+            is JsonSoknadsStatus -> apply(hendelse)
+            is JsonTildeltNavKontor -> apply(hendelse, norgClient)
+            is JsonSaksStatus -> apply(hendelse)
+            is JsonVedtakFattet -> apply(hendelse, clientProperties)
+            is JsonDokumentasjonEtterspurt -> apply(hendelse, clientProperties)
+            is JsonForelopigSvar -> apply(hendelse, clientProperties)
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }
     }

@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity

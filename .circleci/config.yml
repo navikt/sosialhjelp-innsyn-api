@@ -125,12 +125,8 @@ workflows:
       - build
 
       - release:
-          context: NAIS deployment
           requires:
             - build
-          #filters:
-          #  branches:
-          #    only: master
 
       - deploy_dev:
           requires:

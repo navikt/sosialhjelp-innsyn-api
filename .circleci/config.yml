@@ -67,7 +67,7 @@ jobs:
             set -eo pipefail
             git clone https://github.com/navikt/github-apps-support.git
             export PATH=`pwd`/github-apps-support/bin:$PATH
-            echo $DIGISOS_TOKEN | tr '_' '\n' > digisos.key
+            echo $DIGISOS_KEY | tr '_' '\n' > digisos.key
             export GH_TOKEN=$(generate-installation-token.sh `generate-jwt.sh digisos.key $DIGISOS_APPID`)
             echo -e "machine api.github.com login x-access-token password $GH_TOKEN" > ~/.netrc
             rm digisos.key

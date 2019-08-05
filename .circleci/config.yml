@@ -64,6 +64,7 @@ jobs:
       - run:
           # Push the image to Docker Packages, can also be used against dockerhub by omitting docker.pkg.github.com
           name: Docker push
+          context: NAIS deployment
           command: |
             set -eo pipefail
             git clone https://github.com/navikt/github-apps-support.git
@@ -72,6 +73,9 @@ jobs:
             export GH_TOKEN=$(generate-installation-token.sh `generate-jwt.sh digisos.key $DIGISOS_APPID`)
             echo -e "machine api.github.com login x-access-token password $GH_TOKEN" > ~/.netrc
             rm digisos.key
+
+            echo "docker login $DOCKER_LOGIN"
+
             echo $GH_TOKEN > ./GH_TOKEN.txt
 
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_LOGIN" --password-stdin docker.pkg.github.com

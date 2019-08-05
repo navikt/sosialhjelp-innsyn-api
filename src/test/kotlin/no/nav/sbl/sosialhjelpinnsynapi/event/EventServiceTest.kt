@@ -3,10 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.*
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
@@ -70,12 +67,6 @@ internal class EventServiceTest {
     private val tidspunkt_3 = now.minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)
     private val tidspunkt_4 = now.minusHours(7).format(DateTimeFormatter.ISO_DATE_TIME)
     private val tidspunkt_5 = now.minusHours(6).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_6 = now.minusHours(5).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_7 = now.minusHours(4).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_8 = now.minusHours(3).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_9 = now.minusHours(2).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_10 = now.minusHours(1).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_11 = now.minusHours(0).format(DateTimeFormatter.ISO_DATE_TIME)
 
     private val innsendelsesfrist = now.plusDays(7).format(DateTimeFormatter.ISO_DATE_TIME)
 
@@ -103,7 +94,7 @@ internal class EventServiceTest {
  [x] saksStatus før vedtakFattet
  [x] vedtakFattet uten saksStatus
  [x] vedtakFattet før saksStatus
- [ ] saksStatus med 2 vedtakFattet
+ [x] saksStatus med 2 vedtakFattet
  [x] dokumentasjonEtterspurt
  [ ] dokumentasjonEtterspurt - flere caser?
  [x] forelopigSvar
@@ -328,7 +319,9 @@ internal class EventServiceTest {
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
             assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.tittel)
+                    .isEqualTo(tittel_1)
+                    .isNotEqualTo(DEFAULT_TITTEL)
             assertThat(sak.vedtak).hasSize(1)
 
             val vedtak = sak.vedtak.last()
@@ -337,19 +330,50 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-//            assertThat(hendelse.tittel).contains("$tittel_1 er ${enumNameToLowercase(vedtak.utfall.name)}") // TODO: se VedtakFattet.kt
+            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ${enumNameToLowercase(vedtak.utfall.name)}")
             assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
-        internal fun `saksStatus med 2 vedtakFattet`() {
-//            TODO: implement
+        fun `saksStatus med 2 vedtakFattet`() {
+            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                    JsonDigisosSoker()
+                            .withAvsender(avsender)
+                            .withVersion("123")
+                            .withHendelser(listOf(
+                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                    SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
+                                    SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
+                                    SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5)
+                            ))
+
+            val model = service.createModel("123")
+
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(model.saker).hasSize(1)
+            assertThat(model.historikk).hasSize(5)
+
+            val sak = model.saker.last()
+            assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
+            assertThat(sak.referanse).isEqualTo(referanse_1)
+            assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.vedtak).hasSize(2)
+
+            val vedtak = sak.vedtak[0]
+            assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
+            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+
+            val vedtak2 = sak.vedtak[1]
+            assertThat(vedtak2.utfall).isEqualTo(UtfallVedtak.AVSLATT)
+            assertThat(vedtak2.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_2")
         }
     }
 
 
     @Test
-    fun `dokumentasjonEtterspurt`() {
+    fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -380,7 +404,7 @@ internal class EventServiceTest {
     }
 
     @Test
-    fun `forelopigSvar`() {
+    fun `forelopigSvar skal gi historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -482,6 +506,5 @@ internal class EventServiceTest {
 
     private val FORELOPIGSVAR = JsonForelopigSvar()
             .withType(JsonHendelse.Type.FORELOPIG_SVAR)
-            .withForvaltningsbrev(JsonForvaltningsbrev_().withReferanse(SVARUT_1))
-
+            .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(SVARUT_1))
 }

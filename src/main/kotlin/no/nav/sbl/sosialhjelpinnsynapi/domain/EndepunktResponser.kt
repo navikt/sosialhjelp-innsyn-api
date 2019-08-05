@@ -8,7 +8,7 @@ data class SoknadsStatusResponse(
 
 data class SaksStatusResponse(
         val tittel: String,
-        val status: UtfallEllerSaksStatus,
+        val status: UtfallEllerSaksStatus?,
         val vedtaksfilUrlList: List<String>?
 )
 
@@ -42,4 +42,9 @@ data class UtbetalingResponse(
         val tittel: String,
         val belop: Double,
         val utbetalingsdato: LocalDate
+)
+
+data class VedleggOpplastingResponse(
+        val filnavn: String?,
+        val storrelse: Long
 )

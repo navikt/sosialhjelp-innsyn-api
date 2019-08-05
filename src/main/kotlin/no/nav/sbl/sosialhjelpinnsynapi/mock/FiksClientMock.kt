@@ -31,8 +31,12 @@ class FiksClientMock : FiksClient {
         return innsynMap.values.toList()
     }
 
-    override fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo {
+    override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
+        return
     }
 
     fun postDigisosSak(digisosId: String, digisosSak: DigisosSak) {

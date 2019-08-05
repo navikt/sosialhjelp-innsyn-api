@@ -8,7 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
-fun InternalDigisosSoker.applyVedtakFattet(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
+fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
 
     val utfall = UtfallVedtak.valueOf(hendelse.utfall.utfall.name)
     val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)
@@ -19,8 +19,7 @@ fun InternalDigisosSoker.applyVedtakFattet(hendelse: JsonVedtakFattet, clientPro
     if (sakForReferanse != null) {
         sakForReferanse.vedtak.add(vedtakFattet)
     } else {
-        // TODO: lag ny sak med "default" verdier dersom vedtakFattet mottas _før_ saksStatus?
-
+        // Ny Sak opprettes med default-verdier
         val sak = Sak(
                 hendelse.referanse,
                 SaksStatus.UNDER_BEHANDLING, //TODO: midlertidig SaksStatus for disse tilfellene?

@@ -5,7 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 
-fun InternalDigisosSoker.applySaksStatus(hendelse: JsonSaksStatus) {
+fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
 
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.referanse }
 
@@ -23,10 +23,4 @@ fun InternalDigisosSoker.applySaksStatus(hendelse: JsonSaksStatus) {
                 mutableListOf()
         ))
     }
-
-    // TODO:
-    //  Hvis vedtakFattet kommer FØR SaksStatus -> Sak.tittel = DEFAULT_TITTEL og DEFAULT_TITTEL blir skrevet til historikk
-    //  Når SaksStatus-hendelse med korrekt tittel kommer, skal vi da overskrive tittel i historikk?
-            // Tittel i historikk skal ikke overskrives, da er det jo ikke lengre en historikk
-
 }

@@ -7,7 +7,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-fun InternalDigisosSoker.applyForelopigSvar(hendelse: JsonUtbetaling, clientProperties: ClientProperties) {
+fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling, clientProperties: ClientProperties) {
     hendelse.belop
     val pattern = DateTimeFormatter.ofPattern("YYYY-MM-DD")
     Utbetaling(hendelse.utbetalingsreferanse,

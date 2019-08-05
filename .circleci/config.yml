@@ -38,6 +38,7 @@ jobs:
   release:
     docker:
       - image: "circleci/openjdk:11-jdk"
+    context: NAIS deployment
     steps:
       - checkout
       - setup_remote_docker:
@@ -71,15 +72,16 @@ jobs:
             export GH_TOKEN=$(generate-installation-token.sh `generate-jwt.sh digisos.key $DIGISOS_APPID`)
             echo -e "machine api.github.com login x-access-token password $GH_TOKEN" > ~/.netrc
             rm digisos.key
-            echo $GH_TOKEN
+            echo $GH_TOKEN > ./GH_TOKEN.txt
 
-            #echo "$DEPLOYMENT_PASSWORD" | docker login -u "$DEPLOYMENT_USERNAME" --password-stdin docker.pkg.github.com
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_LOGIN" --password-stdin docker.pkg.github.com
             echo $DOCKER_TAG
             docker push $DOCKER_TAG
       - persist_to_workspace:
           root: .
           paths:
             - ./VERSION.txt
+            - ./GH_TOKEN.txt
 
   deploy_dev:
     docker:
@@ -93,6 +95,9 @@ jobs:
           name: Deploy til default dev-sbs
           command: |
             export VERSION=$(cat /tmp/workspace/VERSION.txt)
+            export GH_TOKEN=$(cat /tmp/workspace/GH_TOKEN.txt)
+
+            echo "temporary token $GH_TOKEN"
 
             deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=nais.yaml --var version=${VERSION} --vars=nais/dev/default.json
 

@@ -7,19 +7,20 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.Month
-import java.time.format.TextStyle
+import java.text.DateFormatSymbols
+import java.time.LocalDate
+import java.time.temporal.ChronoField
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+
 
 private val log = LoggerFactory.getLogger(UtbetalingerService::class.java)
 
 @Component
 class UtbetalingerService(private val eventService: EventService) {
 
-    fun hentUtbetalingerResponse(fiksDigisosId: String, token: String): UtbetalingerResponse {
+    fun hentUtbetalinger(fiksDigisosId: String, token: String): UtbetalingerResponse {
         val model = eventService.createModel(fiksDigisosId)
 
         if (model.saker.isEmpty()) {
@@ -29,20 +30,31 @@ class UtbetalingerService(private val eventService: EventService) {
 
         val utbetalingerResponse = UtbetalingerResponse(mutableListOf())
 
-        val utbetalingerPerManed = HashMap<Month, MutableList<Utbetaling>>().withDefault { key -> ArrayList() }
+        val utbetalingerPerManed = TreeMap<String, MutableList<Utbetaling>>()
         model.saker.stream().flatMap { t -> t.utbetalinger.stream() }.collect(Collectors.toList()).forEach { utbetaling ->
-            utbetalingerPerManed[utbetaling.fom.month]!!.add(utbetaling)
+            if (utbetaling.utbetalingsDato != null) {
+                val monthToString = monthToString(utbetaling.utbetalingsDato)
+                if (!utbetalingerPerManed.containsKey(monthToString)) {
+                    utbetalingerPerManed[monthToString] = ArrayList()
+                }
+                utbetalingerPerManed[monthToString]!!.add(utbetaling)
+
+            }
+            if (utbetaling.fom != null) {
+                utbetalingerPerManed[monthToString(utbetaling.fom)]!!.add(utbetaling)
+            }
         }
         for (utbetalinger in utbetalingerPerManed.entries) {
-            val key = utbetalinger.key
-            val tittel = key.getDisplayName(TextStyle.FULL, Locale.ENGLISH)
 
-
-            val utbetalinger = utbetalinger.value.map { utbetaling -> UtbetalingResponse("", utbetaling.belop.toDouble(), utbetaling.utbetalingsDato) }
-            utbetalingerResponse.maned.add(UtbetalingerManedResponse(tittel, utbetalinger.toMutableList(), utbetalinger.stream().map { t -> t.belop }.reduce { t, u -> t.plus(u) }.get()))
+            // Todo dato blir array
+            val alleUtbetalingene = utbetalinger.value.map { utbetaling -> UtbetalingResponse(utbetaling.beskrivelse, utbetaling.belop.toDouble(), utbetaling.utbetalingsDato) }
+            utbetalingerResponse.utbetalinger.add(UtbetalingerManedResponse(utbetalinger.key, alleUtbetalingene.toMutableList(), alleUtbetalingene.stream().map { t -> t.belop }.reduce { t, u -> t.plus(u) }.get()))
         }
 
         return utbetalingerResponse
     }
+
+    private fun monthToString(localDate: LocalDate?) =
+            DateFormatSymbols().months[localDate!!.get(ChronoField.MONTH_OF_YEAR) - 1]
 
 }

@@ -183,7 +183,15 @@ val ok_komplett_jsondigisossoker_response = """
 			"status": "IKKE_INNSYN",
 			"referanse": "SAK2",
 			"tittel": "KVP"
-		}
+		},  {
+            "utbetalingsreferanse": "Betaling 1",
+            "saksreferanse": "SAK1",
+            "status": "PLANLAGT_UTBETALING",
+            "beskrivelse": "Nødhjelp",
+            "utbetalingsdato": "2019-08-01",
+            "type": "utbetaling",
+            "belop": 12000
+        }
 	]
 }
 """.trimIndent()

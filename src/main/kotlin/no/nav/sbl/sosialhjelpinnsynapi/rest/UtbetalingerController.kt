@@ -16,7 +16,7 @@ class UtbetalingerController(private val utbetalingerService: UtbetalingerServic
     @GetMapping("{fiksDigisosId}/utbetalinger")
     fun hentUtbetalinger(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<UtbetalingerResponse> {
         // Gitt innlogget bruker
-        return ResponseEntity.ok().body(utbetalingerService.hentUtbetalingerResponse(fiksDigisosId, token))
+        return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(fiksDigisosId, token))
     }
 
 }

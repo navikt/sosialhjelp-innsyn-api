@@ -9,31 +9,33 @@ import java.time.format.DateTimeFormatter
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling, clientProperties: ClientProperties) {
     hendelse.belop
-    val pattern = DateTimeFormatter.ofPattern("YYYY-MM-DD")
-    Utbetaling(hendelse.utbetalingsreferanse,
+    val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val utbetaling = Utbetaling(hendelse.utbetalingsreferanse,
             UtbetalingsStatus.valueOf(hendelse.status.value()),
             BigDecimal.valueOf(hendelse.belop),
-            "",//  hendelse.beskrivelse,
-            LocalDate.parse(hendelse.posteringsdato, pattern),
-            LocalDate.parse(hendelse.utbetalingsdato, pattern),
-            LocalDate.parse(hendelse.fom, pattern),
-            LocalDate.parse(hendelse.tom, pattern),
+            hendelse.beskrivelse,
+            if (hendelse.posteringsdato == null) null else LocalDate.parse(hendelse.posteringsdato, pattern),
+            if (hendelse.utbetalingsdato == null) null else LocalDate.parse(hendelse.utbetalingsdato, pattern),
+            if (hendelse.fom == null) null else LocalDate.parse(hendelse.fom, pattern),
+            if (hendelse.tom == null) null else LocalDate.parse(hendelse.tom, pattern),
             hendelse.mottaker,
             "utbetalingsform"
     )
-    val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
+    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
 
     if (sakForReferanse != null) {
         sakForReferanse.utbetalinger.firstOrNull { it.referanse == hendelse.utbetalingsreferanse }
     } else {
         // Opprett ny Sak
-        saker.add(Sak(
+        sakForReferanse = Sak(
                 hendelse.saksreferanse,
                 SaksStatus.UNDER_BEHANDLING,
                 "Sak om sosialhjelp",
                 mutableListOf(),
                 mutableListOf()
-        ))
+        )
+        saker.add(sakForReferanse)
     }
+    sakForReferanse.utbetalinger.add(utbetaling)
 
 }

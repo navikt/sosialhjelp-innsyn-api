@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDate
 
 data class SoknadsStatusResponse(
@@ -29,7 +30,7 @@ data class OppgaveResponse(
 )
 
 data class UtbetalingerResponse(
-        val maned: MutableList<UtbetalingerManedResponse>
+        val utbetalinger: MutableList<UtbetalingerManedResponse>
 )
 
 data class UtbetalingerManedResponse(
@@ -39,9 +40,10 @@ data class UtbetalingerManedResponse(
 )
 
 data class UtbetalingResponse(
-        val tittel: String,
+        val tittel: String?,
         val belop: Double,
-        val utbetalingsdato: LocalDate
+        @JsonFormat(pattern="yyyy-MM-dd")
+        val utbetalingsdato: LocalDate?
 )
 
 data class VedleggOpplastingResponse(

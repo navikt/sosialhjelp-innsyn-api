@@ -49,13 +49,13 @@ data class Utbetaling(
         var referanse: String,
         var status: UtbetalingsStatus,
         var belop: BigDecimal,
-        var beskrivelse: String,
-        var posteringsDato: LocalDate,
-        var utbetalingsDato: LocalDate,
-        var fom: LocalDate,
-        var tom: LocalDate,
-        var mottaker: String,
-        var utbetalingsform: String
+        var beskrivelse: String?,
+        var posteringsDato: LocalDate?,
+        var utbetalingsDato: LocalDate?,
+        var fom: LocalDate?,
+        var tom: LocalDate?,
+        var mottaker: String?,
+        var utbetalingsform: String?
 )
 
 data class Vilkar(

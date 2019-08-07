@@ -14,13 +14,15 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling, clientProperties: Clien
             UtbetalingsStatus.valueOf(hendelse.status.value()),
             BigDecimal.valueOf(hendelse.belop),
             hendelse.beskrivelse,
-            if (hendelse.posteringsdato == null) null else LocalDate.parse(hendelse.posteringsdato, pattern),
+            if (hendelse.forfallsdato == null) null else LocalDate.parse(hendelse.forfallsdato, pattern),
             if (hendelse.utbetalingsdato == null) null else LocalDate.parse(hendelse.utbetalingsdato, pattern),
             if (hendelse.fom == null) null else LocalDate.parse(hendelse.fom, pattern),
             if (hendelse.tom == null) null else LocalDate.parse(hendelse.tom, pattern),
             hendelse.mottaker,
-            "utbetalingsform"
+            hendelse.utbetalingsform
     )
+
+
     var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
 
     if (sakForReferanse != null) {

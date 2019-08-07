@@ -23,7 +23,7 @@ class DigisosApiController(val digisosApiService: DigisosApiService) {
 
     @PostMapping("/opprettDigisosSak", consumes = [APPLICATION_JSON_UTF8_VALUE], produces = [APPLICATION_JSON_UTF8_VALUE])
     fun opprettDigisosSak(@RequestBody digisosSak: DigisosSak): ResponseEntity<String> {
-        digisosApiService.oppdaterDigisosSak(digisosSak)
+        digisosApiService.opprettDigisosSak(digisosSak)
         return ResponseEntity.ok("ok")
     }
 

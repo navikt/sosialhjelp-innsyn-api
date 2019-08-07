@@ -10,11 +10,13 @@ val logstashVersion = "5.3"
 val junitJupiterVersion = "5.4.2"
 val mockkVersion = "1.9.3"
 val wireMockVersion = "2.19.0"
-val filformatVersion = "1.2019.06.26-14.50-746e7610cb12"
+val filformatVersion = "1.2019.07.09-13.14-92d3aa4f71f5"
 val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.9"
 val swaggerVersion = "2.9.2"
+val resilience4jVersion = "0.16.0"
+val rxjavaVersion = "2.2.10"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -43,6 +45,8 @@ configurations {
     "testCompile" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
         exclude(group = "junit", module = "junit")
+        exclude(group = "org.hamcrest", module = "hamcrest-library")
+        exclude(group = "org.hamcrest", module = "hamcrest-core")
     }
 }
 
@@ -68,6 +72,13 @@ dependencies {
     compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
+    
+    //selftest
+    compile("io.github.resilience4j:resilience4j-spring-boot2:$resilience4jVersion")
+    compile("io.github.resilience4j:resilience4j-timelimiter:$resilience4jVersion")
+    compile("io.github.resilience4j:resilience4j-rxjava2:$resilience4jVersion")
+    compile("io.reactivex.rxjava2:rxjava:$rxjavaVersion")
+    compile("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
 
 //    Test dependencies
     testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {

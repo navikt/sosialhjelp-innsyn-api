@@ -69,10 +69,6 @@ val ok_komplett_jsondigisossoker_response = """
 			"status": "MOTTATT"
 		}, {
 			"type": "tildeltNavKontor",
-			"hendelsestidspunkt": "2018-10-04T13:42:00.134Z",
-			"navKontor": "030101"
-		}, {
-			"type": "tildeltNavKontor",
 			"hendelsestidspunkt": "2018-10-08T21:47:00.134Z",
 			"navKontor": "030102"
 		}, {

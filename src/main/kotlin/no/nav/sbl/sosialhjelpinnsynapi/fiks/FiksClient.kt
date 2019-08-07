@@ -9,5 +9,7 @@ interface FiksClient {
 
     fun hentAlleDigisosSaker(token: String): List<DigisosSak>
 
-    fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo
+    fun hentKommuneInfo(kommunenummer: String): KommuneInfo
+
+    fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String)
 }

@@ -5,6 +5,7 @@ server:
 cors:
   allowed_origins:
     - "http://localhost:3000"
+    - "https://www.digisos-test.com"
     - "https://tjenester.nav.no/veivisersosialhjelp/"
     - "https://tjenester-q0.nav.no/veivisersosialhjelp/"
     - "https://tjenester-q1.nav.no/veivisersosialhjelp/"

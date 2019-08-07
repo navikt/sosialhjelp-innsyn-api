@@ -1,0 +1,39 @@
+package no.nav.sbl.sosialhjelpinnsynapi.soknadsstatus
+
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatusResponse
+import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+internal class SoknadsStatusServiceTest {
+
+    private val eventService: EventService = mockk()
+
+    private val service = SoknadsStatusService(eventService)
+
+    private val mockInternalDigisosSoker: InternalDigisosSoker = mockk()
+
+    private val token = "token"
+
+    @BeforeEach
+    fun init() {
+        clearMocks(eventService, mockInternalDigisosSoker)
+    }
+
+    @Test
+    fun `Skal returnere mest nylige SoknadsStatus`() {
+        every { eventService.createModel(any()) } returns mockInternalDigisosSoker
+        every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
+
+        val response: SoknadsStatusResponse = service.hentSoknadsStatus("123", token)
+
+        assertThat(response).isNotNull
+        assertThat(response.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+    }
+}

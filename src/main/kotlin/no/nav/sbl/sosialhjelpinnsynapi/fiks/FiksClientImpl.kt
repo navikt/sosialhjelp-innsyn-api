@@ -4,18 +4,24 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.HttpHeaders.TRANSFER_ENCODING
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.util.Base64Utils
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import java.util.Collections.singletonList
+import java.util.UUID.randomUUID
 
 
 private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
@@ -31,7 +37,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
     private val mapper = jacksonObjectMapper()
-
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         val headers = HttpHeaders()
@@ -70,7 +75,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo {
+    override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
         val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", KommuneInfo::class.java)
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!
@@ -79,6 +84,54 @@ class FiksClientImpl(clientProperties: ClientProperties,
             throw ResponseStatusException(response.statusCode, "something went wrong")
         }
     }
+
+    // Ta inn ett vedlegg eller alle vedlegg tilknyttet en digisosId?
+    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
+//        Innsending av ny ettersendelse til Fiks Digisos bruker også multipart streaming request.
+//          {kommunenummer} er kommunenummer søknaden tilhører
+//          {soknadId} er Fiks DigisosId-en for søknaden det skal ettersendes til
+//          {navEksternRefId} er en unik id fra NAV for denne ettersendelsen
+
+        val navEksternRefId = randomUUID().toString()
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.MULTIPART_FORM_DATA
+        headers.set(TRANSFER_ENCODING, "chunked")
+        headers.set(AUTHORIZATION, token)
+        headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
+        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+
+        // TODO:
+        //  Endepunktet tar inn påkrevde felter for innsending av ny ettersendelse:
+        //  - metadataen vedlegg.json (String) --> { filnavn, mimetype, storrelse }
+        //  - liste med vedlegg (metadata + base64-encodet blokk av selve vedlegget)
+
+        // endre til det man nå enn vil få fra DB
+        file as MultipartFile
+        val vedleggMetadata = VedleggMetadata(file.originalFilename, file.contentType, file.size)
+
+        val base64EncodetVedlegg: ByteArray = Base64Utils.encode(file.bytes) // ??
+
+        val body = LinkedMultiValueMap<String, Any>()
+        body.add("files", vedleggMetadata)
+        body.add("files", base64EncodetVedlegg)
+        // flere
+
+        val requestEntity = HttpEntity<MultiValueMap<String, Any>>(body, headers)
+
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId", HttpMethod.POST, requestEntity, String::class.java)
+
+//      Det er ingen returtype på dette endepunktet.
+//      Ved feil ved opplasting får man 400 Bad Request når multipart-requesten ikke er definert med riktige data.
+        if (response.statusCode.is4xxClientError) {
+            log.warn("Opplasting av ettersendelse feilet")
+            throw ResponseStatusException(response.statusCode, "something went wrong")
+        }
+    }
 }
 
-inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
+data class VedleggMetadata(
+        val filnavn: String?,
+        val mimetype: String?,
+        val storrelse: Long
+)

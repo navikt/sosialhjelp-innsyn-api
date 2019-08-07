@@ -8,8 +8,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -36,7 +35,7 @@ internal class InnsynServiceTest {
 
         val jsonDigisosSoker: JsonDigisosSoker? = service.hentJsonDigisosSoker("123", "Token")
 
-        assertNotNull(jsonDigisosSoker)
+        assertThat(jsonDigisosSoker).isNotNull
     }
 
     @Test
@@ -46,7 +45,7 @@ internal class InnsynServiceTest {
 
         val jsonDigisosSoker = service.hentJsonDigisosSoker("123", "Token")
 
-        assertNull(jsonDigisosSoker)
+        assertThat(jsonDigisosSoker).isNull()
     }
 
     @Test
@@ -59,6 +58,6 @@ internal class InnsynServiceTest {
 
         val jsonSoknad: JsonSoknad = service.hentOriginalSoknad("123")
 
-        assertNotNull(jsonSoknad)
+        assertThat(jsonSoknad).isNotNull
     }
 }

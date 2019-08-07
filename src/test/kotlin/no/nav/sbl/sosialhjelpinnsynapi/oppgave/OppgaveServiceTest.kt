@@ -3,25 +3,19 @@ package no.nav.sbl.sosialhjelpinnsynapi.oppgave
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumenter
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import org.junit.jupiter.api.Assertions.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
+import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 internal class OppgaveServiceTest {
 
-    private val innsynService: InnsynService = mockk()
+    private val eventService: EventService = mockk()
 
-    private val service = OppgaveService(innsynService)
-
-    private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
+    private val service = OppgaveService(eventService)
 
     private val type = "brukskonto"
     private val tillegg = "fraarm"
@@ -31,113 +25,89 @@ internal class OppgaveServiceTest {
     private val tillegg3 = "bes svare umiddelbart"
     private val type4 = "pengebinge"
     private val tillegg4 = "Onkel Skrue penger"
-    private val frist = "2019-10-01T13:37:00.134Z"
-    private val frist2 = "2019-10-02T13:37:00.134Z"
-    private val frist3 = "2019-10-03T13:37:00.134Z"
-    private val frist4 = "2019-10-04T13:37:00.134Z"
+    private val frist = LocalDateTime.now()//"2019-10-01T13:37:00.134Z"
+    private val frist2 = LocalDateTime.now().plusDays(1)//"2019-10-02T13:37:00.134Z"
+    private val frist3 = LocalDateTime.now().plusDays(2)//"2019-10-03T13:37:00.134Z"
+    private val frist4 = LocalDateTime.now().plusDays(3)//"2019-10-04T13:37:00.134Z"
 
     private val token = "token"
 
     @BeforeEach
     fun init() {
-        clearMocks(innsynService, mockJsonDigisosSoker)
+        clearMocks(eventService)
+    }
+
+    @Test
+    fun `Should return emptylist`() {
+        val model = InternalDigisosSoker()
+
+        every { eventService.createModel(any()) } returns model
+
+        val oppgaver = service.hentOppgaver("123", token)
+
+        assertThat(oppgaver).isNotNull
+        assertThat(oppgaver).isEmpty()
     }
 
     @Test
     fun `Should return oppgave`() {
-        every { innsynService.hentJsonDigisosSoker(any(), token) } returns jsonDigisosSoker_med_oppgave
+        val model = InternalDigisosSoker()
+        model.oppgaver.add(Oppgave(type, tillegg, frist))
 
-        val oppgaver = service.getOppgaverForSoknad("123", token)
+        every { eventService.createModel(any()) } returns model
 
-        assertNotNull(oppgaver)
-        assertTrue(oppgaver[0].dokumenttype == type)
-        assertTrue(oppgaver[0].tilleggsinformasjon == tillegg)
-        assertTrue(oppgaver[0].innsendelsesfrist == frist)
+        val oppgaver = service.hentOppgaver("123", token)
+
+        assertThat(oppgaver).isNotNull
+        assertThat(oppgaver[0].dokumenttype).isEqualTo(type)
+        assertThat(oppgaver[0].tilleggsinformasjon).isEqualTo(tillegg)
+        assertThat(oppgaver[0].innsendelsesfrist).isEqualTo(frist.toString())
     }
 
     @Test
     fun `Should return oppgave without tilleggsinformasjon`() {
-        every { innsynService.hentJsonDigisosSoker(any(), token) } returns jsonDigisosSoker_med_oppgave_uten_tilleggsinfo
+        val model = InternalDigisosSoker()
+        model.oppgaver.add(Oppgave(type, null, frist))
 
-        val oppgaver = service.getOppgaverForSoknad("123", token)
+        every { eventService.createModel(any()) } returns model
 
-        assertNotNull(oppgaver)
-        assertTrue(oppgaver[0].dokumenttype == type)
-        assertNull(oppgaver[0].tilleggsinformasjon)
-        assertTrue(oppgaver[0].innsendelsesfrist == frist)
+        val oppgaver = service.hentOppgaver("123", token)
+
+        assertThat(oppgaver).isNotNull
+        assertThat(oppgaver[0].dokumenttype).isEqualTo(type)
+        assertThat(oppgaver[0].tilleggsinformasjon).isNull()
+        assertThat(oppgaver[0].innsendelsesfrist).isEqualTo(frist.toString())
     }
 
     @Test
     fun `Should return list of oppgaver from several JsonDokumentasjonEtterspurt and sorted by frist`() {
-        every { innsynService.hentJsonDigisosSoker(any(), token) } returns jsonDigisosSoker_med_oppgaver
+        val model = InternalDigisosSoker()
+        model.oppgaver.addAll(listOf(
+                Oppgave(type, tillegg, frist),
+                Oppgave(type3, tillegg3, frist3),
+                Oppgave(type4, tillegg4, frist4),
+                Oppgave(type2, tillegg2, frist2)))
 
-        val oppgaver = service.getOppgaverForSoknad("123", token)
+        every { eventService.createModel(any()) } returns model
 
-        assertNotNull(oppgaver)
-        assertTrue(oppgaver.size == 4)
-        assertTrue(oppgaver[0].dokumenttype == type)
-        assertTrue(oppgaver[0].tilleggsinformasjon == tillegg)
-        assertTrue(oppgaver[0].innsendelsesfrist == frist)
-        assertTrue(oppgaver[1].dokumenttype == type2)
-        assertTrue(oppgaver[1].tilleggsinformasjon == tillegg2)
-        assertTrue(oppgaver[1].innsendelsesfrist == frist2)
-        assertTrue(oppgaver[2].dokumenttype == type3)
-        assertTrue(oppgaver[2].tilleggsinformasjon == tillegg3)
-        assertTrue(oppgaver[2].innsendelsesfrist == frist3)
-        assertTrue(oppgaver[3].dokumenttype == type4)
-        assertTrue(oppgaver[3].tilleggsinformasjon == tillegg4)
-        assertTrue(oppgaver[3].innsendelsesfrist == frist4)
+        val oppgaver = service.hentOppgaver("123", token)
+
+        assertThat(oppgaver).isNotNull
+        assertThat(oppgaver.size == 4)
+        assertThat(oppgaver[0].dokumenttype).isEqualTo(type)
+        assertThat(oppgaver[0].tilleggsinformasjon).isEqualTo(tillegg)
+        assertThat(oppgaver[0].innsendelsesfrist).isEqualTo(frist.toString())
+
+        assertThat(oppgaver[1].dokumenttype).isEqualTo(type2)
+        assertThat(oppgaver[1].tilleggsinformasjon).isEqualTo(tillegg2)
+        assertThat(oppgaver[1].innsendelsesfrist).isEqualTo(frist2.toString())
+
+        assertThat(oppgaver[2].dokumenttype).isEqualTo(type3)
+        assertThat(oppgaver[2].tilleggsinformasjon).isEqualTo(tillegg3)
+        assertThat(oppgaver[2].innsendelsesfrist).isEqualTo(frist3.toString())
+
+        assertThat(oppgaver[3].dokumenttype).isEqualTo(type4)
+        assertThat(oppgaver[3].tilleggsinformasjon).isEqualTo(tillegg4)
+        assertThat(oppgaver[3].innsendelsesfrist).isEqualTo(frist4.toString())
     }
-
-    private val jsonDigisosSoker_med_oppgave: JsonDigisosSoker = JsonDigisosSoker()
-            .withAvsender(JsonAvsender().withSystemnavn("test"))
-            .withVersion("1.2.3")
-            .withHendelser(listOf(
-                    JsonDokumentasjonEtterspurt()
-                            .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withDokumenter(listOf(JsonDokumenter()
-                                    .withDokumenttype(type)
-                                    .withTilleggsinformasjon(tillegg)
-                                    .withInnsendelsesfrist(frist)))))
-
-    private val jsonDigisosSoker_med_oppgave_uten_tilleggsinfo: JsonDigisosSoker = JsonDigisosSoker()
-            .withAvsender(JsonAvsender().withSystemnavn("test"))
-            .withVersion("1.2.3")
-            .withHendelser(listOf(
-                    JsonDokumentasjonEtterspurt()
-                            .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withDokumenter(listOf(JsonDokumenter()
-                                    .withDokumenttype(type)
-                                    .withInnsendelsesfrist(frist)))))
-
-    private val jsonDigisosSoker_med_oppgaver: JsonDigisosSoker = JsonDigisosSoker()
-            .withAvsender(JsonAvsender().withSystemnavn("test"))
-            .withVersion("1.2.3")
-            .withHendelser(listOf(
-                    JsonDokumentasjonEtterspurt()
-                            .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withDokumenter(listOf(
-                                    JsonDokumenter()
-                                            .withDokumenttype(type)
-                                            .withTilleggsinformasjon(tillegg)
-                                            .withInnsendelsesfrist(frist),
-                                    JsonDokumenter()
-                                            .withDokumenttype(type3)
-                                            .withTilleggsinformasjon(tillegg3)
-                                            .withInnsendelsesfrist(frist3))),
-                    JsonDokumentasjonEtterspurt()
-                            .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
-                            .withHendelsestidspunkt(LocalDateTime.now().minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME))
-                            .withDokumenter(listOf(
-                                    JsonDokumenter()
-                                            .withDokumenttype(type4)
-                                            .withTilleggsinformasjon(tillegg4)
-                                            .withInnsendelsesfrist(frist4),
-                                    JsonDokumenter()
-                                            .withDokumenttype(type2)
-                                            .withTilleggsinformasjon(tillegg2)
-                                            .withInnsendelsesfrist(frist2)))))
 }

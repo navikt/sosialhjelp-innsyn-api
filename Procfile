@@ -1,1 +1,1 @@
-web: java -jar -Dspring.profiles.active=mock -Dserver.port=$PORT build/libs/sosialhjelp-innsyn-api-*.jar
+web: java -Dserver.port=$PORT -Dspring.profiles.active=mock $JAVA_OPTS -jar build/libs/*.jar

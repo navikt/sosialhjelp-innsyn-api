@@ -1,19 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
-data class SoknadStatusResponse(
-        val status: SoknadStatus
+data class SoknadsStatusResponse(
+        val status: SoknadsStatus
 )
-
-enum class SoknadStatus {
-    SENDT,
-    MOTTATT,
-    UNDER_BEHANDLING,
-    FERDIGBEHANDLET
-}
 
 data class SaksStatusResponse(
         val tittel: String,
-        val status: UtfallEllerSaksStatus,
+        val status: UtfallEllerSaksStatus?,
         val vedtaksfilUrlList: List<String>?
 )
 
@@ -31,4 +24,9 @@ data class OppgaveResponse(
         val innsendelsesfrist: String,
         val dokumenttype: String,
         val tilleggsinformasjon: String?
+)
+
+data class VedleggOpplastingResponse(
+        val filnavn: String?,
+        val storrelse: Long
 )

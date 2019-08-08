@@ -14,15 +14,15 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 @Profile("mock")
 @Configuration
 @EnableSwagger2
-class SwaggerConfig: WebMvcConfigurer {
+class SwaggerConfig : WebMvcConfigurer {
 
     @Bean
     fun api(): Docket {
         return Docket(DocumentationType.SWAGGER_2)
-            .select()
-            .apis(RequestHandlerSelectors.any())
-            .paths(PathSelectors.regex(".*/api/v1/(mock/)?innsyn.*"))
-            .build()
+                .select()
+                .apis(RequestHandlerSelectors.any())
+                .paths(PathSelectors.regex(".*/api/v1/(mock/)?innsyn.*"))
+                .build()
     }
 
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {

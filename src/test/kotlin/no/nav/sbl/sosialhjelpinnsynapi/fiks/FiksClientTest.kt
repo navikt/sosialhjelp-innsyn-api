@@ -6,11 +6,11 @@ import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
+import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -64,7 +64,7 @@ internal class FiksClientTest {
                     any<String>(),
                     any(),
                     any(),
-                    any<ParameterizedTypeReference<List<String>>>())
+                    typeRef<List<String>>())
         } returns mockListResponse
 
         val result = fiksClient.hentAlleDigisosSaker("Token")
@@ -87,7 +87,7 @@ internal class FiksClientTest {
                     KommuneInfo::class.java)
         } returns mockKommuneResponse
 
-        val result = fiksClient.hentInformasjonOmKommuneErPaakoblet("1234")
+        val result = fiksClient.hentKommuneInfo("1234")
 
         assertThat(result).isNotNull
     }

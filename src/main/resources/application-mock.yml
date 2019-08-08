@@ -1,0 +1,7 @@
+cors:
+  allowed_origins:
+    - "https://www.digisos-test.com"
+    - "https://tjenester.nav.no/veivisersosialhjelp/"
+    - "https://tjenester-q0.nav.no/veivisersosialhjelp/"
+    - "https://tjenester-q1.nav.no/veivisersosialhjelp/"
+    - "https://tjenester-t1.nav.no/veivisersosialhjelp/"

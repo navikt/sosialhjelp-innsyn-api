@@ -8,7 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
-fun InternalDigisosSoker.applyDokumentasjonEtterspurt(hendelse: JsonDokumentasjonEtterspurt, clientProperties: ClientProperties) {
+fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProperties: ClientProperties) {
 
 //  TODO: Når DB er på plass må vi sjekke om denne dokumentasjonenEtterspurt har blitt oppfylt av søker
 

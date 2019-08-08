@@ -7,7 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
-fun InternalDigisosSoker.applyForelopigSvar(hendelse: JsonForelopigSvar, clientProperties: ClientProperties) {
+fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: ClientProperties) {
 
     val beskrivelse = "Du har fått et brev om saksbehandlingstiden for søknaden din"
 

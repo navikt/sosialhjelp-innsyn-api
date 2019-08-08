@@ -10,7 +10,7 @@ private val log = LoggerFactory.getLogger(OppgaveService::class.java)
 @Component
 class OppgaveService(private val eventService: EventService) {
 
-    fun getOppgaverForSoknad(fiksDigisosId: String, token: String): List<OppgaveResponse> {
+    fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
         val model = eventService.createModel(fiksDigisosId)
 
         if (model.oppgaver.isEmpty()) {

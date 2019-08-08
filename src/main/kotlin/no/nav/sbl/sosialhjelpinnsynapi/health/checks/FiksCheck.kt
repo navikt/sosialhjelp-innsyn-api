@@ -13,8 +13,8 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Component
-class FiksCheck (private val restTemplate: RestTemplate,
-                 private val clientProperties: ClientProperties) : AbstractDependencyCheck(
+class FiksCheck(private val restTemplate: RestTemplate,
+                private val clientProperties: ClientProperties) : AbstractDependencyCheck(
         DependencyType.REST,
         "Fiks Digisos API",
         clientProperties.fiksDigisosEndpointUrl,

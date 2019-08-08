@@ -2,19 +2,19 @@ package no.nav.sbl.sosialhjelpinnsynapi.health.selftest
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 
-data class DependencyCheckResult (
-    val endpoint: String?,
-    val result: Result?,
-    val address: String?,
-    val errorMessage: String?,
-    val type: DependencyType?,
-    val importance: Importance?,
-    val responseTime: String?,
-    @JsonIgnore
-    val throwable: Throwable?
+data class DependencyCheckResult(
+        val endpoint: String?,
+        val result: Result?,
+        val address: String?,
+        val errorMessage: String?,
+        val type: DependencyType?,
+        val importance: Importance?,
+        val responseTime: String?,
+        @JsonIgnore
+        val throwable: Throwable?
 )
 
-data class SelftestResult (
+data class SelftestResult(
         val appName: String?,
         val version: String?,
         val result: Result?,

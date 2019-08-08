@@ -4,9 +4,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -36,7 +36,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
     private val mapper = jacksonObjectMapper()
-
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         val headers = HttpHeaders()
@@ -75,7 +74,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun hentInformasjonOmKommuneErPaakoblet(kommunenummer: String): KommuneInfo {
+    override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
         val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", KommuneInfo::class.java)
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!
@@ -135,5 +134,3 @@ data class VedleggMetadata(
         val mimetype: String?,
         val storrelse: Long
 )
-
-inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}

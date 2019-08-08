@@ -16,10 +16,10 @@ import org.springframework.web.server.ResponseStatusException
 class HendelseController(val hendelseService: HendelseService) {
 
     @GetMapping("/{fiksDigisosId}/hendelser", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-    fun getHendelserForSoknad(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<HendelseResponse>> {
+    fun hentHendelser(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<HendelseResponse>> {
         try {
-            val hendelserForSoknad = hendelseService.getHendelserForSoknad(fiksDigisosId, token)
-            return ResponseEntity.ok(hendelserForSoknad)
+            val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
+            return ResponseEntity.ok(hendelser)
         } catch (e: Exception) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }

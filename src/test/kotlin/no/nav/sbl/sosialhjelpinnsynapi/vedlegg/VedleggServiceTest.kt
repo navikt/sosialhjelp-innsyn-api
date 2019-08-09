@@ -6,6 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Ettersendelse
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -17,8 +18,9 @@ import java.time.temporal.ChronoUnit
 internal class VedleggServiceTest {
 
     private val fiksClient: FiksClient = mockk()
+    private val dokumentlagerClient: DokumentlagerClient = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
-    private val service = VedleggService(fiksClient, clientProperties)
+    private val service = VedleggService(fiksClient, dokumentlagerClient, clientProperties)
 
     private val mockDigisosSak: DigisosSak = mockk()
 

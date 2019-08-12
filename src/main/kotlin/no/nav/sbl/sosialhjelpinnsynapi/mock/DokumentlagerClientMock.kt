@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -16,9 +17,19 @@ class DokumentlagerClientMock : DokumentlagerClient {
     private val jsonDigisosSoker: String = this.javaClass.classLoader
             .getResourceAsStream("mock/json_digisos_soker.json")
             .bufferedReader().use { it.readText() }
+
     private val jsonSoknad: String = this.javaClass.classLoader
             .getResourceAsStream("mock/json_soknad.json")
             .bufferedReader().use { it.readText() }
+
+    private val jsonVedleggSpesifikasjon: String = this.javaClass.classLoader
+            .getResourceAsStream("mock/json_vedlegg_spesifikasjon.json")
+            .bufferedReader().use { it.readText() }
+
+    private val jsonVedleggSpesifikasjonEttersendelse: String = this.javaClass.classLoader
+            .getResourceAsStream("mock/json_vedlegg_spesifikasjon_ettersendelse.json")
+            .bufferedReader().use { it.readText() }
+
 
     override fun hentDokument(dokumentlagerId: String, requestedClass: Class<out Any>): Any {
         return when (requestedClass) {
@@ -32,6 +43,20 @@ class DokumentlagerClientMock : DokumentlagerClient {
                 dokumentMap[dokumentlagerId] = default
                 default
             })
+            JsonVedleggSpesifikasjon::class.java ->
+                if (dokumentlagerId == "mock-soknad-vedlegg-metadata") {
+                    dokumentMap.getOrElse(dokumentlagerId, {
+                        val default = getDefaultJsonVedleggSpesifikasjon()
+                        dokumentMap[dokumentlagerId] = default
+                        default
+                    })
+                } else {
+                    dokumentMap.getOrElse(dokumentlagerId, {
+                        val default = getDefaultJsonVedleggSpesifikasjonEttersendelse()
+                        dokumentMap[dokumentlagerId] = default
+                        default
+                    })
+                }
             else -> requestedClass.getDeclaredConstructor(requestedClass).newInstance()
         }
     }
@@ -46,5 +71,13 @@ class DokumentlagerClientMock : DokumentlagerClient {
 
     private fun getDefaultJsonSoknad(): JsonSoknad {
         return mapper.readValue(jsonSoknad, JsonSoknad::class.java)
+    }
+
+    private fun getDefaultJsonVedleggSpesifikasjon(): JsonVedleggSpesifikasjon {
+        return mapper.readValue(jsonVedleggSpesifikasjon, JsonVedleggSpesifikasjon::class.java)
+    }
+
+    private fun getDefaultJsonVedleggSpesifikasjonEttersendelse(): JsonVedleggSpesifikasjon {
+        return mapper.readValue(jsonVedleggSpesifikasjonEttersendelse, JsonVedleggSpesifikasjon::class.java)
     }
 }

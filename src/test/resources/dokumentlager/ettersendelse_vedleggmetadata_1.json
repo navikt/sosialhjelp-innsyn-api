@@ -1,0 +1,15 @@
+{
+  "vedlegg": [
+    {
+      "type": "faktura",
+      "tilleggsinfo": "additional",
+      "status": "LastetOpp",
+      "filer": [
+        {
+          "filnavn": "ettersendelse vedlegg filnavn 1",
+          "sha512": "asknd2341"
+        }
+      ]
+    }
+  ]
+}

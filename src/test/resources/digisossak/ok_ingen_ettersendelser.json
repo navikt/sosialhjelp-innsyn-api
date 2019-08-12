@@ -7,24 +7,17 @@
   "originalSoknadNAV": {
     "navEksternRefId": "string",
     "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa0",
-    "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "vedleggMetadata": "3fa85f64-5717-4562-b3fc-000000000000",
     "soknadDokument": {
       "filnavn": "string",
       "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "storrelse": 0
     },
-    "vedlegg": [
-      {
-        "filnavn": "string",
-        "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "storrelse": 0
-      }
-    ],
+    "vedlegg": [],
     "timestampSendt": 0
   },
   "ettersendtInfoNAV": {
-    "ettersendelser": [
-    ]
+    "ettersendelser": []
   },
   "digisosSoker": {
     "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa1",

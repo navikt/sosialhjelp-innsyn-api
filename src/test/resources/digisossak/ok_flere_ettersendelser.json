@@ -7,7 +7,7 @@
   "originalSoknadNAV": {
     "navEksternRefId": "string",
     "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa0",
-    "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "vedleggMetadata": "3fa85f64-5717-4562-b3fc-ffffaaaaffff",
     "soknadDokument": {
       "filnavn": "string",
       "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -15,22 +15,22 @@
     },
     "vedlegg": [
       {
-        "filnavn": "string",
-        "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "storrelse": 0
+        "filnavn": "soknad vedlegg filnavn 1",
+        "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-aaaaaa123456",
+        "storrelse": 4242
       }
     ],
-    "timestampSendt": 0
+    "timestampSendt": 1546473600000
   },
   "ettersendtInfoNAV": {
     "ettersendelser": [
       {
         "navEksternRefId": "navEksternId-1",
-        "vedleggMetadata": "3fa85f64-5717-4562-b3fc-aaa111aaa222",
+        "vedleggMetadata": "3fa85f64-5717-4562-b3fc-aaa111aaa111",
         "vedlegg": [
           {
-            "filnavn": "fil 1",
-            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-bbb111bbb222",
+            "filnavn": "ettersendelse vedlegg filnavn 1",
+            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-bbbbbb123456",
             "storrelse": 1337
           }
         ],
@@ -38,12 +38,22 @@
       },
       {
         "navEksternRefId": "navEksternId-2",
-        "vedleggMetadata": "3fa85f64-5717-4562-b3fc-aaa111aaa333",
+        "vedleggMetadata": "3fa85f64-5717-4562-b3fc-aaa222aaa222",
         "vedlegg": [
           {
-            "filnavn": "fil 2",
-            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-bbb111bbb333",
-            "storrelse": 42
+            "filnavn": "ettersendelse vedlegg filnavn 2",
+            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-cccccc123456",
+            "storrelse": 123
+          },
+          {
+            "filnavn": "ettersendelse vedlegg filnavn 3",
+            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-dddddd123456",
+            "storrelse": 456
+          },
+          {
+            "filnavn": "ettersendelse vedlegg filnavn 4",
+            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-eeeeee123456",
+            "storrelse": 789
           }
         ],
         "timestampSendt": 1546300800000

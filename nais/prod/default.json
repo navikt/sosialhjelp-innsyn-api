@@ -4,5 +4,7 @@
     "https://sosialhjelp-innsyn-api.nais.oera.no/soknadsosialhjelp/innsyn-api",
     "https://www.nav.no/soknadsosialhjelp/innsyn-api"
   ],
-  "norg_endpoint_url": "https://api-gw.oera.no/norg2/api/v1/"
+  "norg_endpoint_url": "https://api-gw.oera.no/norg2/api/v1/",
+  "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/sosialhjelp",
+  "application_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default"
 }

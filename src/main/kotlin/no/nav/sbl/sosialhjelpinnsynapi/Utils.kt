@@ -20,7 +20,7 @@ fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: Jso
     }
 }
 
-fun hentUrlFraDokumentlagerId(clientProperties: ClientProperties, dokumentlagerId: String): String {
+fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: String): String {
     return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${dokumentlagerId}"
 }
 

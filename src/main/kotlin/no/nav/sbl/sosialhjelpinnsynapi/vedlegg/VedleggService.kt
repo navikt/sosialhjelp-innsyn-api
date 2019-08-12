@@ -1,11 +1,14 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonVedlegg
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
+import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraDokumentlagerId
+import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import org.springframework.stereotype.Component
 
@@ -14,34 +17,67 @@ class VedleggService(private val fiksClient: FiksClient,
                      private val dokumentlagerClient: DokumentlagerClient,
                      private val clientProperties: ClientProperties) {
 
-    // TODO:
-    //  - Skal vedleggoversikt vise _alle_ bruker-innsendte vedlegg (ifm med innsending av søknad + ettersendelser i form av oppgaver i innsyn)? Antar ja
-
     fun hentAlleVedlegg(fiksDigisosId: String): List<VedleggResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
 
-        if (digisosSak.ettersendtInfoNAV.ettersendelser.isEmpty()) {
+        val soknadVedlegg = hentSoknadVedlegg(digisosSak.originalSoknadNAV)
+
+        val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
+
+        return soknadVedlegg.plus(ettersendteVedlegg)
+    }
+
+    private fun hentSoknadVedlegg(originalSoknadNAV: OriginalSoknadNAV): List<VedleggResponse> {
+        val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(originalSoknadNAV.vedleggMetadata)
+
+        if (jsonVedleggSpesifikasjon.vedlegg.isEmpty()) {
             return emptyList()
         }
 
-        val vedleggResponses = digisosSak.ettersendtInfoNAV.ettersendelser
+        return jsonVedleggSpesifikasjon.vedlegg
+                .filter { "LastetOpp" == it.status }
                 .flatMap {
-                    it.vedlegg.map {vedlegg -> VedleggResponse(
-                            vedlegg.filnavn,
-                            vedlegg.storrelse.toLong(),
-                            hentUrlFraDokumentlagerId(clientProperties, vedlegg.dokumentlagerDokumentId),
-                            "beskrivelse", // Hvor kommer beskrivelse fra?
-                            unixToLocalDateTime(it.timestampSendt)) }
+                    it.filer.map { fil ->
+                        VedleggResponse(
+                                fil.filnavn,
+                                hentStorrelse(fil.filnavn, originalSoknadNAV.vedlegg),
+                                hentUrl(fil.filnavn, originalSoknadNAV.vedlegg),
+                                it.type,
+                                unixToLocalDateTime(originalSoknadNAV.timestampSendt))
+                    }
                 }
-
-        // Havner ettersendte vedlegg ifm oppgaver i innsyn "samme sted" eller ett annet sted i DigisosSak'en?
-
-        return vedleggResponses
     }
 
-    // Hvis alle vedlegg er no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonVedlegg, kan kanskje tittel benyttes
-    private fun hentBeskrivelseFraInnsynVedlegg(dokumentlagerId: String): String {
-        val vedlegg = dokumentlagerClient.hentDokument(dokumentlagerId, JsonVedlegg::class.java) as JsonVedlegg
-        return vedlegg.tittel
+    private fun hentEttersendteVedlegg(ettersendtInfoNAV: EttersendtInfoNAV): List<VedleggResponse> {
+        return ettersendtInfoNAV.ettersendelser.flatMap {
+            val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(it.vedleggMetadata)
+            jsonVedleggSpesifikasjon.vedlegg
+                    .filter { vedlegg -> "LastetOpp" == vedlegg.status }
+                    .flatMap { vedlegg ->
+                        vedlegg.filer
+                                .map { fil ->
+                                    VedleggResponse(
+                                            fil.filnavn,
+                                            hentStorrelse(fil.filnavn, it.vedlegg),
+                                            hentUrl(fil.filnavn, it.vedlegg),
+                                            vedlegg.type,
+                                            unixToLocalDateTime(it.timestampSendt))
+                                }
+                    }
+        }
+    }
+
+    private fun hentVedleggSpesifikasjon(dokumentlagerId: String): JsonVedleggSpesifikasjon {
+        return dokumentlagerClient.hentDokument(dokumentlagerId, JsonVedleggSpesifikasjon::class.java) as JsonVedleggSpesifikasjon
+    }
+
+    private fun hentStorrelse(filnavn: String, list: List<DokumentInfo>): Long {
+        val first = list.first { it.filnavn == filnavn }
+        return first.storrelse
+    }
+
+    private fun hentUrl(filnavn: String, list: List<DokumentInfo>): String {
+        val first = list.first { it.filnavn == filnavn }
+        return hentDokumentlagerUrl(clientProperties, first.dokumentlagerDokumentId)
     }
 }

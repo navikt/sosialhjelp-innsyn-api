@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.vedleggopplasting.VedleggOpplastingService
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile

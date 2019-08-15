@@ -1,5 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
+import com.fasterxml.jackson.annotation.JsonFormat
+import java.time.LocalDateTime
+
 data class SoknadsStatusResponse(
         val status: SoknadsStatus
 )
@@ -24,6 +27,15 @@ data class OppgaveResponse(
         val innsendelsesfrist: String,
         val dokumenttype: String,
         val tilleggsinformasjon: String?
+)
+
+data class VedleggResponse(
+        val filnavn: String,
+        val storrelse: Long,
+        val url: String,
+        val beskrivelse: String,
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+        val datoLagtTil: LocalDateTime
 )
 
 data class VedleggOpplastingResponse(

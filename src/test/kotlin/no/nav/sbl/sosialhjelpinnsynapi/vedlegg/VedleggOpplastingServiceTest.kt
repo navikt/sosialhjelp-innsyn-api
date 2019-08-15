@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.vedleggopplasting
+package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
 import io.mockk.*
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak

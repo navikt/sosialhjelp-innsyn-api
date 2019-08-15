@@ -17,3 +17,7 @@ client:
   fiks_integrasjonid_kommune: "idkom"
   fiks_integrasjonpassord: "pwd"
   fiks_integrasjonpassord_kommune: "pwdcom"
+  idPortenTokenUrl: "test"
+  idPortenClientId: "test"
+  idPortenScope: "test"
+  idPortenConfigUrl: "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration"

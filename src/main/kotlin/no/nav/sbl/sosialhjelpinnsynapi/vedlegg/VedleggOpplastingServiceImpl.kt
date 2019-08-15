@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.vedleggopplasting
+package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient

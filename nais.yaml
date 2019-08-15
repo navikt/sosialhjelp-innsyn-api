@@ -27,6 +27,11 @@ spec:
   webproxy: true
   vault:
     enabled: true
+    paths:
+      - kvPath: {{application_vault_path}}
+        mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: {{virksomhetssertifikat_vault_path}}
+        mountPath: /var/run/secrets/nais.io/virksomhetssertifikat
   ingresses: {{{ingresses}}}
   resources:
     limits:

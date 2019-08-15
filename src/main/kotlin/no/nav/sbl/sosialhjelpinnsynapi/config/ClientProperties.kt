@@ -21,4 +21,9 @@ class ClientProperties {
 
     lateinit var norgEndpointUrl: String
 
+    lateinit var idPortenTokenUrl: String
+    lateinit var idPortenClientId: String
+    lateinit var idPortenScope: String
+    lateinit var idPortenConfigUrl: String
+
 }

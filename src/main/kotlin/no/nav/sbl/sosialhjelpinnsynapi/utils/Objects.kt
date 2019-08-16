@@ -23,8 +23,8 @@ internal val defaultHttpClient = HttpClient(Apache) {
     }
     engine {
         customizeClient {
-            if (System.getenv("http_proxy") != null)
-                setProxy(HttpHost(System.getenv("http_proxy").split(":")[0], Integer.valueOf(System.getenv("http_proxy").split(":")[1])))
+            if (System.getenv("HTTP_PROXY") != null)
+                setProxy(HttpHost(System.getenv("HTTP_PROXY").split(":")[0], Integer.valueOf(System.getenv("HTTP_PROXY").split(":")[1])))
         }
     }
 }

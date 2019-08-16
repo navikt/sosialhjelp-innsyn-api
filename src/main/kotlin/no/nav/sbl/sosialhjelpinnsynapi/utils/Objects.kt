@@ -12,18 +12,19 @@ import io.ktor.client.features.json.JsonFeature
 import org.apache.http.HttpHost
 
 val objectMapper: ObjectMapper = ObjectMapper()
-    .registerKotlinModule()
-    .registerModule(JavaTimeModule())
-    .configure(SerializationFeature.INDENT_OUTPUT, true)
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .registerKotlinModule()
+        .registerModule(JavaTimeModule())
+        .configure(SerializationFeature.INDENT_OUTPUT, true)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
 internal val defaultHttpClient = HttpClient(Apache) {
     install(JsonFeature) {
         serializer = JacksonSerializer { objectMapper }
     }
-    engine{
+    engine {
         customizeClient {
-            setProxy(HttpHost(System.getenv("http_proxy").split(":")[0], Integer.valueOf(System.getenv("http_proxy").split(":")[1])))
+            if (System.getenv("http_proxy") != null)
+                setProxy(HttpHost(System.getenv("http_proxy").split(":")[0], Integer.valueOf(System.getenv("http_proxy").split(":")[1])))
         }
     }
 }

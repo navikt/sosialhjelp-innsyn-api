@@ -12,7 +12,7 @@ spring:
 
 server:
   servlet:
-    context-path: '/soknadsosialhjelp/innsyn-api'
+    context-path: '/sosialhjelp/innsyn-api'
 
 client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:fiks-digisos-url}
@@ -22,7 +22,7 @@ client:
 
 cors:
   allowed_origins:
-    - "https://tjenester.nav.no/veivisersosialhjelp/"
-    - "https://tjenester-q0.nav.no/veivisersosialhjelp/"
-    - "https://tjenester-q1.nav.no/veivisersosialhjelp/"
-    - "https://tjenester-t1.nav.no/veivisersosialhjelp/"
+    - "https://www.nav.no/sosialhjelp/"
+    - "https://www-q0.nav.no/sosialhjelp/"
+    - "https://www-q1.nav.no/sosialhjelp/"
+    - "https://www-t1.nav.no/sosialhjelp/"

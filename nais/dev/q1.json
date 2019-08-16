@@ -1,8 +1,8 @@
 {
   "namespace": "q1",
   "ingresses": [
-    "https://sosialhjelp-innsyn-api-q1.nais.oera-q.local/soknadsosialhjelp/innsyn-api",
-    "https://www-q1.nav.no/soknadsosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api-q1.nais.oera-q.local/sosialhjelp/innsyn-api",
+    "https://www-q1.nav.no/sosialhjelp/innsyn-api"
   ],
   "fiks_digisos_endpoint_url": "https://api.fiks.test.ks.no",
   "fiks_dokumentlager_endpoint_url": "https://minside.fiks.test.ks.no/",

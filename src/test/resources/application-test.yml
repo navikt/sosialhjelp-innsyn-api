@@ -6,7 +6,7 @@ spring:
 
 server:
   servlet:
-    context-path: '/soknadsosialhjelp/innsyn-api'
+    context-path: '/sosialhjelp/innsyn-api'
 
 client:
   fiks_digisos_endpoint_url: 'http://localhost:51234'

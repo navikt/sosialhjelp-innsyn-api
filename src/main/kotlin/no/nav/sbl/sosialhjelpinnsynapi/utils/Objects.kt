@@ -10,7 +10,9 @@ import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import org.apache.http.HttpHost
+import org.slf4j.LoggerFactory
 
+private val log = LoggerFactory.getLogger(HttpClient::class.java)
 val objectMapper: ObjectMapper = ObjectMapper()
         .registerKotlinModule()
         .registerModule(JavaTimeModule())
@@ -23,8 +25,11 @@ internal val defaultHttpClient = HttpClient(Apache) {
     }
     engine {
         customizeClient {
-            if (System.getenv("HTTP_PROXY") != null)
-                setProxy(HttpHost(System.getenv("HTTP_PROXY").split(":")[0], Integer.valueOf(System.getenv("HTTP_PROXY").split(":")[1])))
+            val proxy = System.getenv("HTTP_PROXY")
+            if (proxy != null){
+                setProxy(HttpHost(proxy.split(":")[0], Integer.valueOf(proxy.split(":")[1])))
+                log.info("proxy set")
+            }
         }
     }
 }

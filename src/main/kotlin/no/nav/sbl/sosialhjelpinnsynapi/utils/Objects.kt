@@ -9,6 +9,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import org.apache.http.HttpHost
 
 val objectMapper: ObjectMapper = ObjectMapper()
     .registerKotlinModule()
@@ -19,5 +20,10 @@ val objectMapper: ObjectMapper = ObjectMapper()
 internal val defaultHttpClient = HttpClient(Apache) {
     install(JsonFeature) {
         serializer = JacksonSerializer { objectMapper }
+    }
+    engine{
+        customizeClient {
+            setProxy(HttpHost(System.getenv("http_proxy").split(":")[0], Integer.valueOf(System.getenv("http_proxy").split(":")[1])))
+        }
     }
 }

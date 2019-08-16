@@ -42,6 +42,8 @@ class IdPortenService(
 
 
     val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
+
+        logger.info("Henter config fra" + idPortenConfigUrl)
         defaultHttpClient.get<IdPortenOidcConfiguration> {
             url(idPortenConfigUrl)
         }

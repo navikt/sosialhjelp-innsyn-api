@@ -80,12 +80,12 @@ class IdPortenService(
             it.time
         }
         val virksertCredentials = objectMapper.readValue<VirksertCredentials>(
-                File("/var/run/secrets/nais.io/virksomhetssertifikat/v/credentials.json").readText(Charsets.UTF_8)
+                File("/var/run/secrets/nais.io/virksomhetssertifikat/credentials.json").readText(Charsets.UTF_8)
         )
 
         val pair = KeyStore.getInstance("PKCS12").let { keyStore ->
             keyStore.load(
-                    decodeBase64(File("/var/run/secrets/nais.io/virksomhetssertifikat/v/key.p12.b64").readText(Charsets.UTF_8)).inputStream(),
+                    decodeBase64(File("/var/run/secrets/nais.io/virksomhetssertifikat/key.p12.b64").readText(Charsets.UTF_8)).inputStream(),
                     virksertCredentials.password.toCharArray()
             )
             val cert = keyStore.getCertificate(virksertCredentials.alias) as X509Certificate

@@ -22,7 +22,7 @@ class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurit
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.cors()
-//        http.csrf().disable()
+        http.csrf().disable()
     }
 
     @Bean

@@ -99,6 +99,9 @@ class IdPortenService(
             ) to cert.encoded
         }
 
+
+        logger.info("Public certificate length " + pair.first.public.encoded.size)
+
         return SignedJWT(
                 JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(mutableListOf(Base64.encode(pair.second))).build(),
                 JWTClaimsSet.Builder()
@@ -111,7 +114,9 @@ class IdPortenService(
                         .build()
         ).run {
             sign(RSASSASigner(pair.first.private))
-            Jws(serialize())
+            val jws = Jws(serialize())
+            logger.info("Serialized JWS")
+            jws
         }
     }
 

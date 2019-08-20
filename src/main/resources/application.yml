@@ -17,7 +17,14 @@ server:
 client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:fiks-digisos-url}
   fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:dokumentlager-url}
+  fiks_integrasjonid: ${INTEGRASJONPASSORD_FIKS:fiks-integrasjonid}
+  fiks_integrasjonid_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE:fiks-integrasjonid-kommune}
   fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS:fiks-integrasjonpassord}
+  fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE:fiks-integrasjonpassord-kommune}
+  idPortenTokenUrl: "https://oidc-ver2.difi.no/idporten-oidc-provider/token"
+  idPortenClientId: "1c3631f4-dbf2-4c12-bdc4-156cbd53c625"
+  idPortenScope: "ks:fiks"
+  idPortenConfigUrl: "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration"
   norg_endpoint_url: ${NORG_ENDPOINT_URL:norg_endpoint_url}
 
 cors:

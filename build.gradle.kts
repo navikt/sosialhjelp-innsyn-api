@@ -19,6 +19,9 @@ val guavaVersion = "28.0-jre"
 val swaggerVersion = "2.9.2"
 val resilience4jVersion = "0.16.0"
 val rxjavaVersion = "2.2.10"
+val ktorVersion = "1.2.2"
+val konfigVersion = "1.6.10.0"
+val kotlinCoroutinesVersion = "1.2.2"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -56,6 +59,18 @@ dependencies {
     compile(kotlin("stdlib"))
     compile(kotlin("reflect"))
 
+    compile("io.ktor:ktor-server-netty:$ktorVersion")
+    compile("io.ktor:ktor-auth:$ktorVersion")
+    compile("io.ktor:ktor-auth-jwt:$ktorVersion")
+    compile("io.ktor:ktor-jackson:$ktorVersion")
+    compile("io.ktor:ktor-client-core:$ktorVersion")
+    compile("io.ktor:ktor-client-apache:$ktorVersion")
+    compile("io.ktor:ktor-client-json:$ktorVersion")
+    compile("io.ktor:ktor-client-jackson:$ktorVersion")
+    compile("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${kotlinCoroutinesVersion}")
+
+    compile("com.natpryce:konfig:$konfigVersion")
+
     compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
@@ -86,7 +101,7 @@ dependencies {
     compile("io.reactivex.rxjava2:rxjava:$rxjavaVersion")
     compile("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
 
-//    Test dependencies
+    //Test dependencies
     testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
         exclude(group = "org.mockito", module = "mockito-core")
     }

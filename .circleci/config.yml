@@ -95,6 +95,8 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Deploy versjon=${VERSION} til miljø=${MILJO} i dev-sbs
           command: |
@@ -110,6 +112,8 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Deploy versjon=${VERSION} til prod
           command: |

@@ -1,0 +1,29 @@
+package no.nav.sbl.sosialhjelpinnsynapi.common
+
+import io.ktor.features.origin
+import io.ktor.request.ApplicationRequest
+import java.time.ZoneOffset
+import javax.xml.datatype.XMLGregorianCalendar
+
+internal sealed class ParamType(val description: String) {
+    object Header : ParamType("header")
+    object Parameter : ParamType("parameter")
+    object QueryParameter : ParamType("query parameter")
+
+    override fun toString(): String = this.description
+}
+
+internal fun ApplicationRequest.url(): String {
+    val port = when (origin.port) {
+        in listOf(80, 443) -> ""
+        else -> ":${origin.port}"
+    }
+    return "${origin.scheme}://${origin.host}$port${origin.uri}"
+}
+
+internal fun XMLGregorianCalendar?.dateTimeToMillis(): Long? =
+    this?.toGregorianCalendar()?.toZonedDateTime()?.toLocalDateTime()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
+
+internal fun XMLGregorianCalendar?.dateToMilis(): Long? =
+    this?.toGregorianCalendar()?.toZonedDateTime()?.toLocalDate()?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+

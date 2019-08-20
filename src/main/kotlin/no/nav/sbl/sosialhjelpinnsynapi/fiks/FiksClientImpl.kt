@@ -34,6 +34,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
+    private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
     private val mapper = jacksonObjectMapper()
 
@@ -41,7 +42,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
+        headers.set("IntegrasjonId", fiksIntegrasjonid)
         headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
@@ -63,7 +64,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
+        headers.set("IntegrasjonId", fiksIntegrasjonid)
         headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {

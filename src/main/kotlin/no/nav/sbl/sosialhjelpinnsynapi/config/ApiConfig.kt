@@ -22,7 +22,7 @@ class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurit
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.cors()
-//        http.csrf().disable()
+        http.csrf().disable()
     }
 
     @Bean
@@ -45,7 +45,7 @@ class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        http.csrf().ignoringAntMatchers("/api/v1/mock/**", "/api/v1/innsyn/**/vedlegg/lastOpp", "/api/v1/innsyn/**/vedlegg/send")
+        http.csrf().ignoringAntMatchers("/api/v1/mock/**", "/api/v1/innsyn/**/vedlegg/lastOpp", "/api/v1/innsyn/**/vedlegg/send","/api/v1/digisosapi/**")
         http.cors()
     }
 }

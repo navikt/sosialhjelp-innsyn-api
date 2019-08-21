@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import org.springframework.context.annotation.Profile
@@ -9,12 +10,8 @@ import java.util.*
 @Profile("mock")
 @Component
 class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : DigisosApiClient {
-    override fun oppdaterDigisosSak(digisosSak: DigisosSak) {
-        fiksClientMock.postDigisosSak(digisosSak)
+    override fun oppdaterDigisosSak(fiksDigisosId:String?, hendelser:List<JsonHendelse>) : String?{
+       // fiksClientMock.postDigisosSak(digisosSak)
+        return ""
     }
-
-    override fun opprettDigisosSak(fiksOrgId: String): String {
-        return UUID.randomUUID().toString()
-    }
-
 }

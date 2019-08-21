@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.AccessToken
@@ -38,11 +39,7 @@ internal class DigisosApiClientTest {
                     String::class.java)
         } returns mockResponse
 
-        val digisosSak = DigisosSak("id", "12345678901", "111222333", "0301", OffsetDateTime.now().toEpochSecond(),
-                OriginalSoknadNAV("", "", "", DokumentInfo("", "", 1), Collections.emptyList(), 0),
-                EttersendtInfoNAV(Collections.emptyList()), DigisosSoker("meta", Collections.emptyList(), OffsetDateTime.now().toEpochSecond()))
-
-        digisosApiClient.oppdaterDigisosSak(digisosSak)
+        digisosApiClient.oppdaterDigisosSak("123123", listOf(JsonHendelse()))
     }
 
 

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Component
 
 @Component
 interface DigisosApiClient {
-    fun postDigisosSakMedInnsyn( digisosSak: DigisosSak)
-    fun postDigisosSakMedInnsynNy( digisosSak: DigisosSak)
+    fun opprettDigisosSak(fiksOrgId: String): String?
+    fun oppdaterDigisosSak(digisosSak: DigisosSak)
 }

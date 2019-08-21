@@ -27,7 +27,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
     private val fiksIntegrasjonPassordKommune = clientProperties.fiksIntegrasjonPassordKommune
     private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
-    override fun postDigisosSakMedInnsyn(digisosSak: DigisosSak) {
+    override fun oppdaterDigisosSak(digisosSak: DigisosSak) {
         val headers = HttpHeaders()
 
         val accessToken = runBlocking { idPortenService.requestToken() }
@@ -49,20 +49,21 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
         }
     }
 
-    override fun postDigisosSakMedInnsynNy(digisosSak: DigisosSak) {
+    override fun opprettDigisosSak(fiksOrgId: String): String? {
         val headers = HttpHeaders()
         val accessToken = runBlocking { idPortenService.requestToken() }
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         headers.set("IntegrasjonId", fiksIntegrasjonIdKommune)
         headers.set("IntegrasjonPassord", fiksIntegrasjonPassordKommune)
         headers.set("Authorization", "Bearer " + accessToken.token)
-        //mapper.writeValueAsString(digisosSak)
         val httpEntity = HttpEntity("", headers)
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/${digisosSak.fiksOrgId}/ny?sokerFnr=01234567890", HttpMethod.POST, httpEntity, String::class.java)
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/$fiksOrgId/ny?sokerFnr=01234567890", HttpMethod.POST, httpEntity, String::class.java)
 
 
         if (response.statusCode.is2xxSuccessful) {
+            log.info("Digisosid: ${response.body}")
             log.info("Postet DigisosSak til Fiks")
+            return response.body
         } else {
             log.warn("Noe feilet ved kall til Fiks")
             log.warn(response.body)

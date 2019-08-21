@@ -42,7 +42,7 @@ internal class DigisosApiClientTest {
                 OriginalSoknadNAV("", "", "", DokumentInfo("", "", 1), Collections.emptyList(), 0),
                 EttersendtInfoNAV(Collections.emptyList()), DigisosSoker("meta", Collections.emptyList(), OffsetDateTime.now().toEpochSecond()))
 
-        digisosApiClient.postDigisosSakMedInnsyn(digisosSak)
+        digisosApiClient.oppdaterDigisosSak(digisosSak)
     }
 
 

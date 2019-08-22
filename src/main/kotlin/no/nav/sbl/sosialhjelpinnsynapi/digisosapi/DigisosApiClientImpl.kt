@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
 
 import kotlinx.coroutines.runBlocking
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
@@ -28,7 +28,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
     private val fiksIntegrasjonPassordKommune = clientProperties.fiksIntegrasjonPassordKommune
     private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
-    override fun oppdaterDigisosSak(fiksDigisosId: String?, hendelser: List<JsonHendelse>) : String? {
+    override fun oppdaterDigisosSak(fiksDigisosId: String?, jsonDigisosSoker: JsonDigisosSoker) : String? {
         val headers = HttpHeaders()
 
         val accessToken = runBlocking { idPortenService.requestToken() }
@@ -41,19 +41,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
         if (fiksDigisosId == null) {
             id = opprettDigisosSak()
         }
-        val httpEntity = HttpEntity("{\n" +
-                "  \"sak\": {\n" +
-                "    \"soker\": {\n" +
-                "      \"version\": \"1.0.0\",\n" +
-                "      \"avsender\": {\n" +
-                "        \"systemnavn\": \"Testsystemet\",\n" +
-                "        \"systemversjon\": \"1.0.0\"\n" +
-                "      },\n" +
-                "      \"hendelser\": " +  objectMapper.writeValueAsString(hendelser) +
-                "    }\n" +
-                "  },\n" +
-                "  \"type\": \"no.nav.digisos.digisos.soker.v1\"\n" +
-                "}", headers)
+        val httpEntity = HttpEntity(objectMapper.writeValueAsString(jsonDigisosSoker) , headers)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
 
         if (response.statusCode.is2xxSuccessful) {

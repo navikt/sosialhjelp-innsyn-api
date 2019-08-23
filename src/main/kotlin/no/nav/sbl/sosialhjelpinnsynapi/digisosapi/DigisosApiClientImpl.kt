@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
 import java.util.*
@@ -28,7 +29,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
     private val fiksIntegrasjonPassordKommune = clientProperties.fiksIntegrasjonPassordKommune
     private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
-    override fun oppdaterDigisosSak(fiksDigisosId: String?, jsonDigisosSoker: JsonDigisosSoker) : String? {
+    override fun oppdaterDigisosSak(fiksDigisosId: String?, jsonDigisosSoker: JsonDigisosSoker): String? {
         val headers = HttpHeaders()
 
         val accessToken = runBlocking { idPortenService.requestToken() }
@@ -41,20 +42,23 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
         if (fiksDigisosId == null) {
             id = opprettDigisosSak()
         }
-        val httpEntity = HttpEntity(objectMapper.writeValueAsString(jsonDigisosSoker) , headers)
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
-
-        if (response.statusCode.is2xxSuccessful) {
-            log.info("Postet DigisosSak til Fiks")
-        } else {
-            log.warn("Noe feilet ved kall til Fiks")
-            log.warn(response.body)
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+        val httpEntity = HttpEntity(objectMapper.writeValueAsString(jsonDigisosSoker), headers)
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
+            if (response.statusCode.is2xxSuccessful) {
+                log.info("Postet DigisosSak til Fiks")
+            } else {
+                log.warn("Noe feilet ved kall til Fiks")
+                throw ResponseStatusException(response.statusCode, "something went wrong")
+            }
+            return id
+        } catch (e: HttpClientErrorException) {
+            log.error(e.responseBodyAsString)
+            throw e
         }
-        return id
     }
 
-     fun opprettDigisosSak(): String? {
+    fun opprettDigisosSak(): String? {
         val headers = HttpHeaders()
         val accessToken = runBlocking { idPortenService.requestToken() }
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
@@ -62,18 +66,24 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
         headers.set("IntegrasjonPassord", fiksIntegrasjonPassordKommune)
         headers.set("Authorization", "Bearer " + accessToken.token)
         val httpEntity = HttpEntity("", headers)
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=01234567890", HttpMethod.POST, httpEntity, String::class.java)
+        try {
 
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=01234567890", HttpMethod.POST, httpEntity, String::class.java)
 
-        if (response.statusCode.is2xxSuccessful) {
-            log.info("Digisosid: ${response.body}")
-            log.info("Postet DigisosSak til Fiks")
-            return response.body
-        } else {
-            log.warn("Noe feilet ved kall til Fiks")
-            log.warn(response.body)
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+            if (response.statusCode.is2xxSuccessful) {
+                log.info("Digisosid: ${response.body}")
+                log.info("Opprette sak hos fiks")
+                return response.body?.replace("\"", "")
+            } else {
+                log.warn("Noe feilet ved kall til Fiks")
+                log.warn(response.body)
+                throw ResponseStatusException(response.statusCode, "something went wrong")
+            }
+        } catch (e: HttpClientErrorException) {
+            log.error("", e)
         }
+
+        return null
     }
 
 }

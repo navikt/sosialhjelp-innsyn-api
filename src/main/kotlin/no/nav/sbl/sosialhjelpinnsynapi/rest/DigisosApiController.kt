@@ -19,7 +19,7 @@ class DigisosApiController(val digisosApiService: DigisosApiService) {
     fun oppdaterDigisosSak(fiksDigisosId:String?, @RequestBody jsonDigisosSoker: JsonDigisosSoker): ResponseEntity<String> {
         val id =  digisosApiService.oppdaterDigisosSak(fiksDigisosId, jsonDigisosSoker)
 
-        return ResponseEntity.ok("{\"fiksDigisosId\":$id}")
+        return ResponseEntity.ok("{\"fiksDigisosId\":\"$id\"}")
     }
 
 }

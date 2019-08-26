@@ -11,7 +11,7 @@ private val log = LoggerFactory.getLogger(OppgaveService::class.java)
 class OppgaveService(private val eventService: EventService) {
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
-        val model = eventService.createModel(fiksDigisosId)
+        val model = eventService.createModel(fiksDigisosId, token)
 
         if (model.oppgaver.isEmpty()) {
             return emptyList()

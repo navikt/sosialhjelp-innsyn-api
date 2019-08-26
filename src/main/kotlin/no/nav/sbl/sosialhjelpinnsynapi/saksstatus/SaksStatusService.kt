@@ -18,7 +18,7 @@ class SaksStatusService(private val eventService: EventService) {
         - Skal IKKE_INNSYN filtreres vekk i backend eller frontend?
      */
     fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {
-        val model = eventService.createModel(fiksDigisosId)
+        val model = eventService.createModel(fiksDigisosId, token)
 
         if (model.saker.isEmpty()) {
             log.info("Fant ingen saker for $fiksDigisosId")

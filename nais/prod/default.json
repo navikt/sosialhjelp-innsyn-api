@@ -8,7 +8,7 @@
   "fiks_dokumentlager_endpoint_url": "https://minside.fiks.test.ks.no/",
   "fiks_svar_ut_endpoint_url": "https://test.svarut.ks.no/",
   "norg_endpoint_url": "https://api-gw.oera.no/norg2/api/v1/",
-  "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/sosialhjelp",
+  "virksomhetssertifikat_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
   "application_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
   "id_porten_token_url": "https://oidc-ver2.difi.no/idporten-oidc-provider/token",
   "id_porten_config_url": "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration",

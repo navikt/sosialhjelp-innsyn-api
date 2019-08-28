@@ -60,7 +60,7 @@ jobs:
       - run:
           name: Create tag and release
           command: |
-            export GIT_COMMIT_MESSAGE=$(git log --format=%B -n 1)
+            export GIT_COMMIT_MESSAGE=$(git log --format=%B -n 1 | sed ':a;N;$!ba;s/\n/\\n/g')
             echo $DIGISOS_KEY | tr '_' '\n' > digisos.key
 
             set -eo pipefail

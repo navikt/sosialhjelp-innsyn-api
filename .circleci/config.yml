@@ -60,7 +60,7 @@ jobs:
       - run:
           name: Create tag and release
           command: |
-            export GIT_COMMIT_HASH=$(git log -n 1 --pretty=format:'%H')
+            export GIT_COMMIT_SHA1=$(git log -n 1 --pretty=format:'%H')
             export GIT_COMMIT_MESSAGE=$(git log --format=%B -n 1)
             echo $DIGISOS_KEY | tr '_' '\n' > digisos.key
 

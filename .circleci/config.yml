@@ -58,6 +58,32 @@ jobs:
 
             echo "export DOCKER_TAG=\"docker.pkg.github.com/navikt/$CIRCLE_PROJECT_REPONAME/$CIRCLE_PROJECT_REPONAME:$VERSION\"" >> $BASH_ENV
       - run:
+          name: Create tag and release
+          command: |
+            export GIT_COMMIT_MESSAGE=$(git log --format=%B -n 1)
+            echo $DIGISOS_KEY | tr '_' '\n' > digisos.key
+
+            set -eo pipefail
+            git clone https://github.com/navikt/github-apps-support.git
+            export PATH=`pwd`/github-apps-support/bin:$PATH
+            export GH_TOKEN=$(generate-installation-token.sh `generate-jwt.sh digisos.key $DIGISOS_APPID`)
+            rm digisos.key
+
+            echo "sha1 $CIRCLE_SHA1"
+
+            curl -X POST https://api.github.com/repos/navikt/sosialhjelp-innsyn-api/git/tags \
+                -H "Accept: application/vnd.github.v3.full+json" \
+                -H "Authorization: token $GH_TOKEN" \
+                -H "Content-Type: application/json" \
+                --data '{"tag": "$DOCKER_TAG", "message": "$DOCKER_TAG", "object": "$CIRCLE_SHA1", "type": "commit"}'
+
+            curl -X POST https://api.github.com/repos/navikt/sosialhjelp-innsyn-api/releases \
+                -H "Accept: application/vnd.github.v3.full+json" \
+                -H "Authorization: token $GH_TOKEN" \
+                -H "Content-Type: application/json" \
+                --data '{"tag_name": "$DOCKER_TAG", "target_commitish": "$CIRLE_SHA1", "name": "$DOCKER_TAG", "body": "$GIT_COMMIT_MESSAGE"}'
+
+      - run:
           name: Build docker image
           command: docker build -t $DOCKER_TAG .
       - run:
@@ -133,6 +159,9 @@ workflows:
           context: NAIS deployment
           requires:
             - build
+#          filters:
+#            branches:
+#              only: master
 
       - deploy_dev:
           requires:

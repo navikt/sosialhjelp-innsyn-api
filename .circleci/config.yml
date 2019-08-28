@@ -55,7 +55,7 @@ jobs:
             export GIT_COMMIT_DATE=$(git log -1 --pretty='%ad' --date=format:'%Y%m%d.%H%M')
             export VERSION=1.0_${GIT_COMMIT_DATE}_${GIT_COMMIT_HASH}
 
-            echo "$VERSION" >> $BASH_ENV
+            echo "export GIT_TAG=\"$VERSION\"" >> $BASH_ENV
             echo "export DOCKER_TAG=\"docker.pkg.github.com/navikt/$CIRCLE_PROJECT_REPONAME/$CIRCLE_PROJECT_REPONAME:$VERSION\"" >> $BASH_ENV
       - run:
           name: Create tag and release
@@ -69,21 +69,21 @@ jobs:
             export GH_TOKEN=$(generate-installation-token.sh `generate-jwt.sh digisos.key $DIGISOS_APPID`)
             rm digisos.key
 
-            echo 'Create tag {"tag": "'$VERSION'", "message": "'$VERSION'", "object": "'$CIRCLE_SHA1'", "type": "commit"}'
+            echo 'Create tag {"tag": "'$GIT_TAG'", "message": "'$GIT_TAG'", "object": "'$CIRCLE_SHA1'", "type": "commit"}'
 
             curl -X POST https://api.github.com/repos/navikt/sosialhjelp-innsyn-api/git/tags \
                 -H "Accept: application/vnd.github.v3.full+json" \
                 -H "Authorization: token $GH_TOKEN" \
                 -H "Content-Type: application/json" \
-                --data '{"tag": "'$VERSION'", "message": "'$VERSION'", "object": "'$CIRCLE_SHA1'", "type": "commit"}'
+                --data '{"tag": "'$GIT_TAG'", "message": "'$GIT_TAG'", "object": "'$CIRCLE_SHA1'", "type": "commit"}'
 
-            echo 'Create release {"tag_name": "'$VERSION'", "target_commitish": "'$CIRCLE_SHA1'", "name": "'$VERSION'", "body": "'"$GIT_COMMIT_MESSAGE"'"}'
+            echo 'Create release {"tag_name": "'$GIT_TAG'", "target_commitish": "'$CIRCLE_SHA1'", "name": "'$GIT_TAG'", "body": "'"$GIT_COMMIT_MESSAGE"'"}'
 
             curl -X POST https://api.github.com/repos/navikt/sosialhjelp-innsyn-api/releases \
                 -H "Accept: application/vnd.github.v3.full+json" \
                 -H "Authorization: token $GH_TOKEN" \
                 -H "Content-Type: application/json" \
-                --data '{"tag_name": "'$VERSION'", "target_commitish": "'$CIRCLE_SHA1'", "name": "'$VERSION'", "body": "'"$GIT_COMMIT_MESSAGE"'"}'
+                --data '{"tag_name": "'$GIT_TAG'", "target_commitish": "'$CIRCLE_SHA1'", "name": "'$GIT_TAG'", "body": "'"$GIT_COMMIT_MESSAGE"'"}'
 
       - run:
           name: Build docker image

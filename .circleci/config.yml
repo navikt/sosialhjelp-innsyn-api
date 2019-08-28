@@ -69,11 +69,15 @@ jobs:
             export GH_TOKEN=$(generate-installation-token.sh `generate-jwt.sh digisos.key $DIGISOS_APPID`)
             rm digisos.key
 
+            echo 'Create tag {"tag": "'$DOCKER_TAG'", "message": "'$DOCKER_TAG'", "object": "'$CIRCLE_SHA1'", "type": "commit"}'
+
             curl -X POST https://api.github.com/repos/navikt/sosialhjelp-innsyn-api/git/tags \
                 -H "Accept: application/vnd.github.v3.full+json" \
                 -H "Authorization: token $GH_TOKEN" \
                 -H "Content-Type: application/json" \
                 --data '{"tag": "'$DOCKER_TAG'", "message": "'$DOCKER_TAG'", "object": "'$CIRCLE_SHA1'", "type": "commit"}'
+
+            echo 'Create release {"tag_name": "'$DOCKER_TAG'", "target_commitish": "'$CIRCLE_SHA1'", "name": "'$DOCKER_TAG'", "body": "'"$GIT_COMMIT_MESSAGE"'"}'
 
             curl -X POST https://api.github.com/repos/navikt/sosialhjelp-innsyn-api/releases \
                 -H "Accept: application/vnd.github.v3.full+json" \

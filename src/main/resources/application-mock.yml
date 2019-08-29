@@ -1,3 +1,7 @@
+server:
+  servlet:
+    context-path: '/login-api/innsyn-api'
+
 cors:
   allowed_origins:
     - "https://www.digisos-test.com"

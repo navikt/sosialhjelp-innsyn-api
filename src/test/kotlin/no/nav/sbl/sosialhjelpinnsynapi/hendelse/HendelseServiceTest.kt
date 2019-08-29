@@ -38,7 +38,7 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
         model.historikk.add(Hendelse(tittel, tidspunkt, url))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -56,7 +56,7 @@ internal class HendelseServiceTest {
                 Hendelse(tittel2, tidspunkt2, url2),
                 Hendelse(tittel3, tidspunkt3, url3)))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val hendelser = service.hentHendelser("123", "Token")
 

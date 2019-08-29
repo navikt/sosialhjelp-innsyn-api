@@ -28,7 +28,7 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere emptyList når model_saker er null`() {
         val model = InternalDigisosSoker()
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -46,7 +46,7 @@ internal class SaksStatusServiceTest {
                 utbetalinger = mutableListOf()
         ))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -71,7 +71,7 @@ internal class SaksStatusServiceTest {
                 utbetalinger = mutableListOf()
         ))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -97,7 +97,7 @@ internal class SaksStatusServiceTest {
                 utbetalinger = mutableListOf()
         ))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -134,7 +134,7 @@ internal class SaksStatusServiceTest {
                 )
         ))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 

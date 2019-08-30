@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController
 class DigisosApiController(val digisosApiService: DigisosApiService) {
 
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_UTF8_VALUE], produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun oppdaterDigisosSak(fiksDigisosId:String?, @RequestBody jsonDigisosSoker: JsonDigisosSoker): ResponseEntity<String> {
-        val id =  digisosApiService.oppdaterDigisosSak(fiksDigisosId, jsonDigisosSoker)
+    fun oppdaterDigisosSak(fiksDigisosId: String?, @RequestBody digisosApiWrapper: DigisosApiWrapper): ResponseEntity<String> {
+        val id = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
 
         return ResponseEntity.ok("{\"fiksDigisosId\":\"$id\"}")
     }

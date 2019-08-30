@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: '/login-api/innsyn-api'
+    context-path: '/sosialhjelp/login-api/innsyn-api'
 
 cors:
   allowed_origins:

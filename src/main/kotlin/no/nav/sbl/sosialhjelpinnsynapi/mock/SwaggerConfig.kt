@@ -2,7 +2,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import springfox.documentation.builders.PathSelectors
@@ -11,7 +10,7 @@ import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2
 
-@Profile("mock")
+//@Profile("mock")
 @Configuration
 @EnableSwagger2
 class SwaggerConfig : WebMvcConfigurer {
@@ -21,7 +20,7 @@ class SwaggerConfig : WebMvcConfigurer {
         return Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.regex(".*/api/v1/(mock/)?innsyn.*"))
+                .paths(PathSelectors.regex(".*/api/v1/.*"))
                 .build()
     }
 

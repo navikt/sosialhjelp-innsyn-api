@@ -20,6 +20,10 @@ fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: Jso
     }
 }
 
+fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: String): String {
+    return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${dokumentlagerId}"
+}
+
 fun toLocalDateTime(hendelsetidspunkt: String): LocalDateTime {
     return LocalDateTime.parse(hendelsetidspunkt, DateTimeFormatter.ISO_DATE_TIME)
 }

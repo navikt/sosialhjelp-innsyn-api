@@ -30,7 +30,7 @@ internal class UtbetalingerServiceTest {
     @Test
     fun `Skal returnere emptyList når model_saker er null`() {
         val model = InternalDigisosSoker()
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: UtbetalingerResponse = service.hentUtbetalinger("123", token)
 
@@ -49,7 +49,7 @@ internal class UtbetalingerServiceTest {
                         Utbetaling("Sak1", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp",null, LocalDate.of(2019, 8,10), null, null, null,null))
         ))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: UtbetalingerResponse = service.hentUtbetalinger("123", token)
 
@@ -77,7 +77,7 @@ internal class UtbetalingerServiceTest {
                 )
         ))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: UtbetalingerResponse = service.hentUtbetalinger("123", token)
 
@@ -109,7 +109,7 @@ internal class UtbetalingerServiceTest {
                 )
         ))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val response: UtbetalingerResponse = service.hentUtbetalinger("123", token)
 

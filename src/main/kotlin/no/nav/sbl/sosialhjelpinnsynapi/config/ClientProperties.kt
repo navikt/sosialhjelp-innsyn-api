@@ -13,8 +13,17 @@ class ClientProperties {
 
     lateinit var fiksSvarUtEndpointUrl: String
 
+    lateinit var fiksIntegrasjonId: String
+    lateinit var fiksIntegrasjonIdKommune: String
+
     lateinit var fiksIntegrasjonpassord: String
+    lateinit var fiksIntegrasjonPassordKommune: String
 
     lateinit var norgEndpointUrl: String
+
+    lateinit var idPortenTokenUrl: String
+    lateinit var idPortenClientId: String
+    lateinit var idPortenScope: String
+    lateinit var idPortenConfigUrl: String
 
 }

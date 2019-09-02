@@ -39,8 +39,8 @@ class FiksClientMock : FiksClient {
         return
     }
 
-    fun postDigisosSak(digisosId: String, digisosSak: DigisosSak) {
-        innsynMap[digisosId] = digisosSak
+    fun postDigisosSak(digisosSak: DigisosSak) {
+        innsynMap[digisosSak.fiksDigisosId] = digisosSak
     }
 
     private fun getDefaultDigisosSak(): DigisosSak {

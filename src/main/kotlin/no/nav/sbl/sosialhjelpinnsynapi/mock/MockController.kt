@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.security.oidc.api.Unprotected
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -28,12 +29,13 @@ class MockController(private val fiksClientMock: FiksClientMock,
     @PostMapping("/{soknadId}",
             consumes = [APPLICATION_JSON_UTF8_VALUE],
             produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun postJsonDigisosSoker(@PathVariable soknadId: String, @RequestBody jsonDigisosSoker: JsonDigisosSoker) {
-        log.info("soknadId: $soknadId, jsonDigisosSoker: $jsonDigisosSoker")
+    fun postJsonDigisosSoker(@PathVariable soknadId: String, @RequestBody digisosApiWrapper: DigisosApiWrapper) {
+        log.info("soknadId: $soknadId, jsonDigisosSoker: $digisosApiWrapper")
         val digisosSak = fiksClientMock.hentDigisosSak(soknadId, "Token")
-        val jsonNode = mapper.convertValue(jsonDigisosSoker, JsonNode::class.java)
-        val tilbakeTilJsonDigisosSoker = mapper.convertValue(jsonNode, JsonDigisosSoker::class.java)
-        digisosSak.digisosSoker?.metadata?.let { dokumentlagerClientMock.postDokument(it, tilbakeTilJsonDigisosSoker) }
+
+        val jsonNode = mapper.convertValue(digisosApiWrapper, JsonNode::class.java)
+        val tilbakeTilJsonDigisosSoker = mapper.convertValue(jsonNode, digisosApiWrapper::class.java)
+        digisosSak.digisosSoker?.metadata?.let { dokumentlagerClientMock.postDokument(it, tilbakeTilJsonDigisosSoker.sak.soker) }
     }
 
     @GetMapping("/{soknadId}",

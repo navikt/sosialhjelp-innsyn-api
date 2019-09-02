@@ -23,7 +23,7 @@ data class OriginalSoknadNAV(
 data class DokumentInfo(
         val filnavn: String,
         val dokumentlagerDokumentId: String,
-        val storrelse: Int
+        val storrelse: Long
 )
 
 data class EttersendtInfoNAV(

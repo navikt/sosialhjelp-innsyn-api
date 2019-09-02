@@ -17,8 +17,8 @@ class EventService(private val clientProperties: ClientProperties,
                    private val innsynService: InnsynService,
                    private val norgClient: NorgClient) {
 
-    fun createModel(fiksDigisosId: String): InternalDigisosSoker {
-        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, "token")
+    fun createModel(fiksDigisosId: String, token: String): InternalDigisosSoker {
+        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token)
         val jsonSoknadsmottaker = innsynService.hentOriginalSoknad(fiksDigisosId).mottaker
         val timestampSendt = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId)
 

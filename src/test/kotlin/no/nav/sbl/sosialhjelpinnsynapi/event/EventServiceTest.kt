@@ -109,7 +109,7 @@ internal class EventServiceTest {
         fun `soknadsStatus SENDT`() {
             every { innsynService.hentJsonDigisosSoker(any(), any()) } returns null
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
@@ -130,7 +130,7 @@ internal class EventServiceTest {
                                     SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
                             ))
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
@@ -152,7 +152,7 @@ internal class EventServiceTest {
                                     SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2)
                             ))
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -176,7 +176,7 @@ internal class EventServiceTest {
                                     SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3)
                             ))
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
@@ -204,7 +204,7 @@ internal class EventServiceTest {
                                     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3)
                             ))
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -236,7 +236,7 @@ internal class EventServiceTest {
                                     SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4)
                             ))
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -272,7 +272,7 @@ internal class EventServiceTest {
                                     SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3)
                             ))
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -309,7 +309,7 @@ internal class EventServiceTest {
                                     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_4)
                             ))
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -348,7 +348,7 @@ internal class EventServiceTest {
                                     SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5)
                             ))
 
-            val model = service.createModel("123")
+            val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -384,7 +384,7 @@ internal class EventServiceTest {
                                 DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
                         ))
 
-        val model = service.createModel("123")
+        val model = service.createModel("123", "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -415,7 +415,7 @@ internal class EventServiceTest {
                                 FORELOPIGSVAR.withHendelsestidspunkt(tidspunkt_3)
                         ))
 
-        val model = service.createModel("123")
+        val model = service.createModel("123", "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)

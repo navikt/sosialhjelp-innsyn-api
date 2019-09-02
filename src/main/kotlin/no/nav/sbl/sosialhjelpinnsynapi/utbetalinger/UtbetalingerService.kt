@@ -21,7 +21,7 @@ private val log = LoggerFactory.getLogger(UtbetalingerService::class.java)
 class UtbetalingerService(private val eventService: EventService) {
 
     fun hentUtbetalinger(fiksDigisosId: String, token: String): UtbetalingerResponse {
-        val model = eventService.createModel(fiksDigisosId)
+        val model = eventService.createModel(fiksDigisosId, token)
 
         if (model.saker.isEmpty()) {
             log.info("Fant ingen saker for $fiksDigisosId")

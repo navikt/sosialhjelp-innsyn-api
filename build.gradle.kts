@@ -14,9 +14,14 @@ val filformatVersion = "1.2019.08.06-15.19-1b2404a10ea4"
 val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.9"
+val jacksonDatabindVersion = "2.9.9.3"
+val guavaVersion = "28.0-jre"
 val swaggerVersion = "2.9.2"
 val resilience4jVersion = "0.16.0"
 val rxjavaVersion = "2.2.10"
+val ktorVersion = "1.2.2"
+val konfigVersion = "1.6.10.0"
+val kotlinCoroutinesVersion = "1.2.2"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -54,6 +59,18 @@ dependencies {
     compile(kotlin("stdlib"))
     compile(kotlin("reflect"))
 
+    compile("io.ktor:ktor-server-netty:$ktorVersion")
+    compile("io.ktor:ktor-auth:$ktorVersion")
+    compile("io.ktor:ktor-auth-jwt:$ktorVersion")
+    compile("io.ktor:ktor-jackson:$ktorVersion")
+    compile("io.ktor:ktor-client-core:$ktorVersion")
+    compile("io.ktor:ktor-client-apache:$ktorVersion")
+    compile("io.ktor:ktor-client-json:$ktorVersion")
+    compile("io.ktor:ktor-client-jackson:$ktorVersion")
+    compile("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${kotlinCoroutinesVersion}")
+
+    compile("com.natpryce:konfig:$konfigVersion")
+
     compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
     compile("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
@@ -72,7 +89,11 @@ dependencies {
     compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
-    
+
+    //spesifikke versjoner oppgradert etter ønske fra snyk
+    compile("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
+    compile("com.google.guava:guava:$guavaVersion")
+
     //selftest
     compile("io.github.resilience4j:resilience4j-spring-boot2:$resilience4jVersion")
     compile("io.github.resilience4j:resilience4j-timelimiter:$resilience4jVersion")
@@ -80,7 +101,7 @@ dependencies {
     compile("io.reactivex.rxjava2:rxjava:$rxjavaVersion")
     compile("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
 
-//    Test dependencies
+    //Test dependencies
     testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
         exclude(group = "org.mockito", module = "mockito-core")
     }
@@ -113,4 +134,8 @@ tasks {
             events("passed", "skipped", "failed")
         }
     }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
 }

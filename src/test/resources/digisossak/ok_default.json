@@ -7,7 +7,7 @@
   "originalSoknadNAV": {
     "navEksternRefId": "string",
     "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa0",
-    "vedleggMetadata": "3fa85f64-5717-4562-b3fc-ffffaaaaffff",
+	  "vedleggMetadata": "3fa85f64-5717-4562-b3fc-ffffaaaaffff",
     "soknadDokument": {
       "filnavn": "string",
       "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -15,9 +15,9 @@
     },
     "vedlegg": [
       {
-        "filnavn": "soknad vedlegg filnavn 1",
+		  "filnavn": "soknad vedlegg filnavn 1",
         "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "storrelse": 4242
+		  "storrelse": 4242
       }
     ],
     "timestampSendt": 0
@@ -26,12 +26,12 @@
     "ettersendelser": [
       {
         "navEksternRefId": "string",
-        "vedleggMetadata": "3fa85f64-5717-4562-b3fc-aaa000aaa000",
+		  "vedleggMetadata": "3fa85f64-5717-4562-b3fc-aaa000aaa000",
         "vedlegg": [
           {
-            "filnavn": "ettersendelse vedlegg filnavn 1",
+			  "filnavn": "ettersendelse vedlegg filnavn 1",
             "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "storrelse": 42
+			  "storrelse": 42
           }
         ],
         "timestampSendt": 0

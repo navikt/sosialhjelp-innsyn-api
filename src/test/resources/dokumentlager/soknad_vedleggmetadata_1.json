@@ -1,15 +1,15 @@
 {
-  "vedlegg": [
-    {
-      "type": "kontoutskrift",
-      "tilleggsinfo": "additional",
-      "status": "LastetOpp",
-      "filer": [
-        {
-          "filnavn": "soknad vedlegg filnavn 1",
-          "sha512": "asknd2341"
-        }
-      ]
-    }
-  ]
+	"vedlegg": [
+		{
+			"type": "kontoutskrift",
+			"tilleggsinfo": "additional",
+			"status": "LastetOpp",
+			"filer": [
+				{
+					"filnavn": "soknad vedlegg filnavn 1",
+					"sha512": "asknd2341"
+				}
+			]
+		}
+	]
 }

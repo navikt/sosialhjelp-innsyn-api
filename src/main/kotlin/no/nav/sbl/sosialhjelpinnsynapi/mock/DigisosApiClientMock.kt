@@ -10,7 +10,7 @@ import java.util.*
 
 @Profile("mock")
 @Component
-class DigisosApiClientMock(private val fiksClientMock: FiksClientMock,private val fiksDokumentlagerMock: DokumentlagerClientMock) : DigisosApiClient {
+class DigisosApiClientMock(private val fiksClientMock: FiksClientMock, private val fiksDokumentlagerMock: DokumentlagerClientMock) : DigisosApiClient {
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
         val dokumentlagerId = UUID.randomUUID().toString()
         fiksDokumentlagerMock.postDokument(dokumentlagerId, digisosApiWrapper.sak.soker)
@@ -20,7 +20,7 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock,private va
         }
 
         fiksClientMock.postDigisosSak(DigisosSak(id, "01234567890", "11415cd1-e26d-499a-8421-751457dfcbd5", "1", System.currentTimeMillis(),
-                OriginalSoknadNAV("", "", "", DokumentInfo("", "", 0L), Collections.emptyList(),System.currentTimeMillis()),
+                OriginalSoknadNAV("", "", "", DokumentInfo("", "", 0L), Collections.emptyList(), System.currentTimeMillis()),
                 EttersendtInfoNAV(Collections.emptyList()), DigisosSoker(objectMapper.writeValueAsString(digisosApiWrapper.sak), Collections.emptyList(), System.currentTimeMillis())))
         return id
     }

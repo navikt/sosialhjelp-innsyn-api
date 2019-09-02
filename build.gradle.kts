@@ -10,7 +10,7 @@ val logstashVersion = "5.3"
 val junitJupiterVersion = "5.4.2"
 val mockkVersion = "1.9.3"
 val wireMockVersion = "2.19.0"
-val filformatVersion = "1.2019.07.09-13.14-92d3aa4f71f5"
+val filformatVersion = "1.2019.09.02-09.04-299de9db71ba"
 val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.9"
@@ -134,4 +134,8 @@ tasks {
             events("passed", "skipped", "failed")
         }
     }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
 }

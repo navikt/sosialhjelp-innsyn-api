@@ -12,8 +12,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.url
 import io.ktor.http.parametersOf
 import kotlinx.coroutines.runBlocking
-import no.nav.sbl.sosialhjelpinnsynapi.common.decodeBase64
-import no.nav.sbl.sosialhjelpinnsynapi.common.randomUuid
 import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiClient
@@ -86,7 +84,7 @@ class IdPortenService(
 
         val pair = KeyStore.getInstance("PKCS12").let { keyStore ->
             keyStore.load(
-                    decodeBase64(File("/var/run/secrets/nais.io/virksomhetssertifikat/key.p12.b64").readText(Charsets.UTF_8)).inputStream(),
+                    java.util.Base64.getDecoder().decode(File("/var/run/secrets/nais.io/virksomhetssertifikat/key.p12.b64").readText(Charsets.UTF_8)).inputStream(),
                     virksertCredentials.password.toCharArray()
             )
             val cert = keyStore.getCertificate(virksertCredentials.alias) as X509Certificate
@@ -109,7 +107,7 @@ class IdPortenService(
                         .audience(oidcConfiguration.issuer)
                         .issuer(issuer)
                         .issueTime(date)
-                        .jwtID(randomUuid())
+                        .jwtID(UUID.randomUUID().toString())
                         .expirationTime(expDate)
                         .claim(CLAIMS_SCOPE, scope)
                         .build()

@@ -20,7 +20,7 @@ internal class DigisosApiClientTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
 
     @Test
-    fun `Post digisos sak til mock`() = runBlocking{
+    fun `Post digisos sak til mock`() = runBlocking {
         val restTemplate: RestTemplate = mockk()
         val idPortenService: IdPortenService = mockk()
 
@@ -29,7 +29,7 @@ internal class DigisosApiClientTest {
         val mockResponse: ResponseEntity<String> = mockk()
         every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_komplett_jsondigisossoker_response
-        coEvery {idPortenService.requestToken() } returns(AccessToken("Token"))
+        coEvery { idPortenService.requestToken() } returns (AccessToken("Token"))
         every {
             restTemplate.exchange(
                     any<String>(),

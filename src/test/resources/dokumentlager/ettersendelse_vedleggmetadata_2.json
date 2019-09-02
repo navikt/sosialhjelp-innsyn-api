@@ -1,41 +1,41 @@
 {
-  "vedlegg": [
-    {
-      "type": "kontoutskrift",
-      "tilleggsinfo": "additional",
-      "status": "LastetOpp",
-      "filer": [
-        {
-          "filnavn": "ettersendelse vedlegg filnavn 2",
-          "sha512": "asknd2341"
-        }
-      ]
-    },
-    {
-      "type": "faktura",
-      "tilleggsinfo": "additional",
-      "status": "LastetOpp",
-      "filer": [
-        {
-          "filnavn": "ettersendelse vedlegg filnavn 3",
-          "sha512": "asknd2341"
-        },
-        {
-          "filnavn": "ettersendelse vedlegg filnavn 4",
-          "sha512": "asknd2341"
-        }
-      ]
-    },
-    {
-      "type": "noeheltannet",
-      "tilleggsinfo": "additional",
-      "status": "VedleggAlleredeSendt",
-      "filer": [
-        {
-          "filnavn": "ettersendelse vedlegg filnavn 5",
-          "sha512": "asknd2341"
-        }
-      ]
-    }
-  ]
+	"vedlegg": [
+		{
+			"type": "kontoutskrift",
+			"tilleggsinfo": "additional",
+			"status": "LastetOpp",
+			"filer": [
+				{
+					"filnavn": "ettersendelse vedlegg filnavn 2",
+					"sha512": "asknd2341"
+				}
+			]
+		},
+		{
+			"type": "faktura",
+			"tilleggsinfo": "additional",
+			"status": "LastetOpp",
+			"filer": [
+				{
+					"filnavn": "ettersendelse vedlegg filnavn 3",
+					"sha512": "asknd2341"
+				},
+				{
+					"filnavn": "ettersendelse vedlegg filnavn 4",
+					"sha512": "asknd2341"
+				}
+			]
+		},
+		{
+			"type": "noeheltannet",
+			"tilleggsinfo": "additional",
+			"status": "VedleggAlleredeSendt",
+			"filer": [
+				{
+					"filnavn": "ettersendelse vedlegg filnavn 5",
+					"sha512": "asknd2341"
+				}
+			]
+		}
+	]
 }

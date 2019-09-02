@@ -15,21 +15,23 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
 
     val vedtakFattet = Vedtak(utfall, vedtaksfilUrl)
 
-    val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.referanse }
+    val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
     if (sakForReferanse != null) {
         sakForReferanse.vedtak.add(vedtakFattet)
     } else {
         // Ny Sak opprettes med default-verdier
         val sak = Sak(
-                hendelse.referanse,
+                hendelse.saksreferanse,
                 SaksStatus.UNDER_BEHANDLING, //TODO: midlertidig SaksStatus for disse tilfellene?
                 DEFAULT_TITTEL,
                 mutableListOf(vedtakFattet),
-                mutableListOf())
+                mutableListOf(),
+                mutableListOf()
+        )
         saker.add(sak)
     }
 
-    val sak = saker.first { it.referanse == hendelse.referanse }
+    val sak = saker.first { it.referanse == hendelse.saksreferanse }
     val beskrivelse = if (hendelse.utfall == null) { // Hvis utfall kan være null
         "Vedtak fattet"
     } else {

@@ -483,19 +483,19 @@ internal class EventServiceTest {
 
     private val SAK1_VEDTAK_FATTET_INNVILGET = JsonVedtakFattet()
             .withType(JsonHendelse.Type.VEDTAK_FATTET)
-            .withReferanse(referanse_1)
+            .withSaksreferanse(referanse_1)
             .withVedtaksfil(JsonVedtaksfil().withReferanse(DOKUMENTLAGER_1))
             .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.INNVILGET))
 
     private val SAK1_VEDTAK_FATTET_AVSLATT = JsonVedtakFattet()
             .withType(JsonHendelse.Type.VEDTAK_FATTET)
-            .withReferanse(referanse_1)
+            .withSaksreferanse(referanse_1)
             .withVedtaksfil(JsonVedtaksfil().withReferanse(DOKUMENTLAGER_2))
             .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.AVSLATT))
 
     private val SAK2_VEDTAK_FATTET = JsonVedtakFattet()
             .withType(JsonHendelse.Type.VEDTAK_FATTET)
-            .withReferanse(referanse_2)
+            .withSaksreferanse(referanse_2)
             .withVedtaksfil(JsonVedtaksfil().withReferanse(SVARUT_1))
             .withUtfall(JsonUtfall().withUtfall(JsonUtfall.Utfall.INNVILGET))
 

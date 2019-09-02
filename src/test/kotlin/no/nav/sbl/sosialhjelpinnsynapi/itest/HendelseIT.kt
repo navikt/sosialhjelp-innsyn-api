@@ -1,8 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.itest
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
@@ -31,8 +35,11 @@ class HendelseIT : AbstractIT() {
 
     @Test
     fun `GET Hendelser - komplett`() {
+        val jsonDigisosSoker = JsonDigisosSoker()
+        jsonDigisosSoker.hendelser.add(JsonSoknadsStatus().withStatus(JsonSoknadsStatus.Status.MOTTATT).withType(JsonHendelse.Type.SOKNADS_STATUS).withHendelsestidspunkt("2019"))
+
         WireMock.stubFor(WireMock.get(WireMock.urlPathMatching("/dokumentlager/nedlasting/3fa85f64-5717-4562-b3fc-2c963f66afa1"))
-                .willReturn(WireMock.ok("/dokumentlager/digisossoker_ok_komplett.json".asResource())))
+                .willReturn(WireMock.ok(objectMapper.writeValueAsString(jsonDigisosSoker))))
 
         val responseEntity = testRestTemplate.exchange("/api/v1/innsyn/$id/hendelser", HttpMethod.GET, HttpEntity<Nothing>(getHeaders()), typeRef<List<HendelseResponse>>())
 

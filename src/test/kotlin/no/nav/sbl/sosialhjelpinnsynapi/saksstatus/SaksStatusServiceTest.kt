@@ -43,7 +43,8 @@ internal class SaksStatusServiceTest {
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
                 tittel = tittel,
                 vedtak = mutableListOf(),
-                utbetalinger = mutableListOf()
+                utbetalinger = mutableListOf(),
+                vilkar = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -68,7 +69,8 @@ internal class SaksStatusServiceTest {
                         utfall = UtfallVedtak.INNVILGET,
                         vedtaksFilUrl = vedtaksfilUrl
                 )),
-                utbetalinger = mutableListOf()
+                utbetalinger = mutableListOf(),
+                vilkar = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -94,7 +96,8 @@ internal class SaksStatusServiceTest {
                         utfall = UtfallVedtak.INNVILGET,
                         vedtaksFilUrl = vedtaksfilUrl
                 )),
-                utbetalinger = mutableListOf()
+                utbetalinger = mutableListOf(),
+                vilkar = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -124,13 +127,15 @@ internal class SaksStatusServiceTest {
                                 Vedtak(
                                         utfall = UtfallVedtak.INNVILGET,
                                         vedtaksFilUrl = vedtaksfilUrl)),
-                        utbetalinger = mutableListOf()),
+                        utbetalinger = mutableListOf(),
+                        vilkar = mutableListOf()),
                 Sak(
                         referanse = referanse,
                         saksStatus = SaksStatus.IKKE_INNSYN,
                         tittel = DEFAULT_TITTEL,
                         vedtak = mutableListOf(),
-                        utbetalinger = mutableListOf()
+                        utbetalinger = mutableListOf(),
+                        vilkar = mutableListOf()
                 )
         ))
 

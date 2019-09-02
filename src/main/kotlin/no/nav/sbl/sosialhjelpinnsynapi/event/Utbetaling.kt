@@ -8,7 +8,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling, clientProperties: ClientProperties) {
-    hendelse.belop
     val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val utbetaling = Utbetaling(hendelse.utbetalingsreferanse,
             UtbetalingsStatus.valueOf(hendelse.status.value()),
@@ -19,7 +18,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling, clientProperties: Clien
             if (hendelse.fom == null) null else LocalDate.parse(hendelse.fom, pattern),
             if (hendelse.tom == null) null else LocalDate.parse(hendelse.tom, pattern),
             hendelse.mottaker,
-            hendelse.utbetalingsform
+            hendelse.utbetalingsmetode,
+            mutableListOf()
     )
 
 
@@ -33,6 +33,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling, clientProperties: Clien
                 hendelse.saksreferanse,
                 SaksStatus.UNDER_BEHANDLING,
                 "Sak om sosialhjelp",
+                mutableListOf(),
                 mutableListOf(),
                 mutableListOf()
         )

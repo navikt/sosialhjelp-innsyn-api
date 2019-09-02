@@ -44,7 +44,13 @@ data class UtbetalingResponse(
         val tittel: String?,
         val belop: Double,
         @JsonFormat(pattern="yyyy-MM-dd")
-        val utbetalingsdato: LocalDate?
+        val utbetalingsdato: LocalDate?,
+        val vilkar: MutableList<VilkarResponse>
+)
+
+data class VilkarResponse(
+        val beskrivelse: String?,
+        val oppfylt: Boolean
 )
 
 data class VedleggResponse(

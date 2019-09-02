@@ -1,9 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.utbetalinger
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerManedResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -45,9 +42,11 @@ class UtbetalingerService(private val eventService: EventService) {
             }
         }
         for (utbetalinger in utbetalingerPerManed.entries) {
-
-            // Todo dato blir array
-            val alleUtbetalingene = utbetalinger.value.map { utbetaling -> UtbetalingResponse(utbetaling.beskrivelse, utbetaling.belop.toDouble(), utbetaling.utbetalingsDato) }
+            val alleUtbetalingene =
+                    utbetalinger.value.map { utbetaling ->
+                        UtbetalingResponse(utbetaling.beskrivelse, utbetaling.belop.toDouble(), utbetaling.utbetalingsDato,
+                                utbetaling.vilkar.map { vilkar -> VilkarResponse(vilkar.beskrivelse, vilkar.oppfyllt) } as MutableList<VilkarResponse>)
+                    }
             utbetalingerResponse.utbetalinger.add(UtbetalingerManedResponse(utbetalinger.key, alleUtbetalingene.toMutableList(), alleUtbetalingene.stream().map { t -> t.belop }.reduce { t, u -> t.plus(u) }.get()))
         }
 

@@ -45,7 +45,8 @@ class UtbetalingerService(private val eventService: EventService) {
             val alleUtbetalingene =
                     utbetalinger.value.map { utbetaling ->
                         UtbetalingResponse(utbetaling.beskrivelse, utbetaling.belop.toDouble(), utbetaling.utbetalingsDato,
-                                utbetaling.vilkar.map { vilkar -> VilkarResponse(vilkar.beskrivelse, vilkar.oppfyllt) } as MutableList<VilkarResponse>)
+                                utbetaling.vilkar.map { vilkar -> VilkarResponse(vilkar.beskrivelse, vilkar.oppfyllt) } as MutableList<VilkarResponse>,
+                                utbetaling.vilkar.map { dokumentasjonKrav -> DokumentasjonkravResponse(dokumentasjonKrav.beskrivelse, dokumentasjonKrav.oppfyllt) } as MutableList<DokumentasjonkravResponse>)
                     }
             utbetalingerResponse.utbetalinger.add(UtbetalingerManedResponse(utbetalinger.key, alleUtbetalingene.toMutableList(), alleUtbetalingene.stream().map { t -> t.belop }.reduce { t, u -> t.plus(u) }.get()))
         }

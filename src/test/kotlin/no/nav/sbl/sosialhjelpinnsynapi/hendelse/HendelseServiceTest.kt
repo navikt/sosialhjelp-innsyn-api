@@ -85,14 +85,16 @@ internal class HendelseServiceTest {
         every { eventService.createModel(any(), any()) } returns model
 
         every { vedleggHistorikkService.hentVedlegg(any()) } returns listOf(
-                Vedlegg(tittel4, tidspunkt4),
-                Vedlegg(tittel5, tidspunkt5))
+                Vedlegg(tidspunkt4),
+                Vedlegg(tidspunkt5))
 
         val hendelser = service.hentHendelser("123", "Token")
 
         assertThat(hendelser).hasSize(5)
 
-        assertThat(hendelser[3].beskrivelse).contains("Vedlegg lastet opp").contains(tittel4)
-        assertThat(hendelser[4].beskrivelse).contains("Vedlegg lastet opp").contains(tittel5)
+        assertThat(hendelser[3].beskrivelse).contains("NAV har mottatt vedlegg fra deg")
+        assertThat(hendelser[3].tidspunkt).isEqualTo(tidspunkt4.toString())
+        assertThat(hendelser[4].beskrivelse).contains("NAV har mottatt vedlegg fra deg")
+        assertThat(hendelser[4].tidspunkt).isEqualTo(tidspunkt5.toString())
     }
 }

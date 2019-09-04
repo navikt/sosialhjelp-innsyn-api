@@ -57,8 +57,8 @@ internal class VedleggHistorikkServiceTest {
         val list: List<Vedlegg> = service.hentVedlegg(id)
 
         assertThat(list).hasSize(2)
-        assertThat(list[0].type).isEqualTo(dokumenttype)
-        assertThat(list[1].type).isEqualTo(dokumenttype)
+        assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
     }
 
     @Test
@@ -84,9 +84,9 @@ internal class VedleggHistorikkServiceTest {
         val list = service.hentVedlegg(id)
 
         assertThat(list).hasSize(3)
-        assertThat(list[0].type).isEqualTo(dokumenttype_2)
-        assertThat(list[1].type).isEqualTo(dokumenttype_2)
-        assertThat(list[2].type).isEqualTo(dokumenttype_3)
+        assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
     }
 
     @Test
@@ -96,19 +96,10 @@ internal class VedleggHistorikkServiceTest {
         Assertions.assertThat(list).hasSize(5)
 
         // nano-presisjon lacking
-        assertThat(list[0].type).isEqualTo(dokumenttype)
         assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
-
-        assertThat(list[1].type).isEqualTo(dokumenttype)
         assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
-
-        assertThat(list[2].type).isEqualTo(dokumenttype_2)
         assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
-
-        assertThat(list[3].type).isEqualTo(dokumenttype_2)
         assertThat(list[3].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
-
-        assertThat(list[4].type).isEqualTo(dokumenttype_3)
         assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
     }
 }

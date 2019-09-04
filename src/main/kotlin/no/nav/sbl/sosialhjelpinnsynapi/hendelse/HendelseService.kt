@@ -4,21 +4,21 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggForHistorikkService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggForHistorikkService.Vedlegg
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService.Vedlegg
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class HendelseService(private val eventService: EventService,
-                      private val vedleggForHistorikkService: VedleggForHistorikkService) {
+                      private val vedleggHistorikkService: VedleggHistorikkService) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
         val model = eventService.createModel(fiksDigisosId, token)
 
-        val vedlegg = vedleggForHistorikkService.hentVedlegg(fiksDigisosId)
+        val vedlegg = vedleggHistorikkService.hentVedlegg(fiksDigisosId)
         leggTilHendelserForOpplastingerEtterMottattSoknad(model, vedlegg)
 
         val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }

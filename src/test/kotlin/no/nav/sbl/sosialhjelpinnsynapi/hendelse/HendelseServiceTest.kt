@@ -6,8 +6,8 @@ import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggForHistorikkService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggForHistorikkService.Vedlegg
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService.Vedlegg
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,8 +16,8 @@ import java.time.LocalDateTime
 internal class HendelseServiceTest {
 
     private val eventService: EventService = mockk()
-    private val vedleggForHistorikkService: VedleggForHistorikkService = mockk()
-    private val service = HendelseService(eventService, vedleggForHistorikkService)
+    private val vedleggHistorikkService: VedleggHistorikkService = mockk()
+    private val service = HendelseService(eventService, vedleggHistorikkService)
 
     private val tidspunkt_sendt = LocalDateTime.now().minusDays(1)
     private val tidspunkt_mottatt = LocalDateTime.now().minusHours(10)
@@ -37,7 +37,7 @@ internal class HendelseServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService, vedleggForHistorikkService)
+        clearMocks(eventService, vedleggHistorikkService)
     }
 
     @Test
@@ -47,7 +47,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggForHistorikkService.hentVedlegg(any()) } returns emptyList()
+        every { vedleggHistorikkService.hentVedlegg(any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -67,7 +67,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggForHistorikkService.hentVedlegg(any()) } returns emptyList()
+        every { vedleggHistorikkService.hentVedlegg(any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -84,7 +84,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggForHistorikkService.hentVedlegg(any()) } returns listOf(
+        every { vedleggHistorikkService.hentVedlegg(any()) } returns listOf(
                 Vedlegg(tittel4, tidspunkt4),
                 Vedlegg(tittel5, tidspunkt5))
 

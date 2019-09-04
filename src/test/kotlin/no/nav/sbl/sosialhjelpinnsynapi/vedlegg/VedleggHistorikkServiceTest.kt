@@ -8,19 +8,19 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Ettersendelse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggForHistorikkService.Vedlegg
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService.Vedlegg
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.ZoneOffset
 
-internal class VedleggForHistorikkServiceTest {
+internal class VedleggHistorikkServiceTest {
 
     private val fiksClient: FiksClient = mockk()
     private val dokumentlagerClient: DokumentlagerClient = mockk()
 
-    private val service = VedleggForHistorikkService(fiksClient, dokumentlagerClient)
+    private val service = VedleggHistorikkService(fiksClient, dokumentlagerClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon = mockk()

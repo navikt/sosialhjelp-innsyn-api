@@ -19,14 +19,14 @@ class HendelseService(private val eventService: EventService,
         val model = eventService.createModel(fiksDigisosId, token)
 
         val vedlegg = vedleggForHistorikkService.hentVedlegg(fiksDigisosId)
-        leggTilHendelserForOpplastingerEtterMottatt(model, vedlegg)
+        leggTilHendelserForOpplastingerEtterMottattSoknad(model, vedlegg)
 
         val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
         log.info("Hentet historikk for fiksDigisosId=$fiksDigisosId")
         return responseList
     }
 
-    private fun leggTilHendelserForOpplastingerEtterMottatt(model: InternalDigisosSoker, vedlegg: List<Vedlegg>) {
+    private fun leggTilHendelserForOpplastingerEtterMottattSoknad(model: InternalDigisosSoker, vedlegg: List<Vedlegg>) {
         val mottattHendelse = model.historikk.firstOrNull { it.tittel.contains("mottatt") }
 
         if (mottattHendelse != null) {

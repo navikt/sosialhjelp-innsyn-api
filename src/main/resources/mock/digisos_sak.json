@@ -35,6 +35,18 @@
           }
         ],
         "timestampSendt": 0
+      },
+      {
+        "navEksternRefId": "string",
+        "vedleggMetadata": "mock-ettersendelse-vedlegg-metadata-2",
+        "vedlegg": [
+          {
+            "filnavn": "ettersendelse vedlegg filnavn 2",
+            "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "storrelse": 0
+          }
+        ],
+        "timestampSendt": 1539296542000
       }
     ]
   },

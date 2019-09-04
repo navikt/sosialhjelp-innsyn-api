@@ -31,26 +31,26 @@ class VedleggForHistorikkService(private val fiksClient: FiksClient,
 
         return jsonVedleggSpesifikasjon.vedlegg
                 .filter { "LastetOpp" == it.status }
-                .flatMap {
-                    it.filer.map { fil ->
+                .flatMap { vedlegg ->
+                    vedlegg.filer.map {
                         Vedlegg(
-                                it.type,
+                                vedlegg.type,
                                 unixToLocalDateTime(originalSoknadNAV.timestampSendt))
                     }
                 }
     }
 
     private fun hentEttersendteVedleggForHistorikk(ettersendtInfoNAV: EttersendtInfoNAV): List<Vedlegg> {
-        return ettersendtInfoNAV.ettersendelser.flatMap {
-            val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(it.vedleggMetadata)
+        return ettersendtInfoNAV.ettersendelser.flatMap { ettersendelse ->
+            val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(ettersendelse.vedleggMetadata)
             jsonVedleggSpesifikasjon.vedlegg
                     .filter { vedlegg -> "LastetOpp" == vedlegg.status }
                     .flatMap { vedlegg ->
                         vedlegg.filer
-                                .map { fil ->
+                                .map {
                                     Vedlegg(
                                             vedlegg.type,
-                                            unixToLocalDateTime(it.timestampSendt))
+                                            unixToLocalDateTime(ettersendelse.timestampSendt))
                                 }
                     }
         }
@@ -60,7 +60,7 @@ class VedleggForHistorikkService(private val fiksClient: FiksClient,
         return dokumentlagerClient.hentDokument(dokumentlagerId, JsonVedleggSpesifikasjon::class.java) as JsonVedleggSpesifikasjon
     }
 
-    data class Vedlegg (
+    data class Vedlegg(
             val type: String,
             val tidspunktLastetOpp: LocalDateTime
     )

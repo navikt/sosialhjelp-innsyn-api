@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 
@@ -13,8 +12,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar, clientProperties: ClientPro
     hendelse.utbetalingsreferanse
 
 
-    val utbetalinger: java.util.ArrayList<Utbetaling> = ArrayList()
-    val vilkarSaker: java.util.ArrayList<Sak> = ArrayList()
+    val utbetalinger: MutableList<Utbetaling> = mutableListOf()
+    val vilkarSaker: MutableList<Utbetaling> = mutableListOf()
+
+
     for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
         for (sak in saker) {
             for (utbetaling in sak.utbetalinger) {

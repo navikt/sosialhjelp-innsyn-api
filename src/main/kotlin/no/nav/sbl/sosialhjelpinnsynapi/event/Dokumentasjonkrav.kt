@@ -4,7 +4,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Dokumentasjonkrav
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, clientProperties: ClientProperties) {
@@ -13,8 +12,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, clientProperties
     hendelse.utbetalingsreferanse
 
 
-    val utbetalinger: java.util.ArrayList<Utbetaling> = ArrayList()
-    val dokumentasjonkravSaker: java.util.ArrayList<Sak> = ArrayList()
+    val utbetalinger: MutableList<Utbetaling> = mutableListOf()
+    val dokumentasjonkravSaker: MutableList<Utbetaling> = mutableListOf()
     for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
         for (sak in saker) {
             for (utbetaling in sak.utbetalinger) {

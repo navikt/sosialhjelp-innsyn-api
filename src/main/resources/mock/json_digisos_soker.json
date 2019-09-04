@@ -6,6 +6,11 @@
   },
   "hendelser": [
     {
+      "type": "soknadsStatus",
+      "hendelsestidspunkt": "2018-10-08T11:00:00.000Z",
+      "status": "MOTTATT"
+    },
+    {
       "type": "tildeltNavKontor",
       "hendelsestidspunkt": "2018-10-08T21:47:00.134Z",
       "navKontor": "030102"

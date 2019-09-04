@@ -15,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException
 class SaksStatusController(private val saksStatusService: SaksStatusService) {
 
     @GetMapping("/{fiksDigisosId}/saksStatus", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-    fun hentSaksStatuser(@PathVariable fiksDigisosId: String, @CookieValue(value = "localhost-idtoken", defaultValue = "") access_token: String): ResponseEntity<List<SaksStatusResponse>> {
+    fun hentSaksStatuser(@PathVariable fiksDigisosId: String, @CookieValue(value = "localhost-idtoken", defaultValue = "1234") access_token: String): ResponseEntity<List<SaksStatusResponse>> {
         try {
             val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, access_token)
             if (saksStatuser.isEmpty()) {

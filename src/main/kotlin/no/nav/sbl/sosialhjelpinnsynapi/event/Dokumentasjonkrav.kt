@@ -23,7 +23,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, clientProperties
             }
         }
     }
-    val dokumentasjonkrav = Dokumentasjonkrav("hendelse.referanse", utbetalinger, hendelse.beskrivelse, hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT)
+    val dokumentasjonkrav = Dokumentasjonkrav(hendelse.dokumentasjonkravreferanse, utbetalinger, hendelse.beskrivelse, hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT)
 
     dokumentasjonkravSaker.forEach { sak ->
         sak.dokumentasjonkrav.add(dokumentasjonkrav)

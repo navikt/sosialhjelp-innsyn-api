@@ -25,7 +25,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar, clientProperties: ClientPro
             }
         }
     }
-    val vilkar = Vilkar("hendelse.referanse", utbetalinger, hendelse.beskrivelse, hendelse.status == JsonVilkar.Status.OPPFYLT)
+    val vilkar = Vilkar(hendelse.vilkarreferanse, utbetalinger, hendelse.beskrivelse, hendelse.status == JsonVilkar.Status.OPPFYLT)
 
     vilkarSaker.forEach { sak ->
         sak.vilkar.add(vilkar)

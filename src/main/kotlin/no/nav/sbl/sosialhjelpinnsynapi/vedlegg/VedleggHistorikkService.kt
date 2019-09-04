@@ -32,11 +32,7 @@ class VedleggHistorikkService(private val fiksClient: FiksClient,
         return jsonVedleggSpesifikasjon.vedlegg
                 .filter { "LastetOpp" == it.status }
                 .flatMap { vedlegg ->
-                    vedlegg.filer.map {
-                        Vedlegg(
-                                vedlegg.type,
-                                unixToLocalDateTime(originalSoknadNAV.timestampSendt))
-                    }
+                    vedlegg.filer.map { Vedlegg(unixToLocalDateTime(originalSoknadNAV.timestampSendt)) }
                 }
     }
 
@@ -46,12 +42,7 @@ class VedleggHistorikkService(private val fiksClient: FiksClient,
             jsonVedleggSpesifikasjon.vedlegg
                     .filter { vedlegg -> "LastetOpp" == vedlegg.status }
                     .flatMap { vedlegg ->
-                        vedlegg.filer
-                                .map {
-                                    Vedlegg(
-                                            vedlegg.type,
-                                            unixToLocalDateTime(ettersendelse.timestampSendt))
-                                }
+                        vedlegg.filer.map { Vedlegg(unixToLocalDateTime(ettersendelse.timestampSendt)) }
                     }
         }
     }
@@ -61,7 +52,6 @@ class VedleggHistorikkService(private val fiksClient: FiksClient,
     }
 
     data class Vedlegg(
-            val type: String,
             val tidspunktLastetOpp: LocalDateTime
     )
 }

@@ -32,7 +32,7 @@ class HendelseService(private val eventService: EventService,
         if (mottattHendelse != null) {
             vedlegg
                     .filter { it.tidspunktLastetOpp.isAfter(mottattHendelse.tidspunkt) }
-                    .forEach { model.historikk.add(Hendelse("Vedlegg lastet opp - ${it.type}", it.tidspunktLastetOpp)) }
+                    .forEach { model.historikk.add(Hendelse("NAV har mottatt vedlegg fra deg", it.tidspunktLastetOpp)) }
 
             model.historikk.sortBy { it.tidspunkt }
         }

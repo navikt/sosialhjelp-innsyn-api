@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.SaksStatusService
 import no.nav.security.oidc.api.Unprotected
-import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -16,9 +15,9 @@ import org.springframework.web.server.ResponseStatusException
 class SaksStatusController(private val saksStatusService: SaksStatusService) {
 
     @GetMapping("/{fiksDigisosId}/saksStatus", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-    fun hentSaksStatuser(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<SaksStatusResponse>> {
+    fun hentSaksStatuser(@PathVariable fiksDigisosId: String, @CookieValue(value = "localhost-idtoken", defaultValue = "") access_token: String): ResponseEntity<List<SaksStatusResponse>> {
         try {
-            val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
+            val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, access_token)
             if (saksStatuser.isEmpty()) {
                 return ResponseEntity(HttpStatus.NO_CONTENT)
             }

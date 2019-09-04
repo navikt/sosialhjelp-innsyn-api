@@ -26,7 +26,7 @@ internal val defaultHttpClient = HttpClient(Apache) {
     engine {
         customizeClient {
             val proxy = System.getenv("HTTP_PROXY")
-            if (proxy != null){
+            if (proxy != null) {
                 setProxy(HttpHost(proxy.substringAfterLast("/").substringBeforeLast(":"), Integer.valueOf(proxy.substringAfterLast(":"))))
                 log.info("proxy set")
             }

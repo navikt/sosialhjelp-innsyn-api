@@ -41,7 +41,7 @@ internal class OppgaveServiceTest {
     fun `Should return emptylist`() {
         val model = InternalDigisosSoker()
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val oppgaver = service.hentOppgaver("123", token)
 
@@ -54,7 +54,7 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.oppgaver.add(Oppgave(type, tillegg, frist))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val oppgaver = service.hentOppgaver("123", token)
 
@@ -69,7 +69,7 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.oppgaver.add(Oppgave(type, null, frist))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val oppgaver = service.hentOppgaver("123", token)
 
@@ -88,7 +88,7 @@ internal class OppgaveServiceTest {
                 Oppgave(type4, tillegg4, frist4),
                 Oppgave(type2, tillegg2, frist2)))
 
-        every { eventService.createModel(any()) } returns model
+        every { eventService.createModel(any(), any()) } returns model
 
         val oppgaver = service.hentOppgaver("123", token)
 

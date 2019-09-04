@@ -16,7 +16,7 @@ class HendelseService(private val eventService: EventService,
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
-        val model = eventService.createModel(fiksDigisosId)
+        val model = eventService.createModel(fiksDigisosId, token)
 
         val vedlegg = vedleggForHistorikkService.hentVedlegg(fiksDigisosId)
         leggTilHendelserForOpplastingerEtterMottatt(model, vedlegg)

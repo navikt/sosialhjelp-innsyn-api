@@ -15,10 +15,10 @@ server:
     context-path: '/sosialhjelp/innsyn-api'
 
 client:
-  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:fiks-digisos-url}
+  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:https://api.fiks.test.ks.no}
   fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:dokumentlager-url}
-  fiks_integrasjonid: ${INTEGRASJONPASSORD_FIKS:fiks-integrasjonid}
-  fiks_integrasjonid_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE:fiks-integrasjonid-kommune}
+  fiks_integrasjonid: ${INTEGRASJONSID_FIKS:fiks-integrasjonid}
+  fiks_integrasjonid_kommune: ${INTEGRASJONSID_FIKS_KOMMUNE:fiks-integrasjonid-kommune}
   fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS:fiks-integrasjonpassord}
   fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE:fiks-integrasjonpassord-kommune}
   idPortenTokenUrl: "https://oidc-ver2.difi.no/idporten-oidc-provider/token"

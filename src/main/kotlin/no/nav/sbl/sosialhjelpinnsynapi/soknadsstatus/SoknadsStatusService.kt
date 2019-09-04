@@ -11,7 +11,7 @@ private val log = LoggerFactory.getLogger(SoknadsStatusService::class.java)
 class SoknadsStatusService(private val eventService: EventService) {
 
     fun hentSoknadsStatus(fiksDigisosId: String, token: String): SoknadsStatusResponse {
-        val model = eventService.createModel(fiksDigisosId)
+        val model = eventService.createModel(fiksDigisosId, token)
         val status = model.status
         if (status == null) {
             log.warn("SoknadsStatus kan ikke være null")

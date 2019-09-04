@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
@@ -16,15 +16,10 @@ import org.springframework.web.bind.annotation.RestController
 class DigisosApiController(val digisosApiService: DigisosApiService) {
 
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_UTF8_VALUE], produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun oppdaterDigisosSak(@RequestBody digisosSak: DigisosSak): ResponseEntity<String> {
-        digisosApiService.oppdaterDigisosSak(digisosSak)
-        return ResponseEntity.ok("ok")
-    }
+    fun oppdaterDigisosSak(fiksDigisosId: String?, @RequestBody digisosApiWrapper: DigisosApiWrapper): ResponseEntity<String> {
+        val id = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
 
-    @PostMapping("/opprettDigisosSak", consumes = [APPLICATION_JSON_UTF8_VALUE], produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun opprettDigisosSak(@RequestBody digisosSak: DigisosSak): ResponseEntity<String> {
-        digisosApiService.opprettDigisosSak(digisosSak)
-        return ResponseEntity.ok("ok")
+        return ResponseEntity.ok("{\"fiksDigisosId\":\"$id\"}")
     }
 
 }

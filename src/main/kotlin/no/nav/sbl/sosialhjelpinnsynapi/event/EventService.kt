@@ -17,8 +17,8 @@ class EventService(private val clientProperties: ClientProperties,
                    private val innsynService: InnsynService,
                    private val norgClient: NorgClient) {
 
-    fun createModel(fiksDigisosId: String): InternalDigisosSoker {
-        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, "token")
+    fun createModel(fiksDigisosId: String, token: String): InternalDigisosSoker {
+        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token)
         val jsonSoknadsmottaker = innsynService.hentOriginalSoknad(fiksDigisosId).mottaker
         val timestampSendt = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId)
 
@@ -49,6 +49,8 @@ class EventService(private val clientProperties: ClientProperties,
             is JsonVedtakFattet -> apply(hendelse, clientProperties)
             is JsonDokumentasjonEtterspurt -> apply(hendelse, clientProperties)
             is JsonForelopigSvar -> apply(hendelse, clientProperties)
+            is JsonUtbetaling -> apply(hendelse, clientProperties)
+            is JsonVilkar -> apply(hendelse, clientProperties)
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }
     }

@@ -37,7 +37,8 @@ data class Sak(
         var saksStatus: SaksStatus,
         var tittel: String,
         var vedtak: MutableList<Vedtak>,
-        var utbetalinger: MutableList<Utbetaling>
+        var utbetalinger: MutableList<Utbetaling>,
+        var vilkar: MutableList<Vilkar>
 )
 
 data class Vedtak(
@@ -49,18 +50,21 @@ data class Utbetaling(
         var referanse: String,
         var status: UtbetalingsStatus,
         var belop: BigDecimal,
-        var beskrivelse: String,
-        var posteringsDato: LocalDate,
-        var fom: LocalDate,
-        var tom: LocalDate,
-        var mottaker: String,
-        var utbetalingsform: String
+        var beskrivelse: String?,
+        var posteringsDato: LocalDate?,
+        var utbetalingsDato: LocalDate?,
+        var fom: LocalDate?,
+        var tom: LocalDate?,
+        var mottaker: String?,
+        var utbetalingsform: String?,
+        var vilkar: MutableList<Vilkar>
 )
 
 data class Vilkar(
         var referanse: String,
         var utbetalinger: MutableList<Utbetaling>,
-        var beskrivelse: String
+        var beskrivelse: String,
+        var oppfyllt: Boolean
 )
 
 data class Hendelse(

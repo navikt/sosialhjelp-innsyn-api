@@ -20,6 +20,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                 SaksStatus.valueOf(hendelse.status.name),
                 hendelse.tittel,
                 mutableListOf(),
+                mutableListOf(),
                 mutableListOf()
         ))
     }

@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Ettersendelse
@@ -23,9 +22,8 @@ internal class VedleggServiceTest {
 
     private val fiksClient: FiksClient = mockk()
     private val dokumentlagerClient: DokumentlagerClient = mockk()
-    private val clientProperties: ClientProperties = mockk(relaxed = true)
 
-    private val service = VedleggService(fiksClient, dokumentlagerClient, clientProperties)
+    private val service = VedleggService(fiksClient, dokumentlagerClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon = mockk()
@@ -102,65 +100,55 @@ internal class VedleggServiceTest {
 
         // nano-presisjon lacking
         assertThat(list[0].filnavn).isEqualTo(soknad_filnavn_1)
-        assertThat(list[0].storrelse).isEqualTo(1337)
-        assertThat(list[0].url).contains(dokumentlagerId_4)
-        assertThat(list[0].beskrivelse).isEqualTo(dokumenttype)
-        assertThat(list[0].datoLagtTil).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[0].type).isEqualTo(dokumenttype)
+        assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
 
         assertThat(list[1].filnavn).isEqualTo(soknad_filnavn_2)
-        assertThat(list[1].storrelse).isEqualTo(1337)
-        assertThat(list[1].url).contains(dokumentlagerId_5)
-        assertThat(list[1].beskrivelse).isEqualTo(dokumenttype)
-        assertThat(list[1].datoLagtTil).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[1].type).isEqualTo(dokumenttype)
+        assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
 
         assertThat(list[2].filnavn).isEqualTo(ettersendelse_filnavn_1)
-        assertThat(list[2].storrelse).isEqualTo(42)
-        assertThat(list[2].url).contains(dokumentlagerId_1)
-        assertThat(list[2].beskrivelse).isEqualTo(dokumenttype_2)
-        assertThat(list[2].datoLagtTil).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[2].type).isEqualTo(dokumenttype_2)
+        assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
 
         assertThat(list[3].filnavn).isEqualTo(ettersendelse_filnavn_2)
-        assertThat(list[3].storrelse).isEqualTo(42)
-        assertThat(list[3].url).contains(dokumentlagerId_2)
-        assertThat(list[3].beskrivelse).isEqualTo(dokumenttype_2)
-        assertThat(list[3].datoLagtTil).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[3].type).isEqualTo(dokumenttype_2)
+        assertThat(list[3].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
 
         assertThat(list[4].filnavn).isEqualTo(ettersendelse_filnavn_3)
-        assertThat(list[4].storrelse).isEqualTo(42)
-        assertThat(list[4].url).contains(dokumentlagerId_3)
-        assertThat(list[4].beskrivelse).isEqualTo(dokumenttype_3)
-        assertThat(list[4].datoLagtTil).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[4].type).isEqualTo(dokumenttype_3)
+        assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
     }
 }
 
-internal val id = "123"
+private val id = "123"
 
-internal val ettersendelse_filnavn_1 = "filnavn.pdf"
-internal val ettersendelse_filnavn_2 = "navn på fil.ocr"
-internal val ettersendelse_filnavn_3 = "denne filens navn.jpg"
-internal val soknad_filnavn_1 = "originalSoknadVedlegg.png"
-internal val soknad_filnavn_2 = "originalSoknadVedlegg_2.exe"
+private val ettersendelse_filnavn_1 = "filnavn.pdf"
+private val ettersendelse_filnavn_2 = "navn på fil.ocr"
+private val ettersendelse_filnavn_3 = "denne filens navn.jpg"
+private val soknad_filnavn_1 = "originalSoknadVedlegg.png"
+private val soknad_filnavn_2 = "originalSoknadVedlegg_2.exe"
 
-internal val dokumentlagerId_1 = "9999"
-internal val dokumentlagerId_2 = "7777"
-internal val dokumentlagerId_3 = "5555"
-internal val dokumentlagerId_4 = "3333"
-internal val dokumentlagerId_5 = "1111"
+private val dokumentlagerId_1 = "9999"
+private val dokumentlagerId_2 = "7777"
+private val dokumentlagerId_3 = "5555"
+private val dokumentlagerId_4 = "3333"
+private val dokumentlagerId_5 = "1111"
 
-internal val dokumenttype = "type"
-internal val dokumenttype_2 = "type 2"
-internal val dokumenttype_3 = "type 3"
+private val dokumenttype = "type"
+private val dokumenttype_2 = "type 2"
+private val dokumenttype_3 = "type 3"
 
-internal val tid_1 = Instant.now()
-internal val tid_2 = Instant.now().minus(2, ChronoUnit.DAYS)
-internal val tid_soknad = Instant.now().minus(14, ChronoUnit.DAYS)
+private val tid_1 = Instant.now()
+private val tid_2 = Instant.now().minus(2, ChronoUnit.DAYS)
+private val tid_soknad = Instant.now().minus(14, ChronoUnit.DAYS)
 
-internal val vedleggMetadata_ettersendelse_1 = "vedlegg metadata 1"
-internal val vedleggMetadata_ettersendelse_2 = "vedlegg metadata 2"
-internal val vedleggMetadata_ettersendelse_3 = "vedlegg metadata 3"
-internal val vedleggMetadata_soknad = "vedlegg metadata soknad"
+private val vedleggMetadata_ettersendelse_1 = "vedlegg metadata 1"
+private val vedleggMetadata_ettersendelse_2 = "vedlegg metadata 2"
+private val vedleggMetadata_ettersendelse_3 = "vedlegg metadata 3"
+private val vedleggMetadata_soknad = "vedlegg metadata soknad"
 
-internal val ettersendelser = listOf(
+private val ettersendelser = listOf(
         Ettersendelse(
                 navEksternRefId = "ref 1",
                 vedleggMetadata = vedleggMetadata_ettersendelse_1,
@@ -173,7 +161,7 @@ internal val ettersendelser = listOf(
                 timestampSendt = tid_2.toEpochMilli())
 )
 
-internal val originalSoknad = OriginalSoknadNAV(
+private val originalSoknad = OriginalSoknadNAV(
         navEksternRefId = "123",
         metadata = "metadata",
         vedleggMetadata = vedleggMetadata_soknad,
@@ -182,7 +170,7 @@ internal val originalSoknad = OriginalSoknadNAV(
         timestampSendt = tid_soknad.toEpochMilli()
 )
 
-internal val soknadVedleggSpesifikasjon = JsonVedleggSpesifikasjon()
+private val soknadVedleggSpesifikasjon = JsonVedleggSpesifikasjon()
         .withVedlegg(listOf(
                 JsonVedlegg()
                         .withFiler(listOf(
@@ -196,7 +184,7 @@ internal val soknadVedleggSpesifikasjon = JsonVedleggSpesifikasjon()
                         .withType(dokumenttype)
         ))
 
-internal val ettersendteVedleggSpesifikasjon_1 = JsonVedleggSpesifikasjon()
+private val ettersendteVedleggSpesifikasjon_1 = JsonVedleggSpesifikasjon()
         .withVedlegg(listOf(
                 JsonVedlegg()
                         .withFiler(listOf(
@@ -210,7 +198,7 @@ internal val ettersendteVedleggSpesifikasjon_1 = JsonVedleggSpesifikasjon()
                         .withType(dokumenttype_2)
         ))
 
-internal val ettersendteVedleggSpesifikasjon_2 = JsonVedleggSpesifikasjon()
+private val ettersendteVedleggSpesifikasjon_2 = JsonVedleggSpesifikasjon()
         .withVedlegg(listOf(
                 JsonVedlegg()
                         .withFiler(listOf(
@@ -219,7 +207,7 @@ internal val ettersendteVedleggSpesifikasjon_2 = JsonVedleggSpesifikasjon()
                         .withType(dokumenttype_3)
         ))
 
-internal val ettersendteVedleggSpesifikasjon_3 = JsonVedleggSpesifikasjon()
+private val ettersendteVedleggSpesifikasjon_3 = JsonVedleggSpesifikasjon()
         .withVedlegg(listOf(
                 JsonVedlegg()
                         .withFiler(listOf(

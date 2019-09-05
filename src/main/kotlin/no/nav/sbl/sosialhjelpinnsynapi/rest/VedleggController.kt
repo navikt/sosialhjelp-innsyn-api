@@ -1,9 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
+import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -16,7 +20,8 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class VedleggController(private val vedleggOpplastingService: VedleggOpplastingService,
-                        private val vedleggService: VedleggService) {
+                        private val vedleggService: VedleggService,
+                        private val clientProperties: ClientProperties) {
 
     // Last opp vedlegg for mellomlagring
     @PostMapping("/{fiksDigisosId}/vedlegg/lastOpp", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -46,10 +51,29 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
     fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
-        val vedleggResponses: List<VedleggResponse> = vedleggService.hentAlleVedlegg(fiksDigisosId)
-        if (vedleggResponses.isEmpty()) {
+        val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleVedlegg(fiksDigisosId)
+        if (internalVedleggList.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
+        val vedleggResponses = internalVedleggList
+                .map {
+                    VedleggResponse(
+                            it.filnavn,
+                            hentStorrelse(it.filnavn, it.dokumentInfoList),
+                            hentUrl(it.filnavn, it.dokumentInfoList),
+                            it.type,
+                            it.tidspunktLastetOpp)
+                }
         return ResponseEntity.ok(vedleggResponses)
+    }
+
+    private fun hentStorrelse(filnavn: String, list: List<DokumentInfo>): Long {
+        val first = list.first { it.filnavn == filnavn }
+        return first.storrelse
+    }
+
+    private fun hentUrl(filnavn: String, list: List<DokumentInfo>): String {
+        val first = list.first { it.filnavn == filnavn }
+        return hentDokumentlagerUrl(clientProperties, first.dokumentlagerDokumentId)
     }
 }

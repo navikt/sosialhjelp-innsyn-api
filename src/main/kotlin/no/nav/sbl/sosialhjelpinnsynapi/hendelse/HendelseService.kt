@@ -4,29 +4,32 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService.Vedlegg
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class HendelseService(private val eventService: EventService,
-                      private val vedleggHistorikkService: VedleggHistorikkService) {
+                      private val vedleggService: VedleggService,
+                      private val fiksClient: FiksClient) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
         val model = eventService.createModel(fiksDigisosId, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
 
-        val vedlegg = vedleggHistorikkService.hentVedlegg(fiksDigisosId)
-        leggTilHendelserForOpplastingerEtterMottattSoknad(model, vedlegg)
+        val vedlegg = vedleggService.hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
+        leggTilHendelserForOpplastinger(model, vedlegg)
 
         val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
         log.info("Hentet historikk for fiksDigisosId=$fiksDigisosId")
         return responseList
     }
 
-    private fun leggTilHendelserForOpplastingerEtterMottattSoknad(model: InternalDigisosSoker, vedlegg: List<Vedlegg>) {
+    private fun leggTilHendelserForOpplastinger(model: InternalDigisosSoker, vedlegg: List<InternalVedlegg>) {
         val mottattHendelse = model.historikk.firstOrNull { it.tittel.contains("mottatt") }
 
         if (mottattHendelse != null) {

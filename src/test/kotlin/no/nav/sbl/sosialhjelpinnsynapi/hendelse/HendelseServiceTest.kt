@@ -3,11 +3,13 @@ package no.nav.sbl.sosialhjelpinnsynapi.hendelse
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggHistorikkService.Vedlegg
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,8 +18,11 @@ import java.time.LocalDateTime
 internal class HendelseServiceTest {
 
     private val eventService: EventService = mockk()
-    private val vedleggHistorikkService: VedleggHistorikkService = mockk()
-    private val service = HendelseService(eventService, vedleggHistorikkService)
+    private val vedleggService: VedleggService = mockk()
+    private val fiksClient: FiksClient = mockk()
+    private val service = HendelseService(eventService, vedleggService, fiksClient)
+
+    private val mockDigisosSak: DigisosSak = mockk()
 
     private val tidspunkt_sendt = LocalDateTime.now().minusDays(1)
     private val tidspunkt_mottatt = LocalDateTime.now().minusHours(10)
@@ -35,9 +40,14 @@ internal class HendelseServiceTest {
     private val url2 = "some url 2"
     private val url3 = "some url 3"
 
+    private val dokumenttype = "type"
+
     @BeforeEach
     fun init() {
-        clearMocks(eventService, vedleggHistorikkService)
+        clearMocks(eventService, vedleggService, fiksClient)
+
+        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
     }
 
     @Test
@@ -47,7 +57,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggHistorikkService.hentVedlegg(any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -67,7 +77,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggHistorikkService.hentVedlegg(any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -84,9 +94,9 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggHistorikkService.hentVedlegg(any()) } returns listOf(
-                Vedlegg(tidspunkt4),
-                Vedlegg(tidspunkt5))
+        every { vedleggService.hentEttersendteVedlegg(any()) } returns listOf(
+                InternalVedlegg(tittel4, dokumenttype, emptyList(), tidspunkt4),
+                InternalVedlegg(tittel5, dokumenttype, emptyList(), tidspunkt5))
 
         val hendelser = service.hentHendelser("123", "Token")
 

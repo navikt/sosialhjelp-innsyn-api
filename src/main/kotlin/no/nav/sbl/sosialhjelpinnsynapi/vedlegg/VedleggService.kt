@@ -1,33 +1,31 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
-import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+
+private const val LASTET_OPP_STATUS = "LastetOpp"
 
 @Component
 class VedleggService(private val fiksClient: FiksClient,
-                     private val dokumentlagerClient: DokumentlagerClient,
-                     private val clientProperties: ClientProperties) {
+                     private val dokumentlagerClient: DokumentlagerClient) {
 
-    fun hentAlleVedlegg(fiksDigisosId: String): List<VedleggResponse> {
+    fun hentAlleVedlegg(fiksDigisosId: String): List<InternalVedlegg> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
 
         val soknadVedlegg = hentSoknadVedlegg(digisosSak.originalSoknadNAV)
-
         val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
 
         return soknadVedlegg.plus(ettersendteVedlegg)
     }
 
-    private fun hentSoknadVedlegg(originalSoknadNAV: OriginalSoknadNAV): List<VedleggResponse> {
+    private fun hentSoknadVedlegg(originalSoknadNAV: OriginalSoknadNAV): List<InternalVedlegg> {
         val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(originalSoknadNAV.vedleggMetadata)
 
         if (jsonVedleggSpesifikasjon.vedlegg.isEmpty()) {
@@ -35,33 +33,33 @@ class VedleggService(private val fiksClient: FiksClient,
         }
 
         return jsonVedleggSpesifikasjon.vedlegg
-                .filter { "LastetOpp" == it.status }
+                .filter { LASTET_OPP_STATUS == it.status }
                 .flatMap {
                     it.filer.map { fil ->
-                        VedleggResponse(
+                        InternalVedlegg(
                                 fil.filnavn,
-                                hentStorrelse(fil.filnavn, originalSoknadNAV.vedlegg),
-                                hentUrl(fil.filnavn, originalSoknadNAV.vedlegg),
                                 it.type,
-                                unixToLocalDateTime(originalSoknadNAV.timestampSendt))
+                                originalSoknadNAV.vedlegg,
+                                unixToLocalDateTime(originalSoknadNAV.timestampSendt)
+                        )
                     }
                 }
     }
 
-    private fun hentEttersendteVedlegg(ettersendtInfoNAV: EttersendtInfoNAV): List<VedleggResponse> {
+    fun hentEttersendteVedlegg(ettersendtInfoNAV: EttersendtInfoNAV): List<InternalVedlegg> {
         return ettersendtInfoNAV.ettersendelser.flatMap {
             val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(it.vedleggMetadata)
             jsonVedleggSpesifikasjon.vedlegg
-                    .filter { vedlegg -> "LastetOpp" == vedlegg.status }
+                    .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                     .flatMap { vedlegg ->
                         vedlegg.filer
                                 .map { fil ->
-                                    VedleggResponse(
+                                    InternalVedlegg(
                                             fil.filnavn,
-                                            hentStorrelse(fil.filnavn, it.vedlegg),
-                                            hentUrl(fil.filnavn, it.vedlegg),
                                             vedlegg.type,
-                                            unixToLocalDateTime(it.timestampSendt))
+                                            it.vedlegg,
+                                            unixToLocalDateTime(it.timestampSendt)
+                                    )
                                 }
                     }
         }
@@ -71,13 +69,10 @@ class VedleggService(private val fiksClient: FiksClient,
         return dokumentlagerClient.hentDokument(dokumentlagerId, JsonVedleggSpesifikasjon::class.java) as JsonVedleggSpesifikasjon
     }
 
-    private fun hentStorrelse(filnavn: String, list: List<DokumentInfo>): Long {
-        val first = list.first { it.filnavn == filnavn }
-        return first.storrelse
-    }
-
-    private fun hentUrl(filnavn: String, list: List<DokumentInfo>): String {
-        val first = list.first { it.filnavn == filnavn }
-        return hentDokumentlagerUrl(clientProperties, first.dokumentlagerDokumentId)
-    }
+    data class InternalVedlegg(
+            val filnavn: String,
+            val type: String,
+            val dokumentInfoList: List<DokumentInfo>,
+            val tidspunktLastetOpp: LocalDateTime
+    )
 }

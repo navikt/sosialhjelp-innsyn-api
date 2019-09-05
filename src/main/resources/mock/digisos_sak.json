@@ -26,10 +26,10 @@
     "ettersendelser": [
       {
         "navEksternRefId": "string",
-		  "vedleggMetadata": "mock-ettersendelse-vedlegg-metadata",
+        "vedleggMetadata": "mock-ettersendelse-vedlegg-metadata",
         "vedlegg": [
           {
-			  "filnavn": "ettersendelse vedlegg filnavn 1",
+			"filnavn": "ettersendelse vedlegg filnavn 1",
             "dokumentlagerDokumentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             "storrelse": 0
           }

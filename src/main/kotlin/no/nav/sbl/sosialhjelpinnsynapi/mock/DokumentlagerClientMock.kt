@@ -30,6 +30,10 @@ class DokumentlagerClientMock : DokumentlagerClient {
             .getResourceAsStream("mock/json_vedlegg_spesifikasjon_ettersendelse.json")
             .bufferedReader().use { it.readText() }
 
+    private val jsonVedleggSpesifikasjonEttersendelse_2: String = this.javaClass.classLoader
+            .getResourceAsStream("mock/json_vedlegg_spesifikasjon_ettersendelse_2.json")
+            .bufferedReader().use { it.readText() }
+
 
     override fun hentDokument(dokumentlagerId: String, requestedClass: Class<out Any>): Any {
         return when (requestedClass) {
@@ -46,13 +50,19 @@ class DokumentlagerClientMock : DokumentlagerClient {
             JsonVedleggSpesifikasjon::class.java ->
                 if (dokumentlagerId == "mock-soknad-vedlegg-metadata") {
                     dokumentMap.getOrElse(dokumentlagerId, {
-                        val default = getDefaultJsonVedleggSpesifikasjon()
+                        val default = getDefaultJsonVedleggSpesifikasjon(jsonVedleggSpesifikasjon)
+                        dokumentMap[dokumentlagerId] = default
+                        default
+                    })
+                } else if (dokumentlagerId == "mock-ettersendelse-vedlegg-metadata"){
+                    dokumentMap.getOrElse(dokumentlagerId, {
+                        val default = getDefaultJsonVedleggSpesifikasjon(jsonVedleggSpesifikasjonEttersendelse)
                         dokumentMap[dokumentlagerId] = default
                         default
                     })
                 } else {
                     dokumentMap.getOrElse(dokumentlagerId, {
-                        val default = getDefaultJsonVedleggSpesifikasjonEttersendelse()
+                        val default = getDefaultJsonVedleggSpesifikasjon(jsonVedleggSpesifikasjonEttersendelse_2)
                         dokumentMap[dokumentlagerId] = default
                         default
                     })
@@ -73,11 +83,7 @@ class DokumentlagerClientMock : DokumentlagerClient {
         return mapper.readValue(jsonSoknad, JsonSoknad::class.java)
     }
 
-    private fun getDefaultJsonVedleggSpesifikasjon(): JsonVedleggSpesifikasjon {
-        return mapper.readValue(jsonVedleggSpesifikasjon, JsonVedleggSpesifikasjon::class.java)
-    }
-
-    private fun getDefaultJsonVedleggSpesifikasjonEttersendelse(): JsonVedleggSpesifikasjon {
-        return mapper.readValue(jsonVedleggSpesifikasjonEttersendelse, JsonVedleggSpesifikasjon::class.java)
+    private fun getDefaultJsonVedleggSpesifikasjon(vedleggSpesifikasjon: String): JsonVedleggSpesifikasjon {
+        return mapper.readValue(vedleggSpesifikasjon, JsonVedleggSpesifikasjon::class.java)
     }
 }

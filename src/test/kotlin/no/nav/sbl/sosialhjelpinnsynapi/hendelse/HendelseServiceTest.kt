@@ -14,6 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 internal class HendelseServiceTest {
 
@@ -48,6 +49,7 @@ internal class HendelseServiceTest {
 
         every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
+        every { mockDigisosSak.originalSoknadNAV.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
     }
 
     @Test

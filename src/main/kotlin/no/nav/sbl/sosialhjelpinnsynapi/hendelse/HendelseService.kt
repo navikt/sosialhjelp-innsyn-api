@@ -5,6 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.slf4j.LoggerFactory
@@ -22,22 +23,18 @@ class HendelseService(private val eventService: EventService,
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
 
         val vedlegg = vedleggService.hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
-        leggTilHendelserForOpplastinger(model, vedlegg)
+        leggTilHendelserForOpplastinger(model, digisosSak.originalSoknadNAV.timestampSendt, vedlegg)
 
         val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
         log.info("Hentet historikk for fiksDigisosId=$fiksDigisosId")
         return responseList
     }
 
-    private fun leggTilHendelserForOpplastinger(model: InternalDigisosSoker, vedlegg: List<InternalVedlegg>) {
-        val mottattHendelse = model.historikk.firstOrNull { it.tittel.contains("mottatt") }
+    private fun leggTilHendelserForOpplastinger(model: InternalDigisosSoker, timestampSoknadSendt: Long, vedlegg: List<InternalVedlegg>) {
+        vedlegg
+                .filter { it.tidspunktLastetOpp.isAfter(unixToLocalDateTime(timestampSoknadSendt)) }
+                .forEach { model.historikk.add(Hendelse("NAV har mottatt vedlegg fra deg", it.tidspunktLastetOpp)) }
 
-        if (mottattHendelse != null) {
-            vedlegg
-                    .filter { it.tidspunktLastetOpp.isAfter(mottattHendelse.tidspunkt) }
-                    .forEach { model.historikk.add(Hendelse("NAV har mottatt vedlegg fra deg", it.tidspunktLastetOpp)) }
-
-            model.historikk.sortBy { it.tidspunkt }
-        }
+        model.historikk.sortBy { it.tidspunkt }
     }
 }

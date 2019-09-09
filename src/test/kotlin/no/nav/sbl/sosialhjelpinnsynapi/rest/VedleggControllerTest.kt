@@ -28,6 +28,7 @@ internal class VedleggControllerTest {
     private val filnavn = "filnavn"
     private val filnavn2 = "filnavn2"
     private val dokumenttype = "type"
+    private val tilleggsinfo = "tilleggsinfo"
 
     private val dokumentlagerId = "id1"
     private val dokumentlagerId2 = "id2"
@@ -44,6 +45,7 @@ internal class VedleggControllerTest {
                 InternalVedlegg(
                         filnavn,
                         dokumenttype,
+                        tilleggsinfo,
                         listOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
                         LocalDateTime.now())
         )

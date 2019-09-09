@@ -42,6 +42,7 @@ internal class HendelseServiceTest {
     private val url3 = "some url 3"
 
     private val dokumenttype = "type"
+    private val tilleggsinfo = "tilleggsinfo"
 
     @BeforeEach
     fun init() {
@@ -97,8 +98,8 @@ internal class HendelseServiceTest {
         every { eventService.createModel(any(), any()) } returns model
 
         every { vedleggService.hentEttersendteVedlegg(any()) } returns listOf(
-                InternalVedlegg(tittel4, dokumenttype, emptyList(), tidspunkt4),
-                InternalVedlegg(tittel5, dokumenttype, emptyList(), tidspunkt5))
+                InternalVedlegg(tittel4, dokumenttype, tilleggsinfo, emptyList(), tidspunkt4),
+                InternalVedlegg(tittel5, dokumenttype, tilleggsinfo, emptyList(), tidspunkt5))
 
         val hendelser = service.hentHendelser("123", "Token")
 

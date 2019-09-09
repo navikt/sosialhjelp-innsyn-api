@@ -39,6 +39,7 @@ class VedleggService(private val fiksClient: FiksClient,
                         InternalVedlegg(
                                 fil.filnavn,
                                 it.type,
+                                if (it.tilleggsinfo != null) it.tilleggsinfo else null,
                                 originalSoknadNAV.vedlegg,
                                 unixToLocalDateTime(originalSoknadNAV.timestampSendt)
                         )
@@ -57,6 +58,7 @@ class VedleggService(private val fiksClient: FiksClient,
                                     InternalVedlegg(
                                             fil.filnavn,
                                             vedlegg.type,
+                                            if (vedlegg.tilleggsinfo != null) vedlegg.tilleggsinfo else null,
                                             it.vedlegg,
                                             unixToLocalDateTime(it.timestampSendt)
                                     )
@@ -72,6 +74,7 @@ class VedleggService(private val fiksClient: FiksClient,
     data class InternalVedlegg(
             val filnavn: String,
             val type: String,
+            val tilleggsinfo: String?,
             val dokumentInfoList: List<DokumentInfo>,
             val tidspunktLastetOpp: LocalDateTime
     )

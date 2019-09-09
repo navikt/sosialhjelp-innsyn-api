@@ -22,7 +22,7 @@ class HendelseService(private val eventService: EventService,
         val model = eventService.createModel(fiksDigisosId, token)
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
 
-        val vedlegg = vedleggService.hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
+        val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
         leggTilHendelserForOpplastinger(model, digisosSak.originalSoknadNAV.timestampSendt, vedlegg)
 
         val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
@@ -33,8 +33,11 @@ class HendelseService(private val eventService: EventService,
     private fun leggTilHendelserForOpplastinger(model: InternalDigisosSoker, timestampSoknadSendt: Long, vedlegg: List<InternalVedlegg>) {
         vedlegg
                 .filter { it.tidspunktLastetOpp.isAfter(unixToLocalDateTime(timestampSoknadSendt)) }
-                .forEach { model.historikk.add(Hendelse("NAV har mottatt vedlegg fra deg", it.tidspunktLastetOpp)) }
-
+                .forEach {
+                    val filnavnTilknyttetType = it.dokumentInfoList.joinToString(separator = ", ", transform = { hendelse -> hendelse.filnavn })
+                    model.historikk.add(
+                            Hendelse("Du har sendt følgende vedlegg til NAV tilknyttet '${it.type}' : $filnavnTilknyttetType", it.tidspunktLastetOpp))
+                }
         model.historikk.sortBy { it.tidspunkt }
     }
 }

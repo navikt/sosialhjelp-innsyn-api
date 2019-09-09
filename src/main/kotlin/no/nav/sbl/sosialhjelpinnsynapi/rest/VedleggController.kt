@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
@@ -48,32 +47,24 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         return ResponseEntity.ok(response)
     }
 
-
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
     fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
         val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleVedlegg(fiksDigisosId)
         if (internalVedleggList.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
+        // mapper til en flat liste av VedleggResponse
         val vedleggResponses = internalVedleggList
-                .map {
-                    VedleggResponse(
-                            it.filnavn,
-                            hentStorrelse(it.filnavn, it.dokumentInfoList),
-                            hentUrl(it.filnavn, it.dokumentInfoList),
-                            it.type,
-                            it.tidspunktLastetOpp)
+                .flatMap {
+                    it.dokumentInfoList.map { dokumentInfo ->
+                        VedleggResponse(
+                                dokumentInfo.filnavn,
+                                dokumentInfo.storrelse,
+                                hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
+                                it.type,
+                                it.tidspunktLastetOpp)
+                    }
                 }
-        return ResponseEntity.ok(vedleggResponses)
-    }
-
-    private fun hentStorrelse(filnavn: String, list: List<DokumentInfo>): Long {
-        val first = list.first { it.filnavn == filnavn }
-        return first.storrelse
-    }
-
-    private fun hentUrl(filnavn: String, list: List<DokumentInfo>): String {
-        val first = list.first { it.filnavn == filnavn }
-        return hentDokumentlagerUrl(clientProperties, first.dokumentlagerDokumentId)
+        return ResponseEntity.ok(vedleggResponses.distinct())
     }
 }

@@ -39,11 +39,9 @@ internal class VedleggControllerTest {
     }
 
     @Test
-    fun `skal mappe fra InternalVedlegg til VedleggResponse`() {
-
+    fun `skal mappe fra InternalVedleggList til VedleggResponseList`() {
         every { vedleggService.hentAlleVedlegg(any()) } returns listOf(
                 InternalVedlegg(
-                        filnavn,
                         dokumenttype,
                         tilleggsinfo,
                         listOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
@@ -56,7 +54,41 @@ internal class VedleggControllerTest {
 
         assertThat(body).isNotNull
         if (body != null && body.isNotEmpty()) {
+            assertThat(body).hasSize(2)
+            assertThat(body[0].filnavn).isEqualTo(filnavn)
+            assertThat(body[0].url).contains(dokumentlagerId)
+            assertThat(body[0].storrelse).isEqualTo(123L)
+
+            assertThat(body[1].filnavn).isEqualTo(filnavn2)
+            assertThat(body[1].url).contains(dokumentlagerId2)
+            assertThat(body[1].storrelse).isEqualTo(42L)
+        }
+    }
+
+    @Test
+    fun `skal utelate duplikater i response`() {
+        val now = LocalDateTime.now()
+        every { vedleggService.hentAlleVedlegg(any()) } returns listOf(
+                InternalVedlegg(
+                        dokumenttype,
+                        null,
+                        listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                        now),
+                InternalVedlegg(
+                        dokumenttype,
+                        null,
+                        listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                        now)
+        )
+
+        val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
+
+        val body = vedleggResponses.body
+
+        assertThat(body).isNotNull
+        if (body != null && body.isNotEmpty()) {
             assertThat(body).hasSize(1)
+            assertThat(body[0].filnavn).isEqualTo(filnavn)
             assertThat(body[0].url).contains(dokumentlagerId)
             assertThat(body[0].storrelse).isEqualTo(123L)
         }

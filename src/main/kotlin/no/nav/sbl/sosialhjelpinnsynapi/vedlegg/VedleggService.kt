@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
@@ -33,46 +34,47 @@ class VedleggService(private val fiksClient: FiksClient,
         }
 
         return jsonVedleggSpesifikasjon.vedlegg
-                .filter { LASTET_OPP_STATUS == it.status }
-                .flatMap {
-                    it.filer.map { fil ->
-                        InternalVedlegg(
-                                fil.filnavn,
-                                it.type,
-                                if (it.tilleggsinfo != null) it.tilleggsinfo else null,
-                                originalSoknadNAV.vedlegg,
-                                unixToLocalDateTime(originalSoknadNAV.timestampSendt)
-                        )
-                    }
+                .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                .map { vedlegg ->
+                    InternalVedlegg(
+                            vedlegg.type,
+                            vedlegg.tilleggsinfo,
+                            matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer),
+                            unixToLocalDateTime(originalSoknadNAV.timestampSendt)
+                    )
                 }
     }
 
     fun hentEttersendteVedlegg(ettersendtInfoNAV: EttersendtInfoNAV): List<InternalVedlegg> {
-        return ettersendtInfoNAV.ettersendelser.flatMap {
-            val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(it.vedleggMetadata)
-            jsonVedleggSpesifikasjon.vedlegg
-                    .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
-                    .flatMap { vedlegg ->
-                        vedlegg.filer
-                                .map { fil ->
-                                    InternalVedlegg(
-                                            fil.filnavn,
-                                            vedlegg.type,
-                                            if (vedlegg.tilleggsinfo != null) vedlegg.tilleggsinfo else null,
-                                            it.vedlegg,
-                                            unixToLocalDateTime(it.timestampSendt)
-                                    )
-                                }
-                    }
-        }
+        return ettersendtInfoNAV.ettersendelser
+                .flatMap { ettersendelse ->
+                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(ettersendelse.vedleggMetadata)
+                    jsonVedleggSpesifikasjon.vedlegg
+                            .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                            .map { vedlegg ->
+                                InternalVedlegg(
+                                        vedlegg.type,
+                                        vedlegg.tilleggsinfo,
+                                        matchDokumentInfoAndJsonFiler(ettersendelse.vedlegg, vedlegg.filer),
+                                        unixToLocalDateTime(ettersendelse.timestampSendt)
+                                )
+                            }
+                }
     }
 
     private fun hentVedleggSpesifikasjon(dokumentlagerId: String): JsonVedleggSpesifikasjon {
         return dokumentlagerClient.hentDokument(dokumentlagerId, JsonVedleggSpesifikasjon::class.java) as JsonVedleggSpesifikasjon
     }
 
+    private fun matchDokumentInfoAndJsonFiler(dokumentInfoList: List<DokumentInfo>, jsonFiler: List<JsonFiler>): List<DokumentInfo> {
+        return jsonFiler
+                .flatMap { fil ->
+                    dokumentInfoList
+                            .filter { it.filnavn == fil.filnavn }
+                }
+    }
+
     data class InternalVedlegg(
-            val filnavn: String,
             val type: String,
             val tilleggsinfo: String?,
             val dokumentInfoList: List<DokumentInfo>,

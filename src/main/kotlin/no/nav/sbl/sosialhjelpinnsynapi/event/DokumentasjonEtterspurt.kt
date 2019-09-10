@@ -9,10 +9,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProperties: ClientProperties) {
-
-//  TODO: Når DB er på plass må vi sjekke om denne dokumentasjonenEtterspurt har blitt oppfylt av søker
-
-    oppgaver.addAll(hendelse.dokumenter.map { Oppgave(it.dokumenttype, it.tilleggsinformasjon, toLocalDateTime(it.innsendelsesfrist)) })
+    oppgaver = hendelse.dokumenter
+            .map { Oppgave(it.dokumenttype, it.tilleggsinformasjon, toLocalDateTime(it.innsendelsesfrist), toLocalDateTime(hendelse.hendelsestidspunkt)) }
+            .toMutableList()
 
     val beskrivelse = "Du må laste opp mer dokumentasjon"
     historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)))

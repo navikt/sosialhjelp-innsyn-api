@@ -34,13 +34,13 @@ internal class OppgaveServiceTest {
     private val tillegg3 = "bes svare umiddelbart"
     private val type4 = "pengebinge"
     private val tillegg4 = "Onkel Skrue penger"
-    private val tidspunktForKrav = LocalDateTime.now().minusDays(5)//"2019-09-26T13:37:00.134Z"
-    private val tidspunktFoerKrav = LocalDateTime.now().minusDays(7)//"2019-09-24T13:37:00.134Z"
-    private val tidspunktEtterKrav = LocalDateTime.now().minusDays(3)//"2019-09-28T13:37:00.134Z"
-    private val frist = LocalDateTime.now()//"2019-10-01T13:37:00.134Z"
-    private val frist2 = LocalDateTime.now().plusDays(1)//"2019-10-02T13:37:00.134Z"
-    private val frist3 = LocalDateTime.now().plusDays(2)//"2019-10-03T13:37:00.134Z"
-    private val frist4 = LocalDateTime.now().plusDays(3)//"2019-10-04T13:37:00.134Z"
+    private val tidspunktForKrav = LocalDateTime.now().minusDays(5)
+    private val tidspunktFoerKrav = LocalDateTime.now().minusDays(7)
+    private val tidspunktEtterKrav = LocalDateTime.now().minusDays(3)
+    private val frist = LocalDateTime.now()
+    private val frist2 = LocalDateTime.now().plusDays(1)
+    private val frist3 = LocalDateTime.now().plusDays(2)
+    private val frist4 = LocalDateTime.now().plusDays(3)
 
     private val token = "token"
 

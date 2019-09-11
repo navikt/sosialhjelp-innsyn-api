@@ -43,7 +43,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     }
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
-    @PostMapping("/{fiksDigisosId}/vedlegg/send")
+    @PostMapping("/{fiksDigisosId}/vedlegg/sendDem")
     fun sendVedleggTilFiks(@PathVariable fiksDigisosId: String): ResponseEntity<String> {
         val response = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId)
 
@@ -51,7 +51,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     }
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
-    @PostMapping("/{fiksDigisosId}/vedlegg/sendDem")
+    @PostMapping("/{fiksDigisosId}/vedlegg/send")
     fun sendDem(@PathVariable fiksDigisosId: String, @RequestParam("files") files: MutableList<MultipartFile>,
                 @RequestParam("metadata") metadata: MutableList<JsonVedlegg>): ResponseEntity<List<VedleggOpplastingResponse>> {
 

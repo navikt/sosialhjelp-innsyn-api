@@ -182,7 +182,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val response = listener.get(30L, TimeUnit.SECONDS)
             val status = response.status
             if (isError(status)) {
-                val content = IOUtils.toString(listener.inputStream, StandardCharsets.UTF_8)
+                val content = IOUtils.toString(listener.inputStream, "UTF-8")
                 throw ResponseStatusException(HttpStatus.valueOf(response.status), content)
             }
             return mapper.readValue(listener.inputStream, String::class.java)

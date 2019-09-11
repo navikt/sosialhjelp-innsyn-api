@@ -22,6 +22,7 @@ val rxjavaVersion = "2.2.10"
 val ktorVersion = "1.2.2"
 val konfigVersion = "1.6.10.0"
 val kotlinCoroutinesVersion = "1.2.2"
+val commonsIoVersion = "1.3.2"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -89,6 +90,8 @@ dependencies {
     compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
+
+    compile("org.apache.commons:commons-io:$commonsIoVersion")
 
     //spesifikke versjoner oppgradert etter ønske fra snyk
     compile("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")

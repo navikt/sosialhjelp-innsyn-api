@@ -1,18 +1,26 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.reactivex.internal.util.NotificationLite.isError
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import org.apache.commons.io.IOUtils
+import org.eclipse.jetty.client.HttpClient
+import org.eclipse.jetty.client.util.InputStreamContentProvider
+import org.eclipse.jetty.client.util.InputStreamResponseListener
+import org.eclipse.jetty.client.util.MultiPartContentProvider
+import org.eclipse.jetty.client.util.StringContentProvider
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
+import org.springframework.http.*
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpHeaders.TRANSFER_ENCODING
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import org.springframework.util.LinkedMultiValueMap
@@ -20,8 +28,15 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.nio.charset.StandardCharsets
 import java.util.Collections.singletonList
 import java.util.UUID.randomUUID
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import org.eclipse.jetty.http.HttpMethod as JettyHttpMethod
 
 
 private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
@@ -127,6 +142,69 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Opplasting av ettersendelse feilet")
             throw ResponseStatusException(response.statusCode, "something went wrong")
         }
+    }
+
+    override fun lastOppNyEttersendelse2(files: List<MultipartFile>, metadata: List<JsonVedlegg>, kommunenummer: String, soknadId: String, token: String): String? {
+        val navEksternRefId = randomUUID().toString()
+
+        val contentProvider = MultiPartContentProvider()
+        val vedleggJson = JsonVedleggSpesifikasjon()
+        vedleggJson.vedlegg = metadata
+        contentProvider.addFieldPart("vedlegg.json", StringContentProvider(serialiser(vedleggJson)), null)
+
+        var fileId = 0
+        files.forEach { file ->
+            val vedleggMetadata = VedleggMetadata(file.originalFilename, file.contentType, file.size)
+
+            val base64EncodetVedlegg: ByteArray = Base64Utils.encode(file.bytes)
+
+            contentProvider.addFieldPart(String.format("metadata:%s", fileId), StringContentProvider(serialiser(vedleggMetadata)), null)
+            contentProvider.addFilePart(String.format("dokument:%s", fileId), file.originalFilename, InputStreamContentProvider(ByteArrayInputStream(base64EncodetVedlegg)), null)
+            fileId++
+        }
+
+        contentProvider.close()
+
+        val path = "/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
+        val listener = InputStreamResponseListener()
+        val client = HttpClient()
+        val request = client.newRequest(baseUrl)
+
+        request.header(AUTHORIZATION, "Bearer $token")
+                .header("IntegrasjonId", fiksIntegrasjonid)
+                .header("IntegrasjonPassord", fiksIntegrasjonpassord)
+                .method(JettyHttpMethod.POST)
+                .path(path)
+                .content(contentProvider)
+                .send(listener)
+
+        try {
+            val response = listener.get(30L, TimeUnit.SECONDS)
+            val status = response.status
+            if (isError(status)) {
+                val content = IOUtils.toString(listener.inputStream, StandardCharsets.UTF_8)
+                throw ResponseStatusException(HttpStatus.valueOf(response.status), content)
+            }
+            return mapper.readValue(listener.inputStream, String::class.java)
+        } catch (e: InterruptedException) {
+            throw RuntimeException("Feil under invokering av api", e)
+        } catch (e: TimeoutException) {
+            throw RuntimeException("Feil under invokering av api", e)
+        } catch (e: ExecutionException) {
+            throw RuntimeException("Feil under invokering av api", e)
+        } catch (e: IOException) {
+            throw RuntimeException("Feil under invokering av api", e)
+        }
+
+    }
+
+    private fun serialiser(@NonNull metadata: Any): String {
+        try {
+            return mapper.writeValueAsString(metadata)
+        } catch (e: JsonProcessingException) {
+            throw RuntimeException("Feil under serialisering av metadata", e)
+        }
+
     }
 }
 

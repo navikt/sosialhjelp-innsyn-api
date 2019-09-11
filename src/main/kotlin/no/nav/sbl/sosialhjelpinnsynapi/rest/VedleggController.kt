@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
@@ -21,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile
 class VedleggController(private val vedleggOpplastingService: VedleggOpplastingService,
                         private val vedleggService: VedleggService,
                         private val clientProperties: ClientProperties) {
+
+    val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
     // Last opp vedlegg for mellomlagring
     @PostMapping("/{fiksDigisosId}/vedlegg/lastOpp", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -45,6 +48,27 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         val response = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId)
 
         return ResponseEntity.ok(response)
+    }
+
+    // Send alle opplastede vedlegg for fiksDigisosId til Fiks
+    @PostMapping("/{fiksDigisosId}/vedlegg/sendDem")
+    fun sendDem(@PathVariable fiksDigisosId: String, @RequestParam("files") files: MutableList<MultipartFile>,
+                @RequestParam("metadata") metadata: MutableList<JsonVedlegg>): ResponseEntity<List<VedleggOpplastingResponse>> {
+
+        files.forEach { file -> if (file.size > MAKS_TOTAL_FILSTORRELSE) {
+            metadata.forEach { it.filer.removeIf { it.filnavn == file.originalFilename } }
+        }
+        }
+        metadata.removeIf { it.filer.isEmpty() }
+        files.removeIf { it.size > MAKS_TOTAL_FILSTORRELSE }
+
+        if (files.isEmpty() || metadata.size != files.size) {
+            return ResponseEntity.ok(emptyList())
+        }
+
+        vedleggOpplastingService.sendVedleggTilFiks2(fiksDigisosId, files, metadata)
+
+        return ResponseEntity.ok(files.map { VedleggOpplastingResponse(it.originalFilename, it.size) })
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])

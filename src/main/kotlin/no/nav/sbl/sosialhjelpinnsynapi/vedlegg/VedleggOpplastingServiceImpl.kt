@@ -1,9 +1,11 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import org.springframework.web.multipart.MultipartFile
 
 @Profile("!mock")
 @Component
@@ -25,5 +27,13 @@ class VedleggOpplastingServiceImpl(private val fiksClient: FiksClient) : Vedlegg
         fiksClient.lastOppNyEttersendelse("file from mellomlager", kommunenummer, fiksDigisosId, "token")
 
         return "OK"
+    }
+
+    override fun sendVedleggTilFiks2(fiksDigisosId: String, files: List<MultipartFile>, metadata: List<JsonVedlegg>): String? {
+        // Hent digisosSak
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
+        val kommunenummer = digisosSak.kommunenummer
+
+        return fiksClient.lastOppNyEttersendelse2(files, metadata, kommunenummer, fiksDigisosId, "token")
     }
 }

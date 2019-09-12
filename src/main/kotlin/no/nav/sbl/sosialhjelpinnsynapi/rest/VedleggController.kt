@@ -1,5 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import io.ktor.http.cio.parseMultipart
+import io.swagger.annotations.ApiImplicitParam
+import io.swagger.annotations.ApiImplicitParams
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
@@ -15,6 +18,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.io.IOException
+import javax.servlet.http.HttpServletRequest
 
 @Unprotected
 @RestController
@@ -51,7 +56,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     }
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
-    @PostMapping("/{fiksDigisosId}/vedlegg/send")
+    @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendDem(@PathVariable fiksDigisosId: String, @RequestParam("files") files: MutableList<MultipartFile>,
                 @RequestParam("metadata") metadata: MutableList<JsonVedlegg>): ResponseEntity<List<VedleggOpplastingResponse>> {
 

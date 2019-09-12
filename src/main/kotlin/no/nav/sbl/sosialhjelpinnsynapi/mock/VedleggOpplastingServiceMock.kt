@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
@@ -40,5 +41,12 @@ class VedleggOpplastingServiceMock(private val fiksClient: FiksClient) : Vedlegg
         files.forEach { fiksClient.lastOppNyEttersendelse(it, kommunenummer, fiksDigisosId, "token") }
 
         return "OK - ikke sendt til Fiks fordi dette er en mock"
+    }
+
+    override fun sendVedleggTilFiks2(fiksDigisosId: String, files: List<MultipartFile>, metadata: List<JsonVedlegg>): String? {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
+        val kommunenummer = digisosSak.kommunenummer
+
+        return fiksClient.lastOppNyEttersendelse2(files, metadata, kommunenummer, fiksDigisosId, "token")
     }
 }

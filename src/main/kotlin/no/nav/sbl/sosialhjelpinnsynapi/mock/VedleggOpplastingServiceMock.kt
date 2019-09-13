@@ -6,6 +6,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
+import no.nav.sbl.sosialhjelpinnsynapi.utils.getSha512FromByteArray
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -57,7 +58,8 @@ class VedleggOpplastingServiceMock(private val fiksClient: FiksClient) : Vedlegg
                         .withFiler(it.filer.map { fil ->
                             JsonFiler()
                                     .withFilnavn(fil.filnavn)
-                                    .withSha512(fil.sha512)
+                                    .withSha512(getSha512FromByteArray(files.first { multipartFile ->
+                                        multipartFile.originalFilename == fil.filnavn }.bytes))
                         }) })
 
         return fiksClient.lastOppNyEttersendelse2(files, vedleggSpesifikasjon, kommunenummer, fiksDigisosId, "token")

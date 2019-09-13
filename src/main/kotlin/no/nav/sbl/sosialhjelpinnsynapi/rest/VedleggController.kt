@@ -53,10 +53,12 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendDem(@PathVariable fiksDigisosId: String, @RequestParam("files") files: MutableList<MultipartFile>,
+    fun sendDem(@PathVariable fiksDigisosId: String, @RequestParam("data") files: MutableList<MultipartFile>,
                 @RequestParam("metadata") metadataMultipartFile: MultipartFile): ResponseEntity<List<VedleggOpplastingResponse>> {
         val mapper = jacksonObjectMapper()
         val metadata: MutableList<OpplastetVedleggMetadata> = mapper.readValue(metadataMultipartFile.bytes)
+
+        val originalFileList = files.toList()
 
         files.forEach { file -> if (file.size > MAKS_TOTAL_FILSTORRELSE) {
             metadata.forEach { it.filer.removeIf { it.filnavn == file.originalFilename } }
@@ -71,7 +73,9 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
         vedleggOpplastingService.sendVedleggTilFiks2(fiksDigisosId, files, metadata)
 
-        return ResponseEntity.ok(files.map { VedleggOpplastingResponse(it.originalFilename, it.size) })
+        return ResponseEntity.ok(originalFileList.map {
+            if (files.contains(it)) VedleggOpplastingResponse(it.originalFilename, it.size) else VedleggOpplastingResponse(it.originalFilename, -1)
+        })
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
@@ -103,6 +107,5 @@ data class OpplastetVedleggMetadata (
 )
 
 data class sendtFil (
-        val filnavn: String,
-        val sha512: String
+        val filnavn: String
 )

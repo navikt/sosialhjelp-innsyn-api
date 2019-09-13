@@ -1,10 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
@@ -36,7 +36,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
-    private val mapper = jacksonObjectMapper()
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         val headers = HttpHeaders()
@@ -48,12 +47,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId == digisos_stub_id) {
             log.info("Hentet stub - digisosId $digisosId")
-            return mapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+            return objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         }
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         if (response.statusCode.is2xxSuccessful) {
             log.info("Hentet DigisosSak $digisosId fra Fiks")
-            return mapper.readValue(response.body!!, DigisosSak::class.java)
+            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
         } else {
             log.warn("Noe feilet ved kall til Fiks")
             throw ResponseStatusException(response.statusCode, "something went wrong")
@@ -68,7 +67,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
-            return response.body!!.map { s: String -> mapper.readValue(s, DigisosSak::class.java) }
+            return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
         } else {
             log.warn("Noe feilet ved kall til Fiks")
             throw ResponseStatusException(response.statusCode, "something went wrong")

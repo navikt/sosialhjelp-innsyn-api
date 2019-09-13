@@ -11,7 +11,7 @@ fun getSha512FromByteArray(bytes: ByteArray?): String {
         return ""
     }
 
-    val md = MessageDigest.getInstance("SHA-256")
+    val md = MessageDigest.getInstance("SHA-512")
     val digest = md.digest(bytes)
     return digest.fold("", { str, it -> str + "%02x".format(it) })
 }

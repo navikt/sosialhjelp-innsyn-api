@@ -11,7 +11,7 @@ class MulitpartConfig {
     @Bean(name = ["multipartResolver"])
     fun multipartResolver(): CommonsMultipartResolver {
         val multipartResolver = CommonsMultipartResolver()
-        multipartResolver.setMaxUploadSize(10000000)
+        multipartResolver.setMaxUploadSize(50000000) //50 MB. Summen av filer som kan sendes i et POST-kall
         return multipartResolver
     }
 

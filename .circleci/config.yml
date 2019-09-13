@@ -155,7 +155,6 @@ workflows:
       - build
 
       - release:
-          context: NAIS deployment
           requires:
             - build
 

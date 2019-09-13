@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.reactivex.internal.util.NotificationLite.isError
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -30,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import java.io.ByteArrayInputStream
 import java.io.IOException
-import java.nio.charset.StandardCharsets
 import java.util.Collections.singletonList
 import java.util.UUID.randomUUID
 import java.util.concurrent.ExecutionException
@@ -144,13 +142,11 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse2(files: List<MultipartFile>, metadata: List<JsonVedlegg>, kommunenummer: String, soknadId: String, token: String): String? {
+    override fun lastOppNyEttersendelse2(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String? {
         val navEksternRefId = randomUUID().toString()
 
         val contentProvider = MultiPartContentProvider()
-        val vedleggJson = JsonVedleggSpesifikasjon()
-        vedleggJson.vedlegg = metadata
-        contentProvider.addFieldPart("vedlegg.json", StringContentProvider(serialiser(vedleggJson)), null)
+        contentProvider.addFieldPart("vedlegg.json", StringContentProvider(serialiser(vedleggSpesifikasjon)), null)
 
         var fileId = 0
         files.forEach { file ->
@@ -158,7 +154,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
             val base64EncodetVedlegg: ByteArray = Base64Utils.encode(file.bytes)
 
-            contentProvider.addFieldPart(String.format("metadata:%s", fileId), StringContentProvider(serialiser(vedleggMetadata)), null)
+            contentProvider.addFieldPart(String.format("vedleggSpesifikasjon:%s", fileId), StringContentProvider(serialiser(vedleggMetadata)), null)
             contentProvider.addFilePart(String.format("dokument:%s", fileId), file.originalFilename, InputStreamContentProvider(ByteArrayInputStream(base64EncodetVedlegg)), null)
             fileId++
         }

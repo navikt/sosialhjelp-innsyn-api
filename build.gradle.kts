@@ -23,6 +23,7 @@ val ktorVersion = "1.2.2"
 val konfigVersion = "1.6.10.0"
 val kotlinCoroutinesVersion = "1.2.2"
 val commonsIoVersion = "1.3.2"
+val fileUploadVersion = "1.4"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -92,6 +93,7 @@ dependencies {
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
 
     compile("org.apache.commons:commons-io:$commonsIoVersion")
+    compile("commons-fileupload:commons-fileupload:$fileUploadVersion")
 
     //spesifikke versjoner oppgradert etter ønske fra snyk
     compile("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")

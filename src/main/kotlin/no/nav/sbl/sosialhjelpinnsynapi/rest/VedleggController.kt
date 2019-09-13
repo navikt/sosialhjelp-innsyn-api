@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
@@ -53,7 +54,9 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendDem(@PathVariable fiksDigisosId: String, @RequestParam("files") files: MutableList<MultipartFile>,
-                @RequestParam("metadata") metadata: MutableList<JsonVedlegg>): ResponseEntity<List<VedleggOpplastingResponse>> {
+                @RequestParam("metadata") metadataMultipartFile: MultipartFile): ResponseEntity<List<VedleggOpplastingResponse>> {
+        val mapper = jacksonObjectMapper()
+        val metadata: MutableList<OpplastetVedleggMetadata> = mapper.readValue(metadataMultipartFile.bytes)
 
         files.forEach { file -> if (file.size > MAKS_TOTAL_FILSTORRELSE) {
             metadata.forEach { it.filer.removeIf { it.filnavn == file.originalFilename } }
@@ -92,3 +95,14 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         return ResponseEntity.ok(vedleggResponses.distinct())
     }
 }
+
+data class OpplastetVedleggMetadata (
+        val type: String,
+        val tilleggsinfo: String,
+        val filer: MutableList<sendtFil>
+)
+
+data class sendtFil (
+        val filnavn: String,
+        val sha512: String
+)

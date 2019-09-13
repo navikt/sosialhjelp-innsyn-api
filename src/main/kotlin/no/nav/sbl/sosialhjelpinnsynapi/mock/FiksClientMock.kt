@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
@@ -41,7 +41,7 @@ class FiksClientMock : FiksClient {
         return
     }
 
-    override fun lastOppNyEttersendelse2(files: List<MultipartFile>, metadata: List<JsonVedlegg>, kommunenummer: String, soknadId: String, token: String): String? {
+    override fun lastOppNyEttersendelse2(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String? {
         return ""
     }
 

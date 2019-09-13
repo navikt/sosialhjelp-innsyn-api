@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
+import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import org.springframework.web.multipart.MultipartFile
 
 interface VedleggOpplastingService {
@@ -9,5 +9,5 @@ interface VedleggOpplastingService {
 
     fun sendVedleggTilFiks(fiksDigisosId: String): String
 
-    fun sendVedleggTilFiks2(fiksDigisosId: String, files: List<MultipartFile>, metadata: List<JsonVedlegg>): String?
+    fun sendVedleggTilFiks2(fiksDigisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>): String?
 }

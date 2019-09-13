@@ -24,6 +24,8 @@ val konfigVersion = "1.6.10.0"
 val kotlinCoroutinesVersion = "1.2.2"
 val commonsIoVersion = "1.3.2"
 val fileUploadVersion = "1.4"
+val tikaVersion = "1.22"
+val pdfBoxVersion = "2.0.16"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -94,6 +96,8 @@ dependencies {
 
     compile("org.apache.commons:commons-io:$commonsIoVersion")
     compile("commons-fileupload:commons-fileupload:$fileUploadVersion")
+    compile("org.apache.tika:tika-core:$tikaVersion")
+    compile("org.apache.pdfbox:preflight:$pdfBoxVersion")
 
     //spesifikke versjoner oppgradert etter ønske fra snyk
     compile("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")

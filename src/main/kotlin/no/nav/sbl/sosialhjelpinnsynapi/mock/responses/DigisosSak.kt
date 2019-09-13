@@ -36,7 +36,7 @@ val defaultDigisosSak = DigisosSak(
                                                 storrelse = 0
                                         )
                                 ),
-                                timestampSendt = 0
+                                timestampSendt = 1539432000000
                         ),
                         Ettersendelse(
                                 navEksternRefId = "string",

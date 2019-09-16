@@ -15,7 +15,6 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 private val log = LoggerFactory.getLogger(DigisosApiClient::class.java)
@@ -76,7 +75,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
             } else {
                 log.warn("Noe feilet ved kall til Fiks")
                 log.warn(response.body)
-                throw ResponseStatusException(response.statusCode, "something went wrong")
+                throw FiksException(response.statusCode, "something went wrong")
             }
         } catch (e: HttpClientErrorException) {
             log.error("", e)

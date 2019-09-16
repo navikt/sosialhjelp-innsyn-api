@@ -30,21 +30,21 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(FiksException::class)
     fun handleFiksError(e: FiksException): ResponseEntity<ErrorMessage> {
-        log.info("Noe feilet ved kall til Fiks")
+        log.error("Noe feilet ved kall til Fiks", e)
         val error = ErrorMessage(fiksError, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(DokumentlagerException::class)
     fun handleDokumentlagerError(e: DokumentlagerException): ResponseEntity<ErrorMessage> {
-        log.info("Noe feilet ved kall til Dokumentlager")
+        log.error("Noe feilet ved kall til Dokumentlager", e)
         val error = ErrorMessage(dokumentlagerError, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(NorgException::class)
     fun handleNorgError(e: NorgException): ResponseEntity<ErrorMessage> {
-        log.info("Noe feilet ved kall til Norg")
+        log.error("Noe feilet ved kall til Norg", e)
         val error = ErrorMessage(norgError, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }

@@ -13,7 +13,5 @@ interface FiksClient {
 
     fun hentKommuneInfo(kommunenummer: String): KommuneInfo
 
-    fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String)
-
-    fun lastOppNyEttersendelse2(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String?
+    fun lastOppNyEttersendelse(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String?
 }

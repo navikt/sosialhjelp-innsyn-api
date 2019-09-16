@@ -26,35 +26,11 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
-    // Last opp vedlegg for mellomlagring
-    @PostMapping("/{fiksDigisosId}/vedlegg/lastOpp", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun lastOppVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("file") files: List<MultipartFile>): ResponseEntity<List<VedleggOpplastingResponse>> {
-
-        // Sjekk om fileSize overskrider MAKS_FILSTORRELSE
-
-        files.forEach { println("file name: ${it.originalFilename}") }
-
-        val bytes = files[0].bytes
-        val inputStream = files[0].inputStream
-
-        // hva bør input være? inputStream / bytes / files ?
-        val response = vedleggOpplastingService.mellomlagreVedlegg(fiksDigisosId, files)
-
-        return ResponseEntity.ok(response)
-    }
-
-    // Send alle opplastede vedlegg for fiksDigisosId til Fiks
-    @PostMapping("/{fiksDigisosId}/vedlegg/sendDem")
-    fun sendVedleggTilFiks(@PathVariable fiksDigisosId: String): ResponseEntity<String> {
-        val response = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId)
-
-        return ResponseEntity.ok(response)
-    }
-
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendDem(@PathVariable fiksDigisosId: String, @RequestParam("data") files: MutableList<MultipartFile>,
-                @RequestParam("metadata") metadataMultipartFile: MultipartFile): ResponseEntity<List<VedleggOpplastingResponse>> {
+    fun sendVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("data") files: MutableList<MultipartFile>,
+                @RequestParam("metadata") metadataMultipartFile: MultipartFile,
+                    @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggOpplastingResponse>> {
         val mapper = jacksonObjectMapper()
         val metadata: MutableList<OpplastetVedleggMetadata> = mapper.readValue(metadataMultipartFile.bytes)
 
@@ -71,7 +47,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
             return ResponseEntity.ok(emptyList())
         }
 
-        vedleggOpplastingService.sendVedleggTilFiks2(fiksDigisosId, files, metadata)
+        vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
 
         return ResponseEntity.ok(originalFileList.map {
             if (files.contains(it)) VedleggOpplastingResponse(it.originalFilename, it.size) else VedleggOpplastingResponse(it.originalFilename, -1)

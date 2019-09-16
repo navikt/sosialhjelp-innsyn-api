@@ -27,7 +27,6 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonIdKommune = clientProperties.fiksIntegrasjonIdKommune
     private val fiksIntegrasjonPassordKommune = clientProperties.fiksIntegrasjonPassordKommune
-    private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
         val headers = HttpHeaders()

@@ -31,11 +31,7 @@ class FiksClientMock : FiksClient {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
-        return
-    }
-
-    override fun lastOppNyEttersendelse2(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String? {
+    override fun lastOppNyEttersendelse(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String? {
         return ""
     }
 

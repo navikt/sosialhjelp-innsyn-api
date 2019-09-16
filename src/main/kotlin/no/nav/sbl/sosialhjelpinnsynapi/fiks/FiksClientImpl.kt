@@ -1,13 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.reactivex.internal.util.NotificationLite.isError
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.util.InputStreamContentProvider
@@ -49,7 +49,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
-    private val mapper = jacksonObjectMapper()
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         val headers = HttpHeaders()
@@ -61,12 +60,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId == digisos_stub_id) {
             log.info("Hentet stub - digisosId $digisosId")
-            return mapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+            return objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         }
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         if (response.statusCode.is2xxSuccessful) {
             log.info("Hentet DigisosSak $digisosId fra Fiks")
-            return mapper.readValue(response.body!!, DigisosSak::class.java)
+            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
         } else {
             log.warn("Noe feilet ved kall til Fiks")
             throw ResponseStatusException(response.statusCode, "something went wrong")
@@ -81,7 +80,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
-            return response.body!!.map { s: String -> mapper.readValue(s, DigisosSak::class.java) }
+            return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
         } else {
             log.warn("Noe feilet ved kall til Fiks")
             throw ResponseStatusException(response.statusCode, "something went wrong")
@@ -181,7 +180,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                 val content = IOUtils.toString(listener.inputStream, "UTF-8")
                 throw ResponseStatusException(HttpStatus.valueOf(response.status), content)
             }
-            return mapper.readValue(listener.inputStream, String::class.java)
+            return objectMapper.readValue(listener.inputStream, String::class.java)
         } catch (e: InterruptedException) {
             throw RuntimeException("Feil under invokering av api", e)
         } catch (e: TimeoutException) {
@@ -196,7 +195,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     private fun serialiser(@NonNull metadata: Any): String {
         try {
-            return mapper.writeValueAsString(metadata)
+            return objectMapper.writeValueAsString(metadata)
         } catch (e: JsonProcessingException) {
             throw RuntimeException("Feil under serialisering av metadata", e)
         }

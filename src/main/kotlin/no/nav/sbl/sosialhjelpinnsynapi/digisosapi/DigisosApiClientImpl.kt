@@ -1,8 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
 
 import kotlinx.coroutines.runBlocking
-import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
@@ -27,7 +27,6 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonIdKommune = clientProperties.fiksIntegrasjonIdKommune
     private val fiksIntegrasjonPassordKommune = clientProperties.fiksIntegrasjonPassordKommune
-    private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
         val headers = HttpHeaders()
@@ -49,7 +48,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
                 log.info("Postet DigisosSak til Fiks")
             } else {
                 log.warn("Noe feilet ved kall til Fiks")
-                throw ResponseStatusException(response.statusCode, "something went wrong")
+                throw FiksException(response.statusCode, "something went wrong")
             }
             return id
         } catch (e: HttpClientErrorException) {

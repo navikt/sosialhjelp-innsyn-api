@@ -20,7 +20,7 @@ class VedleggService(private val fiksClient: FiksClient,
     fun hentAlleVedlegg(fiksDigisosId: String): List<InternalVedlegg> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
 
-        val soknadVedlegg = hentSoknadVedlegg(digisosSak.originalSoknadNAV)
+        val soknadVedlegg = hentSoknadVedlegg(digisosSak.originalSoknadNAV!!)
         val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
 
         return soknadVedlegg.plus(ettersendteVedlegg)
@@ -45,21 +45,20 @@ class VedleggService(private val fiksClient: FiksClient,
                 }
     }
 
-    fun hentEttersendteVedlegg(ettersendtInfoNAV: EttersendtInfoNAV): List<InternalVedlegg> {
-        return ettersendtInfoNAV.ettersendelser
-                .flatMap { ettersendelse ->
-                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(ettersendelse.vedleggMetadata)
-                    jsonVedleggSpesifikasjon.vedlegg
-                            .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
-                            .map { vedlegg ->
-                                InternalVedlegg(
-                                        vedlegg.type,
-                                        vedlegg.tilleggsinfo,
-                                        matchDokumentInfoAndJsonFiler(ettersendelse.vedlegg, vedlegg.filer),
-                                        unixToLocalDateTime(ettersendelse.timestampSendt)
-                                )
-                            }
-                }
+    fun hentEttersendteVedlegg(ettersendtInfoNAV: EttersendtInfoNAV?): List<InternalVedlegg> {
+        return ettersendtInfoNAV?.ettersendelser?.flatMap { ettersendelse ->
+            val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(ettersendelse.vedleggMetadata)
+            jsonVedleggSpesifikasjon.vedlegg
+                    .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                    .map { vedlegg ->
+                        InternalVedlegg(
+                                vedlegg.type,
+                                vedlegg.tilleggsinfo,
+                                matchDokumentInfoAndJsonFiler(ettersendelse.vedlegg, vedlegg.filer),
+                                unixToLocalDateTime(ettersendelse.timestampSendt)
+                        )
+                    }
+        } ?: emptyList()
     }
 
     private fun hentVedleggSpesifikasjon(dokumentlagerId: String): JsonVedleggSpesifikasjon {

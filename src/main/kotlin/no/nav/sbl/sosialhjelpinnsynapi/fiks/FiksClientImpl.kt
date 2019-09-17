@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import io.reactivex.internal.util.NotificationLite.isError
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -14,6 +13,7 @@ import org.eclipse.jetty.client.util.InputStreamContentProvider
 import org.eclipse.jetty.client.util.InputStreamResponseListener
 import org.eclipse.jetty.client.util.MultiPartContentProvider
 import org.eclipse.jetty.client.util.StringContentProvider
+import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.*
@@ -27,7 +27,6 @@ import org.springframework.web.server.ResponseStatusException
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.util.Collections.singletonList
-import java.util.UUID.randomUUID
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -95,7 +94,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun lastOppNyEttersendelse(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String? {
-        val navEksternRefId = randomUUID().toString()
+        val navEksternRefId = "11000000"
 
         val contentProvider = MultiPartContentProvider()
         contentProvider.addFieldPart("vedlegg.json", StringContentProvider(serialiser(vedleggSpesifikasjon)), null)
@@ -115,10 +114,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val path = "/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
         val listener = InputStreamResponseListener()
-        val client = HttpClient()
+        val sslContextFactory = SslContextFactory.Client()
+        val client = HttpClient(sslContextFactory)
+        client.isFollowRedirects = false
+        client.start()
         val request = client.newRequest(baseUrl)
 
-        request.header(AUTHORIZATION, "Bearer $token")
+        request.header(AUTHORIZATION, token)
                 .header("IntegrasjonId", fiksIntegrasjonid)
                 .header("IntegrasjonPassord", fiksIntegrasjonpassord)
                 .method(JettyHttpMethod.POST)
@@ -128,10 +130,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         try {
             val response = listener.get(30L, TimeUnit.SECONDS)
-            val status = response.status
-            if (isError(status)) {
+            val httpStatus = HttpStatus.valueOf(response.status)
+            if (httpStatus.is2xxSuccessful) {
+                log.info("Sendte ettersendelse til Fiks")
+            } else {
                 val content = IOUtils.toString(listener.inputStream, "UTF-8")
-                throw ResponseStatusException(HttpStatus.valueOf(response.status), content)
+                throw ResponseStatusException(httpStatus, content)
             }
             return objectMapper.readValue(listener.inputStream, String::class.java)
         } catch (e: InterruptedException) {
@@ -142,6 +146,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
             throw RuntimeException("Feil under invokering av api", e)
         } catch (e: IOException) {
             throw RuntimeException("Feil under invokering av api", e)
+        } finally {
+            client.stop()
         }
 
     }

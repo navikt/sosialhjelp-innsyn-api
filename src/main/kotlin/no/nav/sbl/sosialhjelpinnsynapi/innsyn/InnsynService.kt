@@ -21,12 +21,12 @@ class InnsynService(private val fiksClient: FiksClient,
 
     fun hentOriginalSoknad(soknadId: String): JsonSoknad {
         val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
-        return dokumentlagerClient.hentDokument(digisosSak.originalSoknadNAV.metadata, JsonSoknad::class.java) as JsonSoknad
+        return dokumentlagerClient.hentDokument(digisosSak.originalSoknadNAV!!.metadata, JsonSoknad::class.java) as JsonSoknad
     }
 
     // Returnerer UNIX tid med millisekunder
     fun hentInnsendingstidspunktForOriginalSoknad(soknadId: String): Long {
         val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
-        return digisosSak.originalSoknadNAV.timestampSendt
+        return digisosSak.originalSoknadNAV!!.timestampSendt
     }
 }

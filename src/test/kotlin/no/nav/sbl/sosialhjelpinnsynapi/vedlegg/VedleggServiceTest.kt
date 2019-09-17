@@ -35,7 +35,7 @@ internal class VedleggServiceTest {
 
         every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV } returns originalSoknad
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns ettersendelser
+        every { mockDigisosSak.ettersendtInfoNAV!!.ettersendelser } returns ettersendelser
 
         every { mockJsonVedleggSpesifikasjon.vedlegg } returns emptyList()
 
@@ -50,7 +50,7 @@ internal class VedleggServiceTest {
     fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() {
         every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any()) } returns mockJsonVedleggSpesifikasjon
 
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns emptyList()
+        every { mockDigisosSak.ettersendtInfoNAV!!.ettersendelser } returns emptyList()
 
         val list = service.hentAlleVedlegg(id)
 
@@ -59,7 +59,7 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() {
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns emptyList()
+        every { mockDigisosSak.ettersendtInfoNAV!!.ettersendelser } returns emptyList()
 
         val list = service.hentAlleVedlegg(id)
 
@@ -74,7 +74,7 @@ internal class VedleggServiceTest {
     fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() {
         every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any()) } returns mockJsonVedleggSpesifikasjon
 
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns listOf(
+        every { mockDigisosSak.ettersendtInfoNAV!!.ettersendelser } returns listOf(
                 Ettersendelse(
                         navEksternRefId = "ref 3",
                         vedleggMetadata = vedleggMetadata_ettersendelse_3,
@@ -156,7 +156,7 @@ internal class VedleggServiceTest {
                                         .withType(dokumenttype_4)
                         ))
 
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns listOf(
+        every { mockDigisosSak.ettersendtInfoNAV!!.ettersendelser } returns listOf(
                 Ettersendelse(
                         navEksternRefId = "ref 3",
                         vedleggMetadata = vedleggMetadata_ettersendelse_5,

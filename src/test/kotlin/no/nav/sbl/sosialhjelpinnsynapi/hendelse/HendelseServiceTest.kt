@@ -52,7 +52,7 @@ internal class HendelseServiceTest {
 
         every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
-        every { mockDigisosSak.originalSoknadNAV.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
+        every { mockDigisosSak.originalSoknadNAV!!.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
     }
 
     @Test

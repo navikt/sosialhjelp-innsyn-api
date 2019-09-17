@@ -5,11 +5,14 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -32,9 +35,9 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
 
         val accessToken = runBlocking { idPortenService.requestToken() }
         headers.accept = Collections.singletonList(MediaType.ALL)
-        headers.set("IntegrasjonId", fiksIntegrasjonIdKommune)
-        headers.set("IntegrasjonPassord", fiksIntegrasjonPassordKommune)
-        headers.set("Authorization", "Bearer " + accessToken.token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
+        headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
         headers.contentType = MediaType.APPLICATION_JSON
         var id = fiksDigisosId
         if (fiksDigisosId == null) {
@@ -60,9 +63,9 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
         val headers = HttpHeaders()
         val accessToken = runBlocking { idPortenService.requestToken() }
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-        headers.set("IntegrasjonId", fiksIntegrasjonIdKommune)
-        headers.set("IntegrasjonPassord", fiksIntegrasjonPassordKommune)
-        headers.set("Authorization", "Bearer " + accessToken.token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
+        headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
         val httpEntity = HttpEntity("", headers)
         try {
 

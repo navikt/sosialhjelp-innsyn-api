@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock.responses
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
-import java.util.*
 
 val defaultDigisosSak = DigisosSak(
         fiksDigisosId = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -53,7 +52,7 @@ val defaultDigisosSak = DigisosSak(
                 )
         ),
         digisosSoker = DigisosSoker(
-                metadata = UUID.randomUUID().toString(),
+                metadata = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                 dokumenter = listOf(
                         DokumentInfo(
                                 filnavn = "string",

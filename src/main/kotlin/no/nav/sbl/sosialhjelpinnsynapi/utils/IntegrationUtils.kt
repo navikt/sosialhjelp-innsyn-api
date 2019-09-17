@@ -18,3 +18,8 @@ private fun getRandomNumber(): Int {
 private fun getSystemTime(): Long {
     return System.currentTimeMillis()
 }
+
+object IntegrationUtils {
+    const val HEADER_INTEGRASJON_ID = "IntegrasjonId"
+    const val HEADER_INTEGRASJON_PASSORD = "IntegrasjonPassord"
+}

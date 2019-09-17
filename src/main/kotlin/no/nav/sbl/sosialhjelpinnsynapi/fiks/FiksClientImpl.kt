@@ -5,6 +5,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -39,8 +41,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", fiksIntegrasjonid)
-        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId == digisos_stub_id) {
@@ -65,8 +67,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", fiksIntegrasjonid)
-        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
@@ -99,8 +101,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         headers.contentType = MediaType.MULTIPART_FORM_DATA
         headers.set(TRANSFER_ENCODING, "chunked")
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
-        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+        headers.set(HEADER_INTEGRASJON_ID, "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
 
         // TODO:
         //  Endepunktet tar inn påkrevde felter for innsending av ny ettersendelse:

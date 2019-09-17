@@ -32,7 +32,7 @@ val ok_komplett_jsondigisossoker_response = """
 		}, {
 			"type": "tildeltNavKontor",
 			"hendelsestidspunkt": "2018-10-08T21:47:00.134Z",
-			"navKontor": "030102"
+			"navKontor": "0301"
 		}, {
 			"type": "soknadsStatus",
 			"hendelsestidspunkt": "2018-10-10T13:42:00.134Z",

@@ -1,13 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import io.mockk.clearMocks
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
-import no.nav.sbl.sosialhjelpinnsynapi.idporten.AccessToken
-import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import org.assertj.core.api.Assertions.assertThat
@@ -23,10 +20,9 @@ import org.springframework.web.multipart.MultipartFile
 internal class FiksClientTest {
 
     private val clientProperties: ClientProperties = mockk(relaxed = true)
-    private val idPortenService: IdPortenService = mockk()
     private val restTemplate: RestTemplate = mockk()
 
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate)
 
     private val id = "123"
     private val kommunenummer = "1337"
@@ -35,7 +31,6 @@ internal class FiksClientTest {
     @BeforeEach
     fun init() {
         clearMocks(restTemplate)
-        coEvery { idPortenService.requestToken() } returns (AccessToken("Token"))
     }
 
     @Test

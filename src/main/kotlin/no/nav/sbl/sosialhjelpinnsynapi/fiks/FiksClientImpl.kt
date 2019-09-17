@@ -1,11 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
-import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
-import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -33,8 +31,7 @@ private const val digisos_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 @Profile("!mock")
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
-                     private val restTemplate: RestTemplate,
-                     private val idPortenService: IdPortenService) : FiksClient {
+                     private val restTemplate: RestTemplate) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
@@ -42,9 +39,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         val headers = HttpHeaders()
-        val accessToken = runBlocking { idPortenService.requestToken() }
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
+        headers.set(AUTHORIZATION, token)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
 

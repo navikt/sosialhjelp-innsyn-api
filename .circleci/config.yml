@@ -94,7 +94,7 @@ jobs:
             # HEROKU_USERNAME must be URL encoded, eg. joachim.liepelt%40nav.no
             git remote add heroku https://$HEROKU_USERNAME:$HEROKU_AUTH_TOKEN@git.heroku.com/$CIRCLE_PROJECT_REPONAME.git
             # Tests are enabled with `heroku config:set GRADLE_TASK="build"` (default is "build -x test")
-            git push heroku $CIRCLE_BRANCH:master
+            git push heroku $CIRCLE_BRANCH:master --force
 
   browser-test:
     docker:

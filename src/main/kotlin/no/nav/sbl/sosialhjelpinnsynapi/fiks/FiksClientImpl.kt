@@ -14,7 +14,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.util.InputStreamContentProvider
 import org.eclipse.jetty.client.util.InputStreamResponseListener
@@ -32,7 +31,6 @@ import org.springframework.util.Base64Utils
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.server.ResponseStatusException
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.PipedInputStream
@@ -186,11 +184,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val httpStatus = HttpStatus.valueOf(response.status)
             if (httpStatus.is2xxSuccessful) {
                 log.info("Sendte ettersendelse til Fiks")
-            } else {
-                val content = IOUtils.toString(listener.inputStream, "UTF-8")
-                throw ResponseStatusException(httpStatus, content)
+            } else if (httpStatus.is4xxClientError) {
+                log.warn("Opplasting av ettersendelse feilet")
+                throw FiksException(httpStatus, "Opplasting til Fiks feilet")
             }
-            return objectMapper.readValue(listener.inputStream, String::class.java)
         } catch (e: InterruptedException) {
             throw RuntimeException("Feil under invokering av api", e)
         } catch (e: TimeoutException) {
@@ -203,7 +200,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             client.stop()
             waitForFutures(krypteringFutureList)
         }
-
+        return "OK"
     }
 
     private fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {

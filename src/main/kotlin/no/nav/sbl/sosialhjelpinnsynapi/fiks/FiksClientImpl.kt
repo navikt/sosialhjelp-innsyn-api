@@ -9,7 +9,10 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.client.HttpClient
@@ -26,6 +29,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
@@ -63,21 +67,25 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", fiksIntegrasjonid)
-        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId == digisos_stub_id) {
             log.info("Hentet stub - digisosId $digisosId")
             return objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         }
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-        if (response.statusCode.is2xxSuccessful) {
-            log.info("Hentet DigisosSak $digisosId fra Fiks")
-            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
-        } else {
-            log.warn("Noe feilet ved kall til Fiks")
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            if (response.statusCode.is2xxSuccessful) {
+                log.info("Hentet DigisosSak $digisosId fra Fiks")
+                return objectMapper.readValue(response.body!!, DigisosSak::class.java)
+            } else {
+                log.warn("Noe feilet ved kall til Fiks")
+                throw FiksException(response.statusCode, "something went wrong")
+            }
+        } catch (e: RestClientResponseException) {
+            throw FiksException(HttpStatus.valueOf(e.rawStatusCode), e.responseBodyAsString)
         }
     }
 
@@ -85,14 +93,14 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", fiksIntegrasjonid)
-        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
         } else {
             log.warn("Noe feilet ved kall til Fiks")
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+            throw FiksException(response.statusCode, "something went wrong")
         }
     }
 
@@ -102,7 +110,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             return response.body!!
         } else {
             log.warn("Noe feilet ved kall til fiks")
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+            throw FiksException(response.statusCode, "something went wrong")
         }
     }
 
@@ -166,8 +174,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val request = client.newRequest(baseUrl)
 
         request.header(AUTHORIZATION, token)
-                .header("IntegrasjonId", fiksIntegrasjonid)
-                .header("IntegrasjonPassord", fiksIntegrasjonpassord)
+                .header(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+                .header(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
                 .method(JettyHttpMethod.POST)
                 .path(path)
                 .content(contentProvider)

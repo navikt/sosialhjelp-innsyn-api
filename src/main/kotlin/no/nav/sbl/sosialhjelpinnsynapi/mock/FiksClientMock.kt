@@ -8,6 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.defaultDigisosSak
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
+import java.util.*
 
 @Profile("mock")
 @Component
@@ -17,7 +18,7 @@ class FiksClientMock : FiksClient {
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         return innsynMap.getOrElse(digisosId, {
-            val default = defaultDigisosSak
+            val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString())
             innsynMap[digisosId] = default
             default
         })
@@ -37,5 +38,9 @@ class FiksClientMock : FiksClient {
 
     fun postDigisosSak(digisosSak: DigisosSak) {
         innsynMap[digisosSak.fiksDigisosId] = digisosSak
+    }
+
+    fun DigisosSak.copyDigisosSokerWithNewMetadataId(metadata: String): DigisosSak {
+        return this.copy(digisosSoker = this.digisosSoker?.copy(metadata = metadata))
     }
 }

@@ -82,12 +82,14 @@ internal class FiksClientTest {
         every { mockKommuneResponse.body } returns mockKommuneInfo
 
         every {
-            restTemplate.getForEntity(
+            restTemplate.exchange(
                     any<String>(),
+                    HttpMethod.GET,
+                    any(),
                     KommuneInfo::class.java)
         } returns mockKommuneResponse
 
-        val result = fiksClient.hentKommuneInfo("1234")
+        val result = fiksClient.hentKommuneInfo("1234", "token")
 
         assertThat(result).isNotNull
     }

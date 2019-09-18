@@ -4,20 +4,20 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.KommuneStatus.*
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Component
 
-@Configuration
-class KommuneConfig(private val fiksClient: FiksClient) {
+@Component
+class KommuneService(private val fiksClient: FiksClient) {
 
     /*
     TODO:
         Vi må vite om en brukers tilhørende kommune er på fiks-løsningen og om de er på innsyn.
      */
 
-    private val log: Logger = LoggerFactory.getLogger(KommuneConfig::class.java)
+    private val log: Logger = LoggerFactory.getLogger(KommuneService::class.java)
 
-    fun hentKommuneStatus(kommunenummer: String): KommuneStatus {
-        val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer)
+    fun hentKommuneStatus(kommunenummer: String, token: String): KommuneStatus {
+        val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer, token)
 
         return when {
             false -> IKKE_PA_FIKS_ELLER_INNSYN

@@ -78,8 +78,14 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
-        val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", KommuneInfo::class.java)
+    override fun hentKommuneInfo(kommunenummer: String, token: String): KommuneInfo {
+        val headers = HttpHeaders()
+        headers.accept = singletonList(MediaType.APPLICATION_JSON)
+        headers.set(AUTHORIZATION, token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java)
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!
         } else {

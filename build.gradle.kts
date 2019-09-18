@@ -98,6 +98,8 @@ dependencies {
     compile("commons-fileupload:commons-fileupload:$fileUploadVersion")
     compile("org.apache.tika:tika-core:$tikaVersion")
     compile("org.apache.pdfbox:preflight:$pdfBoxVersion")
+    compile("no.ks.fiks:streaming-klient:1.0.7")
+    compile("no.ks.fiks:kryptering:1.0.5")
 
     //spesifikke versjoner oppgradert etter ønske fra snyk
     compile("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")

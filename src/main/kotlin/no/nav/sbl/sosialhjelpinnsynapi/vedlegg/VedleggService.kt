@@ -17,16 +17,19 @@ private const val LASTET_OPP_STATUS = "LastetOpp"
 class VedleggService(private val fiksClient: FiksClient,
                      private val dokumentlagerClient: DokumentlagerClient) {
 
-    fun hentAlleVedlegg(fiksDigisosId: String): List<InternalVedlegg> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
+    fun hentAlleVedlegg(fiksDigisosId: String, token: String): List<InternalVedlegg> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
 
-        val soknadVedlegg = hentSoknadVedlegg(digisosSak.originalSoknadNAV!!)
+        val soknadVedlegg = hentSoknadVedlegg(digisosSak.originalSoknadNAV)
         val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
 
         return soknadVedlegg.plus(ettersendteVedlegg)
     }
 
-    private fun hentSoknadVedlegg(originalSoknadNAV: OriginalSoknadNAV): List<InternalVedlegg> {
+    private fun hentSoknadVedlegg(originalSoknadNAV: OriginalSoknadNAV?): List<InternalVedlegg> {
+        if (originalSoknadNAV == null) {
+            return emptyList()
+        }
         val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(originalSoknadNAV.vedleggMetadata)
 
         if (jsonVedleggSpesifikasjon.vedlegg.isEmpty()) {

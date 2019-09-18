@@ -52,7 +52,7 @@ internal class VedleggServiceTest {
 
         every { mockDigisosSak.ettersendtInfoNAV!!.ettersendelser } returns emptyList()
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).isEmpty()
     }
@@ -61,7 +61,7 @@ internal class VedleggServiceTest {
     fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() {
         every { mockDigisosSak.ettersendtInfoNAV!!.ettersendelser } returns emptyList()
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(2)
         assertThat(list[0].type).isEqualTo(dokumenttype)
@@ -81,7 +81,7 @@ internal class VedleggServiceTest {
                         vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_1, dokumentlagerId_1, 42)),
                         timestampSendt = tid_1.toEpochMilli()))
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(0)
     }
@@ -90,7 +90,7 @@ internal class VedleggServiceTest {
     fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() {
         every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any()) } returns mockJsonVedleggSpesifikasjon
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(4)
         assertThat(list[0].type).isEqualTo(dokumenttype_3)
@@ -111,7 +111,7 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal hente alle vedlegg for digisosSak`() {
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(6)
 
@@ -167,7 +167,7 @@ internal class VedleggServiceTest {
                                 DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_4, 4)),
                         timestampSendt = tid_1.toEpochMilli()))
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(2)
 

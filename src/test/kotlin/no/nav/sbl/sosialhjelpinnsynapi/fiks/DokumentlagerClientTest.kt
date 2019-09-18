@@ -34,7 +34,7 @@ internal class DokumentlagerClientTest {
                     String::class.java)
         } returns mockResponse
 
-        val jsonDigisosSoker = dokumentlagerClient.hentDokument("123", JsonDigisosSoker::class.java) as JsonDigisosSoker
+        val jsonDigisosSoker = dokumentlagerClient.hentDokument("123", JsonDigisosSoker::class.java, "token") as JsonDigisosSoker
 
         assertThat(jsonDigisosSoker).isNotNull
         assertThat(jsonDigisosSoker.avsender.systemnavn).isEqualTo("Testsystemet")

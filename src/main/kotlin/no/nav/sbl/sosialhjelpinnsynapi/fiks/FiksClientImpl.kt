@@ -124,9 +124,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
         files.forEach { file ->
             val vedleggMetadata = VedleggMetadata(file.originalFilename, file.contentType, file.size)
 
-            val base64EncodetVedlegg: ByteArray = Base64Utils.encode(file.bytes)
-            val byteArrayInputStream = ByteArrayInputStream(base64EncodetVedlegg)
-
             val kryptering = CMSKrypteringImpl()
             val certificate = getDokumentlagerPublicKeyX509Certificate(token)
 
@@ -136,7 +133,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                 val krypteringFuture = CompletableFuture.runAsync(Runnable {
                     try {
                         log.debug("Starting encryption...")
-                        kryptering.krypterData(pipedOutputStream, byteArrayInputStream, certificate, Security.getProvider("BC"))
+                        kryptering.krypterData(pipedOutputStream, file.inputStream, certificate, Security.getProvider("BC"))
                         log.debug("Encryption completed")
                     } catch (e: Exception) {
                         log.error("Encryption failed, setting exception on encrypted InputStream", e)

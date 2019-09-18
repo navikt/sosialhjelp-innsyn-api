@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayInputStream
 import java.io.IOException
 
+private const val LASTET_OPP_STATUS = "LastetOpp"
+
 @Component
 class VedleggOpplastingService(private val fiksClient: FiksClient) {
 
@@ -29,6 +31,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient) {
                 .withVedlegg(metadata.map { JsonVedlegg()
                         .withType(it.type)
                         .withTilleggsinfo(it.tilleggsinfo)
+                        .withStatus(LASTET_OPP_STATUS)
                         .withFiler(it.filer.map { fil ->
                             JsonFiler()
                                     .withFilnavn(fil.filnavn)

@@ -21,7 +21,7 @@ val digisosSoker = JsonDigisosSoker()
                         JsonTildeltNavKontor()
                                 .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
                                 .withHendelsestidspunkt("2018-10-08T21:47:00.134Z")
-                                .withNavKontor("030102"),
+                                .withNavKontor("0301"),
 
                         JsonDokumentasjonEtterspurt()
                                 .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)

@@ -3,23 +3,23 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
+import org.springframework.http.*
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpHeaders.TRANSFER_ENCODING
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.server.ResponseStatusException
 import java.util.Collections.singletonList
 import java.util.UUID.randomUUID
 
@@ -41,21 +41,25 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", fiksIntegrasjonid)
-        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId == digisos_stub_id) {
             log.info("Hentet stub - digisosId $digisosId")
             return objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         }
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-        if (response.statusCode.is2xxSuccessful) {
-            log.info("Hentet DigisosSak $digisosId fra Fiks")
-            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
-        } else {
-            log.warn("Noe feilet ved kall til Fiks")
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            if (response.statusCode.is2xxSuccessful) {
+                log.info("Hentet DigisosSak $digisosId fra Fiks")
+                return objectMapper.readValue(response.body!!, DigisosSak::class.java)
+            } else {
+                log.warn("Noe feilet ved kall til Fiks")
+                throw FiksException(response.statusCode, "something went wrong")
+            }
+        } catch (e: RestClientResponseException) {
+            throw FiksException(HttpStatus.valueOf(e.rawStatusCode), e.responseBodyAsString)
         }
     }
 
@@ -63,14 +67,14 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", fiksIntegrasjonid)
-        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
         } else {
             log.warn("Noe feilet ved kall til Fiks")
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+            throw FiksException(response.statusCode, "something went wrong")
         }
     }
 
@@ -80,7 +84,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             return response.body!!
         } else {
             log.warn("Noe feilet ved kall til fiks")
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+            throw FiksException(response.statusCode, "something went wrong")
         }
     }
 
@@ -97,8 +101,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         headers.contentType = MediaType.MULTIPART_FORM_DATA
         headers.set(TRANSFER_ENCODING, "chunked")
         headers.set(AUTHORIZATION, token)
-        headers.set("IntegrasjonId", "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
-        headers.set("IntegrasjonPassord", fiksIntegrasjonpassord)
+        headers.set(HEADER_INTEGRASJON_ID, "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
 
         // TODO:
         //  Endepunktet tar inn påkrevde felter for innsending av ny ettersendelse:
@@ -124,7 +128,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
 //      Ved feil ved opplasting får man 400 Bad Request når multipart-requesten ikke er definert med riktige data.
         if (response.statusCode.is4xxClientError) {
             log.warn("Opplasting av ettersendelse feilet")
-            throw ResponseStatusException(response.statusCode, "something went wrong")
+            throw FiksException(response.statusCode, "Opplasting til Fiks feilet")
         }
     }
 }

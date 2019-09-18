@@ -10,11 +10,9 @@ import no.nav.security.oidc.api.Unprotected
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 
 @Profile("mock")
 @Unprotected
@@ -43,11 +41,7 @@ class MockController(private val fiksClientMock: FiksClientMock,
     @GetMapping("/{soknadId}",
             produces = [APPLICATION_JSON_UTF8_VALUE])
     fun getInnsynForSoknad(@PathVariable soknadId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<JsonDigisosSoker> {
-        try {
-            val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(soknadId, token)
-            return ResponseEntity.ok(jsonDigisosSoker!!)
-        } catch (e: Exception) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST)
-        }
+        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(soknadId, token)
+        return ResponseEntity.ok(jsonDigisosSoker!!)
     }
 }

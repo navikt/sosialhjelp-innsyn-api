@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 
 @Unprotected
 @RestController
@@ -16,14 +15,10 @@ class SaksStatusController(private val saksStatusService: SaksStatusService) {
 
     @GetMapping("/{fiksDigisosId}/saksStatus", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
     fun hentSaksStatuser(@PathVariable fiksDigisosId: String, @CookieValue(value = "localhost-idtoken", defaultValue = "") access_token: String): ResponseEntity<List<SaksStatusResponse>> {
-        try {
-            val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, access_token)
-            if (saksStatuser.isEmpty()) {
-                return ResponseEntity(HttpStatus.NO_CONTENT)
-            }
-            return ResponseEntity.ok(saksStatuser)
-        } catch (e: Exception) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+        val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, access_token)
+        if (saksStatuser.isEmpty()) {
+            return ResponseEntity(HttpStatus.NO_CONTENT)
         }
+        return ResponseEntity.ok(saksStatuser)
     }
 }

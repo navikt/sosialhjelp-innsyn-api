@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 internal class VedleggOpplastingServiceTest {
 
     private val fiksClient: FiksClient = mockk()
-    private val service = VedleggOpplastingServiceImpl(fiksClient)
+    private val service = VedleggOpplastingService(fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
 
@@ -26,18 +26,9 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
-    fun `mellomlagreVedlegg skal mellomlagre vedlegg`() {
-        // implement
-        val list = service.mellomlagreVedlegg(id, listOf("any file.any"))
-
-        assertThat(list).isEmpty()
-    }
-
-    @Test
     fun `lastOppVedleggTilFiks skal kalle FiksClient`() {
-        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } just runs
-
-        val response = service.sendVedleggTilFiks(id)
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) } returns "OK"
+        val response = service.sendVedleggTilFiks(id, emptyList(), mutableListOf(), "")
 
         assertThat(response).isEqualTo("OK")
     }

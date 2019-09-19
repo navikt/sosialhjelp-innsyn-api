@@ -1,11 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.defaultDigisosSak
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @Profile("mock")
@@ -30,8 +32,8 @@ class FiksClientMock : FiksClient {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
-        return
+    override fun lastOppNyEttersendelse(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String? {
+        return ""
     }
 
     fun postDigisosSak(digisosSak: DigisosSak) {

@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
+import java.util.*
 import java.io.InputStream
 import java.util.*
 
@@ -22,10 +23,12 @@ private const val dokumentlager_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
 @Profile("!mock")
 @Component
-class DokumentlagerClientImpl(private val clientProperties: ClientProperties,
+class DokumentlagerClientImpl(clientProperties: ClientProperties,
                               private val restTemplate: RestTemplate) : DokumentlagerClient {
 
     private val baseUrl = clientProperties.fiksDokumentlagerEndpointUrl
+    private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
+    private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
     private val mapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
     override fun hentDokument(dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
@@ -33,6 +36,12 @@ class DokumentlagerClientImpl(private val clientProperties: ClientProperties,
             log.info("Henter stub - dokumentlagerId $dokumentlagerId")
             return mapper.readValue(ok_komplett_jsondigisossoker_response, requestedClass)
         }
+
+        val headers = HttpHeaders()
+        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
+        headers.set(HttpHeaders.AUTHORIZATION, token)
+        headers.set(IntegrationUtils.HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(IntegrationUtils.HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
 
         try {
             val headers = HttpHeaders()
@@ -50,6 +59,8 @@ class DokumentlagerClientImpl(private val clientProperties: ClientProperties,
             }
         } catch (e: RestClientResponseException) {
             throw DokumentlagerException(HttpStatus.valueOf(e.rawStatusCode), e.responseBodyAsString)
+        } catch (e: Exception) {
+            throw e
         }
     }
 }

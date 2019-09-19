@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
@@ -10,6 +11,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
@@ -21,6 +23,11 @@ internal class DokumentlagerClientTest {
 
     private val dokumentlagerClient: DokumentlagerClient = DokumentlagerClientImpl(clientProperties, restTemplate)
 
+    @BeforeEach
+    fun init() {
+        clearMocks(restTemplate)
+    }
+
     @Test
     fun `GET JsonDigisosSoker fra dokumentlager`() {
         val mockResponse: ResponseEntity<String> = mockk()
@@ -29,8 +36,10 @@ internal class DokumentlagerClientTest {
         every { mockResponse.body } returns ok_komplett_jsondigisossoker_response
 
         every {
-            restTemplate.getForEntity(
+            restTemplate.exchange(
                     any<String>(),
+                    any(),
+                    any(),
                     String::class.java)
         } returns mockResponse
 

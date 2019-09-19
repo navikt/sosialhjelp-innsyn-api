@@ -5,6 +5,7 @@ import no.ks.fiks.streaming.klient.HttpHeader
 import no.ks.fiks.streaming.klient.StreamingKlient
 import no.ks.fiks.streaming.klient.authentication.PersonIntegrasjonAuthenticationStrategy
 import no.ks.kryptering.CMSKrypteringImpl
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -27,7 +28,6 @@ import org.springframework.http.*
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
-import org.springframework.util.Base64Utils
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
@@ -49,6 +49,7 @@ import org.eclipse.jetty.http.HttpMethod as JettyHttpMethod
 private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
 
 private const val digisos_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+private const val dokumentlager_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
 @Profile("!mock")
 @Component
@@ -78,6 +79,32 @@ class FiksClientImpl(clientProperties: ClientProperties,
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Hentet DigisosSak $digisosId fra Fiks")
                 return objectMapper.readValue(response.body!!, DigisosSak::class.java)
+            } else {
+                log.warn("Noe feilet ved kall til Fiks")
+                throw FiksException(response.statusCode, "something went wrong")
+            }
+        } catch (e: RestClientResponseException) {
+            throw FiksException(HttpStatus.valueOf(e.rawStatusCode), e.responseBodyAsString)
+        }
+    }
+
+    override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
+        val headers = HttpHeaders()
+        headers.accept = singletonList(MediaType.APPLICATION_JSON)
+        headers.set(AUTHORIZATION, token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+
+        log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
+        if (dokumentlagerId == dokumentlager_stub_id && requestedClass == JsonDigisosSoker::class.java) {
+            log.info("Henter stub - dokumentlagerId $dokumentlagerId")
+            return objectMapper.readValue(ok_komplett_jsondigisossoker_response, requestedClass)
+        }
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            if (response.statusCode.is2xxSuccessful) {
+                log.info("Hentet dokument (${requestedClass.simpleName}) fra fiks, dokumentlagerId $dokumentlagerId")
+                return objectMapper.readValue(response.body!!, requestedClass)
             } else {
                 log.warn("Noe feilet ved kall til Fiks")
                 throw FiksException(response.statusCode, "something went wrong")

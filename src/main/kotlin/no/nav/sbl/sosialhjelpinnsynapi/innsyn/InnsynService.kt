@@ -2,35 +2,23 @@ package no.nav.sbl.sosialhjelpinnsynapi.innsyn
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.springframework.stereotype.Component
 
 @Component
-class InnsynService(private val fiksClient: FiksClient,
-                    private val dokumentlagerClient: DokumentlagerClient) {
+class InnsynService(private val dokumentlagerClient: DokumentlagerClient) {
 
-    fun hentJsonDigisosSoker(soknadId: String, token: String): JsonDigisosSoker? {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId, token)
+    fun hentJsonDigisosSoker(digisosSokerMetadata: String?, token: String): JsonDigisosSoker? {
         return when {
-            digisosSak.digisosSoker != null -> dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java, token) as JsonDigisosSoker
+            digisosSokerMetadata != null -> dokumentlagerClient.hentDokument(digisosSokerMetadata, JsonDigisosSoker::class.java, token) as JsonDigisosSoker
             else -> null
         }
     }
 
-    fun hentOriginalSoknad(soknadId: String, token: String): JsonSoknad? {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
-        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
+    fun hentOriginalSoknad(originalSoknadNAVMetadata: String?, token: String): JsonSoknad? {
         return when {
-            originalSoknadNAV != null -> dokumentlagerClient.hentDokument(originalSoknadNAV.metadata, JsonSoknad::class.java, token) as JsonSoknad
+            originalSoknadNAVMetadata != null -> dokumentlagerClient.hentDokument(originalSoknadNAVMetadata, JsonSoknad::class.java, token) as JsonSoknad
             else -> null
         }
-    }
-
-    // Returnerer UNIX tid med millisekunder
-    fun hentInnsendingstidspunktForOriginalSoknad(soknadId: String): Long? {
-        val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
-        return digisosSak.originalSoknadNAV?.timestampSendt
     }
 }

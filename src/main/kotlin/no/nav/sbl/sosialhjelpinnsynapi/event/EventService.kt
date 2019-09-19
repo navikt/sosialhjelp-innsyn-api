@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
@@ -8,6 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Soknadsmottaker
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
@@ -16,19 +18,22 @@ import org.springframework.stereotype.Component
 @Component
 class EventService(private val clientProperties: ClientProperties,
                    private val innsynService: InnsynService,
-                   private val norgClient: NorgClient) {
+                   private val norgClient: NorgClient,
+                   private val fiksClient: FiksClient) {
 
     fun createModel(fiksDigisosId: String, token: String): InternalDigisosSoker {
-        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token)
-        val originalSoknadNAV: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, token)
-        val timestampSendt = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
+
+        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.digisosSoker?.metadata, token)
+        val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak.originalSoknadNAV?.metadata, token)
+        val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
 
         val internal = InternalDigisosSoker()
 
-        if (originalSoknadNAV != null && timestampSendt != null) {
-            internal.soknadsmottaker = Soknadsmottaker(originalSoknadNAV.mottaker.enhetsnummer, originalSoknadNAV.mottaker.navEnhetsnavn)
+        if (jsonSoknad != null && timestampSendt != null) {
+            internal.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
             internal.status = SoknadsStatus.SENDT
-            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${originalSoknadNAV.mottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
+            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
         }
 
         if (jsonDigisosSoker == null) {

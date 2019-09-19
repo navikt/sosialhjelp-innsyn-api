@@ -9,11 +9,9 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilrefe
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.enumNameToLowercase
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
@@ -33,9 +31,11 @@ internal class EventServiceTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val norgClient: NorgClient = mockk()
+    private val fiksClient: FiksClient = mockk()
 
-    private val service = EventService(clientProperties, innsynService, norgClient)
+    private val service = EventService(clientProperties, innsynService, norgClient, fiksClient)
 
+    private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
     private val mockNavEnhet: NavEnhet = mockk()
@@ -75,11 +75,14 @@ internal class EventServiceTest {
     @BeforeEach
     fun init() {
         clearMocks(innsynService, mockJsonDigisosSoker, mockJsonSoknad)
+        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
+        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns tidspunkt_soknad
 
         resetHendelser()
     }

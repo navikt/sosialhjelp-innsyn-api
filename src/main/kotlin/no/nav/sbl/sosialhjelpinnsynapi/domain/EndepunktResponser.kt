@@ -57,7 +57,8 @@ data class VedleggResponse(
         val filnavn: String,
         val storrelse: Long,
         val url: String,
-        val beskrivelse: String,
+        val type: String,
+        val tilleggsinfo: String?,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
         val datoLagtTil: LocalDateTime
 )

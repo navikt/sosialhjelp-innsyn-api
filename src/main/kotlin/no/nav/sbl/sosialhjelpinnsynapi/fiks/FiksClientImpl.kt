@@ -101,7 +101,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             return objectMapper.readValue(ok_komplett_jsondigisossoker_response, requestedClass)
         }
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Hentet dokument (${requestedClass.simpleName}) fra fiks, dokumentlagerId $dokumentlagerId")
                 return objectMapper.readValue(response.body!!, requestedClass)
@@ -142,7 +142,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun lastOppNyEttersendelse(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String? {
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(files.size))
 
-        val navEksternRefId = "11000001"
+        val navEksternRefId = "11000004"
 
         val contentProvider = MultiPartContentProvider()
         contentProvider.addFieldPart("vedlegg.json", StringContentProvider(serialiser(vedleggSpesifikasjon)), null)

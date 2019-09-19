@@ -88,7 +88,7 @@ internal class EventServiceTest {
     }
 
 /* Test-caser:
- [ ] ingen innsyn, ingen sendt soknad
+ [x] ingen innsyn, ingen sendt soknad
  [x] ingen innsyn, sendt soknad -> status SENDT
  [x] status mottatt
  [x] status under behandling
@@ -102,9 +102,23 @@ internal class EventServiceTest {
  [ ] dokumentasjonEtterspurt - flere caser?
  [x] forelopigSvar
  [ ] forelopigSvar - flere caser?
+ [ ] utbetaling
+ [ ] utbetaling - flere caser?
  ...
  [ ] komplett case
 */
+
+    @Test
+    fun `ingen innsyn OG ingen soknad`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns null
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns null
+
+        val model = service.createModel("123", "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isNull()
+        assertThat(model.historikk).hasSize(0)
+    }
 
     @Nested
     inner class soknadStatus {

@@ -30,7 +30,7 @@ class EventService(private val clientProperties: ClientProperties,
 
         val internal = InternalDigisosSoker()
 
-        if (jsonSoknad != null && timestampSendt != null) {
+        if (jsonSoknad != null && jsonSoknad.mottaker != null && timestampSendt != null) {
             internal.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
             internal.status = SoknadsStatus.SENDT
             internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))

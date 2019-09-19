@@ -11,7 +11,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 @Component
 class EventService(private val clientProperties: ClientProperties,
@@ -25,10 +24,10 @@ class EventService(private val clientProperties: ClientProperties,
 
         val internal = InternalDigisosSoker()
 
-        if (jsonSoknadsmottaker != null) {
+        if (jsonSoknadsmottaker != null && timestampSendt != null) {
             internal.soknadsmottaker = Soknadsmottaker(jsonSoknadsmottaker.enhetsnummer, jsonSoknadsmottaker.navEnhetsnavn)
             internal.status = SoknadsStatus.SENDT
-            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknadsmottaker.navEnhetsnavn}", timestampSendt?.let { unixToLocalDateTime(it) } ?: LocalDateTime.now()))
+            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknadsmottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
         }
 
         if (jsonDigisosSoker == null) {

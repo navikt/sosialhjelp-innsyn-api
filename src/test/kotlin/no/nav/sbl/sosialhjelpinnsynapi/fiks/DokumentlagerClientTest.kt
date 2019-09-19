@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 
@@ -29,12 +30,14 @@ internal class DokumentlagerClientTest {
         every { mockResponse.body } returns ok_komplett_jsondigisossoker_response
 
         every {
-            restTemplate.getForEntity(
+            restTemplate.exchange(
                     any<String>(),
+                    HttpMethod.GET,
+                    any(),
                     String::class.java)
         } returns mockResponse
 
-        val jsonDigisosSoker = dokumentlagerClient.hentDokument("123", JsonDigisosSoker::class.java) as JsonDigisosSoker
+        val jsonDigisosSoker = dokumentlagerClient.hentDokument("123", JsonDigisosSoker::class.java, "token") as JsonDigisosSoker
 
         assertThat(jsonDigisosSoker).isNotNull
         assertThat(jsonDigisosSoker.avsender.systemnavn).isEqualTo("Testsystemet")

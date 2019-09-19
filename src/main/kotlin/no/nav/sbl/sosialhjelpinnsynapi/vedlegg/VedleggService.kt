@@ -17,17 +17,17 @@ private const val LASTET_OPP_STATUS = "LastetOpp"
 class VedleggService(private val fiksClient: FiksClient,
                      private val dokumentlagerClient: DokumentlagerClient) {
 
-    fun hentAlleVedlegg(fiksDigisosId: String): List<InternalVedlegg> {
+    fun hentAlleVedlegg(fiksDigisosId: String, token: String): List<InternalVedlegg> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, "token")
 
-        val soknadVedlegg = hentSoknadVedlegg(digisosSak.originalSoknadNAV)
-        val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
+        val soknadVedlegg = digisosSak.originalSoknadNAV?.let { hentSoknadVedlegg(it, token) }
+        val ettersendteVedlegg = digisosSak.ettersendtInfoNAV?.let { hentEttersendteVedlegg(it, token) } ?: emptyList()
 
-        return soknadVedlegg.plus(ettersendteVedlegg)
+        return soknadVedlegg?.plus(ettersendteVedlegg) ?: emptyList()
     }
 
-    private fun hentSoknadVedlegg(originalSoknadNAV: OriginalSoknadNAV): List<InternalVedlegg> {
-        val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(originalSoknadNAV.vedleggMetadata)
+    private fun hentSoknadVedlegg(originalSoknadNAV: OriginalSoknadNAV, token: String): List<InternalVedlegg> {
+        val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(originalSoknadNAV.vedleggMetadata, token)
 
         if (jsonVedleggSpesifikasjon.vedlegg.isEmpty()) {
             return emptyList()
@@ -45,10 +45,10 @@ class VedleggService(private val fiksClient: FiksClient,
                 }
     }
 
-    fun hentEttersendteVedlegg(ettersendtInfoNAV: EttersendtInfoNAV): List<InternalVedlegg> {
+    fun hentEttersendteVedlegg(ettersendtInfoNAV: EttersendtInfoNAV, token: String): List<InternalVedlegg> {
         return ettersendtInfoNAV.ettersendelser
                 .flatMap { ettersendelse ->
-                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(ettersendelse.vedleggMetadata)
+                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(ettersendelse.vedleggMetadata, token)
                     jsonVedleggSpesifikasjon.vedlegg
                             .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                             .map { vedlegg ->
@@ -62,8 +62,8 @@ class VedleggService(private val fiksClient: FiksClient,
                 }
     }
 
-    private fun hentVedleggSpesifikasjon(dokumentlagerId: String): JsonVedleggSpesifikasjon {
-        return dokumentlagerClient.hentDokument(dokumentlagerId, JsonVedleggSpesifikasjon::class.java) as JsonVedleggSpesifikasjon
+    private fun hentVedleggSpesifikasjon(dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {
+        return dokumentlagerClient.hentDokument(dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token) as JsonVedleggSpesifikasjon
     }
 
     private fun matchDokumentInfoAndJsonFiler(dokumentInfoList: List<DokumentInfo>, jsonFiler: List<JsonFiler>): List<DokumentInfo> {

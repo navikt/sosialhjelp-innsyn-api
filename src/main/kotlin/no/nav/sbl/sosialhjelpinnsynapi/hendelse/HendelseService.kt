@@ -22,9 +22,9 @@ class HendelseService(private val eventService: EventService,
         val model = eventService.createModel(fiksDigisosId, token)
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
 
-        val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(digisosSak.ettersendtInfoNAV)
-        leggTilHendelserForOpplastinger(model, digisosSak.originalSoknadNAV.timestampSendt, vedlegg)
+        val vedlegg: List<InternalVedlegg> = digisosSak.ettersendtInfoNAV?.let { vedleggService.hentEttersendteVedlegg(it, token) } ?: emptyList()
 
+        digisosSak.originalSoknadNAV?.timestampSendt?.let { leggTilHendelserForOpplastinger(model, it, vedlegg) }
         val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
         log.info("Hentet historikk for fiksDigisosId=$fiksDigisosId")
         return responseList

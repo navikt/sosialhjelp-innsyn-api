@@ -14,7 +14,7 @@ class DokumentlagerClientMock : DokumentlagerClient {
 
     private val dokumentMap = mutableMapOf<String, Any>()
 
-    override fun hentDokument(dokumentlagerId: String, requestedClass: Class<out Any>): Any {
+    override fun hentDokument(dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
         return when (requestedClass) {
             JsonDigisosSoker::class.java -> dokumentMap.getOrElse(dokumentlagerId, {
                 val default = digisosSoker

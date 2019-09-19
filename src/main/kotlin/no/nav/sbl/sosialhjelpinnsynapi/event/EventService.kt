@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class EventService(private val clientProperties: ClientProperties,
@@ -19,7 +20,7 @@ class EventService(private val clientProperties: ClientProperties,
 
     fun createModel(fiksDigisosId: String, token: String): InternalDigisosSoker {
         val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token)
-        val jsonSoknadsmottaker = innsynService.hentOriginalSoknad(fiksDigisosId).mottaker
+        val jsonSoknadsmottaker = innsynService.hentOriginalSoknad(fiksDigisosId, token).mottaker
         val timestampSendt = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId)
 
         val internal = InternalDigisosSoker()
@@ -27,7 +28,7 @@ class EventService(private val clientProperties: ClientProperties,
         if (jsonSoknadsmottaker != null) {
             internal.soknadsmottaker = Soknadsmottaker(jsonSoknadsmottaker.enhetsnummer, jsonSoknadsmottaker.navEnhetsnavn)
             internal.status = SoknadsStatus.SENDT
-            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknadsmottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
+            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknadsmottaker.navEnhetsnavn}", timestampSendt?.let { unixToLocalDateTime(it) } ?: LocalDateTime.now()))
         }
 
         if (jsonDigisosSoker == null) {

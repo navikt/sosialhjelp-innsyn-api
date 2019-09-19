@@ -13,20 +13,20 @@ class InnsynService(private val fiksClient: FiksClient,
     fun hentJsonDigisosSoker(soknadId: String, token: String): JsonDigisosSoker? {
         val digisosSak = fiksClient.hentDigisosSak(soknadId, token)
         return if (digisosSak.digisosSoker != null) {
-            dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java) as JsonDigisosSoker
+            dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java, token) as JsonDigisosSoker
         } else {
             null
         }
     }
 
-    fun hentOriginalSoknad(soknadId: String): JsonSoknad {
+    fun hentOriginalSoknad(soknadId: String, token: String): JsonSoknad {
         val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
-        return dokumentlagerClient.hentDokument(digisosSak.originalSoknadNAV.metadata, JsonSoknad::class.java) as JsonSoknad
+        return digisosSak.originalSoknadNAV?.metadata?.let { dokumentlagerClient.hentDokument(it, JsonSoknad::class.java, token) } as JsonSoknad
     }
 
     // Returnerer UNIX tid med millisekunder
-    fun hentInnsendingstidspunktForOriginalSoknad(soknadId: String): Long {
+    fun hentInnsendingstidspunktForOriginalSoknad(soknadId: String): Long? {
         val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
-        return digisosSak.originalSoknadNAV.timestampSendt
+        return digisosSak.originalSoknadNAV?.timestampSendt
     }
 }

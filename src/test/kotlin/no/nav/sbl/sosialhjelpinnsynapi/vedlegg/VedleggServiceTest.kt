@@ -35,33 +35,33 @@ internal class VedleggServiceTest {
 
         every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV } returns originalSoknad
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns ettersendelser
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns ettersendelser
 
         every { mockJsonVedleggSpesifikasjon.vedlegg } returns emptyList()
 
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any()) } returns soknadVedleggSpesifikasjon
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_1, any()) } returns ettersendteVedleggSpesifikasjon_1
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_2, any()) } returns ettersendteVedleggSpesifikasjon_2
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_3, any()) } returns ettersendteVedleggSpesifikasjon_3
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_4, any()) } returns ettersendteVedleggSpesifikasjon_4
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns soknadVedleggSpesifikasjon
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_1, any(), any()) } returns ettersendteVedleggSpesifikasjon_1
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_2, any(), any()) } returns ettersendteVedleggSpesifikasjon_2
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_3, any(), any()) } returns ettersendteVedleggSpesifikasjon_3
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_4, any(), any()) } returns ettersendteVedleggSpesifikasjon_4
     }
 
     @Test
     fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() {
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any()) } returns mockJsonVedleggSpesifikasjon
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns emptyList()
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).isEmpty()
     }
 
     @Test
     fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() {
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns emptyList()
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(2)
         assertThat(list[0].type).isEqualTo(dokumenttype)
@@ -72,25 +72,25 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() {
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any()) } returns mockJsonVedleggSpesifikasjon
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns listOf(
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns listOf(
                 Ettersendelse(
                         navEksternRefId = "ref 3",
                         vedleggMetadata = vedleggMetadata_ettersendelse_3,
                         vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_1, dokumentlagerId_1, 42)),
                         timestampSendt = tid_1.toEpochMilli()))
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(0)
     }
 
     @Test
     fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() {
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any()) } returns mockJsonVedleggSpesifikasjon
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(4)
         assertThat(list[0].type).isEqualTo(dokumenttype_3)
@@ -111,7 +111,7 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal hente alle vedlegg for digisosSak`() {
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(6)
 
@@ -137,9 +137,9 @@ internal class VedleggServiceTest {
 
     @Test
     fun `like filnavn i DokumentInfoList vil resultere i at de returneres for hver JsonFil med samme filnavn`() {
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any()) } returns mockJsonVedleggSpesifikasjon
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_5, any()) } returns
+        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_5, any(), any()) } returns
                 JsonVedleggSpesifikasjon()
                         .withVedlegg(listOf(
                                 JsonVedlegg()
@@ -156,7 +156,7 @@ internal class VedleggServiceTest {
                                         .withType(dokumenttype_4)
                         ))
 
-        every { mockDigisosSak.ettersendtInfoNAV.ettersendelser } returns listOf(
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns listOf(
                 Ettersendelse(
                         navEksternRefId = "ref 3",
                         vedleggMetadata = vedleggMetadata_ettersendelse_5,
@@ -167,7 +167,7 @@ internal class VedleggServiceTest {
                                 DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_4, 4)),
                         timestampSendt = tid_1.toEpochMilli()))
 
-        val list = service.hentAlleVedlegg(id)
+        val list = service.hentAlleVedlegg(id, "token")
 
         assertThat(list).hasSize(2)
 

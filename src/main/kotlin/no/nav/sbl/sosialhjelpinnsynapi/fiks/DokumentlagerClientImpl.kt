@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import java.util.*
-import java.io.InputStream
-import java.util.*
 
 private val log = LoggerFactory.getLogger(DokumentlagerClient::class.java)
 
@@ -39,16 +37,11 @@ class DokumentlagerClientImpl(clientProperties: ClientProperties,
 
         val headers = HttpHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-        headers.set(HttpHeaders.AUTHORIZATION, token)
-        headers.set(IntegrationUtils.HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(IntegrationUtils.HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        headers.set(AUTHORIZATION, token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
 
         try {
-            val headers = HttpHeaders()
-            headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON_UTF8)
-            headers.set(AUTHORIZATION, token)
-            headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
-            headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             val response = restTemplate.exchange("$baseUrl/dokumentlager/nedlasting/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Hentet dokument (${requestedClass.simpleName}) fra dokumentlager, dokumentlagerId $dokumentlagerId")

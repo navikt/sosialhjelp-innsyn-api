@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.innsyn
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.springframework.stereotype.Component
@@ -12,16 +13,19 @@ class InnsynService(private val fiksClient: FiksClient,
 
     fun hentJsonDigisosSoker(soknadId: String, token: String): JsonDigisosSoker? {
         val digisosSak = fiksClient.hentDigisosSak(soknadId, token)
-        return if (digisosSak.digisosSoker != null) {
-            dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java, token) as JsonDigisosSoker
-        } else {
-            null
+        return when {
+            digisosSak.digisosSoker != null -> dokumentlagerClient.hentDokument(digisosSak.digisosSoker.metadata, JsonDigisosSoker::class.java, token) as JsonDigisosSoker
+            else -> null
         }
     }
 
-    fun hentOriginalSoknad(soknadId: String, token: String): JsonSoknad {
+    fun hentOriginalSoknad(soknadId: String, token: String): JsonSoknad? {
         val digisosSak = fiksClient.hentDigisosSak(soknadId, "Token")
-        return digisosSak.originalSoknadNAV?.metadata?.let { dokumentlagerClient.hentDokument(it, JsonSoknad::class.java, token) } as JsonSoknad
+        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
+        return when {
+            originalSoknadNAV != null -> dokumentlagerClient.hentDokument(originalSoknadNAV.metadata, JsonSoknad::class.java, token) as JsonSoknad
+            else -> null
+        }
     }
 
     // Returnerer UNIX tid med millisekunder

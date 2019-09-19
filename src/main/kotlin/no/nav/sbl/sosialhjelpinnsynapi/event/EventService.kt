@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
@@ -19,15 +20,15 @@ class EventService(private val clientProperties: ClientProperties,
 
     fun createModel(fiksDigisosId: String, token: String): InternalDigisosSoker {
         val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(fiksDigisosId, token)
-        val jsonSoknadsmottaker = innsynService.hentOriginalSoknad(fiksDigisosId, token).mottaker
+        val originalSoknadNAV: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, token)
         val timestampSendt = innsynService.hentInnsendingstidspunktForOriginalSoknad(fiksDigisosId)
 
         val internal = InternalDigisosSoker()
 
-        if (jsonSoknadsmottaker != null && timestampSendt != null) {
-            internal.soknadsmottaker = Soknadsmottaker(jsonSoknadsmottaker.enhetsnummer, jsonSoknadsmottaker.navEnhetsnavn)
+        if (originalSoknadNAV != null && timestampSendt != null) {
+            internal.soknadsmottaker = Soknadsmottaker(originalSoknadNAV.mottaker.enhetsnummer, originalSoknadNAV.mottaker.navEnhetsnavn)
             internal.status = SoknadsStatus.SENDT
-            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknadsmottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
+            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${originalSoknadNAV.mottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
         }
 
         if (jsonDigisosSoker == null) {

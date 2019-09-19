@@ -56,8 +56,18 @@ internal class InnsynServiceTest {
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some id"
         every { dokumentlagerClient.hentDokument(any(), JsonSoknad::class.java, any()) } returns mockJsonSoknad
 
-        val jsonSoknad: JsonSoknad = service.hentOriginalSoknad("123", "token")
+        val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad("123", "token")
 
         assertThat(jsonSoknad).isNotNull
+    }
+
+    @Test
+    fun `Should return null if originalSoknadNAV is null`() {
+        every { fiksClient.hentDigisosSak("123", "Token") } returns mockDigisosSak
+        every { mockDigisosSak.originalSoknadNAV } returns null
+
+        val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad("123", "token")
+
+        assertThat(jsonSoknad).isNull()
     }
 }

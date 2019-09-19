@@ -6,7 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
-@Profile("mock")
+@Profile("mock | local")
 @Component
 class NorgClientMock : NorgClient {
 

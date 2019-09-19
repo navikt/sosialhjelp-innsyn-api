@@ -75,12 +75,12 @@ internal class DigisosApiControllerTest {
         if (saker != null && saker.size == 2) {
             val first = saker[0]
             assertThat(first.soknadNavn).isEqualTo("Søknad om økonomisk sosialhjelp")
-            assertThat(first.status).isEqualTo(SENDT.toString())
+            assertThat(first.status).isEqualTo("$SENDT")
             assertThat(first.antallOppgaver).isEqualTo(2)
 
             val second = saker[1]
             assertThat(second.soknadNavn).contains("Livsopphold", "Strøm")
-            assertThat(second.status).isEqualTo(UNDER_BEHANDLING.toString())
+            assertThat(second.status).isEqualTo("$UNDER_BEHANDLING")
             assertThat(second.antallOppgaver).isEqualTo(1)
         }
     }

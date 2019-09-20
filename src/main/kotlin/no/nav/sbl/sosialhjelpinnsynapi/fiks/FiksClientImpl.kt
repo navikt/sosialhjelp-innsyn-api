@@ -63,19 +63,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val executor = Executors.newFixedThreadPool(4)
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
-
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId == digisos_stub_id) {
             log.info("Hentet stub - digisosId $digisosId")
             return objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         }
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers(token)), String::class.java)
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Hentet DigisosSak $digisosId fra Fiks")
                 return objectMapper.readValue(response.body!!, DigisosSak::class.java)
@@ -89,19 +83,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
-
         log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
         if (dokumentlagerId == dokumentlager_stub_id && requestedClass == JsonDigisosSoker::class.java) {
             log.info("Henter stub - dokumentlagerId $dokumentlagerId")
             return objectMapper.readValue(ok_komplett_jsondigisossoker_response, requestedClass)
         }
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers(token)), String::class.java)
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Hentet dokument (${requestedClass.simpleName}) fra fiks, dokumentlagerId $dokumentlagerId")
                 return objectMapper.readValue(response.body!!, requestedClass)
@@ -115,12 +103,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
+        log.info("Forsøker å hente alle DigisosSaker for innlogget bruker fra $baseUrl/digisos/api/v1/soknader")
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers(token)), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
         } else {
@@ -137,6 +121,15 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Noe feilet ved kall til fiks")
             throw FiksException(response.statusCode, "something went wrong")
         }
+    }
+
+    private fun headers(token: String): HttpHeaders {
+        val headers = HttpHeaders()
+        headers.accept = singletonList(MediaType.APPLICATION_JSON)
+        headers.set(AUTHORIZATION, token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        return headers
     }
 
     override fun lastOppNyEttersendelse(files: List<MultipartFile>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String): String? {

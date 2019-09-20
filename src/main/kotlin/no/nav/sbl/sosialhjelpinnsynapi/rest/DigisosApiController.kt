@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.*
 
 @Unprotected
 @RestController
-@RequestMapping("/api/v1/digisosapi/")
+@RequestMapping("/api/v1/digisosapi")
 class DigisosApiController(private val digisosApiService: DigisosApiService) {
 
-    @GetMapping("/kommuneInfo/{kommunenummer}")
+    @GetMapping("/kommune/{kommunenummer}")
     fun hentKommuneInfo(@PathVariable kommunenummer: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<String>{
         val kommuneStatus = digisosApiService.hentKommuneStatus(kommunenummer, token)
 

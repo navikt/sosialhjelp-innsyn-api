@@ -24,33 +24,22 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                         private val vedleggService: VedleggService,
                         private val clientProperties: ClientProperties) {
 
-    val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
-
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("data") files: MutableList<MultipartFile>,
+    fun sendVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("data") files: List<MultipartFile>,
                 @RequestParam("metadata") metadataMultipartFile: MultipartFile,
                     @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggOpplastingResponse>> {
         val mapper = jacksonObjectMapper()
         val metadata: MutableList<OpplastetVedleggMetadata> = mapper.readValue(metadataMultipartFile.bytes)
 
-        val originalFileList = files.toList()
+        val uploadedFiles = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
 
-        files.forEach { file -> if (file.size > MAKS_TOTAL_FILSTORRELSE) {
-            metadata.forEach { it.filer.removeIf { it.filnavn == file.originalFilename } }
-        }
-        }
-        metadata.removeIf { it.filer.isEmpty() }
-        files.removeIf { it.size > MAKS_TOTAL_FILSTORRELSE }
-
-        if (files.isEmpty() || metadata.size != files.size) {
+        if (uploadedFiles.isEmpty()) {
             return ResponseEntity.ok(emptyList())
         }
 
-        vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
-
-        return ResponseEntity.ok(originalFileList.map {
-            if (files.contains(it)) VedleggOpplastingResponse(it.originalFilename, it.size) else VedleggOpplastingResponse(it.originalFilename, -1)
+        return ResponseEntity.ok(files.map {
+            if (uploadedFiles.contains(it)) VedleggOpplastingResponse(it.originalFilename, it.size) else VedleggOpplastingResponse(it.originalFilename, -1)
         })
     }
 

@@ -10,7 +10,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Ettersendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -22,9 +21,8 @@ import java.time.temporal.ChronoUnit
 internal class VedleggServiceTest {
 
     private val fiksClient: FiksClient = mockk()
-    private val dokumentlagerClient: DokumentlagerClient = mockk()
 
-    private val service = VedleggService(fiksClient, dokumentlagerClient)
+    private val service = VedleggService(fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon = mockk()
@@ -39,16 +37,16 @@ internal class VedleggServiceTest {
 
         every { mockJsonVedleggSpesifikasjon.vedlegg } returns emptyList()
 
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns soknadVedleggSpesifikasjon
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_1, any(), any()) } returns ettersendteVedleggSpesifikasjon_1
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_2, any(), any()) } returns ettersendteVedleggSpesifikasjon_2
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_3, any(), any()) } returns ettersendteVedleggSpesifikasjon_3
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_4, any(), any()) } returns ettersendteVedleggSpesifikasjon_4
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), "token") } returns soknadVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_1, any(), "token") } returns ettersendteVedleggSpesifikasjon_1
+        every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_2, any(), "token") } returns ettersendteVedleggSpesifikasjon_2
+        every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_3, any(), "token") } returns ettersendteVedleggSpesifikasjon_3
+        every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_4, any(), "token") } returns ettersendteVedleggSpesifikasjon_4
     }
 
     @Test
     fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() {
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
@@ -72,7 +70,7 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() {
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns listOf(
                 Ettersendelse(
@@ -88,7 +86,7 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() {
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
         val list = service.hentAlleVedlegg(id, "token")
 
@@ -137,9 +135,9 @@ internal class VedleggServiceTest {
 
     @Test
     fun `like filnavn i DokumentInfoList vil resultere i at de returneres for hver JsonFil med samme filnavn`() {
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
-        every { dokumentlagerClient.hentDokument(vedleggMetadata_ettersendelse_5, any(), any()) } returns
+        every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_5, any(), any()) } returns
                 JsonVedleggSpesifikasjon()
                         .withVedlegg(listOf(
                                 JsonVedlegg()

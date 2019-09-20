@@ -23,7 +23,7 @@ class OppgaveService(private val eventService: EventService,
         }
 
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val ettersendteVedlegg = digisosSak.ettersendtInfoNAV?.let { vedleggService.hentEttersendteVedlegg(it, token) } ?: emptyList()
+        val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
 
         val oppgaveResponseList = model.oppgaver.sortedBy { it.innsendelsesfrist }
                 .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }

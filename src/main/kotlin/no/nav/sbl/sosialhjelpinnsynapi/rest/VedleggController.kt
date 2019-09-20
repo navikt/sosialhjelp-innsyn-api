@@ -69,6 +69,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                                 dokumentInfo.storrelse,
                                 hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
                                 it.type,
+                                it.tilleggsinfo,
                                 it.tidspunktLastetOpp)
                     }
                 }

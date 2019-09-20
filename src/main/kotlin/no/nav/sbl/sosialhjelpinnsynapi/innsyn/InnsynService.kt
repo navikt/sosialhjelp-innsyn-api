@@ -8,16 +8,16 @@ import org.springframework.stereotype.Component
 @Component
 class InnsynService(private val fiksClient: FiksClient) {
 
-    fun hentJsonDigisosSoker(digisosSokerMetadata: String?, token: String): JsonDigisosSoker? {
+    fun hentJsonDigisosSoker(digisosId: String, digisosSokerMetadata: String?, token: String): JsonDigisosSoker? {
         return when {
-            digisosSokerMetadata != null -> fiksClient.hentDokument(digisosSokerMetadata, JsonDigisosSoker::class.java, token) as JsonDigisosSoker
+            digisosSokerMetadata != null -> fiksClient.hentDokument(digisosId, digisosSokerMetadata, JsonDigisosSoker::class.java, token) as JsonDigisosSoker
             else -> null
         }
     }
 
-    fun hentOriginalSoknad(originalSoknadNAVMetadata: String?, token: String): JsonSoknad? {
+    fun hentOriginalSoknad(digisosId: String, originalSoknadNAVMetadata: String?, token: String): JsonSoknad? {
         return when {
-            originalSoknadNAVMetadata != null -> fiksClient.hentDokument(originalSoknadNAVMetadata, JsonSoknad::class.java, token) as JsonSoknad
+            originalSoknadNAVMetadata != null -> fiksClient.hentDokument(digisosId, originalSoknadNAVMetadata, JsonSoknad::class.java, token) as JsonSoknad
             else -> null
         }
     }

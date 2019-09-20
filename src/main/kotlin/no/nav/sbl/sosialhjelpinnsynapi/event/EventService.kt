@@ -24,8 +24,8 @@ class EventService(private val clientProperties: ClientProperties,
     fun createModel(fiksDigisosId: String, token: String): InternalDigisosSoker {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
 
-        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.digisosSoker?.metadata, token)
-        val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak.originalSoknadNAV?.metadata, token)
+        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
+        val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
         val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
 
         val internal = InternalDigisosSoker()

@@ -41,7 +41,8 @@ class MockController(private val fiksClientMock: FiksClientMock,
     @GetMapping("/{soknadId}",
             produces = [APPLICATION_JSON_UTF8_VALUE])
     fun getInnsynForSoknad(@PathVariable soknadId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<JsonDigisosSoker> {
-        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(soknadId, token)
+        val digisosSak = fiksClientMock.hentDigisosSak(soknadId, token)
+        val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(soknadId, digisosSak.digisosSoker?.metadata, token)
         return ResponseEntity.ok(jsonDigisosSoker!!)
     }
 }

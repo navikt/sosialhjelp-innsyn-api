@@ -7,6 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
+import java.util.*
 import java.util.Collections.singletonList
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -124,7 +126,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
         val contentProvider = MultiPartContentProvider()
         contentProvider.addFieldPart("vedlegg.json", StringContentProvider(serialiser(vedleggSpesifikasjon)), null)
 
@@ -138,7 +140,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         contentProvider.close()
 
-        val navEksternRefId = "11000007"
+        val digisosSak = hentDigisosSak(soknadId, token)
+        val kommunenummer = digisosSak.kommunenummer
+        val navEksternRefId = lagNavEksternRefId(digisosSak)
         val path = "/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
         val listener = InputStreamResponseListener()
         val sslContextFactory = SslContextFactory.Client()

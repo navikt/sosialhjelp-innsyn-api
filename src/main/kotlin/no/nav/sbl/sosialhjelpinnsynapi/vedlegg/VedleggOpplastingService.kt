@@ -72,9 +72,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                         }) })
 
         // Last opp filer til FIKS
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val kommunenummer = digisosSak.kommunenummer
-        fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, kommunenummer, fiksDigisosId, token)
+        fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, fiksDigisosId, token)
 
         waitForFutures(krypteringFutureList)
         return vedleggOpplastingResponseList

@@ -3,9 +3,9 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.*
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
@@ -70,8 +70,21 @@ class FiksClientMock : FiksClient {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, kommunenummer: String, soknadId: String, token: String) {
-        return
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
+        var digisosSak = hentDigisosSak(soknadId, token)
+        val navEksternRefId = lagNavEksternRefId(digisosSak)
+        val vedleggMetadata = UUID.randomUUID().toString()
+        val dokumentalagerIdList = List(files.size) {
+            UUID.randomUUID().toString()
+        }
+        val dokumentInfoList = files.mapIndexed { i, fil -> DokumentInfo(fil.filnavn!!, dokumentalagerIdList[i], fil.storrelse) }
+        val timestampSendt = System.currentTimeMillis()
+        val ettersendelse = Ettersendelse(navEksternRefId, vedleggMetadata, dokumentInfoList, timestampSendt)
+
+        val tidligereEttersendelser: List<Ettersendelse> = digisosSak.ettersendtInfoNAV?.ettersendelser.orEmpty()
+        val updatedDigisosSak = digisosSak.updateEttersendtInfoNAV(EttersendtInfoNAV(tidligereEttersendelser.plus(ettersendelse)))
+        postDigisosSak(updatedDigisosSak)
+        postDokument(vedleggMetadata, vedleggSpesifikasjon)
     }
 
     fun postDigisosSak(digisosSak: DigisosSak) {
@@ -82,7 +95,15 @@ class FiksClientMock : FiksClient {
         dokumentMap[dokumentlagerId] = jsonDigisosSoker
     }
 
+    fun postDokument(dokumentlagerId: String, jsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon) {
+        dokumentMap[dokumentlagerId] = jsonVedleggSpesifikasjon
+    }
+
     fun DigisosSak.copyDigisosSokerWithNewMetadataId(metadata: String): DigisosSak {
         return this.copy(digisosSoker = this.digisosSoker?.copy(metadata = metadata))
+    }
+
+    fun DigisosSak.updateEttersendtInfoNAV(ettersendtInfoNAV: EttersendtInfoNAV): DigisosSak {
+        return this.copy(ettersendtInfoNAV = ettersendtInfoNAV)
     }
 }

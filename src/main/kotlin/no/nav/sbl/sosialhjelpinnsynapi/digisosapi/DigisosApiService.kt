@@ -21,11 +21,10 @@ class DigisosApiService(private val digisosApiClient: DigisosApiClient,
         val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer, token)
 
         return when {
-            false -> IKKE_PA_FIKS_ELLER_INNSYN
+            !kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> IKKE_PA_FIKS_ELLER_INNSYN
             kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> KUN_PA_FIKS
             kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus -> PA_FIKS_OG_INNSYN
             else -> {
-                // something is wrong
                 log.error("Noe feil skjedde her")
                 throw RuntimeException("Noe feil skjedde her")
             }

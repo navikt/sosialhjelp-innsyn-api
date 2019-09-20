@@ -32,15 +32,8 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         val mapper = jacksonObjectMapper()
         val metadata: MutableList<OpplastetVedleggMetadata> = mapper.readValue(metadataMultipartFile.bytes)
 
-        val uploadedFiles = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
-
-        if (uploadedFiles.isEmpty()) {
-            return ResponseEntity.ok(emptyList())
-        }
-
-        return ResponseEntity.ok(files.map {
-            if (uploadedFiles.contains(it)) VedleggOpplastingResponse(it.originalFilename, it.size) else VedleggOpplastingResponse(it.originalFilename, -1)
-        })
+        val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+        return ResponseEntity.ok(vedleggOpplastingResponseList)
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])

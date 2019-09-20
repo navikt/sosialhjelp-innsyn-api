@@ -138,7 +138,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         contentProvider.close()
 
-        val navEksternRefId = "11000006"
+        val navEksternRefId = "11000007"
         val path = "/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
         val listener = InputStreamResponseListener()
         val sslContextFactory = SslContextFactory.Client()

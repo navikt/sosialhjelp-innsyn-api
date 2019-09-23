@@ -72,6 +72,6 @@ data class SakResponse(
         val soknadNavn: String,
         val status: String,
         val sistOppdatert: LocalDateTime,
-        val antallOppgaver: Int
+        val antallNyeOppgaver: Int?
 
 )

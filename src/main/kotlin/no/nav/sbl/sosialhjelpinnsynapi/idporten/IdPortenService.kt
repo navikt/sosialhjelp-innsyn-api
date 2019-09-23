@@ -38,6 +38,8 @@ class IdPortenService(
     private val idPortenScope = clientProperties.idPortenScope
     private val idPortenConfigUrl = clientProperties.idPortenConfigUrl
 
+    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI") ?: "/var/run/secrets/nais.io/virksomhetssertifikat/"
+
 
     val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
         logger.info("Henter config fra " + idPortenConfigUrl)
@@ -79,12 +81,12 @@ class IdPortenService(
             it.time
         }
         val virksertCredentials = objectMapper.readValue<VirksertCredentials>(
-                File("/var/run/secrets/nais.io/virksomhetssertifikat/credentials.json").readText(Charsets.UTF_8)
+                File("$VIRKSERT_STI/credentials.json").readText(Charsets.UTF_8)
         )
 
         val pair = KeyStore.getInstance("PKCS12").let { keyStore ->
             keyStore.load(
-                    java.util.Base64.getDecoder().decode(File("/var/run/secrets/nais.io/virksomhetssertifikat/key.p12.b64").readText(Charsets.UTF_8)).inputStream(),
+                    java.util.Base64.getDecoder().decode(File("$VIRKSERT_STI/key.p12.b64").readText(Charsets.UTF_8)).inputStream(),
                     virksertCredentials.password.toCharArray()
             )
             val cert = keyStore.getCertificate(virksertCredentials.alias) as X509Certificate

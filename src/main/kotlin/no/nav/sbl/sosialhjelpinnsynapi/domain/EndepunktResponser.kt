@@ -69,9 +69,8 @@ data class VedleggOpplastingResponse(
 
 data class SakResponse(
         val fiksDigisosId: String,
-        val soknadNavn: String,
+        val soknadTittel: String,
         val status: String,
         val sistOppdatert: LocalDateTime,
         val antallNyeOppgaver: Int?
-
 )

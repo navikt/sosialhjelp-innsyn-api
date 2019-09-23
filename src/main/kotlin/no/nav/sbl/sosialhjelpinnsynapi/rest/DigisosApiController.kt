@@ -43,7 +43,7 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
                             hentNavn(it, model),
                             model.status.toString(),
                             unixToLocalDateTime(it.sistEndret),
-                            oppgaveService.hentOppgaver(it.fiksDigisosId, token).size
+                            hentAntallNyeOppgaver(model, it.fiksDigisosId, token)
                     )
                 }
 
@@ -54,6 +54,13 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
         return when {
             digisosSak.digisosSoker == null -> "Søknad om økonomisk sosialhjelp"
             else -> model.saker.joinToString { it.tittel }
+        }
+    }
+
+    private fun hentAntallNyeOppgaver(model: InternalDigisosSoker, fiksDigisosId: String, token: String) : Int? {
+        return when {
+            model.oppgaver.isEmpty() -> null
+            else -> oppgaveService.hentOppgaver(fiksDigisosId, token).size
         }
     }
 

@@ -1,8 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import io.mockk.clearMocks
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
@@ -37,9 +35,14 @@ internal class DigisosApiControllerTest {
     @BeforeEach
     internal fun setUp() {
         clearMocks(digisosApiService, fiksClient, eventService, oppgaveService)
-        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(
-                digisosSak1,
-                digisosSak2)
+
+        every { digisosSak1.fiksDigisosId } returns "123"
+        every { digisosSak1.sistEndret } returns 0L
+        every { digisosSak1.digisosSoker } returns null
+
+        every { digisosSak2.fiksDigisosId } returns "456"
+        every { digisosSak2.sistEndret } returns 1000L
+        every { digisosSak2.digisosSoker } returns mockk()
 
         every { eventService.createModel("123", any()) } returns model1
         every { eventService.createModel("456", any()) } returns model2
@@ -50,16 +53,13 @@ internal class DigisosApiControllerTest {
 
     @Test
     fun `skal mappe fra DigisosSak til SakResponse`() {
-        every { digisosSak1.fiksDigisosId } returns "123"
-        every { digisosSak1.sistEndret } returns 0L
-        every { digisosSak1.digisosSoker } returns null
-
-        every { digisosSak2.fiksDigisosId } returns "456"
-        every { digisosSak2.sistEndret } returns 1000L
-        every { digisosSak2.digisosSoker } returns mockk()
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2)
 
         every { model1.status } returns SENDT
         every { model2.status } returns UNDER_BEHANDLING
+
+        every { model1.oppgaver.isEmpty() } returns false
+        every { model2.oppgaver.isEmpty() } returns false
 
         every { sak1.tittel } returns "Livsopphold"
         every { sak2.tittel } returns "Strøm"
@@ -76,12 +76,34 @@ internal class DigisosApiControllerTest {
             val first = saker[0]
             assertThat(first.soknadNavn).isEqualTo("Søknad om økonomisk sosialhjelp")
             assertThat(first.status).isEqualTo("$SENDT")
-            assertThat(first.antallOppgaver).isEqualTo(2)
+            assertThat(first.antallNyeOppgaver).isEqualTo(2)
 
             val second = saker[1]
             assertThat(second.soknadNavn).contains("Livsopphold", "Strøm")
             assertThat(second.status).isEqualTo("$UNDER_BEHANDLING")
-            assertThat(second.antallOppgaver).isEqualTo(1)
+            assertThat(second.antallNyeOppgaver).isEqualTo(1)
         }
     }
+
+    @Test
+    fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() {
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1)
+
+        every { model1.status } returns SENDT
+        every { model1.oppgaver.isEmpty() } returns true
+
+        val response = controller.hentAlleSaker("token")
+        val saker = response.body
+
+        assertThat(saker).isNotNull
+        assertThat(saker).hasSize(1)
+
+        verify { oppgaveService wasNot Called }
+
+        if (saker != null && saker.size == 1) {
+            val first = saker[0]
+            assertThat(first.antallNyeOppgaver).isEqualTo(null)
+        }
+    }
+
 }

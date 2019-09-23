@@ -11,8 +11,8 @@ class KommuneService(private val fiksClient: FiksClient) {
 
     private val log: Logger = LoggerFactory.getLogger(KommuneService::class.java)
 
-    fun hentKommuneStatus(kommunenummer: String, token: String): KommuneStatus {
-        val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer, token)
+    fun hentKommuneStatus(kommunenummer: String): KommuneStatus {
+        val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer)
 
         return when {
             !kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> IKKE_PA_FIKS_ELLER_INNSYN

@@ -1,10 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import io.mockk.clearMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import org.assertj.core.api.Assertions.assertThat
@@ -21,8 +23,9 @@ internal class FiksClientTest {
 
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val restTemplate: RestTemplate = mockk()
+    private val idPortenService: IdPortenService = mockk()
 
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService)
 
     private val id = "123"
     private val kommunenummer = "1337"
@@ -81,6 +84,8 @@ internal class FiksClientTest {
         every { mockKommuneResponse.statusCode.is2xxSuccessful } returns true
         every { mockKommuneResponse.body } returns mockKommuneInfo
 
+        coEvery { idPortenService.requestToken().token } returns "token"
+
         every {
             restTemplate.exchange(
                     any<String>(),
@@ -89,7 +94,7 @@ internal class FiksClientTest {
                     KommuneInfo::class.java)
         } returns mockKommuneResponse
 
-        val result = fiksClient.hentKommuneInfo("1234", "token")
+        val result = fiksClient.hentKommuneInfo("1234")
 
         assertThat(result).isNotNull
     }

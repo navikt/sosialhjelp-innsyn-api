@@ -64,9 +64,9 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 data class OpplastetVedleggMetadata (
         val type: String,
         val tilleggsinfo: String,
-        val filer: MutableList<sendtFil>
+        val filer: MutableList<OpplastetFil>
 )
 
-data class sendtFil (
+data class OpplastetFil (
         val filnavn: String
 )

@@ -22,12 +22,11 @@ import kotlin.collections.ArrayList
 
 private val log = LoggerFactory.getLogger(VedleggOpplastingService::class.java)
 
-private const val LASTET_OPP_STATUS = "LastetOpp"
-private const val MESSAGE_COULD_NOT_LOAD_DOCUMENT = "COULD_NOT_LOAD_DOCUMENT"
-private const val MESSAGE_PDF_IS_SIGNED = "PDF_IS_SIGNED"
-private const val MESSAGE_PDF_IS_ENCRYPTED = "PDF_IS_ENCRYPTED"
-private const val MESSAGE_ILLEGAL_FILE_TYPE = "ILLEGAL_FILE_TYPE"
-private const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
+const val MESSAGE_COULD_NOT_LOAD_DOCUMENT = "COULD_NOT_LOAD_DOCUMENT"
+const val MESSAGE_PDF_IS_SIGNED = "PDF_IS_SIGNED"
+const val MESSAGE_PDF_IS_ENCRYPTED = "PDF_IS_ENCRYPTED"
+const val MESSAGE_ILLEGAL_FILE_TYPE = "ILLEGAL_FILE_TYPE"
+const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
 @Component
 class VedleggOpplastingService(private val fiksClient: FiksClient,
@@ -38,12 +37,14 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     fun sendVedleggTilFiks(fiksDigisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<VedleggOpplastingResponse> {
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
+        check(filenamesAreUniqueAndMatchInMetadataAndFiles(metadata, files)) { "Filnavn er ikke unike eller det er mismatch mellom filer og metadata" }
+
         // Valider og krypter
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(files.size))
 
         files.forEach { file ->
-            val valideringstatus = validerFil(file)
+            val valideringstatus = validateFil(file)
             if (valideringstatus == "OK") {
                 val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token)
                 filerForOpplasting.add(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
@@ -67,8 +68,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                         .withFiler(it.filer.map { fil ->
                             JsonFiler()
                                     .withFilnavn(fil.filnavn)
-                                    .withSha512(getSha512FromByteArray(files.first { multipartFile ->
-                                        multipartFile.originalFilename == fil.filnavn }.bytes))
+                                    .withSha512(getSha512FromByteArray(files.firstOrNull { multipartFile ->
+                                        multipartFile.originalFilename == fil.filnavn }?.bytes ?: throw IllegalStateException("Fil mangler metadata")))
                         }) })
 
         // Last opp filer til FIKS
@@ -78,7 +79,17 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         return vedleggOpplastingResponseList
     }
 
-    private fun validerFil(file: MultipartFile) : String {
+    private fun filenamesAreUniqueAndMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
+        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { it.filnavn } }
+        val filnavnMetadataSet = filnavnMetadata.toHashSet()
+        val filnavnMultipart = files.map { it.originalFilename }
+        val filnavnMultipartSet = filnavnMultipart.toHashSet()
+        return filnavnMetadata.size == filnavnMetadataSet.size &&
+                filnavnMultipart.size == filnavnMultipartSet.size &&
+                filnavnMetadataSet == filnavnMultipartSet
+    }
+
+    fun validateFil(file: MultipartFile) : String {
         if (file.size > MAKS_TOTAL_FILSTORRELSE) {
             log.warn(MESSAGE_FILE_TOO_LARGE)
             return MESSAGE_FILE_TOO_LARGE
@@ -89,12 +100,12 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             return MESSAGE_ILLEGAL_FILE_TYPE
         }
         if (isPdf(file.inputStream)) {
-            return sjekkOmPdfErGyldig(file.inputStream)
+            return checkIfPdfIsValid(file.inputStream)
         }
         return "OK"
     }
 
-    private fun sjekkOmPdfErGyldig(data: InputStream): String {
+    private fun checkIfPdfIsValid(data: InputStream): String {
         val document: PDDocument
         try {
             document = PDDocument.load(data)

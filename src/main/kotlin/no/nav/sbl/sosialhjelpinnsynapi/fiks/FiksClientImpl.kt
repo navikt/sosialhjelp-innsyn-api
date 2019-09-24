@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
-import java.util.*
 import java.util.Collections.singletonList
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -50,11 +49,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        val headers = setPersonIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         if (digisosId == digisos_stub_id) {
@@ -76,11 +71,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        val headers = setPersonIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
         if (dokumentlagerId == dokumentlager_stub_id && requestedClass == JsonDigisosSoker::class.java) {
@@ -102,11 +93,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        val headers = setPersonIntegrasjonHeaders(token)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
@@ -187,7 +174,15 @@ class FiksClientImpl(clientProperties: ClientProperties,
         } catch (e: JsonProcessingException) {
             throw RuntimeException("Feil under serialisering av metadata", e)
         }
+    }
 
+    private fun setPersonIntegrasjonHeaders(token: String): HttpHeaders {
+        val headers = HttpHeaders()
+        headers.accept = singletonList(MediaType.APPLICATION_JSON)
+        headers.set(AUTHORIZATION, token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        return headers
     }
 }
 

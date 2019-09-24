@@ -67,3 +67,11 @@ data class VedleggOpplastingResponse(
         val filnavn: String?,
         val storrelse: Long
 )
+
+data class SakResponse(
+        val fiksDigisosId: String,
+        val soknadTittel: String,
+        val status: String,
+        val sistOppdatert: LocalDateTime,
+        val antallNyeOppgaver: Int?
+)

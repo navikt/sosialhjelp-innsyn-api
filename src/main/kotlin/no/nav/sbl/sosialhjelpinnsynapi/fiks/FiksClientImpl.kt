@@ -20,10 +20,13 @@ import org.eclipse.jetty.client.util.StringContentProvider
 import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
+import org.springframework.core.io.InputStreamResource
 import org.springframework.http.*
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
@@ -101,14 +104,71 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
+    override fun postFiles(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
+        val headers = setPersonIntegrasjonHeaders(token)
+        headers.contentType = MediaType.MULTIPART_FORM_DATA
+
+        val body = LinkedMultiValueMap<String, Any>()
+        body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggSpesifikasjon), "vedlegg.json"))
+
+        files.forEachIndexed { fileId, file ->
+            val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
+            body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
+            body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
+        }
+
+        val digisosSak = hentDigisosSak(soknadId, token)
+        val kommunenummer = digisosSak.kommunenummer
+        val navEksternRefId = lagNavEksternRefId(digisosSak)
+
+        val requestEntity = HttpEntity(body, headers)
+        try {
+            val response = restTemplate.exchange(
+                    "$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId",
+                    HttpMethod.POST,
+                    requestEntity,
+                    String::class.java)
+            if (response.statusCode.is2xxSuccessful) {
+                log.info("Sendte ettersendelse til Fiks")
+            } else if (response.statusCode.is4xxClientError) {
+                log.warn("Opplasting av ettersendelse feilet")
+                throw FiksException(response.statusCode, "Opplasting til Fiks feilet")
+            }
+        } catch (e: HttpClientErrorException) {
+            e.printStackTrace()
+        }
+
+    }
+
+    private fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
+        return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
+    }
+
+    private fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
+        return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
+    }
+
+    private fun createHttpEntity(body: Any, name: String, filename: String?, contentType: String): HttpEntity<Any> {
+        val headerMap = LinkedMultiValueMap<String, String>()
+        val contentDisposition = ContentDisposition
+                .builder("form-data")
+                .name(name)
+                .filename(filename)
+                .build()
+
+        headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+        headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
+        return HttpEntity(body, headerMap)
+    }
+
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
         val contentProvider = MultiPartContentProvider()
         contentProvider.addFieldPart("vedlegg.json", StringContentProvider(serialiser(vedleggSpesifikasjon)), null)
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
-            contentProvider.addFieldPart(String.format("vedleggSpesifikasjon:%s", fileId), StringContentProvider(serialiser(vedleggMetadata)), null)
-            contentProvider.addFilePart(String.format("dokument:%s", fileId), file.filnavn, InputStreamContentProvider(file.fil), null)
+            contentProvider.addFieldPart("vedleggSpesifikasjon:$fileId", StringContentProvider(serialiser(vedleggMetadata)), null)
+            contentProvider.addFilePart("dokument:$fileId", file.filnavn, InputStreamContentProvider(file.fil), null)
         }
 
         contentProvider.close()

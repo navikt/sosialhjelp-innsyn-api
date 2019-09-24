@@ -15,9 +15,10 @@ class KommuneService(private val fiksClient: FiksClient) {
         val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer)
 
         return when {
-            !kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> IKKE_PA_FIKS_ELLER_INNSYN
-            kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> KUN_PA_FIKS
-            kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus -> PA_FIKS_OG_INNSYN
+            !kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> IKKE_FIKS_ELLER_INNSYN
+            kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> KUN_FIKS
+            kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus -> FIKS_OG_INNSYN
+            !kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus -> KUN_INNSYN
             else -> {
                 log.error("Noe feil skjedde her")
                 throw RuntimeException("Noe feil skjedde her")
@@ -27,7 +28,8 @@ class KommuneService(private val fiksClient: FiksClient) {
 }
 
 enum class KommuneStatus {
-    IKKE_PA_FIKS_ELLER_INNSYN,
-    KUN_PA_FIKS,
-    PA_FIKS_OG_INNSYN
+    IKKE_FIKS_ELLER_INNSYN,
+    KUN_FIKS,
+    FIKS_OG_INNSYN,
+    KUN_INNSYN
 }

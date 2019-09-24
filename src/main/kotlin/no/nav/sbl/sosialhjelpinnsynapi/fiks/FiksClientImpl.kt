@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -36,9 +35,6 @@ import org.eclipse.jetty.http.HttpMethod as JettyHttpMethod
 
 private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
 
-private const val digisos_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-private const val dokumentlager_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-
 @Profile("!mock")
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
@@ -52,10 +48,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = setPersonIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
-        if (digisosId == digisos_stub_id) {
-            log.info("Hentet stub - digisosId $digisosId")
-            return objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        }
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
             if (response.statusCode.is2xxSuccessful) {
@@ -74,10 +66,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = setPersonIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
-        if (dokumentlagerId == dokumentlager_stub_id && requestedClass == JsonDigisosSoker::class.java) {
-            log.info("Henter stub - dokumentlagerId $dokumentlagerId")
-            return objectMapper.readValue(ok_komplett_jsondigisossoker_response, requestedClass)
-        }
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
             if (response.statusCode.is2xxSuccessful) {
@@ -117,12 +105,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val contentProvider = MultiPartContentProvider()
         contentProvider.addFieldPart("vedlegg.json", StringContentProvider(serialiser(vedleggSpesifikasjon)), null)
 
-        var fileId = 0
-        files.forEach {
-            val vedleggMetadata = VedleggMetadata(it.filnavn, it.mimetype, it.storrelse)
+        files.forEachIndexed { fileId, file ->
+            val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             contentProvider.addFieldPart(String.format("vedleggSpesifikasjon:%s", fileId), StringContentProvider(serialiser(vedleggMetadata)), null)
-            contentProvider.addFilePart(String.format("dokument:%s", fileId), it.filnavn, InputStreamContentProvider(it.fil), null)
-            fileId++
+            contentProvider.addFilePart(String.format("dokument:%s", fileId), file.filnavn, InputStreamContentProvider(file.fil), null)
         }
 
         contentProvider.close()

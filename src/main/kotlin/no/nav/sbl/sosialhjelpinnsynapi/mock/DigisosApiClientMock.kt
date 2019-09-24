@@ -20,7 +20,7 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
         }
 
         fiksClientMock.postDigisosSak(DigisosSak(id, "01234567890", "11415cd1-e26d-499a-8421-751457dfcbd5", "1", System.currentTimeMillis(),
-                OriginalSoknadNAV("", "", "", DokumentInfo("", "", 0L), Collections.emptyList(), System.currentTimeMillis()),
+                OriginalSoknadNAV("110000000", "", "mock-soknad-vedlegg-metadata", DokumentInfo("", "", 0L), Collections.emptyList(), System.currentTimeMillis()),
                 EttersendtInfoNAV(Collections.emptyList()), DigisosSoker(objectMapper.writeValueAsString(digisosApiWrapper.sak), Collections.emptyList(), System.currentTimeMillis())))
         return id
     }

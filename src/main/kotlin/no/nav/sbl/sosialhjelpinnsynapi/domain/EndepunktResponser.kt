@@ -65,7 +65,7 @@ data class VedleggResponse(
 
 data class VedleggOpplastingResponse(
         val filnavn: String?,
-        val storrelse: Long
+        val status: String
 )
 
 data class SakResponse(

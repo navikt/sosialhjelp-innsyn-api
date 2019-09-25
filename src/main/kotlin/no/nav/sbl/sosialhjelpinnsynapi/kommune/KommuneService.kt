@@ -1,7 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.kommune
 
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.*
+import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.FIKS_OG_INNSYN
+import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.KUN_FIKS
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -15,13 +16,11 @@ class KommuneService(private val fiksClient: FiksClient) {
         val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer)
 
         return when {
-            !kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> IKKE_FIKS_ELLER_INNSYN
             kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus -> KUN_FIKS
             kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus -> FIKS_OG_INNSYN
-            !kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus -> KUN_INNSYN
             else -> {
-                log.error("Noe feil skjedde her")
-                throw RuntimeException("Noe feil skjedde her")
+                log.warn("Forsøkte å hente kommunestatus, men scenariet er ikke dekket")
+                throw RuntimeException("KommuneStatus scenario er ikke dekket")
             }
         }
     }

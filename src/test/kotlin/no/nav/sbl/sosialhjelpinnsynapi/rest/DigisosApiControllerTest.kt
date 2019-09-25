@@ -10,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -77,11 +78,13 @@ internal class DigisosApiControllerTest {
             assertThat(first.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
             assertThat(first.status).isEqualTo("$SENDT")
             assertThat(first.antallNyeOppgaver).isEqualTo(2)
+            assertThat(first.kilde).isEqualTo(KILDE_INNSYN_API)
 
             val second = saker[1]
             assertThat(second.soknadTittel).contains("Livsopphold", "Strøm")
             assertThat(second.status).isEqualTo("$UNDER_BEHANDLING")
             assertThat(second.antallNyeOppgaver).isEqualTo(1)
+            assertThat(second.kilde).isEqualTo(KILDE_INNSYN_API)
         }
     }
 

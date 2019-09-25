@@ -43,7 +43,7 @@ data class UtbetalingerManedResponse(
 data class UtbetalingResponse(
         val tittel: String?,
         val belop: Double,
-        @JsonFormat(pattern="yyyy-MM-dd")
+        @JsonFormat(pattern = "yyyy-MM-dd")
         val utbetalingsdato: LocalDate?,
         val vilkar: MutableList<VilkarResponse>
 )
@@ -72,5 +72,6 @@ data class SakResponse(
         val soknadTittel: String,
         val status: String,
         val sistOppdatert: LocalDateTime,
-        val antallNyeOppgaver: Int?
+        val antallNyeOppgaver: Int?,
+        val kilde: String
 )

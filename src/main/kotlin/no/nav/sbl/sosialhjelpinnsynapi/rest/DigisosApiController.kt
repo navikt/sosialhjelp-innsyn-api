@@ -9,6 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
@@ -43,7 +44,8 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
                             hentNavn(it, model),
                             model.status.toString(),
                             unixToLocalDateTime(it.sistEndret),
-                            hentAntallNyeOppgaver(model, it.fiksDigisosId, token)
+                            hentAntallNyeOppgaver(model, it.fiksDigisosId, token),
+                            KILDE_INNSYN_API
                     )
                 }
 

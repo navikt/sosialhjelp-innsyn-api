@@ -17,7 +17,6 @@ import org.eclipse.jetty.client.util.InputStreamContentProvider
 import org.eclipse.jetty.client.util.InputStreamResponseListener
 import org.eclipse.jetty.client.util.MultiPartContentProvider
 import org.eclipse.jetty.client.util.StringContentProvider
-import org.eclipse.jetty.util.ssl.SslContextFactory
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
@@ -41,7 +40,8 @@ private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
 @Profile("!mock")
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
-                     private val restTemplate: RestTemplate) : FiksClient {
+                     private val restTemplate: RestTemplate,
+                     private val client: HttpClient) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
@@ -123,11 +123,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val requestEntity = HttpEntity(body, headers)
         try {
-            val response = restTemplate.exchange(
-                    "$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId",
-                    HttpMethod.POST,
-                    requestEntity,
-                    String::class.java)
+            val path = "$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
+            val response = restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Sendte ettersendelse til Fiks")
             } else if (response.statusCode.is4xxClientError) {
@@ -178,10 +175,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val navEksternRefId = lagNavEksternRefId(digisosSak)
         val path = "/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
         val listener = InputStreamResponseListener()
-        val sslContextFactory = SslContextFactory.Client()
-        val client = HttpClient(sslContextFactory)
-        client.isFollowRedirects = false
-        client.start()
         val request = client.newRequest(baseUrl)
 
         request.header(AUTHORIZATION, token)
@@ -209,8 +202,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
             throw RuntimeException("Feil under invokering av api", e)
         } catch (e: IOException) {
             throw RuntimeException("Feil under invokering av api", e)
-        } finally {
-            client.stop()
         }
     }
 

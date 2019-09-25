@@ -15,9 +15,6 @@ import java.util.*
 @Profile("mock")
 @Component
 class FiksClientMock : FiksClient {
-    override fun postFiles(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
-        lastOppNyEttersendelse(files, vedleggSpesifikasjon, soknadId, token)
-    }
 
     private val innsynMap = mutableMapOf<String, DigisosSak>()
     private val dokumentMap = mutableMapOf<String, Any>()

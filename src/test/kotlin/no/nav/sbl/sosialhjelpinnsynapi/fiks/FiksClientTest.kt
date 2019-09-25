@@ -12,7 +12,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.eclipse.jetty.client.HttpClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
@@ -26,9 +25,8 @@ internal class FiksClientTest {
 
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val restTemplate: RestTemplate = mockk()
-    private val client: HttpClient = mockk()
 
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, client)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate)
 
     private val id = "123"
     private val kommunenummer = "1337"
@@ -113,7 +111,7 @@ internal class FiksClientTest {
         val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, mockk()),
                 FilForOpplasting("filnavn1", "image/jpg", 1L, mockk()))
 
-        Assertions.assertThatCode { fiksClient.postFiles(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
+        Assertions.assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
 
         val httpEntity = slot.captured
 

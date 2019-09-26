@@ -5,8 +5,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.FIKS_OG_INNSYN
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.KUN_FIKS
+import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.IKKE_INNSYN
+import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.INNSYN
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,7 +30,7 @@ internal class KommuneServiceTest {
 
         val status = service.hentKommuneStatus(kommuneNr)
 
-        assertThat(status).isEqualTo(KUN_FIKS)
+        assertThat(status).isEqualTo(IKKE_INNSYN)
     }
 
     @Test
@@ -39,6 +39,6 @@ internal class KommuneServiceTest {
 
         val status = service.hentKommuneStatus(kommuneNr)
 
-        assertThat(status).isEqualTo(FIKS_OG_INNSYN)
+        assertThat(status).isEqualTo(INNSYN)
     }
 }

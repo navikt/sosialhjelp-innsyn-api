@@ -22,6 +22,12 @@ val rxjavaVersion = "2.2.10"
 val ktorVersion = "1.2.2"
 val konfigVersion = "1.6.10.0"
 val kotlinCoroutinesVersion = "1.2.2"
+val commonsIoVersion = "1.3.2"
+val fileUploadVersion = "1.4"
+val tikaVersion = "1.22"
+val pdfBoxVersion = "2.0.16"
+val fiksKrypteringVersion = "1.0.5"
+val kotlinTestVersion = "1.3.50"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -90,6 +96,12 @@ dependencies {
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
 
+    compile("org.apache.commons:commons-io:$commonsIoVersion")
+    compile("commons-fileupload:commons-fileupload:$fileUploadVersion")
+    compile("org.apache.tika:tika-core:$tikaVersion")
+    compile("org.apache.pdfbox:preflight:$pdfBoxVersion")
+    compile("no.ks.fiks:kryptering:$fiksKrypteringVersion")
+
     //spesifikke versjoner oppgradert etter ønske fra snyk
     compile("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
     compile("com.google.guava:guava:$guavaVersion")
@@ -109,6 +121,7 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
     testCompile("com.github.tomakehurst:wiremock:$wireMockVersion")
     testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion")
+    testCompile("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
 }
 
 repositories {

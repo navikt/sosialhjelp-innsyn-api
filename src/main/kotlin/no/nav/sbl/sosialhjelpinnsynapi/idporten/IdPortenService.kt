@@ -37,6 +37,7 @@ class IdPortenService(
     private val idPortenClientId = clientProperties.idPortenClientId
     private val idPortenScope = clientProperties.idPortenScope
     private val idPortenConfigUrl = clientProperties.idPortenConfigUrl
+    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI") ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
 
     private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI") ?: "/var/run/secrets/nais.io/virksomhetssertifikat/"
 

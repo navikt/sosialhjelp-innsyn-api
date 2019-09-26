@@ -1,7 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 
 interface FiksClient {
 
@@ -11,5 +13,7 @@ interface FiksClient {
 
     fun hentKommuneInfo(kommunenummer: String): KommuneInfo
 
-    fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String)
+    fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String)
+
+    fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any
 }

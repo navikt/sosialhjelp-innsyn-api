@@ -77,9 +77,9 @@ internal class EventServiceTest {
         clearMocks(innsynService, mockJsonDigisosSoker, mockJsonSoknad)
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
-        every { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns tidspunkt_soknad
+        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any(), any()) } returns tidspunkt_soknad
 
         resetHendelser()
     }
@@ -96,7 +96,7 @@ internal class EventServiceTest {
  [x] vedtakFattet før saksStatus
  [x] saksStatus med 2 vedtakFattet
  [x] dokumentasjonEtterspurt
- [ ] dokumentasjonEtterspurt - flere caser?
+ [x] dokumentasjonEtterspurt med tom dokumentliste
  [x] forelopigSvar
  [ ] forelopigSvar - flere caser?
  ...
@@ -372,35 +372,65 @@ internal class EventServiceTest {
     }
 
 
-    @Test
-    fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
-                JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
-                        ))
+    @Nested
+    inner class dokumentasjonEtterspurt {
 
-        val model = service.createModel("123", "token")
+        @Test
+        fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
+            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                    JsonDigisosSoker()
+                            .withAvsender(avsender)
+                            .withVersion("123")
+                            .withHendelser(listOf(
+                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                    DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
+                            ))
 
-        assertThat(model).isNotNull
-        assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-        assertThat(model.saker).isEmpty()
-        assertThat(model.oppgaver).hasSize(1)
-        assertThat(model.historikk).hasSize(4)
+            val model = service.createModel("123", "token")
 
-        val oppgave = model.oppgaver.last()
-        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
-        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
-        assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(model.saker).isEmpty()
+            assertThat(model.oppgaver).hasSize(1)
+            assertThat(model.historikk).hasSize(4)
 
-        val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-        assertThat(hendelse.tittel).contains("Du må laste opp mer dokumentasjon")
-        assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            val oppgave = model.oppgaver.last()
+            assertThat(oppgave.tittel).isEqualTo(dokumenttype)
+            assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+            assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+
+            val hendelse = model.historikk.last()
+            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+            assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav")
+            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+        }
+
+        @Test
+        fun `dokumentasjonEtterspurt skal gi egen historikkmelding og ikke url eller oppgaver dersom det dokumentlisten er tom`() {
+            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                    JsonDigisosSoker()
+                            .withAvsender(avsender)
+                            .withVersion("123")
+                            .withHendelser(listOf(
+                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                    DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_3)
+                            ))
+
+            val model = service.createModel("123", "token")
+
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(model.saker).isEmpty()
+            assertThat(model.oppgaver).hasSize(0)
+            assertThat(model.historikk).hasSize(4)
+
+            val hendelse = model.historikk.last()
+            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+            assertThat(hendelse.tittel).contains("Veileder har lest dokumentene du har sendt")
+            assertThat(hendelse.url).isNull()
+        }
     }
 
     @Test
@@ -502,6 +532,10 @@ internal class EventServiceTest {
     private val DOKUMENTASJONETTERSPURT = JsonDokumentasjonEtterspurt()
             .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
             .withDokumenter(mutableListOf(JsonDokumenter().withInnsendelsesfrist(innsendelsesfrist).withDokumenttype(dokumenttype).withTilleggsinformasjon(tilleggsinfo)))
+            .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(DOKUMENTLAGER_1))
+
+    private val DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE = JsonDokumentasjonEtterspurt()
+            .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
             .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(DOKUMENTLAGER_1))
 
     private val FORELOPIGSVAR = JsonForelopigSvar()

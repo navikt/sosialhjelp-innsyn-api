@@ -69,7 +69,7 @@ internal class OppgaveServiceTest {
         model.oppgaver.add(Oppgave(type, tillegg, frist, tidspunktForKrav))
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val oppgaver = service.hentOppgaver("123", token)
 
@@ -85,7 +85,7 @@ internal class OppgaveServiceTest {
         model.oppgaver.add(Oppgave(type, null, frist, tidspunktForKrav))
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val oppgaver = service.hentOppgaver("123", token)
 
@@ -105,7 +105,7 @@ internal class OppgaveServiceTest {
                 Oppgave(type2, tillegg2, frist2, tidspunktForKrav)))
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val oppgaver = service.hentOppgaver("123", token)
 
@@ -137,7 +137,7 @@ internal class OppgaveServiceTest {
                 Oppgave(type3, tillegg3, frist3, tidspunktForKrav)))
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any()) } returns listOf(
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(type, tillegg, emptyList(), tidspunktEtterKrav),
                 InternalVedlegg(type2, null, emptyList(), tidspunktEtterKrav),
                 InternalVedlegg(type3, tillegg3, emptyList(), tidspunktFoerKrav),

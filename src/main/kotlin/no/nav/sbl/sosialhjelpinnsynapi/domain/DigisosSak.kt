@@ -6,8 +6,8 @@ data class DigisosSak(
         val fiksOrgId: String,
         val kommunenummer: String,
         val sistEndret: Long,
-        val originalSoknadNAV: OriginalSoknadNAV,
-        val ettersendtInfoNAV: EttersendtInfoNAV,
+        val originalSoknadNAV: OriginalSoknadNAV?,
+        val ettersendtInfoNAV: EttersendtInfoNAV?,
         val digisosSoker: DigisosSoker?
 )
 

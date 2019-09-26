@@ -43,7 +43,7 @@ data class UtbetalingerManedResponse(
 data class UtbetalingResponse(
         val tittel: String?,
         val belop: Double,
-        @JsonFormat(pattern="yyyy-MM-dd")
+        @JsonFormat(pattern = "yyyy-MM-dd")
         val utbetalingsdato: LocalDate?,
         val vilkar: MutableList<VilkarResponse>
 )
@@ -57,12 +57,22 @@ data class VedleggResponse(
         val filnavn: String,
         val storrelse: Long,
         val url: String,
-        val beskrivelse: String,
+        val type: String,
+        val tilleggsinfo: String?,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
         val datoLagtTil: LocalDateTime
 )
 
 data class VedleggOpplastingResponse(
         val filnavn: String?,
-        val storrelse: Long
+        val status: String
+)
+
+data class SakResponse(
+        val fiksDigisosId: String,
+        val soknadTittel: String,
+        val status: String,
+        val sistOppdatert: LocalDateTime,
+        val antallNyeOppgaver: Int?,
+        val kilde: String
 )

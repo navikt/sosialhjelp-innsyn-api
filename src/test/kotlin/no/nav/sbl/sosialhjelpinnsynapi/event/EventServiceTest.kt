@@ -406,7 +406,7 @@ internal class EventServiceTest {
 
         @Test
         fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -437,7 +437,7 @@ internal class EventServiceTest {
 
         @Test
         fun `dokumentasjonEtterspurt skal gi egen historikkmelding og ikke url eller oppgaver dersom det dokumentlisten er tom`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")

@@ -10,10 +10,14 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.ResponseEntity
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
+import kotlin.test.assertFailsWith
 
 internal class VedleggControllerTest {
 
@@ -33,6 +37,14 @@ internal class VedleggControllerTest {
     private val dokumentlagerId = "id1"
     private val dokumentlagerId2 = "id2"
 
+    private val metadataJson = """[{
+  "type": "brukskonto",
+  "tilleggsinfo": "kontoutskrift",
+  "filer": [{
+    "filnavn": "test.jpg"
+    }]
+  }]"""
+
     @BeforeEach
     internal fun setUp() {
         clearMocks(vedleggOpplastingService, vedleggService)
@@ -40,7 +52,7 @@ internal class VedleggControllerTest {
 
     @Test
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() {
-        every { vedleggService.hentAlleVedlegg(any()) } returns listOf(
+        every { vedleggService.hentAlleVedlegg(any(), any()) } returns listOf(
                 InternalVedlegg(
                         dokumenttype,
                         tilleggsinfo,
@@ -68,7 +80,7 @@ internal class VedleggControllerTest {
     @Test
     fun `skal utelate duplikater i response`() {
         val now = LocalDateTime.now()
-        every { vedleggService.hentAlleVedlegg(any()) } returns listOf(
+        every { vedleggService.hentAlleVedlegg(any(), any()) } returns listOf(
                 InternalVedlegg(
                         dokumenttype,
                         null,
@@ -93,4 +105,24 @@ internal class VedleggControllerTest {
             assertThat(body[0].storrelse).isEqualTo(123L)
         }
     }
+
+    @Test
+    fun `kaster exception dersom input til sendVedlegg ikke inneholder metadata-json`() {
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+                MockMultipartFile("files", "test2.png", null, ByteArray(0)))
+
+        assertFailsWith<IllegalStateException>{ controller.sendVedlegg(id, files, "token") }
+    }
+
+    @Test
+    fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() {
+        every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                MockMultipartFile("files", "test.jpg", null, ByteArray(0)))
+
+        assertThatCode { controller.sendVedlegg(id, files, "token") }.doesNotThrowAnyException()
+    }
+
 }

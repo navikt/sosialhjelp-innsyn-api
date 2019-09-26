@@ -1,32 +1,31 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
+import com.fasterxml.jackson.core.JsonProcessingException
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
+import org.springframework.core.io.InputStreamResource
 import org.springframework.http.*
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.HttpHeaders.TRANSFER_ENCODING
+import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
-import org.springframework.util.Base64Utils
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.multipart.MultipartFile
 import java.util.Collections.singletonList
-import java.util.UUID.randomUUID
-
 
 private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
-
-private const val digisos_stub_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 
 @Profile("!mock")
 @Component
@@ -38,17 +37,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        val headers = setPersonIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
-        if (digisosId == digisos_stub_id) {
-            log.info("Hentet stub - digisosId $digisosId")
-            return objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        }
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
             if (response.statusCode.is2xxSuccessful) {
@@ -63,12 +54,26 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
+    override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
+        val headers = setPersonIntegrasjonHeaders(token)
+
+        log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            if (response.statusCode.is2xxSuccessful) {
+                log.info("Hentet dokument (${requestedClass.simpleName}) fra fiks, dokumentlagerId $dokumentlagerId")
+                return objectMapper.readValue(response.body!!, requestedClass)
+            } else {
+                log.warn("Noe feilet ved kall til Fiks")
+                throw FiksException(response.statusCode, "something went wrong")
+            }
+        } catch (e: RestClientResponseException) {
+            throw FiksException(HttpStatus.valueOf(e.rawStatusCode), e.responseBodyAsString)
+        }
+    }
+
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        val headers = setPersonIntegrasjonHeaders(token)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
@@ -88,48 +93,75 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    // Ta inn ett vedlegg eller alle vedlegg tilknyttet en digisosId?
-    override fun lastOppNyEttersendelse(file: Any, kommunenummer: String, soknadId: String, token: String) {
-//        Innsending av ny ettersendelse til Fiks Digisos bruker også multipart streaming request.
-//          {kommunenummer} er kommunenummer søknaden tilhører
-//          {soknadId} er Fiks DigisosId-en for søknaden det skal ettersendes til
-//          {navEksternRefId} er en unik id fra NAV for denne ettersendelsen
-
-        val navEksternRefId = randomUUID().toString()
-
-        val headers = HttpHeaders()
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
+        val headers = setPersonIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
-        headers.set(TRANSFER_ENCODING, "chunked")
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, "046f44cc-4fbd-45f6-90f7-d2cc8a3720d2")
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
-
-        // TODO:
-        //  Endepunktet tar inn påkrevde felter for innsending av ny ettersendelse:
-        //  - metadataen vedlegg.json (String) --> { filnavn, mimetype, storrelse }
-        //  - liste med vedlegg (metadata + base64-encodet blokk av selve vedlegget)
-
-        // endre til det man nå enn vil få fra DB
-        file as MultipartFile
-        val vedleggMetadata = VedleggMetadata(file.originalFilename, file.contentType, file.size)
-
-        val base64EncodetVedlegg: ByteArray = Base64Utils.encode(file.bytes) // ??
 
         val body = LinkedMultiValueMap<String, Any>()
-        body.add("files", vedleggMetadata)
-        body.add("files", base64EncodetVedlegg)
-        // flere
+        body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggSpesifikasjon), "vedlegg.json"))
 
-        val requestEntity = HttpEntity<MultiValueMap<String, Any>>(body, headers)
-
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId", HttpMethod.POST, requestEntity, String::class.java)
-
-//      Det er ingen returtype på dette endepunktet.
-//      Ved feil ved opplasting får man 400 Bad Request når multipart-requesten ikke er definert med riktige data.
-        if (response.statusCode.is4xxClientError) {
-            log.warn("Opplasting av ettersendelse feilet")
-            throw FiksException(response.statusCode, "Opplasting til Fiks feilet")
+        files.forEachIndexed { fileId, file ->
+            val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
+            body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
+            body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
         }
+
+        val digisosSak = hentDigisosSak(soknadId, token)
+        val kommunenummer = digisosSak.kommunenummer
+        val navEksternRefId = lagNavEksternRefId(digisosSak)
+
+        val requestEntity = HttpEntity(body, headers)
+        try {
+            val path = "$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
+            val response = restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
+            if (response.statusCode.is2xxSuccessful) {
+                log.info("Sendte ettersendelse til Fiks")
+            } else if (response.statusCode.is4xxClientError) {
+                log.warn("Opplasting av ettersendelse feilet")
+                throw FiksException(response.statusCode, "Opplasting til Fiks feilet")
+            }
+        } catch (e: HttpClientErrorException) {
+            e.printStackTrace()
+        }
+
+    }
+
+    private fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
+        return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
+    }
+
+    private fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
+        return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
+    }
+
+    private fun createHttpEntity(body: Any, name: String, filename: String?, contentType: String): HttpEntity<Any> {
+        val headerMap = LinkedMultiValueMap<String, String>()
+        val contentDisposition = ContentDisposition
+                .builder("form-data")
+                .name(name)
+                .filename(filename)
+                .build()
+
+        headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+        headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
+        return HttpEntity(body, headerMap)
+    }
+
+    private fun serialiser(@NonNull metadata: Any): String {
+        try {
+            return objectMapper.writeValueAsString(metadata)
+        } catch (e: JsonProcessingException) {
+            throw RuntimeException("Feil under serialisering av metadata", e)
+        }
+    }
+
+    private fun setPersonIntegrasjonHeaders(token: String): HttpHeaders {
+        val headers = HttpHeaders()
+        headers.accept = singletonList(MediaType.APPLICATION_JSON)
+        headers.set(AUTHORIZATION, token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        return headers
     }
 }
 

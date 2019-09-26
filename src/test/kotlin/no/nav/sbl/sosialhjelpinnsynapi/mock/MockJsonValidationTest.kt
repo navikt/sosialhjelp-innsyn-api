@@ -21,8 +21,8 @@ internal class DefaultMockResponseTest {
     @Test
     fun `validerer digisosSoker`() {
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns digisosSoker
-        every { innsynService.hentOriginalSoknad(any()).mottaker } returns null
-        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns 1L
+        every { innsynService.hentOriginalSoknad(any(), any()).mottaker } returns null
+        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any(), any()) } returns 1L
 
         assertThatCode { eventService.createModel("123", "token") }.doesNotThrowAnyException()
     }

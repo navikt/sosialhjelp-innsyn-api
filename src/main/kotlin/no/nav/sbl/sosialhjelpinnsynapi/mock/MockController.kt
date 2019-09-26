@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/mock/innsyn")
 class MockController(private val fiksClientMock: FiksClientMock,
-                     private val dokumentlagerClientMock: DokumentlagerClientMock,
                      private val innsynService: InnsynService) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
@@ -35,7 +34,7 @@ class MockController(private val fiksClientMock: FiksClientMock,
 
         val jsonNode = mapper.convertValue(digisosApiWrapper.sak.soker, JsonNode::class.java)
         val jsonDigisosSoker = sosialhjelpMapper.convertValue<JsonDigisosSoker>(jsonNode, JsonDigisosSoker::class.java)
-        digisosSak.digisosSoker?.metadata?.let { dokumentlagerClientMock.postDokument(it, jsonDigisosSoker) }
+        digisosSak.digisosSoker?.metadata?.let { fiksClientMock.postDokument(it, jsonDigisosSoker) }
     }
 
     @GetMapping("/{soknadId}",

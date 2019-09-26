@@ -52,7 +52,7 @@ internal class HendelseServiceTest {
 
         every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
-        every { mockDigisosSak.originalSoknadNAV.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
+        every { mockDigisosSak.originalSoknadNAV!!.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggService.hentEttersendteVedlegg(any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -82,7 +82,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggService.hentEttersendteVedlegg(any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -93,7 +93,7 @@ internal class HendelseServiceTest {
     fun `Should return response with opplastede vedlegg`() {
         every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
 
-        every { vedleggService.hentEttersendteVedlegg(any()) } returns listOf(
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(dokumenttype_1, null, listOf(DokumentInfo(tittel4, "id1", 42)), tidspunkt4),
                 InternalVedlegg(dokumenttype_2, null, listOf(DokumentInfo(tittel5, "id2", 11), DokumentInfo(tittel6, "id3", 22)), tidspunkt5))
 
@@ -113,7 +113,7 @@ internal class HendelseServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
 
-        every { vedleggService.hentEttersendteVedlegg(any()) } returns listOf(
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(dokumenttype_1, null, listOf(DokumentInfo(tittel4, "id4", 4), DokumentInfo(tittel5, "id5", 5)), tidspunkt4),
                 InternalVedlegg(dokumenttype_2, null, listOf(DokumentInfo(tittel5, "id5", 5), DokumentInfo(tittel6, "id6", 6)), tidspunkt5))
 

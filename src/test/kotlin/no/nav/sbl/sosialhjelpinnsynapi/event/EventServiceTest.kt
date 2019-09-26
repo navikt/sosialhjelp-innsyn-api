@@ -77,9 +77,9 @@ internal class EventServiceTest {
         clearMocks(innsynService, mockJsonDigisosSoker, mockJsonSoknad)
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
-        every { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any()) } returns tidspunkt_soknad
+        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any(), any()) } returns tidspunkt_soknad
 
         resetHendelser()
     }

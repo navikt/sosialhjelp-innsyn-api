@@ -27,8 +27,8 @@ class KommuneService(private val fiksClient: FiksClient) {
 }
 
 enum class KommuneStatus {
-    IKKE_FIKS_ELLER_INNSYN,
+//    IKKE_FIKS_ELLER_INNSYN,
     KUN_FIKS,
     FIKS_OG_INNSYN,
-    KUN_INNSYN
+//    KUN_INNSYN
 }

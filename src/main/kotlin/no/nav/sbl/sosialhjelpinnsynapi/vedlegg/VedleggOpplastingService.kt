@@ -55,7 +55,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         }
         metadata.removeIf { it.filer.isEmpty() }
 
-        if (filerForOpplasting.isEmpty()) {
+        // Ikke last opp hvis ikke alle filer er validert ok
+        if (filerForOpplasting.isEmpty() || !vedleggOpplastingResponseList.none { it.status != "OK" }) {
             return vedleggOpplastingResponseList
         }
 

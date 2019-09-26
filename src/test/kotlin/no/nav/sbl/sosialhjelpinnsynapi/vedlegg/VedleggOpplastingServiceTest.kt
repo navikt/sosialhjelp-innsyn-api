@@ -54,13 +54,10 @@ internal class VedleggOpplastingServiceTest {
         every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
-        val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2))))
+        val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile),
-                MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
+                MockMultipartFile("files", filnavn1, filtype0, pngFile))
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
@@ -88,28 +85,29 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggOpplastingResponseList[0].status == "OK")
         assertThat(vedleggOpplastingResponseList[1].filnavn == filnavn1)
         assertThat(vedleggOpplastingResponseList[1].status == "OK")
-        assertThat(vedleggOpplastingResponseList[2].filnavn == filnavn2)
-        assertThat(vedleggOpplastingResponseList[2].status == MESSAGE_ILLEGAL_FILE_TYPE)
     }
 
     @Test
-    fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ingen filer er gyldige for opplasting`() {
+    fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ikke alle filene blir validert ok`() {
+        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+
         val metadata = mutableListOf(
                 OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))),
                 OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2))))
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn0, "unknown", ByteArray(0)),
-                MockMultipartFile("files", filnavn1, "unknown", ByteArray(10)),
-                MockMultipartFile("files", filnavn2, "unknown", ByteArray(100)))
+                MockMultipartFile("files", filnavn0, filtype1, jpgFile),
+                MockMultipartFile("files", filnavn1, filtype0, pngFile),
+                MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
         verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
         assertThat(vedleggOpplastingResponseList[0].filnavn == filnavn0)
-        assertThat(vedleggOpplastingResponseList[0].status == MESSAGE_ILLEGAL_FILE_TYPE)
+        assertThat(vedleggOpplastingResponseList[0].status == "OK")
         assertThat(vedleggOpplastingResponseList[1].filnavn == filnavn1)
-        assertThat(vedleggOpplastingResponseList[1].status == MESSAGE_ILLEGAL_FILE_TYPE)
+        assertThat(vedleggOpplastingResponseList[1].status == "OK")
         assertThat(vedleggOpplastingResponseList[2].filnavn == filnavn2)
         assertThat(vedleggOpplastingResponseList[2].status == MESSAGE_ILLEGAL_FILE_TYPE)
     }

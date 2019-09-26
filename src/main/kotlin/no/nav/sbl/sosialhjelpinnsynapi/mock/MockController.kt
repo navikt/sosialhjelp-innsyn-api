@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/mock/innsyn")
 class MockController(private val fiksClientMock: FiksClientMock,
-                     private val dokumentlagerClientMock: DokumentlagerClientMock,
                      private val innsynService: InnsynService) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)

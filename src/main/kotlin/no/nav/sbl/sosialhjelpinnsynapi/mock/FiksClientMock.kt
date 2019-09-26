@@ -15,6 +15,7 @@ import java.util.*
 @Profile("mock")
 @Component
 class FiksClientMock : FiksClient {
+
     private val innsynMap = mutableMapOf<String, DigisosSak>()
     private val dokumentMap = mutableMapOf<String, Any>()
 

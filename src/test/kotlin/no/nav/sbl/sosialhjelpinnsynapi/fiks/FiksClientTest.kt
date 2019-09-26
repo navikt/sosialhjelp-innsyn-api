@@ -3,20 +3,23 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.multipart.MultipartFile
+
 
 internal class FiksClientTest {
 
@@ -95,18 +98,34 @@ internal class FiksClientTest {
 
     @Test
     fun `POST ny ettersendelse`() {
-        val response: ResponseEntity<String> = mockk()
-        every { response.statusCode } returns HttpStatus.OK
+        val mockDigisosSakResponse: ResponseEntity<String> = mockk()
+        every { mockDigisosSakResponse.statusCode.is2xxSuccessful } returns true
+        every { mockDigisosSakResponse.body } returns ok_digisossak_response
+        every { restTemplate.exchange(any<String>(), HttpMethod.GET, any(), String::class.java) } returns mockDigisosSakResponse
 
-        every { restTemplate.exchange(any<String>(), HttpMethod.POST, any(), String::class.java) } returns response
+        val slot = slot<HttpEntity<LinkedMultiValueMap<String, Any>>>()
+        val mockFiksResponse: ResponseEntity<String> = mockk()
+        every { mockFiksResponse.statusCode.is2xxSuccessful } returns true
+        every { restTemplate.exchange(any<String>(), HttpMethod.POST, capture(slot), String::class.java) } returns mockFiksResponse
 
-        val file: MultipartFile = mockk()
-        every { file.originalFilename } returns "filnavn.pdf"
-        every { file.contentType } returns "application/pdf"
-        every { file.size } returns 42
-        every { file.bytes } returns "fil".toByteArray()
+        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, mockk()),
+                FilForOpplasting("filnavn1", "image/jpg", 1L, mockk()))
 
-        //TODO: Fiks denne testen.
-//        assertThatCode { fiksClient.lastOppNyEttersendelse(listOf(file), JsonVedleggSpesifikasjon(), kommunenummer, id, "token") }.doesNotThrowAnyException()
+        Assertions.assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
+
+        val httpEntity = slot.captured
+
+        assertThat(httpEntity.body!!.size == 5)
+        assertThat(httpEntity.headers["Content-Type"]!![0] == "multipart/form-data")
+        assertThat(httpEntity.body!!.keys.contains("vedlegg.json"))
+        assertThat(httpEntity.body!!.keys.contains("vedleggSpesifikasjon:0"))
+        assertThat(httpEntity.body!!.keys.contains("dokument:0"))
+        assertThat(httpEntity.body!!.keys.contains("vedleggSpesifikasjon:1"))
+        assertThat(httpEntity.body!!.keys.contains("dokument:1"))
+        assertThat(httpEntity.body!!["dokument:0"].toString().contains("InputStream resource"))
+        assertThat(httpEntity.body!!["dokument:1"].toString().contains("InputStream resource"))
+        assertThat(httpEntity.body!!["vedlegg.json"].toString().contains("text/plain;charset=UTF-8"))
+        assertThat(httpEntity.body!!["vedleggSpesifikasjon:0"].toString().contains("text/plain;charset=UTF-8"))
+        assertThat(httpEntity.body!!["vedleggSpesifikasjon:1"].toString().contains("text/plain;charset=UTF-8"))
     }
 }

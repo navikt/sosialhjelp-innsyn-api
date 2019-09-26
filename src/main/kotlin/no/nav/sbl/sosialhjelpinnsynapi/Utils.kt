@@ -41,11 +41,7 @@ fun enumNameToLowercase(string: String): String {
 fun lagNavEksternRefId(digisosSak: DigisosSak) : String {
     val previousId: Long = digisosSak.ettersendtInfoNAV?.ettersendelser?.map { it.navEksternRefId.toLowerCase().toLong(36) }?.max()
             ?: digisosSak.originalSoknadNAV?.navEksternRefId?.toLowerCase()?.plus("000")?.toLong(36)
-            ?: 0L
-
-    if (previousId == 0L) {
-        return UUID.randomUUID().toString()
-    }
+            ?: return UUID.randomUUID().toString()
 
     return (previousId + 1L).toString(36).toUpperCase().replace("O", "o").replace("I", "i")
 }

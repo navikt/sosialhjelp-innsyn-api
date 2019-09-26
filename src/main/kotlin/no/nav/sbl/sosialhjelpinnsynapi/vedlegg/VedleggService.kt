@@ -10,7 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
-private const val LASTET_OPP_STATUS = "LastetOpp"
+const val LASTET_OPP_STATUS = "LastetOpp"
 
 @Component
 class VedleggService(private val fiksClient: FiksClient) {

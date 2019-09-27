@@ -1,11 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
@@ -30,14 +32,15 @@ private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
 @Profile("!mock")
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
-                     private val restTemplate: RestTemplate) : FiksClient {
+                     private val restTemplate: RestTemplate,
+                     private val idPortenService: IdPortenService) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
-        val headers = setPersonIntegrasjonHeaders(token)
+        val headers = setIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         try {
@@ -55,7 +58,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val headers = setPersonIntegrasjonHeaders(token)
+        val headers = setIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
         try {
@@ -73,7 +76,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        val headers = setPersonIntegrasjonHeaders(token)
+        val headers = setIntegrasjonHeaders(token)
         val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
@@ -84,7 +87,11 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
-        val response = restTemplate.getForEntity("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", KommuneInfo::class.java)
+        val virksomhetsToken = runBlocking { idPortenService.requestToken() }
+
+        val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
+
+        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java)
         if (response.statusCode.is2xxSuccessful) {
             return response.body!!
         } else {
@@ -94,7 +101,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
-        val headers = setPersonIntegrasjonHeaders(token)
+        val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
         val body = LinkedMultiValueMap<String, Any>()
@@ -155,7 +162,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    private fun setPersonIntegrasjonHeaders(token: String): HttpHeaders {
+    private fun setIntegrasjonHeaders(token: String): HttpHeaders {
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)

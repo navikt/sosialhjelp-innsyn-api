@@ -49,3 +49,11 @@ spec:
       value: {{fiks_svar_ut_endpoint_url}}
     - name: NORG_ENDPOINT_URL
       value: {{norg_endpoint_url}}
+    - name: ID_PORTEN_TOKEN_URL
+      value: {{id_porten_token_url}}
+    - name: ID_PORTEN_CONFIG_URL
+      value: {{id_porten_config_url}}
+    - name: ID_PORTEN_CLIENT_ID
+      value: {{id_porten_client_id}}
+    - name: ID_PORTEN_SCOPE
+      value: {{id_porten_scope}}

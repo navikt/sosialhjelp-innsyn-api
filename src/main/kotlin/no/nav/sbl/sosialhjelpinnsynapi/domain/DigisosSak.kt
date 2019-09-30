@@ -47,7 +47,7 @@ data class KommuneInfo(
         val kommunenummer: String,
         val kanMottaSoknader: Boolean,
         val kanOppdatereStatus: Boolean,
-        val kontaktPersoner: Kontaktpersoner
+        val kontaktPersoner: Kontaktpersoner?
 )
 
 data class Kontaktpersoner(

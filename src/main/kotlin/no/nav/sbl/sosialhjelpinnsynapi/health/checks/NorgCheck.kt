@@ -26,7 +26,7 @@ class NorgCheck(private val restTemplate: RestTemplate,
             val norgApiKey = System.getProperty("NORG_PASSWORD")
             val headers = HttpHeaders()
             headers.set("Nav-Call-Id", generateCallId())
-            headers.set("Nav-Consumer-Id", "srvsoknadsosialhje") // TODO: endre denne når vi har fått generert egen consumer-id for innsyn
+            headers.set("Nav-Consumer-Id", "srvsosialhjelp-inn")
             headers.set("x-nav-apiKey", norgApiKey)
 
             val enhetsnummer = "1630"

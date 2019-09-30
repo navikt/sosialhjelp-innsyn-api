@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate
 class NorgCheck(private val restTemplate: RestTemplate,
                 clientProperties: ClientProperties) : AbstractDependencyCheck(
         DependencyType.REST,
-        "Norg",
+        "NORG2",
         clientProperties.norgEndpointUrl,
         Importance.WARNING
 ) {
@@ -29,7 +29,9 @@ class NorgCheck(private val restTemplate: RestTemplate,
             headers.set("Nav-Consumer-Id", "srvsoknadsosialhje") // TODO: endre denne når vi har fått generert egen consumer-id for innsyn
             headers.set("x-nav-apiKey", norgApiKey)
 
-            restTemplate.exchange("$address/ping", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java) // må ha ett reelt endepunkt å kalle
+            // NAV Åfjord som default enhetsnummer
+            val enhetsnummer = "1630"
+            restTemplate.exchange("$address/enhet/$enhetsnummer", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         } catch (e: Exception) {
             throw RuntimeException("Kunne ikke pinge Norg", e)
         }

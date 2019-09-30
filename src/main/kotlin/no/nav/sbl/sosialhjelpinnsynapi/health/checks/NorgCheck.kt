@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
@@ -31,7 +30,7 @@ class NorgCheck(private val restTemplate: RestTemplate,
             headers.set("x-nav-apiKey", norgApiKey)
 
             val enhetsnummer = "1630"
-            restTemplate.exchange("$address/enhet/$enhetsnummer", HttpMethod.GET, HttpEntity<Nothing>(headers), NavEnhet::class.java)
+            restTemplate.exchange("$address/enhet/$enhetsnummer", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         } catch (e: Exception) {
             throw RuntimeException("Kunne ikke pinge Norg", e)
         }

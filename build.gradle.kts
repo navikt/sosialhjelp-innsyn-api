@@ -17,8 +17,9 @@ val jacksonVersion = "2.9.9"
 val jacksonDatabindVersion = "2.9.9.3"
 val guavaVersion = "28.0-jre"
 val swaggerVersion = "2.9.2"
-val resilience4jVersion = "0.16.0"
-val rxjavaVersion = "2.2.10"
+val resilience4jVersion = "1.0.0"
+val rxKotlinVersion = "2.4.0"
+val vavrKotlinVersion = "0.10.0"
 val ktorVersion = "1.2.2"
 val konfigVersion = "1.6.10.0"
 val kotlinCoroutinesVersion = "1.2.2"
@@ -107,11 +108,11 @@ dependencies {
     compile("com.google.guava:guava:$guavaVersion")
 
     //selftest
-    compile("io.github.resilience4j:resilience4j-spring-boot2:$resilience4jVersion")
-    compile("io.github.resilience4j:resilience4j-timelimiter:$resilience4jVersion")
-    compile("io.github.resilience4j:resilience4j-rxjava2:$resilience4jVersion")
-    compile("io.reactivex.rxjava2:rxjava:$rxjavaVersion")
-    compile("org.springframework.boot:spring-boot-starter-aop:$springBootVersion")
+    implementation ("io.github.resilience4j:resilience4j-kotlin:$resilience4jVersion")
+    implementation ("io.github.resilience4j:resilience4j-timelimiter:$resilience4jVersion")
+    implementation ("io.github.resilience4j:resilience4j-circuitbreaker:$resilience4jVersion")
+    implementation ("io.reactivex.rxjava2:rxkotlin:$rxKotlinVersion")
+    implementation ("io.vavr:vavr-kotlin:$vavrKotlinVersion")
 
     //Test dependencies
     testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {

@@ -1,18 +1,18 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.selftest
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
 import io.github.resilience4j.timelimiter.TimeLimiter
 import io.github.resilience4j.timelimiter.TimeLimiterConfig
 import io.vavr.control.Try
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.function.Supplier
 
 abstract class AbstractDependencyCheck(
         protected val type: DependencyType,
@@ -20,28 +20,38 @@ abstract class AbstractDependencyCheck(
         protected val address: String,
         private val importance: Importance) {
 
-    private val circuitBreakerRegistry: CircuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
-    private val executor = Executors.newSingleThreadExecutor()
+    private val log = LoggerFactory.getLogger(AbstractDependencyCheck::class.java)
+
+    private val circuitBreaker = CircuitBreaker.ofDefaults("selftest")
+    private val dispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+
     private val timeLimiterConfig = TimeLimiterConfig.custom()
-            .timeoutDuration(Duration.ofMillis(2800))
+            .timeoutDuration(Duration.ofMillis(1000))
             .cancelRunningFuture(true)
             .build()
     private val timeLimiter = TimeLimiter.of(timeLimiterConfig)
-    private val dependency_status = AtomicInteger()
+
+    private val dependencyStatus = AtomicInteger()
 
     protected abstract fun doCheck()
 
     fun check(): Try<DependencyCheckResult> {
-        val futureSupplier: Supplier<Future<DependencyCheckResult>> = Supplier { executor.submit(getCheckCallable()) }
-        val timeRestrictedCall = TimeLimiter.decorateFutureSupplier(timeLimiter, futureSupplier)
-        val circuitBreaker = circuitBreakerRegistry.circuitBreaker(name)
-        val chainedCallable = CircuitBreaker.decorateCallable(circuitBreaker, timeRestrictedCall)
-        return Try.ofCallable(chainedCallable)
-                .onSuccess { dependency_status.set(1) }
-                .onFailure { dependency_status.set(0) }
-                //                    log.error("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", name, type, address, throwable)
+        // fixme change to suspend function?
+        val callable: Callable<DependencyCheckResult> = dispatcher.run { getCheckCallable() }
+//        val susp: suspend () -> DependencyCheckResult = suspend {  getCheck() }
 
+        // decorate suspend function
+//        val timeRestrictedCall: suspend () -> DependencyCheckResult = timeLimiter.decorateSuspendFunction(susp)
+
+//        val chainedCallable2: suspend () -> DependencyCheckResult = circuitBreaker.decorateSuspendFunction(susp)
+        val chainedCallable: Callable<DependencyCheckResult> = CircuitBreaker.decorateCallable(circuitBreaker, callable)
+
+        return Try
+                .ofCallable(chainedCallable)
+                .onSuccess { dependencyStatus.set(1) }
+                .onFailure { dependencyStatus.set(0) }
                 .recover { throwable ->
+                    log.warn("Call to dependency={} with type={} at url={} timed out or circuitbreaker was tripped.", name, type, address, throwable)
                     DependencyCheckResult(
                             endpoint = name,
                             result = if (importance == Importance.CRITICAL) Result.ERROR else Result.WARNING,
@@ -68,7 +78,7 @@ abstract class AbstractDependencyCheck(
                     address = address,
                     result = Result.OK,
                     errorMessage = null,
-                    responseTime = "${responseTime.toString()}ms",
+                    responseTime = "${responseTime.toString()} ms",
                     throwable = null
             )
         }
@@ -80,5 +90,4 @@ abstract class AbstractDependencyCheck(
         }
         return if (e.cause == null) e.message else e.cause!!.message
     }
-
 }

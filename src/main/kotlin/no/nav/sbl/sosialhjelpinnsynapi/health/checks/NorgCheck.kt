@@ -26,7 +26,7 @@ class NorgCheck(private val restTemplate: RestTemplate,
             val norgApiKey = System.getProperty("NORG_PASSWORD")
             val headers = HttpHeaders()
             headers.set("Nav-Call-Id", generateCallId())
-            headers.set("Nav-Consumer-Id", "srvsoknadsosialhje") // TODO: endre denne når vi har fått generert egen consumer-id for innsyn
+            headers.set("Nav-Consumer-Id", "srvsosialhjelp-inn")
             headers.set("x-nav-apiKey", norgApiKey)
 
             restTemplate.exchange("$address/ping", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java) // må ha ett reelt endepunkt å kalle

@@ -1,9 +1,11 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
+import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import org.springframework.http.HttpEntity
@@ -17,7 +19,8 @@ import java.util.*
 
 @Component
 class FiksCheck(private val restTemplate: RestTemplate,
-                private val clientProperties: ClientProperties) : AbstractDependencyCheck(
+                private val clientProperties: ClientProperties,
+                private val idPortenService: IdPortenService) : AbstractDependencyCheck(
         DependencyType.REST,
         "Fiks Digisos API",
         clientProperties.fiksDigisosEndpointUrl,
@@ -26,16 +29,16 @@ class FiksCheck(private val restTemplate: RestTemplate,
 
     override fun doCheck() {
         try {
-            // som i FiksClientImpl
             val headers = HttpHeaders()
+            val accessToken = runBlocking { idPortenService.requestToken() }
             headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-            headers.set(AUTHORIZATION, "token") // Token ?
+            headers.set(AUTHORIZATION, "Bearer ${accessToken.token}")
             headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
 
-            restTemplate.exchange("$address/digisos/api/v1/soknader/0", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java) // FIXME må ha ett reelt endepunkt å kalle
+            restTemplate.exchange("$address/digisos/api/v1/nav/kommune/0301", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         } catch (e: Exception) {
-            throw RuntimeException("Kunne ikke pinge Dokumentlager", e)
+            throw RuntimeException("Kunne ikke pinge Fiks", e)
         }
     }
 }

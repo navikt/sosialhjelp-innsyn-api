@@ -5,6 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
 import no.nav.sbl.sosialhjelpinnsynapi.utils.generateCallId
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -20,6 +21,8 @@ class NorgCheck(private val restTemplate: RestTemplate,
         Importance.WARNING
 ) {
 
+    private val log = LoggerFactory.getLogger(NorgCheck::class.java)
+
     override fun doCheck() {
         try {
             // som i NorgClientImpl
@@ -32,7 +35,8 @@ class NorgCheck(private val restTemplate: RestTemplate,
             val enhetsnummer = "1630"
             restTemplate.exchange("$address/enhet/$enhetsnummer", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         } catch (e: Exception) {
-            throw RuntimeException("Kunne ikke pinge Norg", e)
+            log.error("Kall til NORG feilet", e)
+            throw RuntimeException("Selftest-kall mot Norg feilet", e)
         }
     }
 }

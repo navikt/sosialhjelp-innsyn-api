@@ -3,18 +3,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sbl"
 version = "1.0-SNAPSHOT"
 
-val kotlinVersion = "1.3.31"
+val kotlinVersion = "1.3.50"
 val springBootVersion = "2.1.6.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
 val junitJupiterVersion = "5.4.2"
 val mockkVersion = "1.9.3"
-val wireMockVersion = "2.19.0"
 val filformatVersion = "1.2019.09.03-11.46-9f8acd3a6442"
 val micrometerRegistryVersion = "1.1.2"
 val tokenSupportVersion = "0.2.18"
-val jacksonVersion = "2.9.9"
-val jacksonDatabindVersion = "2.9.9.3"
+val jacksonVersion = "2.9.10"
+val jacksonDatabindVersion = "2.9.10"
 val guavaVersion = "28.0-jre"
 val swaggerVersion = "2.9.2"
 val resilience4jVersion = "1.0.0"
@@ -22,7 +21,7 @@ val rxKotlinVersion = "2.4.0"
 val vavrKotlinVersion = "0.10.0"
 val ktorVersion = "1.2.2"
 val konfigVersion = "1.6.10.0"
-val kotlinCoroutinesVersion = "1.2.2"
+val kotlinCoroutinesVersion = "1.3.2"
 val commonsIoVersion = "1.3.2"
 val fileUploadVersion = "1.4"
 val tikaVersion = "1.22"
@@ -34,9 +33,9 @@ val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
 plugins {
     application
-    kotlin("jvm") version "1.3.31"
+    kotlin("jvm") version "1.3.50"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.3.31"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.3.50"
     id("org.springframework.boot") version "2.1.6.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
 }
@@ -54,7 +53,7 @@ configurations {
     "compile" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
-    "testCompile" {
+    "testImplementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
         exclude(group = "junit", module = "junit")
         exclude(group = "org.hamcrest", module = "hamcrest-library")
@@ -115,14 +114,13 @@ dependencies {
     implementation ("io.vavr:vavr-kotlin:$vavrKotlinVersion")
 
     //Test dependencies
-    testCompile("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
         exclude(group = "org.mockito", module = "mockito-core")
     }
-    testCompile("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testCompile("com.github.tomakehurst:wiremock:$wireMockVersion")
-    testCompile("no.nav.security:oidc-test-support:$tokenSupportVersion")
-    testCompile("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
+    testImplementation("no.nav.security:oidc-test-support:$tokenSupportVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
 }
 
 repositories {

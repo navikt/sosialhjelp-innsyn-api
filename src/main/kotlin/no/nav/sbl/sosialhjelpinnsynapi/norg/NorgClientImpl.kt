@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate
 
 private val log = LoggerFactory.getLogger(NorgClient::class.java)
 
-@Profile("!mock")
+@Profile("!mock & !local")
 @Component
 class NorgClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate) : NorgClient {

@@ -9,11 +9,9 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilrefe
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.enumNameToLowercase
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
@@ -33,9 +31,11 @@ internal class EventServiceTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val norgClient: NorgClient = mockk()
+    private val fiksClient: FiksClient = mockk()
 
-    private val service = EventService(clientProperties, innsynService, norgClient)
+    private val service = EventService(clientProperties, innsynService, norgClient, fiksClient)
 
+    private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
     private val mockNavEnhet: NavEnhet = mockk()
@@ -75,17 +75,20 @@ internal class EventServiceTest {
     @BeforeEach
     fun init() {
         clearMocks(innsynService, mockJsonDigisosSoker, mockJsonSoknad)
+        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
+        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
-        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
+        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-        every { innsynService.hentInnsendingstidspunktForOriginalSoknad(any(), any()) } returns tidspunkt_soknad
 
         resetHendelser()
     }
 
 /* Test-caser:
- [ ] ingen innsyn, ingen sendt soknad
+ [x] ingen innsyn, ingen sendt soknad
  [x] ingen innsyn, sendt soknad -> status SENDT
  [x] status mottatt
  [x] status under behandling
@@ -99,15 +102,41 @@ internal class EventServiceTest {
  [x] dokumentasjonEtterspurt med tom dokumentliste
  [x] forelopigSvar
  [ ] forelopigSvar - flere caser?
+ [ ] utbetaling
+ [ ] utbetaling - flere caser?
  ...
  [ ] komplett case
 */
+
+    @Test
+    fun `ingen innsyn OG ingen soknad`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
+        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
+
+        val model = service.createModel("123", "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isNull()
+        assertThat(model.historikk).hasSize(0)
+    }
+
+    @Test
+    fun `ingen innsyn `() {
+        every { mockDigisosSak.digisosSoker } returns null
+        every { innsynService.hentJsonDigisosSoker(any(), null, any()) } returns null
+
+        val model = service.createModel("123", "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
+        assertThat(model.historikk).hasSize(1)
+    }
 
     @Nested
     inner class soknadStatus {
         @Test
         fun `soknadsStatus SENDT`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns null
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
 
             val model = service.createModel("123", "token")
 
@@ -122,7 +151,7 @@ internal class EventServiceTest {
 
         @Test
         fun `soknadsStatus MOTTATT`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -143,7 +172,7 @@ internal class EventServiceTest {
 
         @Test
         fun `soknadsStatus UNDER_BEHANDLING`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -166,7 +195,7 @@ internal class EventServiceTest {
 
         @Test
         fun `soknadsStatus FERDIGBEHANDLET`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -194,7 +223,7 @@ internal class EventServiceTest {
 
         @Test
         fun `saksStatus UTEN vedtakFattet`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -225,7 +254,7 @@ internal class EventServiceTest {
 
         @Test
         fun `saksStatus FØR vedtakFattet`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -262,7 +291,7 @@ internal class EventServiceTest {
 
         @Test
         fun `vedtakFattet UTEN saksStatus`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -298,7 +327,7 @@ internal class EventServiceTest {
 
         @Test
         fun `vedtakFattet FØR saksStatus`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -336,7 +365,7 @@ internal class EventServiceTest {
 
         @Test
         fun `saksStatus med 2 vedtakFattet`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -377,7 +406,7 @@ internal class EventServiceTest {
 
         @Test
         fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -408,7 +437,7 @@ internal class EventServiceTest {
 
         @Test
         fun `dokumentasjonEtterspurt skal gi egen historikkmelding og ikke url eller oppgaver dersom det dokumentlisten er tom`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
                             .withVersion("123")
@@ -435,7 +464,7 @@ internal class EventServiceTest {
 
     @Test
     fun `forelopigSvar skal gi historikk`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")

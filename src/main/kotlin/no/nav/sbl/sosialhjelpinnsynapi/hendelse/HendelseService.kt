@@ -23,7 +23,7 @@ class HendelseService(private val eventService: EventService,
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
 
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
-        leggTilHendelserForOpplastinger(model, digisosSak.originalSoknadNAV!!.timestampSendt, vedlegg)
+        digisosSak.originalSoknadNAV?.timestampSendt?.let { leggTilHendelserForOpplastinger(model, it, vedlegg) }
 
         val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
         log.info("Hentet historikk for fiksDigisosId=$fiksDigisosId")

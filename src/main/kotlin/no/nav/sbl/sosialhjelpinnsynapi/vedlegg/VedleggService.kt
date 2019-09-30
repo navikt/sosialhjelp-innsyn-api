@@ -47,19 +47,20 @@ class VedleggService(private val fiksClient: FiksClient) {
     }
 
     fun hentEttersendteVedlegg(fiksDigisosId: String, ettersendtInfoNAV: EttersendtInfoNAV?, token: String): List<InternalVedlegg> {
-        return ettersendtInfoNAV?.ettersendelser?.flatMap { ettersendelse ->
-            val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)
-            jsonVedleggSpesifikasjon.vedlegg
-                    .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
-                    .map { vedlegg ->
-                        InternalVedlegg(
-                                vedlegg.type,
-                                vedlegg.tilleggsinfo,
-                                matchDokumentInfoAndJsonFiler(ettersendelse.vedlegg, vedlegg.filer),
-                                unixToLocalDateTime(ettersendelse.timestampSendt)
-                        )
-                    }
-        } ?: emptyList()
+        return ettersendtInfoNAV?.ettersendelser
+                ?.flatMap { ettersendelse ->
+                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)
+                    jsonVedleggSpesifikasjon.vedlegg
+                            .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                            .map { vedlegg ->
+                                InternalVedlegg(
+                                        vedlegg.type,
+                                        vedlegg.tilleggsinfo,
+                                        matchDokumentInfoAndJsonFiler(ettersendelse.vedlegg, vedlegg.filer),
+                                        unixToLocalDateTime(ettersendelse.timestampSendt)
+                                )
+                            }
+                } ?: emptyList()
     }
 
     private fun hentVedleggSpesifikasjon(fiksDigisosId: String, dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {

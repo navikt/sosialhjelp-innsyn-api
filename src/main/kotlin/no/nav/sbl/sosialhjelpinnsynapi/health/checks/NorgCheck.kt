@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
@@ -29,9 +30,8 @@ class NorgCheck(private val restTemplate: RestTemplate,
             headers.set("Nav-Consumer-Id", "srvsoknadsosialhje") // TODO: endre denne når vi har fått generert egen consumer-id for innsyn
             headers.set("x-nav-apiKey", norgApiKey)
 
-            // NAV Åfjord som default enhetsnummer
             val enhetsnummer = "1630"
-            restTemplate.exchange("$address/enhet/$enhetsnummer", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            restTemplate.exchange("$address/enhet/$enhetsnummer", HttpMethod.GET, HttpEntity<Nothing>(headers), NavEnhet::class.java)
         } catch (e: Exception) {
             throw RuntimeException("Kunne ikke pinge Norg", e)
         }

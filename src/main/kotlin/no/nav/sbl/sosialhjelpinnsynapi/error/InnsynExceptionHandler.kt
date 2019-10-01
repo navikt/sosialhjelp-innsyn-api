@@ -1,6 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi.error
 
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.DokumentlagerException
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.NorgException
 import org.slf4j.Logger
@@ -13,7 +12,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 private const val unexpectedError: String = "unexpected_error"
 private const val fiksError: String = "fiks_error"
-private const val dokumentlagerError: String = "dokumentlager_error"
 private const val norgError: String = "norg_error"
 
 @ControllerAdvice
@@ -32,13 +30,6 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleFiksError(e: FiksException): ResponseEntity<ErrorMessage> {
         log.error("Noe feilet ved kall til Fiks", e)
         val error = ErrorMessage(fiksError, "Noe uventet feilet")
-        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
-    @ExceptionHandler(DokumentlagerException::class)
-    fun handleDokumentlagerError(e: DokumentlagerException): ResponseEntity<ErrorMessage> {
-        log.error("Noe feilet ved kall til Dokumentlager", e)
-        val error = ErrorMessage(dokumentlagerError, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 
 @Component
@@ -33,9 +34,11 @@ class NorgCheck(private val restTemplate: RestTemplate,
             headers.set("x-nav-apiKey", norgApiKey)
 
             // samme kall som selftest i soknad-api utfører
-            val responseEntity = restTemplate.exchange("$address/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
             log.warn("adress: $address/kodeverk/EnhetstyperNorg")
-            log.warn("body: ${responseEntity.body}")
+            restTemplate.exchange("$address/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+
+        } catch (e: RestClientResponseException) {
+            log.error(e.responseBodyAsString)
         } catch (e: Exception) {
             log.error("Kall til NORG feilet", e)
             throw RuntimeException("Selftest-kall mot Norg feilet", e)

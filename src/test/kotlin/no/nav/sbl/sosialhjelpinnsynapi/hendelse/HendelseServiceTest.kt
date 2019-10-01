@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 
 internal class HendelseServiceTest {
 
@@ -35,9 +36,6 @@ internal class HendelseServiceTest {
     private val tittel_sendt = "søknad sendt"
     private val tittel_mottatt = "søknad mottatt"
     private val tittel3 = "tittel 3"
-    private val tittel4 = "tittel 4"
-    private val tittel5 = "tittel 5"
-    private val tittel6 = "tittel 6"
 
     private val url = "some url"
     private val url2 = "some url 2"
@@ -45,6 +43,10 @@ internal class HendelseServiceTest {
 
     private val dokumenttype_1 = "strømregning"
     private val dokumenttype_2 = "tannlegeregning"
+
+    private val dok1 = DokumentInfo("tittel 4", "id1", 11)
+    private val dok2 = DokumentInfo("tittel 5", "id2", 22)
+    private val dok3 = DokumentInfo("tittel 6", "id3", 33)
 
     @BeforeEach
     fun init() {
@@ -56,7 +58,7 @@ internal class HendelseServiceTest {
     }
 
     @Test
-    fun `Should return response with 1 hendelse`() {
+    fun `Skal returnere respons med 1 hendelse`() {
         val model = InternalDigisosSoker()
         model.historikk.add(Hendelse(tittel_sendt, tidspunkt_sendt, url))
 
@@ -73,7 +75,7 @@ internal class HendelseServiceTest {
     }
 
     @Test
-    fun `Should return response with multiple hendelser`() {
+    fun `Skal returnere respons med flere hendelser`() {
         val model = InternalDigisosSoker()
         model.historikk.addAll(listOf(
                 Hendelse(tittel_sendt, tidspunkt_sendt, url),
@@ -90,40 +92,85 @@ internal class HendelseServiceTest {
     }
 
     @Test
-    fun `Should return response with opplastede vedlegg`() {
+    fun `Hendelse for opplastet vedlegg`() {
         every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
 
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
-                InternalVedlegg(dokumenttype_1, null, listOf(DokumentInfo(tittel4, "id1", 42)), tidspunkt4),
-                InternalVedlegg(dokumenttype_2, null, listOf(DokumentInfo(tittel5, "id2", 11), DokumentInfo(tittel6, "id3", 22)), tidspunkt5))
+                InternalVedlegg(dokumenttype_1, null, listOf(dok1), tidspunkt4),
+                InternalVedlegg(dokumenttype_2, null, listOf(dok2, dok3), tidspunkt5))
 
         val hendelser = service.hentHendelser("123", "Token")
 
         assertThat(hendelser).hasSize(2)
 
-        assertThat(hendelser[0].beskrivelse).contains(dokumenttype_1, tittel4)
+        assertThat(hendelser[0].beskrivelse).contains("Du har sendt 1 vedlegg til NAV")
         assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt4.toString())
-        assertThat(hendelser[1].beskrivelse).contains(dokumenttype_2, tittel5, tittel6)
+        assertThat(hendelser[1].beskrivelse).contains("Du har sendt 2 vedlegg til NAV")
         assertThat(hendelser[1].tidspunkt).isEqualTo(tidspunkt5.toString())
     }
 
     @Test
-    fun `Should return response with opplastede vedlegg  - samme dokument tilknyttet to saker`() {
+    fun `Hendelse for opplastet vedlegg - tom fil-liste skal ikke resultere i hendelse`() {
+        every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
+
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+                InternalVedlegg(dokumenttype_2, null, emptyList(), tidspunkt5))
+
+        val hendelser = service.hentHendelser("123", "Token")
+
+        assertThat(hendelser).hasSize(0)
+    }
+
+    @Test
+    fun `Hendelse for opplastet vedlegg - samme dokument tilknyttet to saker`() {
         val model = InternalDigisosSoker()
 
         every { eventService.createModel(any(), any()) } returns model
 
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
-                InternalVedlegg(dokumenttype_1, null, listOf(DokumentInfo(tittel4, "id4", 4), DokumentInfo(tittel5, "id5", 5)), tidspunkt4),
-                InternalVedlegg(dokumenttype_2, null, listOf(DokumentInfo(tittel5, "id5", 5), DokumentInfo(tittel6, "id6", 6)), tidspunkt5))
+                InternalVedlegg(dokumenttype_1, null, listOf(dok1, dok2), tidspunkt4),
+                InternalVedlegg(dokumenttype_2, null, listOf(dok2, dok3), tidspunkt5))
 
         val hendelser = service.hentHendelser("123", "Token")
 
         assertThat(hendelser).hasSize(2)
 
-        assertThat(hendelser[0].beskrivelse).contains(dokumenttype_1, tittel4, tittel5)
+        assertThat(hendelser[0].beskrivelse).contains("Du har sendt 2 vedlegg til NAV")
         assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt4.toString())
-        assertThat(hendelser[1].beskrivelse).contains(dokumenttype_2, tittel5, tittel6)
+        assertThat(hendelser[1].beskrivelse).contains("Du har sendt 2 vedlegg til NAV")
         assertThat(hendelser[1].tidspunkt).isEqualTo(tidspunkt5.toString())
+    }
+
+    @Test
+    fun `Hendelse for opplastet vedlegg - grupperer opplastinger som har samme tidspunkt`() {
+        val model = InternalDigisosSoker()
+
+        every { eventService.createModel(any(), any()) } returns model
+
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+                InternalVedlegg(dokumenttype_1, null, listOf(dok1), tidspunkt4),
+                InternalVedlegg(dokumenttype_2, null, listOf(dok2), tidspunkt4))
+
+        val hendelser = service.hentHendelser("123", "Token")
+
+        assertThat(hendelser).hasSize(1)
+
+        assertThat(hendelser[0].beskrivelse).contains("Du har sendt 2 vedlegg til NAV")
+        assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt4.toString())
+    }
+
+    @Test
+    fun `Hendelse for opplastet vedlegg - grupperer ikke ved millisekund-avvik`() {
+        val model = InternalDigisosSoker()
+
+        every { eventService.createModel(any(), any()) } returns model
+
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+                InternalVedlegg(dokumenttype_1, null, listOf(dok1), tidspunkt4),
+                InternalVedlegg(dokumenttype_2, null, listOf(dok2), tidspunkt4.plus(1, ChronoUnit.MILLIS)))
+
+        val hendelser = service.hentHendelser("123", "Token")
+
+        assertThat(hendelser).hasSize(2)
     }
 }

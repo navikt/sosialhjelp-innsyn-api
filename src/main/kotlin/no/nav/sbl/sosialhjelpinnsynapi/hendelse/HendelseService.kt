@@ -33,10 +33,13 @@ class HendelseService(private val eventService: EventService,
     private fun leggTilHendelserForOpplastinger(model: InternalDigisosSoker, timestampSoknadSendt: Long, vedlegg: List<InternalVedlegg>) {
         vedlegg
                 .filter { it.tidspunktLastetOpp.isAfter(unixToLocalDateTime(timestampSoknadSendt)) }
-                .forEach {
-                    val filnavnTilknyttetType = it.dokumentInfoList.joinToString(separator = ", ", transform = { hendelse -> hendelse.filnavn })
+                .filter { it.dokumentInfoList.isNotEmpty() }
+                .groupBy { it.tidspunktLastetOpp }
+                .forEach { (tidspunkt, samtidigOpplastedeVedlegg) ->
+                    val antallVedleggForTidspunkt = samtidigOpplastedeVedlegg.sumBy { it.dokumentInfoList.size }
                     model.historikk.add(
-                            Hendelse("Du har sendt følgende vedlegg til NAV tilknyttet '${it.type}' : $filnavnTilknyttetType", it.tidspunktLastetOpp))
+                            Hendelse("Du har sendt $antallVedleggForTidspunkt vedlegg til NAV", tidspunkt)
+                    )
                 }
         model.historikk.sortBy { it.tidspunkt }
     }

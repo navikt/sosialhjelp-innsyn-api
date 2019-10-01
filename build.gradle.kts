@@ -50,7 +50,7 @@ java {
 }
 
 configurations {
-    "compile" {
+    "implementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
     "testImplementation" {
@@ -62,49 +62,49 @@ configurations {
 }
 
 dependencies {
-    compile(kotlin("stdlib"))
-    compile(kotlin("reflect"))
+    implementation(kotlin("stdlib"))
+    implementation(kotlin("reflect"))
 
-    compile("io.ktor:ktor-server-netty:$ktorVersion")
-    compile("io.ktor:ktor-auth:$ktorVersion")
-    compile("io.ktor:ktor-auth-jwt:$ktorVersion")
-    compile("io.ktor:ktor-jackson:$ktorVersion")
-    compile("io.ktor:ktor-client-core:$ktorVersion")
-    compile("io.ktor:ktor-client-apache:$ktorVersion")
-    compile("io.ktor:ktor-client-json:$ktorVersion")
-    compile("io.ktor:ktor-client-jackson:$ktorVersion")
-    compile("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${kotlinCoroutinesVersion}")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-auth:$ktorVersion")
+    implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
+    implementation("io.ktor:ktor-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${kotlinCoroutinesVersion}")
 
-    compile("com.natpryce:konfig:$konfigVersion")
+    implementation("com.natpryce:konfig:$konfigVersion")
 
-    compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
-    compile("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
-    compile("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
-    compile("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
-    compile("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-jetty:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
 
-    compile("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryVersion")
+    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryVersion")
 
-    compile("ch.qos.logback:logback-classic:$logbackVersion")
-    compile("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
 
-    compile("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:$filformatVersion")
+    implementation("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:$filformatVersion")
 
-    compile("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
-    compile("no.nav.security:oidc-spring-support:$tokenSupportVersion")
-    compile("io.springfox:springfox-swagger2:$swaggerVersion")
-    compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
+    implementation("no.nav.security:oidc-spring-support:$tokenSupportVersion")
+    implementation("io.springfox:springfox-swagger2:$swaggerVersion")
+    implementation("io.springfox:springfox-swagger-ui:$swaggerVersion")
 
-    compile("org.apache.commons:commons-io:$commonsIoVersion")
-    compile("commons-fileupload:commons-fileupload:$fileUploadVersion")
-    compile("org.apache.tika:tika-core:$tikaVersion")
-    compile("org.apache.pdfbox:preflight:$pdfBoxVersion")
-    compile("no.ks.fiks:kryptering:$fiksKrypteringVersion")
+    implementation("org.apache.commons:commons-io:$commonsIoVersion")
+    implementation("commons-fileupload:commons-fileupload:$fileUploadVersion")
+    implementation("org.apache.tika:tika-core:$tikaVersion")
+    implementation("org.apache.pdfbox:preflight:$pdfBoxVersion")
+    implementation("no.ks.fiks:kryptering:$fiksKrypteringVersion")
 
     //spesifikke versjoner oppgradert etter ønske fra snyk
-    compile("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
-    compile("com.google.guava:guava:$guavaVersion")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")
+    implementation("com.google.guava:guava:$guavaVersion")
 
     //selftest
     implementation ("io.github.resilience4j:resilience4j-kotlin:$resilience4jVersion")

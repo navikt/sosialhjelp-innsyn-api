@@ -1,13 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
-import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 
-fun InternalDigisosSoker.apply(hendelse: JsonVilkar, clientProperties: ClientProperties) {
+fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
     hendelse.beskrivelse
     hendelse.status
     hendelse.utbetalingsreferanse

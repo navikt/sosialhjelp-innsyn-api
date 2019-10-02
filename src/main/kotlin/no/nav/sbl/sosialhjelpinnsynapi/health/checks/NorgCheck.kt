@@ -27,7 +27,7 @@ class NorgCheck(private val restTemplate: RestTemplate,
     override fun doCheck() {
         try {
             // som i NorgClientImpl
-            val norgApiKey = System.getProperty("NORG_PASSWORD")
+            val norgApiKey = System.getenv("NORG_PASSWORD")
             val headers = HttpHeaders()
             headers.set("Nav-Call-Id", generateCallId())
 //            headers.set("Nav-Consumer-Id", "srvsosialhjelp-inn")

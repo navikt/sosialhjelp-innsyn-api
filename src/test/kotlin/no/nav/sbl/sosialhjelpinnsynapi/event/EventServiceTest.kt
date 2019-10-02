@@ -431,7 +431,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-            assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav")
+            assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav: 1 vedlegg mangler")
             assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
@@ -457,7 +457,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-            assertThat(hendelse.tittel).contains("Veileder har lest dokumentene du har sendt")
+            assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav: Ingen vedlegg mangler")
             assertThat(hendelse.url).isNull()
         }
     }

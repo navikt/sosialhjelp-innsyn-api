@@ -33,8 +33,9 @@ class NorgCheck(private val restTemplate: RestTemplate,
 //            headers.set("Nav-Consumer-Id", "srvsosialhjelp-inn")
             headers.set("x-nav-apiKey", norgApiKey)
 
+            log.warn("Headers: {}", headers.toString())
+
             // samme kall som selftest i soknad-api utfører
-            log.warn("adress: $address/kodeverk/EnhetstyperNorg")
             restTemplate.exchange("$address/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
         } catch (e: RestClientResponseException) {

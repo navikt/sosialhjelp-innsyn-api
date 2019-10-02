@@ -30,16 +30,14 @@ class NorgCheck(private val restTemplate: RestTemplate,
             val norgApiKey = System.getenv("NORG_PASSWORD")
             val headers = HttpHeaders()
             headers.set("Nav-Call-Id", generateCallId())
-//            headers.set("Nav-Consumer-Id", "srvsosialhjelp-inn")
+            headers.set("Nav-Consumer-Id", "srvsosialhjelp-inn")
             headers.set("x-nav-apiKey", norgApiKey)
-
-            log.warn("Headers: {}", headers.toString())
 
             // samme kall som selftest i soknad-api utfører
             restTemplate.exchange("$address/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-
         } catch (e: RestClientResponseException) {
-            log.error(e.responseBodyAsString)
+            log.error("Kall til Norg feilet", e.responseBodyAsString)
+            throw RuntimeException("Selftest-kall mot Norg feilet", e)
         } catch (e: Exception) {
             log.error("Kall til NORG feilet", e)
             throw RuntimeException("Selftest-kall mot Norg feilet", e)

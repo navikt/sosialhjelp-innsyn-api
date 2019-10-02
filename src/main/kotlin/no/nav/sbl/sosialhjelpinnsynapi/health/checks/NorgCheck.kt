@@ -30,7 +30,6 @@ class NorgCheck(private val restTemplate: RestTemplate,
             val norgApiKey = System.getenv("NORG_PASSWORD")
             val headers = HttpHeaders()
             headers.set("Nav-Call-Id", generateCallId())
-            headers.set("Nav-Consumer-Id", "srvsosialhjelp-inn")
             headers.set("x-nav-apiKey", norgApiKey)
 
             // samme kall som selftest i soknad-api utfører

@@ -13,7 +13,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
             .map { Oppgave(it.dokumenttype, it.tilleggsinformasjon, toLocalDateTime(it.innsendelsesfrist), toLocalDateTime(hendelse.hendelsestidspunkt)) }
             .toMutableList()
 
-    val beskrivelse = if (hendelse.dokumenter.isEmpty()) "Veileder har lest dokumentene du har sendt" else "Veileder har oppdatert dine dokumentasjonskrav"
+    val antallKrav = if (hendelse.dokumenter.isEmpty()) "Ingen" else hendelse.dokumenter.size.toString()
+    val beskrivelse = "Veileder har oppdatert dine dokumentasjonskrav: $antallKrav vedlegg mangler"
     val url = if (hendelse.dokumenter.isEmpty()) null else hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
     historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), url))
 }

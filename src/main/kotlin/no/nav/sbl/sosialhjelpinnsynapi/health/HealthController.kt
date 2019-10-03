@@ -1,7 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health
 
-import io.reactivex.Flowable
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyCheckResult
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Result
@@ -32,11 +34,12 @@ class HealthController(private val dependencyCheckList: List<AbstractDependencyC
         @GetMapping(value = ["/isReady"], produces = [MediaType.TEXT_PLAIN_VALUE])
         get() = APPLICATION_READY
 
+    @FlowPreview
     @GetMapping("/selftest")
     @ResponseBody
     fun selftest(): SelftestResult {
         val results = ArrayList<DependencyCheckResult>()
-        checkDependencies(results)
+        runBlocking { checkDependencies(results) }
         return SelftestResult(
                 "sosialhjelp-innsyn-api",
                 "version",
@@ -68,11 +71,10 @@ class HealthController(private val dependencyCheckList: List<AbstractDependencyC
 //                .sequential().blockingSubscribe{ results.add(it) }
 //    }
 
-    private fun checkDependencies(results: MutableList<DependencyCheckResult>) {
-        Flowable.fromIterable(dependencyCheckList)
-                .parallel()
-                .runOn(Schedulers.io())
-                .map { it.check().get() }
-                .sequential().blockingSubscribe { results.add(it) }
+    @FlowPreview
+    private suspend fun checkDependencies(results: MutableList<DependencyCheckResult>) {
+        dependencyCheckList
+                .asFlow()
+                .collect { results.add(it.check().get()) }
     }
 }

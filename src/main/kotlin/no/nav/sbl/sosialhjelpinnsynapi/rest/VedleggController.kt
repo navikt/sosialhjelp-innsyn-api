@@ -1,6 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse

@@ -13,11 +13,13 @@ import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 
 @Component
 class EventService(private val clientProperties: ClientProperties,
                    private val innsynService: InnsynService,
+                   private val vedleggService: VedleggService,
                    private val norgClient: NorgClient,
                    private val fiksClient: FiksClient) {
 
@@ -43,6 +45,11 @@ class EventService(private val clientProperties: ClientProperties,
         jsonDigisosSoker.hendelser
                 .sortedBy { it.hendelsestidspunkt }
                 .forEach { internal.applyHendelse(it) }
+
+        val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
+        if (digisosSak.originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
+            internal.applySoknadKrav(fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
+        }
 
         return internal
     }

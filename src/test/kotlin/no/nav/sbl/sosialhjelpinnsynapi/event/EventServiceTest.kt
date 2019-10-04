@@ -17,6 +17,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -30,10 +32,11 @@ internal class EventServiceTest {
 
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
+    private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
     private val fiksClient: FiksClient = mockk()
 
-    private val service = EventService(clientProperties, innsynService, norgClient, fiksClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
@@ -56,6 +59,9 @@ internal class EventServiceTest {
 
     private val dokumenttype = "dokumentasjonstype"
     private val tilleggsinfo = "ekstra info"
+
+    private val vedleggKrevesDokumenttype = "faktura"
+    private val vedleggKrevesTilleggsinfo = "strom"
 
     private val navKontor = "1337"
 
@@ -100,6 +106,7 @@ internal class EventServiceTest {
  [x] saksStatus med 2 vedtakFattet
  [x] dokumentasjonEtterspurt
  [x] dokumentasjonEtterspurt med tom dokumentliste
+ [x] ingen dokumentasjonEtterspurt-hendelser
  [x] forelopigSvar
  [ ] forelopigSvar - flere caser?
  [ ] utbetaling
@@ -158,6 +165,7 @@ internal class EventServiceTest {
                             .withHendelser(listOf(
                                     SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
                             ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 
@@ -180,6 +188,7 @@ internal class EventServiceTest {
                                     SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                                     SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2)
                             ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 
@@ -204,6 +213,7 @@ internal class EventServiceTest {
                                     SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                                     SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3)
                             ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 
@@ -232,6 +242,7 @@ internal class EventServiceTest {
                                     SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                                     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3)
                             ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 
@@ -264,6 +275,7 @@ internal class EventServiceTest {
                                     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
                                     SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4)
                             ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 
@@ -300,6 +312,7 @@ internal class EventServiceTest {
                                     SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                                     SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3)
                             ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 
@@ -337,6 +350,7 @@ internal class EventServiceTest {
                                     SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
                                     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_4)
                             ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 
@@ -376,6 +390,7 @@ internal class EventServiceTest {
                                     SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
                                     SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5)
                             ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 
@@ -460,6 +475,38 @@ internal class EventServiceTest {
             assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav: Ingen vedlegg mangler")
             assertThat(hendelse.url).isNull()
         }
+
+        @Test
+        fun `oppgaver skal hentes fra søknaden dersom det ikke finnes dokumentasjonEtterspurt`() {
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                    JsonDigisosSoker()
+                            .withAvsender(avsender)
+                            .withVersion("123")
+                            .withHendelser(listOf(
+                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2)
+                            ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+                    listOf(VedleggService.InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+
+            val model = service.createModel("123", "token")
+
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(model.saker).isEmpty()
+            assertThat(model.oppgaver).hasSize(1)
+            assertThat(model.historikk).hasSize(3)
+
+            val oppgave = model.oppgaver.last()
+            assertThat(oppgave.tittel).isEqualTo(vedleggKrevesDokumenttype)
+            assertThat(oppgave.tilleggsinfo).isEqualTo(vedleggKrevesTilleggsinfo)
+            assertThat(oppgave.innsendelsesfrist).isNull()
+
+            val hendelse = model.historikk.last()
+            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))
+            assertThat(hendelse.tittel).contains("Søknaden er under behandling")
+            assertThat(hendelse.url).isNull()
+        }
     }
 
     @Test
@@ -473,6 +520,7 @@ internal class EventServiceTest {
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                                 FORELOPIGSVAR.withHendelsestidspunkt(tidspunkt_3)
                         ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
         val model = service.createModel("123", "token")
 

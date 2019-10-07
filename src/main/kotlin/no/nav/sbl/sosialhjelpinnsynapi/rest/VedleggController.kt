@@ -62,7 +62,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
 data class OpplastetVedleggMetadata (
         val type: String,
-        val tilleggsinfo: String,
+        val tilleggsinfo: String?,
         val filer: MutableList<OpplastetFil>
 )
 

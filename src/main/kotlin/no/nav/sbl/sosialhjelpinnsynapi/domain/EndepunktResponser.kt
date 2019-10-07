@@ -25,7 +25,7 @@ data class HendelseResponse(
 )
 
 data class OppgaveResponse(
-        val innsendelsesfrist: String,
+        val innsendelsesfrist: String?,
         val dokumenttype: String,
         val tilleggsinformasjon: String?
 )

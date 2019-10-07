@@ -42,7 +42,7 @@ class FiksClientMock : FiksClient {
             JsonVedleggSpesifikasjon::class.java ->
                 if (dokumentlagerId == "mock-soknad-vedlegg-metadata") {
                     dokumentMap.getOrElse(dokumentlagerId, {
-                        val default = jsonVedleggSpesifikasjon
+                        val default = jsonVedleggSpesifikasjonSoknad
                         dokumentMap[dokumentlagerId] = default
                         default
                     })

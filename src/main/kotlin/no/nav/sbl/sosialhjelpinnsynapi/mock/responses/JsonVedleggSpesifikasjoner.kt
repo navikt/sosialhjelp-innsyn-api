@@ -4,7 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 
-val jsonVedleggSpesifikasjon = JsonVedleggSpesifikasjon()
+val jsonVedleggSpesifikasjonSoknad = JsonVedleggSpesifikasjon()
         .withVedlegg(
                 listOf(
                         JsonVedlegg()
@@ -17,7 +17,15 @@ val jsonVedleggSpesifikasjon = JsonVedleggSpesifikasjon()
                                                         .withFilnavn("soknad vedlegg filnavn 1")
                                                         .withSha512("asknd2341")
                                         )
-                                )
+                                ),
+                        JsonVedlegg()
+                                .withType("kontooversikt")
+                                .withTilleggsinfo("brukskonto")
+                                .withStatus("VedleggKreves"),
+                        JsonVedlegg()
+                                .withType("annet")
+                                .withTilleggsinfo("annet")
+                                .withStatus("VedleggKreves")
                 )
         )!!
 

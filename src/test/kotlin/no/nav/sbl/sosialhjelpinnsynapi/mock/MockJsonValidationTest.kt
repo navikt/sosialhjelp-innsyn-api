@@ -8,6 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.digisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 
@@ -17,8 +18,9 @@ internal class DefaultMockResponseTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val norgClient: NorgClient = mockk(relaxed = true)
     private val fiksClient: FiksClient = mockk(relaxed = true)
+    private val vedleggService: VedleggService = mockk()
 
-    private val eventService = EventService(clientProperties, innsynService, norgClient, fiksClient)
+    private val eventService = EventService(clientProperties, innsynService, vedleggService, norgClient, fiksClient)
 
     @Test
     fun `validerer digisosSoker`() {

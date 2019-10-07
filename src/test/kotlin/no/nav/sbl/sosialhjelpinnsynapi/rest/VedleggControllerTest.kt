@@ -52,7 +52,7 @@ internal class VedleggControllerTest {
 
     @Test
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() {
-        every { vedleggService.hentAlleVedlegg(any(), any()) } returns listOf(
+        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns listOf(
                 InternalVedlegg(
                         dokumenttype,
                         tilleggsinfo,
@@ -80,7 +80,7 @@ internal class VedleggControllerTest {
     @Test
     fun `skal utelate duplikater i response`() {
         val now = LocalDateTime.now()
-        every { vedleggService.hentAlleVedlegg(any(), any()) } returns listOf(
+        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns listOf(
                 InternalVedlegg(
                         dokumenttype,
                         null,

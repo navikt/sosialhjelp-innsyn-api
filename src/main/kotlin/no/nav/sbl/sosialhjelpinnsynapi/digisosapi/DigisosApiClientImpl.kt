@@ -16,7 +16,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
@@ -45,17 +45,15 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
         }
         val httpEntity = HttpEntity(objectMapper.writeValueAsString(digisosApiWrapper), headers)
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
-            if (response.statusCode.is2xxSuccessful) {
-                log.info("Postet DigisosSak til Fiks")
-            } else {
-                log.warn("Noe feilet ved kall til Fiks")
-                throw FiksException(response.statusCode, "something went wrong")
-            }
+            restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
+            log.info("Postet DigisosSak til Fiks")
             return id
-        } catch (e: HttpClientErrorException) {
-            log.error(e.responseBodyAsString)
-            throw e
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.error(e.message, e)
+            throw FiksException(null, e.message, e)
         }
     }
 
@@ -68,23 +66,15 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
         headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
         val httpEntity = HttpEntity("", headers)
         try {
-
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=23079403598", HttpMethod.POST, httpEntity, String::class.java)
-
-            if (response.statusCode.is2xxSuccessful) {
-                log.info("Digisosid: ${response.body}")
-                log.info("Opprette sak hos fiks")
-                return response.body?.replace("\"", "")
-            } else {
-                log.warn("Noe feilet ved kall til Fiks")
-                log.warn(response.body)
-                throw FiksException(response.statusCode, "something went wrong")
-            }
-        } catch (e: HttpClientErrorException) {
-            log.error("", e)
+            log.info("Opprettet sak hos Fiks. Digisosid: ${response.body}")
+            return response.body?.replace("\"", "")
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.error(e.message, e)
+            throw FiksException(null, e.message, e)
         }
-
-        return null
     }
-
 }

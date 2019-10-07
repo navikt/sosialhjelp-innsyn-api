@@ -9,11 +9,18 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import org.apache.http.HttpHost
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(HttpClient::class.java)
+
 val objectMapper: ObjectMapper = jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .configure(SerializationFeature.INDENT_OUTPUT, true)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+
+val filformatObjectMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
         .registerModule(JavaTimeModule())
         .configure(SerializationFeature.INDENT_OUTPUT, true)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

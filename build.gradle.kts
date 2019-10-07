@@ -12,6 +12,7 @@ val mockkVersion = "1.9.3"
 val wireMockVersion = "2.19.0"
 val filformatVersion = "1.2019.09.03-11.46-9f8acd3a6442"
 val micrometerRegistryVersion = "1.1.2"
+val prometheusVersion = "0.7.0"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.9"
 val jacksonDatabindVersion = "2.9.9.3"
@@ -84,6 +85,8 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
 
     compile("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryVersion")
+    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
     compile("ch.qos.logback:logback-classic:$logbackVersion")
     compile("net.logstash.logback:logstash-logback-encoder:$logstashVersion")

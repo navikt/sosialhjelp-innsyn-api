@@ -1,10 +1,9 @@
 # Prometheus
 management:
   endpoints:
-    metrics.enabled: true
-    web.exposure.include: prometheus
-    export.prometheus.enabled: true
-    prometheus.enabled: true
+    web:
+      exposure:
+        include: prometheus,metrics
 
 spring:
   main:

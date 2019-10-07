@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import kotlinx.coroutines.runBlocking
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -9,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
+import no.nav.sbl.sosialhjelpinnsynapi.metrics.REQUEST_TIME
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -44,7 +46,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         try {
+            val requestLatency = REQUEST_TIME.startTimer()
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+
+            val currentRequestLatency = requestLatency.observeDuration()
+            log.debug("Finished processing took {}s", StructuredArguments.keyValue("latency", currentRequestLatency))
+
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Hentet DigisosSak $digisosId fra Fiks")
                 return objectMapper.readValue(response.body!!, DigisosSak::class.java)
@@ -62,7 +69,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
         try {
+            val requestLatency = REQUEST_TIME.startTimer()
+
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+
+            val currentRequestLatency = requestLatency.observeDuration()
+            log.debug("Finished processing took {}s", StructuredArguments.keyValue("latency", currentRequestLatency))
+
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Hentet dokument (${requestedClass.simpleName}) fra fiks, dokumentlagerId $dokumentlagerId")
                 return objectMapper.readValue(response.body!!, requestedClass)

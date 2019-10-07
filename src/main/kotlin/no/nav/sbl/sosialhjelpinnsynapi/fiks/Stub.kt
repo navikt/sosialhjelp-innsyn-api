@@ -145,7 +145,7 @@ val ok_komplett_jsondigisossoker_response = """
 				    "id": "12345678-9abc-def0-1234-56789abcdef0"
 				}
 			},
-			"referanse": "SAK1",
+			"saksreferanse": "SAK1",
 			"utfall": {
 				"utfall": "INNVILGET"
 			},

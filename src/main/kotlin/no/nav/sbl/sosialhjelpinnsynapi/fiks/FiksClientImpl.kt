@@ -156,11 +156,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     private fun createHttpEntity(body: Any, name: String, filename: String?, contentType: String): HttpEntity<Any> {
         val headerMap = LinkedMultiValueMap<String, String>()
-        val contentDisposition = ContentDisposition
+        val builder: ContentDisposition.Builder = ContentDisposition
                 .builder("form-data")
                 .name(name)
-                .filename(filename)
-                .build()
+        val contentDisposition: ContentDisposition = if (filename == null) builder.build() else builder.filename(filename).build()
 
         headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
         headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)

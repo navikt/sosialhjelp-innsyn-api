@@ -29,7 +29,7 @@ data class Soknadsmottaker(
 data class Oppgave(
         var tittel: String,
         var tilleggsinfo: String?,
-        var innsendelsesfrist: LocalDateTime,
+        var innsendelsesfrist: LocalDateTime?,
         var tidspunktForKrav: LocalDateTime
 )
 

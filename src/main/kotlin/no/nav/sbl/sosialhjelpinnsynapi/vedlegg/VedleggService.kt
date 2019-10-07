@@ -11,20 +11,21 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 const val LASTET_OPP_STATUS = "LastetOpp"
+const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 
 @Component
 class VedleggService(private val fiksClient: FiksClient) {
 
-    fun hentAlleVedlegg(fiksDigisosId: String, token: String): List<InternalVedlegg> {
+    fun hentAlleOpplastedeVedlegg(fiksDigisosId: String, token: String): List<InternalVedlegg> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
 
-        val soknadVedlegg = hentSoknadVedlegg(fiksDigisosId, digisosSak.originalSoknadNAV, token)
+        val soknadVedlegg = hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, fiksDigisosId, digisosSak.originalSoknadNAV, token)
         val ettersendteVedlegg = hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
 
         return soknadVedlegg.plus(ettersendteVedlegg)
     }
 
-    private fun hentSoknadVedlegg(fiksDigisosId: String, originalSoknadNAV: OriginalSoknadNAV?, token: String): List<InternalVedlegg> {
+    fun hentSoknadVedleggMedStatus(status: String, fiksDigisosId: String, originalSoknadNAV: OriginalSoknadNAV?, token: String): List<InternalVedlegg> {
         if (originalSoknadNAV == null) {
             return emptyList()
         }
@@ -35,7 +36,7 @@ class VedleggService(private val fiksClient: FiksClient) {
         }
 
         return jsonVedleggSpesifikasjon.vedlegg
-                .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                .filter { vedlegg -> vedlegg.status == status }
                 .map { vedlegg ->
                     InternalVedlegg(
                             vedlegg.type,

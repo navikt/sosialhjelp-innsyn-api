@@ -12,6 +12,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
+import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.slf4j.LoggerFactory
@@ -57,6 +58,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
+    /**
+     * Brukes for å hente json-filer som er definert i filformat. Dermed brukes filformatObjectMapper
+     */
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
         val headers = setIntegrasjonHeaders(token)
 
@@ -65,7 +69,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
             if (response.statusCode.is2xxSuccessful) {
                 log.info("Hentet dokument (${requestedClass.simpleName}) fra fiks, dokumentlagerId $dokumentlagerId")
-                return objectMapper.readValue(response.body!!, requestedClass)
+                return filformatObjectMapper.readValue(response.body!!, requestedClass)
             } else {
                 log.warn("Noe feilet ved kall til Fiks")
                 throw FiksException(response.statusCode, "something went wrong")

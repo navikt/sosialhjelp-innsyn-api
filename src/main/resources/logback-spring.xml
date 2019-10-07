@@ -25,6 +25,8 @@
             <appender-ref ref="CONSOLE"/>
         </root>
 
+        <logger name="no.nav.sbl.sosialhjelpinnsynapi" level="DEBUG"/>
+
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.springframework.security" level="DEBUG"/>
         <logger name="org.springframework.web" level="DEBUG"/>

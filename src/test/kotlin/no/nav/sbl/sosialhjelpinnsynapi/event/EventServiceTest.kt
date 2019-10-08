@@ -443,6 +443,7 @@ internal class EventServiceTest {
             assertThat(oppgave.tittel).isEqualTo(dokumenttype)
             assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
             assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+            assertThat(oppgave.erFraInnsyn).isEqualTo(true)
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
@@ -501,6 +502,7 @@ internal class EventServiceTest {
             assertThat(oppgave.tittel).isEqualTo(vedleggKrevesDokumenttype)
             assertThat(oppgave.tilleggsinfo).isEqualTo(vedleggKrevesTilleggsinfo)
             assertThat(oppgave.innsendelsesfrist).isNull()
+            assertThat(oppgave.erFraInnsyn).isEqualTo(false)
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))

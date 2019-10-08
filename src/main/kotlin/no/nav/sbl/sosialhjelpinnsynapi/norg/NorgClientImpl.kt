@@ -11,6 +11,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
 private val log = LoggerFactory.getLogger(NorgClient::class.java)
@@ -27,16 +28,19 @@ class NorgClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.set("Nav-Call-Id", generateCallId())
         headers.set("x-nav-apiKey", norgApiKey)
+        try {
+            log.info("Forsøker å hente NAV-enhet $enhetsnr fra NORG2, url = $baseUrl/enhet/$enhetsnr")
+            val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
-        log.info("Forsøker å hente NAV-enhet $enhetsnr fra NORG2, url = $baseUrl/enhet/$enhetsnr")
-
-        val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-        if (response.statusCode.is2xxSuccessful) {
             log.info("Hentet NAV-enhet fra NORG")
             return objectMapper.readValue(response.body!!, NavEnhet::class.java)
-        } else {
-            log.warn("Noe feilet ved kall mot NORG")
-            throw NorgException(response.statusCode, "something went wrong")
+
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Noe feilet ved kall mot NORG - ${e.statusCode} ${e.statusText}", e)
+            throw NorgException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Noe feilet ved kall mot NORG", e)
+            throw NorgException(null, e.message, e)
         }
     }
 }

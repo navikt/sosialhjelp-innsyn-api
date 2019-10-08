@@ -27,7 +27,11 @@ class OppgaveService(private val eventService: EventService,
 
         val oppgaveResponseList = model.oppgaver.sortedBy { it.innsendelsesfrist }
                 .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
-                .map { OppgaveResponse(it.innsendelsesfrist.toString(), it.tittel, it.tilleggsinfo) }
+                .map { OppgaveResponse(
+                        if (it.innsendelsesfrist == null) null else it.innsendelsesfrist.toString(),
+                        it.tittel,
+                        it.tilleggsinfo,
+                        it.erFraInnsyn) }
         log.info("Hentet ${oppgaveResponseList.size} oppgaver for fiksDigisosId=$fiksDigisosId")
         return oppgaveResponseList
     }

@@ -30,7 +30,8 @@ data class Oppgave(
         var tittel: String,
         var tilleggsinfo: String?,
         var innsendelsesfrist: LocalDateTime?,
-        var tidspunktForKrav: LocalDateTime
+        var tidspunktForKrav: LocalDateTime,
+        var erFraInnsyn: Boolean
 )
 
 data class Sak(

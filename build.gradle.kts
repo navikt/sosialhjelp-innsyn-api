@@ -42,6 +42,7 @@ plugins {
 }
 
 application {
+    applicationName = "sosialhjelp-innsyn-api"
     mainClassName = mainClass
 }
 

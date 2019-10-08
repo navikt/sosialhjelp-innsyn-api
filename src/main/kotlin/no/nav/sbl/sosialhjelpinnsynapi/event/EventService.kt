@@ -30,28 +30,28 @@ class EventService(private val clientProperties: ClientProperties,
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
         val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
 
-        val internal = InternalDigisosSoker()
+        val model = InternalDigisosSoker()
 
         if (jsonSoknad != null && jsonSoknad.mottaker != null && timestampSendt != null) {
-            internal.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
-            internal.status = SoknadsStatus.SENDT
-            internal.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
+            model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
+            model.status = SoknadsStatus.SENDT
+            model.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
         }
 
         if (jsonDigisosSoker == null) {
-            return internal
+            return model
         }
 
         jsonDigisosSoker.hendelser
                 .sortedBy { it.hendelsestidspunkt }
-                .forEach { internal.applyHendelse(it) }
+                .forEach { model.applyHendelse(it) }
 
         val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         if (digisosSak.originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
-            internal.applySoknadKrav(fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
+            model.applySoknadKrav(fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
         }
 
-        return internal
+        return model
     }
 
     fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration
 
 
 @Configuration
-class CommonConfig {
+class MetricsConfig {
 
     /**
      * Make sure spring uses the defaultRegistry

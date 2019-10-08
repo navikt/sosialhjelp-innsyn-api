@@ -8,6 +8,8 @@ management:
 spring:
   main:
     banner-mode: 'off'
+  application:
+    name: "sosialhjelp-innsyn-api"
 
 server:
   servlet:

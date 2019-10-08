@@ -30,7 +30,8 @@ class OppgaveService(private val eventService: EventService,
                 .map { OppgaveResponse(
                         if (it.innsendelsesfrist == null) null else it.innsendelsesfrist.toString(),
                         it.tittel,
-                        it.tilleggsinfo) }
+                        it.tilleggsinfo,
+                        it.erFraInnsyn) }
         log.info("Hentet ${oppgaveResponseList.size} oppgaver for fiksDigisosId=$fiksDigisosId")
         return oppgaveResponseList
     }

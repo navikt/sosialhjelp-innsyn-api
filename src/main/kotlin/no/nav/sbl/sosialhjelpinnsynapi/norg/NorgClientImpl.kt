@@ -27,6 +27,9 @@ class NorgClientImpl(clientProperties: ClientProperties,
         val headers = HttpHeaders()
         headers.set("Nav-Call-Id", generateCallId())
         headers.set("x-nav-apiKey", norgApiKey)
+
+        log.info("Forsøker å hente NAV-enhet $enhetsnr fra NORG2, url = $baseUrl/enhet/$enhetsnr")
+
         val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         if (response.statusCode.is2xxSuccessful) {
             log.info("Hentet NAV-enhet fra NORG")

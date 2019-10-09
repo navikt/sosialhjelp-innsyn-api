@@ -1,9 +1,6 @@
-package no.nav.sbl.sosialhjelpinnsynapi.error
+package no.nav.sbl.sosialhjelpinnsynapi.common
 
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.NorgException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -14,10 +11,13 @@ private const val unexpectedError: String = "unexpected_error"
 private const val fiksError: String = "fiks_error"
 private const val norgError: String = "norg_error"
 
-private val log: Logger = LoggerFactory.getLogger(InnsynExceptionHandler::class.java)
 
 @ControllerAdvice
 class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
+
+    companion object {
+        val log by logger()
+    }
 
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<ErrorMessage> {

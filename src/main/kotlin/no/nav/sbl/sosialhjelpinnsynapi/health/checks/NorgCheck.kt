@@ -1,12 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
+import no.nav.sbl.sosialhjelpinnsynapi.common.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.generateCallId
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
-
-private val log = LoggerFactory.getLogger(NorgCheck::class.java)
 
 @Component
 class NorgCheck(private val restTemplate: RestTemplate,
@@ -25,6 +23,10 @@ class NorgCheck(private val restTemplate: RestTemplate,
         clientProperties.norgEndpointUrl,
         Importance.WARNING
 ) {
+    companion object {
+        val log by logger()
+    }
+
     override fun doCheck() {
         try {
             val norgApiKey = System.getenv("NORG_PASSWORD")

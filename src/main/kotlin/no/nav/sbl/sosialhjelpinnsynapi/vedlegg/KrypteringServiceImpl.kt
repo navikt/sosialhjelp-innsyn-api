@@ -1,10 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
 import no.ks.kryptering.CMSKrypteringImpl
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -21,12 +21,15 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
-private val log = LoggerFactory.getLogger(KrypteringServiceImpl::class.java)
 
 @Profile("!mock")
 @Component
 class KrypteringServiceImpl(clientProperties: ClientProperties,
                             private val restTemplate: RestTemplate) : KrypteringService {
+
+    companion object {
+        val log by logger()
+    }
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId

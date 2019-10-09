@@ -5,16 +5,15 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.security.oidc.api.Unprotected
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-private val log = LoggerFactory.getLogger(MockController::class.java)
 
 @Profile("mock")
 @Unprotected
@@ -22,6 +21,10 @@ private val log = LoggerFactory.getLogger(MockController::class.java)
 @RequestMapping("/api/v1/mock/innsyn")
 class MockController(private val fiksClientMock: FiksClientMock,
                      private val innsynService: InnsynService) {
+
+    companion object {
+        val log by logger()
+    }
 
     private val mapper = jacksonObjectMapper()
     private val sosialhjelpMapper = JsonSosialhjelpObjectMapper.createObjectMapper()

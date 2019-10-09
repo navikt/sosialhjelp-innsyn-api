@@ -2,13 +2,16 @@ package no.nav.sbl.sosialhjelpinnsynapi.soknadsstatus
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import org.slf4j.LoggerFactory
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 
-private val log = LoggerFactory.getLogger(SoknadsStatusService::class.java)
 
 @Component
 class SoknadsStatusService(private val eventService: EventService) {
+
+    companion object {
+        val log by logger()
+    }
 
     fun hentSoknadsStatus(fiksDigisosId: String, token: String): SoknadsStatusResponse {
         val model = eventService.createModel(fiksDigisosId, token)

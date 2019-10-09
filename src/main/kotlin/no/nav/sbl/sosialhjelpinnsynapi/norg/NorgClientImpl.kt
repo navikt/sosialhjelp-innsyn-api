@@ -1,11 +1,11 @@
 package no.nav.sbl.sosialhjelpinnsynapi.norg
 
+import no.nav.sbl.sosialhjelpinnsynapi.common.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.NorgException
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.generateCallId
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -14,12 +14,15 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
-private val log = LoggerFactory.getLogger(NorgClientImpl::class.java)
 
 @Profile("!mock & !local")
 @Component
 class NorgClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate) : NorgClient {
+
+    companion object {
+        val log by logger()
+    }
 
     private val baseUrl = clientProperties.norgEndpointUrl
 

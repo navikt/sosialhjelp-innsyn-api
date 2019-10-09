@@ -14,10 +14,9 @@ import io.ktor.http.parametersOf
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiClient
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.defaultHttpClient
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.File
 import java.security.KeyPair
@@ -27,17 +26,15 @@ import java.security.cert.X509Certificate
 import java.util.*
 
 
-private val log = LoggerFactory.getLogger(DigisosApiClient::class.java)
-
 @Component
-class IdPortenService(
-        clientProperties: ClientProperties
-) {
+class IdPortenService(clientProperties: ClientProperties) {
+
     private val idPortenTokenUrl = clientProperties.idPortenTokenUrl
     private val idPortenClientId = clientProperties.idPortenClientId
     private val idPortenScope = clientProperties.idPortenScope
     private val idPortenConfigUrl = clientProperties.idPortenConfigUrl
-    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI") ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
+    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI")
+            ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
 
     val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
         log.info("Henter config fra " + idPortenConfigUrl)
@@ -126,6 +123,8 @@ class IdPortenService(
 
         private const val GRANT_TYPE_PARAM = "grant_type"
         private const val ASSERTION_PARAM = "assertion"
+
+        val log by logger()
     }
 
     private data class VirksertCredentials(val alias: String, val password: String, val type: String)

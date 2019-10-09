@@ -35,7 +35,7 @@ class NorgClientImpl(clientProperties: ClientProperties,
             log.info("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
             val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
-            log.info("Hentet NAV-enhet $enhetsnr fra NORG")
+            log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
             return objectMapper.readValue(response.body!!, NavEnhet::class.java)
 
         } catch (e: HttpStatusCodeException) {

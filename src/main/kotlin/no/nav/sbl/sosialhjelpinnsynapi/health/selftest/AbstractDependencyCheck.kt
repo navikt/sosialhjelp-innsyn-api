@@ -6,7 +6,7 @@ import io.github.resilience4j.timelimiter.TimeLimiterConfig
 import io.vavr.control.Try
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
-import org.slf4j.LoggerFactory
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.Callable
@@ -14,13 +14,16 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 
+
 abstract class AbstractDependencyCheck(
         protected val type: DependencyType,
         private val name: String,
         protected val address: String,
         private val importance: Importance) {
 
-    private val log = LoggerFactory.getLogger(AbstractDependencyCheck::class.java)
+    companion object {
+        val log by logger()
+    }
 
     private val circuitBreaker = CircuitBreaker.ofDefaults("selftest")
     private val dispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()

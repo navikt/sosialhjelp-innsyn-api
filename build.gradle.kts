@@ -10,7 +10,8 @@ val logstashVersion = "5.3"
 val junitJupiterVersion = "5.4.2"
 val mockkVersion = "1.9.3"
 val filformatVersion = "1.2019.09.03-11.46-9f8acd3a6442"
-val micrometerRegistryVersion = "1.1.2"
+val micrometerRegistryVersion = "1.1.5"
+val prometheusVersion = "0.7.0"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.10"
 val jacksonDatabindVersion = "2.9.10"
@@ -41,6 +42,7 @@ plugins {
 }
 
 application {
+    applicationName = "sosialhjelp-innsyn-api"
     mainClassName = mainClass
 }
 
@@ -84,6 +86,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
 
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryVersion")
+    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
+    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")

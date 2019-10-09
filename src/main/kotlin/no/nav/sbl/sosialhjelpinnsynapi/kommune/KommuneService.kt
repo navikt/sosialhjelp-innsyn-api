@@ -3,14 +3,15 @@ package no.nav.sbl.sosialhjelpinnsynapi.kommune
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.IKKE_INNSYN
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.INNSYN
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 
 @Component
 class KommuneService(private val fiksClient: FiksClient) {
 
-    private val log: Logger = LoggerFactory.getLogger(KommuneService::class.java)
+    companion object {
+        val log by logger()
+    }
 
     fun hentKommuneStatus(kommunenummer: String): KommuneStatus {
         val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer)

@@ -1,14 +1,14 @@
 package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
 
 import kotlinx.coroutines.runBlocking
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -20,11 +20,14 @@ import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-private val log = LoggerFactory.getLogger(DigisosApiClient::class.java)
 
 @Profile("!mock")
 @Component
 class DigisosApiClientImpl(clientProperties: ClientProperties, private val restTemplate: RestTemplate, private val idPortenService: IdPortenService) : DigisosApiClient {
+
+    companion object {
+        val log by logger()
+    }
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonIdKommune = clientProperties.fiksIntegrasjonIdKommune

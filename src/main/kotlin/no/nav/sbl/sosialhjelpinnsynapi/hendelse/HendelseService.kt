@@ -5,18 +5,21 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+
 
 @Component
 class HendelseService(private val eventService: EventService,
                       private val vedleggService: VedleggService,
                       private val fiksClient: FiksClient) {
 
-    private val log = LoggerFactory.getLogger(this.javaClass)
+    companion object {
+        val log by logger()
+    }
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
         val model = eventService.createModel(fiksDigisosId, token)

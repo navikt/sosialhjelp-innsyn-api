@@ -5,6 +5,8 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
 import java.time.Instant
 import java.time.LocalDateTime
@@ -12,6 +14,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.reflect.full.companionObject
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
@@ -40,10 +43,21 @@ fun enumNameToLowercase(string: String): String {
     return string.toLowerCase().replace('_', ' ')
 }
 
-fun lagNavEksternRefId(digisosSak: DigisosSak) : String {
+fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: Long = digisosSak.ettersendtInfoNAV?.ettersendelser?.map { it.navEksternRefId.toLowerCase().toLong(36) }?.max()
             ?: digisosSak.originalSoknadNAV?.navEksternRefId?.toLowerCase()?.plus("000")?.toLong(36)
             ?: return UUID.randomUUID().toString()
 
     return (previousId + 1L).toString(36).toUpperCase().replace("O", "o").replace("I", "i")
+}
+
+fun <R : Any> R.logger(): Lazy<Logger> {
+    return lazy { LoggerFactory.getLogger(unwrapCompanionClass(this.javaClass).name) }
+}
+
+// unwrap companion class to enclosing class given a Java Class
+fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
+    return ofClass.enclosingClass?.takeIf {
+        ofClass.enclosingClass.kotlin.companionObject?.java == ofClass
+    } ?: ofClass
 }

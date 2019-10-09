@@ -4,19 +4,18 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallEllerSaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import org.slf4j.LoggerFactory
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 
 const val DEFAULT_TITTEL: String = "Saken"
 
-private val log = LoggerFactory.getLogger(SaksStatusService::class.java)
-
 @Component
 class SaksStatusService(private val eventService: EventService) {
 
-    /* TODO:
-        - Skal IKKE_INNSYN filtreres vekk i backend eller frontend?
-     */
+    companion object {
+        val log by logger()
+    }
+
     fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {
         val model = eventService.createModel(fiksDigisosId, token)
 

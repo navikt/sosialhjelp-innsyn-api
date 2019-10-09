@@ -23,8 +23,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 
@@ -65,9 +64,9 @@ internal class EventServiceTest {
 
     private val navKontor = "1337"
 
-    private val now = LocalDateTime.now()
+    private val now = ZonedDateTime.now()
 
-    private val tidspunkt_soknad = now.minusHours(11).atZone(ZoneOffset.UTC).toEpochSecond() * 1000L
+    private val tidspunkt_soknad = now.minusHours(11).toEpochSecond() * 1000L
     private val tidspunkt_1 = now.minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME)
     private val tidspunkt_2 = now.minusHours(9).format(DateTimeFormatter.ISO_DATE_TIME)
     private val tidspunkt_3 = now.minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)

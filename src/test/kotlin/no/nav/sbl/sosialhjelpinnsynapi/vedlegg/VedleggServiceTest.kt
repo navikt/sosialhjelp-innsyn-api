@@ -15,7 +15,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
-import java.time.ZoneOffset
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 internal class VedleggServiceTest {
@@ -115,23 +116,24 @@ internal class VedleggServiceTest {
         assertThat(list).hasSize(6)
 
         // nano-presisjon lacking
+        val zoneIdOslo = ZoneId.of("Europe/Oslo")
         assertThat(list[0].type).isEqualTo(dokumenttype)
-        assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
         assertThat(list[1].type).isEqualTo(dokumenttype_2)
-        assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
         assertThat(list[2].type).isEqualTo(dokumenttype_3)
-        assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
 
         assertThat(list[3].type).isEqualTo(dokumenttype_4)
-        assertThat(list[3].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[3].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
 
         assertThat(list[4].type).isEqualTo(dokumenttype_3)
-        assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_2, zoneIdOslo))
 
         assertThat(list[5].type).isEqualTo(dokumenttype_3)
-        assertThat(list[5].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[5].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_2, zoneIdOslo))
     }
 
     @Test
@@ -143,11 +145,12 @@ internal class VedleggServiceTest {
         assertThat(vedleggKrevesList).hasSize(1)
 
         // nano-presisjon lacking
+        val zoneIdOslo = ZoneId.of("Europe/Oslo")
         assertThat(lastetOppList[0].type).isEqualTo(dokumenttype)
-        assertThat(lastetOppList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(lastetOppList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
         assertThat(vedleggKrevesList[0].type).isEqualTo(dokumenttype_2)
-        assertThat(vedleggKrevesList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(vedleggKrevesList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
     }
 
     @Test

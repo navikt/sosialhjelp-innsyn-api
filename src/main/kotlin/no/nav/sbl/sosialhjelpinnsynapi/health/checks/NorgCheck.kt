@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
@@ -10,7 +11,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestClientResponseException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
 
@@ -31,14 +32,14 @@ class NorgCheck(private val restTemplate: RestTemplate,
             headers.set("Nav-Call-Id", generateCallId())
             headers.set("x-nav-apiKey", norgApiKey)
 
-            // samme kall som selftest i soknad-api utfører
+            // samme kall som selftest i soknad-api
             restTemplate.exchange("$address/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-        } catch (e: RestClientResponseException) {
-            log.error("Kall til Norg feilet", e.responseBodyAsString)
-            throw RuntimeException("Selftest-kall mot Norg feilet", e)
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Selftest - noe feilet ved kall mot NORG - ${e.statusCode} ${e.statusText}", e)
+            throw NorgException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            log.error("Kall til NORG feilet", e)
-            throw RuntimeException("Selftest-kall mot Norg feilet", e)
+            log.warn("Selftest - noe feilet ved kall mot NORG", e)
+            throw NorgException(null, e.message, e)
         }
     }
 }

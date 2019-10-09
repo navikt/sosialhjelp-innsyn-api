@@ -2,20 +2,25 @@ package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.*
+
+private val log = LoggerFactory.getLogger(FiksCheck::class.java)
 
 @Component
 class FiksCheck(private val restTemplate: RestTemplate,
@@ -36,9 +41,14 @@ class FiksCheck(private val restTemplate: RestTemplate,
             headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
 
+            // later som kommuneInfo-kall er ping for selftest
             restTemplate.exchange("$address/digisos/api/v1/nav/kommune/0301", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Selftest - Fiks hentKommuneInfo feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            throw RuntimeException("Kunne ikke pinge Fiks", e)
+            log.warn("Selftest - Fiks hentKommuneInfo feilet", e)
+            throw FiksException(null, e.message, e)
         }
     }
 }

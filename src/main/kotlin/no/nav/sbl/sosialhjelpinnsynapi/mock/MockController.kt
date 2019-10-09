@@ -14,6 +14,8 @@ import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+private val log = LoggerFactory.getLogger(MockController::class.java)
+
 @Profile("mock")
 @Unprotected
 @RestController
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.*
 class MockController(private val fiksClientMock: FiksClientMock,
                      private val innsynService: InnsynService) {
 
-    private val log = LoggerFactory.getLogger(this.javaClass)
     private val mapper = jacksonObjectMapper()
     private val sosialhjelpMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 

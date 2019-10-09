@@ -7,10 +7,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
+private val log: Logger = LoggerFactory.getLogger(KommuneService::class.java)
+
 @Component
 class KommuneService(private val fiksClient: FiksClient) {
 
-    private val log: Logger = LoggerFactory.getLogger(KommuneService::class.java)
 
     fun hentKommuneStatus(kommunenummer: String): KommuneStatus {
         val kommuneInfo = fiksClient.hentKommuneInfo(kommunenummer)

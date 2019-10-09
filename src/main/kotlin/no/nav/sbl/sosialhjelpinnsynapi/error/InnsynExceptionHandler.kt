@@ -14,10 +14,10 @@ private const val unexpectedError: String = "unexpected_error"
 private const val fiksError: String = "fiks_error"
 private const val norgError: String = "norg_error"
 
+private val log: Logger = LoggerFactory.getLogger(InnsynExceptionHandler::class.java)
+
 @ControllerAdvice
 class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
-
-    private val log: Logger = LoggerFactory.getLogger(InnsynExceptionHandler::class.java)
 
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<ErrorMessage> {

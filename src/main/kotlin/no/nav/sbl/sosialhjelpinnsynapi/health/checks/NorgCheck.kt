@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 
+
+private val log = LoggerFactory.getLogger(NorgCheck::class.java)
+
 @Component
 class NorgCheck(private val restTemplate: RestTemplate,
                 clientProperties: ClientProperties) : AbstractDependencyCheck(
@@ -21,12 +24,8 @@ class NorgCheck(private val restTemplate: RestTemplate,
         clientProperties.norgEndpointUrl,
         Importance.WARNING
 ) {
-
-    private val log = LoggerFactory.getLogger(NorgCheck::class.java)
-
     override fun doCheck() {
         try {
-            // som i NorgClientImpl
             val norgApiKey = System.getenv("NORG_PASSWORD")
             val headers = HttpHeaders()
             headers.set("Nav-Call-Id", generateCallId())

@@ -14,13 +14,14 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
 
+private val log = LoggerFactory.getLogger(AbstractDependencyCheck::class.java)
+
 abstract class AbstractDependencyCheck(
         protected val type: DependencyType,
         private val name: String,
         protected val address: String,
         private val importance: Importance) {
 
-    private val log = LoggerFactory.getLogger(AbstractDependencyCheck::class.java)
 
     private val circuitBreaker = CircuitBreaker.ofDefaults("selftest")
     private val dispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()

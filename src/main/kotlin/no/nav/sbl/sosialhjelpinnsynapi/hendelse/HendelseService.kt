@@ -11,12 +11,12 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
+private val log = LoggerFactory.getLogger(HendelseService::class.java)
+
 @Component
 class HendelseService(private val eventService: EventService,
                       private val vedleggService: VedleggService,
                       private val fiksClient: FiksClient) {
-
-    private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
         val model = eventService.createModel(fiksDigisosId, token)

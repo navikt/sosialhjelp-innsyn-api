@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
-private val log = LoggerFactory.getLogger(NorgClient::class.java)
+private val log = LoggerFactory.getLogger(NorgClientImpl::class.java)
 
 @Profile("!mock & !local")
 @Component
@@ -29,10 +29,10 @@ class NorgClientImpl(clientProperties: ClientProperties,
         headers.set("Nav-Call-Id", generateCallId())
         headers.set("x-nav-apiKey", norgApiKey)
         try {
-            log.info("Forsøker å hente NAV-enhet $enhetsnr fra NORG2, url = $baseUrl/enhet/$enhetsnr")
+            log.info("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
             val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
-            log.info("Hentet NAV-enhet fra NORG")
+            log.info("Hentet NAV-enhet $enhetsnr fra NORG")
             return objectMapper.readValue(response.body!!, NavEnhet::class.java)
 
         } catch (e: HttpStatusCodeException) {

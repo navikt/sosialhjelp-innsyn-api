@@ -27,7 +27,7 @@ import java.security.cert.X509Certificate
 import java.util.*
 
 
-private val logger = LoggerFactory.getLogger(DigisosApiClient::class.java)
+private val log = LoggerFactory.getLogger(DigisosApiClient::class.java)
 
 @Component
 class IdPortenService(
@@ -40,20 +40,20 @@ class IdPortenService(
     private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI") ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
 
     val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
-        logger.info("Henter config fra " + idPortenConfigUrl)
+        log.info("Henter config fra " + idPortenConfigUrl)
         val config = defaultHttpClient.get<IdPortenOidcConfiguration> {
             url(idPortenConfigUrl)
         }
-        logger.info("Hentet config fra " + idPortenConfigUrl)
+        log.info("Hentet config fra " + idPortenConfigUrl)
         config
     }.also {
-        logger.info("IdPorten: OIDC configuration initialized")
+        log.info("IdPorten: OIDC configuration initialized")
     }
 
     suspend fun requestToken(attempts: Int = 10): AccessToken =
             retry(callName = "Difi - Maskinporten", attempts = attempts) {
                 val jws = createJws()
-                logger.info("Got jws, getting token")
+                log.info("Got jws, getting token")
                 val response = defaultHttpClient.submitForm<IdPortenAccessTokenResponse>(
                         parametersOf(GRANT_TYPE_PARAM to listOf(GRANT_TYPE), ASSERTION_PARAM to listOf(jws.token))
                 ) {
@@ -99,7 +99,7 @@ class IdPortenService(
         }
 
 
-        logger.info("Public certificate length " + pair.first.public.encoded.size)
+        log.info("Public certificate length " + pair.first.public.encoded.size)
 
         return SignedJWT(
                 JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(mutableListOf(Base64.encode(pair.second))).build(),
@@ -114,7 +114,7 @@ class IdPortenService(
         ).run {
             sign(RSASSASigner(pair.first.private))
             val jws = Jws(serialize())
-            logger.info("Serialized JWS")
+            log.info("Serialized JWS")
             jws
         }
     }

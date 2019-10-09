@@ -8,7 +8,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import org.springframework.core.ParameterizedTypeReference
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -27,11 +28,12 @@ fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: St
 }
 
 fun toLocalDateTime(hendelsetidspunkt: String): LocalDateTime {
-    return LocalDateTime.parse(hendelsetidspunkt, DateTimeFormatter.ISO_DATE_TIME)
+    return ZonedDateTime.parse(hendelsetidspunkt, DateTimeFormatter.ISO_DATE_TIME)
+            .withZoneSameInstant(ZoneId.of("Europe/Oslo")).toLocalDateTime()
 }
 
 fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime {
-    return LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneOffset.UTC)
+    return LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneId.of("Europe/Oslo"))
 }
 
 fun enumNameToLowercase(string: String): String {

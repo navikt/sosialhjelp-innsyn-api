@@ -28,7 +28,7 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
     }
 
     private fun femMinutterForMottattSoknad(digisosApiWrapper: DigisosApiWrapper): Long {
-        val mottattTidspunkt = digisosApiWrapper.sak.soker.hendelser.sortedBy { it.hendelsestidspunkt }.first().hendelsestidspunkt
+        val mottattTidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt
         return toLocalDateTime(mottattTidspunkt).minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
     }
 }

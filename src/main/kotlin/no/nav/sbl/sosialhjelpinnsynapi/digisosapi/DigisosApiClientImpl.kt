@@ -34,19 +34,11 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
     private val fiksIntegrasjonPassordKommune = clientProperties.fiksIntegrasjonPassordKommune
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
-        val headers = HttpHeaders()
-
-        val accessToken = runBlocking { idPortenService.requestToken() }
-        headers.accept = Collections.singletonList(MediaType.ALL)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
-        headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
-        headers.contentType = MediaType.APPLICATION_JSON
         var id = fiksDigisosId
         if (fiksDigisosId == null) {
             id = opprettDigisosSak()
         }
-        val httpEntity = HttpEntity(objectMapper.writeValueAsString(digisosApiWrapper), headers)
+        val httpEntity = HttpEntity(objectMapper.writeValueAsString(digisosApiWrapper), headers())
         try {
             restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
             log.info("Postet DigisosSak til Fiks")
@@ -61,13 +53,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
     }
 
     fun opprettDigisosSak(): String? {
-        val headers = HttpHeaders()
-        val accessToken = runBlocking { idPortenService.requestToken() }
-        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
-        headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
-        val httpEntity = HttpEntity("", headers)
+        val httpEntity = HttpEntity("", headers())
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=23079403598", HttpMethod.POST, httpEntity, String::class.java)
             log.info("Opprettet sak hos Fiks. Digisosid: ${response.body}")
@@ -79,5 +65,16 @@ class DigisosApiClientImpl(clientProperties: ClientProperties, private val restT
             log.error(e.message, e)
             throw FiksException(null, e.message, e)
         }
+    }
+
+    private fun headers(): HttpHeaders {
+        val headers = HttpHeaders()
+        val accessToken = runBlocking { idPortenService.requestToken() }
+        headers.accept = Collections.singletonList(MediaType.ALL)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
+        headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
+        headers.contentType = MediaType.APPLICATION_JSON
+        return headers
     }
 }

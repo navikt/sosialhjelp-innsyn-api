@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.AccessToken
@@ -20,7 +19,7 @@ internal class DigisosApiClientTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
 
     @Test
-    fun `Post digisos sak til mock`() = runBlocking {
+    fun `Post digisos sak til mock`() {
         val restTemplate: RestTemplate = mockk()
         val idPortenService: IdPortenService = mockk()
 
@@ -40,6 +39,4 @@ internal class DigisosApiClientTest {
 
         digisosApiClient.oppdaterDigisosSak("123123", DigisosApiWrapper(SakWrapper(JsonDigisosSoker()), ""))
     }
-
-
 }

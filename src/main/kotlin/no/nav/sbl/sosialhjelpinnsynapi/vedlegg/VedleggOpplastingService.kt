@@ -87,7 +87,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     }
 
     private fun filenamesAreUniqueAndMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
-        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { it.filnavn } }
+        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
         val filnavnMetadataSet = filnavnMetadata.toHashSet()
         val filnavnMultipart = files.map { it.originalFilename }
         val filnavnMultipartSet = filnavnMultipart.toHashSet()

@@ -3,7 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.common
 import io.ktor.features.origin
 import io.ktor.request.ApplicationRequest
 
-internal sealed class ParamType(val description: String) {
+internal sealed class ParamType(private val description: String) {
     object Header : ParamType("header")
     object Parameter : ParamType("parameter")
     object QueryParameter : ParamType("query parameter")

@@ -79,7 +79,7 @@ data class Hendelse(
 }
 
 enum class SoknadsStatus {
-    SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET
+    MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE
 }
 
 enum class SaksStatus {

@@ -134,7 +134,6 @@ internal class EventServiceTest {
         val model = service.createModel("123", "token")
 
         assertThat(model).isNotNull
-        assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
         assertThat(model.historikk).hasSize(1)
     }
 
@@ -147,7 +146,6 @@ internal class EventServiceTest {
             val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
             assertThat(model.historikk).hasSize(1)
 
             val hendelse = model.historikk.last()

@@ -14,6 +14,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
         JsonSoknadsStatus.Status.MOTTATT -> "Søknaden med vedlegg er mottatt hos ${soknadsmottaker?.navEnhetsnavn} "
         JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling"
         JsonSoknadsStatus.Status.FERDIGBEHANDLET -> "Søknaden er ferdig behandlet"
+        JsonSoknadsStatus.Status.BEHANDLES_IKKE -> "Søknaden behandles ikke"
         else -> throw RuntimeException("Statustype ${hendelse.status.value()} mangler mapping")
     }
 

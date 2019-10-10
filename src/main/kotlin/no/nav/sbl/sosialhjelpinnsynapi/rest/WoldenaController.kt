@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 class WoldenaController(private val norgClient: NorgClient) {
 
     @PostMapping("/nyNavEnhet", consumes = [APPLICATION_JSON_UTF8_VALUE], produces = [APPLICATION_JSON_UTF8_VALUE])
-    fun oppdaterDigisosSak(@RequestBody nyeNavEnheter: List<NyNavEnhet>): ResponseEntity<String> {
+    fun oppdaterNavEnhetMock(@RequestBody nyeNavEnheter: List<NyNavEnhet>): ResponseEntity<String> {
         nyeNavEnheter.forEach {
             val navEnhet = NavEnhet(0, it.name, it.id, "", 0, "", "")
             norgClient.postNavEnhet(navEnhet.enhetNr.toString(), navEnhet)

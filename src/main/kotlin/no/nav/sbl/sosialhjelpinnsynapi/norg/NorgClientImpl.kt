@@ -46,6 +46,4 @@ class NorgClientImpl(clientProperties: ClientProperties,
             throw NorgException(null, e.message, e)
         }
     }
-
-    override fun postNavEnhet(enhetsnr: String, navenhet: NavEnhet) { }
 }

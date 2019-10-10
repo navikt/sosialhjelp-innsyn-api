@@ -20,7 +20,7 @@ class NorgClientMock : NorgClient {
         })
     }
 
-    override fun postNavEnhet(enhetsnr: String, navenhet: NavEnhet) {
+    fun postNavEnhet(enhetsnr: String, navenhet: NavEnhet) {
         innsynMap[enhetsnr] = navenhet
     }
 }

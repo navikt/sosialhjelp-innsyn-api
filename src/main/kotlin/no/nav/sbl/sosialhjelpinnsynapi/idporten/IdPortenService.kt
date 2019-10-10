@@ -37,11 +37,11 @@ class IdPortenService(clientProperties: ClientProperties) {
             ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
 
     val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
-        log.info("Henter config fra " + idPortenConfigUrl)
+        log.info("Henter config fra $idPortenConfigUrl")
         val config = defaultHttpClient.get<IdPortenOidcConfiguration> {
             url(idPortenConfigUrl)
         }
-        log.info("Hentet config fra " + idPortenConfigUrl)
+        log.info("Hentet config fra $idPortenConfigUrl")
         config
     }.also {
         log.info("IdPorten: OIDC configuration initialized")

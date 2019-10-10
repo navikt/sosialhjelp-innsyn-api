@@ -5,7 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.SENDT
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.MOTTATT
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
@@ -56,7 +56,7 @@ internal class DigisosApiControllerTest {
     fun `skal mappe fra DigisosSak til SakResponse`() {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2)
 
-        every { model1.status } returns SENDT
+        every { model1.status } returns MOTTATT
         every { model2.status } returns UNDER_BEHANDLING
 
         every { model1.oppgaver.isEmpty() } returns false
@@ -76,7 +76,6 @@ internal class DigisosApiControllerTest {
         if (saker != null && saker.size == 2) {
             val first = saker[0]
             assertThat(first.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
-            assertThat(first.status).isEqualTo("$SENDT")
             assertThat(first.antallNyeOppgaver).isEqualTo(2)
             assertThat(first.kilde).isEqualTo(KILDE_INNSYN_API)
 
@@ -92,7 +91,7 @@ internal class DigisosApiControllerTest {
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1)
 
-        every { model1.status } returns SENDT
+        every { model1.status } returns MOTTATT
         every { model1.oppgaver.isEmpty() } returns true
 
         val response = controller.hentAlleSaker("token")

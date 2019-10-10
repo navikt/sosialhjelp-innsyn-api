@@ -20,7 +20,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonalia
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sbl.soknadsosialhjelp.soknad.utdanning.JsonUtdanning
 
-val defaultJsonSoknad = JsonSoknad()
+val defaultJsonSoknad: JsonSoknad = JsonSoknad()
         .withVersion("1.0.0")
         .withData(
                 JsonData()

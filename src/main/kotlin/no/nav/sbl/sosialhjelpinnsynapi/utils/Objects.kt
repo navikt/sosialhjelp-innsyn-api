@@ -20,7 +20,7 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
         .configure(SerializationFeature.INDENT_OUTPUT, true)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-val filformatObjectMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
+val filformatObjectMapper: ObjectMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
         .registerModule(JavaTimeModule())
         .configure(SerializationFeature.INDENT_OUTPUT, true)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

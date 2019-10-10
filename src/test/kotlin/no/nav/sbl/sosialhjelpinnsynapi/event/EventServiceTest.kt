@@ -134,12 +134,11 @@ internal class EventServiceTest {
         val model = service.createModel("123", "token")
 
         assertThat(model).isNotNull
-        assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
         assertThat(model.historikk).hasSize(1)
     }
 
     @Nested
-    inner class soknadStatus {
+    inner class SoknadStatus {
         @Test
         fun `soknadsStatus SENDT`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
@@ -147,7 +146,6 @@ internal class EventServiceTest {
             val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
             assertThat(model.historikk).hasSize(1)
 
             val hendelse = model.historikk.last()
@@ -228,7 +226,7 @@ internal class EventServiceTest {
     }
 
     @Nested
-    inner class saksStatusVedtakFattet {
+    inner class SaksStatusVedtakFattet {
 
         @Test
         fun `saksStatus UTEN vedtakFattet`() {
@@ -416,7 +414,7 @@ internal class EventServiceTest {
 
 
     @Nested
-    inner class dokumentasjonEtterspurt {
+    inner class DokumentasjonEtterspurt {
 
         @Test
         fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
@@ -536,7 +534,7 @@ internal class EventServiceTest {
         assertThat(hendelse.url).contains("/forsendelse/$svarUtId/$svarUtNr")
     }
 
-    fun resetHendelser() {
+    private fun resetHendelser() {
         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(null)
         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(null)

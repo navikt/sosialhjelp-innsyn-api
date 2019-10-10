@@ -40,6 +40,13 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(OpplastingException::class)
+    fun handleOpplastingError(e: OpplastingException): ResponseEntity<ErrorMessage> {
+        log.error("Noe feilet ved opplasting til Fiks", e)
+        val error = ErrorMessage(fiksError, "Noe uventet feilet")
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
 }
 
 data class ErrorMessage(

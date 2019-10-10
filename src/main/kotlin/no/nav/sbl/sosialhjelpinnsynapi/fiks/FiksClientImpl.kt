@@ -16,6 +16,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON
 import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
+import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.*
@@ -32,7 +33,8 @@ import java.util.Collections.singletonList
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate,
-                     private val idPortenService: IdPortenService) : FiksClient {
+                     private val idPortenService: IdPortenService,
+                     private val virusScanner: VirusScanner) : FiksClient {
 
     companion object {
         val log by logger()
@@ -119,6 +121,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
+        files.forEach { virusScanner.scan(it.filnavn!!, it.fil.readAllBytes()) }
+
         val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 

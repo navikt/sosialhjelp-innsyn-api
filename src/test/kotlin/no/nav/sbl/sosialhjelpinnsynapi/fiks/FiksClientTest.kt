@@ -3,15 +3,15 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
@@ -22,6 +22,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.io.InputStream
 
 
 internal class FiksClientTest {
@@ -29,8 +30,9 @@ internal class FiksClientTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val restTemplate: RestTemplate = mockk()
     private val idPortenService: IdPortenService = mockk()
+    private val virusScanner: VirusScanner = mockk()
 
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, virusScanner)
 
     private val id = "123"
 
@@ -143,6 +145,12 @@ internal class FiksClientTest {
 
     @Test
     fun `POST ny ettersendelse`() {
+        val fil1: InputStream = mockk()
+        val fil2: InputStream = mockk()
+
+        every { fil1.readAllBytes() } returns "test-fil".toByteArray()
+        every { fil2.readAllBytes() } returns "div".toByteArray()
+
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()
         every { mockDigisosSakResponse.statusCode.is2xxSuccessful } returns true
         every { mockDigisosSakResponse.body } returns ok_digisossak_response
@@ -153,10 +161,12 @@ internal class FiksClientTest {
         every { mockFiksResponse.statusCode.is2xxSuccessful } returns true
         every { restTemplate.exchange(any<String>(), HttpMethod.POST, capture(slot), String::class.java) } returns mockFiksResponse
 
-        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, mockk()),
-                FilForOpplasting("filnavn1", "image/jpg", 1L, mockk()))
+        every { virusScanner.scan(any(), any()) } just runs
 
-        Assertions.assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
+        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
+                FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))
+
+        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
 
         val httpEntity = slot.captured
 
@@ -172,5 +182,24 @@ internal class FiksClientTest {
         assertThat(httpEntity.body!!["vedlegg.json"].toString().contains("text/plain;charset=UTF-8"))
         assertThat(httpEntity.body!!["vedleggSpesifikasjon:0"].toString().contains("text/plain;charset=UTF-8"))
         assertThat(httpEntity.body!!["vedleggSpesifikasjon:1"].toString().contains("text/plain;charset=UTF-8"))
+    }
+
+    @Test
+    fun `POST ny ettersendelse feiler fordi virusscanner detekterer mulig virus`() {
+        val fil1: InputStream = mockk()
+
+        every { fil1.readAllBytes() } returns "test-fil".toByteArray()
+
+        every { virusScanner.scan(any(), any()) } throws OpplastingException("mulig virus", null)
+
+        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1))
+
+        assertThatExceptionOfType(OpplastingException::class.java)
+                .isThrownBy { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }
+
+//        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
+
+        verify { restTemplate wasNot Called }
+
     }
 }

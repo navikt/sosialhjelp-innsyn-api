@@ -13,7 +13,6 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 
-@Profile("mock")
 @Configuration
 @EnableWebSecurity
 @EnableWebMvc
@@ -22,7 +21,7 @@ class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurit
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        // http.cors()
+        http.cors()
         http.csrf().disable()
     }
 
@@ -34,12 +33,12 @@ class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurit
         configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization")
         configuration.allowCredentials = true
         val source = UrlBasedCorsConfigurationSource()
-        //   source.registerCorsConfiguration("/**", configuration)
+        source.registerCorsConfiguration("/**", configuration)
         return source
     }
 }
 
-
+@Profile("mock")
 @Order(-1)
 @Configuration
 class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {

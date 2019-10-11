@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.config
 import no.nav.security.spring.oidc.api.EnableOIDCTokenValidation
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -12,7 +13,8 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 
-//@Configuration
+@Profile("mock")
+@Configuration
 @EnableWebSecurity
 @EnableWebMvc
 @EnableOIDCTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController"])
@@ -37,7 +39,7 @@ class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurit
     }
 }
 
-//@Profile("mock")
+
 @Order(-1)
 @Configuration
 class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {

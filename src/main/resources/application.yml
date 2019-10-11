@@ -31,6 +31,8 @@ client:
 
 cors:
   allowed_origins:
+    - "http://localhost:3000"
+    - "http://localhost:3001"
     - "https://www.nav.no/sosialhjelp/"
     - "https://www-q0.nav.no/sosialhjelp/"
     - "https://www-q1.nav.no/sosialhjelp/"

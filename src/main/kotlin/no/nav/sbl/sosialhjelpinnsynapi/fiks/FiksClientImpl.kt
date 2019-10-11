@@ -45,7 +45,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         val headers = setIntegrasjonHeaders(token)
 
-        log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
+        log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId $token")
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 

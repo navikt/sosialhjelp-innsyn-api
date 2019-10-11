@@ -25,8 +25,6 @@ import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
-import java.time.LocalDate
-import java.time.ZoneOffset
 import java.util.Collections.singletonList
 
 
@@ -85,13 +83,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun hentAlleDigisosSaker(token: String, sokePeriode: LocalDate?): List<DigisosSak> {
+    override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         val headers = setIntegrasjonHeaders(token)
-        var timeEpoc:Long = if(sokePeriode == null) 0 else sokePeriode.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
 
-            return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }.filter { it.sistEndret >= timeEpoc }
+            return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.statusCode} ${e.statusText}", e)

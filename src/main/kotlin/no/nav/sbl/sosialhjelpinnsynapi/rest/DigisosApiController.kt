@@ -15,7 +15,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
 
 @Unprotected
 @RestController
@@ -33,11 +32,9 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
     }
 
     @GetMapping("/saker")
-    fun hentAlleSaker(periode: String?, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SakResponse>> {
+    fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SakResponse>> {
 
-        var sokePeriode = tolkPeriodeStreng(periode)
-
-        val saker = fiksClient.hentAlleDigisosSaker(token, sokePeriode)
+        val saker = fiksClient.hentAlleDigisosSaker(token)
 
         val responselist = saker
                 .map {
@@ -54,19 +51,6 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
                 }
 
         return ResponseEntity.ok().body(responselist)
-    }
-
-    private fun tolkPeriodeStreng(periode: String?): LocalDate? {
-        var sokeDato = LocalDate.now()
-        if(periode == null)
-            return sokeDato.minusWeeks(4)
-        if(periode.toLowerCase().equals("siste3mnd"))
-            return sokeDato.minusMonths(3)
-        if(periode.toLowerCase().equals("sisteaar"))
-            return sokeDato.minusYears(1)
-        if(periode.toLowerCase().equals("alle"))
-            return null
-        return sokeDato.minusWeeks(4)
     }
 
     private fun hentNavn(digisosSak: DigisosSak, model: InternalDigisosSoker): String {

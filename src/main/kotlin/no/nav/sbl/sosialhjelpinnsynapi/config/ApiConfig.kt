@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.config
 import no.nav.security.spring.oidc.api.EnableOIDCTokenValidation
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -13,7 +12,7 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 
-@Configuration
+//@Configuration
 @EnableWebSecurity
 @EnableWebMvc
 @EnableOIDCTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController"])
@@ -28,17 +27,17 @@ class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurit
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("*")
+        configuration.allowedOrigins = listOf(*corsProperties.allowedOrigins)
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
         configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization")
         configuration.allowCredentials = true
         val source = UrlBasedCorsConfigurationSource()
-        source.registerCorsConfiguration("/**", configuration)
+        //   source.registerCorsConfiguration("/**", configuration)
         return source
     }
 }
 
-@Profile("mock")
+//@Profile("mock")
 @Order(-1)
 @Configuration
 class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {

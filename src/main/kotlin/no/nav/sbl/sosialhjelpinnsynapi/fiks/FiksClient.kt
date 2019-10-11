@@ -4,12 +4,13 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
+import java.time.LocalDate
 
 interface FiksClient {
 
     fun hentDigisosSak(digisosId: String, token: String): DigisosSak
 
-    fun hentAlleDigisosSaker(token: String): List<DigisosSak>
+    fun hentAlleDigisosSaker(token: String, sokePeriode: LocalDate?): List<DigisosSak>
 
     fun hentKommuneInfo(kommunenummer: String): KommuneInfo
 

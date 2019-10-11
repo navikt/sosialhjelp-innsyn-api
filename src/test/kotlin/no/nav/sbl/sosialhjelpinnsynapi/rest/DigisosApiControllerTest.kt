@@ -54,7 +54,7 @@ internal class DigisosApiControllerTest {
 
     @Test
     fun `skal mappe fra DigisosSak til SakResponse`() {
-        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2)
+        every { fiksClient.hentAlleDigisosSaker(any(), null) } returns listOf(digisosSak1, digisosSak2)
 
         every { model1.status } returns MOTTATT
         every { model2.status } returns UNDER_BEHANDLING
@@ -67,7 +67,7 @@ internal class DigisosApiControllerTest {
 
         every { model2.saker } returns mutableListOf(sak1, sak2)
 
-        val response = controller.hentAlleSaker("token")
+        val response = controller.hentAlleSaker(null, "token")
         val saker = response.body
 
         assertThat(saker).isNotNull
@@ -89,12 +89,12 @@ internal class DigisosApiControllerTest {
 
     @Test
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() {
-        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1)
+        every { fiksClient.hentAlleDigisosSaker(any(), null) } returns listOf(digisosSak1)
 
         every { model1.status } returns MOTTATT
         every { model1.oppgaver.isEmpty() } returns true
 
-        val response = controller.hentAlleSaker("token")
+        val response = controller.hentAlleSaker(null, "token")
         val saker = response.body
 
         assertThat(saker).isNotNull

@@ -91,7 +91,7 @@ internal class FiksClientTest {
                     typeRef<List<String>>())
         } returns mockListResponse
 
-        val result = fiksClient.hentAlleDigisosSaker("Token")
+        val result = fiksClient.hentAlleDigisosSaker("Token", null)
 
         assertThat(result).isNotNull
         assertThat(result).hasSize(2)

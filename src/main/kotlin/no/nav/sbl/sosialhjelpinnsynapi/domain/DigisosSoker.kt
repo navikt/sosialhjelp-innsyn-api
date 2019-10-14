@@ -36,15 +36,15 @@ data class Oppgave(
 
 data class Sak(
         var referanse: String,
-        var saksStatus: SaksStatus,
-        var tittel: String,
+        var saksStatus: SaksStatus?,
+        var tittel: String?,
         var vedtak: MutableList<Vedtak>,
         var utbetalinger: MutableList<Utbetaling>,
         var vilkar: MutableList<Vilkar>
 )
 
 data class Vedtak(
-        var utfall: UtfallVedtak,
+        var utfall: UtfallVedtak?,
         var vedtaksFilUrl: String
 )
 
@@ -83,7 +83,7 @@ enum class SoknadsStatus {
 }
 
 enum class SaksStatus {
-    UNDER_BEHANDLING, IKKE_INNSYN
+    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE
 }
 
 enum class UtbetalingsStatus {

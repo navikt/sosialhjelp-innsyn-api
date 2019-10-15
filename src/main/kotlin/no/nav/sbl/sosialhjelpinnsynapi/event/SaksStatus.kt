@@ -11,13 +11,15 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
 
     if (sakForReferanse != null) {
         // Oppdater felter
-        sakForReferanse.saksStatus = SaksStatus.valueOf(hendelse.status.name)
-        sakForReferanse.tittel = hendelse.tittel
+        if (hendelse.status != null) {
+            sakForReferanse.saksStatus = SaksStatus.valueOf(hendelse.status.name)
+        }
+        sakForReferanse.tittel = hendelse.tittel ?: sakForReferanse.tittel
     } else {
         // Opprett ny Sak
         saker.add(Sak(
                 hendelse.referanse,
-                SaksStatus.valueOf(hendelse.status.name),
+                if (hendelse.status != null) SaksStatus.valueOf(hendelse.status.name) else null,
                 hendelse.tittel,
                 mutableListOf(),
                 mutableListOf(),

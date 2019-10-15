@@ -10,7 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
 
-    val utfall = if (hendelse.utfall != null) UtfallVedtak.valueOf(hendelse.utfall.utfall.name) else null
+    val utfall = if (hendelse.utfall?.utfall?.name != null) UtfallVedtak.valueOf(hendelse.utfall.utfall.name) else null
     val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)
 
     val vedtakFattet = Vedtak(utfall, vedtaksfilUrl)

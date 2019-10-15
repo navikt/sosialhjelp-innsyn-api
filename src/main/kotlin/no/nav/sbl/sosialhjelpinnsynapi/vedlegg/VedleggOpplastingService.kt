@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.getSha512FromByteArray
 import no.nav.sbl.sosialhjelpinnsynapi.utils.isImage
 import no.nav.sbl.sosialhjelpinnsynapi.utils.isPdf
 import no.nav.sbl.sosialhjelpinnsynapi.utils.pdfIsSigned
+import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
@@ -29,7 +30,8 @@ const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
 @Component
 class VedleggOpplastingService(private val fiksClient: FiksClient,
-                               private val krypteringService: KrypteringService) {
+                               private val krypteringService: KrypteringService,
+                               private val virusScanner: VirusScanner) {
 
     companion object {
         val log by logger()
@@ -41,6 +43,9 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
         check(filenamesAreUniqueAndMatchInMetadataAndFiles(metadata, files)) { "Filnavn er ikke unike eller det er mismatch mellom filer og metadata" }
+
+        // Scan for virus
+        files.forEach { virusScanner.scan(it.name, it.bytes) }
 
         // Valider og krypter
         val filerForOpplasting = mutableListOf<FilForOpplasting>()

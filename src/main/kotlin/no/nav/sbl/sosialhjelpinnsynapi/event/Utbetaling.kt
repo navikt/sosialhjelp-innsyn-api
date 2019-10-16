@@ -12,7 +12,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
             UtbetalingsStatus.valueOf(hendelse.status?.value() ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()),
             BigDecimal.valueOf(hendelse.belop ?: 0.0),
             hendelse.beskrivelse,
-            if (hendelse.forfallsdato == null) LocalDate.now() else LocalDate.parse(hendelse.forfallsdato, pattern),
+            if (hendelse.forfallsdato == null) null else LocalDate.parse(hendelse.forfallsdato, pattern),
             if (hendelse.utbetalingsdato == null) null else LocalDate.parse(hendelse.utbetalingsdato, pattern),
             if (hendelse.fom == null) null else LocalDate.parse(hendelse.fom, pattern),
             if (hendelse.tom == null) null else LocalDate.parse(hendelse.tom, pattern),

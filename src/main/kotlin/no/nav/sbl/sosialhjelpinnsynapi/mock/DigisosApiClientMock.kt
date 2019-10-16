@@ -6,7 +6,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeParseException
 import java.util.*
 
 @Profile("mock")
@@ -29,6 +31,11 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
 
     private fun femMinutterForMottattSoknad(digisosApiWrapper: DigisosApiWrapper): Long {
         val mottattTidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt
-        return toLocalDateTime(mottattTidspunkt).minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
+        try {
+            val toLocalDateTime = toLocalDateTime(mottattTidspunkt)
+            return toLocalDateTime.minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
+        } catch (e: DateTimeParseException) {
+            return LocalDateTime.now().minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
+        }
     }
 }

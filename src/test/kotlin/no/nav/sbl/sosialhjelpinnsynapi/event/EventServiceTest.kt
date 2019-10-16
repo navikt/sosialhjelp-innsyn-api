@@ -280,7 +280,7 @@ internal class EventServiceTest {
             assertThat(model.historikk).hasSize(3)
 
             val sak = model.saker.last()
-            assertThat(sak.saksStatus).isNull()
+            assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
             assertThat(sak.referanse).isEqualTo(referanse_1)
             assertThat(sak.tittel).isNull()
             assertThat(sak.vedtak).isEmpty()
@@ -464,7 +464,7 @@ internal class EventServiceTest {
             assertThat(model.historikk).hasSize(4)
 
             val sak = model.saker.last()
-            assertThat(sak.saksStatus).isNull()
+            assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
             assertThat(sak.referanse).isEqualTo(referanse_1)
             assertThat(sak.tittel).isNull()
             assertThat(sak.vedtak).hasSize(1)

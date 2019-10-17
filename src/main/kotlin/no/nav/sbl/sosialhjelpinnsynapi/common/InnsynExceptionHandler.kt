@@ -22,7 +22,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<ErrorMessage> {
         log.error(e.message, e)
-        val error = ErrorMessage(unexpectedError, "Noe uventet feilet")
+        val error = ErrorMessage(unexpectedError, e.message)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

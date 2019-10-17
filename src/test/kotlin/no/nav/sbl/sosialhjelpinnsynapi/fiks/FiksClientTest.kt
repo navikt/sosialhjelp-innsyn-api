@@ -4,8 +4,10 @@ import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
@@ -28,14 +30,18 @@ internal class FiksClientTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val restTemplate: RestTemplate = mockk()
     private val idPortenService: IdPortenService = mockk()
+    private val redisStore: RedisStore = mockk()
 
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore)
 
     private val id = "123"
 
     @BeforeEach
     fun init() {
         clearMocks(restTemplate)
+
+        every { redisStore.get(id) } returns null
+        every { redisStore.set(id, any(), any()) } returns "OK"
     }
 
     @Test
@@ -56,6 +62,50 @@ internal class FiksClientTest {
         val result = fiksClient.hentDigisosSak(id, "Token")
 
         assertThat(result).isNotNull
+    }
+
+    @Test
+    fun `GET digisosSak fra cache`() {
+        val mockCacheResponse: DigisosSak = mockk()
+        every { redisStore.get(id) } returns mockCacheResponse
+
+        val result2 = fiksClient.hentDigisosSak(id, "Token")
+
+        assertThat(result2).isNotNull
+
+        verify(exactly = 0) { redisStore.set(any(), any(), any()) }
+    }
+
+    @Test
+    fun `GET digisosSak fra cache etter put`() {
+        val mockResponse: ResponseEntity<String> = mockk()
+
+        every { mockResponse.statusCode.is2xxSuccessful } returns true
+        every { mockResponse.body } returns ok_digisossak_response
+
+        every {
+            restTemplate.exchange(
+                    any<String>(),
+                    any(),
+                    any(),
+                    String::class.java)
+        } returns mockResponse
+
+        val result1 = fiksClient.hentDigisosSak(id, "Token")
+
+        assertThat(result1).isNotNull
+        verify(exactly = 1) { redisStore.set(any(), any(), any()) }
+        verify(exactly = 1) { redisStore.get(any()) }
+
+        val mockCacheResponse: DigisosSak = mockk()
+        every { redisStore.get(id) } returns mockCacheResponse
+
+        val result = fiksClient.hentDigisosSak(id, "Token")
+
+        assertThat(result).isNotNull
+
+        verify(exactly = 1) { redisStore.set(any(), any(), any()) }
+        verify(exactly = 2) { redisStore.get(any()) }
     }
 
     @Test

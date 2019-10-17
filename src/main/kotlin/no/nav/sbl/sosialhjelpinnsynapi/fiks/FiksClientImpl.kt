@@ -10,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -32,7 +33,8 @@ import java.util.Collections.singletonList
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate,
-                     private val idPortenService: IdPortenService) : FiksClient {
+                     private val idPortenService: IdPortenService,
+                     private val redisStore: RedisStore) : FiksClient {
 
     companion object {
         val log by logger()
@@ -43,6 +45,14 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
+        val get: Any? = redisStore.get(digisosId)
+        if (get != null) {
+            if (get is DigisosSak) {
+                log.info("Henter digisosSak fra cache $digisosId")
+                return get
+            }
+        }
+
         val headers = setIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
@@ -50,7 +60,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
             log.info("Hentet DigisosSak $digisosId fra Fiks")
-            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
+            val digisosSak = objectMapper.readValue(response.body!!, DigisosSak::class.java)
+            cachePut(digisosId, digisosSak)
+            return digisosSak
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
@@ -58,6 +70,18 @@ class FiksClientImpl(clientProperties: ClientProperties,
         } catch (e: Exception) {
             log.warn("Fiks - hentDigisosSak feilet", e)
             throw FiksException(null, e.message, e)
+        }
+    }
+
+    /**
+     * lagrer digisosSak i cache i 20s
+     */
+    private fun cachePut(key: String, value: Any) {
+        val set = redisStore.set(key, value, 20_000)
+        if (set == null) {
+            log.warn("Cache put feilet eller fikk timeout")
+        } else if (set == "OK") {
+            log.info("Cache put OK $key")
         }
     }
 

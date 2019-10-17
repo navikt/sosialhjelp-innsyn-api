@@ -29,6 +29,8 @@ val tikaVersion = "1.22"
 val pdfBoxVersion = "2.0.16"
 val fiksKrypteringVersion = "1.0.5"
 val kotlinTestVersion = "1.3.50"
+val redisMockVersion = "0.1.15"
+val lettuceVersion = "5.2.0.RELEASE"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -105,6 +107,9 @@ dependencies {
     implementation("org.apache.tika:tika-core:$tikaVersion")
     implementation("org.apache.pdfbox:preflight:$pdfBoxVersion")
     implementation("no.ks.fiks:kryptering:$fiksKrypteringVersion")
+
+    implementation("io.lettuce:lettuce-core:$lettuceVersion")
+    implementation("com.github.fppt:jedis-mock:$redisMockVersion")
 
     //spesifikke versjoner oppgradert etter ønske fra snyk
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion")

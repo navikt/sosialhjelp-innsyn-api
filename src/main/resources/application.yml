@@ -10,6 +10,9 @@ spring:
     banner-mode: 'off'
   application:
     name: "sosialhjelp-innsyn-api"
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: 6379
 
 server:
   servlet:

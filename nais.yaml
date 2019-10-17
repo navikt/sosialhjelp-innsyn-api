@@ -41,6 +41,8 @@ spec:
       cpu: 200m
       memory: 256Mi
   env:
+    - name: REDIS_HOST
+      value: sosialhjelp-innsyn-api-redis.default.svc.nais.local
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: {{fiks_digisos_endpoint_url}}
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL

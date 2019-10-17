@@ -1,12 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
@@ -26,9 +26,6 @@ class MockController(private val fiksClientMock: FiksClientMock,
         val log by logger()
     }
 
-    private val mapper = jacksonObjectMapper()
-    private val sosialhjelpMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
-
     @PostMapping("/{soknadId}",
             consumes = [APPLICATION_JSON_UTF8_VALUE],
             produces = [APPLICATION_JSON_UTF8_VALUE])
@@ -36,8 +33,8 @@ class MockController(private val fiksClientMock: FiksClientMock,
         log.info("soknadId: $soknadId, jsonDigisosSoker: $digisosApiWrapper")
         val digisosSak = fiksClientMock.hentDigisosSak(soknadId, "Token")
 
-        val jsonNode = mapper.convertValue(digisosApiWrapper.sak.soker, JsonNode::class.java)
-        val jsonDigisosSoker = sosialhjelpMapper.convertValue<JsonDigisosSoker>(jsonNode, JsonDigisosSoker::class.java)
+        val jsonNode = objectMapper.convertValue(digisosApiWrapper.sak.soker, JsonNode::class.java)
+        val jsonDigisosSoker = filformatObjectMapper.convertValue<JsonDigisosSoker>(jsonNode, JsonDigisosSoker::class.java)
         digisosSak.digisosSoker?.metadata?.let { fiksClientMock.postDokument(it, jsonDigisosSoker) }
     }
 

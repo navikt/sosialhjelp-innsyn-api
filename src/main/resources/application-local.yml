@@ -1,13 +1,3 @@
-server:
-  servlet:
-    context-path: '/sosialhjelp/innsyn-api'
-
-spring:
-  main:
-    banner-mode: 'off'
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: 6379
 
 cors:
   allowed_origins:

@@ -53,13 +53,13 @@ internal class SaksStatusServiceTest {
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
-        assertThat(response[0].status).isEqualTo(UtfallEllerSaksStatus.UNDER_BEHANDLING)
+        assertThat(response[0].status).isEqualTo(SaksStatus.UNDER_BEHANDLING)
         assertThat(response[0].tittel).isEqualTo(tittel)
         assertThat(response[0].vedtaksfilUrlList).isNull()
     }
 
     @Test
-    fun `Skal returnere response med status = INNVILGET og vedtaksfilUrl`() {
+    fun `Skal returnere response med status = FERDIGBEHANDLET ved vedtakFattet uavhengig av utfallet til vedtakFattet`() {
         val model = InternalDigisosSoker()
         model.saker.add(Sak(
                 referanse = referanse,
@@ -79,14 +79,14 @@ internal class SaksStatusServiceTest {
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
-        assertThat(response[0].status).isEqualTo(UtfallEllerSaksStatus.INNVILGET)
+        assertThat(response[0].status).isEqualTo(SaksStatus.FERDIGBEHANDLET)
         assertThat(response[0].tittel).isEqualTo(tittel)
         assertThat(response[0].vedtaksfilUrlList).hasSize(1)
         assertThat(response[0].vedtaksfilUrlList?.get(0)).isEqualTo(vedtaksfilUrl)
     }
 
     @Test
-    fun `Skal returnere response med status = INNVILGET og vedtaksfilUrl og DEFAULT_TITTEL`() {
+    fun `Skal returnere response med status = FERDIGBEHANDLET og vedtaksfilUrl og DEFAULT_TITTEL`() {
         val model = InternalDigisosSoker()
         model.saker.add(Sak(
                 referanse = referanse,
@@ -106,7 +106,7 @@ internal class SaksStatusServiceTest {
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
-        assertThat(response[0].status).isEqualTo(UtfallEllerSaksStatus.INNVILGET)
+        assertThat(response[0].status).isEqualTo(SaksStatus.FERDIGBEHANDLET)
         assertThat(response[0].tittel).isEqualTo(DEFAULT_TITTEL)
         assertThat(response[0].vedtaksfilUrlList).hasSize(1)
         assertThat(response[0].vedtaksfilUrlList?.get(0)).isEqualTo(vedtaksfilUrl)

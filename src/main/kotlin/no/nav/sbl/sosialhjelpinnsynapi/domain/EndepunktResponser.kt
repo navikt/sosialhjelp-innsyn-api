@@ -10,13 +10,9 @@ data class SoknadsStatusResponse(
 
 data class SaksStatusResponse(
         val tittel: String,
-        val status: UtfallEllerSaksStatus?,
+        val status: SaksStatus?,
         val vedtaksfilUrlList: List<String>?
 )
-
-enum class UtfallEllerSaksStatus {
-    UNDER_BEHANDLING, IKKE_INNSYN, FEILREGISTRERT, INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST, OMGJORT
-}
 
 data class HendelseResponse(
         val tidspunkt: String,

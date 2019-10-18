@@ -3,14 +3,14 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
-import no.nav.sbl.sosialhjelpinnsynapi.enumNameToLowercase
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
 
-    val utfall = UtfallVedtak.valueOf(hendelse.utfall.utfall.name)
+    val utfallString = hendelse.utfall?.utfall?.name
+    val utfall = if (utfallString == null) null else UtfallVedtak.valueOf(utfallString)
     val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)
 
     val vedtakFattet = Vedtak(utfall, vedtaksfilUrl)
@@ -19,11 +19,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     if (sakForReferanse != null) {
         sakForReferanse.vedtak.add(vedtakFattet)
     } else {
-        // Ny Sak opprettes med default-verdier
         val sak = Sak(
                 hendelse.saksreferanse,
-                SaksStatus.UNDER_BEHANDLING, //TODO: midlertidig SaksStatus for disse tilfellene?
-                DEFAULT_TITTEL,
+                null,
+                null,
                 mutableListOf(vedtakFattet),
                 mutableListOf(),
                 mutableListOf()
@@ -32,11 +31,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     }
 
     val sak = saker.first { it.referanse == hendelse.saksreferanse }
-    val beskrivelse = if (hendelse.utfall == null) { // Hvis utfall kan være null
-        "Vedtak fattet"
-    } else {
-        "${sak.tittel} er ${enumNameToLowercase(utfall.name)}"
-    }
+    val beskrivelse = "${sak.tittel ?: DEFAULT_TITTEL} er ferdig behandlet"
 
     historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), vedtaksfilUrl))
 }

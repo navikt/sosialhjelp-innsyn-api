@@ -22,7 +22,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<ErrorMessage> {
         log.error(e.message, e)
-        val error = ErrorMessage(unexpectedError, "Noe uventet feilet")
+        val error = ErrorMessage(unexpectedError, e.message)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
@@ -37,6 +37,13 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleNorgError(e: NorgException): ResponseEntity<ErrorMessage> {
         log.error("Noe feilet ved kall til Norg", e)
         val error = ErrorMessage(norgError, "Noe uventet feilet")
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @ExceptionHandler(OpplastingException::class)
+    fun handleOpplastingError(e: OpplastingException): ResponseEntity<ErrorMessage> {
+        log.error("Noe feilet ved opplasting av vedlegg", e)
+        val error = ErrorMessage(unexpectedError, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

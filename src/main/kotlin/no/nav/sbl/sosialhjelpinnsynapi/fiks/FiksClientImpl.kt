@@ -143,6 +143,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.info("Ettersendelse sendt til Fiks")
 
         } catch (e: HttpStatusCodeException) {
+            log.warn(e.responseBodyAsString)
             log.warn("Opplasting av ettersendelse feilet - ${e.statusCode} ${e.statusText}", e)
             throw FiksException(e.statusCode, e.message, e)
         } catch (e: Exception) {

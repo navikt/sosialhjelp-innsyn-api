@@ -7,6 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SakResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
+import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
@@ -56,7 +57,7 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
     private fun hentNavn(digisosSak: DigisosSak, model: InternalDigisosSoker): String {
         return when {
             digisosSak.digisosSoker == null -> "Søknad om økonomisk sosialhjelp"
-            else -> model.saker.joinToString { it.tittel }
+            else -> model.saker.joinToString { it.tittel ?: DEFAULT_TITTEL }
         }
     }
 

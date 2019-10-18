@@ -21,3 +21,8 @@ client:
   idPortenClientId: "test"
   idPortenScope: "test"
   idPortenConfigUrl: "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration"
+
+innsyn:
+  vedlegg:
+    virusscan:
+      enabled: false

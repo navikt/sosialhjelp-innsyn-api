@@ -6,15 +6,16 @@ import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.*
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 
 @Component
 class KommuneService(private val fiksClient: FiksClient,
                      private val innsynService: InnsynService) {
 
-    private val log: Logger = LoggerFactory.getLogger(KommuneService::class.java)
+    companion object {
+        val log by logger()
+    }
 
     fun hentKommuneStatus(fiksDigisosId: String, token: String): KommuneStatus {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)

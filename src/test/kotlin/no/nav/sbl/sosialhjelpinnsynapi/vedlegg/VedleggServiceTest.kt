@@ -15,7 +15,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
-import java.time.ZoneOffset
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 internal class VedleggServiceTest {
@@ -37,7 +38,8 @@ internal class VedleggServiceTest {
 
         every { mockJsonVedleggSpesifikasjon.vedlegg } returns emptyList()
 
-        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), "token") } returns soknadVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), "token") } returns soknadVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_2, any(), "token") } returns soknadVedleggSpesifikasjonMedStatusKrevesOgLastetOpp
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_1, any(), "token") } returns ettersendteVedleggSpesifikasjon_1
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_2, any(), "token") } returns ettersendteVedleggSpesifikasjon_2
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_3, any(), "token") } returns ettersendteVedleggSpesifikasjon_3
@@ -46,11 +48,11 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() {
-        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-        val list = service.hentAlleVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(id, "token")
 
         assertThat(list).isEmpty()
     }
@@ -59,7 +61,7 @@ internal class VedleggServiceTest {
     fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() {
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-        val list = service.hentAlleVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(id, "token")
 
         assertThat(list).hasSize(2)
         assertThat(list[0].type).isEqualTo(dokumenttype)
@@ -70,7 +72,7 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() {
-        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns listOf(
                 Ettersendelse(
@@ -79,16 +81,16 @@ internal class VedleggServiceTest {
                         vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_1, dokumentlagerId_1, 42)),
                         timestampSendt = tid_1.toEpochMilli()))
 
-        val list = service.hentAlleVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(id, "token")
 
         assertThat(list).hasSize(0)
     }
 
     @Test
     fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() {
-        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
-        val list = service.hentAlleVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(id, "token")
 
         assertThat(list).hasSize(4)
         assertThat(list[0].type).isEqualTo(dokumenttype_3)
@@ -109,33 +111,51 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal hente alle vedlegg for digisosSak`() {
-        val list = service.hentAlleVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(id, "token")
 
         assertThat(list).hasSize(6)
 
         // nano-presisjon lacking
+        val zoneIdOslo = ZoneId.of("Europe/Oslo")
         assertThat(list[0].type).isEqualTo(dokumenttype)
-        assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
         assertThat(list[1].type).isEqualTo(dokumenttype_2)
-        assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_soknad.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
         assertThat(list[2].type).isEqualTo(dokumenttype_3)
-        assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
 
         assertThat(list[3].type).isEqualTo(dokumenttype_4)
-        assertThat(list[3].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_1.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[3].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
 
         assertThat(list[4].type).isEqualTo(dokumenttype_3)
-        assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_2, zoneIdOslo))
 
         assertThat(list[5].type).isEqualTo(dokumenttype_3)
-        assertThat(list[5].tidspunktLastetOpp).isEqualToIgnoringNanos(tid_2.atOffset(ZoneOffset.UTC).toLocalDateTime())
+        assertThat(list[5].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_2, zoneIdOslo))
+    }
+
+    @Test
+    fun `skal hente søknadsvedlegg filtrert på status for digisosSak`() {
+        val lastetOppList = service.hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, id, originalSoknadMedVedleggKrevesOgLastetOpp, "token")
+        val vedleggKrevesList = service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, id, originalSoknadMedVedleggKrevesOgLastetOpp, "token")
+
+        assertThat(lastetOppList).hasSize(1)
+        assertThat(vedleggKrevesList).hasSize(1)
+
+        // nano-presisjon lacking
+        val zoneIdOslo = ZoneId.of("Europe/Oslo")
+        assertThat(lastetOppList[0].type).isEqualTo(dokumenttype)
+        assertThat(lastetOppList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
+
+        assertThat(vedleggKrevesList[0].type).isEqualTo(dokumenttype_2)
+        assertThat(vedleggKrevesList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
     }
 
     @Test
     fun `like filnavn i DokumentInfoList vil resultere i at de returneres for hver JsonFil med samme filnavn`() {
-        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_5, any(), any()) } returns
                 JsonVedleggSpesifikasjon()
@@ -144,13 +164,13 @@ internal class VedleggServiceTest {
                                         .withFiler(listOf(
                                                 JsonFiler().withFilnavn(ettersendelse_filnavn_1).withSha512("1231231"),
                                                 JsonFiler().withFilnavn(ettersendelse_filnavn_2).withSha512("adfgbjn")))
-                                        .withStatus("LastetOpp")
+                                        .withStatus(LASTET_OPP_STATUS)
                                         .withType(dokumenttype_3),
                                 JsonVedlegg()
                                         .withFiler(listOf(
                                                 JsonFiler().withFilnavn(ettersendelse_filnavn_2).withSha512("aasdcx"),
                                                 JsonFiler().withFilnavn(ettersendelse_filnavn_4).withSha512("qweqqa")))
-                                        .withStatus("LastetOpp")
+                                        .withStatus(LASTET_OPP_STATUS)
                                         .withType(dokumenttype_4)
                         ))
 
@@ -165,7 +185,7 @@ internal class VedleggServiceTest {
                                 DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_4, 4)),
                         timestampSendt = tid_1.toEpochMilli()))
 
-        val list = service.hentAlleVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(id, "token")
 
         assertThat(list).hasSize(2)
 
@@ -213,7 +233,8 @@ private const val vedleggMetadata_ettersendelse_2 = "vedlegg metadata 2"
 private const val vedleggMetadata_ettersendelse_3 = "vedlegg metadata 3"
 private const val vedleggMetadata_ettersendelse_4 = "vedlegg metadata 4"
 private const val vedleggMetadata_ettersendelse_5 = "vedlegg metadata 5"
-private const val vedleggMetadata_soknad = "vedlegg metadata soknad"
+private const val vedleggMetadata_soknad_1 = "vedlegg metadata soknad"
+private const val vedleggMetadata_soknad_2 = "vedlegg metadata soknad med vedlegg kreves og lastet opp"
 
 private val ettersendelser = listOf(
         Ettersendelse(
@@ -236,9 +257,18 @@ private val ettersendelser = listOf(
 private val originalSoknad = OriginalSoknadNAV(
         navEksternRefId = "123",
         metadata = "metadata",
-        vedleggMetadata = vedleggMetadata_soknad,
+        vedleggMetadata = vedleggMetadata_soknad_1,
         soknadDokument = mockk(),
         vedlegg = listOf(DokumentInfo(soknad_filnavn_1, dokumentlagerId_soknad_1, 1337), DokumentInfo(soknad_filnavn_2, dokumentlagerId_soknad_2, 1337)),
+        timestampSendt = tid_soknad.toEpochMilli()
+)
+
+private val originalSoknadMedVedleggKrevesOgLastetOpp = OriginalSoknadNAV(
+        navEksternRefId = "123",
+        metadata = "metadata",
+        vedleggMetadata = vedleggMetadata_soknad_2,
+        soknadDokument = mockk(),
+        vedlegg = listOf(DokumentInfo(soknad_filnavn_1, dokumentlagerId_soknad_1, 1337)),
         timestampSendt = tid_soknad.toEpochMilli()
 )
 
@@ -247,12 +277,25 @@ private val soknadVedleggSpesifikasjon = JsonVedleggSpesifikasjon()
                 JsonVedlegg()
                         .withFiler(listOf(
                                 JsonFiler().withFilnavn(soknad_filnavn_1).withSha512("1234fasd")))
-                        .withStatus("LastetOpp")
+                        .withStatus(LASTET_OPP_STATUS)
                         .withType(dokumenttype),
                 JsonVedlegg()
                         .withFiler(listOf(
                                 JsonFiler().withFilnavn(soknad_filnavn_2).withSha512("sfg234")))
-                        .withStatus("LastetOpp")
+                        .withStatus(LASTET_OPP_STATUS)
+                        .withType(dokumenttype_2)
+        ))
+
+private val soknadVedleggSpesifikasjonMedStatusKrevesOgLastetOpp = JsonVedleggSpesifikasjon()
+        .withVedlegg(listOf(
+                JsonVedlegg()
+                        .withFiler(listOf(
+                                JsonFiler().withFilnavn(soknad_filnavn_1).withSha512("1234fasd")))
+                        .withStatus(LASTET_OPP_STATUS)
+                        .withType(dokumenttype),
+                JsonVedlegg()
+                        .withFiler(listOf())
+                        .withStatus("VedleggKreves")
                         .withType(dokumenttype_2)
         ))
 
@@ -261,12 +304,12 @@ private val ettersendteVedleggSpesifikasjon_1 = JsonVedleggSpesifikasjon()
                 JsonVedlegg()
                         .withFiler(listOf(
                                 JsonFiler().withFilnavn(ettersendelse_filnavn_1).withSha512("g25b3")))
-                        .withStatus("LastetOpp")
+                        .withStatus(LASTET_OPP_STATUS)
                         .withType(dokumenttype_3),
                 JsonVedlegg()
                         .withFiler(listOf(
                                 JsonFiler().withFilnavn(ettersendelse_filnavn_2).withSha512("4avc65a8")))
-                        .withStatus("LastetOpp")
+                        .withStatus(LASTET_OPP_STATUS)
                         .withType(dokumenttype_4)
         ))
 
@@ -276,7 +319,7 @@ private val ettersendteVedleggSpesifikasjon_2 = JsonVedleggSpesifikasjon()
                         .withFiler(listOf(
                                 JsonFiler().withFilnavn(ettersendelse_filnavn_3).withSha512("aadsfwr"),
                                 JsonFiler().withFilnavn(ettersendelse_filnavn_4).withSha512("uiuusss")))
-                        .withStatus("LastetOpp")
+                        .withStatus(LASTET_OPP_STATUS)
                         .withType(dokumenttype_3)
         ))
 
@@ -294,6 +337,6 @@ private val ettersendteVedleggSpesifikasjon_4 = JsonVedleggSpesifikasjon()
                 JsonVedlegg()
                         .withFiler(listOf(
                                 JsonFiler().withFilnavn(ettersendelse_filnavn_4).withSha512("1231231")))
-                        .withStatus("LastetOpp")
+                        .withStatus(LASTET_OPP_STATUS)
                         .withType(dokumenttype_3)
         ))

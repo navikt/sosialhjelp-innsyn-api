@@ -1,17 +1,16 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
 import no.ks.kryptering.CMSKrypteringImpl
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestClientResponseException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.io.*
 import java.security.Security
@@ -22,12 +21,15 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
-private val log = LoggerFactory.getLogger(KrypteringServiceImpl::class.java)
 
 @Profile("!mock")
 @Component
 class KrypteringServiceImpl(clientProperties: ClientProperties,
                             private val restTemplate: RestTemplate) : KrypteringService {
+
+    companion object {
+        val log by logger()
+    }
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
@@ -76,23 +78,21 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
 
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/dokumentlager-public-key", org.springframework.http.HttpMethod.GET, HttpEntity<Nothing>(headers), ByteArray::class.java)
-            if (response.statusCode.is2xxSuccessful) {
-                log.info("Hentet public key for dokumentlager")
-                val publicKey = response.body
-                try {
-                    val certificateFactory = CertificateFactory.getInstance("X.509")
+            log.info("Hentet public key for dokumentlager")
+            val publicKey = response.body
+            try {
+                val certificateFactory = CertificateFactory.getInstance("X.509")
 
-                    return certificateFactory.generateCertificate(ByteArrayInputStream(publicKey)) as X509Certificate
+                return certificateFactory.generateCertificate(ByteArrayInputStream(publicKey)) as X509Certificate
 
-                } catch (e: CertificateException) {
-                    throw RuntimeException(e)
-                }
-            } else {
-                log.warn("Noe feilet ved kall til Fiks")
-                throw FiksException(response.statusCode, "something went wrong")
+            } catch (e: CertificateException) {
+                throw RuntimeException(e)
             }
-        } catch (e: RestClientResponseException) {
-            throw FiksException(HttpStatus.valueOf(e.rawStatusCode), e.responseBodyAsString)
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - getDokumentlagerPublicKey feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            throw FiksException(null, e.message, e)
         }
     }
 }

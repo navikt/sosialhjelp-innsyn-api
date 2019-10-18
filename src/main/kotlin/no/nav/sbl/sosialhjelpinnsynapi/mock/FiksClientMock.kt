@@ -40,20 +40,18 @@ class FiksClientMock : FiksClient {
                 default
             })
             JsonVedleggSpesifikasjon::class.java ->
-                if (dokumentlagerId == "mock-soknad-vedlegg-metadata") {
-                    dokumentMap.getOrElse(dokumentlagerId, {
-                        val default = jsonVedleggSpesifikasjon
+                when (dokumentlagerId) {
+                    "mock-soknad-vedlegg-metadata" -> dokumentMap.getOrElse(dokumentlagerId, {
+                        val default = jsonVedleggSpesifikasjonSoknad
                         dokumentMap[dokumentlagerId] = default
                         default
                     })
-                } else if (dokumentlagerId == "mock-ettersendelse-vedlegg-metadata"){
-                    dokumentMap.getOrElse(dokumentlagerId, {
+                    "mock-ettersendelse-vedlegg-metadata" -> dokumentMap.getOrElse(dokumentlagerId, {
                         val default = jsonVedleggSpesifikasjonEttersendelse
                         dokumentMap[dokumentlagerId] = default
                         default
                     })
-                } else {
-                    dokumentMap.getOrElse(dokumentlagerId, {
+                    else -> dokumentMap.getOrElse(dokumentlagerId, {
                         val default = jsonVedleggSpesifikasjonEttersendelse_2
                         dokumentMap[dokumentlagerId] = default
                         default
@@ -72,7 +70,7 @@ class FiksClientMock : FiksClient {
     }
 
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
-        var digisosSak = hentDigisosSak(soknadId, token)
+        val digisosSak = hentDigisosSak(soknadId, token)
         val navEksternRefId = lagNavEksternRefId(digisosSak)
         val vedleggMetadata = UUID.randomUUID().toString()
         val dokumentalagerIdList = List(files.size) {

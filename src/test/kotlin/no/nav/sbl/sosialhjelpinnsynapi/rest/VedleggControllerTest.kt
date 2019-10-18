@@ -21,11 +21,11 @@ import kotlin.test.assertFailsWith
 
 internal class VedleggControllerTest {
 
-    val vedleggOpplastingService: VedleggOpplastingService = mockk()
-    val vedleggService: VedleggService = mockk()
-    val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val vedleggOpplastingService: VedleggOpplastingService = mockk()
+    private val vedleggService: VedleggService = mockk()
+    private val clientProperties: ClientProperties = mockk(relaxed = true)
 
-    val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties)
+    private val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties)
 
     private val id = "123"
 
@@ -52,7 +52,7 @@ internal class VedleggControllerTest {
 
     @Test
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() {
-        every { vedleggService.hentAlleVedlegg(any(), any()) } returns listOf(
+        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns listOf(
                 InternalVedlegg(
                         dokumenttype,
                         tilleggsinfo,
@@ -80,7 +80,7 @@ internal class VedleggControllerTest {
     @Test
     fun `skal utelate duplikater i response`() {
         val now = LocalDateTime.now()
-        every { vedleggService.hentAlleVedlegg(any(), any()) } returns listOf(
+        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns listOf(
                 InternalVedlegg(
                         dokumenttype,
                         null,

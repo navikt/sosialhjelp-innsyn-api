@@ -1,8 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import io.micrometer.core.instrument.util.IOUtils
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.security.oidc.api.Unprotected
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -29,7 +29,11 @@ class VeiviserController {
 }
 
 private class KommunenummerCache {
-    private val log = LoggerFactory.getLogger(this.javaClass)
+
+    companion object {
+        val log by logger()
+    }
+
     private val referanse = AtomicReference(Intern())
 
     private class Intern {

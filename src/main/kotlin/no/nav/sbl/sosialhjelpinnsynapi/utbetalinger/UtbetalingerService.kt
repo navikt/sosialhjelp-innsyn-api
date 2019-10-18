@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.utbetalinger
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import org.slf4j.LoggerFactory
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 import java.text.DateFormatSymbols
 import java.time.LocalDate
@@ -12,10 +12,12 @@ import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 
-private val log = LoggerFactory.getLogger(UtbetalingerService::class.java)
-
 @Component
 class UtbetalingerService(private val eventService: EventService) {
+
+    companion object {
+        val log by logger()
+    }
 
     fun hentUtbetalinger(fiksDigisosId: String, token: String): UtbetalingerResponse {
         val model = eventService.createModel(fiksDigisosId, token)

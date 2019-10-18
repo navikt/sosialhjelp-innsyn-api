@@ -14,10 +14,9 @@ import io.ktor.http.parametersOf
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiClient
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.defaultHttpClient
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.File
 import java.security.KeyPair
@@ -27,33 +26,31 @@ import java.security.cert.X509Certificate
 import java.util.*
 
 
-private val logger = LoggerFactory.getLogger(DigisosApiClient::class.java)
-
 @Component
-class IdPortenService(
-        clientProperties: ClientProperties
-) {
+class IdPortenService(clientProperties: ClientProperties) {
+
     private val idPortenTokenUrl = clientProperties.idPortenTokenUrl
     private val idPortenClientId = clientProperties.idPortenClientId
     private val idPortenScope = clientProperties.idPortenScope
     private val idPortenConfigUrl = clientProperties.idPortenConfigUrl
-    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI") ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
+    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI")
+            ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
 
     val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
-        logger.info("Henter config fra " + idPortenConfigUrl)
+        log.info("Henter config fra $idPortenConfigUrl")
         val config = defaultHttpClient.get<IdPortenOidcConfiguration> {
             url(idPortenConfigUrl)
         }
-        logger.info("Hentet config fra " + idPortenConfigUrl)
+        log.info("Hentet config fra $idPortenConfigUrl")
         config
     }.also {
-        logger.info("IdPorten: OIDC configuration initialized")
+        log.info("IdPorten: OIDC configuration initialized")
     }
 
     suspend fun requestToken(attempts: Int = 10): AccessToken =
             retry(callName = "Difi - Maskinporten", attempts = attempts) {
                 val jws = createJws()
-                logger.info("Got jws, getting token")
+                log.info("Got jws, getting token")
                 val response = defaultHttpClient.submitForm<IdPortenAccessTokenResponse>(
                         parametersOf(GRANT_TYPE_PARAM to listOf(GRANT_TYPE), ASSERTION_PARAM to listOf(jws.token))
                 ) {
@@ -99,7 +96,7 @@ class IdPortenService(
         }
 
 
-        logger.info("Public certificate length " + pair.first.public.encoded.size)
+        log.info("Public certificate length " + pair.first.public.encoded.size)
 
         return SignedJWT(
                 JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(mutableListOf(Base64.encode(pair.second))).build(),
@@ -114,7 +111,7 @@ class IdPortenService(
         ).run {
             sign(RSASSASigner(pair.first.private))
             val jws = Jws(serialize())
-            logger.info("Serialized JWS")
+            log.info("Serialized JWS")
             jws
         }
     }
@@ -126,6 +123,8 @@ class IdPortenService(
 
         private const val GRANT_TYPE_PARAM = "grant_type"
         private const val ASSERTION_PARAM = "assertion"
+
+        val log by logger()
     }
 
     private data class VirksertCredentials(val alias: String, val password: String, val type: String)

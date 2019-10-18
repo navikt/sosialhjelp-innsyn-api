@@ -1,22 +1,21 @@
 package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallEllerSaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import org.slf4j.LoggerFactory
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 
-const val DEFAULT_TITTEL: String = "Saken"
-
-private val log = LoggerFactory.getLogger(SaksStatusService::class.java)
+const val DEFAULT_TITTEL: String = "Økonomisk sosialhjelp"
 
 @Component
 class SaksStatusService(private val eventService: EventService) {
 
-    /* TODO:
-        - Skal IKKE_INNSYN filtreres vekk i backend eller frontend?
-     */
+    companion object {
+        val log by logger()
+    }
+
     fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {
         val model = eventService.createModel(fiksDigisosId, token)
 
@@ -31,18 +30,18 @@ class SaksStatusService(private val eventService: EventService) {
     }
 
     private fun mapToResponse(sak: Sak): SaksStatusResponse {
-        val utfallEllerStatus = hentStatusNavn(sak)
+        val saksStatus = hentStatusNavn(sak)
         val vedtakfilUrlList = when {
             sak.vedtak.isEmpty() -> null
             else -> sak.vedtak.map { it.vedtaksFilUrl }
         }
-        return SaksStatusResponse(sak.tittel, utfallEllerStatus, vedtakfilUrlList)
+        return SaksStatusResponse(sak.tittel ?: DEFAULT_TITTEL, saksStatus, vedtakfilUrlList)
     }
 
-    private fun hentStatusNavn(sak: Sak): UtfallEllerSaksStatus? {
+    private fun hentStatusNavn(sak: Sak): SaksStatus? {
         return when {
-            sak.vedtak.size > 1 -> null
-            else -> UtfallEllerSaksStatus.valueOf(sak.vedtak.firstOrNull()?.utfall?.name ?: sak.saksStatus.name)
+            sak.vedtak.isEmpty() -> sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
+            else -> SaksStatus.FERDIGBEHANDLET
         }
     }
 }

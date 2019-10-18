@@ -1,26 +1,26 @@
 package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
-import io.mockk.clearMocks
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.io.InputStream
 
 
 internal class FiksClientTest {
@@ -32,8 +32,6 @@ internal class FiksClientTest {
     private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService)
 
     private val id = "123"
-    private val kommunenummer = "1337"
-    private val navEksternRefId = "42"
 
     @BeforeEach
     fun init() {
@@ -58,6 +56,24 @@ internal class FiksClientTest {
         val result = fiksClient.hentDigisosSak(id, "Token")
 
         assertThat(result).isNotNull
+    }
+
+    @Test
+    fun `GET DigisosSak feiler hvis Fiks gir 500`() {
+        val mockResponse: ResponseEntity<String> = mockk()
+
+        every { mockResponse.statusCode.is2xxSuccessful } returns true
+        every { mockResponse.body } returns ok_digisossak_response
+
+        every {
+            restTemplate.exchange(
+                    any<String>(),
+                    any(),
+                    any(),
+                    String::class.java)
+        } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "some error")
+
+        assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentDigisosSak(id, "Token") }
     }
 
     @Test
@@ -104,7 +120,34 @@ internal class FiksClientTest {
     }
 
     @Test
+    fun `GET KommuneInfo feiler hvis kommuneInfo gir 404`() {
+        val mockKommuneResponse: ResponseEntity<KommuneInfo> = mockk()
+        val mockKommuneInfo: KommuneInfo = mockk()
+
+        every { mockKommuneResponse.statusCode.is2xxSuccessful } returns true
+        every { mockKommuneResponse.body } returns mockKommuneInfo
+
+        coEvery { idPortenService.requestToken().token } returns "token"
+
+        every {
+            restTemplate.exchange(
+                    any<String>(),
+                    HttpMethod.GET,
+                    any(),
+                    KommuneInfo::class.java)
+        } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "not found")
+
+        assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentKommuneInfo("1234") }
+    }
+
+    @Test
     fun `POST ny ettersendelse`() {
+        val fil1: InputStream = mockk()
+        val fil2: InputStream = mockk()
+
+        every { fil1.readAllBytes() } returns "test-fil".toByteArray()
+        every { fil2.readAllBytes() } returns "div".toByteArray()
+
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()
         every { mockDigisosSakResponse.statusCode.is2xxSuccessful } returns true
         every { mockDigisosSakResponse.body } returns ok_digisossak_response
@@ -115,10 +158,10 @@ internal class FiksClientTest {
         every { mockFiksResponse.statusCode.is2xxSuccessful } returns true
         every { restTemplate.exchange(any<String>(), HttpMethod.POST, capture(slot), String::class.java) } returns mockFiksResponse
 
-        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, mockk()),
-                FilForOpplasting("filnavn1", "image/jpg", 1L, mockk()))
+        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
+                FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))
 
-        Assertions.assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
+        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
 
         val httpEntity = slot.captured
 

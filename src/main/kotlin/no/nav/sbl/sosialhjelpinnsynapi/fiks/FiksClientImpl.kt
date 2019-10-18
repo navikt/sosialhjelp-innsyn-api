@@ -3,18 +3,19 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 import com.fasterxml.jackson.core.JsonProcessingException
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
-import no.nav.sbl.sosialhjelpinnsynapi.error.exceptions.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
+import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.*
@@ -22,18 +23,20 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestClientResponseException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.Collections.singletonList
 
-private val log = LoggerFactory.getLogger(FiksClientImpl::class.java)
 
 @Profile("!mock")
 @Component
 class FiksClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate,
                      private val idPortenService: IdPortenService) : FiksClient {
+
+    companion object {
+        val log by logger()
+    }
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
@@ -45,44 +48,54 @@ class FiksClientImpl(clientProperties: ClientProperties,
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-            if (response.statusCode.is2xxSuccessful) {
-                log.info("Hentet DigisosSak $digisosId fra Fiks")
-                return objectMapper.readValue(response.body!!, DigisosSak::class.java)
-            } else {
-                log.warn("Noe feilet ved kall til Fiks")
-                throw FiksException(response.statusCode, "something went wrong")
-            }
-        } catch (e: RestClientResponseException) {
-            throw FiksException(HttpStatus.valueOf(e.rawStatusCode), e.responseBodyAsString)
+
+            log.info("Hentet DigisosSak $digisosId fra Fiks")
+            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
+
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - hentDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Fiks - hentDigisosSak feilet", e)
+            throw FiksException(null, e.message, e)
         }
     }
 
+    /**
+     * Brukes for å hente json-filer som er definert i filformat. Dermed brukes filformatObjectMapper
+     */
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
         val headers = setIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-            if (response.statusCode.is2xxSuccessful) {
-                log.info("Hentet dokument (${requestedClass.simpleName}) fra fiks, dokumentlagerId $dokumentlagerId")
-                return objectMapper.readValue(response.body!!, requestedClass)
-            } else {
-                log.warn("Noe feilet ved kall til Fiks")
-                throw FiksException(response.statusCode, "something went wrong")
-            }
-        } catch (e: RestClientResponseException) {
-            throw FiksException(HttpStatus.valueOf(e.rawStatusCode), e.responseBodyAsString)
+
+            log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId $dokumentlagerId")
+            return filformatObjectMapper.readValue(response.body!!, requestedClass)
+
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - hentDokument feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Fiks - hentDokument feilet", e)
+            throw FiksException(null, e.message, e)
         }
     }
 
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         val headers = setIntegrasjonHeaders(token)
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
-        if (response.statusCode.is2xxSuccessful) {
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
+
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
-        } else {
-            log.warn("Noe feilet ved kall til Fiks")
-            throw FiksException(response.statusCode, "something went wrong")
+
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Fiks - hentAlleDigisosSaker feilet", e)
+            throw FiksException(null, e.message, e)
         }
     }
 
@@ -91,12 +104,17 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
 
-        val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java)
-        if (response.statusCode.is2xxSuccessful) {
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java)
+
             return response.body!!
-        } else {
-            log.warn("Noe feilet ved kall til fiks")
-            throw FiksException(response.statusCode, "something went wrong")
+
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - hentKommuneInfo feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Fiks - hentKommuneInfo feilet", e)
+            throw FiksException(null, e.message, e)
         }
     }
 
@@ -120,15 +138,17 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val requestEntity = HttpEntity(body, headers)
         try {
             val path = "$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
-            val response = restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
-            if (response.statusCode.is2xxSuccessful) {
-                log.info("Sendte ettersendelse til Fiks")
-            } else if (response.statusCode.is4xxClientError) {
-                log.warn("Opplasting av ettersendelse feilet")
-                throw FiksException(response.statusCode, "Opplasting til Fiks feilet")
-            }
-        } catch (e: HttpClientErrorException) {
-            e.printStackTrace()
+            restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
+
+            log.info("Ettersendelse sendt til Fiks")
+
+        } catch (e: HttpStatusCodeException) {
+            log.warn(e.responseBodyAsString)
+            log.warn("Opplasting av ettersendelse feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Opplasting av ettersendelse feilet", e)
+            throw FiksException(null, e.message, e)
         }
 
     }

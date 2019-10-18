@@ -39,7 +39,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
     fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
-        val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleVedlegg(fiksDigisosId, token)
+        val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(fiksDigisosId, token)
         if (internalVedleggList.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
@@ -62,7 +62,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
 data class OpplastetVedleggMetadata (
         val type: String,
-        val tilleggsinfo: String,
+        val tilleggsinfo: String?,
         val filer: MutableList<OpplastetFil>
 )
 

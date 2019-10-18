@@ -5,13 +5,14 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.utils.getSha512FromByteArray
 import no.nav.sbl.sosialhjelpinnsynapi.utils.isImage
 import no.nav.sbl.sosialhjelpinnsynapi.utils.isPdf
 import no.nav.sbl.sosialhjelpinnsynapi.utils.pdfIsSigned
+import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
@@ -20,7 +21,6 @@ import java.util.*
 import java.util.concurrent.*
 import kotlin.collections.ArrayList
 
-private val log = LoggerFactory.getLogger(VedleggOpplastingService::class.java)
 
 const val MESSAGE_COULD_NOT_LOAD_DOCUMENT = "COULD_NOT_LOAD_DOCUMENT"
 const val MESSAGE_PDF_IS_SIGNED = "PDF_IS_SIGNED"
@@ -30,7 +30,12 @@ const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
 @Component
 class VedleggOpplastingService(private val fiksClient: FiksClient,
-                               private val krypteringService: KrypteringService) {
+                               private val krypteringService: KrypteringService,
+                               private val virusScanner: VirusScanner) {
+
+    companion object {
+        val log by logger()
+    }
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
@@ -38,6 +43,9 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
         check(filenamesAreUniqueAndMatchInMetadataAndFiles(metadata, files)) { "Filnavn er ikke unike eller det er mismatch mellom filer og metadata" }
+
+        // Scan for virus
+        files.forEach { virusScanner.scan(it.name, it.bytes) }
 
         // Valider og krypter
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
@@ -62,16 +70,19 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
         // Lag metadata i form av vedleggspesifikasjon
         val vedleggSpesifikasjon = JsonVedleggSpesifikasjon()
-                .withVedlegg(metadata.map { JsonVedlegg()
-                        .withType(it.type)
-                        .withTilleggsinfo(it.tilleggsinfo)
-                        .withStatus(LASTET_OPP_STATUS)
-                        .withFiler(it.filer.map { fil ->
-                            JsonFiler()
-                                    .withFilnavn(fil.filnavn)
-                                    .withSha512(getSha512FromByteArray(files.firstOrNull { multipartFile ->
-                                        multipartFile.originalFilename == fil.filnavn }?.bytes ?: throw IllegalStateException("Fil mangler metadata")))
-                        }) })
+                .withVedlegg(metadata.map {
+                    JsonVedlegg()
+                            .withType(it.type)
+                            .withTilleggsinfo(it.tilleggsinfo)
+                            .withStatus(LASTET_OPP_STATUS)
+                            .withFiler(it.filer.map { fil ->
+                                JsonFiler()
+                                        .withFilnavn(fil.filnavn)
+                                        .withSha512(getSha512FromByteArray(files.firstOrNull { multipartFile ->
+                                            multipartFile.originalFilename == fil.filnavn
+                                        }?.bytes ?: throw IllegalStateException("Fil mangler metadata")))
+                            })
+                })
 
         // Last opp filer til FIKS
         fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, fiksDigisosId, token)
@@ -81,7 +92,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     }
 
     private fun filenamesAreUniqueAndMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
-        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { it.filnavn } }
+        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
         val filnavnMetadataSet = filnavnMetadata.toHashSet()
         val filnavnMultipart = files.map { it.originalFilename }
         val filnavnMultipartSet = filnavnMultipart.toHashSet()
@@ -90,7 +101,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                 filnavnMetadataSet == filnavnMultipartSet
     }
 
-    fun validateFil(file: MultipartFile) : String {
+    fun validateFil(file: MultipartFile): String {
         if (file.size > MAKS_TOTAL_FILSTORRELSE) {
             log.warn(MESSAGE_FILE_TOO_LARGE)
             return MESSAGE_FILE_TOO_LARGE
@@ -142,7 +153,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     }
 }
 
-data class FilForOpplasting (
+data class FilForOpplasting(
         val filnavn: String?,
         val mimetype: String?,
         val storrelse: Long,

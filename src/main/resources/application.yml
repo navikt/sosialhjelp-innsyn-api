@@ -1,14 +1,15 @@
 # Prometheus
 management:
   endpoints:
-    metrics.enabled: true
-    web.exposure.include: prometheus
-    export.prometheus.enabled: true
-    prometheus.enabled: true
+    web:
+      exposure:
+        include: prometheus,metrics
 
 spring:
   main:
     banner-mode: 'off'
+  application:
+    name: "sosialhjelp-innsyn-api"
 
 server:
   servlet:
@@ -30,7 +31,14 @@ client:
 
 cors:
   allowed_origins:
+    - "http://localhost:3000"
+    - "http://localhost:3001"
     - "https://www.nav.no/sosialhjelp/"
     - "https://www-q0.nav.no/sosialhjelp/"
     - "https://www-q1.nav.no/sosialhjelp/"
     - "https://www-t1.nav.no/sosialhjelp/"
+
+innsyn:
+  vedlegg:
+    virusscan:
+      enabled: true

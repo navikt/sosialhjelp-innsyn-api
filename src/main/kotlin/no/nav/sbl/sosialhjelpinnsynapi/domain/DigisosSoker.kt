@@ -29,21 +29,22 @@ data class Soknadsmottaker(
 data class Oppgave(
         var tittel: String,
         var tilleggsinfo: String?,
-        var innsendelsesfrist: LocalDateTime,
-        var tidspunktForKrav: LocalDateTime
+        var innsendelsesfrist: LocalDateTime?,
+        var tidspunktForKrav: LocalDateTime,
+        var erFraInnsyn: Boolean
 )
 
 data class Sak(
         var referanse: String,
-        var saksStatus: SaksStatus,
-        var tittel: String,
+        var saksStatus: SaksStatus?,
+        var tittel: String?,
         var vedtak: MutableList<Vedtak>,
         var utbetalinger: MutableList<Utbetaling>,
         var vilkar: MutableList<Vilkar>
 )
 
 data class Vedtak(
-        var utfall: UtfallVedtak,
+        var utfall: UtfallVedtak?,
         var vedtaksFilUrl: String
 )
 
@@ -78,11 +79,11 @@ data class Hendelse(
 }
 
 enum class SoknadsStatus {
-    SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET
+    MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE
 }
 
 enum class SaksStatus {
-    UNDER_BEHANDLING, IKKE_INNSYN
+    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE
 }
 
 enum class UtbetalingsStatus {

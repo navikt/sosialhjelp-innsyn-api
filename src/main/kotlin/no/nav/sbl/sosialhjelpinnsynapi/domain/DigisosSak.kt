@@ -48,6 +48,8 @@ data class KommuneInfo(
         val kommunenummer: String,
         val kanMottaSoknader: Boolean,
         val kanOppdatereStatus: Boolean,
+        val harMidlertidigDeaktivertMottak: Boolean,
+        val harMidlertidigDeaktivertOppdateringer: Boolean,
         val kontaktPersoner: Kontaktpersoner?
 )
 

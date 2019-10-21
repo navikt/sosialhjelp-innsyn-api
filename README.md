@@ -28,3 +28,18 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 ### Vault
 - Lag PR til `vault-iac` slik at man kan lagre secrets på vault.
 - Denne må godkjennes og merges før man kan opprette secrets i din apps katalog `.../app/namespace`.
+
+### Redis
+Vi bruker Redis som cache.
+Dette gjøres manuelt med kubectl både i preprod og prod. Se [nais/doc](https://github.com/nais/doc/blob/master/content/redis.md)
+1. `kubectl config use-context dev-sbs`
+2. `kubectl apply -f redis-config.yml`
+
+For å ta i bruk Redis lokalt anbefaler vi bruk av Docker.
+1. `docker pull redis` (laster ned image fra docker hub)
+2. `docker run --name <myredis> -d -p 6379:6379 redis` 
+(kjører opp redis (`--name <myredis>` må samsvare med referansen i redis-config.yaml))
+3. `docker run -it --link myredis:redis --rm redis redis-cli -h redis -p 6379` 
+(kommandolinjeverktøy mot redis for å sjekke innholdet.)
+
+Det er også mulig å kjøre redis *in-memory* ved å sette miljøvariabelen `IS_REDIS_MOCKED=true`. Denne bør være satt i integrasjonstester.

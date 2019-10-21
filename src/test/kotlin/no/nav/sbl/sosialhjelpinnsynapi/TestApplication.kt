@@ -1,6 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi
 
-
 import no.nav.security.oidc.test.support.spring.TokenGeneratorConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

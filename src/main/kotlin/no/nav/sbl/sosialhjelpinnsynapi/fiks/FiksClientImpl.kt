@@ -48,9 +48,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val get: Any? = redisStore.get(digisosId)
         if (get != null) {
             if (get is DigisosSak) {
-                log.info("Henter digisosSak fra cache $digisosId")
+                log.info("Henter digisosSak fra cache for digisosId=$digisosId")
                 return get
             }
+            log.info("Fant key i cache, men value var ikke DigisosSak")
         }
 
         val headers = setIntegrasjonHeaders(token)
@@ -59,7 +60,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
-            log.info("Hentet DigisosSak $digisosId fra Fiks")
+            log.info("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
             val digisosSak = objectMapper.readValue(response.body!!, DigisosSak::class.java)
             cachePut(digisosId, digisosSak)
             return digisosSak
@@ -74,6 +75,39 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     /**
+     * Brukes for å hente json-filer som er definert i filformat. Dermed brukes filformatObjectMapper
+     */
+    override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
+        val get: Any? = redisStore.get(digisosId)
+        if (get != null) {
+            if (get.javaClass == requestedClass) {
+                log.info("Henter ${requestedClass.simpleName} dokument ($dokumentlagerId) fra cache for digisosId=$digisosId")
+                return get
+            }
+            log.info("Fant key i cache, men value var ikke ${requestedClass.simpleName}")
+        }
+
+        val headers = setIntegrasjonHeaders(token)
+
+        log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+
+            log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
+            val dokument = filformatObjectMapper.readValue(response.body!!, requestedClass)
+            cachePut(digisosId, dokument)
+            return dokument
+
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - hentDokument feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Fiks - hentDokument feilet", e)
+            throw FiksException(null, e.message, e)
+        }
+    }
+
+    /**
      * lagrer digisosSak i cache i 20s
      */
     private fun cachePut(key: String, value: Any) {
@@ -82,28 +116,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {
             log.info("Cache put OK $key")
-        }
-    }
-
-    /**
-     * Brukes for å hente json-filer som er definert i filformat. Dermed brukes filformatObjectMapper
-     */
-    override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val headers = setIntegrasjonHeaders(token)
-
-        log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
-        try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-
-            log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId $dokumentlagerId")
-            return filformatObjectMapper.readValue(response.body!!, requestedClass)
-
-        } catch (e: HttpStatusCodeException) {
-            log.warn("Fiks - hentDokument feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksException(e.statusCode, e.message, e)
-        } catch (e: Exception) {
-            log.warn("Fiks - hentDokument feilet", e)
-            throw FiksException(null, e.message, e)
         }
     }
 

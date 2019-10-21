@@ -4,13 +4,13 @@ group = "no.nav.sbl"
 version = "1.0-SNAPSHOT"
 
 val kotlinVersion = "1.3.50"
-val springBootVersion = "2.1.6.RELEASE"
+val springBootVersion = "2.1.9.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
-val junitJupiterVersion = "5.4.2"
+val junitJupiterVersion = "5.5.2"
 val mockkVersion = "1.9.3"
 val filformatVersion = "1.2019.09.30-08.39-30ada7fb01ce"
-val micrometerRegistryVersion = "1.1.5"
+val micrometerRegistryVersion = "1.1.7"
 val prometheusVersion = "0.7.0"
 val tokenSupportVersion = "0.2.18"
 val jacksonVersion = "2.9.10"
@@ -23,11 +23,11 @@ val vavrKotlinVersion = "0.10.0"
 val ktorVersion = "1.2.2"
 val konfigVersion = "1.6.10.0"
 val kotlinCoroutinesVersion = "1.3.2"
-val commonsIoVersion = "1.3.2"
+val commonsIoVersion = "2.6"
 val fileUploadVersion = "1.4"
 val tikaVersion = "1.22"
 val pdfBoxVersion = "2.0.16"
-val fiksKrypteringVersion = "1.0.5"
+val fiksKrypteringVersion = "1.0.7"
 val kotlinTestVersion = "1.3.50"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
@@ -37,7 +37,7 @@ plugins {
     kotlin("jvm") version "1.3.50"
 
     id("org.jetbrains.kotlin.plugin.spring") version "1.3.50"
-    id("org.springframework.boot") version "2.1.6.RELEASE"
+    id("org.springframework.boot") version "2.1.9.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
 }
 
@@ -100,7 +100,7 @@ dependencies {
     implementation("io.springfox:springfox-swagger2:$swaggerVersion")
     implementation("io.springfox:springfox-swagger-ui:$swaggerVersion")
 
-    implementation("org.apache.commons:commons-io:$commonsIoVersion")
+    implementation("commons-io:commons-io:$commonsIoVersion")
     implementation("commons-fileupload:commons-fileupload:$fileUploadVersion")
     implementation("org.apache.tika:tika-core:$tikaVersion")
     implementation("org.apache.pdfbox:preflight:$pdfBoxVersion")

@@ -9,9 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
@@ -22,6 +20,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
+import java.io.InputStream
 
 
 internal class FiksClientTest {
@@ -143,6 +142,12 @@ internal class FiksClientTest {
 
     @Test
     fun `POST ny ettersendelse`() {
+        val fil1: InputStream = mockk()
+        val fil2: InputStream = mockk()
+
+        every { fil1.readAllBytes() } returns "test-fil".toByteArray()
+        every { fil2.readAllBytes() } returns "div".toByteArray()
+
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()
         every { mockDigisosSakResponse.statusCode.is2xxSuccessful } returns true
         every { mockDigisosSakResponse.body } returns ok_digisossak_response
@@ -153,10 +158,10 @@ internal class FiksClientTest {
         every { mockFiksResponse.statusCode.is2xxSuccessful } returns true
         every { restTemplate.exchange(any<String>(), HttpMethod.POST, capture(slot), String::class.java) } returns mockFiksResponse
 
-        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, mockk()),
-                FilForOpplasting("filnavn1", "image/jpg", 1L, mockk()))
+        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
+                FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))
 
-        Assertions.assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
+        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
 
         val httpEntity = slot.captured
 

@@ -37,3 +37,8 @@ cors:
     - "https://www-q0.nav.no/sosialhjelp/"
     - "https://www-q1.nav.no/sosialhjelp/"
     - "https://www-t1.nav.no/sosialhjelp/"
+
+innsyn:
+  vedlegg:
+    virusscan:
+      enabled: true

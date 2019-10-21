@@ -16,6 +16,9 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.reflect.full.companionObject
 
+const val NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
+const val NAIS_NAMESPACE = "NAIS_NAMESPACE"
+
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
 fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
@@ -60,4 +63,8 @@ fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
     return ofClass.enclosingClass?.takeIf {
         ofClass.enclosingClass.kotlin.companionObject?.java == ofClass
     } ?: ofClass
+}
+
+fun isRunningInProd(): Boolean {
+    return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "default"
 }

@@ -41,7 +41,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     companion object {
         val log by logger()
-        const val CACHE_TIME_TO_LIVE: Long = 20_000
+        const val CACHE_TIME_TO_LIVE_SECONDS: Long = 20
     }
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
@@ -132,7 +132,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
      * lagrer digisosSak i cache i 20s
      */
     private fun cachePut(key: String, value: String) {
-        val set = redisStore.set(key, value, CACHE_TIME_TO_LIVE)
+        val set = redisStore.set(key, value, CACHE_TIME_TO_LIVE_SECONDS)
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {

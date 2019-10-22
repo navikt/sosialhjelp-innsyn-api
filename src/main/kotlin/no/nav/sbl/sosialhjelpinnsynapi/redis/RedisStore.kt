@@ -22,9 +22,8 @@ class RedisStore @Autowired constructor(redisClient: RedisClient) {
     }
 
     fun set(key: String, value: String, timeToLive: Long): String? {
-        val set: RedisFuture<String> = async.set(key, value)
+        val set: RedisFuture<String> = async.setex(key, timeToLive, value)
         return if (set.await(1, TimeUnit.SECONDS)) {
-            async.pexpire(key, timeToLive)
             set.get()
         } else null
     }

@@ -16,7 +16,7 @@ spec:
       cpu: 250m
       memory: 256Mi
     requests:
-      cpu: 125m
-      memory: 128Mi
+      cpu: 250m
+      memory: 256Mi
   service:
     port: 6379

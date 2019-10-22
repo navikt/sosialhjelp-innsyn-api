@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @Profile("mock | local")
 @Unprotected
 @RestController
-@RequestMapping("/api/v1/mock/innsyn")
+@RequestMapping("/api/v1/mock")
 class MockController(private val norgClient: NorgClientMock) {
 
     @PostMapping("/nyNavEnhet", consumes = [APPLICATION_JSON_UTF8_VALUE], produces = [APPLICATION_JSON_UTF8_VALUE])

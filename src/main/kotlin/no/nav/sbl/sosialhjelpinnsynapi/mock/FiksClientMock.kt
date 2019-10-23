@@ -62,7 +62,10 @@ class FiksClientMock : FiksClient {
     }
 
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        return innsynMap.values.toList()
+        return when {
+            innsynMap.values.isEmpty() -> listOf(defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString()))
+            else -> innsynMap.values.toList()
+        }
     }
 
     override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {

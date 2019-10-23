@@ -45,7 +45,7 @@ class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        http.csrf().ignoringAntMatchers("/api/v1/mock/**", "/api/v1/innsyn/**/vedlegg/send", "/api/v1/digisosapi/**", "/api/woldena/**")
+        http.csrf().ignoringAntMatchers("/api/v1/mock/**", "/api/v1/innsyn/**/vedlegg/send", "/api/v1/digisosapi/**")
         http.cors()
     }
 }

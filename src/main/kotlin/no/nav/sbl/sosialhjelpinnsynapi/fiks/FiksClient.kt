@@ -7,7 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 
 interface FiksClient {
 
-    fun hentDigisosSak(digisosId: String, token: String): DigisosSak
+    fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak
 
     fun hentAlleDigisosSaker(token: String): List<DigisosSak>
 

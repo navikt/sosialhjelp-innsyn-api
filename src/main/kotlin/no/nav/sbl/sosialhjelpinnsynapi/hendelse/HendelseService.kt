@@ -22,8 +22,8 @@ class HendelseService(private val eventService: EventService,
     }
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
-        val model = eventService.createModel(fiksDigisosId, token)
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
 
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
         digisosSak.originalSoknadNAV?.timestampSendt?.let { leggTilHendelserForOpplastinger(model, it, vedlegg) }

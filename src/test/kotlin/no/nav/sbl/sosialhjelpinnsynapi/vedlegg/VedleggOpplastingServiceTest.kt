@@ -49,7 +49,7 @@ internal class VedleggOpplastingServiceTest {
     fun init() {
         clearMocks(fiksClient, mockDigisosSak)
 
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.kommunenummer } returns kommunenummer
         every { virusScanner.scan(any(), any()) } just runs
     }

@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.utbetalinger
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 import java.text.DateFormatSymbols
@@ -13,14 +14,16 @@ import kotlin.collections.ArrayList
 
 
 @Component
-class UtbetalingerService(private val eventService: EventService) {
+class UtbetalingerService(private val eventService: EventService,
+                          private val fiksClient: FiksClient) {
 
     companion object {
         val log by logger()
     }
 
     fun hentUtbetalinger(fiksDigisosId: String, token: String): UtbetalingerResponse {
-        val model = eventService.createModel(fiksDigisosId, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
 
         if (model.saker.isEmpty()) {
             log.info("Fant ingen saker for $fiksDigisosId")

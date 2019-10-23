@@ -48,7 +48,15 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
 
-    override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
+    override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
+        log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
+        return when {
+            useCache -> hentDigisosSakFraCache(digisosId, token)
+            else -> hentDigisosSakFraFiks(digisosId, token)
+        }
+    }
+
+    private fun hentDigisosSakFraCache(digisosId: String, token: String): DigisosSak {
         val get: String? = redisStore.get(digisosId)
         if (get != null) {
             try {
@@ -60,17 +68,19 @@ class FiksClientImpl(clientProperties: ClientProperties,
             }
         }
 
-        log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
+        // kunne ikke finne digisosSak i cache. Henter fra Fiks og lagrer til cache
+        val digisosSak = hentDigisosSakFraFiks(digisosId, token)
+        cachePut(digisosId, objectMapper.writeValueAsString(digisosSak))
+        return digisosSak
+    }
 
+    private fun hentDigisosSakFraFiks(digisosId: String, token: String): DigisosSak {
         val headers = setIntegrasjonHeaders(token)
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
             log.info("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
-            val digisosSak = objectMapper.readValue(response.body!!, DigisosSak::class.java)
-            cachePut(digisosId, objectMapper.writeValueAsString(digisosSak))
-            return digisosSak
-
+            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
             throw FiksException(e.statusCode, e.message, e)
@@ -188,7 +198,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
         }
 
-        val digisosSak = hentDigisosSak(soknadId, token)
+        val digisosSak = hentDigisosSakFraFiks(soknadId, token)
         val kommunenummer = digisosSak.kommunenummer
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 

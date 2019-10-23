@@ -47,7 +47,7 @@ internal class OppgaveServiceTest {
     @BeforeEach
     fun init() {
         clearMocks(eventService)
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
     }
 

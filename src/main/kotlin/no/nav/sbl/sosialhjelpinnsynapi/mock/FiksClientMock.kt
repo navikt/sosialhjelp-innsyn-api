@@ -19,7 +19,7 @@ class FiksClientMock : FiksClient {
     private val innsynMap = mutableMapOf<String, DigisosSak>()
     private val dokumentMap = mutableMapOf<String, Any>()
 
-    override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
+    override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
         return innsynMap.getOrElse(digisosId, {
             val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString())
             innsynMap[digisosId] = default
@@ -70,7 +70,7 @@ class FiksClientMock : FiksClient {
     }
 
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
-        val digisosSak = hentDigisosSak(soknadId, token)
+        val digisosSak = hentDigisosSak(soknadId, token, false)
         val navEksternRefId = lagNavEksternRefId(digisosSak)
         val vedleggMetadata = UUID.randomUUID().toString()
         val dokumentalagerIdList = List(files.size) {

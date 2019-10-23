@@ -45,8 +45,8 @@ internal class DigisosApiControllerTest {
         every { digisosSak2.sistEndret } returns 1000L
         every { digisosSak2.digisosSoker } returns mockk()
 
-        every { eventService.createModel("123", any()) } returns model1
-        every { eventService.createModel("456", any()) } returns model2
+        every { eventService.createModel(digisosSak1, any()) } returns model1
+        every { eventService.createModel(digisosSak2, any()) } returns model2
 
         every { oppgaveService.hentOppgaver("123", any()).size } returns 2
         every { oppgaveService.hentOppgaver("456", any()).size } returns 1

@@ -2,19 +2,22 @@ package no.nav.sbl.sosialhjelpinnsynapi.soknadsstatus
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 
 
 @Component
-class SoknadsStatusService(private val eventService: EventService) {
+class SoknadsStatusService(private val eventService: EventService,
+                           private val fiksClient: FiksClient) {
 
     companion object {
         val log by logger()
     }
 
     fun hentSoknadsStatus(fiksDigisosId: String, token: String): SoknadsStatusResponse {
-        val model = eventService.createModel(fiksDigisosId, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
         val status = model.status
         if (status == null) {
             log.warn("SoknadsStatus kan ikke være null")

@@ -31,7 +31,7 @@ class MockController(private val fiksClientMock: FiksClientMock,
             produces = [APPLICATION_JSON_UTF8_VALUE])
     fun postJsonDigisosSoker(@PathVariable soknadId: String, @RequestBody digisosApiWrapper: DigisosApiWrapper) {
         log.info("soknadId: $soknadId, jsonDigisosSoker: $digisosApiWrapper")
-        val digisosSak = fiksClientMock.hentDigisosSak(soknadId, "Token")
+        val digisosSak = fiksClientMock.hentDigisosSak(soknadId, "Token", false)
 
         val jsonNode = objectMapper.convertValue(digisosApiWrapper.sak.soker, JsonNode::class.java)
         val jsonDigisosSoker = filformatObjectMapper.convertValue<JsonDigisosSoker>(jsonNode, JsonDigisosSoker::class.java)
@@ -41,7 +41,7 @@ class MockController(private val fiksClientMock: FiksClientMock,
     @GetMapping("/{soknadId}",
             produces = [APPLICATION_JSON_UTF8_VALUE])
     fun getInnsynForSoknad(@PathVariable soknadId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<JsonDigisosSoker> {
-        val digisosSak = fiksClientMock.hentDigisosSak(soknadId, token)
+        val digisosSak = fiksClientMock.hentDigisosSak(soknadId, token, false)
         val jsonDigisosSoker = innsynService.hentJsonDigisosSoker(soknadId, digisosSak.digisosSoker?.metadata, token)
         return ResponseEntity.ok(jsonDigisosSoker!!)
     }

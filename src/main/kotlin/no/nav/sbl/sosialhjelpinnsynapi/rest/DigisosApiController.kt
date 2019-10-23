@@ -38,7 +38,7 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
 
         val responselist = saker
                 .map {
-                    val model = eventService.createModel(it.fiksDigisosId, token)
+                    val model = eventService.createModel(it, token)
 
                     SakResponse(
                             it.fiksDigisosId,

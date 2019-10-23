@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,8 +14,11 @@ import java.time.LocalDate
 
 internal class UtbetalingerServiceTest {
     private val eventService: EventService = mockk()
+    private val fiksClient: FiksClient = mockk()
 
-    private val service = UtbetalingerService(eventService)
+    private val service = UtbetalingerService(eventService, fiksClient)
+
+    private val mockDigisosSak: DigisosSak = mockk()
 
     private val token = "token"
 
@@ -24,7 +28,9 @@ internal class UtbetalingerServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService)
+        clearMocks(eventService, fiksClient)
+
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
     }
 
     @Test

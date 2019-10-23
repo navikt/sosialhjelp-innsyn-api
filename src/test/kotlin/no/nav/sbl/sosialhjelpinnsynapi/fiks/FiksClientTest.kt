@@ -59,7 +59,7 @@ internal class FiksClientTest {
                     String::class.java)
         } returns mockResponse
 
-        val result = fiksClient.hentDigisosSak(id, "Token")
+        val result = fiksClient.hentDigisosSak(id, "Token", false)
 
         assertThat(result).isNotNull
     }
@@ -68,7 +68,7 @@ internal class FiksClientTest {
     fun `GET digisosSak fra cache`() {
         every { redisStore.get(id) } returns ok_digisossak_response
 
-        val result2 = fiksClient.hentDigisosSak(id, "Token")
+        val result2 = fiksClient.hentDigisosSak(id, "Token", true)
 
         assertThat(result2).isNotNull
 
@@ -88,7 +88,7 @@ internal class FiksClientTest {
                     String::class.java)
         } returns mockResponse
 
-        val result1 = fiksClient.hentDigisosSak(id, "Token")
+        val result1 = fiksClient.hentDigisosSak(id, "Token", true)
 
         assertThat(result1).isNotNull
         verify(exactly = 1) { redisStore.set(any(), any(), any()) }
@@ -96,7 +96,7 @@ internal class FiksClientTest {
 
         every { redisStore.get(id) } returns ok_digisossak_response
 
-        val result = fiksClient.hentDigisosSak(id, "Token")
+        val result = fiksClient.hentDigisosSak(id, "Token", true)
 
         assertThat(result).isNotNull
 
@@ -117,7 +117,7 @@ internal class FiksClientTest {
                     String::class.java)
         } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "some error")
 
-        assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentDigisosSak(id, "Token") }
+        assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentDigisosSak(id, "Token", true) }
     }
 
     @Test

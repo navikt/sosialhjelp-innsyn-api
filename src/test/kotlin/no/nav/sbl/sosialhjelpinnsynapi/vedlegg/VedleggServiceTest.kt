@@ -32,7 +32,7 @@ internal class VedleggServiceTest {
     internal fun setUp() {
         clearAllMocks()
 
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV } returns originalSoknad
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns ettersendelser
 

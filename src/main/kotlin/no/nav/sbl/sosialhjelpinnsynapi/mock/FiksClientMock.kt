@@ -10,6 +10,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.*
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 @Profile("mock")
@@ -21,7 +23,7 @@ class FiksClientMock : FiksClient {
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         return innsynMap.getOrElse(digisosId, {
-            val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString())
+            val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString(), innsynMap.size.toLong())
             innsynMap[digisosId] = default
             default
         })
@@ -98,8 +100,9 @@ class FiksClientMock : FiksClient {
         dokumentMap[dokumentlagerId] = jsonVedleggSpesifikasjon
     }
 
-    fun DigisosSak.copyDigisosSokerWithNewMetadataId(metadata: String): DigisosSak {
-        return this.copy(digisosSoker = this.digisosSoker?.copy(metadata = metadata))
+    fun DigisosSak.copyDigisosSokerWithNewMetadataId(metadata: String, ukerTilbake: Long): DigisosSak {
+        val sistEndret = LocalDateTime.now().minusWeeks(ukerTilbake).toEpochSecond(ZoneOffset.UTC) * 1000
+        return this.copy(fiksDigisosId = metadata, sistEndret = sistEndret, digisosSoker = this.digisosSoker?.copy(metadata = metadata))
     }
 
     fun DigisosSak.updateEttersendtInfoNAV(ettersendtInfoNAV: EttersendtInfoNAV): DigisosSak {

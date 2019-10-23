@@ -65,7 +65,7 @@ class FiksClientMock : FiksClient {
 
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         return when {
-            innsynMap.values.isEmpty() -> listOf(defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString()))
+            innsynMap.values.isEmpty() -> listOf(defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString(), 1))
             else -> innsynMap.values.toList()
         }
     }

@@ -1,10 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.common
 
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 private const val unexpectedError: String = "unexpected_error"
@@ -23,6 +26,13 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleAll(e: Throwable): ResponseEntity<ErrorMessage> {
         log.error(e.message, e)
         val error = ErrorMessage(unexpectedError, e.message)
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    override fun handleHttpMessageNotReadable(
+            ex: HttpMessageNotReadableException, headers: HttpHeaders, status: HttpStatus, request: WebRequest): ResponseEntity<Any> {
+        log.error(ex.message, ex)
+        val error = ErrorMessage(unexpectedError, ex.message)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

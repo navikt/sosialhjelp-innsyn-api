@@ -34,7 +34,6 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SakResponse>> {
-
         val saker = fiksClient.hentAlleDigisosSaker(token)
 
         val responselist = saker

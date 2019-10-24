@@ -3,12 +3,12 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.utbetalinger.UtbetalingerService
-import no.nav.security.oidc.api.Unprotected
+import no.nav.security.oidc.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-@Unprotected
+@ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/innsyn/")
 class UtbetalingerController(private val utbetalingerService: UtbetalingerService) {

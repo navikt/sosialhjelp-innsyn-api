@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneService
+import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatusDetaljer
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
@@ -18,4 +19,9 @@ class KommuneController(private val kommuneService: KommuneService) {
         return ResponseEntity.ok(kommuneStatus.toString())
     }
 
+    @GetMapping()
+    fun hentAlleKommuneStatuser() : ResponseEntity<List<KommuneStatusDetaljer>> {
+        val alleKommunerMedStatus = kommuneService.hentAlleKommunerMedStatusStatus()
+        return ResponseEntity.ok(alleKommunerMedStatus)
+    }
 }

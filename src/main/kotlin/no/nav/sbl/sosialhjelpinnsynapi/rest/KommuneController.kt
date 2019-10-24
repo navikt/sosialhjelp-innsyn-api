@@ -19,7 +19,7 @@ class KommuneController(private val kommuneService: KommuneService) {
         return ResponseEntity.ok(kommuneStatus.toString())
     }
 
-    @GetMapping("/alle/statuser")
+    @GetMapping()
     fun hentAlleKommuneStatuser() : ResponseEntity<List<KommuneStatusDetaljer>> {
         val alleKommunerMedStatus = kommuneService.hentAlleKommunerMedStatusStatus()
         return ResponseEntity.ok(alleKommunerMedStatus)

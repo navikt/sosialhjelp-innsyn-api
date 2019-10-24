@@ -49,6 +49,27 @@ class KommuneService(private val fiksClient: FiksClient,
             }
         }
     }
+
+    fun hentAlleKommunerMedStatusStatus(): List<KommuneStatusDetaljer> {
+        val alleKommunerMedStatus = fiksClient.hentKommuneInfoForAlle()
+        return alleKommunerMedStatus.map {info -> KommuneStatusDetaljer(info)}
+    }
+}
+
+class KommuneStatusDetaljer(kommuneInfo: KommuneInfo) {
+    var kommunenummer: String
+    var kanMottaSoknader: Boolean
+    var kanOppdatereStatus: Boolean
+    var harMidlertidigDeaktivertMottak: Boolean
+    var harMidlertidigDeaktivertOppdateringer: Boolean
+
+    init {
+        this.kommunenummer = kommuneInfo.kommunenummer
+        this.kanMottaSoknader = kommuneInfo.kanMottaSoknader
+        this.kanOppdatereStatus = kommuneInfo.kanOppdatereStatus
+        this.harMidlertidigDeaktivertMottak = kommuneInfo.harMidlertidigDeaktivertMottak
+        this.harMidlertidigDeaktivertOppdateringer = kommuneInfo.harMidlertidigDeaktivertOppdateringer
+    }
 }
 
 enum class KommuneStatus {

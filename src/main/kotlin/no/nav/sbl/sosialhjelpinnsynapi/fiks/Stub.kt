@@ -146,9 +146,7 @@ val ok_komplett_jsondigisossoker_response = """
 				}
 			},
 			"saksreferanse": "SAK1",
-			"utfall": {
-				"utfall": "INNVILGET"
-			},
+			"utfall": "INNVILGET",
 			"vedlegg": [
 				{
 					"tittel": "Foobar",

@@ -9,7 +9,6 @@ import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.temporal.ChronoField
 import java.util.*
-import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 
@@ -21,41 +20,58 @@ class UtbetalingerService(private val eventService: EventService,
         val log by logger()
     }
 
-    fun hentUtbetalinger(fiksDigisosId: String, token: String): UtbetalingerResponse {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        val model = eventService.createModel(digisosSak, token)
+    fun hentUtbetalinger(token: String): List<UtbetalingerResponse> {
+        val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
-        if (model.saker.isEmpty()) {
-            log.info("Fant ingen saker for $fiksDigisosId")
-            return UtbetalingerResponse(mutableListOf())
+        if (digisosSaker.isEmpty()) {
+            log.info("Fant ingen søknader for bruker")
+            return emptyList()
         }
 
-        val utbetalingerResponse = UtbetalingerResponse(mutableListOf())
+        val responseList: List<UtbetalingerResponse> = digisosSaker.map {
+            val model = eventService.createModel(it, token)
+            val utbetalingerResponse = UtbetalingerResponse(it.fiksDigisosId, mutableListOf())
+            val utbetalingerPerManed = TreeMap<String, MutableList<Utbetaling>>()
 
-        val utbetalingerPerManed = TreeMap<String, MutableList<Utbetaling>>()
-        model.saker.stream().flatMap { t -> t.utbetalinger.stream() }.collect(Collectors.toList()).forEach { utbetaling ->
-            if (utbetaling.utbetalingsDato != null) {
-                val monthToString = monthToString(utbetaling.utbetalingsDato)
-                if (!utbetalingerPerManed.containsKey(monthToString)) {
-                    utbetalingerPerManed[monthToString] = ArrayList()
-                }
-                utbetalingerPerManed[monthToString]!!.add(utbetaling)
+            model.saker
+                    .flatMap { sak -> sak.utbetalinger }
+                    .forEach { utbetaling ->
+                        if (utbetaling.utbetalingsDato != null) {
+                            val monthToString = monthToString(utbetaling.utbetalingsDato)
+                            if (!utbetalingerPerManed.containsKey(monthToString)) {
+                                utbetalingerPerManed[monthToString] = ArrayList()
+                            }
+                            utbetalingerPerManed[monthToString]!!.add(utbetaling)
 
-            }
-            if (utbetaling.fom != null) {
-                utbetalingerPerManed[monthToString(utbetaling.fom)]!!.add(utbetaling)
-            }
-        }
-        for (utbetalinger in utbetalingerPerManed.entries) {
-            val alleUtbetalingene =
-                    utbetalinger.value.map { utbetaling ->
-                        UtbetalingResponse(utbetaling.beskrivelse, utbetaling.belop.toDouble(), utbetaling.utbetalingsDato,
-                                utbetaling.vilkar.map { vilkar -> VilkarResponse(vilkar.beskrivelse, vilkar.oppfyllt) } as MutableList<VilkarResponse>)
+                        }
+                        if (utbetaling.fom != null) {
+                            utbetalingerPerManed[monthToString(utbetaling.fom)]!!.add(utbetaling)
+                        }
                     }
-            utbetalingerResponse.utbetalinger.add(UtbetalingerManedResponse(utbetalinger.key, alleUtbetalingene.toMutableList(), alleUtbetalingene.stream().map { t -> t.belop }.reduce { t, u -> t.plus(u) }.get()))
+
+            utbetalingerPerManed.entries
+                    .forEach {
+                        val alleUtbetalingene = it.value
+                                .map { utbetaling ->
+                                    UtbetalingResponse(
+                                            utbetaling.beskrivelse,
+                                            utbetaling.belop.toDouble(),
+                                            utbetaling.utbetalingsDato,
+                                            utbetaling.vilkar
+                                                    .map { vilkar -> VilkarResponse(vilkar.beskrivelse, vilkar.oppfyllt) } as MutableList<VilkarResponse>)
+                                }
+                        utbetalingerResponse.utbetalinger.add(UtbetalingerManedResponse(
+                                it.key,
+                                alleUtbetalingene.toMutableList(),
+                                alleUtbetalingene
+                                        .map { t -> t.belop }
+                                        .reduce { t, u -> t.plus(u) }))
+                    }
+
+            utbetalingerResponse
         }
 
-        return utbetalingerResponse
+        return responseList
     }
 
     private fun monthToString(localDate: LocalDate?) =

@@ -94,4 +94,26 @@ internal class KommuneServiceTest {
         assertThatExceptionOfType(RuntimeException::class.java).isThrownBy { service.hentKommuneStatus("123", "token") }
                 .withMessage("KommuneStatus kan ikke hentes uten kommunenummer")
     }
+
+    @Test
+    fun `Alle kommuner paa FIKS med status`() {
+        val kommuneStatusListe = ArrayList<KommuneInfo>()
+        kommuneStatusListe.add(KommuneInfo("0001", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null))
+        kommuneStatusListe.add(KommuneInfo("0002", kanMottaSoknader = false, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null))
+        kommuneStatusListe.add(KommuneInfo("0003", kanMottaSoknader = true, kanOppdatereStatus = false, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null))
+        kommuneStatusListe.add(KommuneInfo("0004", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = true, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null))
+        kommuneStatusListe.add(KommuneInfo("0005", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = true, kontaktPersoner = null))
+        every { fiksClient.hentKommuneInfoForAlle() } returns kommuneStatusListe
+
+        val status = service.hentAlleKommunerMedStatusStatus()
+
+        assertThat(status).isNotEmpty
+        assertThat(status).hasSize(5)
+        assertThat(status[0].kommunenummer).isEqualTo("0001")
+        assertThat(status[0].kommunenummer).isEqualTo(kommuneStatusListe[0].kommunenummer)
+        assertThat(status[1].kanMottaSoknader).isEqualTo(kommuneStatusListe[1].kanMottaSoknader)
+        assertThat(status[2].kanOppdatereStatus).isEqualTo(kommuneStatusListe[2].kanOppdatereStatus)
+        assertThat(status[3].harMidlertidigDeaktivertMottak).isEqualTo(kommuneStatusListe[3].harMidlertidigDeaktivertMottak)
+        assertThat(status[4].harMidlertidigDeaktivertOppdateringer).isEqualTo(kommuneStatusListe[4].harMidlertidigDeaktivertOppdateringer)
+    }
 }

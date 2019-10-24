@@ -28,6 +28,7 @@ data class OppgaveResponse(
 )
 
 data class UtbetalingerResponse(
+        val fiksDigisosId: String,
         val utbetalinger: MutableList<UtbetalingerManedResponse>
 )
 

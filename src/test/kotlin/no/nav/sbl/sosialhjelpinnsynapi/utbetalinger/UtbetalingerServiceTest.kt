@@ -57,7 +57,6 @@ internal class UtbetalingerServiceTest {
                 , vilkar = mutableListOf()
         ))
 
-        every { mockDigisosSak.fiksDigisosId } returns "some id"
         every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
@@ -219,8 +218,8 @@ internal class UtbetalingerServiceTest {
         val id2 = "other id"
         every { mockDigisosSak.fiksDigisosId } returns id1
         every { mockDigisosSak2.fiksDigisosId } returns id2
-        every { eventService.createModel(id1, any()) } returns model
-        every { eventService.createModel(id2, any()) } returns model2
+        every { eventService.createModel(mockDigisosSak, any()) } returns model
+        every { eventService.createModel(mockDigisosSak2, any()) } returns model2
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak, mockDigisosSak2)
 
         val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token)

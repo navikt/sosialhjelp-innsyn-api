@@ -83,7 +83,7 @@ enum class SoknadsStatus {
 }
 
 enum class SaksStatus {
-    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE
+    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE, FEILREGISTRERT
 }
 
 enum class UtbetalingsStatus {

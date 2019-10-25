@@ -91,6 +91,8 @@ class FiksClientMock : FiksClient {
         returnValue.add(KommuneInfo("6663", true, true, false, false, null))
         returnValue.add(KommuneInfo("1201", true, true, false, false, null))
         returnValue.add(KommuneInfo("4455", true, true, false, true, null))
+        returnValue.add(KommuneInfo("1858", false, false, false, false, null))
+        returnValue.add(KommuneInfo("1430", true, true, true, true, null))
         return returnValue
     }
 

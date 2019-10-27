@@ -3,14 +3,13 @@ package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
-import no.nav.sbl.sosialhjelpinnsynapi.utils.getSha512FromByteArray
-import no.nav.sbl.sosialhjelpinnsynapi.utils.isImage
-import no.nav.sbl.sosialhjelpinnsynapi.utils.isPdf
-import no.nav.sbl.sosialhjelpinnsynapi.utils.pdfIsSigned
+import no.nav.sbl.sosialhjelpinnsynapi.utils.*
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.stereotype.Component
@@ -31,10 +30,13 @@ const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 @Component
 class VedleggOpplastingService(private val fiksClient: FiksClient,
                                private val krypteringService: KrypteringService,
-                               private val virusScanner: VirusScanner) {
+                               private val virusScanner: VirusScanner,
+                               private val redisStore: RedisStore) {
 
     companion object {
         val log by logger()
+
+        const val CACHE_TIME_TO_LIVE_SECONDS: Long = 20
     }
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
@@ -88,6 +90,11 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, fiksDigisosId, token)
 
         waitForFutures(krypteringFutureList)
+
+        // opppdater cache med digisossak
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, false)
+        cachePut(fiksDigisosId, digisosSak)
+
         return vedleggOpplastingResponseList
     }
 
@@ -150,6 +157,16 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             throw IllegalStateException(e)
         }
 
+    }
+
+    private fun cachePut(key: String, value: DigisosSak) {
+        val stringValue = objectMapper.writeValueAsString(value)
+        val set = redisStore.set(key, stringValue, CACHE_TIME_TO_LIVE_SECONDS)
+        if (set == null) {
+            log.warn("Cache put feilet eller fikk timeout")
+        } else if (set == "OK") {
+            log.info("Cache put OK $key")
+        }
     }
 }
 

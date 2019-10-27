@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.*
@@ -35,7 +35,6 @@ internal class EventServiceTest {
     private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
-    private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
     private val mockNavEnhet: NavEnhet = mockk()
 
@@ -76,7 +75,7 @@ internal class EventServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(innsynService, mockJsonDigisosSoker, mockJsonSoknad)
+        clearAllMocks()
         every { mockDigisosSak.fiksDigisosId } returns "123"
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"

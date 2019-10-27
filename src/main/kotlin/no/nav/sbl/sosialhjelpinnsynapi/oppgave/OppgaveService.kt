@@ -19,7 +19,7 @@ class OppgaveService(private val eventService: EventService,
     }
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, false)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
 
         if (model.oppgaver.isEmpty()) {

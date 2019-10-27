@@ -5,6 +5,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
@@ -25,12 +26,12 @@ internal class VedleggOpplastingServiceTest {
     private val fiksClient: FiksClient = mockk()
     private val krypteringService: KrypteringService = mockk()
     private val virusScanner: VirusScanner = mockk()
-    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner)
+    private val redisStore: RedisStore = mockk()
+    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisStore)
 
-    private val mockDigisosSak: DigisosSak = mockk()
+    private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
 
     private val id = "123"
-    private val kommunenummer = "1337"
 
     private val type0 = "brukskonto"
     private val tilleggsinfo0 = "kontoutskrift"
@@ -47,11 +48,12 @@ internal class VedleggOpplastingServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(fiksClient, mockDigisosSak)
+        clearAllMocks()
 
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
-        every { mockDigisosSak.kommunenummer } returns kommunenummer
+        every { mockDigisosSak.fiksDigisosId } returns id
         every { virusScanner.scan(any(), any()) } just runs
+        every { redisStore.set(any(), any(), any()) } returns "OK"
     }
 
     @Test

@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.oppgave
 
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -46,7 +46,7 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService)
+        clearAllMocks()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
     }

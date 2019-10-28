@@ -4,8 +4,6 @@ import io.ktor.client.features.ClientRequestException
 import kotlinx.coroutines.delay
 import kotlin.reflect.KClass
 
-private class Common
-
 internal suspend fun <T> retry(
         attempts: Int = 10,
         initialDelay: Long = 100L,
@@ -16,7 +14,7 @@ internal suspend fun <T> retry(
     var currentDelay = initialDelay
     repeat(attempts - 1) {
         try {
-            return timed() { block() }
+            return timed { block() }
         } catch (e: Throwable) {
             if (illegalExceptions.any { it.isInstance(e) } || (e is ClientRequestException)) {
                 countAndRethrowError(e) {
@@ -27,7 +25,7 @@ internal suspend fun <T> retry(
         currentDelay = (currentDelay * 2.0).toLong().coerceAtMost(maxDelay)
     }
     return try {
-        timed() { block() }
+        timed { block() }
     } catch (e: Throwable) {
         countAndRethrowError(e) {
         }

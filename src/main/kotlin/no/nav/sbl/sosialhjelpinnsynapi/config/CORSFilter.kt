@@ -19,7 +19,7 @@ class CORSFilter : Filter {
     @Throws(IOException::class, ServletException::class)
     override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
         val httpResponse = servletResponse as HttpServletResponse
-        val origin = if (servletRequest is HttpServletRequest) (servletRequest.getHeader("Origin")?: "*") else "*"
+        val origin = if (servletRequest is HttpServletRequest) (servletRequest.getHeader("Origin")) else null
 
         if (!isRunningInProd() || ALLOWED_ORIGINS.contains(origin)) {
             httpResponse.setHeader("Access-Control-Allow-Origin", origin)

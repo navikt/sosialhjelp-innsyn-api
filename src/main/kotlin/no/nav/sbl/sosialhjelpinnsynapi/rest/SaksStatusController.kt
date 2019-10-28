@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/innsyn")
 class SaksStatusController(private val saksStatusService: SaksStatusService) {
 
-    @GetMapping("/{fiksDigisosId}/saksStatus", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
+    @GetMapping("/{fiksDigisosId}/saksStatus", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentSaksStatuser(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<SaksStatusResponse>> {
         val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
         if (saksStatuser.isEmpty()) {

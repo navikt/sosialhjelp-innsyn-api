@@ -81,7 +81,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
 
         val requestEntity = HttpEntity(body, headers)
         try {
-            val path = "$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/8a3322fe-36a8-48f5-9ad7-a4c9fc0a1184/filer"
+            val path = "$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer"
             val response = restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
 
             val opplastingResponse: List<FilOpplastingResponse> = objectMapper.readValue(response.body!!)

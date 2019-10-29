@@ -53,6 +53,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
             log.info("Postet DigisosSak til Fiks")
             return id
         } catch (e: HttpStatusCodeException) {
+            log.warn(e.responseBodyAsString)
             log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
             throw FiksException(e.statusCode, e.message, e)
         } catch (e: Exception) {

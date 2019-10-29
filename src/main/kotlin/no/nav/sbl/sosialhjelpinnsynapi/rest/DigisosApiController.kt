@@ -13,9 +13,11 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @Unprotected
 @RestController
@@ -30,6 +32,13 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
         val id = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
 
         return ResponseEntity.ok("{\"fiksDigisosId\":\"$id\"}")
+    }
+
+    @PostMapping("/{fiksDigisosId}/filOpplasting", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun filOpplasting(@PathVariable fiksDigisosId: String, @RequestParam("file") file: MultipartFile): ResponseEntity<String> {
+        val dokumentlagerId = digisosApiService.lastOppFil(fiksDigisosId, file)
+
+        return ResponseEntity.ok(dokumentlagerId)
     }
 
     @GetMapping("/saker")

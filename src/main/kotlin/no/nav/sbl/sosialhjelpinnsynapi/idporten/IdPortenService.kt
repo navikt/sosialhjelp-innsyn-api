@@ -48,7 +48,7 @@ class IdPortenService(clientProperties: ClientProperties) {
     }
 
     suspend fun requestToken(attempts: Int = 10): AccessToken =
-            retry(callName = "Difi - Maskinporten", attempts = attempts) {
+            retry(attempts = attempts) {
                 val jws = createJws()
                 log.info("Got jws, getting token")
                 val response = defaultHttpClient.submitForm<IdPortenAccessTokenResponse>(

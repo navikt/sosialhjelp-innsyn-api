@@ -45,7 +45,8 @@ data class Sak(
 
 data class Vedtak(
         var utfall: UtfallVedtak?,
-        var vedtaksFilUrl: String
+        var vedtaksFilUrl: String,
+        var dato: LocalDate?
 )
 
 data class Utbetaling(
@@ -83,7 +84,7 @@ enum class SoknadsStatus {
 }
 
 enum class SaksStatus {
-    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE
+    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE, FEILREGISTRERT
 }
 
 enum class UtbetalingsStatus {

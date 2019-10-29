@@ -105,7 +105,26 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
 
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommune/$kommunenummer", HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java)
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommuner/$kommunenummer", HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java)
+
+            return response.body!!
+
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Fiks - hentKommuneInfo feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Fiks - hentKommuneInfo feilet", e)
+            throw FiksException(null, e.message, e)
+        }
+    }
+
+    override fun hentKommuneInfoForAlle(): List<KommuneInfo> {
+        val virksomhetsToken = runBlocking { idPortenService.requestToken() }
+
+        val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
+
+        try {
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommuner", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<KommuneInfo>>())
 
             return response.body!!
 

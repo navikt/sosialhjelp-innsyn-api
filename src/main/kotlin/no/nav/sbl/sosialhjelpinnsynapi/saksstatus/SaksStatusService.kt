@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.VedtaksfilUrl
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
@@ -24,7 +25,7 @@ class SaksStatusService(private val eventService: EventService) {
             return emptyList()
         }
 
-        val responseList = model.saker.map { mapToResponse(it) }
+        val responseList = model.saker.filter { it.saksStatus != SaksStatus.FEILREGISTRERT }.map { mapToResponse(it) }
         log.info("Hentet ${responseList.size} sak(er) for $fiksDigisosId")
         return responseList
     }
@@ -33,7 +34,9 @@ class SaksStatusService(private val eventService: EventService) {
         val saksStatus = hentStatusNavn(sak)
         val vedtakfilUrlList = when {
             sak.vedtak.isEmpty() -> null
-            else -> sak.vedtak.map { it.vedtaksFilUrl }
+            else -> sak.vedtak.map {
+                VedtaksfilUrl(it.dato, it.vedtaksFilUrl)
+            }
         }
         return SaksStatusResponse(sak.tittel ?: DEFAULT_TITTEL, saksStatus, vedtakfilUrlList)
     }

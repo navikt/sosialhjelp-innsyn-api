@@ -11,9 +11,14 @@ data class SoknadsStatusResponse(
 data class SaksStatusResponse(
         val tittel: String,
         val status: SaksStatus?,
-        val vedtaksfilUrlList: List<String>?
+        val vedtaksfilUrlList: List<VedtaksfilUrl>?
 )
 
+data class VedtaksfilUrl(
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val dato: LocalDate?,
+        val vedtaksfilUrl: String
+)
 data class HendelseResponse(
         val tidspunkt: String,
         val beskrivelse: String,
@@ -28,6 +33,7 @@ data class OppgaveResponse(
 )
 
 data class UtbetalingerResponse(
+        val fiksDigisosId: String,
         val utbetalinger: MutableList<UtbetalingerManedResponse>
 )
 

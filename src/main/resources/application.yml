@@ -29,15 +29,6 @@ client:
   id_porten_config_url: ${ID_PORTEN_CONFIG_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration}
   norg_endpoint_url: ${NORG_ENDPOINT_URL:norg_endpoint_url}
 
-cors:
-  allowed_origins:
-    - "http://localhost:3000"
-    - "http://localhost:3001"
-    - "https://www.nav.no/sosialhjelp/"
-    - "https://www-q0.nav.no/sosialhjelp/"
-    - "https://www-q1.nav.no/sosialhjelp/"
-    - "https://www-t1.nav.no/sosialhjelp/"
-
 innsyn:
   vedlegg:
     virusscan:

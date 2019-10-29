@@ -45,7 +45,8 @@ data class Sak(
 
 data class Vedtak(
         var utfall: UtfallVedtak?,
-        var vedtaksFilUrl: String
+        var vedtaksFilUrl: String,
+        var dato: LocalDate?
 )
 
 data class Utbetaling(

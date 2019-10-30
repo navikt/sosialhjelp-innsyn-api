@@ -40,7 +40,8 @@ data class Sak(
         var tittel: String?,
         var vedtak: MutableList<Vedtak>,
         var utbetalinger: MutableList<Utbetaling>,
-        var vilkar: MutableList<Vilkar>
+        var vilkar: MutableList<Vilkar>,
+        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
 )
 
 data class Vedtak(
@@ -60,10 +61,18 @@ data class Utbetaling(
         var tom: LocalDate?,
         var mottaker: String?,
         var utbetalingsform: String?,
-        var vilkar: MutableList<Vilkar>
+        var vilkar: MutableList<Vilkar>,
+        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
 )
 
 data class Vilkar(
+        var referanse: String,
+        var utbetalinger: MutableList<Utbetaling>,
+        var beskrivelse: String,
+        var oppfyllt: Boolean
+)
+
+data class Dokumentasjonkrav(
         var referanse: String,
         var utbetalinger: MutableList<Utbetaling>,
         var beskrivelse: String,

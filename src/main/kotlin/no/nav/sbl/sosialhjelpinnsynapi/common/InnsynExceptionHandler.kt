@@ -36,6 +36,13 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(FiksNotFoundException::class)
+    fun handleFiksNotFoundError(e: FiksNotFoundException): ResponseEntity<ErrorMessage> {
+        log.error("DigisosSak finnes ikke i FIKS ", e)
+        val error = ErrorMessage(fiksError, "DigisosSak finnes ikke")
+        return ResponseEntity(error, HttpStatus.NOT_FOUND)
+    }
+
     @ExceptionHandler(FiksException::class)
     fun handleFiksError(e: FiksException): ResponseEntity<ErrorMessage> {
         log.error("Noe feilet ved kall til Fiks", e)

@@ -114,14 +114,14 @@ internal class EventServiceTest {
 */
 
     @Test
-    fun `ingen innsyn OG ingen soknad`() {
+    fun `ingen innsyn OG ingen soknad, men med sendTidspunkt`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
 
         val model = service.createModel("123", "token")
 
         assertThat(model).isNotNull
-        assertThat(model.status).isNull()
+        assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
         assertThat(model.historikk).hasSize(0)
     }
 
@@ -145,6 +145,7 @@ internal class EventServiceTest {
             val model = service.createModel("123", "token")
 
             assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
             assertThat(model.historikk).hasSize(1)
 
             val hendelse = model.historikk.last()

@@ -7,6 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SakResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
@@ -29,11 +30,18 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
                            private val eventService: EventService,
                            private val oppgaveService: OppgaveService) {
 
+    companion object {
+        val log by logger()
+    }
+
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     fun oppdaterDigisosSak(fiksDigisosId: String?, @RequestBody body: String): ResponseEntity<String> {
         val json = objectMapper.writeValueAsString(objectMapper.readTree(body).at("/sak/soker"))
-        JsonSosialhjelpValidator.ensureValidInnsyn(json)
-
+        try {
+            JsonSosialhjelpValidator.ensureValidInnsyn(json)
+        } catch (e:Exception) {
+            log.warn("Validering av hendelser feilet", e.stackTrace)
+        }
         val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
         val id = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
 

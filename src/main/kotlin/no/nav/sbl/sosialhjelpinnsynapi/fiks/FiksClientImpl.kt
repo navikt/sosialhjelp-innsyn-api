@@ -172,11 +172,11 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     }
 
-    private fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
+    fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
     }
 
-    private fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
+    fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
         return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
     }
 
@@ -192,7 +192,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         return HttpEntity(body, headerMap)
     }
 
-    private fun serialiser(@NonNull metadata: Any): String {
+    fun serialiser(@NonNull metadata: Any): String {
         try {
             return objectMapper.writeValueAsString(metadata)
         } catch (e: JsonProcessingException) {

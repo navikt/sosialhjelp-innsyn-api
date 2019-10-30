@@ -90,7 +90,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         val headers = setIntegrasjonHeaders(token)
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
 
             return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
 

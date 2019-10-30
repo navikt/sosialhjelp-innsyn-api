@@ -45,7 +45,8 @@ internal class SaksStatusServiceTest {
                 tittel = tittel,
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf()
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -72,7 +73,8 @@ internal class SaksStatusServiceTest {
                         dato = LocalDate.now()
                 )),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf()
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -100,7 +102,8 @@ internal class SaksStatusServiceTest {
                         dato = LocalDate.now()
                 )),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf()
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -133,14 +136,16 @@ internal class SaksStatusServiceTest {
                                         vedtaksFilUrl = vedtaksfilUrl,
                                         dato = LocalDate.now())),
                         utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf()),
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf()),
                 Sak(
                         referanse = referanse,
                         saksStatus = SaksStatus.IKKE_INNSYN,
                         tittel = DEFAULT_TITTEL,
                         vedtak = mutableListOf(),
                         utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf()
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf()
                 )
         ))
 

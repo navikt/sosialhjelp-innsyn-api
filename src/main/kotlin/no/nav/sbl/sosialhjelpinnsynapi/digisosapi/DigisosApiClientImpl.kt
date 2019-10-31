@@ -1,6 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
@@ -48,9 +47,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
             id = opprettDigisosSak()
             log.info("Laget ny digisossak: " + id)
         }
-        val body = objectmapper.writeValueAsString(digisosApiWrapper)
-        val nonNull = stripNulls(objectmapper.readTree(body))
-        val httpEntity = HttpEntity(objectmapper.writeValueAsString(nonNull), headers())
+        val httpEntity = HttpEntity(objectmapper.writeValueAsString(digisosApiWrapper), headers())
         try {
             restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
             log.info("Postet DigisosSak til Fiks")
@@ -62,17 +59,6 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
         } catch (e: Exception) {
             log.error(e.message, e)
             throw FiksException(null, e.message, e)
-        }
-    }
-
-    fun stripNulls(node: JsonNode) {
-        val it = node.iterator()
-        while (it.hasNext()) {
-            val child = it.next()
-            if (child.isNull)
-                it.remove()
-            else
-                stripNulls(child)
         }
     }
 

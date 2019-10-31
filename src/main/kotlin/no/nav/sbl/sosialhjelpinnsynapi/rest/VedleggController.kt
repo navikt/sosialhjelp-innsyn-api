@@ -26,7 +26,8 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendVedlegg(@PathVariable fiksDigisosId: String, @RequestParam("files") files: MutableList<MultipartFile>,
+    fun sendVedlegg(@PathVariable fiksDigisosId: String,
+                    @RequestParam("files") files: MutableList<MultipartFile>,
                     @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggOpplastingResponse>> {
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
                 ?: throw IllegalStateException("Mangler metadata.json")

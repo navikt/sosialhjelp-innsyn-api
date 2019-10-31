@@ -10,58 +10,66 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
-private const val unexpectedError: String = "unexpected_error"
-private const val fiksError: String = "fiks_error"
-private const val norgError: String = "norg_error"
-
 
 @ControllerAdvice
 class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     companion object {
         val log by logger()
+
+        private const val UNEXPECTED_ERROR = "unexpected_error"
+        private const val FIKS_ERROR = "fiks_error"
+        private const val NORG_ERROR = "norg_error"
+        private const val FILOPPLASTING_ERROR = "FILOPPLASTING_ERROR"
     }
 
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<ErrorMessage> {
         log.error(e.message, e)
-        val error = ErrorMessage(unexpectedError, e.message)
+        val error = ErrorMessage(UNEXPECTED_ERROR, e.message)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     override fun handleHttpMessageNotReadable(
             ex: HttpMessageNotReadableException, headers: HttpHeaders, status: HttpStatus, request: WebRequest): ResponseEntity<Any> {
         log.error(ex.message, ex)
-        val error = ErrorMessage(unexpectedError, ex.message)
+        val error = ErrorMessage(UNEXPECTED_ERROR, ex.message)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(FiksNotFoundException::class)
     fun handleFiksNotFoundError(e: FiksNotFoundException): ResponseEntity<ErrorMessage> {
         log.error("DigisosSak finnes ikke i FIKS ", e)
-        val error = ErrorMessage(fiksError, "DigisosSak finnes ikke")
+        val error = ErrorMessage(FIKS_ERROR, "DigisosSak finnes ikke")
         return ResponseEntity(error, HttpStatus.NOT_FOUND)
     }
 
     @ExceptionHandler(FiksException::class)
     fun handleFiksError(e: FiksException): ResponseEntity<ErrorMessage> {
         log.error("Noe feilet ved kall til Fiks", e)
-        val error = ErrorMessage(fiksError, "Noe uventet feilet")
+        val error = ErrorMessage(FIKS_ERROR, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(NorgException::class)
     fun handleNorgError(e: NorgException): ResponseEntity<ErrorMessage> {
         log.error("Noe feilet ved kall til Norg", e)
-        val error = ErrorMessage(norgError, "Noe uventet feilet")
+        val error = ErrorMessage(NORG_ERROR, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(OpplastingException::class)
     fun handleOpplastingError(e: OpplastingException): ResponseEntity<ErrorMessage> {
         log.error("Noe feilet ved opplasting av vedlegg", e)
-        val error = ErrorMessage(unexpectedError, "Noe uventet feilet")
+        val error = ErrorMessage(FILOPPLASTING_ERROR, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @ExceptionHandler(OpplastingFilnavnMismatchException::class)
+    fun handleOpplastingFilnavnMismatchError(e: OpplastingFilnavnMismatchException): ResponseEntity<ErrorMessage> {
+        log.error("Filnavn er ikke unike eller det er mismatch mellom filer og metadata", e)
+        val error = ErrorMessage(FILOPPLASTING_ERROR, "Filnavn er ikke unike eller det er mismatch mellom filer og metadata")
+        return ResponseEntity(error, HttpStatus.BAD_REQUEST)
     }
 
 }

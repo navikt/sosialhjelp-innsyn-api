@@ -41,15 +41,15 @@ class EventService(private val clientProperties: ClientProperties,
             }
         }
 
-        if (jsonDigisosSoker == null) {
-            return model
+        var ingenDokumentasjonskravFraInnsyn = true
+        if (jsonDigisosSoker != null) {
+            jsonDigisosSoker.hendelser
+                    .sortedBy { it.hendelsestidspunkt }
+                    .forEach { model.applyHendelse(it) }
+
+            ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         }
 
-        jsonDigisosSoker.hendelser
-                .sortedBy { it.hendelsestidspunkt }
-                .forEach { model.applyHendelse(it) }
-
-        val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         if (digisosSak.originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
             model.applySoknadKrav(fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
         }

@@ -15,14 +15,14 @@ import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(HttpClient::class.java)
 
-val objectmapper: ObjectMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
+val objectMapper: ObjectMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
         .registerModules(JavaTimeModule(), KotlinModule())
         .configure(SerializationFeature.INDENT_OUTPUT, true)
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
 internal val defaultHttpClient = HttpClient(Apache) {
     install(JsonFeature) {
-        serializer = JacksonSerializer { objectmapper }
+        serializer = JacksonSerializer { objectMapper }
     }
     engine {
         customizeClient {

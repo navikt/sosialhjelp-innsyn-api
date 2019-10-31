@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.utils.objectmapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -28,17 +28,17 @@ class MockController(private val norgClient: NorgClientMock, private val fiksCli
 
     @GetMapping("/soknad", produces = [APPLICATION_JSON_VALUE])
     fun listSoknader(): ResponseEntity<String> {
-        return ResponseEntity.ok(objectmapper.writeValueAsString(fiksClientMock.hentAlleDigisosSaker("token")))
+        return ResponseEntity.ok(objectMapper.writeValueAsString(fiksClientMock.hentAlleDigisosSaker("token")))
     }
 
     @GetMapping("/soknad/{id}", produces = [APPLICATION_JSON_VALUE])
     fun listSoknad(@PathVariable id: String): ResponseEntity<String> {
-        return ResponseEntity.ok(objectmapper.writeValueAsString(fiksClientMock.hentAlleDigisosSaker("token").filter { it.fiksDigisosId == id }))
+        return ResponseEntity.ok(objectMapper.writeValueAsString(fiksClientMock.hentAlleDigisosSaker("token").filter { it.fiksDigisosId == id }))
     }
 
     @GetMapping("/dokument/{fiksdigisosId}/{id}", produces = [APPLICATION_JSON_VALUE])
     fun listSoknads(@PathVariable fiksdigisosId: String, @PathVariable id: String): ResponseEntity<String> {
-        return ResponseEntity.ok(objectmapper.writeValueAsString(innsynService.hentJsonDigisosSoker(fiksdigisosId, id, "token")))
+        return ResponseEntity.ok(objectMapper.writeValueAsString(innsynService.hentJsonDigisosSoker(fiksdigisosId, id, "token")))
     }
 }
 

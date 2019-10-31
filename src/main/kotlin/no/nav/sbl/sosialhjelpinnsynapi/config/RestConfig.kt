@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.config
 
-import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectmapper
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -20,7 +20,7 @@ class RestConfig {
     @Bean
     fun objectMapperCustomizer(): Jackson2ObjectMapperBuilderCustomizer {
         return Jackson2ObjectMapperBuilderCustomizer { jacksonObjectMapperBuilder ->
-            jacksonObjectMapperBuilder.configure(filformatObjectMapper)
+            jacksonObjectMapperBuilder.configure(objectmapper)
         }
     }
 
@@ -31,7 +31,7 @@ class RestConfig {
         val converters = reqAdapter.messageConverters
         converters.removeIf { httpMessageConverter -> httpMessageConverter.javaClass == MappingJackson2HttpMessageConverter::class.java }
 
-        val jackson = MappingJackson2HttpMessageConverter(filformatObjectMapper)
+        val jackson = MappingJackson2HttpMessageConverter(objectmapper)
         converters.add(jackson)
         reqAdapter.messageConverters = converters
         return jackson

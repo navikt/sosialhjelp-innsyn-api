@@ -16,7 +16,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.defaultHttpClient
-import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectmapper
 import org.springframework.stereotype.Component
 import java.io.File
 import java.security.KeyPair
@@ -75,7 +75,7 @@ class IdPortenService(clientProperties: ClientProperties) {
             it.add(Calendar.SECOND, expirySeconds)
             it.time
         }
-        val virksertCredentials = objectMapper.readValue<VirksertCredentials>(
+        val virksertCredentials = objectmapper.readValue<VirksertCredentials>(
                 File("$VIRKSERT_STI/credentials.json").readText(Charsets.UTF_8)
         )
 

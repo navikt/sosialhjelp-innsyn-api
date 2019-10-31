@@ -5,7 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
-import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectmapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
@@ -30,7 +30,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                     @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggOpplastingResponse>> {
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
                 ?: throw IllegalStateException("Mangler metadata.json")
-        val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)
+        val metadata: MutableList<OpplastetVedleggMetadata> = objectmapper.readValue(metadataJson.bytes)
         files.removeIf { it.originalFilename == "metadata.json" }
 
         val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)

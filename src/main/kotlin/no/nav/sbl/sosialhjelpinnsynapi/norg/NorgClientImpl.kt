@@ -5,7 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.generateCallId
-import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectmapper
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -36,7 +36,7 @@ class NorgClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
             log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
-            return objectMapper.readValue(response.body!!, NavEnhet::class.java)
+            return objectmapper.readValue(response.body!!, NavEnhet::class.java)
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Noe feilet ved kall mot NORG - ${e.statusCode} ${e.statusText}", e)

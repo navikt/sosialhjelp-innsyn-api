@@ -14,8 +14,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
-import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
-import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectmapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
@@ -51,7 +50,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
             log.info("Hentet DigisosSak $digisosId fra Fiks")
-            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
+            return objectmapper.readValue(response.body!!, DigisosSak::class.java)
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
@@ -76,7 +75,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
             log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId $dokumentlagerId")
-            return filformatObjectMapper.readValue(response.body!!, requestedClass)
+            return objectmapper.readValue(response.body!!, requestedClass)
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentDokument feilet - ${e.statusCode} ${e.statusText}", e)
@@ -198,7 +197,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     fun serialiser(@NonNull metadata: Any): String {
         try {
-            return objectMapper.writeValueAsString(metadata)
+            return objectmapper.writeValueAsString(metadata)
         } catch (e: JsonProcessingException) {
             throw RuntimeException("Feil under serialisering av metadata", e)
         }

@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
@@ -11,7 +12,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
-import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectmapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
@@ -47,7 +48,9 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
             id = opprettDigisosSak()
             log.info("Laget ny digisossak: " + id)
         }
-        val httpEntity = HttpEntity(objectMapper.writeValueAsString(digisosApiWrapper), headers())
+        val body = objectmapper.writeValueAsString(digisosApiWrapper)
+        val nonNull = stripNulls(objectmapper.readTree(body))
+        val httpEntity = HttpEntity(objectmapper.writeValueAsString(nonNull), headers())
         try {
             restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
             log.info("Postet DigisosSak til Fiks")
@@ -59,6 +62,17 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
         } catch (e: Exception) {
             log.error(e.message, e)
             throw FiksException(null, e.message, e)
+        }
+    }
+
+    fun stripNulls(node: JsonNode) {
+        val it = node.iterator()
+        while (it.hasNext()) {
+            val child = it.next()
+            if (child.isNull)
+                it.remove()
+            else
+                stripNulls(child)
         }
     }
 
@@ -85,7 +99,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
             val path = "$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer"
             val response = restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
 
-            val opplastingResponse: List<FilOpplastingResponse> = objectMapper.readValue(response.body!!)
+            val opplastingResponse: List<FilOpplastingResponse> = objectmapper.readValue(response.body!!)
             log.info("Filer sendt til Fiks")
             return opplastingResponse.map { filOpplastingResponse -> filOpplastingResponse.dokumentlagerDokumentId }
 

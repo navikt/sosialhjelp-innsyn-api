@@ -12,7 +12,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
-import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpHeaders
@@ -32,10 +31,10 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
 
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     fun oppdaterDigisosSak(fiksDigisosId: String?, @RequestBody body: String): ResponseEntity<String> {
-        val json = filformatObjectMapper.writeValueAsString(filformatObjectMapper.readTree(body).at("/sak/soker"))
+        val json = objectMapper.writeValueAsString(objectMapper.readTree(body).at("/sak/soker"))
         JsonSosialhjelpValidator.ensureValidInnsyn(json)
 
-        val digisosApiWrapper = filformatObjectMapper.readValue(body, DigisosApiWrapper::class.java)
+        val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
         val id = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
 
         return ResponseEntity.ok("{\"fiksDigisosId\":\"$id\"}")

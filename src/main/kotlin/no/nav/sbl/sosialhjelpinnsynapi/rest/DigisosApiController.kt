@@ -12,7 +12,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.unixTimestampToDate
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
-import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType

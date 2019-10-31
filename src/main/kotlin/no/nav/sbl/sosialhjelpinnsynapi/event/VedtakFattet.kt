@@ -25,6 +25,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
                 null,
                 mutableListOf(vedtakFattet),
                 mutableListOf(),
+                mutableListOf(),
                 mutableListOf()
         )
         saker.add(sak)

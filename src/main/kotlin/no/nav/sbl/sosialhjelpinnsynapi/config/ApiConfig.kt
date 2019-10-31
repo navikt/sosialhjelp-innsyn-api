@@ -33,7 +33,8 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "https://www-q0.nav.no",
                 "https://www-q1.nav.no",
                 "http://localhost:3000",
-                "http://localhost:3001")
+                "http://localhost:3001",
+                "https://www.digisos-test.com")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
         configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization")
         configuration.allowCredentials = true
@@ -55,7 +56,7 @@ class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        http.csrf().ignoringAntMatchers("/api/v1/mock/**", "/api/v1/innsyn/**/vedlegg/lastOpp", "/api/v1/innsyn/**/vedlegg/send")
+        http.csrf().disable()
         http.cors()
     }
 }

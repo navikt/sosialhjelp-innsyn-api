@@ -7,13 +7,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 
 fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
-    hendelse.beskrivelse
-    hendelse.status
-    hendelse.utbetalingsreferanse
 
-
-    val utbetalinger: java.util.ArrayList<Utbetaling> = ArrayList()
-    val vilkarSaker: java.util.ArrayList<Sak> = ArrayList()
+    val utbetalinger= mutableListOf<Utbetaling>()
+    val vilkarSaker = mutableListOf<Sak>()
     for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
         for (sak in saker) {
             for (utbetaling in sak.utbetalinger) {

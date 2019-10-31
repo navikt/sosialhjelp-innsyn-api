@@ -4,10 +4,12 @@ import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -78,16 +80,17 @@ internal class FiksClientTest {
 
     @Test
     fun `GET alle DigisosSaker`() {
-        val mockListResponse: ResponseEntity<List<String>> = mockk()
+        val mockListResponse: ResponseEntity<List<DigisosSak>> = mockk()
+        val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         every { mockListResponse.statusCode.is2xxSuccessful } returns true
-        every { mockListResponse.body } returns listOf(ok_digisossak_response, ok_digisossak_response)
+        every { mockListResponse.body } returns listOf(digisosSakOk, digisosSakOk)
 
         every {
             restTemplate.exchange(
                     any<String>(),
                     any(),
                     any(),
-                    typeRef<List<String>>())
+                    typeRef<List<DigisosSak>>())
         } returns mockListResponse
 
         val result = fiksClient.hentAlleDigisosSaker("Token")

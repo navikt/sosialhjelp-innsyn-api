@@ -96,6 +96,14 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val filnavnMetadataSet = filnavnMetadata.toHashSet()
         val filnavnMultipart = files.map { it.originalFilename }
         val filnavnMultipartSet = filnavnMultipart.toHashSet()
+        try {
+            if (!(filnavnMetadata.size == filnavnMetadataSet.size &&
+                            filnavnMultipart.size == filnavnMultipartSet.size &&
+                            filnavnMetadataSet == filnavnMultipartSet)) {
+                log.warn(filnavnMetadataSet.toString())
+                log.warn(filnavnMultipartSet.toString())
+            }
+        } catch (e:Exception) {}
         return filnavnMetadata.size == filnavnMetadataSet.size &&
                 filnavnMultipart.size == filnavnMultipartSet.size &&
                 filnavnMetadataSet == filnavnMultipartSet

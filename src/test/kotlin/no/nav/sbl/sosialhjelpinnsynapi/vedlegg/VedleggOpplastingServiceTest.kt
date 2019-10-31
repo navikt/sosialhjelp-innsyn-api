@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
+import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
@@ -127,7 +128,7 @@ internal class VedleggOpplastingServiceTest {
                 MockMultipartFile("files", filnavn1, filtype0, pngFile),
                 MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
 
-        assertFailsWith<IllegalStateException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
+        assertFailsWith<OpplastingFilnavnMismatchException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
     @Test
@@ -141,7 +142,7 @@ internal class VedleggOpplastingServiceTest {
                 MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)),
                 MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
 
-        assertFailsWith<IllegalStateException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
+        assertFailsWith<OpplastingFilnavnMismatchException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
     @Test

@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
@@ -42,7 +43,9 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     fun sendVedleggTilFiks(fiksDigisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<VedleggOpplastingResponse> {
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
-        check(filenamesAreUniqueAndMatchInMetadataAndFiles(metadata, files)) { "Filnavn er ikke unike eller det er mismatch mellom filer og metadata" }
+        if (!filenamesAreUniqueAndMatchInMetadataAndFiles(metadata, files)) {
+            throw OpplastingFilnavnMismatchException("Filnavn er ikke unike eller det er mismatch mellom filer og metadata", null)
+        }
 
         // Scan for virus
         files.forEach { virusScanner.scan(it.name, it.bytes) }
@@ -103,7 +106,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                 log.warn(filnavnMetadataSet.toString())
                 log.warn(filnavnMultipartSet.toString())
             }
-        } catch (e:Exception) {}
+        } catch (e: Exception) {
+        }
         return filnavnMetadata.size == filnavnMetadataSet.size &&
                 filnavnMultipart.size == filnavnMultipartSet.size &&
                 filnavnMetadataSet == filnavnMultipartSet

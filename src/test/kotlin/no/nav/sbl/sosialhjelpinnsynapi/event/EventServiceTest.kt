@@ -118,6 +118,7 @@ internal class EventServiceTest {
     fun `ingen innsyn OG ingen soknad, men med sendTidspunkt`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
         val model = service.createModel("123", "token")
 
@@ -130,6 +131,7 @@ internal class EventServiceTest {
     fun `ingen innsyn `() {
         every { mockDigisosSak.digisosSoker } returns null
         every { innsynService.hentJsonDigisosSoker(any(), null, any()) } returns null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
         val model = service.createModel("123", "token")
 
@@ -142,6 +144,7 @@ internal class EventServiceTest {
         @Test
         fun `soknadsStatus SENDT`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
             val model = service.createModel("123", "token")
 

@@ -10,3 +10,4 @@ class FiksNotFoundException(status: HttpStatus?, override val message: String?, 
 class NorgException(status: HttpStatus?, override val message: String?, override val cause: Throwable?): RuntimeException(message,cause)
 
 class OpplastingException(override val message: String?, override val cause: Throwable?): RuntimeException(message, cause)
+class OpplastingFilnavnMismatchException(override val message: String?, override val cause: Throwable?): RuntimeException(message, cause)

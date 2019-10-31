@@ -83,6 +83,7 @@ internal class EventServiceTest {
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
+        every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
@@ -293,7 +294,7 @@ internal class EventServiceTest {
         }
 
         @Test
-        fun `saksStatus FØR vedtakFattet`() {
+        fun `saksStatus FOER vedtakFattet`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
@@ -368,7 +369,7 @@ internal class EventServiceTest {
         }
 
         @Test
-        fun `vedtakFattet FØR saksStatus`() {
+        fun `vedtakFattet FOER saksStatus`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
@@ -544,7 +545,7 @@ internal class EventServiceTest {
         }
 
         @Test
-        fun `oppgaver skal hentes fra søknaden dersom det ikke finnes dokumentasjonEtterspurt`() {
+        fun `oppgaver skal hentes fra soknaden dersom det ikke finnes dokumentasjonEtterspurt`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)

@@ -42,6 +42,10 @@ fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime {
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneId.of("Europe/Oslo"))
 }
 
+fun unixTimestampToDate(tidspunkt: Long): Date {
+    return Date.from(Instant.ofEpochMilli(tidspunkt))
+}
+
 fun enumNameToLowercase(string: String): String {
     return string.toLowerCase().replace('_', ' ')
 }

@@ -5,10 +5,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Soknadsmottaker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
@@ -53,7 +50,26 @@ class EventService(private val clientProperties: ClientProperties,
         if (digisosSak.originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
             model.applySoknadKrav(fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
         }
+        model.ettersendtInfoNAV = digisosSak.ettersendtInfoNAV
 
+        return model
+    }
+
+    fun createSaksoversiktModel(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
+        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
+        val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
+
+        val model = InternalDigisosSoker()
+        if (timestampSendt != null) {
+            model.status = SoknadsStatus.SENDT
+        }
+        if (jsonDigisosSoker == null) {
+            return model
+        }
+        jsonDigisosSoker.hendelser
+                .sortedBy { it.hendelsestidspunkt }
+                .forEach { model.applyHendelse(it) }
+        model.ettersendtInfoNAV = digisosSak.ettersendtInfoNAV
         return model
     }
 

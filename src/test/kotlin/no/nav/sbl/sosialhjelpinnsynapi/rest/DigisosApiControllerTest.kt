@@ -45,11 +45,8 @@ internal class DigisosApiControllerTest {
         every { digisosSak2.sistEndret } returns 1000L
         every { digisosSak2.digisosSoker } returns mockk()
 
-        every { eventService.createModel("123", any()) } returns model1
-        every { eventService.createModel("456", any()) } returns model2
-
-        every { oppgaveService.hentOppgaver("123", any()).size } returns 2
-        every { oppgaveService.hentOppgaver("456", any()).size } returns 1
+        every { oppgaveService.hentOppgaver("123", model1, any()).size } returns 2
+        every { oppgaveService.hentOppgaver("456", model2, any()).size } returns 1
     }
 
     @Test
@@ -76,25 +73,62 @@ internal class DigisosApiControllerTest {
         if (saker != null && saker.size == 2) {
             val first = saker[0]
             assertThat(first.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
-            assertThat(first.antallNyeOppgaver).isEqualTo(2)
             assertThat(first.kilde).isEqualTo(KILDE_INNSYN_API)
+
+            val second = saker[1]
+            assertThat(second.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
+            assertThat(second.kilde).isEqualTo(KILDE_INNSYN_API)
+        }
+    }
+
+    @Test
+    fun `skal mappe fra DigisosSak til SakResponse for detaljer`() {
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2)
+        every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
+        every { eventService.createSaksoversiktModel(any(), digisosSak2) } returns model2
+
+        every { model1.status } returns MOTTATT
+        every { model2.status } returns UNDER_BEHANDLING
+
+        every { model1.oppgaver.isEmpty() } returns false
+        every { model2.oppgaver.isEmpty() } returns false
+
+        every { sak1.tittel } returns "Livsopphold"
+        every { sak2.tittel } returns "Strøm"
+
+        every { model1.saker } returns mutableListOf()
+        every { model2.saker } returns mutableListOf(sak1, sak2)
+
+        val ids = listOf(digisosSak1.fiksDigisosId, digisosSak2.fiksDigisosId)
+        val response = controller.hentSaksDetaljer(ids,"token")
+        val saker = response.body
+
+        assertThat(saker).isNotNull
+        assertThat(saker).hasSize(2)
+
+        if (saker != null && saker.size == 2) {
+            val first = saker[0]
+            assertThat(first.soknadTittel).isEqualTo("")
+            assertThat(first.antallNyeOppgaver).isEqualTo(2)
 
             val second = saker[1]
             assertThat(second.soknadTittel).contains("Livsopphold", "Strøm")
             assertThat(second.status).isEqualTo("$UNDER_BEHANDLING")
             assertThat(second.antallNyeOppgaver).isEqualTo(1)
-            assertThat(second.kilde).isEqualTo(KILDE_INNSYN_API)
         }
     }
 
     @Test
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1)
+        every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
 
         every { model1.status } returns MOTTATT
         every { model1.oppgaver.isEmpty() } returns true
+        every { model1.saker } returns mutableListOf()
 
-        val response = controller.hentAlleSaker("token")
+        val ids = listOf(digisosSak1.fiksDigisosId)
+        val response = controller.hentSaksDetaljer(ids,"token")
         val saker = response.body
 
         assertThat(saker).isNotNull
@@ -107,5 +141,4 @@ internal class DigisosApiControllerTest {
             assertThat(first.antallNyeOppgaver).isEqualTo(null)
         }
     }
-
 }

@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.domain
 import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 data class SoknadsStatusResponse(
         val status: SoknadsStatus
@@ -77,12 +78,18 @@ data class VedleggOpplastingResponse(
         val status: String
 )
 
-data class SakResponse(
+data class SaksListeResponse(
+        val fiksDigisosId: String,
+        val soknadTittel: String,
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+        val sistOppdatert: Date,
+        val kilde: String
+)
+
+data class SaksDetaljerResponse(
         val fiksDigisosId: String,
         val soknadTittel: String,
         val status: String,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
-        val sistOppdatert: LocalDateTime,
-        val antallNyeOppgaver: Int?,
-        val kilde: String
+        val antallNyeOppgaver: Int?
 )

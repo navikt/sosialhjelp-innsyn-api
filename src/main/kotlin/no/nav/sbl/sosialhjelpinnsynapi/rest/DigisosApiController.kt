@@ -66,21 +66,19 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
     }
 
     @GetMapping("/saksDetaljer")
-    fun hentSaksDetaljer(@RequestParam ids: List<String>, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksDetaljerResponse>> {
-        val saker = fiksClient.hentAlleDigisosSaker(token)
-
-        val responselist =  saker.filter {ids.contains(it.fiksDigisosId)}.map {
-            val model = eventService.createSaksoversiktModel(token, it)
-
-            SaksDetaljerResponse(
-                    it.fiksDigisosId,
-                    hentNavn(model),
-                    model.status.toString(),
-                    hentAntallNyeOppgaver(model, it.fiksDigisosId, token)
-            )
+    fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
+        if(id === "") {
+            return ResponseEntity.ok().body(null)
         }
-
-        return ResponseEntity.ok().body(responselist)
+        val sak = fiksClient.hentDigisosSak(id, token)
+        val model = eventService.createSaksoversiktModel(token, sak)
+        val saksDetaljerResponse = SaksDetaljerResponse(
+                sak.fiksDigisosId,
+                hentNavn(model),
+                model.status.toString(),
+                hentAntallNyeOppgaver(model, sak.fiksDigisosId, token)
+        )
+        return ResponseEntity.ok().body(saksDetaljerResponse)
     }
 
     private fun hentNavn(model: InternalDigisosSoker): String {

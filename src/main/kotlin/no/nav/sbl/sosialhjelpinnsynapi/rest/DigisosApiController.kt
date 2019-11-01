@@ -67,8 +67,8 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
 
     @GetMapping("/saksDetaljer")
     fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
-        if(id === "") {
-            return ResponseEntity.ok().body(null)
+        if(id.isEmpty()) {
+            return ResponseEntity.noContent().build()
         }
         val sak = fiksClient.hentDigisosSak(id, token)
         val model = eventService.createSaksoversiktModel(token, sak)

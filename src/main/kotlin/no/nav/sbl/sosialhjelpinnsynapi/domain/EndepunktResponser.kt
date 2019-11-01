@@ -11,9 +11,14 @@ data class SoknadsStatusResponse(
 data class SaksStatusResponse(
         val tittel: String,
         val status: SaksStatus?,
-        val vedtaksfilUrlList: List<String>?
+        val vedtaksfilUrlList: List<VedtaksfilUrl>?
 )
 
+data class VedtaksfilUrl(
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val dato: LocalDate?,
+        val vedtaksfilUrl: String
+)
 data class HendelseResponse(
         val tidspunkt: String,
         val beskrivelse: String,
@@ -43,10 +48,16 @@ data class UtbetalingResponse(
         val belop: Double,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val utbetalingsdato: LocalDate?,
-        val vilkar: MutableList<VilkarResponse>
+        val vilkar: MutableList<VilkarResponse>,
+        val dokumentasjonkrav: MutableList<DokumentasjonskravResponse>
 )
 
 data class VilkarResponse(
+        val beskrivelse: String?,
+        val oppfylt: Boolean
+)
+
+data class DokumentasjonskravResponse(
         val beskrivelse: String?,
         val oppfylt: Boolean
 )

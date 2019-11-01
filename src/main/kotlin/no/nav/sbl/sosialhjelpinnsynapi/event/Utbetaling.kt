@@ -18,6 +18,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
             if (hendelse.tom == null) null else LocalDate.parse(hendelse.tom, pattern),
             hendelse.mottaker,
             hendelse.utbetalingsmetode,
+            mutableListOf(),
             mutableListOf()
     )
 
@@ -32,6 +33,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
                 hendelse.saksreferanse,
                 SaksStatus.UNDER_BEHANDLING,
                 "Sak om sosialhjelp",
+                mutableListOf(),
                 mutableListOf(),
                 mutableListOf(),
                 mutableListOf()

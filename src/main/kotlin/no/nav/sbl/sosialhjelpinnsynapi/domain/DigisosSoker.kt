@@ -40,12 +40,14 @@ data class Sak(
         var tittel: String?,
         var vedtak: MutableList<Vedtak>,
         var utbetalinger: MutableList<Utbetaling>,
-        var vilkar: MutableList<Vilkar>
+        var vilkar: MutableList<Vilkar>,
+        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
 )
 
 data class Vedtak(
         var utfall: UtfallVedtak?,
-        var vedtaksFilUrl: String
+        var vedtaksFilUrl: String,
+        var dato: LocalDate?
 )
 
 data class Utbetaling(
@@ -59,13 +61,21 @@ data class Utbetaling(
         var tom: LocalDate?,
         var mottaker: String?,
         var utbetalingsform: String?,
-        var vilkar: MutableList<Vilkar>
+        var vilkar: MutableList<Vilkar>,
+        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
 )
 
 data class Vilkar(
         var referanse: String,
         var utbetalinger: MutableList<Utbetaling>,
-        var beskrivelse: String,
+        var beskrivelse: String?,
+        var oppfyllt: Boolean
+)
+
+data class Dokumentasjonkrav(
+        var referanse: String,
+        var utbetalinger: MutableList<Utbetaling>,
+        var beskrivelse: String?,
         var oppfyllt: Boolean
 )
 
@@ -79,11 +89,11 @@ data class Hendelse(
 }
 
 enum class SoknadsStatus {
-    MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE
+    SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE
 }
 
 enum class SaksStatus {
-    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE
+    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE, FEILREGISTRERT
 }
 
 enum class UtbetalingsStatus {

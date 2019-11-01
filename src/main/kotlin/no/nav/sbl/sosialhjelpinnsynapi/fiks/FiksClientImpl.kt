@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksNotFoundException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
@@ -13,7 +14,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
-import no.nav.sbl.sosialhjelpinnsynapi.utils.filformatObjectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
@@ -54,6 +54,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                throw FiksNotFoundException(e.statusCode, e.message, e)
+            }
             throw FiksException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDigisosSak feilet", e)
@@ -72,7 +75,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
             log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId $dokumentlagerId")
-            return filformatObjectMapper.readValue(response.body!!, requestedClass)
+            return objectMapper.readValue(response.body!!, requestedClass)
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentDokument feilet - ${e.statusCode} ${e.statusText}", e)
@@ -86,9 +89,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         val headers = setIntegrasjonHeaders(token)
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<String>>())
 
-            return response.body!!.map { s: String -> objectMapper.readValue(s, DigisosSak::class.java) }
+            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
+            return response.body.orEmpty()
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.statusCode} ${e.statusText}", e)
@@ -172,11 +175,11 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     }
 
-    private fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
+    fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
     }
 
-    private fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
+    fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
         return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
     }
 
@@ -192,7 +195,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         return HttpEntity(body, headerMap)
     }
 
-    private fun serialiser(@NonNull metadata: Any): String {
+    fun serialiser(@NonNull metadata: Any): String {
         try {
             return objectMapper.writeValueAsString(metadata)
         } catch (e: JsonProcessingException) {

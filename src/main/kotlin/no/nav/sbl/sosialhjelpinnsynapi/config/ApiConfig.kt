@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc
 @EnableWebSecurity
 @EnableWebMvc
 @EnableOIDCTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController"])
-class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurityConfigurerAdapter() {
+class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
@@ -28,13 +28,24 @@ class WebSecurityConfig(private val corsProperties: CorsProperties) : WebSecurit
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf(*corsProperties.allowedOrigins)
+        configuration.allowedOrigins = listOf(
+                "https://www.nav.no",
+                "https://www-q0.nav.no",
+                "https://www-q1.nav.no",
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "https://www.digisos-test.com")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
         configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization")
         configuration.allowCredentials = true
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
+    }
+
+    @Bean
+    fun navCorsFilter(): CORSFilter {
+        return CORSFilter()
     }
 }
 
@@ -45,7 +56,7 @@ class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        http.csrf().ignoringAntMatchers("/api/v1/mock/**", "/api/v1/innsyn/**/vedlegg/send", "/api/v1/digisosapi/**")
+        http.csrf().disable()
         http.cors()
     }
 }

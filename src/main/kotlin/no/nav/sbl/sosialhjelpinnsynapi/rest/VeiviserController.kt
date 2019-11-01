@@ -3,7 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 import io.micrometer.core.instrument.util.IOUtils
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.security.oidc.api.Unprotected
-import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -22,7 +22,7 @@ import javax.net.ssl.HttpsURLConnection
 class VeiviserController {
     private val kommunenummerCache = KommunenummerCache()
 
-    @GetMapping("kommunenummer", produces = [APPLICATION_JSON_UTF8_VALUE])
+    @GetMapping("kommunenummer", produces = [APPLICATION_JSON_VALUE])
     fun hentKommunenummer(): ResponseEntity<String> {
         return ResponseEntity.ok(kommunenummerCache.getKommunenr())
     }

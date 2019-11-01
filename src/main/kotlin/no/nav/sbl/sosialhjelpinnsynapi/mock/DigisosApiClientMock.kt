@@ -4,6 +4,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -28,6 +29,8 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
                 EttersendtInfoNAV(Collections.emptyList()), DigisosSoker(dokumentlagerId, Collections.emptyList(), System.currentTimeMillis())))
         return id
     }
+
+    override fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String> {return emptyList()}
 
     private fun femMinutterForMottattSoknad(digisosApiWrapper: DigisosApiWrapper): Long {
         val mottattTidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt

@@ -13,7 +13,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 import kotlin.reflect.full.companionObject
 
 const val NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
@@ -57,13 +56,19 @@ fun enumNameToLowercase(string: String): String {
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser
             ?.map { it.navEksternRefId }?.maxBy { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
-            ?: digisosSak.originalSoknadNAV?.navEksternRefId?.toLowerCase()?.plus("0000")
-            ?: UUID.randomUUID().toString().plus("0000")
+            ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
+            ?: digisosSak.fiksDigisosId.plus("0000")
 
-    val nyCounter = previousId.takeLast(COUNTER_SUFFIX_LENGTH).toLong() + 1
-    val nyCounterAsString = nyCounter.toString().padStart(4, '0')
+    val nesteSuffix = lagIdSuffix(previousId)
+    return (previousId.dropLast(COUNTER_SUFFIX_LENGTH).plus(nesteSuffix))
+}
 
-    return (previousId.dropLast(COUNTER_SUFFIX_LENGTH).plus(nyCounterAsString)).toUpperCase().replace("O", "o").replace("I", "i")
+/**
+ * returnerer neste id-suffix som 4-sifret String
+ */
+private fun lagIdSuffix(previousId: String): String {
+    val suffix = previousId.takeLast(COUNTER_SUFFIX_LENGTH).toLong() + 1
+    return suffix.toString().padStart(4, '0')
 }
 
 fun <R : Any> R.logger(): Lazy<Logger> {

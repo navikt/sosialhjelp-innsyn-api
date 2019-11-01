@@ -15,6 +15,7 @@ internal class UtilsTest {
 
     private val ettersendelse: Ettersendelse = mockk()
 
+    private val fiksDigisosId = "abcdeadfasfd"
     private val soknadId = "1100007B5"
     private val ettersendelseId1 = "${soknadId}0001"
     private val ettersendelseId2 = "${soknadId}0009"
@@ -29,20 +30,22 @@ internal class UtilsTest {
     fun `lagNavEksternId ingen ettersendelser eller originalSoknad `() {
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
         every { mockDigisosSak.originalSoknadNAV } returns null
+        every { mockDigisosSak.fiksDigisosId} returns fiksDigisosId
 
         val navEksternRefId = lagNavEksternRefId(mockDigisosSak)
 
-        assertThat(navEksternRefId).endsWith("0001")
+        assertThat(navEksternRefId).isEqualTo(fiksDigisosId.plus("0001"))
     }
 
     @Test
     fun `lagNavEksternId ingen ettersendelser eller originalSoknad og påfølgende vedlegg bruker samme uuid `() {
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
         every { mockDigisosSak.originalSoknadNAV } returns null
+        every { mockDigisosSak.fiksDigisosId} returns fiksDigisosId
 
         val id1 = lagNavEksternRefId(mockDigisosSak)
 
-        assertThat(id1).endsWith("0001")
+        assertThat(id1).isEqualTo(fiksDigisosId.plus("0001"))
 
         every { ettersendelse.navEksternRefId } returns id1
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns listOf(ettersendelse)
@@ -50,7 +53,7 @@ internal class UtilsTest {
         val id2 = lagNavEksternRefId(mockDigisosSak)
 
         assertThat(id2.dropLast(COUNTER_SUFFIX_LENGTH)).isEqualTo(id1.dropLast(COUNTER_SUFFIX_LENGTH))
-        assertThat(id2).endsWith("0002")
+        assertThat(id2).isEqualTo(fiksDigisosId.plus("0002"))
     }
 
     @Test

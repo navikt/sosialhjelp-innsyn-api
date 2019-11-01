@@ -49,7 +49,7 @@ internal class UtilsTest {
 
         val id2 = lagNavEksternRefId(mockDigisosSak)
 
-        assertThat(id2.dropLast(COUNTER_LENGTH)).isEqualTo(id1.dropLast(COUNTER_LENGTH))
+        assertThat(id2.dropLast(COUNTER_SUFFIX_LENGTH)).isEqualTo(id1.dropLast(COUNTER_SUFFIX_LENGTH))
         assertThat(id2).endsWith("0002")
     }
 

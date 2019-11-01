@@ -8,7 +8,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.util.StringUtils
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -20,7 +19,7 @@ import kotlin.reflect.full.companionObject
 const val NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
 const val NAIS_NAMESPACE = "NAIS_NAMESPACE"
 
-const val COUNTER_LENGTH = 4
+const val COUNTER_SUFFIX_LENGTH = 4
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
@@ -57,13 +56,14 @@ fun enumNameToLowercase(string: String): String {
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser
-            ?.map { it.navEksternRefId }?.maxBy { it.takeLast(COUNTER_LENGTH).toLong() }
+            ?.map { it.navEksternRefId }?.maxBy { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
             ?: digisosSak.originalSoknadNAV?.navEksternRefId?.toLowerCase()?.plus("0000")
             ?: UUID.randomUUID().toString().plus("0000")
 
-    val nyCounter = previousId.takeLast(COUNTER_LENGTH).toLong() + 1
+    val nyCounter = previousId.takeLast(COUNTER_SUFFIX_LENGTH).toLong() + 1
+    val nyCounterAsString = nyCounter.toString().padStart(4, '0')
 
-    return (previousId.dropLast(COUNTER_LENGTH).plus(nyCounter.toString().padStart(4, '0'))).toUpperCase().replace("O", "o").replace("I", "i")
+    return (previousId.dropLast(COUNTER_SUFFIX_LENGTH).plus(nyCounterAsString)).toUpperCase().replace("O", "o").replace("I", "i")
 }
 
 fun <R : Any> R.logger(): Lazy<Logger> {

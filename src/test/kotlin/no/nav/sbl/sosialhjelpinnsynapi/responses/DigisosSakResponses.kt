@@ -28,7 +28,7 @@ val ok_digisossak_response = """
   "ettersendtInfoNAV": {
     "ettersendelser": [
       {
-        "navEksternRefId": "string",
+        "navEksternRefId": "navEksternRefIdEttersendelse0001",
         "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
         "vedlegg": [
           {

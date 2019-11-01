@@ -62,7 +62,7 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
                     )
                 }
 
-        return ResponseEntity.ok().body(responselist.sortedBy { it.sistOppdatert })
+        return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
     }
 
     @GetMapping("/saksDetaljer")

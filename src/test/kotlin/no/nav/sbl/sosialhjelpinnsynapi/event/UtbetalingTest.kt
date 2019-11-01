@@ -12,7 +12,7 @@ import java.time.LocalDate
 internal class UtbetalingTest : BaseEventTest() {
 
     @Test
-    fun `utbetaling ETTER vedtakFattet`() {
+    fun `utbetaling ETTER vedtakFattet og saksStatus`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -20,9 +20,10 @@ internal class UtbetalingTest : BaseEventTest() {
                         .withHendelser(listOf(
                                 SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                                SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
-                                UTBETALING.withHendelsestidspunkt(tidspunkt_5)
+                                SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
+                                SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
+                                SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_5),
+                                UTBETALING.withHendelsestidspunkt(tidspunkt_6)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
@@ -32,6 +33,8 @@ internal class UtbetalingTest : BaseEventTest() {
         assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
         assertThat(model.saker).hasSize(1)
         assertThat(model.historikk).hasSize(5)
+
+        assertThat(model.saker[0].tittel).isEqualTo(tittel_1) // tittel for sak fra saksstatus-hendelse
 
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]

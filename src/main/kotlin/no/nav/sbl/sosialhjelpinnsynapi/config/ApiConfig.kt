@@ -52,6 +52,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 @Profile("mock")
 @Order(-1)
 @Configuration
+@EnableOIDCTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController", "no.nav.sbl.sosialhjelpinnsynapi"])
 class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)

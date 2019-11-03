@@ -15,7 +15,7 @@ import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
 
-@Profile("!mock & !local")
+@Profile("!(mock | local)")
 @Component
 class NorgClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate) : NorgClient {

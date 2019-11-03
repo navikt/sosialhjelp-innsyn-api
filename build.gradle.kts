@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 group = "no.nav.sbl"
 version = "1.0-SNAPSHOT"
 
@@ -9,7 +8,7 @@ val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
 val junitJupiterVersion = "5.5.2"
 val mockkVersion = "1.9.3"
-val filformatVersion = "1.2019.10.22-14.45-df3f5aae642d"
+val filformatVersion = "1.2019.10.29-12.39-6bf6917cf603"
 val micrometerRegistryVersion = "1.1.7"
 val prometheusVersion = "0.7.0"
 val tokenSupportVersion = "0.2.18"

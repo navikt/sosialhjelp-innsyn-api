@@ -13,7 +13,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     val utfall = if (utfallString == null) null else UtfallVedtak.valueOf(utfallString)
     val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)
 
-    val vedtakFattet = Vedtak(utfall, vedtaksfilUrl)
+    val vedtakFattet = Vedtak(utfall, vedtaksfilUrl, toLocalDateTime(hendelse.hendelsestidspunkt).toLocalDate())
 
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
     if (sakForReferanse != null) {
@@ -24,6 +24,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
                 null,
                 null,
                 mutableListOf(vedtakFattet),
+                mutableListOf(),
                 mutableListOf(),
                 mutableListOf()
         )

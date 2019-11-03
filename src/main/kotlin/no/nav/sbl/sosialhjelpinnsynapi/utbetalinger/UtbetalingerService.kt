@@ -58,7 +58,11 @@ class UtbetalingerService(private val eventService: EventService,
                                             utbetaling.belop.toDouble(),
                                             utbetaling.utbetalingsDato,
                                             utbetaling.vilkar
-                                                    .map { vilkar -> VilkarResponse(vilkar.beskrivelse, vilkar.oppfyllt) } as MutableList<VilkarResponse>)
+                                                    .map { vilkar -> VilkarResponse(vilkar.beskrivelse, vilkar.oppfyllt) }
+                                                    .toMutableList(),
+                                            utbetaling.dokumentasjonkrav
+                                                    .map { dokumentasjonskrav -> DokumentasjonskravResponse(dokumentasjonskrav.beskrivelse, dokumentasjonskrav.oppfyllt) }
+                                                    .toMutableList())
                                 }
                         utbetalingerResponse.utbetalinger.add(UtbetalingerManedResponse(
                                 it.key,

@@ -48,11 +48,6 @@ class HealthController(private val dependencyCheckList: List<AbstractDependencyC
         )
     }
 
-    // Hvis appen skal hindres fra å starte dersom kritiske avhengigheter er nede
-//    private fun isAnyVitalDependencyUnhealthy(results: List<Result>): Boolean {
-//        return results.stream().anyMatch { result -> result == Result.ERROR }
-//    }
-
     private fun getOverallSelftestResult(results: List<DependencyCheckResult>): Result {
         if (results.stream().anyMatch { result -> result.result == Result.ERROR }) {
             return Result.ERROR
@@ -61,15 +56,6 @@ class HealthController(private val dependencyCheckList: List<AbstractDependencyC
         }
         return Result.OK
     }
-    // Hvis appen skal hindres fra å starte dersom kritiske avhengigheter er nede
-//    private fun checkCriticalDependencies(results: MutableList<DependencyCheckResult>) {
-//        Flowable.fromIterable(dependencyCheckList)
-//                .filter { it.importance ==  Importance.CRITICAL }
-//                .parallel()
-//                .runOn(Schedulers.io())
-//                .map { it.check().get() }
-//                .sequential().blockingSubscribe{ results.add(it) }
-//    }
 
     @FlowPreview
     private suspend fun checkDependencies(results: MutableList<DependencyCheckResult>) {

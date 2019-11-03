@@ -26,7 +26,7 @@ val defaultDigisosSak = DigisosSak(
         ettersendtInfoNAV = EttersendtInfoNAV(
                 ettersendelser = listOf(
                         Ettersendelse(
-                                navEksternRefId = "string",
+                                navEksternRefId = "ettersendtNavEksternRef0001",
                                 vedleggMetadata = "mock-ettersendelse-vedlegg-metadata",
                                 vedlegg = listOf(
                                         DokumentInfo(
@@ -38,7 +38,7 @@ val defaultDigisosSak = DigisosSak(
                                 timestampSendt = 1539432000000
                         ),
                         Ettersendelse(
-                                navEksternRefId = "string",
+                                navEksternRefId = "ettersendtNavEksternRef0002",
                                 vedleggMetadata = "mock-ettersendelse-vedlegg-metadata-2",
                                 vedlegg = listOf(
                                         DokumentInfo(

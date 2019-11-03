@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/innsyn")
 class OppgaveController(val oppgaveService: OppgaveService) {
 
-    @GetMapping("/{fiksDigisosId}/oppgaver", produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
+    @GetMapping("/{fiksDigisosId}/oppgaver", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
         val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
         if (oppgaver.isEmpty()) {

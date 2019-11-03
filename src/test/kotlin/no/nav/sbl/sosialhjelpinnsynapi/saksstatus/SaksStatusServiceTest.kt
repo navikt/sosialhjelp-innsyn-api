@@ -9,6 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class SaksStatusServiceTest {
     private val eventService: EventService = mockk()
@@ -50,7 +51,8 @@ internal class SaksStatusServiceTest {
                 tittel = tittel,
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf()
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -73,10 +75,12 @@ internal class SaksStatusServiceTest {
                 tittel = tittel,
                 vedtak = mutableListOf(Vedtak(
                         utfall = UtfallVedtak.INNVILGET,
-                        vedtaksFilUrl = vedtaksfilUrl
+                        vedtaksFilUrl = vedtaksfilUrl,
+                        dato = LocalDate.now()
                 )),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf()
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -88,7 +92,7 @@ internal class SaksStatusServiceTest {
         assertThat(response[0].status).isEqualTo(SaksStatus.FERDIGBEHANDLET)
         assertThat(response[0].tittel).isEqualTo(tittel)
         assertThat(response[0].vedtaksfilUrlList).hasSize(1)
-        assertThat(response[0].vedtaksfilUrlList?.get(0)).isEqualTo(vedtaksfilUrl)
+        assertThat(response[0].vedtaksfilUrlList?.get(0)?.vedtaksfilUrl).isEqualTo(vedtaksfilUrl)
     }
 
     @Test
@@ -100,10 +104,12 @@ internal class SaksStatusServiceTest {
                 tittel = DEFAULT_TITTEL,
                 vedtak = mutableListOf(Vedtak(
                         utfall = UtfallVedtak.INNVILGET,
-                        vedtaksFilUrl = vedtaksfilUrl
+                        vedtaksFilUrl = vedtaksfilUrl,
+                        dato = LocalDate.now()
                 )),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf()
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -115,7 +121,7 @@ internal class SaksStatusServiceTest {
         assertThat(response[0].status).isEqualTo(SaksStatus.FERDIGBEHANDLET)
         assertThat(response[0].tittel).isEqualTo(DEFAULT_TITTEL)
         assertThat(response[0].vedtaksfilUrlList).hasSize(1)
-        assertThat(response[0].vedtaksfilUrlList?.get(0)).isEqualTo(vedtaksfilUrl)
+        assertThat(response[0].vedtaksfilUrlList?.get(0)?.vedtaksfilUrl).isEqualTo(vedtaksfilUrl)
     }
 
     @Test
@@ -129,19 +135,23 @@ internal class SaksStatusServiceTest {
                         vedtak = mutableListOf(
                                 Vedtak(
                                         utfall = UtfallVedtak.INNVILGET,
-                                        vedtaksFilUrl = vedtaksfilUrl),
+                                        vedtaksFilUrl = vedtaksfilUrl,
+                                        dato = LocalDate.now()),
                                 Vedtak(
                                         utfall = UtfallVedtak.INNVILGET,
-                                        vedtaksFilUrl = vedtaksfilUrl)),
+                                        vedtaksFilUrl = vedtaksfilUrl,
+                                        dato = LocalDate.now())),
                         utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf()),
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf()),
                 Sak(
                         referanse = referanse,
                         saksStatus = SaksStatus.IKKE_INNSYN,
                         tittel = DEFAULT_TITTEL,
                         vedtak = mutableListOf(),
                         utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf()
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf()
                 )
         ))
 

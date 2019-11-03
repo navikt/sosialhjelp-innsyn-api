@@ -5,10 +5,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Soknadsmottaker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
@@ -28,20 +25,24 @@ class EventService(private val clientProperties: ClientProperties,
 
         val model = InternalDigisosSoker()
 
-        if (jsonSoknad != null && jsonSoknad.mottaker != null && timestampSendt != null) {
-            model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
-            model.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
+        if (timestampSendt != null) {
+            model.status = SoknadsStatus.SENDT
+
+            if (jsonSoknad != null && jsonSoknad.mottaker != null) {
+                model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
+                model.historikk.add(Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}", unixToLocalDateTime(timestampSendt)))
+            }
         }
 
-        if (jsonDigisosSoker == null) {
-            return model
+        var ingenDokumentasjonskravFraInnsyn = true
+        if (jsonDigisosSoker != null) {
+            jsonDigisosSoker.hendelser
+                    .sortedBy { it.hendelsestidspunkt }
+                    .forEach { model.applyHendelse(it) }
+
+            ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         }
 
-        jsonDigisosSoker.hendelser
-                .sortedBy { it.hendelsestidspunkt }
-                .forEach { model.applyHendelse(it) }
-
-        val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         if (digisosSak.originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
             model.applySoknadKrav(digisosSak.fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
         }
@@ -59,6 +60,8 @@ class EventService(private val clientProperties: ClientProperties,
             is JsonForelopigSvar -> apply(hendelse, clientProperties)
             is JsonUtbetaling -> apply(hendelse)
             is JsonVilkar -> apply(hendelse)
+            is JsonDokumentasjonkrav -> apply(hendelse)
+            is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }
     }

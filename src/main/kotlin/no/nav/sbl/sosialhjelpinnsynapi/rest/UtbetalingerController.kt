@@ -3,7 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.utbetalinger.UtbetalingerService
-import no.nav.security.oidc.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

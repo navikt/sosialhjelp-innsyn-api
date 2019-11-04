@@ -13,7 +13,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import no.nav.security.oidc.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE

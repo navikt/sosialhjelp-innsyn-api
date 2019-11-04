@@ -9,7 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
-import no.nav.security.oidc.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType

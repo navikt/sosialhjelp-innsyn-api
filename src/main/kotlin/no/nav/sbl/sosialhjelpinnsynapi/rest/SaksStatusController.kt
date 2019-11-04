@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.SaksStatusService
-import no.nav.security.oidc.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType

@@ -4,6 +4,7 @@ import io.mockk.every
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -72,7 +73,7 @@ internal class UtbetalingTest : BaseEventTest() {
         assertThat(model.saker).hasSize(1)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.saker[0].tittel).isEqualTo("Sak om sosialhjelp") // default tittel for sak som settes i dersom hverken saksStatus eller vedtakfattet er mottatt
+        assertThat(model.saker[0].tittel).isEqualTo(DEFAULT_TITTEL) // default tittel for sak som settes i dersom hverken saksStatus eller vedtakfattet er mottatt
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
         assertThat(utbetaling.belop).isEqualTo("1234.56")

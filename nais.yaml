@@ -57,7 +57,7 @@ spec:
       value: {{id_porten_client_id}}
     - name: ID_PORTEN_SCOPE
       value: {{id_porten_scope}}
-    - name: NO_NAV_SECURITY_JWT_ISSUER_SELVBETJENING_DISCOVERYURL
-      value: {{no_nav_security_jwt_issuer_selvbetjening_discoveryurl}}
-    - name: NO_NAV_SECURITY_JWT_ISSUER_SELVBETJENING_ACCEPTEDAUDIENCE
-      value: {{no_nav_security_jwt_issuer_selvbetjening_acceptedaudience}}
+    - name: AZUREAD_DISCOVERYURL
+      value: {{azuread_discoveryurl}}
+    - name: AZUREAD_CLIENTID
+      value: {{azuread_clientid}}

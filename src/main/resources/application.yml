@@ -31,12 +31,9 @@ client:
 
 no.nav.security.jwt:
   issuer.selvbetjening:
-    discoveryurl: ${NO_NAV_SECURITY_JWT_ISSUER_SELVBETJENING_DISCOVERYURL:https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten}
+    discoveryurl: ${AZUREAD_DISCOVERYURL}
     cookie_name: selvbetjening-idtoken
-    accepted_audience: ${NO_NAV_SECURITY_JWT_ISSUER_SELVBETJENING_ACCEPTEDAUDIENCE}
-
-#Q0/Q1:
-#no.nav.security.jwt.issuer.selvbetjening.discoveryurl: https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1
+    accepted_audience: ${AZUREAD_CLIENTID}
 
 innsyn:
   vedlegg:

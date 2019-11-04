@@ -22,7 +22,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
         sakForReferanse = Sak(
                 hendelse.saksreferanse ?: "default",
                 SaksStatus.UNDER_BEHANDLING,
-                "Sak om sosialhjelp",
+                DEFAULT_TITTEL,
                 mutableListOf(),
                 mutableListOf(),
                 mutableListOf(),

@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -30,7 +31,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
         sakForReferanse = Sak(
                 hendelse.saksreferanse ?: "default",
                 SaksStatus.UNDER_BEHANDLING,
-                "Sak om sosialhjelp",
+                DEFAULT_TITTEL,
                 mutableListOf(),
                 mutableListOf(),
                 mutableListOf(),

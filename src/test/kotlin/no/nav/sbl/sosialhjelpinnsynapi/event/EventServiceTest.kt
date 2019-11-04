@@ -354,9 +354,9 @@ internal class EventServiceTest {
             assertThat(model.historikk).hasSize(4)
 
             val sak = model.saker.last()
-            assertThat(sak.saksStatus).isNull()
+            assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
             assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isNull()
+            assertThat(sak.tittel).isEqualTo(DEFAULT_TITTEL)
             assertThat(sak.vedtak).hasSize(1)
             assertThat(sak.utbetalinger).isEmpty()
 

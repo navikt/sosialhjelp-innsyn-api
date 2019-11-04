@@ -8,7 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 
 fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 
-    val utbetalinger= mutableListOf<Utbetaling>()
+    val utbetalinger = mutableListOf<Utbetaling>()
     val vilkarSaker = mutableListOf<Sak>()
     for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
         for (sak in saker) {
@@ -19,7 +19,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
             }
         }
     }
-    val vilkar = Vilkar("hendelse.referanse", utbetalinger, hendelse.beskrivelse, hendelse.status == JsonVilkar.Status.OPPFYLT)
+    val vilkar = Vilkar(hendelse.vilkarreferanse, utbetalinger, hendelse.beskrivelse, hendelse.status == JsonVilkar.Status.OPPFYLT)
 
     vilkarSaker.forEach { sak ->
         sak.vilkar.add(vilkar)

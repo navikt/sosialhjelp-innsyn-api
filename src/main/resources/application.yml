@@ -29,6 +29,14 @@ client:
   id_porten_config_url: ${ID_PORTEN_CONFIG_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration}
   norg_endpoint_url: ${NORG_ENDPOINT_URL:norg_endpoint_url}
 
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: ${SECURITY_JWT_ISSUER_SELVBETJENING_DISCOVERYURL:https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten}
+    cookie_name: selvbetjening-idtoken
+
+#Q0/Q1:
+#no.nav.security.jwt.issuer.selvbetjening.discoveryurl: https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1
+
 innsyn:
   vedlegg:
     virusscan:

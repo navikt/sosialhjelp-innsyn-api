@@ -23,14 +23,12 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     )
 
 
-    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
+    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse } ?: saker.firstOrNull { it.referanse == "default" }
 
-    if (sakForReferanse != null) {
-        sakForReferanse.utbetalinger.firstOrNull { it.referanse == hendelse.utbetalingsreferanse }
-    } else {
+    if (sakForReferanse == null) {
         // Opprett ny Sak
         sakForReferanse = Sak(
-                hendelse.saksreferanse,
+                hendelse.saksreferanse ?: "default",
                 SaksStatus.UNDER_BEHANDLING,
                 "Sak om sosialhjelp",
                 mutableListOf(),
@@ -40,6 +38,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
         )
         saker.add(sakForReferanse)
     }
+
     sakForReferanse.utbetalinger.add(utbetaling)
 
 }

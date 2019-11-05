@@ -198,7 +198,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_1))
-            assertThat(hendelse.tittel).contains("Søknaden med vedlegg er mottatt hos navkontoret")
+            assertThat(hendelse.tittel).isEqualTo("Søknaden med vedlegg er mottatt")
         }
 
         @Test

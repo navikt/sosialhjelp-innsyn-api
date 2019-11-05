@@ -8,6 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
+import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -43,7 +44,7 @@ fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime {
 }
 
 fun unixTimestampToDate(tidspunkt: Long): Date {
-    return Date.from(Instant.ofEpochMilli(tidspunkt))
+    return Timestamp.valueOf(unixToLocalDateTime(tidspunkt))
 }
 
 fun enumNameToLowercase(string: String): String {

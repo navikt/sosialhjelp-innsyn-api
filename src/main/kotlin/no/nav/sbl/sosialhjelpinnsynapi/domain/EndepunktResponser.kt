@@ -90,6 +90,5 @@ data class SaksDetaljerResponse(
         val fiksDigisosId: String,
         val soknadTittel: String,
         val status: String,
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
         val antallNyeOppgaver: Int?
 )

@@ -69,7 +69,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isNotEmpty
         assertThat(response).hasSize(1)
         assertThat(response[0].ar).isEqualTo(2019)
-        assertThat(response[0].maned).isEqualTo("august")
+        assertThat(response[0].maned).isEqualToIgnoringCase("august")
         assertThat(response[0].sum).isEqualTo(10.0)
         assertThat(response[0].utbetalinger).hasSize(1)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Nødhjelp")
@@ -102,7 +102,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
         assertThat(response[0].ar).isEqualTo(2019)
-        assertThat(response[0].maned).isEqualTo("august")
+        assertThat(response[0].maned).isEqualToIgnoringCase("august")
         assertThat(response[0].sum).isEqualTo(20.0)
         assertThat(response[0].utbetalinger).hasSize(2)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Tannlege")
@@ -139,7 +139,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isNotNull
         assertThat(response).hasSize(2)
         assertThat(response[0].ar).isEqualTo(2019)
-        assertThat(response[0].maned).isEqualTo("september")
+        assertThat(response[0].maned).isEqualToIgnoringCase("september")
         assertThat(response[0].sum).isEqualTo(10.0)
         assertThat(response[0].utbetalinger).hasSize(1)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Tannlege")
@@ -148,7 +148,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-09-12")
 
         assertThat(response[1].ar).isEqualTo(2019)
-        assertThat(response[1].maned).isEqualTo("august")
+        assertThat(response[1].maned).isEqualToIgnoringCase("august")
         assertThat(response[1].sum).isEqualTo(10.0)
         assertThat(response[1].utbetalinger).hasSize(1)
         assertThat(response[1].utbetalinger[0].tittel).isEqualTo("Nødhjelp")
@@ -260,7 +260,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).hasSize(2)
 
         assertThat(response[0].ar).isEqualTo(2019)
-        assertThat(response[0].maned).isEqualTo("september")
+        assertThat(response[0].maned).isEqualToIgnoringCase("september")
         assertThat(response[0].sum).isEqualTo(1.0)
         assertThat(response[0].utbetalinger).hasSize(1)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Barnehage og SFO")
@@ -269,7 +269,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-09-12")
 
         assertThat(response[1].ar).isEqualTo(2019)
-        assertThat(response[1].maned).isEqualTo("august")
+        assertThat(response[1].maned).isEqualToIgnoringCase("august")
         assertThat(response[1].sum).isEqualTo(10.0)
         assertThat(response[1].utbetalinger).hasSize(1)
         assertThat(response[1].utbetalinger[0].tittel).isEqualTo("Nødhjelp")

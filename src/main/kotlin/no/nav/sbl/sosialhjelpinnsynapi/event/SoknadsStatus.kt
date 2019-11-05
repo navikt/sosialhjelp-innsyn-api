@@ -11,7 +11,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
     status = SoknadsStatus.valueOf(hendelse.status.name)
 
     val tittel = when (hendelse.status) {
-        JsonSoknadsStatus.Status.MOTTATT -> "Søknaden med vedlegg er mottatt hos ${soknadsmottaker?.navEnhetsnavn} "
+        JsonSoknadsStatus.Status.MOTTATT -> {
+            val navEnhetsnavn = soknadsmottaker?.navEnhetsnavn ?: "navkontoret"
+            "Søknaden med vedlegg er mottatt hos $navEnhetsnavn "
+        }
         JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling"
         JsonSoknadsStatus.Status.FERDIGBEHANDLET -> "Søknaden er ferdig behandlet"
         JsonSoknadsStatus.Status.BEHANDLES_IKKE -> "Søknaden behandles ikke"

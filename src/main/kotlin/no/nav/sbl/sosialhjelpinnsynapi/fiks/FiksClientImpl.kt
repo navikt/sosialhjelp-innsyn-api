@@ -51,7 +51,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
             log.info("Hentet DigisosSak $digisosId fra Fiks")
             val body = response.body!!
-            log.info("DigisosSak: $body")
             return objectMapper.readValue(body, DigisosSak::class.java)
 
         } catch (e: HttpStatusCodeException) {

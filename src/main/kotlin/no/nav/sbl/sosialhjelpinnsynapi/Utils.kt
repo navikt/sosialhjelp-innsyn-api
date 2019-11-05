@@ -14,11 +14,12 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 import kotlin.reflect.full.companionObject
 
 const val NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
 const val NAIS_NAMESPACE = "NAIS_NAMESPACE"
+
+const val COUNTER_SUFFIX_LENGTH = 4
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
@@ -51,12 +52,28 @@ fun enumNameToLowercase(string: String): String {
     return string.toLowerCase().replace('_', ' ')
 }
 
+/**
+ * Generer navEksternRefId for nytt opplastet vedlegg
+ * HVIS digisosSak har ettersendelser, hent siste navEksternRefId og inkrementer
+ * HVIS digisosSak ikke har ettersendelser -> hent originalSøknads navEksternRefId, legg på "0000" og inkrementer
+ * HVIS digisosSak ikke har originalSøknad (ergo papirsøknad) -> generer UUID, legg på "0000" og inkrementer
+ */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
-    val previousId: Long = digisosSak.ettersendtInfoNAV?.ettersendelser?.map { it.navEksternRefId.toLowerCase().toLong(36) }?.max()
-            ?: digisosSak.originalSoknadNAV?.navEksternRefId?.toLowerCase()?.plus("000")?.toLong(36)
-            ?: return UUID.randomUUID().toString()
+    val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser
+            ?.map { it.navEksternRefId }?.maxBy { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
+            ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
+            ?: digisosSak.fiksDigisosId.plus("0000")
 
-    return (previousId + 1L).toString(36).toUpperCase().replace("O", "o").replace("I", "i")
+    val nesteSuffix = lagIdSuffix(previousId)
+    return (previousId.dropLast(COUNTER_SUFFIX_LENGTH).plus(nesteSuffix))
+}
+
+/**
+ * returnerer neste id-suffix som 4-sifret String
+ */
+private fun lagIdSuffix(previousId: String): String {
+    val suffix = previousId.takeLast(COUNTER_SUFFIX_LENGTH).toLong() + 1
+    return suffix.toString().padStart(4, '0')
 }
 
 fun <R : Any> R.logger(): Lazy<Logger> {

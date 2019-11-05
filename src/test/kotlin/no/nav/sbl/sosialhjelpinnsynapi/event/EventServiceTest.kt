@@ -179,6 +179,29 @@ internal class EventServiceTest {
         }
 
         @Test
+        fun `soknadsStatus MOTTATT uten soknad`() {
+            every { mockJsonSoknad.mottaker } returns null
+            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                    JsonDigisosSoker()
+                            .withAvsender(avsender)
+                            .withVersion("123")
+                            .withHendelser(listOf(
+                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
+                            ))
+            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+            val model = service.createModel("123", "token")
+
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
+            assertThat(model.historikk).hasSize(1)
+
+            val hendelse = model.historikk.last()
+            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_1))
+            assertThat(hendelse.tittel).contains("Søknaden med vedlegg er mottatt hos navkontoret")
+        }
+
+        @Test
         fun `soknadsStatus UNDER_BEHANDLING`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()

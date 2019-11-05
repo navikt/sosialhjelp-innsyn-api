@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 
-internal class EventServiceTest: BaseEventTest() {
+internal class EventServiceTest : BaseEventTest() {
 
 /* Test-caser:
  [x] ingen innsyn, ingen sendt soknad

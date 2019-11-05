@@ -1,95 +1,19 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
-import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.mockk
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.*
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
-import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
-import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
-import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 
-internal class EventServiceTest {
-
-    private val clientProperties: ClientProperties = mockk(relaxed = true)
-    private val innsynService: InnsynService = mockk()
-    private val vedleggService: VedleggService = mockk()
-    private val norgClient: NorgClient = mockk()
-    private val fiksClient: FiksClient = mockk()
-
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, fiksClient)
-
-    private val mockDigisosSak: DigisosSak = mockk()
-    private val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
-    private val mockJsonSoknad: JsonSoknad = mockk()
-    private val mockNavEnhet: NavEnhet = mockk()
-
-    private val soknadsmottaker = "The Office"
-    private val enhetsnr = "2317"
-
-    private val tittel_1 = "tittel"
-    private val tittel_2 = "tittel2"
-
-    private val referanse_1 = "sak1"
-    private val referanse_2 = "sak2"
-
-    private val dokumentlagerId_1 = "1"
-    private val dokumentlagerId_2 = "2"
-    private val svarUtId = "42"
-    private val svarUtNr = 42
-
-    private val dokumenttype = "dokumentasjonstype"
-    private val tilleggsinfo = "ekstra info"
-
-    private val vedleggKrevesDokumenttype = "faktura"
-    private val vedleggKrevesTilleggsinfo = "strom"
-
-    private val navKontor = "1337"
-
-    private val now = ZonedDateTime.now()
-
-    private val tidspunkt_soknad = now.minusHours(11).toEpochSecond() * 1000L
-    private val tidspunkt_1 = now.minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_2 = now.minusHours(9).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_3 = now.minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_4 = now.minusHours(7).format(DateTimeFormatter.ISO_DATE_TIME)
-    private val tidspunkt_5 = now.minusHours(6).format(DateTimeFormatter.ISO_DATE_TIME)
-
-    private val innsendelsesfrist = now.plusDays(7).format(DateTimeFormatter.ISO_DATE_TIME)
-
-    private val avsender = JsonAvsender().withSystemnavn("test").withSystemversjon("123")
-
-    @BeforeEach
-    fun init() {
-        clearMocks(innsynService, mockJsonDigisosSoker, mockJsonSoknad)
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
-        every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
-        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
-        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
-        every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
-        every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
-        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
-        every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-
-        resetHendelser()
-    }
+internal class EventServiceTest : BaseEventTest() {
 
 /* Test-caser:
  [x] ingen innsyn, ingen sendt soknad
@@ -107,8 +31,11 @@ internal class EventServiceTest {
  [x] ingen dokumentasjonEtterspurt-hendelser
  [x] forelopigSvar
  [ ] forelopigSvar - flere caser?
- [ ] utbetaling
- [ ] utbetaling - flere caser?
+ [x] utbetaling
+ [?] utbetaling - flere caser?
+ [x] dokumentasjonskrav
+ [x] vilkår
+ [ ] rammevedtak
  ...
  [ ] komplett case
 */
@@ -136,119 +63,6 @@ internal class EventServiceTest {
 
         assertThat(model).isNotNull
         assertThat(model.historikk).hasSize(1)
-    }
-
-    @Nested
-    inner class SoknadStatus {
-        @Test
-        fun `soknadsStatus SENDT`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
-            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
-
-            val model = service.createModel("123", "token")
-
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
-            assertThat(model.historikk).hasSize(1)
-
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(unixToLocalDateTime(tidspunkt_soknad))
-            assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til")
-        }
-
-        @Test
-        fun `soknadsStatus MOTTATT`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
-                    JsonDigisosSoker()
-                            .withAvsender(avsender)
-                            .withVersion("123")
-                            .withHendelser(listOf(
-                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
-                            ))
-            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
-
-            val model = service.createModel("123", "token")
-
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
-            assertThat(model.historikk).hasSize(2)
-
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_1))
-            assertThat(hendelse.tittel).contains("Søknaden med vedlegg er mottatt hos ")
-        }
-
-        @Test
-        fun `soknadsStatus MOTTATT uten soknad`() {
-            every { mockJsonSoknad.mottaker } returns null
-            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
-                    JsonDigisosSoker()
-                            .withAvsender(avsender)
-                            .withVersion("123")
-                            .withHendelser(listOf(
-                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
-                            ))
-            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
-
-            val model = service.createModel("123", "token")
-
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
-            assertThat(model.historikk).hasSize(1)
-
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_1))
-            assertThat(hendelse.tittel).isEqualTo("Søknaden med vedlegg er mottatt")
-        }
-
-        @Test
-        fun `soknadsStatus UNDER_BEHANDLING`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
-                    JsonDigisosSoker()
-                            .withAvsender(avsender)
-                            .withVersion("123")
-                            .withHendelser(listOf(
-                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2)
-                            ))
-            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
-
-            val model = service.createModel("123", "token")
-
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-            assertThat(model.saker).isEmpty()
-            assertThat(model.historikk).hasSize(3)
-
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))
-            assertThat(hendelse.tittel).contains("Søknaden er under behandling")
-        }
-
-        @Test
-        fun `soknadsStatus FERDIGBEHANDLET`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
-                    JsonDigisosSoker()
-                            .withAvsender(avsender)
-                            .withVersion("123")
-                            .withHendelser(listOf(
-                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                    SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3)
-                            ))
-            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
-
-            val model = service.createModel("123", "token")
-
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
-            assertThat(model.saker).isEmpty()
-            assertThat(model.historikk).hasSize(4)
-
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-            assertThat(hendelse.tittel).contains("Søknaden er ferdig behandlet")
-        }
     }
 
     @Nested
@@ -507,102 +321,6 @@ internal class EventServiceTest {
         }
     }
 
-
-    @Nested
-    inner class DokumentasjonEtterspurt {
-
-        @Test
-        fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
-                    JsonDigisosSoker()
-                            .withAvsender(avsender)
-                            .withVersion("123")
-                            .withHendelser(listOf(
-                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                    DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
-                            ))
-
-            val model = service.createModel("123", "token")
-
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-            assertThat(model.saker).isEmpty()
-            assertThat(model.oppgaver).hasSize(1)
-            assertThat(model.historikk).hasSize(4)
-
-            val oppgave = model.oppgaver.last()
-            assertThat(oppgave.tittel).isEqualTo(dokumenttype)
-            assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
-            assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
-            assertThat(oppgave.erFraInnsyn).isEqualTo(true)
-
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-            assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav: 1 vedlegg mangler")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
-        }
-
-        @Test
-        fun `dokumentasjonEtterspurt skal gi egen historikkmelding og ikke url eller oppgaver dersom det dokumentlisten er tom`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
-                    JsonDigisosSoker()
-                            .withAvsender(avsender)
-                            .withVersion("123")
-                            .withHendelser(listOf(
-                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                    DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_3)
-                            ))
-
-            val model = service.createModel("123", "token")
-
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-            assertThat(model.saker).isEmpty()
-            assertThat(model.oppgaver).hasSize(0)
-            assertThat(model.historikk).hasSize(4)
-
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-            assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav: Ingen vedlegg mangler")
-            assertThat(hendelse.url).isNull()
-        }
-
-        @Test
-        fun `oppgaver skal hentes fra søknaden dersom det ikke finnes dokumentasjonEtterspurt`() {
-            every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
-                    JsonDigisosSoker()
-                            .withAvsender(avsender)
-                            .withVersion("123")
-                            .withHendelser(listOf(
-                                    SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                    SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2)
-                            ))
-            every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
-                    listOf(VedleggService.InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
-
-            val model = service.createModel("123", "token")
-
-            assertThat(model).isNotNull
-            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-            assertThat(model.saker).isEmpty()
-            assertThat(model.oppgaver).hasSize(1)
-            assertThat(model.historikk).hasSize(3)
-
-            val oppgave = model.oppgaver.last()
-            assertThat(oppgave.tittel).isEqualTo(vedleggKrevesDokumenttype)
-            assertThat(oppgave.tilleggsinfo).isEqualTo(vedleggKrevesTilleggsinfo)
-            assertThat(oppgave.innsendelsesfrist).isNull()
-            assertThat(oppgave.erFraInnsyn).isEqualTo(false)
-
-            val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))
-            assertThat(hendelse.tittel).contains("Søknaden er under behandling")
-            assertThat(hendelse.url).isNull()
-        }
-    }
-
     @Test
     fun `forelopigSvar skal gi historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
@@ -628,97 +346,4 @@ internal class EventServiceTest {
         assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
         assertThat(hendelse.url).contains("/forsendelse/$svarUtId/$svarUtNr")
     }
-
-    private fun resetHendelser() {
-        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(null)
-        SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
-        SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(null)
-        TILDELT_NAV_KONTOR.withHendelsestidspunkt(null)
-        SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
-        SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(null)
-        SAK2_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
-        SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(null)
-        SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(null)
-        SAK2_VEDTAK_FATTET.withHendelsestidspunkt(null)
-        DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(null)
-        FORELOPIGSVAR.withHendelsestidspunkt(null)
-    }
-
-    private val DOKUMENTLAGER_1 = JsonDokumentlagerFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId(dokumentlagerId_1)
-    private val DOKUMENTLAGER_2 = JsonDokumentlagerFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId(dokumentlagerId_2)
-    private val SVARUT_1 = JsonSvarUtFilreferanse().withType(JsonFilreferanse.Type.DOKUMENTLAGER).withId(svarUtId).withNr(svarUtNr)
-
-    private val SOKNADS_STATUS_MOTTATT = JsonSoknadsStatus()
-            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-            .withStatus(JsonSoknadsStatus.Status.MOTTATT)
-
-    private val SOKNADS_STATUS_UNDERBEHANDLING = JsonSoknadsStatus()
-            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-            .withStatus(JsonSoknadsStatus.Status.UNDER_BEHANDLING)
-
-    private val SOKNADS_STATUS_FERDIGBEHANDLET = JsonSoknadsStatus()
-            .withType(JsonHendelse.Type.SOKNADS_STATUS)
-            .withStatus(JsonSoknadsStatus.Status.FERDIGBEHANDLET)
-
-    private val TILDELT_NAV_KONTOR = JsonTildeltNavKontor()
-            .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
-            .withNavKontor(navKontor)
-
-    private val SAK1_SAKS_STATUS_UNDERBEHANDLING = JsonSaksStatus()
-            .withType(JsonHendelse.Type.SAKS_STATUS)
-            .withStatus(JsonSaksStatus.Status.UNDER_BEHANDLING)
-            .withTittel(tittel_1)
-            .withReferanse(referanse_1)
-
-    private val SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL = JsonSaksStatus()
-            .withType(JsonHendelse.Type.SAKS_STATUS)
-            .withReferanse(referanse_1)
-
-    private val SAK1_SAKS_STATUS_IKKEINNSYN = JsonSaksStatus()
-            .withType(JsonHendelse.Type.SAKS_STATUS)
-            .withStatus(JsonSaksStatus.Status.IKKE_INNSYN)
-            .withTittel(tittel_1)
-            .withReferanse(referanse_1)
-
-    private val SAK2_SAKS_STATUS_UNDERBEHANDLING = JsonSaksStatus()
-            .withType(JsonHendelse.Type.SAKS_STATUS)
-            .withStatus(JsonSaksStatus.Status.UNDER_BEHANDLING)
-            .withTittel(tittel_2)
-            .withReferanse(referanse_2)
-
-    private val SAK1_VEDTAK_FATTET_INNVILGET = JsonVedtakFattet()
-            .withType(JsonHendelse.Type.VEDTAK_FATTET)
-            .withSaksreferanse(referanse_1)
-            .withVedtaksfil(JsonVedtaksfil().withReferanse(DOKUMENTLAGER_1))
-            .withUtfall(JsonVedtakFattet.Utfall.INNVILGET)
-
-    private val SAK1_VEDTAK_FATTET_UTEN_UTFALL = JsonVedtakFattet()
-            .withType(JsonHendelse.Type.VEDTAK_FATTET)
-            .withSaksreferanse(referanse_1)
-            .withVedtaksfil(JsonVedtaksfil().withReferanse(DOKUMENTLAGER_1))
-
-    private val SAK1_VEDTAK_FATTET_AVSLATT = JsonVedtakFattet()
-            .withType(JsonHendelse.Type.VEDTAK_FATTET)
-            .withSaksreferanse(referanse_1)
-            .withVedtaksfil(JsonVedtaksfil().withReferanse(DOKUMENTLAGER_2))
-            .withUtfall(JsonVedtakFattet.Utfall.AVSLATT)
-
-    private val SAK2_VEDTAK_FATTET = JsonVedtakFattet()
-            .withType(JsonHendelse.Type.VEDTAK_FATTET)
-            .withSaksreferanse(referanse_2)
-            .withVedtaksfil(JsonVedtaksfil().withReferanse(SVARUT_1))
-            .withUtfall(JsonVedtakFattet.Utfall.INNVILGET)
-
-    private val DOKUMENTASJONETTERSPURT = JsonDokumentasjonEtterspurt()
-            .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
-            .withDokumenter(mutableListOf(JsonDokumenter().withInnsendelsesfrist(innsendelsesfrist).withDokumenttype(dokumenttype).withTilleggsinformasjon(tilleggsinfo)))
-            .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(DOKUMENTLAGER_1))
-
-    private val DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE = JsonDokumentasjonEtterspurt()
-            .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
-            .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(DOKUMENTLAGER_1))
-
-    private val FORELOPIGSVAR = JsonForelopigSvar()
-            .withType(JsonHendelse.Type.FORELOPIG_SVAR)
-            .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(SVARUT_1))
 }

@@ -65,10 +65,17 @@ internal class VedleggOpplastingServiceTest {
         every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
-        val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))))
+        val largePngFile = createImageByteArray("png", 2)
+        val filnavn3 = "test3.png"
+
+        val metadata = mutableListOf(
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1))),
+                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn3))))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile))
+                MockMultipartFile("files", filnavn1, filtype0, pngFile),
+                MockMultipartFile("files", filnavn1, filtype0, largePngFile),
+                MockMultipartFile("files", filnavn3, filtype0, pngFile))
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
@@ -78,24 +85,42 @@ internal class VedleggOpplastingServiceTest {
         val filerForOpplasting = filerForOpplastingSlot.captured
         val vedleggSpesifikasjon = vedleggSpesifikasjonSlot.captured
 
-        assertThat(filerForOpplasting).hasSize(2)
+        assertThat(filerForOpplasting).hasSize(4)
         assertThat(filerForOpplasting[0].filnavn == filnavn0)
         assertThat(filerForOpplasting[0].mimetype == filtype0)
         assertThat(filerForOpplasting[1].filnavn == filnavn1)
         assertThat(filerForOpplasting[1].mimetype == filtype1)
+        assertThat(filerForOpplasting[2].filnavn == filnavn1)
+        assertThat(filerForOpplasting[2].mimetype == filtype1)
+        assertThat(filerForOpplasting[3].filnavn == filnavn1)
+        assertThat(filerForOpplasting[3].mimetype == filtype1)
 
-        assertThat(vedleggSpesifikasjon.vedlegg.size == 1)
+        assertThat(vedleggSpesifikasjon.vedlegg.size).isEqualTo(2)
         assertThat(vedleggSpesifikasjon.vedlegg[0].type == type0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].tilleggsinfo == tilleggsinfo0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].status == "LastetOpp")
-        assertThat(vedleggSpesifikasjon.vedlegg[0].filer.size == 2)
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer.size == 3)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[0].filnavn == filnavn0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].filnavn == filnavn1)
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer[2].filnavn == filnavn1)
+
+        assertThat(vedleggSpesifikasjon.vedlegg[1].type).isEqualTo(type1)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].tilleggsinfo).isEqualTo(tilleggsinfo1)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].status).isEqualTo("LastetOpp")
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer.size).isEqualTo(1)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn).isEqualTo(filnavn3)
+
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isNotEqualTo(vedleggSpesifikasjon.vedlegg[0].filer[2].sha512)
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isEqualTo(vedleggSpesifikasjon.vedlegg[1].filer[0].sha512)
 
         assertThat(vedleggOpplastingResponseList[0].filnavn == filnavn0)
         assertThat(vedleggOpplastingResponseList[0].status == "OK")
         assertThat(vedleggOpplastingResponseList[1].filnavn == filnavn1)
         assertThat(vedleggOpplastingResponseList[1].status == "OK")
+        assertThat(vedleggOpplastingResponseList[2].filnavn == filnavn1)
+        assertThat(vedleggOpplastingResponseList[2].status == "OK")
+        assertThat(vedleggOpplastingResponseList[3].filnavn == filnavn3)
+        assertThat(vedleggOpplastingResponseList[2].status == "OK")
     }
 
     @Test
@@ -178,9 +203,9 @@ internal class VedleggOpplastingServiceTest {
                 .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
-    private fun createImageByteArray(type: String): ByteArray {
+    private fun createImageByteArray(type: String, size: Int = 1): ByteArray {
         val outputStream = ByteArrayOutputStream()
-        ImageIO.write(BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB), type, outputStream)
+        ImageIO.write(BufferedImage(size, size, BufferedImage.TYPE_INT_RGB), type, outputStream)
         return outputStream.toByteArray()
     }
 

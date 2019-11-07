@@ -96,7 +96,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     private fun filenamesMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
-        val filnavnMultipart: List<String> = files.map { it.originalFilename }
+        val filnavnMultipart: List<String> = files.map { it.originalFilename }.filterNotNull()
         return filnavnMetadata.size == filnavnMultipart.size &&
                 filnavnMetadata.filterIndexed{ idx, it -> it == filnavnMultipart[idx] }.size == filnavnMetadata.size
     }

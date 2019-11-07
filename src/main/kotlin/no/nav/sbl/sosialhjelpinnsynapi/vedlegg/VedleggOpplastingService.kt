@@ -72,6 +72,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             return vedleggOpplastingResponseList
         }
 
+        var filIndex = 0
         // Lag metadata i form av vedleggspesifikasjon
         val vedleggSpesifikasjon = JsonVedleggSpesifikasjon()
                 .withVedlegg(metadata.map {
@@ -82,9 +83,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                             .withFiler(it.filer.map { fil ->
                                 JsonFiler()
                                         .withFilnavn(fil.filnavn)
-                                        .withSha512(getSha512FromByteArray(files.firstOrNull { multipartFile ->
-                                            multipartFile.originalFilename == fil.filnavn
-                                        }?.bytes ?: throw IllegalStateException("Fil mangler metadata")))
+                                        .withSha512(getSha512FromByteArray(files[filIndex++].bytes ?: throw IllegalStateException("Fil mangler metadata")))
                             })
                 })
 

@@ -11,6 +11,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.commons.io.IOUtils
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
@@ -21,6 +23,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import kotlin.test.assertFailsWith
+import org.apache.pdfbox.pdmodel.PDPage
 
 internal class VedleggOpplastingServiceTest {
 
@@ -133,20 +136,34 @@ internal class VedleggOpplastingServiceTest {
         assertFailsWith<OpplastingFilnavnMismatchException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
-    /*@Test
-    fun `sendVedleggTilFiks skal kaste exception hvis filnavn ikke er unike`() {
-        val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2), OpplastetFil(filnavn2))))
-        val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile),
-                MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)),
-                MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
+    @Test
+    fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er signert`() {
+        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
-        assertFailsWith<OpplastingFilnavnMismatchException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
-    }*/
-    // FIXME Test at exception blir kastet hvis metadata ikke samsvarer med multipart
+        val filnavn1 = "test1.pdf"
+        val filnavn2 = "test2.pdf"
+        val filtype = "application/pdf"
+        val pdfFile = createPdfByteArray()
+        val signedPdfFile = createPdfByteArray(true)
+
+        val metadata = mutableListOf(
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(
+                        OpplastetFil(filnavn1),
+                        OpplastetFil(filnavn2))))
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", filnavn1, filtype, pdfFile),
+                MockMultipartFile("files", filnavn2, filtype, signedPdfFile))
+
+        val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
+
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+
+        assertThat(vedleggOpplastingResponseList[0].filnavn).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].status).isEqualTo("OK")
+        assertThat(vedleggOpplastingResponseList[1].filnavn).isEqualTo(filnavn2)
+        assertThat(vedleggOpplastingResponseList[1].status).isEqualTo(MESSAGE_PDF_IS_SIGNED)
+    }
 
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
@@ -164,6 +181,18 @@ internal class VedleggOpplastingServiceTest {
     private fun createImageByteArray(type: String): ByteArray {
         val outputStream = ByteArrayOutputStream()
         ImageIO.write(BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB), type, outputStream)
+        return outputStream.toByteArray()
+    }
+
+    private fun createPdfByteArray(signed: Boolean = false): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        val document = PDDocument()
+        document.addPage(PDPage())
+        if (signed) {
+            document.addSignature(PDSignature())
+        }
+        document.save(outputStream)
+        document.close()
         return outputStream.toByteArray()
     }
 }

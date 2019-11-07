@@ -13,7 +13,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.unixTimestampToDate
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import no.nav.security.oidc.api.Unprotected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -21,7 +21,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
-@Unprotected
+@ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/digisosapi")
 class DigisosApiController(private val digisosApiService: DigisosApiService,
@@ -49,7 +49,6 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
-
         val saker = fiksClient.hentAlleDigisosSaker(token)
 
         val responselist = saker

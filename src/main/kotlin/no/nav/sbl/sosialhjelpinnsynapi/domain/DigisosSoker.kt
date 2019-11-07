@@ -98,7 +98,7 @@ enum class SaksStatus {
 }
 
 enum class UtbetalingsStatus {
-    PLANLAGT_UTBETALING, UTBETALT, STOPPET
+    PLANLAGT_UTBETALING, UTBETALT, STOPPET, ANNULLERT
 }
 
 enum class UtfallVedtak {

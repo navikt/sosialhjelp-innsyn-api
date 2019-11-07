@@ -29,6 +29,12 @@ client:
   id_porten_config_url: ${ID_PORTEN_CONFIG_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration}
   norg_endpoint_url: ${NORG_ENDPOINT_URL:norg_endpoint_url}
 
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: ${AZUREAD_DISCOVERYURL}
+    cookie_name: selvbetjening-idtoken
+    accepted_audience: ${AZUREAD_CLIENTID}
+
 innsyn:
   vedlegg:
     virusscan:

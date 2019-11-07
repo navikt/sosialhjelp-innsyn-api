@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import io.micrometer.core.instrument.util.IOUtils
 import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.security.oidc.api.Unprotected
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

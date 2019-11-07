@@ -117,6 +117,10 @@ class FiksClientMock : FiksClient {
         innsynMap[digisosSak.fiksDigisosId] = digisosSak
     }
 
+    fun digisosSakFinnes(fiksDigisosId: String): Boolean {
+        return innsynMap.containsKey(fiksDigisosId)
+    }
+
     fun postDokument(dokumentlagerId: String, jsonDigisosSoker: JsonDigisosSoker) {
         dokumentMap[dokumentlagerId] = jsonDigisosSoker
     }

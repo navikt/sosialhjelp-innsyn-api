@@ -2,14 +2,14 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SakResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksDetaljerResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksListeResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
-import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.unixTimestampToDate
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
@@ -48,37 +48,46 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
     }
 
     @GetMapping("/saker")
-    fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SakResponse>> {
+    fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
         val saker = fiksClient.hentAlleDigisosSaker(token)
 
         val responselist = saker
                 .map {
-                    val model = eventService.createModel(it.fiksDigisosId, token)
-
-                    SakResponse(
+                    SaksListeResponse(
                             it.fiksDigisosId,
-                            hentNavn(it, model),
-                            model.status.toString(),
-                            unixToLocalDateTime(it.sistEndret),
-                            hentAntallNyeOppgaver(model, it.fiksDigisosId, token),
+                            "Søknad om økonomisk sosialhjelp",
+                            unixTimestampToDate(it.sistEndret),
                             KILDE_INNSYN_API
                     )
                 }
 
-        return ResponseEntity.ok().body(responselist)
+        return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
     }
 
-    private fun hentNavn(digisosSak: DigisosSak, model: InternalDigisosSoker): String {
-        return when {
-            digisosSak.digisosSoker == null -> "Søknad om økonomisk sosialhjelp"
-            else -> model.saker.joinToString { it.tittel ?: DEFAULT_TITTEL }
+    @GetMapping("/saksDetaljer")
+    fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
+        if(id.isEmpty()) {
+            return ResponseEntity.noContent().build()
         }
+        val sak = fiksClient.hentDigisosSak(id, token)
+        val model = eventService.createSaksoversiktModel(token, sak)
+        val saksDetaljerResponse = SaksDetaljerResponse(
+                sak.fiksDigisosId,
+                hentNavn(model),
+                model.status.toString(),
+                hentAntallNyeOppgaver(model, sak.fiksDigisosId, token)
+        )
+        return ResponseEntity.ok().body(saksDetaljerResponse)
+    }
+
+    private fun hentNavn(model: InternalDigisosSoker): String {
+        return model.saker.joinToString { it.tittel ?: DEFAULT_TITTEL }
     }
 
     private fun hentAntallNyeOppgaver(model: InternalDigisosSoker, fiksDigisosId: String, token: String) : Int? {
         return when {
             model.oppgaver.isEmpty() -> null
-            else -> oppgaveService.hentOppgaver(fiksDigisosId, token).size
+            else -> oppgaveService.hentOppgaver(fiksDigisosId, model, token).size
         }
     }
 

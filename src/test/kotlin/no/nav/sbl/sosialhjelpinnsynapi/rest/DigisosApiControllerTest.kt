@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
+import org.apache.http.HttpStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,11 +46,8 @@ internal class DigisosApiControllerTest {
         every { digisosSak2.sistEndret } returns 1000L
         every { digisosSak2.digisosSoker } returns mockk()
 
-        every { eventService.createModel("123", any()) } returns model1
-        every { eventService.createModel("456", any()) } returns model2
-
-        every { oppgaveService.hentOppgaver("123", any()).size } returns 2
-        every { oppgaveService.hentOppgaver("456", any()).size } returns 1
+        every { oppgaveService.hentOppgaver("123", model1, any()).size } returns 2
+        every { oppgaveService.hentOppgaver("456", model2, any()).size } returns 1
     }
 
     @Test
@@ -76,36 +74,68 @@ internal class DigisosApiControllerTest {
         if (saker != null && saker.size == 2) {
             val first = saker[0]
             assertThat(first.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
-            assertThat(first.antallNyeOppgaver).isEqualTo(2)
             assertThat(first.kilde).isEqualTo(KILDE_INNSYN_API)
 
             val second = saker[1]
-            assertThat(second.soknadTittel).contains("Livsopphold", "Strøm")
-            assertThat(second.status).isEqualTo("$UNDER_BEHANDLING")
-            assertThat(second.antallNyeOppgaver).isEqualTo(1)
+            assertThat(second.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
             assertThat(second.kilde).isEqualTo(KILDE_INNSYN_API)
         }
     }
 
     @Test
+    fun `skal mappe fra DigisosSak til SakResponse for detaljer`() {
+        every { fiksClient.hentDigisosSak("123", "token") } returns digisosSak1
+        every { fiksClient.hentDigisosSak("456", "token") } returns digisosSak2
+        every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
+        every { eventService.createSaksoversiktModel(any(), digisosSak2) } returns model2
+
+        every { model1.status } returns MOTTATT
+        every { model2.status } returns UNDER_BEHANDLING
+
+        every { model1.oppgaver.isEmpty() } returns false
+        every { model2.oppgaver.isEmpty() } returns false
+
+        every { sak1.tittel } returns "Livsopphold"
+        every { sak2.tittel } returns "Strøm"
+
+        every { model1.saker } returns mutableListOf()
+        every { model2.saker } returns mutableListOf(sak1, sak2)
+
+        val response1 = controller.hentSaksDetaljer("123","token")
+        val sak1 = response1.body
+
+        assertThat(response1.statusCode.value()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(sak1).isNotNull
+        assertThat(sak1?.soknadTittel).isEqualTo("")
+        assertThat(sak1?.antallNyeOppgaver).isEqualTo(2)
+
+        val response2 = controller.hentSaksDetaljer("456","token")
+        val sak2 = response2.body
+
+        assertThat(response2.statusCode.value()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(sak2).isNotNull
+        assertThat(sak2?.soknadTittel).contains("Livsopphold", "Strøm")
+        assertThat(sak2?.status).isEqualTo("$UNDER_BEHANDLING")
+        assertThat(sak2?.antallNyeOppgaver).isEqualTo(1)
+    }
+
+    @Test
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() {
-        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1)
+        every { fiksClient.hentDigisosSak("123", "token") } returns digisosSak1
+        every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
 
         every { model1.status } returns MOTTATT
         every { model1.oppgaver.isEmpty() } returns true
+        every { model1.saker } returns mutableListOf()
 
-        val response = controller.hentAlleSaker("token")
-        val saker = response.body
+        val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId,"token")
+        val sak = response.body
 
-        assertThat(saker).isNotNull
-        assertThat(saker).hasSize(1)
+        assertThat(sak).isNotNull
+        assertThat(response.statusCode.value()).isEqualTo(HttpStatus.SC_OK)
 
         verify { oppgaveService wasNot Called }
 
-        if (saker != null && saker.size == 1) {
-            val first = saker[0]
-            assertThat(first.antallNyeOppgaver).isEqualTo(null)
-        }
+        assertThat(sak?.antallNyeOppgaver).isEqualTo(null)
     }
-
 }

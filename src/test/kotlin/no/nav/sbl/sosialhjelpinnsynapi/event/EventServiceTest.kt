@@ -133,7 +133,7 @@ internal class EventServiceTest : BaseEventTest() {
         }
 
         @Test
-        fun `saksStatus FØR vedtakFattet`() {
+        fun `saksStatus FOR vedtakFattet`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
@@ -208,7 +208,7 @@ internal class EventServiceTest : BaseEventTest() {
         }
 
         @Test
-        fun `vedtakFattet FØR saksStatus`() {
+        fun `vedtakFattet FOR saksStatus`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)

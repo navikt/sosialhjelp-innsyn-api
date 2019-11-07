@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
@@ -17,6 +18,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
+import javax.servlet.http.Cookie
+import javax.servlet.http.HttpServletRequest
 import kotlin.test.assertFailsWith
 
 internal class VedleggControllerTest {
@@ -111,8 +114,9 @@ internal class VedleggControllerTest {
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                 MockMultipartFile("files", "test2.png", null, ByteArray(0)))
-
-        assertFailsWith<IllegalStateException>{ controller.sendVedlegg(id, files, "token") }
+        val request: HttpServletRequest = mockk()
+        every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
+        assertFailsWith<IllegalStateException> { controller.sendVedlegg(id, files, "token", request) }
     }
 
     @Test
@@ -121,8 +125,29 @@ internal class VedleggControllerTest {
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
                 MockMultipartFile("files", "test.jpg", null, ByteArray(0)))
+        val request: HttpServletRequest = mockk()
+        every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
+        assertThatCode { controller.sendVedlegg(id, files, "token", request) }.doesNotThrowAnyException()
+    }
 
-        assertThatCode { controller.sendVedlegg(id, files, "token") }.doesNotThrowAnyException()
+    @Test
+    fun `skal kaste exception dersom token mangler`() {
+        every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                MockMultipartFile("files", "test.jpg", null, ByteArray(0)))
+        val request: HttpServletRequest = mockk()
+        every { request.cookies } returns arrayOf()
+        assertFailsWith<IllegalArgumentException> { controller.sendVedlegg(id, files, "token", request) }
+    }
+
+
+    private fun xsrfCookie(fiksDigisosId: String, token: String): Cookie {
+
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", XsrfGenerator.generateXsrfToken(fiksDigisosId, token))
+        xsrfCookie.path = "/"
+        xsrfCookie.isHttpOnly = true;
+        return xsrfCookie
     }
 
 }

@@ -133,7 +133,7 @@ internal class VedleggOpplastingServiceTest {
         assertFailsWith<OpplastingFilnavnMismatchException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
-    @Test
+    /*@Test
     fun `sendVedleggTilFiks skal kaste exception hvis filnavn ikke er unike`() {
         val metadata = mutableListOf(
                 OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))),
@@ -145,7 +145,8 @@ internal class VedleggOpplastingServiceTest {
                 MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
 
         assertFailsWith<OpplastingFilnavnMismatchException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
-    }
+    }*/
+    // FIXME Test at exception blir kastet hvis metadata ikke samsvarer med multipart
 
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {

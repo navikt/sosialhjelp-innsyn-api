@@ -44,7 +44,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     fun sendVedleggTilFiks(fiksDigisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<VedleggOpplastingResponse> {
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
-        if (!filenamesAreUniqueAndMatchInMetadataAndFiles(metadata, files)) {
+        if (!filenamesMatchInMetadataAndFiles(metadata, files)) {
             throw OpplastingFilnavnMismatchException("Filnavn er ikke unike eller det er mismatch mellom filer og metadata", null)
         }
 
@@ -100,14 +100,11 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         return vedleggOpplastingResponseList
     }
 
-    private fun filenamesAreUniqueAndMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
+    private fun filenamesMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
-        val filnavnMetadataSet = filnavnMetadata.toHashSet()
-        val filnavnMultipart = files.map { it.originalFilename }
-        val filnavnMultipartSet = filnavnMultipart.toHashSet()
-        return filnavnMetadata.size == filnavnMetadataSet.size &&
-                filnavnMultipart.size == filnavnMultipartSet.size &&
-                filnavnMetadataSet == filnavnMultipartSet
+        val filnavnMultipart: List<String> = files.map { it.originalFilename }
+        return filnavnMetadata.size == filnavnMultipart.size &&
+                filnavnMetadata.filterIndexed{ idx, it -> it == filnavnMultipart[idx] }.size == filnavnMetadata.size
     }
 
     fun validateFil(file: MultipartFile): String {

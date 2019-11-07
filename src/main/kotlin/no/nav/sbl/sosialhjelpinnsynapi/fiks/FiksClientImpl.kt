@@ -50,7 +50,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
 
             log.info("Hentet DigisosSak $digisosId fra Fiks")
-            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
+            val body = response.body!!
+            return objectMapper.readValue(body, DigisosSak::class.java)
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)

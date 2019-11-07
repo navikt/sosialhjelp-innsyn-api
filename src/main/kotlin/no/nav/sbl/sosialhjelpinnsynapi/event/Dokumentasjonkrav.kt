@@ -9,7 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
 
     val utbetalinger = mutableListOf<Utbetaling>()
-    val saker = mutableListOf<Sak>()
+    val dokumentasjonkravsaker = mutableListOf<Sak>()
     for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
         for (sak in saker) {
             for (utbetaling in sak.utbetalinger) {
@@ -19,9 +19,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
             }
         }
     }
-    val dokumentasjonkrav = Dokumentasjonkrav("hendelse.referanse", utbetalinger, hendelse.beskrivelse, hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT)
+    val dokumentasjonkrav = Dokumentasjonkrav(hendelse.dokumentasjonkravreferanse, utbetalinger, hendelse.beskrivelse, hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT)
 
-    saker.forEach { sak ->
+    dokumentasjonkravsaker.forEach { sak ->
         sak.dokumentasjonkrav.add(dokumentasjonkrav)
     }
 

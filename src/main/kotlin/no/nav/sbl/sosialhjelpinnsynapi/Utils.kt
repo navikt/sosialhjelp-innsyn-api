@@ -8,11 +8,13 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
+import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 import kotlin.reflect.full.companionObject
 
 const val NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
@@ -41,6 +43,10 @@ fun toLocalDateTime(hendelsetidspunkt: String): LocalDateTime {
 
 fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime {
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneId.of("Europe/Oslo"))
+}
+
+fun unixTimestampToDate(tidspunkt: Long): Date {
+    return Timestamp.valueOf(unixToLocalDateTime(tidspunkt))
 }
 
 fun enumNameToLowercase(string: String): String {

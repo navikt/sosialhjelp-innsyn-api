@@ -28,3 +28,10 @@ Dette prosjektet bygger og deployer vha CircleCi og Github deployment
 ### Vault
 - Lag PR til `vault-iac` slik at man kan lagre secrets på vault.
 - Denne må godkjennes og merges før man kan opprette secrets i din apps katalog `.../app/namespace`.
+
+## Lokal kjøring
+#### uten integrasjon til Fiks og login-api
+TestApplication og profile=mock
+#### med integrasjon til Fiks og login-api
+TestApplication og profile=local. \
+I tillegg må FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS og VIRKSERT_STI settes som env-variabler

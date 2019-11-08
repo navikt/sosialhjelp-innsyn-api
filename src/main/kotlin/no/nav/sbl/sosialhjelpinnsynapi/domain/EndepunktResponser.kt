@@ -55,7 +55,7 @@ data class VedleggResponse(
         val url: String,
         val type: String,
         val tilleggsinfo: String?,
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
         val datoLagtTil: LocalDateTime
 )
 
@@ -67,7 +67,7 @@ data class VedleggOpplastingResponse(
 data class SaksListeResponse(
         val fiksDigisosId: String,
         val soknadTittel: String,
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
         val sistOppdatert: Date,
         val kilde: String
 )

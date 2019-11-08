@@ -26,10 +26,12 @@ class SoknadsStatusController(private val soknadsStatusService: SoknadsStatusSer
     }
 
     private fun xsrfCookie(fiksDigisosId: String, request: HttpServletRequest): Cookie {
-        val idportenTokenOptional = Arrays.stream(request.cookies).filter { c -> c.name == "idporten-idtoken" }.findFirst()
         var idportenIdtoken = "default"
-        if (idportenTokenOptional.isPresent) {
-            idportenIdtoken = idportenTokenOptional.get().value
+        if (request.cookies != null) {
+            val idportenTokenOptional = Arrays.stream(request.cookies).filter { c -> c.name == "idporten-idtoken" }.findFirst()
+            if (idportenTokenOptional.isPresent) {
+                idportenIdtoken = idportenTokenOptional.get().value
+            }
         }
 
         val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", generateXsrfToken(fiksDigisosId, idportenIdtoken))

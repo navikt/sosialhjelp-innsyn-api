@@ -77,10 +77,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private fun hentDigisosSakFraFiks(digisosId: String, token: String): DigisosSak {
         val headers = setIntegrasjonHeaders(token)
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{digisosId}"
+            val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, digisosId)
 
             log.info("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
-            return objectMapper.readValue(response.body!!, DigisosSak::class.java)
+            val body = response.body!!
+            return objectMapper.readValue(body, DigisosSak::class.java)
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
             if (e.statusCode == HttpStatus.NOT_FOUND) {
@@ -110,7 +112,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val headers = setIntegrasjonHeaders(token)
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{digisosId}/dokumenter/{dokumentlagerId}"
+            val response = restTemplate.exchange(
+                    urlTemplate,
+                    HttpMethod.GET,
+                    HttpEntity<Nothing>(headers),
+                    String::class.java,
+                    mapOf("digisosId" to digisosId, "dokumentlagerId" to dokumentlagerId))
 
             log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
             val dokument = objectMapper.readValue(response.body!!, requestedClass)
@@ -153,7 +161,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         val headers = setIntegrasjonHeaders(token)
         try {
-
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
             return response.body.orEmpty()
 
@@ -172,7 +179,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
 
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommuner/$kommunenummer", HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java)
+            val urlTemplate = "$baseUrl/digisos/api/v1/nav/kommuner/{kommunenummer}"
+            val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java, kommunenummer)
 
             return response.body!!
 
@@ -204,7 +212,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
         val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
@@ -217,14 +225,19 @@ class FiksClientImpl(clientProperties: ClientProperties,
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
         }
 
-        val digisosSak = hentDigisosSakFraFiks(soknadId, token)
+        val digisosSak = hentDigisosSakFraFiks(digisosId, token)
         val kommunenummer = digisosSak.kommunenummer
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
         val requestEntity = HttpEntity(body, headers)
         try {
-            val path = "$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
-            restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
+            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
+            restTemplate.exchange(
+                    urlTemplate,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String::class.java,
+                    mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
             log.info("Ettersendelse sendt til Fiks")
 

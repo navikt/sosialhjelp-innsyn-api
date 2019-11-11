@@ -11,9 +11,10 @@ data class InternalDigisosSoker(
         var forvaltningsbrev: MutableList<Forvaltningsbrev>,
         var soknadsmottaker: Soknadsmottaker?,
         var oppgaver: MutableList<Oppgave>,
-        var historikk: MutableList<Hendelse>
+        var historikk: MutableList<Hendelse>,
+        var ettersendtInfoNAV: EttersendtInfoNAV?
 ) {
-    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, mutableListOf(), mutableListOf())
+    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, mutableListOf(), mutableListOf(), null)
 }
 
 data class Forvaltningsbrev(
@@ -97,7 +98,7 @@ enum class SaksStatus {
 }
 
 enum class UtbetalingsStatus {
-    PLANLAGT_UTBETALING, UTBETALT, STOPPET
+    PLANLAGT_UTBETALING, UTBETALT, STOPPET, ANNULLERT
 }
 
 enum class UtfallVedtak {

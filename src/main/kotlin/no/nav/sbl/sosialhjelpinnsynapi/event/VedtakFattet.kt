@@ -15,21 +15,22 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
 
     val vedtakFattet = Vedtak(utfall, vedtaksfilUrl, toLocalDateTime(hendelse.hendelsestidspunkt).toLocalDate())
 
-    val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
-    if (sakForReferanse != null) {
-        sakForReferanse.vedtak.add(vedtakFattet)
-    } else {
-        val sak = Sak(
-                hendelse.saksreferanse,
-                null,
-                null,
-                mutableListOf(vedtakFattet),
+    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse } ?: saker.firstOrNull { it.referanse == "default" }
+
+    if (sakForReferanse == null) {
+        // Opprett ny Sak
+        sakForReferanse = Sak(
+                hendelse.saksreferanse ?: "default",
+                SaksStatus.UNDER_BEHANDLING,
+                DEFAULT_TITTEL,
+                mutableListOf(),
                 mutableListOf(),
                 mutableListOf(),
                 mutableListOf()
         )
-        saker.add(sak)
+        saker.add(sakForReferanse)
     }
+    sakForReferanse.vedtak.add(vedtakFattet)
 
     val sak = saker.first { it.referanse == hendelse.saksreferanse }
     val beskrivelse = "${sak.tittel ?: DEFAULT_TITTEL} er ferdig behandlet"

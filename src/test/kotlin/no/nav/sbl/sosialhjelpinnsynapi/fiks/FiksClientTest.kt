@@ -55,10 +55,11 @@ internal class FiksClientTest {
         every { mockResponse.body } returns ok_digisossak_response
         every {
             restTemplate.exchange(
-                    any<String>(),
                     any(),
                     any(),
-                    String::class.java)
+                    any(),
+                    String::class.java,
+                    id)
         } returns mockResponse
 
         val result = fiksClient.hentDigisosSak(id, "Token", false)
@@ -84,10 +85,11 @@ internal class FiksClientTest {
         every { mockResponse.body } returns ok_digisossak_response
         every {
             restTemplate.exchange(
-                    any<String>(),
                     any(),
                     any(),
-                    String::class.java)
+                    any(),
+                    String::class.java,
+                    id)
         } returns mockResponse
 
         val result1 = fiksClient.hentDigisosSak(id, "Token", true)
@@ -113,10 +115,11 @@ internal class FiksClientTest {
         every { mockResponse.body } returns ok_digisossak_response
         every {
             restTemplate.exchange(
-                    any<String>(),
                     any(),
                     any(),
-                    String::class.java)
+                    any(),
+                    String::class.java,
+                    id)
         } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "some error")
 
         assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentDigisosSak(id, "Token", true) }
@@ -149,10 +152,11 @@ internal class FiksClientTest {
         every { mockResponse.body } returns ok_minimal_jsondigisossoker_response
         every {
             restTemplate.exchange(
-                    any<String>(),
                     any(),
                     any(),
-                    String::class.java)
+                    any(),
+                    String::class.java,
+                    any())
         } returns mockResponse
 
         val result = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
@@ -178,10 +182,11 @@ internal class FiksClientTest {
         every { mockResponse.body } returns ok_digisossak_response
         every {
             restTemplate.exchange(
-                    any<String>(),
                     any(),
                     any(),
-                    String::class.java)
+                    any(),
+                    String::class.java,
+                    any())
         } returns mockResponse
 
         val result1 = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
@@ -210,10 +215,11 @@ internal class FiksClientTest {
         every { mockResponse.body } returns ok_minimal_jsondigisossoker_response
         every {
             restTemplate.exchange(
-                    any<String>(),
                     any(),
                     any(),
-                    String::class.java)
+                    any(),
+                    String::class.java,
+                    any())
         } returns mockResponse
 
         val result2 = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
@@ -230,15 +236,18 @@ internal class FiksClientTest {
         every { mockKommuneResponse.statusCode.is2xxSuccessful } returns true
         every { mockKommuneResponse.body } returns mockKommuneInfo
         coEvery { idPortenService.requestToken().token } returns "token"
+
+        val kommunenummer = "1234"
         every {
             restTemplate.exchange(
-                    any<String>(),
+                    any(),
                     HttpMethod.GET,
                     any(),
-                    KommuneInfo::class.java)
+                    KommuneInfo::class.java,
+                    kommunenummer)
         } returns mockKommuneResponse
 
-        val result = fiksClient.hentKommuneInfo("1234")
+        val result = fiksClient.hentKommuneInfo(kommunenummer)
 
         assertThat(result).isNotNull
     }
@@ -250,15 +259,18 @@ internal class FiksClientTest {
         every { mockKommuneResponse.statusCode.is2xxSuccessful } returns true
         every { mockKommuneResponse.body } returns mockKommuneInfo
         coEvery { idPortenService.requestToken().token } returns "token"
+
+        val kommunenummer = "1234"
         every {
             restTemplate.exchange(
-                    any<String>(),
+                    any(),
                     HttpMethod.GET,
                     any(),
-                    KommuneInfo::class.java)
+                    KommuneInfo::class.java,
+                    kommunenummer)
         } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "not found")
 
-        assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentKommuneInfo("1234") }
+        assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentKommuneInfo(kommunenummer) }
     }
 
     @Test
@@ -271,12 +283,12 @@ internal class FiksClientTest {
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()
         every { mockDigisosSakResponse.statusCode.is2xxSuccessful } returns true
         every { mockDigisosSakResponse.body } returns ok_digisossak_response
-        every { restTemplate.exchange(any<String>(), HttpMethod.GET, any(), String::class.java) } returns mockDigisosSakResponse
+        every { restTemplate.exchange(any(), HttpMethod.GET, any(), String::class.java, id) } returns mockDigisosSakResponse
 
         val slot = slot<HttpEntity<LinkedMultiValueMap<String, Any>>>()
         val mockFiksResponse: ResponseEntity<String> = mockk()
         every { mockFiksResponse.statusCode.is2xxSuccessful } returns true
-        every { restTemplate.exchange(any<String>(), HttpMethod.POST, capture(slot), String::class.java) } returns mockFiksResponse
+        every { restTemplate.exchange(any(), HttpMethod.POST, capture(slot), String::class.java, any()) } returns mockFiksResponse
 
         val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
                 FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))

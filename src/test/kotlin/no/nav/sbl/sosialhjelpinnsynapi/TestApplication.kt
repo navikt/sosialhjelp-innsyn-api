@@ -1,9 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi
 
-
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisMockUtil.startRedisIfMocked
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisMockUtil.stopRedisIfMocked
-import no.nav.security.oidc.test.support.spring.TokenGeneratorConfiguration
+import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Import

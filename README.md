@@ -43,3 +43,10 @@ For å ta i bruk Redis lokalt anbefaler vi bruk av Docker.
 (kommandolinjeverktøy mot redis for å sjekke innholdet.)
 
 Det er også mulig å kjøre redis *in-memory* ved å sette miljøvariabelen `IS_REDIS_MOCKED=true`. Denne bør være satt i integrasjonstester.
+
+## Lokal kjøring
+#### uten integrasjon til Fiks og login-api
+TestApplication og profile=mock
+#### med integrasjon til Fiks og login-api
+TestApplication og profile=local. \
+I tillegg må FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI og IS_REDIS_MOCKED settes som env-variabler

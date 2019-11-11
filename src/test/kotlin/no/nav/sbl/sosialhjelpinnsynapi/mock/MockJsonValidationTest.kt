@@ -30,6 +30,7 @@ internal class DefaultMockResponseTest {
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns 1L
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
+        every { mockDigisosSak.ettersendtInfoNAV } returns null
 
         assertThatCode { eventService.createModel(mockDigisosSak, "token") }.doesNotThrowAnyException()
     }

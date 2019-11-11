@@ -145,7 +145,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
         val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
@@ -158,19 +158,19 @@ class FiksClientImpl(clientProperties: ClientProperties,
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
         }
 
-        val digisosSak = hentDigisosSak(soknadId, token)
+        val digisosSak = hentDigisosSak(digisosId, token)
         val kommunenummer = digisosSak.kommunenummer
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
         val requestEntity = HttpEntity(body, headers)
         try {
-            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{soknadId}/{navEksternRefId}"
+            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
             restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.POST,
                     requestEntity,
                     String::class.java,
-                    mapOf("kommunenummer" to kommunenummer, "soknadId" to soknadId, "navEksternRefId" to navEksternRefId))
+                    mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
             log.info("Ettersendelse sendt til Fiks")
 

@@ -47,7 +47,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{digisosId}"
+            val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, digisosId)
 
             log.info("Hentet DigisosSak $digisosId fra Fiks")
             val body = response.body!!
@@ -65,15 +66,18 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    /**
-     * Brukes for å hente json-filer som er definert i filformat. Dermed brukes filformatObjectMapper
-     */
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
         val headers = setIntegrasjonHeaders(token)
 
         log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{digisosId}/dokumenter/{dokumentlagerId}"
+            val response = restTemplate.exchange(
+                    urlTemplate,
+                    HttpMethod.GET,
+                    HttpEntity<Nothing>(headers),
+                    String::class.java,
+                    mapOf("digisosId" to digisosId, "dokumentlagerId" to dokumentlagerId))
 
             log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId $dokumentlagerId")
             return objectMapper.readValue(response.body!!, requestedClass)
@@ -90,7 +94,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         val headers = setIntegrasjonHeaders(token)
         try {
-
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
             return response.body.orEmpty()
 
@@ -109,7 +112,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
 
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommuner/$kommunenummer", HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java)
+            val urlTemplate = "$baseUrl/digisos/api/v1/nav/kommuner/{kommunenummer}"
+            val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java, kommunenummer)
 
             return response.body!!
 
@@ -160,8 +164,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val requestEntity = HttpEntity(body, headers)
         try {
-            val path = "$baseUrl/digisos/api/v1/soknader/$kommunenummer/$soknadId/$navEksternRefId"
-            restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
+            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{soknadId}/{navEksternRefId}"
+            restTemplate.exchange(
+                    urlTemplate,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String::class.java,
+                    mapOf("kommunenummer" to kommunenummer, "soknadId" to soknadId, "navEksternRefId" to navEksternRefId))
 
             log.info("Ettersendelse sendt til Fiks")
 

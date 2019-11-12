@@ -70,15 +70,15 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
     @GetMapping("/vedlegg/{filreferanseId}")
     fun hentVedlegg(httpServletResponse: HttpServletResponse, @PathVariable filreferanseId: String) {
-        val fiksDigisosEndpointUrl = clientProperties.fiksDigisosEndpointUrl
+        val fiksDigisosEndpointUrl = clientProperties.fiksDokumentlagerEndpointUrl
         httpServletResponse.setHeader("Location", "${fiksDigisosEndpointUrl}/dokumentlager/nedlasting/${filreferanseId}")
         httpServletResponse.status = 302
     }
 
     @GetMapping("/vedlegg/{filreferanseId}/{filreferanseNr}")
     fun hentVedlegg(httpServletResponse: HttpServletResponse, @PathVariable filreferanseId: String, @PathVariable filreferanseNr: String) {
-        val fiksDigisosEndpointUrl = clientProperties.fiksDigisosEndpointUrl
-        httpServletResponse.setHeader("Location", "${fiksDigisosEndpointUrl}/forsendelse//${filreferanseId}/${filreferanseNr}")
+        val fiksDigisosEndpointUrl = clientProperties.fiksSvarUtEndpointUrl
+        httpServletResponse.setHeader("Location", "${fiksDigisosEndpointUrl}/forsendelse/${filreferanseId}/${filreferanseNr}")
         httpServletResponse.status = 302
     }
 }

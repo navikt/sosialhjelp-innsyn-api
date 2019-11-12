@@ -41,7 +41,7 @@ internal class DokumentasjonEtterspurtTest : BaseEventTest() {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
         assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav: 1 vedlegg mangler")
-        assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+        assertThat(hendelse.url).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
     }
 
     @Test

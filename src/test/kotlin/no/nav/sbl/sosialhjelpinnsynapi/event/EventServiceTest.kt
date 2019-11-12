@@ -162,12 +162,12 @@ internal class EventServiceTest : BaseEventTest() {
 
             val vedtak = sak.vedtak.last()
             assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
             assertThat(hendelse.tittel).contains("$tittel_1 er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
         }
 
         @Test
@@ -199,12 +199,12 @@ internal class EventServiceTest : BaseEventTest() {
 
             val vedtak = sak.vedtak.last()
             assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
         }
 
         @Test
@@ -238,12 +238,12 @@ internal class EventServiceTest : BaseEventTest() {
 
             val vedtak = sak.vedtak.last()
             assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
         }
 
         @Test
@@ -276,11 +276,11 @@ internal class EventServiceTest : BaseEventTest() {
 
             val vedtak = sak.vedtak[0]
             assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
 
             val vedtak2 = sak.vedtak[1]
             assertThat(vedtak2.utfall).isEqualTo(UtfallVedtak.AVSLATT)
-            assertThat(vedtak2.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_2")
+            assertThat(vedtak2.vedtaksFilUrl).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_2")
         }
 
         @Test
@@ -312,12 +312,12 @@ internal class EventServiceTest : BaseEventTest() {
 
             val vedtak = sak.vedtak[0]
             assertThat(vedtak.utfall).isNull()
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$dokumentlagerId_1")
         }
     }
 
@@ -344,6 +344,6 @@ internal class EventServiceTest : BaseEventTest() {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
         assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
-        assertThat(hendelse.url).contains("/forsendelse/$svarUtId/$svarUtNr")
+        assertThat(hendelse.url).contains("/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/$svarUtId/$svarUtNr")
     }
 }

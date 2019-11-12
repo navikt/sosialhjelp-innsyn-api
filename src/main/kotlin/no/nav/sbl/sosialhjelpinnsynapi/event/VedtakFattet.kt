@@ -11,7 +11,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
 
     val utfallString = hendelse.utfall?.name
     val utfall = if (utfallString == null) null else UtfallVedtak.valueOf(utfallString)
-    val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)
+    val vedtaksfilUrl = hentUrlFraFilreferanse(hendelse.vedtaksfil.referanse)
 
     val vedtakFattet = Vedtak(utfall, vedtaksfilUrl, toLocalDateTime(hendelse.hendelsestidspunkt).toLocalDate())
 

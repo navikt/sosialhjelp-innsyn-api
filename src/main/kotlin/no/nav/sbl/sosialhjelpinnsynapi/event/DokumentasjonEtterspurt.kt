@@ -15,6 +15,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
 
     val antallKrav = if (hendelse.dokumenter.isEmpty()) "Ingen" else hendelse.dokumenter.size.toString()
     val beskrivelse = "Veileder har oppdatert dine dokumentasjonskrav: $antallKrav vedlegg mangler"
-    val url = if (hendelse.dokumenter.isEmpty()) null else hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
+    val url = if (hendelse.dokumenter.isEmpty()) null else hentUrlFraFilreferanse(hendelse.forvaltningsbrev.referanse)
     historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), url))
 }

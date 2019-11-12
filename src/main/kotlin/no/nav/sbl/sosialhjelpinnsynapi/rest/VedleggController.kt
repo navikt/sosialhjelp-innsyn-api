@@ -18,6 +18,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+
+
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
@@ -56,13 +59,27 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                         VedleggResponse(
                                 dokumentInfo.filnavn,
                                 dokumentInfo.storrelse,
-                                hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
+                                hentDokumentlagerUrl(dokumentInfo.dokumentlagerDokumentId),
                                 it.type,
                                 it.tilleggsinfo,
                                 it.tidspunktLastetOpp)
                     }
                 }
         return ResponseEntity.ok(vedleggResponses.distinct())
+    }
+
+    @GetMapping("/vedlegg/{filreferanseId}")
+    fun hentVedlegg(httpServletResponse: HttpServletResponse, @PathVariable filreferanseId: String) {
+        val fiksDigisosEndpointUrl = clientProperties.fiksDigisosEndpointUrl
+        httpServletResponse.setHeader("Location", "${fiksDigisosEndpointUrl}/dokumentlager/nedlasting/${filreferanseId}")
+        httpServletResponse.status = 302
+    }
+
+    @GetMapping("/vedlegg/{filreferanseId}/{filreferanseNr}")
+    fun hentVedlegg(httpServletResponse: HttpServletResponse, @PathVariable filreferanseId: String, @PathVariable filreferanseNr: String) {
+        val fiksDigisosEndpointUrl = clientProperties.fiksDigisosEndpointUrl
+        httpServletResponse.setHeader("Location", "${fiksDigisosEndpointUrl}/forsendelse//${filreferanseId}/${filreferanseNr}")
+        httpServletResponse.status = 302
     }
 }
 

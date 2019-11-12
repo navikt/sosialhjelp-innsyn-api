@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -24,16 +23,16 @@ const val COUNTER_SUFFIX_LENGTH = 4
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
-fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
+fun hentUrlFraFilreferanse(filreferanse: JsonFilreferanse): String {
     return when (filreferanse) {
-        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"
-        is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}"
+        is JsonDokumentlagerFilreferanse -> "/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/${filreferanse.id}"
+        is JsonSvarUtFilreferanse -> "/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/${filreferanse.id}/${filreferanse.nr}"
         else -> throw RuntimeException("Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
     }
 }
 
-fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: String): String {
-    return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${dokumentlagerId}"
+fun hentDokumentlagerUrl(dokumentlagerId: String): String {
+    return  "/sosialhjelp/innsyn-api/api/v1/innsyn/vedlegg/${dokumentlagerId}"
 }
 
 fun toLocalDateTime(hendelsetidspunkt: String): LocalDateTime {

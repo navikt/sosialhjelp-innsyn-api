@@ -78,3 +78,8 @@ data class SaksDetaljerResponse(
         val status: String,
         val antallNyeOppgaver: Int?
 )
+
+data class ForelopigSvarResponse(
+        val harMottattForelopigSvar: Boolean,
+        val link: String?
+)

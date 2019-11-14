@@ -2,41 +2,38 @@ package no.nav.sbl.sosialhjelpinnsynapi.oppgave
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveElement
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveResponse
-import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 
 
 @Component
-class OppgaveService(private val eventService: EventService,
-                     private val vedleggService: VedleggService,
-                     private val fiksClient: FiksClient) {
+class OppgaveService(private val vedleggService: VedleggService) {
 
     companion object {
         val log by logger()
     }
 
     fun hentOppgaver(fiksDigisosId: String, model: InternalDigisosSoker, token: String): List<OppgaveResponse> {
-
         if (model.oppgaver.isEmpty()) {
             return emptyList()
         }
 
         val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, model.ettersendtInfoNAV, token)
 
-        val oppgaveResponseList = model.oppgaver.sortedBy { it.innsendelsesfrist }
+        val oppgaveResponseList = model.oppgaver
                 .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
-                .map {
+                .groupBy { if (it.innsendelsesfrist == null) null else it.innsendelsesfrist!!.toLocalDate() }
+                .map { (key, value) ->
                     OppgaveResponse(
-                            if (it.innsendelsesfrist == null) null else it.innsendelsesfrist.toString(),
-                            it.tittel,
-                            it.tilleggsinfo,
-                            it.erFraInnsyn)
+                            innsendelsesfrist = key,
+                            oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.erFraInnsyn) }
+                    )
                 }
-        log.info("Hentet ${oppgaveResponseList.size} oppgaver for fiksDigisosId=$fiksDigisosId")
+                .sortedBy { it.innsendelsesfrist }
+        log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver for fiksDigisosId=$fiksDigisosId")
         return oppgaveResponseList
     }
 

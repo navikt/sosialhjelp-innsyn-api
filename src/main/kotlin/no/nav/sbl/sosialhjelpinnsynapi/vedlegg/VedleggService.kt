@@ -1,6 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
@@ -41,11 +43,14 @@ class VedleggService(private val fiksClient: FiksClient) {
                     val currentFilIndex = filIndex
                     filIndex += vedlegg.filer.size
                     filIndex = filIndex.coerceAtMost(originalSoknadNAV.vedlegg.size)
+                    val dokumentInfoList = originalSoknadNAV.vedlegg.subList(currentFilIndex, filIndex)
+                    if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
+                        throw OpplastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
+                    }
                     InternalVedlegg(
                             vedlegg.type,
                             vedlegg.tilleggsinfo,
-                            originalSoknadNAV.vedlegg.subList(currentFilIndex, filIndex),
-                            //matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer),
+                            dokumentInfoList,
                             unixToLocalDateTime(originalSoknadNAV.timestampSendt)
                     )
                 }
@@ -62,10 +67,14 @@ class VedleggService(private val fiksClient: FiksClient) {
                                 val currentFilIndex = filIndex
                                 filIndex += vedlegg.filer.size
                                 filIndex = filIndex.coerceAtMost(ettersendelse.vedlegg.size)
+                                val dokumentInfoList = ettersendelse.vedlegg.subList(currentFilIndex, filIndex)
+                                if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
+                                    throw OpplastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
+                                }
                                 InternalVedlegg(
                                         vedlegg.type,
                                         vedlegg.tilleggsinfo,
-                                        ettersendelse.vedlegg.subList(currentFilIndex, filIndex),
+                                        dokumentInfoList,
                                         unixToLocalDateTime(ettersendelse.timestampSendt)
                                 )
                             }
@@ -74,6 +83,11 @@ class VedleggService(private val fiksClient: FiksClient) {
 
     private fun hentVedleggSpesifikasjon(fiksDigisosId: String, dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {
         return fiksClient.hentDokument(fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token) as JsonVedleggSpesifikasjon
+    }
+
+    private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {
+        return dokumentInfoList.size == files.size &&
+                dokumentInfoList.filterIndexed{ idx, it -> it.filnavn == files[idx].filnavn }.size == dokumentInfoList.size
     }
 
     data class InternalVedlegg(

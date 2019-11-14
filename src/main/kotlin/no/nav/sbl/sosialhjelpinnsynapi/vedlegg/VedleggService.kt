@@ -1,6 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
@@ -35,13 +34,18 @@ class VedleggService(private val fiksClient: FiksClient) {
             return emptyList()
         }
 
+        var filIndex = 0
         return jsonVedleggSpesifikasjon.vedlegg
                 .filter { vedlegg -> vedlegg.status == status }
                 .map { vedlegg ->
+                    val currentFilIndex = filIndex
+                    filIndex += vedlegg.filer.size
+                    filIndex = filIndex.coerceAtMost(originalSoknadNAV.vedlegg.size)
                     InternalVedlegg(
                             vedlegg.type,
                             vedlegg.tilleggsinfo,
-                            matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer),
+                            originalSoknadNAV.vedlegg.subList(currentFilIndex, filIndex),
+                            //matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer),
                             unixToLocalDateTime(originalSoknadNAV.timestampSendt)
                     )
                 }
@@ -50,14 +54,18 @@ class VedleggService(private val fiksClient: FiksClient) {
     fun hentEttersendteVedlegg(fiksDigisosId: String, ettersendtInfoNAV: EttersendtInfoNAV?, token: String): List<InternalVedlegg> {
         return ettersendtInfoNAV?.ettersendelser
                 ?.flatMap { ettersendelse ->
+                    var filIndex = 0
                     val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)
                     jsonVedleggSpesifikasjon.vedlegg
                             .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                             .map { vedlegg ->
+                                val currentFilIndex = filIndex
+                                filIndex += vedlegg.filer.size
+                                filIndex = filIndex.coerceAtMost(ettersendelse.vedlegg.size)
                                 InternalVedlegg(
                                         vedlegg.type,
                                         vedlegg.tilleggsinfo,
-                                        matchDokumentInfoAndJsonFiler(ettersendelse.vedlegg, vedlegg.filer),
+                                        ettersendelse.vedlegg.subList(currentFilIndex, filIndex),
                                         unixToLocalDateTime(ettersendelse.timestampSendt)
                                 )
                             }
@@ -66,14 +74,6 @@ class VedleggService(private val fiksClient: FiksClient) {
 
     private fun hentVedleggSpesifikasjon(fiksDigisosId: String, dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {
         return fiksClient.hentDokument(fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token) as JsonVedleggSpesifikasjon
-    }
-
-    private fun matchDokumentInfoAndJsonFiler(dokumentInfoList: List<DokumentInfo>, jsonFiler: List<JsonFiler>): List<DokumentInfo> {
-        return jsonFiler
-                .flatMap { fil ->
-                    dokumentInfoList
-                            .filter { it.filnavn == fil.filnavn }
-                }
     }
 
     data class InternalVedlegg(

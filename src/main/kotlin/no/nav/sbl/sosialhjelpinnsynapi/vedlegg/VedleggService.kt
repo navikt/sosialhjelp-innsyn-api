@@ -36,21 +36,13 @@ class VedleggService(private val fiksClient: FiksClient) {
             return emptyList()
         }
 
-        var filIndex = 0
         return jsonVedleggSpesifikasjon.vedlegg
                 .filter { vedlegg -> vedlegg.status == status }
                 .map { vedlegg ->
-                    val currentFilIndex = filIndex
-                    filIndex += vedlegg.filer.size
-                    filIndex = filIndex.coerceAtMost(originalSoknadNAV.vedlegg.size)
-                    val dokumentInfoList = originalSoknadNAV.vedlegg.subList(currentFilIndex, filIndex)
-                    if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                        throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
-                    }
                     InternalVedlegg(
                             vedlegg.type,
                             vedlegg.tilleggsinfo,
-                            dokumentInfoList,
+                            matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer),
                             unixToLocalDateTime(originalSoknadNAV.timestampSendt)
                     )
                 }
@@ -66,7 +58,6 @@ class VedleggService(private val fiksClient: FiksClient) {
                             .map { vedlegg ->
                                 val currentFilIndex = filIndex
                                 filIndex += vedlegg.filer.size
-                                filIndex = filIndex.coerceAtMost(ettersendelse.vedlegg.size)
                                 val dokumentInfoList = ettersendelse.vedlegg.subList(currentFilIndex, filIndex)
                                 if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
                                     throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
@@ -83,6 +74,14 @@ class VedleggService(private val fiksClient: FiksClient) {
 
     private fun hentVedleggSpesifikasjon(fiksDigisosId: String, dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {
         return fiksClient.hentDokument(fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token) as JsonVedleggSpesifikasjon
+    }
+
+    private fun matchDokumentInfoAndJsonFiler(dokumentInfoList: List<DokumentInfo>, jsonFiler: List<JsonFiler>): List<DokumentInfo> {
+        return jsonFiler
+                .flatMap { fil ->
+                    dokumentInfoList
+                            .filter { it.filnavn == fil.filnavn }
+                }
     }
 
     private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {

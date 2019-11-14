@@ -45,7 +45,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
         if (!filenamesMatchInMetadataAndFiles(metadata, files)) {
-            throw OpplastingFilnavnMismatchException("Filnavn er ikke unike eller det er mismatch mellom filer og metadata", null)
+            throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata", null)
         }
 
         // Scan for virus

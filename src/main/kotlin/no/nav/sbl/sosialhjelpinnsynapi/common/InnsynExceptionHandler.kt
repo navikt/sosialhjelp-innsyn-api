@@ -67,11 +67,17 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(OpplastingFilnavnMismatchException::class)
     fun handleOpplastingFilnavnMismatchError(e: OpplastingFilnavnMismatchException): ResponseEntity<ErrorMessage> {
-        log.error("Filnavn er ikke unike eller det er mismatch mellom filer og metadata", e)
-        val error = ErrorMessage(FILOPPLASTING_ERROR, "Filnavn er ikke unike eller det er mismatch mellom filer og metadata")
+        log.error("Det er mismatch mellom opplastede filer og metadata", e)
+        val error = ErrorMessage(FILOPPLASTING_ERROR, "Det er mismatch mellom opplastede filer og metadata")
         return ResponseEntity(error, HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(NedlastingFilnavnMismatchException::class)
+    fun handleNedlastingFilnavnMismatchError(e: NedlastingFilnavnMismatchException): ResponseEntity<ErrorMessage> {
+        log.error("Det er mismatch mellom nedlastede filer og metadata", e)
+        val error = ErrorMessage(FIKS_ERROR, "Det er mismatch mellom nedlastede filer og metadata")
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 }
 
 data class ErrorMessage(

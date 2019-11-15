@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -81,5 +82,9 @@ data class SaksDetaljerResponse(
 
 data class ForelopigSvarResponse(
         val harMottattForelopigSvar: Boolean,
-        val link: String?
+        val link: String?  
+)
+
+data class KommuneResponse(
+        val kommuneStatus: KommuneStatus
 )

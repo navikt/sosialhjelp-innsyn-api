@@ -12,9 +12,10 @@ data class InternalDigisosSoker(
         var soknadsmottaker: Soknadsmottaker?,
         var oppgaver: MutableList<Oppgave>,
         var historikk: MutableList<Hendelse>,
-        var ettersendtInfoNAV: EttersendtInfoNAV?
+        var ettersendtInfoNAV: EttersendtInfoNAV?,
+        var forelopigSvar: ForelopigSvar
 ) {
-    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, mutableListOf(), mutableListOf(), null)
+    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, mutableListOf(), mutableListOf(), null, ForelopigSvar(false, null))
 }
 
 data class Forvaltningsbrev(
@@ -104,3 +105,8 @@ enum class UtbetalingsStatus {
 enum class UtfallVedtak {
     INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST
 }
+
+data class ForelopigSvar(
+        val harMottattForelopigSvar: Boolean,
+        val link: String?
+)

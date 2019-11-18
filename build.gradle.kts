@@ -28,6 +28,7 @@ val tikaVersion = "1.22"
 val pdfBoxVersion = "2.0.16"
 val fiksKrypteringVersion = "1.0.7"
 val kotlinTestVersion = "1.3.50"
+val springmockkVersion = "1.1.3"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -124,6 +125,7 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("no.nav.security:token-validation-test-support:$tokenValidationVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
+    testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
 }
 
 repositories {

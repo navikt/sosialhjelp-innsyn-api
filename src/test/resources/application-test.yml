@@ -9,10 +9,10 @@ server:
     context-path: '/sosialhjelp/innsyn-api'
 
 client:
-  fiks_digisos_endpoint_url: 'http://localhost:51234'
-  fiks_svar_ut_endpoint_url: 'svar-ut.com' # https://test.svarut.ks.no/forsendelse/{id}/{nr}
-  fiks_dokumentlager_endpoint_url: 'http://localhost:51234' # https://minside.fiks.test.ks.no/dokumentlager/nedlasting/{id}
-  norg_endpoint_url: 'http://localhost:51234'
+  fiks_digisos_endpoint_url: 'http://localhost:51111'
+  fiks_svar_ut_endpoint_url: 'http://localhost:52222'
+  fiks_dokumentlager_endpoint_url: 'http://localhost:53333'
+  norg_endpoint_url: 'http://localhost:54444'
   fiks_integrasjonid: "id"
   fiks_integrasjonid_kommune: "idkom"
   fiks_integrasjonpassord: "pwd"
@@ -20,9 +20,15 @@ client:
   idPortenTokenUrl: "test"
   idPortenClientId: "test"
   idPortenScope: "test"
-  idPortenConfigUrl: "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration"
+  idPortenConfigUrl: 'http://localhost:55555'
 
 innsyn:
   vedlegg:
     virusscan:
       enabled: false
+
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: http://metadata
+    accepted_audience: aud-localhost
+    cookie_name: localhost-idtoken

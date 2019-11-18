@@ -3,14 +3,16 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.*
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonForvaltningsbrev
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
@@ -30,9 +32,7 @@ abstract class BaseEventTest {
     protected val service = EventService(clientProperties, innsynService, vedleggService, norgClient, fiksClient)
 
     protected val mockDigisosSak: DigisosSak = mockk()
-    protected val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
     protected val mockJsonSoknad: JsonSoknad = mockk()
-    protected val mockNavEnhet: NavEnhet = mockk()
 
     protected val soknadsmottaker = "The Office"
     protected val enhetsnr = "2317"
@@ -88,7 +88,6 @@ abstract class BaseEventTest {
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
-        every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
         resetHendelser()
     }

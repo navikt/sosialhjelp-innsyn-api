@@ -56,7 +56,7 @@ internal class DokumentasjonEtterspurtTest : BaseEventTest() {
                                 DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV.withHendelsestidspunkt(tidspunkt_3)
                         ))
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)

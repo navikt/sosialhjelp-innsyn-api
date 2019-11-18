@@ -62,6 +62,7 @@ abstract class BaseEventTest {
     protected val vedleggKrevesTilleggsinfo = "strom"
 
     protected val navKontor = "1337"
+    protected val navKontor2 = "2222"
 
     private val now = ZonedDateTime.now()
 
@@ -97,6 +98,7 @@ abstract class BaseEventTest {
         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(null)
         TILDELT_NAV_KONTOR.withHendelsestidspunkt(null)
+        TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(null)
         SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
         SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(null)
         SAK2_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
@@ -131,6 +133,10 @@ abstract class BaseEventTest {
     protected val TILDELT_NAV_KONTOR = JsonTildeltNavKontor()
             .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
             .withNavKontor(navKontor)
+
+    protected val TILDELT_NAV_KONTOR_2 = JsonTildeltNavKontor()
+            .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
+            .withNavKontor(navKontor2)
 
     protected val SAK1_SAKS_STATUS_UNDERBEHANDLING = JsonSaksStatus()
             .withType(JsonHendelse.Type.SAKS_STATUS)

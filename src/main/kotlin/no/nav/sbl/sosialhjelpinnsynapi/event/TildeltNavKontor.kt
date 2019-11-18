@@ -9,9 +9,17 @@ import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonTildeltNavKontor, norgClient: NorgClient) {
 
-    if (hendelse.navKontor == soknadsmottaker?.navEnhetsnummer) {
+    if (hendelse.navKontor == tildeltNavKontor) {
         return
     }
+
+    if (hendelse.navKontor == soknadsmottaker?.navEnhetsnummer) {
+        tildeltNavKontor = hendelse.navKontor
+        return
+    }
+
+    tildeltNavKontor = hendelse.navKontor
+
     val detalj = try {
         val navKontorNavn = norgClient.hentNavEnhet(hendelse.navKontor).navn
         navKontorNavn

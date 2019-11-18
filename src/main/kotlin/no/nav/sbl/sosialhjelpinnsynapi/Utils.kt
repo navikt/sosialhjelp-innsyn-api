@@ -26,14 +26,14 @@ inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object :
 
 fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
     return when (filreferanse) {
-        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}"
-        is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}"
+        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl  + "/dokumentlager/nedlasting/${filreferanse.id}?inline=true"
+        is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
         else -> throw RuntimeException("Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
     }
 }
 
 fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: String): String {
-    return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${dokumentlagerId}"
+    return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${dokumentlagerId}?inline=true"
 }
 
 fun toLocalDateTime(hendelsetidspunkt: String): LocalDateTime {

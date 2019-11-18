@@ -23,7 +23,7 @@ class FiksClientMock : FiksClient {
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
         return innsynMap.getOrElse(digisosId, {
-            val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString(), innsynMap.size.toLong())
+            val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(digisosId, innsynMap.size.toLong())
             innsynMap[digisosId] = default
             default
         })

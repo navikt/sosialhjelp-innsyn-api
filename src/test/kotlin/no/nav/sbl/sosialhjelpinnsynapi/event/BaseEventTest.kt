@@ -104,6 +104,8 @@ abstract class BaseEventTest {
         SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(null)
         SAK2_VEDTAK_FATTET.withHendelsestidspunkt(null)
         DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(null)
+        DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV.withHendelsestidspunkt(null)
+        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(null)
         FORELOPIGSVAR.withHendelsestidspunkt(null)
         UTBETALING.withHendelsestidspunkt(null)
         DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(null)
@@ -179,6 +181,10 @@ abstract class BaseEventTest {
             .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
             .withDokumenter(mutableListOf(JsonDokumenter().withInnsendelsesfrist(innsendelsesfrist).withDokumenttype(dokumenttype).withTilleggsinformasjon(tilleggsinfo)))
             .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(DOKUMENTLAGER_1))
+
+    protected val DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV = JsonDokumentasjonEtterspurt()
+            .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
+            .withDokumenter(mutableListOf(JsonDokumenter().withInnsendelsesfrist(innsendelsesfrist).withDokumenttype(dokumenttype).withTilleggsinformasjon(tilleggsinfo)))
 
     protected val DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE = JsonDokumentasjonEtterspurt()
             .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)

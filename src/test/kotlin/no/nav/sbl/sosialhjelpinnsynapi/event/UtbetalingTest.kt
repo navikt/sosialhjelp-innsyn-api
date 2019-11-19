@@ -47,6 +47,7 @@ internal class UtbetalingTest {
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
+        every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 

@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.oppgave
 
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
@@ -18,15 +19,13 @@ class OppgaveService(private val eventService: EventService,
         val log by logger()
     }
 
-    fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
-        val model = eventService.createModel(fiksDigisosId, token)
+    fun hentOppgaver(fiksDigisosId: String, model: InternalDigisosSoker, token: String): List<OppgaveResponse> {
 
         if (model.oppgaver.isEmpty()) {
             return emptyList()
         }
 
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+        val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, model.ettersendtInfoNAV, token)
 
         val oppgaveResponseList = model.oppgaver.sortedBy { it.innsendelsesfrist }
                 .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }

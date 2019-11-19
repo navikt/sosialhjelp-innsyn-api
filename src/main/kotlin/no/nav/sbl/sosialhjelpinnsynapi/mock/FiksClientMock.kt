@@ -23,7 +23,7 @@ class FiksClientMock : FiksClient {
 
     override fun hentDigisosSak(digisosId: String, token: String): DigisosSak {
         return innsynMap.getOrElse(digisosId, {
-            val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(UUID.randomUUID().toString(), innsynMap.size.toLong())
+            val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(digisosId, innsynMap.size.toLong())
             innsynMap[digisosId] = default
             default
         })
@@ -96,8 +96,8 @@ class FiksClientMock : FiksClient {
         return returnValue
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, soknadId: String, token: String) {
-        val digisosSak = hentDigisosSak(soknadId, token)
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
+        val digisosSak = hentDigisosSak(digisosId, token)
         val navEksternRefId = lagNavEksternRefId(digisosSak)
         val vedleggMetadata = UUID.randomUUID().toString()
         val dokumentalagerIdList = List(files.size) {
@@ -115,6 +115,10 @@ class FiksClientMock : FiksClient {
 
     fun postDigisosSak(digisosSak: DigisosSak) {
         innsynMap[digisosSak.fiksDigisosId] = digisosSak
+    }
+
+    fun digisosSakFinnes(fiksDigisosId: String): Boolean {
+        return innsynMap.containsKey(fiksDigisosId)
     }
 
     fun postDokument(dokumentlagerId: String, jsonDigisosSoker: JsonDigisosSoker) {

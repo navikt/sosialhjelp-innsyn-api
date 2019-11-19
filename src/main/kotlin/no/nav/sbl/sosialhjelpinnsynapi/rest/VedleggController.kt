@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator.sjekkXsrfToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
@@ -9,15 +10,16 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
-import no.nav.security.oidc.api.Unprotected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import javax.servlet.http.HttpServletRequest
 
-@Unprotected
+@ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class VedleggController(private val vedleggOpplastingService: VedleggOpplastingService,
@@ -28,7 +30,10 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(@PathVariable fiksDigisosId: String,
                     @RequestParam("files") files: MutableList<MultipartFile>,
-                    @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggOpplastingResponse>> {
+                    @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+                    request: HttpServletRequest
+    ): ResponseEntity<List<VedleggOpplastingResponse>> {
+        sjekkXsrfToken(fiksDigisosId, request)
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
                 ?: throw IllegalStateException("Mangler metadata.json")
         val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)

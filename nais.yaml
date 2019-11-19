@@ -57,3 +57,7 @@ spec:
       value: {{id_porten_client_id}}
     - name: ID_PORTEN_SCOPE
       value: {{id_porten_scope}}
+    - name: AZUREAD_DISCOVERYURL
+      value: {{azuread_discoveryurl}}
+    - name: AZUREAD_CLIENTID
+      value: {{azuread_clientid}}

@@ -33,7 +33,8 @@ class NorgClientImpl(clientProperties: ClientProperties,
         headers.set("x-nav-apiKey", norgApiKey)
         try {
             log.info("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
-            val response = restTemplate.exchange("$baseUrl/enhet/$enhetsnr", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+            val urlTemplate = "$baseUrl/enhet/{enhetsnr}"
+            val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, enhetsnr)
 
             log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
             return objectMapper.readValue(response.body!!, NavEnhet::class.java)

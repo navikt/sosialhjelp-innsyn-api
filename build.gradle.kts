@@ -3,7 +3,7 @@ group = "no.nav.sbl"
 version = "1.0-SNAPSHOT"
 
 val kotlinVersion = "1.3.50"
-val springBootVersion = "2.2.0.RELEASE"
+val springBootVersion = "2.2.1.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
 val junitJupiterVersion = "5.5.2"
@@ -11,9 +11,9 @@ val mockkVersion = "1.9.3"
 val filformatVersion = "1.2019.10.29-12.39-6bf6917cf603"
 val micrometerRegistryVersion = "1.1.7"
 val prometheusVersion = "0.7.0"
-val tokenSupportVersion = "0.2.18"
-val jacksonVersion = "2.10.0"
-val jacksonDatabindVersion = "2.10.0"
+val tokenValidationVersion = "1.1.2"
+val jacksonVersion = "2.10.1"
+val jacksonDatabindVersion = "2.10.1"
 val guavaVersion = "28.0-jre"
 val swaggerVersion = "2.9.2"
 val resilience4jVersion = "1.0.0"
@@ -36,7 +36,7 @@ plugins {
     kotlin("jvm") version "1.3.50"
 
     id("org.jetbrains.kotlin.plugin.spring") version "1.3.50"
-    id("org.springframework.boot") version "2.2.0.RELEASE"
+    id("org.springframework.boot") version "2.2.1.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
 }
 
@@ -95,7 +95,7 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
-    implementation("no.nav.security:oidc-spring-support:$tokenSupportVersion")
+    implementation("no.nav.security:token-validation-spring:$tokenValidationVersion")
     implementation("io.springfox:springfox-swagger2:$swaggerVersion")
     implementation("io.springfox:springfox-swagger-ui:$swaggerVersion")
 
@@ -122,7 +122,7 @@ dependencies {
     }
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("no.nav.security:oidc-test-support:$tokenSupportVersion")
+    testImplementation("no.nav.security:token-validation-test-support:$tokenValidationVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
 }
 

@@ -23,10 +23,15 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
             id = UUID.randomUUID().toString()
         }
 
-        fiksClientMock.postDigisosSak(DigisosSak(id, "01234567890", "11415cd1-e26d-499a-8421-751457dfcbd5", "1", System.currentTimeMillis(),
-                OriginalSoknadNAV("110000000", "", "mock-soknad-vedlegg-metadata", DokumentInfo("", "", 0L), Collections.emptyList(),
-                        femMinutterForMottattSoknad(digisosApiWrapper)),
-                EttersendtInfoNAV(Collections.emptyList()), DigisosSoker(dokumentlagerId, Collections.emptyList(), System.currentTimeMillis())))
+        if (!fiksClientMock.digisosSakFinnes(id)) {
+            fiksClientMock.postDigisosSak(DigisosSak(id, "01234567890", "11415cd1-e26d-499a-8421-751457dfcbd5", "1", System.currentTimeMillis(),
+                    OriginalSoknadNAV("110000000", "", "mock-soknad-vedlegg-metadata", DokumentInfo("", "", 0L), Collections.emptyList(),
+                            femMinutterForMottattSoknad(digisosApiWrapper)), EttersendtInfoNAV(Collections.emptyList()), null))
+        }
+
+        val digisosSak = fiksClientMock.hentDigisosSak(id, "")
+        val updatedDigisosSak = digisosSak.updateDigisosSoker(DigisosSoker(dokumentlagerId, Collections.emptyList(), System.currentTimeMillis()))
+        fiksClientMock.postDigisosSak(updatedDigisosSak)
         return id
     }
 
@@ -40,5 +45,9 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
         } catch (e: DateTimeParseException) {
             return LocalDateTime.now().minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
         }
+    }
+
+    fun DigisosSak.updateDigisosSoker(digisosSoker: DigisosSoker): DigisosSak {
+        return this.copy(digisosSoker = digisosSoker)
     }
 }

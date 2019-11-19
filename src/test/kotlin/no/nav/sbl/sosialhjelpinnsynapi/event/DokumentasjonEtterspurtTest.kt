@@ -49,6 +49,7 @@ internal class DokumentasjonEtterspurtTest {
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
+        every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
@@ -56,7 +57,7 @@ internal class DokumentasjonEtterspurtTest {
     }
 
     @Test
-    fun `dokumentasjonEtterspurt skal gi oppgaver og historikk`() {
+    fun `dokumentliste er satt OG vedtaksbrev er satt - skal gi oppgaver og historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -83,12 +84,39 @@ internal class DokumentasjonEtterspurtTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-        assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav: 1 vedlegg mangler")
+        assertThat(hendelse.tittel).contains("Du må sende dokumentasjon")
         assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
     }
 
     @Test
-    fun `dokumentasjonEtterspurt skal gi egen historikkmelding og ikke url eller oppgaver dersom det dokumentlisten er tom`() {
+    internal fun `dokumentliste er satt OG forvaltningsbrev mangler - skal gi oppgaver men ikke historikk`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV.withHendelsestidspunkt(tidspunkt_3)
+                        ))
+
+        val model = service.createModel("123", "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+        assertThat(model.saker).isEmpty()
+        assertThat(model.oppgaver).hasSize(1)
+        assertThat(model.historikk).hasSize(3)
+
+        val oppgave = model.oppgaver.last()
+        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
+        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+        assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+        assertThat(oppgave.erFraInnsyn).isEqualTo(true)
+    }
+
+    @Test
+    fun `dokumentliste er tom OG forvaltningsbrev er satt - skal verken gi oppgaver eller historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -105,16 +133,11 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
         assertThat(model.saker).isEmpty()
         assertThat(model.oppgaver).hasSize(0)
-        assertThat(model.historikk).hasSize(4)
-
-        val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-        assertThat(hendelse.tittel).contains("Veileder har oppdatert dine dokumentasjonskrav: Ingen vedlegg mangler")
-        assertThat(hendelse.url).isNull()
+        assertThat(model.historikk).hasSize(3)
     }
 
     @Test
-    fun `oppgaver skal hentes fra søknaden dersom det ikke finnes dokumentasjonEtterspurt`() {
+    fun `oppgaver skal hentes fra soknaden dersom det ikke finnes dokumentasjonEtterspurt`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)

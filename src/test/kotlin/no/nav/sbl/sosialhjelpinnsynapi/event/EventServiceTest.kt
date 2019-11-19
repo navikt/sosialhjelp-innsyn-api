@@ -46,6 +46,7 @@ internal class EventServiceTest {
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
+        every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
@@ -170,7 +171,7 @@ internal class EventServiceTest {
         }
 
         @Test
-        fun `saksStatus FØR vedtakFattet`() {
+        fun `saksStatus FOR vedtakFattet`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)
@@ -245,7 +246,7 @@ internal class EventServiceTest {
         }
 
         @Test
-        fun `vedtakFattet FØR saksStatus`() {
+        fun `vedtakFattet FOR saksStatus`() {
             every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                     JsonDigisosSoker()
                             .withAvsender(avsender)

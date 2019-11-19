@@ -92,8 +92,9 @@ val defaultJsonSoknad: JsonSoknad = JsonSoknad()
         )
         .withMottaker(
                 JsonSoknadsmottaker()
-                        .withNavEnhetsnavn("Eiganes og Tasta, Stavanger kommune")
+                        .withNavEnhetsnavn("Mock bydel, mock kommune")
                         .withEnhetsnummer("0301")
+                        .withKommunenummer("1337")
         )
         .withDriftsinformasjon(
                 JsonDriftsinformasjon()

@@ -46,7 +46,6 @@ class EventService(private val clientProperties: ClientProperties,
         if (digisosSak.originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
             model.applySoknadKrav(digisosSak.fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
         }
-        model.ettersendtInfoNAV = digisosSak.ettersendtInfoNAV
 
         return model
     }
@@ -65,7 +64,7 @@ class EventService(private val clientProperties: ClientProperties,
         jsonDigisosSoker.hendelser
                 .sortedBy { it.hendelsestidspunkt }
                 .forEach { model.applyHendelse(it) }
-        model.ettersendtInfoNAV = digisosSak.ettersendtInfoNAV
+
         return model
     }
 

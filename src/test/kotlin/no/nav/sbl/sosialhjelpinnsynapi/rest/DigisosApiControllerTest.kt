@@ -4,6 +4,7 @@ import io.mockk.*
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.MOTTATT
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.UNDER_BEHANDLING
@@ -34,6 +35,8 @@ internal class DigisosApiControllerTest {
     private val sak1: Sak = mockk()
     private val sak2: Sak = mockk()
 
+    private val oppgaveResponseMock: OppgaveResponse = mockk()
+
     @BeforeEach
     internal fun setUp() {
         clearMocks(digisosApiService, fiksClient, eventService, oppgaveService)
@@ -46,8 +49,10 @@ internal class DigisosApiControllerTest {
         every { digisosSak2.sistEndret } returns 1000L
         every { digisosSak2.digisosSoker } returns mockk()
 
-        every { oppgaveService.hentOppgaver("123", model1, any()).size } returns 2
-        every { oppgaveService.hentOppgaver("456", model2, any()).size } returns 1
+        every { oppgaveResponseMock.oppgaveElementer.size } returns 1
+
+        every { oppgaveService.hentOppgaver("123", model1, any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
+        every { oppgaveService.hentOppgaver("456", model2, any()) }  returns listOf(oppgaveResponseMock) // 1 oppgave
     }
 
     @Test

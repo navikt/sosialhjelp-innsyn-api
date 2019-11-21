@@ -87,7 +87,7 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
     private fun hentAntallNyeOppgaver(model: InternalDigisosSoker, fiksDigisosId: String, token: String) : Int? {
         return when {
             model.oppgaver.isEmpty() -> null
-            else -> oppgaveService.hentOppgaver(fiksDigisosId, model, token).size
+            else -> oppgaveService.hentOppgaver(fiksDigisosId, model, token).sumBy { it.oppgaveElementer.size }
         }
     }
 

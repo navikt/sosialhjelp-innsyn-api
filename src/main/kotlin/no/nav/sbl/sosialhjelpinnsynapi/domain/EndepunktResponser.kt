@@ -91,5 +91,9 @@ data class ForelopigSvarResponse(
 )
 
 data class KommuneResponse(
-        val kommuneStatus: KommuneStatus
+        val erInnsynDeaktivert: Boolean,
+        val erInnsynMidlertidigDeaktivert: Boolean,
+        val erInnsendingEttersendelseDeaktivert: Boolean,
+        val erInnsendingEttersendelseMidlertidigDeaktivert: Boolean
 )
+

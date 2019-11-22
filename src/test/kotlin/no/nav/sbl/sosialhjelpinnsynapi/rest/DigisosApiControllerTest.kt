@@ -106,7 +106,7 @@ internal class DigisosApiControllerTest {
         every { model1.saker } returns mutableListOf()
         every { model2.saker } returns mutableListOf(sak1, sak2)
 
-        val response1 = controller.hentSaksDetaljer("123","token")
+        val response1 = controller.hentSaksDetaljer("123", "token")
         val sak1 = response1.body
 
         assertThat(response1.statusCode.value()).isEqualTo(HttpStatus.SC_OK)
@@ -114,13 +114,13 @@ internal class DigisosApiControllerTest {
         assertThat(sak1?.soknadTittel).isEqualTo("")
         assertThat(sak1?.antallNyeOppgaver).isEqualTo(2)
 
-        val response2 = controller.hentSaksDetaljer("456","token")
+        val response2 = controller.hentSaksDetaljer("456", "token")
         val sak2 = response2.body
 
         assertThat(response2.statusCode.value()).isEqualTo(HttpStatus.SC_OK)
         assertThat(sak2).isNotNull
         assertThat(sak2?.soknadTittel).contains("Livsopphold", "Strøm")
-        assertThat(sak2?.status).isEqualTo("$UNDER_BEHANDLING")
+        assertThat(sak2?.status).isEqualTo("UNDER BEHANDLING")
         assertThat(sak2?.antallNyeOppgaver).isEqualTo(1)
     }
 
@@ -133,7 +133,7 @@ internal class DigisosApiControllerTest {
         every { model1.oppgaver.isEmpty() } returns true
         every { model1.saker } returns mutableListOf()
 
-        val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId,"token")
+        val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId, "token")
         val sak = response.body
 
         assertThat(sak).isNotNull

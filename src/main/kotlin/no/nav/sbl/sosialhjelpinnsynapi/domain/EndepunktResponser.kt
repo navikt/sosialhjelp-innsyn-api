@@ -13,7 +13,7 @@ data class SoknadsStatusResponse(
 data class SaksStatusResponse(
         val tittel: String,
         val status: SaksStatus?,
-        val vedtak: MutableList<Vedtak>,
+        val skalViseVedtakInfoPanel: Boolean,
         val vedtaksfilUrlList: List<VedtaksfilUrl>?
 )
 

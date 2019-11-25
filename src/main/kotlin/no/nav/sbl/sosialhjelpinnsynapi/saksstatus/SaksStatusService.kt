@@ -1,9 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.VedtaksfilUrl
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
@@ -38,7 +35,8 @@ class SaksStatusService(private val eventService: EventService) {
                 VedtaksfilUrl(it.dato, it.vedtaksFilUrl)
             }
         }
-        return SaksStatusResponse(sak.tittel ?: DEFAULT_TITTEL, saksStatus, sak.vedtak ,vedtakfilUrlList)
+        val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak);
+        return SaksStatusResponse(sak.tittel ?: DEFAULT_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList)
     }
 
     private fun hentStatusNavn(sak: Sak): SaksStatus? {
@@ -46,5 +44,16 @@ class SaksStatusService(private val eventService: EventService) {
             sak.vedtak.isEmpty() -> sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
             else -> SaksStatus.FERDIGBEHANDLET
         }
+    }
+
+    fun getSkalViseVedtakInfoPanel(sak: Sak): Boolean {
+        var sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget = false
+        for (vedtak in sak.vedtak) {
+            when {
+                vedtak.utfall == UtfallVedtak.DELVIS_INNVILGET || vedtak.utfall == UtfallVedtak.INNVILGET -> sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget = true
+                vedtak.utfall == UtfallVedtak.AVSLATT || vedtak.utfall == UtfallVedtak.AVVIST -> sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget = false
+            }
+        }
+        return sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget;
     }
 }

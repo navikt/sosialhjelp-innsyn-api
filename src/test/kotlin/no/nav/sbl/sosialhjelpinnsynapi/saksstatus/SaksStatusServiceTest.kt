@@ -161,4 +161,55 @@ internal class SaksStatusServiceTest {
         assertThat(response[0].vedtaksfilUrlList).hasSize(2)
         assertThat(response[1].vedtaksfilUrlList).isNull()
     }
+
+    @Test
+    fun `teste at getSkalViseVedtakInfoPanel gir riktig svar`() {
+
+        val vedtak1: Vedtak = Vedtak(
+                utfall = UtfallVedtak.INNVILGET,
+                vedtaksFilUrl = "en link til noe",
+                dato = null
+        )
+        val vedtak2: Vedtak = Vedtak(
+                utfall = UtfallVedtak.DELVIS_INNVILGET,
+                vedtaksFilUrl = "en link til noe",
+                dato = null
+        )
+        val vedtak3: Vedtak = Vedtak(
+                utfall = UtfallVedtak.AVVIST,
+                vedtaksFilUrl = "en link til noe",
+                dato = null
+        )
+        val vedtak4: Vedtak = Vedtak(
+                utfall = UtfallVedtak.AVSLATT,
+                vedtaksFilUrl = "en link til noe",
+                dato = null
+        )
+        val vedtak5: Vedtak = Vedtak(
+                utfall = null,
+                vedtaksFilUrl = "en link til noe",
+                dato = null
+        )
+        val sakSomSkalGiTrue: Sak = Sak(
+                "ref1",
+                SaksStatus.FERDIGBEHANDLET,
+                "Tittel på sak",
+                vedtak = mutableListOf<Vedtak>(vedtak1, vedtak2),
+                utbetalinger = mutableListOf<Utbetaling>(),
+                vilkar = mutableListOf<Vilkar>(),
+                dokumentasjonkrav = mutableListOf<Dokumentasjonkrav>()
+        )
+        val sakSomSkalGiFalse: Sak = Sak(
+                "ref1",
+                SaksStatus.FERDIGBEHANDLET,
+                "Tittel på sak",
+                vedtak = mutableListOf<Vedtak>(vedtak1, vedtak2, vedtak3, vedtak4, vedtak5),
+                utbetalinger = mutableListOf<Utbetaling>(),
+                vilkar = mutableListOf<Vilkar>(),
+                dokumentasjonkrav = mutableListOf<Dokumentasjonkrav>()
+        )
+
+        assertThat(service.getSkalViseVedtakInfoPanel(sakSomSkalGiTrue)).isEqualTo(true)
+        assertThat(service.getSkalViseVedtakInfoPanel(sakSomSkalGiFalse)).isEqualTo(false)
+    }
 }

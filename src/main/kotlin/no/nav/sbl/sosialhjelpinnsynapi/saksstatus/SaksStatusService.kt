@@ -38,7 +38,7 @@ class SaksStatusService(private val eventService: EventService) {
                 VedtaksfilUrl(it.dato, it.vedtaksFilUrl)
             }
         }
-        return SaksStatusResponse(sak.tittel ?: DEFAULT_TITTEL, saksStatus, vedtakfilUrlList)
+        return SaksStatusResponse(sak.tittel ?: DEFAULT_TITTEL, saksStatus, sak.vedtak ,vedtakfilUrlList)
     }
 
     private fun hentStatusNavn(sak: Sak): SaksStatus? {

@@ -3,7 +3,7 @@ group = "no.nav.sbl"
 version = "1.0-SNAPSHOT"
 
 val kotlinVersion = "1.3.50"
-val springBootVersion = "2.2.1.RELEASE"
+val springBootVersion = "2.2.0.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
 val junitJupiterVersion = "5.5.2"
@@ -11,7 +11,7 @@ val mockkVersion = "1.9.3"
 val filformatVersion = "1.2019.10.29-12.39-6bf6917cf603"
 val micrometerRegistryVersion = "1.1.7"
 val prometheusVersion = "0.7.0"
-val tokenValidationVersion = "1.1.2"
+val tokenValidationVersion = "1.1.3"
 val jacksonVersion = "2.10.1"
 val jacksonDatabindVersion = "2.10.1"
 val guavaVersion = "28.0-jre"
@@ -30,6 +30,7 @@ val fiksKrypteringVersion = "1.0.7"
 val kotlinTestVersion = "1.3.50"
 val redisMockVersion = "0.1.15"
 val lettuceVersion = "5.2.0.RELEASE"
+val springmockkVersion = "1.1.3"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 
@@ -38,7 +39,7 @@ plugins {
     kotlin("jvm") version "1.3.50"
 
     id("org.jetbrains.kotlin.plugin.spring") version "1.3.50"
-    id("org.springframework.boot") version "2.2.1.RELEASE"
+    id("org.springframework.boot") version "2.2.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
 }
 
@@ -129,6 +130,7 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("no.nav.security:token-validation-test-support:$tokenValidationVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
+    testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
 }
 
 repositories {

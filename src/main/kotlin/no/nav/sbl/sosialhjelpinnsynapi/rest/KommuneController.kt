@@ -1,8 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneResponse
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneService
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatusDetaljer
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -15,14 +15,19 @@ import org.springframework.web.bind.annotation.*
 class KommuneController(private val kommuneService: KommuneService) {
 
     @GetMapping("/{fiksDigisosId}/kommune")
-    fun hentKommuneInfo(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<KommuneResponse>{
-        val kommuneStatus: KommuneStatus = kommuneService.hentKommuneStatus(fiksDigisosId, token)
+    fun hentKommuneInfo(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<KommuneResponse> {
+        val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
 
-        return ResponseEntity.ok().body(KommuneResponse(kommuneStatus));
+        return ResponseEntity.ok().body(
+                KommuneResponse(
+                        erInnsynDeaktivert = kommuneInfo == null || !kommuneInfo.kanOppdatereStatus,
+                        erInnsynMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertOppdateringer,
+                        erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
+                        erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak));
     }
 
-    @GetMapping()
-    fun hentAlleKommuneStatuser() : ResponseEntity<List<KommuneStatusDetaljer>> {
+    @GetMapping("/kommuner")
+    fun hentAlleKommuneStatuser(): ResponseEntity<List<KommuneStatusDetaljer>> {
         val alleKommunerMedStatus = kommuneService.hentAlleKommunerMedStatusStatus()
         return ResponseEntity.ok(alleKommunerMedStatus)
     }

@@ -35,6 +35,8 @@ internal class EventServiceTest : BaseEventTest() {
  [?] utbetaling - flere caser?
  [x] dokumentasjonskrav
  [x] vilkår
+ [x] tildeltNavKontor - OK response fra Norg
+ [x] tildeltNavKontor - generell melding ved Norg-feil
  [ ] rammevedtak
  ...
  [ ] komplett case

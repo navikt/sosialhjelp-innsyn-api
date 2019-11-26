@@ -94,6 +94,7 @@ val defaultJsonSoknad: JsonSoknad = JsonSoknad()
                 JsonSoknadsmottaker()
                         .withNavEnhetsnavn("Mock bydel, mock kommune")
                         .withEnhetsnummer("0301")
+                        .withKommunenummer("1337")
         )
         .withDriftsinformasjon(
                 JsonDriftsinformasjon()

@@ -3,15 +3,16 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.*
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonForvaltningsbrev
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
@@ -29,9 +30,7 @@ abstract class BaseEventTest {
     protected val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
 
     protected val mockDigisosSak: DigisosSak = mockk()
-    protected val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
     protected val mockJsonSoknad: JsonSoknad = mockk()
-    protected val mockNavEnhet: NavEnhet = mockk()
 
     protected val soknadsmottaker = "The Office"
     protected val enhetsnr = "2317"
@@ -61,6 +60,7 @@ abstract class BaseEventTest {
     protected val vedleggKrevesTilleggsinfo = "strom"
 
     protected val navKontor = "1337"
+    protected val navKontor2 = "2222"
 
     private val now = ZonedDateTime.now()
 
@@ -87,7 +87,6 @@ abstract class BaseEventTest {
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
-        every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
         resetHendelser()
     }
@@ -97,6 +96,7 @@ abstract class BaseEventTest {
         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(null)
         TILDELT_NAV_KONTOR.withHendelsestidspunkt(null)
+        TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(null)
         SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
         SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(null)
         SAK2_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
@@ -131,6 +131,10 @@ abstract class BaseEventTest {
     protected val TILDELT_NAV_KONTOR = JsonTildeltNavKontor()
             .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
             .withNavKontor(navKontor)
+
+    protected val TILDELT_NAV_KONTOR_2 = JsonTildeltNavKontor()
+            .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
+            .withNavKontor(navKontor2)
 
     protected val SAK1_SAKS_STATUS_UNDERBEHANDLING = JsonSaksStatus()
             .withType(JsonHendelse.Type.SAKS_STATUS)

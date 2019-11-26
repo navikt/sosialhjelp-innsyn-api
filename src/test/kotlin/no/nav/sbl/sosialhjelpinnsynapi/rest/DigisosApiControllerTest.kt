@@ -51,8 +51,8 @@ internal class DigisosApiControllerTest {
 
         every { oppgaveResponseMock.oppgaveElementer.size } returns 1
 
-        every { oppgaveService.hentOppgaver("123", model1, any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
-        every { oppgaveService.hentOppgaver("456", model2, any()) }  returns listOf(oppgaveResponseMock) // 1 oppgave
+        every { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
+        every { oppgaveService.hentOppgaver("456", any()) }  returns listOf(oppgaveResponseMock) // 1 oppgave
     }
 
     @Test
@@ -89,8 +89,8 @@ internal class DigisosApiControllerTest {
 
     @Test
     fun `skal mappe fra DigisosSak til SakResponse for detaljer`() {
-        every { fiksClient.hentDigisosSak("123", "token") } returns digisosSak1
-        every { fiksClient.hentDigisosSak("456", "token") } returns digisosSak2
+        every { fiksClient.hentDigisosSak("123", "token", true) } returns digisosSak1
+        every { fiksClient.hentDigisosSak("456", "token", true) } returns digisosSak2
         every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
         every { eventService.createSaksoversiktModel(any(), digisosSak2) } returns model2
 
@@ -126,7 +126,7 @@ internal class DigisosApiControllerTest {
 
     @Test
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() {
-        every { fiksClient.hentDigisosSak("123", "token") } returns digisosSak1
+        every { fiksClient.hentDigisosSak("123", "token", true) } returns digisosSak1
         every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
 
         every { model1.status } returns MOTTATT

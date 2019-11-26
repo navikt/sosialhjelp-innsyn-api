@@ -32,7 +32,7 @@ internal class TildeltNavKontorTest : BaseEventTest() {
                                 TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2)))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
@@ -54,7 +54,7 @@ internal class TildeltNavKontorTest : BaseEventTest() {
                                 TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2)))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
@@ -79,7 +79,7 @@ internal class TildeltNavKontorTest : BaseEventTest() {
                                 TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2)))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
@@ -103,7 +103,7 @@ internal class TildeltNavKontorTest : BaseEventTest() {
                                 TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_3)))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
@@ -129,7 +129,7 @@ internal class TildeltNavKontorTest : BaseEventTest() {
                                 TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(tidspunkt_3)))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)

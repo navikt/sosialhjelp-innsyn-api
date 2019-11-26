@@ -36,7 +36,7 @@ class KommuneService(private val fiksClient: FiksClient,
     }
 
     fun hentKommuneInfo(fiksDigisosId: String, token: String): KommuneInfo? {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
 
         val originalSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
 

@@ -29,7 +29,7 @@ internal class KommuneServiceTest {
     internal fun setUp() {
         clearMocks(fiksClient, innsynService, mockDigisosSak, mockJsonSoknad)
 
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV?.metadata }  returns "some id"
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
         every { mockJsonSoknad.mottaker.kommunenummer } returns kommuneNr

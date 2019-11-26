@@ -7,6 +7,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
+import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.assertj.core.api.Assertions.assertThat
@@ -16,8 +18,10 @@ import java.time.LocalDateTime
 
 internal class OppgaveServiceTest {
 
+    private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
-    private val service = OppgaveService(vedleggService)
+    private val fiksClient: FiksClient = mockk()
+    private val service = OppgaveService(eventService, vedleggService, fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockEttersendtInfoNAV: EttersendtInfoNAV = mockk()
@@ -43,6 +47,7 @@ internal class OppgaveServiceTest {
     @BeforeEach
     fun init() {
         clearAllMocks()
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
     }
 
@@ -50,7 +55,9 @@ internal class OppgaveServiceTest {
     fun `Should return emptylist`() {
         val model = InternalDigisosSoker()
 
-        val oppgaver = service.hentOppgaver("123", model, token)
+        every { eventService.createModel(any(), any()) } returns model
+
+        val oppgaver = service.hentOppgaver("123", token)
 
         assertThat(oppgaver).isNotNull
         assertThat(oppgaver).isEmpty()
@@ -61,9 +68,10 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.oppgaver.add(Oppgave(type, tillegg, frist, tidspunktForKrav, true))
 
+        every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-        val responseList = service.hentOppgaver("123", model, token)
+        val responseList = service.hentOppgaver("123", token)
 
         assertThat(responseList).isNotNull
         assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
@@ -78,9 +86,10 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.oppgaver.add(Oppgave(type, null, frist, tidspunktForKrav, true))
 
+        every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-        val responseList = service.hentOppgaver("123", model, token)
+        val responseList = service.hentOppgaver("123", token)
 
         assertThat(responseList).isNotNull
         assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
@@ -99,9 +108,10 @@ internal class OppgaveServiceTest {
                 Oppgave(type4, tillegg4, frist4, tidspunktForKrav, true),
                 Oppgave(type2, tillegg2, frist2, tidspunktForKrav, true)))
 
+        every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-        val responseList = service.hentOppgaver("123", model, token)
+        val responseList = service.hentOppgaver("123", token)
 
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 4)
@@ -134,13 +144,14 @@ internal class OppgaveServiceTest {
                 Oppgave(type2, null, frist2, tidspunktForKrav, true),
                 Oppgave(type3, tillegg3, frist3, tidspunktForKrav, true)))
 
+        every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(type, tillegg, emptyList(), tidspunktEtterKrav),
                 InternalVedlegg(type2, null, emptyList(), tidspunktEtterKrav),
                 InternalVedlegg(type3, tillegg3, emptyList(), tidspunktFoerKrav),
                 InternalVedlegg(type3, null, emptyList(), tidspunktEtterKrav))
 
-        val responseList = service.hentOppgaver("123", model, token)
+        val responseList = service.hentOppgaver("123", token)
 
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)

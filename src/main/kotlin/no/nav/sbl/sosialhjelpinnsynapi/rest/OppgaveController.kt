@@ -17,8 +17,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val eventService: Ev
 
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
-        val model = eventService.createModel(fiksDigisosId, token)
-        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, model, token)
+        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
         if (oppgaver.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }

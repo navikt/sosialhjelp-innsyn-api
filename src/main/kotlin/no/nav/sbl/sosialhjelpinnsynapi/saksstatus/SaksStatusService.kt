@@ -2,20 +2,23 @@ package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 
 const val DEFAULT_TITTEL: String = "Økonomisk sosialhjelp"
 
 @Component
-class SaksStatusService(private val eventService: EventService) {
+class SaksStatusService(private val eventService: EventService,
+                        private val fiksClient: FiksClient) {
 
     companion object {
         val log by logger()
     }
 
     fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {
-        val model = eventService.createModel(fiksDigisosId, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
 
         if (model.saker.isEmpty()) {
             log.info("Fant ingen saker for $fiksDigisosId")

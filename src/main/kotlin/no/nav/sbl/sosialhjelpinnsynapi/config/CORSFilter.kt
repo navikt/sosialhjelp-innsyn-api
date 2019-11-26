@@ -4,10 +4,10 @@ package no.nav.sbl.sosialhjelpinnsynapi.config
 import no.nav.sbl.sosialhjelpinnsynapi.isRunningInProd
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import java.io.IOException
 
 class CORSFilter : Filter {
     val log: Logger = LoggerFactory.getLogger(CORSFilter::class.java)

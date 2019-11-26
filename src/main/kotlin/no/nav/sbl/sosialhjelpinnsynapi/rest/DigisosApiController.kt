@@ -70,7 +70,7 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
         if (id.isEmpty()) {
             return ResponseEntity.noContent().build()
         }
-        val sak = fiksClient.hentDigisosSak(id, token)
+        val sak = fiksClient.hentDigisosSak(id, token, true)
         val model = eventService.createSaksoversiktModel(token, sak)
         val saksDetaljerResponse = SaksDetaljerResponse(
                 sak.fiksDigisosId,
@@ -96,7 +96,7 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
     private fun hentAntallNyeOppgaver(model: InternalDigisosSoker, fiksDigisosId: String, token: String): Int? {
         return when {
             model.oppgaver.isEmpty() -> null
-            else -> oppgaveService.hentOppgaver(fiksDigisosId, model, token).sumBy { it.oppgaveElementer.size }
+            else -> oppgaveService.hentOppgaver(fiksDigisosId, token).sumBy { it.oppgaveElementer.size }
         }
     }
 

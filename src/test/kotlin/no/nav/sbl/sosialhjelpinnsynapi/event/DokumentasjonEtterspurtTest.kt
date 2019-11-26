@@ -124,4 +124,33 @@ internal class DokumentasjonEtterspurtTest : BaseEventTest() {
         assertThat(hendelse.tittel).contains("Søknaden er under behandling")
         assertThat(hendelse.url).isNull()
     }
+
+    @Test
+    internal fun `dokumentasjonEtterspurt overstyrer gjenstaende vedleggskrav fra soknad`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+                listOf(VedleggService.InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+
+        val model = service.createModel("123", "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+        assertThat(model.saker).isEmpty()
+        assertThat(model.oppgaver).hasSize(1)
+        assertThat(model.historikk).hasSize(4)
+
+        val oppgave = model.oppgaver.last()
+        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
+        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+        assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+        assertThat(oppgave.erFraInnsyn).isEqualTo(true)
+    }
 }

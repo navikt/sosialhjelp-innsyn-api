@@ -13,6 +13,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.redis.CACHE_TIME_TO_LIVE_SECONDS
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
@@ -41,7 +42,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     companion object {
         val log by logger()
-        const val CACHE_TIME_TO_LIVE_SECONDS: Long = 20
     }
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
@@ -147,7 +147,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     /**
-     * lagrer digisosSak i cache i 20s
+     * lagrer digisosSak i cache i 2s
      */
     private fun cachePut(key: String, value: String) {
         val set = redisStore.set(key, value, CACHE_TIME_TO_LIVE_SECONDS)

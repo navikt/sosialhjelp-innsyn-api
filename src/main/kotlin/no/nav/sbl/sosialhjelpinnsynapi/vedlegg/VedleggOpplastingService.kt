@@ -8,6 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.redis.CACHE_TIME_TO_LIVE_SECONDS
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.utils.*
@@ -36,8 +37,6 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     companion object {
         val log by logger()
-
-        const val CACHE_TIME_TO_LIVE_SECONDS: Long = 20
     }
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10

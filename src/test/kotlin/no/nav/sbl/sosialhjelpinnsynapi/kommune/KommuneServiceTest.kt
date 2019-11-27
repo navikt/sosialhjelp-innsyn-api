@@ -33,6 +33,7 @@ internal class KommuneServiceTest {
         every { mockDigisosSak.originalSoknadNAV?.metadata }  returns "some id"
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
         every { mockJsonSoknad.mottaker.kommunenummer } returns kommuneNr
+        every { mockDigisosSak.kommunenummer } returns kommuneNr
     }
 
     @Test

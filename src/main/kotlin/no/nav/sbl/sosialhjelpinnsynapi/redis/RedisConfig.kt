@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.redis
 
 import io.lettuce.core.RedisClient
-import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisMockUtil.startRedisMocked
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -21,12 +20,8 @@ class RedisConfig(private val cacheProperties: CacheProperties) {
 
     private fun startInMemoryRedisIfMocked() {
         if (cacheProperties.redisMocked) {
-            log.error("in-memory redis brukes - denne feilmeldingen bør ALDRI vises i PROD")
             startRedisMocked()
         }
     }
 
-    companion object{
-        val log by logger()
-    }
 }

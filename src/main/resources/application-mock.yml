@@ -6,3 +6,5 @@ innsyn:
   vedlegg:
     virusscan:
       enabled: false
+  cache:
+    redisMocked: true

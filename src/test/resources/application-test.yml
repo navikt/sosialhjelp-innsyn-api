@@ -18,6 +18,8 @@ innsyn:
   vedlegg:
     virusscan:
       enabled: false
+  cache:
+    redisMocked: true
 
 no.nav.security.jwt:
   issuer.selvbetjening:

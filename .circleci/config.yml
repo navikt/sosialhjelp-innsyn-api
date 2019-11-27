@@ -164,7 +164,8 @@ workflows:
       - deploy_heroku:
           filters:
             branches:
-              only: master
+#              TODO: Endre tilbake til master
+              only: feature/reduserer_slugsize_heroku
       - browser-test:
           requires:
             - deploy_heroku

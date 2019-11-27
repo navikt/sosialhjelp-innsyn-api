@@ -92,10 +92,11 @@ internal class KommuneServiceTest {
         every { mockDigisosSak.originalSoknadNAV?.metadata }  returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
         every { mockDigisosSak.kommunenummer } returns kommuneNr
+        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, true, false, false, null)
 
         val status = service.hentKommuneStatus("123", "token")
 
-        assertThat(status).isEqualTo(SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SKAL_VISE_FEILSIDE)
+        assertThat(status).isEqualTo(SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA)
     }
 
     @Test

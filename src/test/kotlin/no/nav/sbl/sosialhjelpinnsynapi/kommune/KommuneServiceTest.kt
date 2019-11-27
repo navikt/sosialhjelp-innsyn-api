@@ -88,12 +88,14 @@ internal class KommuneServiceTest {
     }
 
     @Test
-    fun `Ingen originalSoknad - skal kaste feil`() {
+    fun `Ingen originalSoknad - skal ikke kaste feil`() {
         every { mockDigisosSak.originalSoknadNAV?.metadata }  returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
+        every { mockDigisosSak.kommunenummer } returns kommuneNr
 
-        assertThatExceptionOfType(RuntimeException::class.java).isThrownBy { service.hentKommuneStatus("123", "token") }
-                .withMessage("KommuneStatus kan ikke hentes uten kommunenummer")
+        val status = service.hentKommuneStatus("123", "token")
+
+        assertThat(status).isEqualTo(SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SKAL_VISE_FEILSIDE)
     }
 
     @Test

@@ -42,11 +42,11 @@ For å ta i bruk Redis lokalt anbefaler vi bruk av Docker.
 3. `docker run -it --link myredis:redis --rm redis redis-cli -h redis -p 6379` 
 (kommandolinjeverktøy mot redis for å sjekke innholdet.)
 
-Det er også mulig å kjøre redis *in-memory* ved å sette miljøvariabelen `IS_REDIS_MOCKED=true`. Denne bør være satt i integrasjonstester.
+Propertyen `innsyn.cache.redisMocked` styrer hvorvidt en _in-memory_ Redis instans spinnes opp og tas i bruk. Denne er satt til `true` ved bruk av spring-profilene `mock`, `local` og `test`.
 
 ## Lokal kjøring
-#### uten integrasjon til Fiks og login-api
+#### *uten* integrasjon til Fiks og login-api
 TestApplication og profile=mock
-#### med integrasjon til Fiks og login-api
+#### *med* integrasjon til Fiks og login-api
 TestApplication og profile=local. \
-I tillegg må FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI og IS_REDIS_MOCKED settes som env-variabler
+I tillegg må FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, og VIRKSERT_STI settes som env-variabler

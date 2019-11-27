@@ -157,6 +157,15 @@ tasks {
         }
     }
 }
+
+tasks.register("stage") {
+    dependsOn("build")
+    doLast {
+        delete(fileTree("dir" to "build", "exclude" to "libs"))
+        delete(fileTree("dir" to "build/libs", "exclude" to "*.jar"))
+    }
+}
+
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")

@@ -7,7 +7,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
@@ -26,9 +25,8 @@ internal class EventServiceTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
-    private val fiksClient: FiksClient = mockk()
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, fiksClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
@@ -40,7 +38,7 @@ internal class EventServiceTest {
     @BeforeEach
     fun init() {
         clearAllMocks()
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { mockDigisosSak.fiksDigisosId } returns "123"
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad

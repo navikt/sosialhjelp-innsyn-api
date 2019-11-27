@@ -17,6 +17,7 @@ const val svarUtId = "42"
 const val svarUtNr = 42
 
 const val navKontor = "1337"
+const val navKontor2 = "2244"
 
 const val tittel_1 = "tittel"
 const val tittel_2 = "tittel2"
@@ -64,6 +65,10 @@ val SOKNADS_STATUS_FERDIGBEHANDLET = JsonSoknadsStatus()
 val TILDELT_NAV_KONTOR = JsonTildeltNavKontor()
         .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
         .withNavKontor(navKontor)
+
+val TILDELT_NAV_KONTOR_2 = JsonTildeltNavKontor()
+        .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
+        .withNavKontor(navKontor2)
 
 val SAK1_SAKS_STATUS_UNDERBEHANDLING = JsonSaksStatus()
         .withType(JsonHendelse.Type.SAKS_STATUS)
@@ -165,6 +170,7 @@ fun resetHendelser() {
     SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
     SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(null)
     TILDELT_NAV_KONTOR.withHendelsestidspunkt(null)
+    TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(null)
     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
     SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(null)
     SAK2_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)

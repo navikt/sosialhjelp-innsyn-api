@@ -73,6 +73,8 @@ internal class EventServiceTest {
  [?] utbetaling - flere caser?
  [x] dokumentasjonskrav
  [x] vilkår
+ [x] tildeltNavKontor - OK response fra Norg
+ [x] tildeltNavKontor - generell melding ved Norg-feil
  [ ] rammevedtak
  ...
  [ ] komplett case
@@ -84,7 +86,7 @@ internal class EventServiceTest {
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
@@ -97,7 +99,7 @@ internal class EventServiceTest {
         every { innsynService.hentJsonDigisosSoker(any(), null, any()) } returns null
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.historikk).hasSize(1)
@@ -119,7 +121,7 @@ internal class EventServiceTest {
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-            val model = service.createModel("123", "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -151,7 +153,7 @@ internal class EventServiceTest {
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-            val model = service.createModel("123", "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -184,7 +186,7 @@ internal class EventServiceTest {
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-            val model = service.createModel("123", "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -221,7 +223,7 @@ internal class EventServiceTest {
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-            val model = service.createModel("123", "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -259,7 +261,7 @@ internal class EventServiceTest {
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-            val model = service.createModel("123", "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -299,7 +301,7 @@ internal class EventServiceTest {
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-            val model = service.createModel("123", "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -335,7 +337,7 @@ internal class EventServiceTest {
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-            val model = service.createModel("123", "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -372,7 +374,7 @@ internal class EventServiceTest {
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)

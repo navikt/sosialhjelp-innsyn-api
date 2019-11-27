@@ -29,7 +29,7 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
                             femMinutterForMottattSoknad(digisosApiWrapper)), EttersendtInfoNAV(Collections.emptyList()), null))
         }
 
-        val digisosSak = fiksClientMock.hentDigisosSak(id, "")
+        val digisosSak = fiksClientMock.hentDigisosSak(id, "", true)
         val updatedDigisosSak = digisosSak.updateDigisosSoker(DigisosSoker(dokumentlagerId, Collections.emptyList(), System.currentTimeMillis()))
         fiksClientMock.postDigisosSak(updatedDigisosSak)
         return id

@@ -62,7 +62,7 @@ val digisosSoker = JsonDigisosSoker()
                                                 JsonDokumenter()
                                                         .withDokumenttype("Kopi av depositumskonto")
                                                         .withTilleggsinformasjon("Signert av både deg og utleier")
-                                                        .withInnsendelsesfrist("2018-10-20T07:37:30.000Z")
+                                                        .withInnsendelsesfrist("2018-10-30T07:37:30.000Z")
                                         )
                                 ),
 

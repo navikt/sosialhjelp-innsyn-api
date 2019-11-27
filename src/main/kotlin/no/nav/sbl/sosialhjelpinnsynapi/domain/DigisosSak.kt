@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
+
 data class DigisosSak(
         val fiksDigisosId: String,
         val sokerFnr: String,

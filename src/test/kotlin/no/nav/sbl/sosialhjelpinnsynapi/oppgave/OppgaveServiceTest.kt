@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.oppgave
 
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -46,8 +46,8 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService)
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        clearAllMocks()
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
     }
 
@@ -55,8 +55,9 @@ internal class OppgaveServiceTest {
     fun `Should return emptylist`() {
         val model = InternalDigisosSoker()
 
+        every { eventService.createModel(any(), any()) } returns model
 
-        val oppgaver = service.hentOppgaver("123", model, token)
+        val oppgaver = service.hentOppgaver("123", token)
 
         assertThat(oppgaver).isNotNull
         assertThat(oppgaver).isEmpty()
@@ -67,14 +68,17 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.oppgaver.add(Oppgave(type, tillegg, frist, tidspunktForKrav, true))
 
+        every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-        val oppgaver = service.hentOppgaver("123", model, token)
+        val responseList = service.hentOppgaver("123", token)
 
-        assertThat(oppgaver).isNotNull
-        assertThat(oppgaver[0].dokumenttype).isEqualTo(type)
-        assertThat(oppgaver[0].tilleggsinformasjon).isEqualTo(tillegg)
-        assertThat(oppgaver[0].innsendelsesfrist).isEqualTo(frist.toString())
+        assertThat(responseList).isNotNull
+        assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
+        assertThat(responseList[0].oppgaveElementer).hasSize(1)
+        assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
+        assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg)
+        assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue()
     }
 
     @Test
@@ -82,14 +86,17 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.oppgaver.add(Oppgave(type, null, frist, tidspunktForKrav, true))
 
+        every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-        val oppgaver = service.hentOppgaver("123", model, token)
+        val responseList = service.hentOppgaver("123", token)
 
-        assertThat(oppgaver).isNotNull
-        assertThat(oppgaver[0].dokumenttype).isEqualTo(type)
-        assertThat(oppgaver[0].tilleggsinformasjon).isNull()
-        assertThat(oppgaver[0].innsendelsesfrist).isEqualTo(frist.toString())
+        assertThat(responseList).isNotNull
+        assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
+        assertThat(responseList[0].oppgaveElementer).hasSize(1)
+        assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
+        assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isNull()
+        assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue()
     }
 
     @Test
@@ -101,27 +108,32 @@ internal class OppgaveServiceTest {
                 Oppgave(type4, tillegg4, frist4, tidspunktForKrav, true),
                 Oppgave(type2, tillegg2, frist2, tidspunktForKrav, true)))
 
+        every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-        val oppgaver = service.hentOppgaver("123", model, token)
+        val responseList = service.hentOppgaver("123", token)
 
-        assertThat(oppgaver).isNotNull
-        assertThat(oppgaver.size == 4)
-        assertThat(oppgaver[0].dokumenttype).isEqualTo(type)
-        assertThat(oppgaver[0].tilleggsinformasjon).isEqualTo(tillegg)
-        assertThat(oppgaver[0].innsendelsesfrist).isEqualTo(frist.toString())
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 4)
+        assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
+        assertThat(responseList[0].oppgaveElementer).hasSize(1)
+        assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
+        assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg)
 
-        assertThat(oppgaver[1].dokumenttype).isEqualTo(type2)
-        assertThat(oppgaver[1].tilleggsinformasjon).isEqualTo(tillegg2)
-        assertThat(oppgaver[1].innsendelsesfrist).isEqualTo(frist2.toString())
+        assertThat(responseList[1].innsendelsesfrist).isEqualTo(frist2.toLocalDate())
+        assertThat(responseList[1].oppgaveElementer).hasSize(1)
+        assertThat(responseList[1].oppgaveElementer[0].dokumenttype).isEqualTo(type2)
+        assertThat(responseList[1].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg2)
 
-        assertThat(oppgaver[2].dokumenttype).isEqualTo(type3)
-        assertThat(oppgaver[2].tilleggsinformasjon).isEqualTo(tillegg3)
-        assertThat(oppgaver[2].innsendelsesfrist).isEqualTo(frist3.toString())
+        assertThat(responseList[2].innsendelsesfrist).isEqualTo(frist3.toLocalDate())
+        assertThat(responseList[2].oppgaveElementer).hasSize(1)
+        assertThat(responseList[2].oppgaveElementer[0].dokumenttype).isEqualTo(type3)
+        assertThat(responseList[2].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg3)
 
-        assertThat(oppgaver[3].dokumenttype).isEqualTo(type4)
-        assertThat(oppgaver[3].tilleggsinformasjon).isEqualTo(tillegg4)
-        assertThat(oppgaver[3].innsendelsesfrist).isEqualTo(frist4.toString())
+        assertThat(responseList[3].innsendelsesfrist).isEqualTo(frist4.toLocalDate())
+        assertThat(responseList[3].oppgaveElementer).hasSize(1)
+        assertThat(responseList[3].oppgaveElementer[0].dokumenttype).isEqualTo(type4)
+        assertThat(responseList[3].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg4)
     }
 
     @Test
@@ -132,19 +144,21 @@ internal class OppgaveServiceTest {
                 Oppgave(type2, null, frist2, tidspunktForKrav, true),
                 Oppgave(type3, tillegg3, frist3, tidspunktForKrav, true)))
 
+        every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(type, tillegg, emptyList(), tidspunktEtterKrav),
                 InternalVedlegg(type2, null, emptyList(), tidspunktEtterKrav),
                 InternalVedlegg(type3, tillegg3, emptyList(), tidspunktFoerKrav),
                 InternalVedlegg(type3, null, emptyList(), tidspunktEtterKrav))
 
-        val oppgaver = service.hentOppgaver("123", model, token)
+        val responseList = service.hentOppgaver("123", token)
 
-        assertThat(oppgaver).isNotNull
-        assertThat(oppgaver.size == 1)
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
 
-        assertThat(oppgaver[0].dokumenttype).isEqualTo(type3)
-        assertThat(oppgaver[0].tilleggsinformasjon).isEqualTo(tillegg3)
-        assertThat(oppgaver[0].innsendelsesfrist).isEqualTo(frist3.toString())
+        assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist3.toLocalDate())
+        assertThat(responseList[0].oppgaveElementer).hasSize(1)
+        assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type3)
+        assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg3)
     }
 }

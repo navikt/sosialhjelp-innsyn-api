@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -13,6 +12,7 @@ data class SoknadsStatusResponse(
 data class SaksStatusResponse(
         val tittel: String,
         val status: SaksStatus?,
+        val skalViseVedtakInfoPanel: Boolean,
         val vedtaksfilUrlList: List<VedtaksfilUrl>?
 )
 
@@ -28,7 +28,12 @@ data class HendelseResponse(
 )
 
 data class OppgaveResponse(
-        val innsendelsesfrist: String?,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val innsendelsesfrist: LocalDate?,
+        val oppgaveElementer: List<OppgaveElement>
+)
+
+data class OppgaveElement(
         val dokumenttype: String,
         val tilleggsinformasjon: String?,
         val erFraInnsyn: Boolean
@@ -86,5 +91,9 @@ data class ForelopigSvarResponse(
 )
 
 data class KommuneResponse(
-        val kommuneStatus: KommuneStatus
+        val erInnsynDeaktivert: Boolean,
+        val erInnsynMidlertidigDeaktivert: Boolean,
+        val erInnsendingEttersendelseDeaktivert: Boolean,
+        val erInnsendingEttersendelseMidlertidigDeaktivert: Boolean
 )
+

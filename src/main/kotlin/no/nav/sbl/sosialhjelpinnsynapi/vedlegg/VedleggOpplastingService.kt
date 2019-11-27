@@ -4,14 +4,14 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.redis.CACHE_TIME_TO_LIVE_SECONDS
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
-import no.nav.sbl.sosialhjelpinnsynapi.utils.getSha512FromByteArray
-import no.nav.sbl.sosialhjelpinnsynapi.utils.isImage
-import no.nav.sbl.sosialhjelpinnsynapi.utils.isPdf
-import no.nav.sbl.sosialhjelpinnsynapi.utils.pdfIsSigned
+import no.nav.sbl.sosialhjelpinnsynapi.utils.*
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.stereotype.Component
@@ -32,7 +32,8 @@ const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 @Component
 class VedleggOpplastingService(private val fiksClient: FiksClient,
                                private val krypteringService: KrypteringService,
-                               private val virusScanner: VirusScanner) {
+                               private val virusScanner: VirusScanner,
+                               private val redisStore: RedisStore) {
 
     companion object {
         val log by logger()
@@ -43,8 +44,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     fun sendVedleggTilFiks(fiksDigisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<VedleggOpplastingResponse> {
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
-        if (!filenamesAreUniqueAndMatchInMetadataAndFiles(metadata, files)) {
-            throw OpplastingFilnavnMismatchException("Filnavn er ikke unike eller det er mismatch mellom filer og metadata", null)
+        if (!filenamesMatchInMetadataAndFiles(metadata, files)) {
+            throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata", null)
         }
 
         // Scan for virus
@@ -71,6 +72,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             return vedleggOpplastingResponseList
         }
 
+        var filIndex = 0
         // Lag metadata i form av vedleggspesifikasjon
         val vedleggSpesifikasjon = JsonVedleggSpesifikasjon()
                 .withVedlegg(metadata.map {
@@ -81,9 +83,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                             .withFiler(it.filer.map { fil ->
                                 JsonFiler()
                                         .withFilnavn(fil.filnavn)
-                                        .withSha512(getSha512FromByteArray(files.firstOrNull { multipartFile ->
-                                            multipartFile.originalFilename == fil.filnavn
-                                        }?.bytes ?: throw IllegalStateException("Fil mangler metadata")))
+                                        .withSha512(getSha512FromByteArray(files[filIndex++].bytes ?: throw IllegalStateException("Fil mangler metadata")))
                             })
                 })
 
@@ -91,17 +91,19 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, fiksDigisosId, token)
 
         waitForFutures(krypteringFutureList)
+
+        // opppdater cache med digisossak
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, false)
+        cachePut(fiksDigisosId, digisosSak)
+
         return vedleggOpplastingResponseList
     }
 
-    private fun filenamesAreUniqueAndMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
+    private fun filenamesMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
-        val filnavnMetadataSet = filnavnMetadata.toHashSet()
-        val filnavnMultipart = files.map { it.originalFilename }
-        val filnavnMultipartSet = filnavnMultipart.toHashSet()
-        return filnavnMetadata.size == filnavnMetadataSet.size &&
-                filnavnMultipart.size == filnavnMultipartSet.size &&
-                filnavnMetadataSet == filnavnMultipartSet
+        val filnavnMultipart: List<String> = files.map { it.originalFilename }.filterNotNull()
+        return filnavnMetadata.size == filnavnMultipart.size &&
+                filnavnMetadata.filterIndexed{ idx, it -> it == filnavnMultipart[idx] }.size == filnavnMetadata.size
     }
 
     fun validateFil(file: MultipartFile): String {
@@ -153,6 +155,16 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             throw IllegalStateException(e)
         }
 
+    }
+
+    private fun cachePut(key: String, value: DigisosSak) {
+        val stringValue = objectMapper.writeValueAsString(value)
+        val set = redisStore.set(key, stringValue, CACHE_TIME_TO_LIVE_SECONDS)
+        if (set == null) {
+            log.warn("Cache put feilet eller fikk timeout")
+        } else if (set == "OK") {
+            log.info("Cache put OK $key")
+        }
     }
 }
 

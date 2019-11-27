@@ -32,7 +32,7 @@ internal class VedleggServiceTest {
     internal fun setUp() {
         clearAllMocks()
 
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV } returns originalSoknad
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns ettersendelser
 
@@ -105,7 +105,7 @@ internal class VedleggServiceTest {
         assertThat(list[2].dokumentInfoList[1].filnavn).isEqualTo(ettersendelse_filnavn_4)
 
         assertThat(list[3].type).isEqualTo(dokumenttype_3)
-        assertThat(list[3].dokumentInfoList).hasSize(2)
+        assertThat(list[3].dokumentInfoList).hasSize(1)
         assertThat(list[3].dokumentInfoList[0].filnavn).isEqualTo(ettersendelse_filnavn_4)
     }
 
@@ -154,7 +154,7 @@ internal class VedleggServiceTest {
     }
 
     @Test
-    fun `like filnavn i DokumentInfoList vil resultere i at de returneres for hver JsonFil med samme filnavn`() {
+    fun `like filnavn i DokumentInfoList vil resultere i at de returneres for hver JsonFil med riktig filnavn`() {
         every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_5, any(), any()) } returns
@@ -189,17 +189,17 @@ internal class VedleggServiceTest {
 
         assertThat(list).hasSize(2)
 
-        assertThat(list[0].dokumentInfoList).hasSize(3)
+        assertThat(list[0].dokumentInfoList).hasSize(2)
+        assertThat(list[0].dokumentInfoList[0].filnavn).isEqualTo(ettersendelse_filnavn_1)
+        assertThat(list[0].dokumentInfoList[0].dokumentlagerDokumentId).isEqualTo(dokumentlagerId_1)
         assertThat(list[0].dokumentInfoList[1].filnavn).isEqualTo(ettersendelse_filnavn_2)
         assertThat(list[0].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(dokumentlagerId_2)
-        assertThat(list[0].dokumentInfoList[2].filnavn).isEqualTo(ettersendelse_filnavn_2)
-        assertThat(list[0].dokumentInfoList[2].dokumentlagerDokumentId).isEqualTo(dokumentlagerId_3)
 
-        assertThat(list[1].dokumentInfoList).hasSize(3)
+        assertThat(list[1].dokumentInfoList).hasSize(2)
         assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(ettersendelse_filnavn_2)
-        assertThat(list[1].dokumentInfoList[0].dokumentlagerDokumentId).isEqualTo(dokumentlagerId_2)
-        assertThat(list[1].dokumentInfoList[1].filnavn).isEqualTo(ettersendelse_filnavn_2)
-        assertThat(list[1].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(dokumentlagerId_3)
+        assertThat(list[1].dokumentInfoList[0].dokumentlagerDokumentId).isEqualTo(dokumentlagerId_3)
+        assertThat(list[1].dokumentInfoList[1].filnavn).isEqualTo(ettersendelse_filnavn_4)
+        assertThat(list[1].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(dokumentlagerId_4)
     }
 }
 

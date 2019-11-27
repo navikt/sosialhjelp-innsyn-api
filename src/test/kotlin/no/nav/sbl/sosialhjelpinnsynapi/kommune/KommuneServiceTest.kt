@@ -29,10 +29,11 @@ internal class KommuneServiceTest {
     internal fun setUp() {
         clearMocks(fiksClient, innsynService, mockDigisosSak, mockJsonSoknad)
 
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV?.metadata }  returns "some id"
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
         every { mockJsonSoknad.mottaker.kommunenummer } returns kommuneNr
+        every { mockDigisosSak.kommunenummer } returns kommuneNr
     }
 
     @Test
@@ -87,12 +88,15 @@ internal class KommuneServiceTest {
     }
 
     @Test
-    fun `Ingen originalSoknad - skal kaste feil`() {
+    fun `Ingen originalSoknad - skal ikke kaste feil`() {
         every { mockDigisosSak.originalSoknadNAV?.metadata }  returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
+        every { mockDigisosSak.kommunenummer } returns kommuneNr
+        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, true, false, false, null)
 
-        assertThatExceptionOfType(RuntimeException::class.java).isThrownBy { service.hentKommuneStatus("123", "token") }
-                .withMessage("KommuneStatus kan ikke hentes uten kommunenummer")
+        val status = service.hentKommuneStatus("123", "token")
+
+        assertThat(status).isEqualTo(SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA)
     }
 
     @Test

@@ -29,8 +29,7 @@ class UtbetalingerService(private val eventService: EventService,
 
         val alleUtbetalinger: List<ManedUtbetaling> = digisosSaker
                 .flatMap { digisosSak ->
-                    val id = digisosSak.fiksDigisosId
-                    val model = eventService.createModel(digisosSak.fiksDigisosId, token)
+                    val model = eventService.createModel(digisosSak, token)
                     model.saker
                             .flatMap { sak ->
                                 sak.utbetalinger
@@ -41,7 +40,7 @@ class UtbetalingerService(private val eventService: EventService,
                                                     belop = utbetaling.belop.toDouble(),
                                                     utbetalingsdato = utbetaling.utbetalingsDato,
                                                     status = utbetaling.status.name,
-                                                    fiksDigisosId = id
+                                                    fiksDigisosId = digisosSak.fiksDigisosId
                                             )
                                         }
                             }

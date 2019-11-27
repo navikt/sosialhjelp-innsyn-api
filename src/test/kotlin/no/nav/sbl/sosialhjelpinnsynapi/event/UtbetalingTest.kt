@@ -70,7 +70,7 @@ internal class UtbetalingTest {
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
@@ -108,7 +108,7 @@ internal class UtbetalingTest {
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
-        val model = service.createModel("123", "token")
+        val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)

@@ -6,10 +6,13 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.commons.io.IOUtils
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
@@ -20,18 +23,19 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import kotlin.test.assertFailsWith
+import org.apache.pdfbox.pdmodel.PDPage
 
 internal class VedleggOpplastingServiceTest {
 
     private val fiksClient: FiksClient = mockk()
     private val krypteringService: KrypteringService = mockk()
     private val virusScanner: VirusScanner = mockk()
-    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner)
+    private val redisStore: RedisStore = mockk()
+    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisStore)
 
-    private val mockDigisosSak: DigisosSak = mockk()
+    private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
 
     private val id = "123"
-    private val kommunenummer = "1337"
 
     private val type0 = "brukskonto"
     private val tilleggsinfo0 = "kontoutskrift"
@@ -48,11 +52,12 @@ internal class VedleggOpplastingServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(fiksClient, mockDigisosSak)
+        clearAllMocks()
 
-        every { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
-        every { mockDigisosSak.kommunenummer } returns kommunenummer
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
+        every { mockDigisosSak.fiksDigisosId } returns id
         every { virusScanner.scan(any(), any()) } just runs
+        every { redisStore.set(any(), any(), any()) } returns "OK"
     }
 
     @Test
@@ -60,10 +65,17 @@ internal class VedleggOpplastingServiceTest {
         every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
-        val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))))
+        val largePngFile = createImageByteArray("png", 2)
+        val filnavn3 = "test3.png"
+
+        val metadata = mutableListOf(
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1))),
+                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn3))))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile))
+                MockMultipartFile("files", filnavn1, filtype0, pngFile),
+                MockMultipartFile("files", filnavn1, filtype0, largePngFile),
+                MockMultipartFile("files", filnavn3, filtype0, pngFile))
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
@@ -73,24 +85,42 @@ internal class VedleggOpplastingServiceTest {
         val filerForOpplasting = filerForOpplastingSlot.captured
         val vedleggSpesifikasjon = vedleggSpesifikasjonSlot.captured
 
-        assertThat(filerForOpplasting).hasSize(2)
+        assertThat(filerForOpplasting).hasSize(4)
         assertThat(filerForOpplasting[0].filnavn == filnavn0)
         assertThat(filerForOpplasting[0].mimetype == filtype0)
         assertThat(filerForOpplasting[1].filnavn == filnavn1)
         assertThat(filerForOpplasting[1].mimetype == filtype1)
+        assertThat(filerForOpplasting[2].filnavn == filnavn1)
+        assertThat(filerForOpplasting[2].mimetype == filtype1)
+        assertThat(filerForOpplasting[3].filnavn == filnavn1)
+        assertThat(filerForOpplasting[3].mimetype == filtype1)
 
-        assertThat(vedleggSpesifikasjon.vedlegg.size == 1)
+        assertThat(vedleggSpesifikasjon.vedlegg.size).isEqualTo(2)
         assertThat(vedleggSpesifikasjon.vedlegg[0].type == type0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].tilleggsinfo == tilleggsinfo0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].status == "LastetOpp")
-        assertThat(vedleggSpesifikasjon.vedlegg[0].filer.size == 2)
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer.size == 3)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[0].filnavn == filnavn0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].filnavn == filnavn1)
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer[2].filnavn == filnavn1)
+
+        assertThat(vedleggSpesifikasjon.vedlegg[1].type).isEqualTo(type1)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].tilleggsinfo).isEqualTo(tilleggsinfo1)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].status).isEqualTo("LastetOpp")
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer.size).isEqualTo(1)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn).isEqualTo(filnavn3)
+
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isNotEqualTo(vedleggSpesifikasjon.vedlegg[0].filer[2].sha512)
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isEqualTo(vedleggSpesifikasjon.vedlegg[1].filer[0].sha512)
 
         assertThat(vedleggOpplastingResponseList[0].filnavn == filnavn0)
         assertThat(vedleggOpplastingResponseList[0].status == "OK")
         assertThat(vedleggOpplastingResponseList[1].filnavn == filnavn1)
         assertThat(vedleggOpplastingResponseList[1].status == "OK")
+        assertThat(vedleggOpplastingResponseList[2].filnavn == filnavn1)
+        assertThat(vedleggOpplastingResponseList[2].status == "OK")
+        assertThat(vedleggOpplastingResponseList[3].filnavn == filnavn3)
+        assertThat(vedleggOpplastingResponseList[2].status == "OK")
     }
 
     @Test
@@ -132,17 +162,32 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
-    fun `sendVedleggTilFiks skal kaste exception hvis filnavn ikke er unike`() {
-        val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2), OpplastetFil(filnavn2))))
-        val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile),
-                MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)),
-                MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
+    fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er signert`() {
+        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
-        assertFailsWith<OpplastingFilnavnMismatchException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
+        val filnavn1 = "test1.pdf"
+        val filnavn2 = "test2.pdf"
+        val filtype = "application/pdf"
+        val pdfFile = createPdfByteArray()
+        val signedPdfFile = createPdfByteArray(true)
+
+        val metadata = mutableListOf(
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(
+                        OpplastetFil(filnavn1),
+                        OpplastetFil(filnavn2))))
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", filnavn1, filtype, pdfFile),
+                MockMultipartFile("files", filnavn2, filtype, signedPdfFile))
+
+        val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
+
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+
+        assertThat(vedleggOpplastingResponseList[0].filnavn).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].status).isEqualTo("OK")
+        assertThat(vedleggOpplastingResponseList[1].filnavn).isEqualTo(filnavn2)
+        assertThat(vedleggOpplastingResponseList[1].status).isEqualTo(MESSAGE_PDF_IS_SIGNED)
     }
 
     @Test
@@ -158,9 +203,21 @@ internal class VedleggOpplastingServiceTest {
                 .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
-    private fun createImageByteArray(type: String): ByteArray {
+    private fun createImageByteArray(type: String, size: Int = 1): ByteArray {
         val outputStream = ByteArrayOutputStream()
-        ImageIO.write(BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB), type, outputStream)
+        ImageIO.write(BufferedImage(size, size, BufferedImage.TYPE_INT_RGB), type, outputStream)
+        return outputStream.toByteArray()
+    }
+
+    private fun createPdfByteArray(signed: Boolean = false): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        val document = PDDocument()
+        document.addPage(PDPage())
+        if (signed) {
+            document.addSignature(PDSignature())
+        }
+        document.save(outputStream)
+        document.close()
         return outputStream.toByteArray()
     }
 }

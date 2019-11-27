@@ -19,7 +19,6 @@ class InnsynOrginalSoknadService(
     fun hentOrginalSoknad(fiksDigisosId: String, token: String): OrginalSoknadResponse {
 
         val digisosSak: DigisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-
         val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId;
         val orginalSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
 
@@ -27,10 +26,6 @@ class InnsynOrginalSoknadService(
         if (dokumentlagerDokumentId != null){
             soknadPdfUrl = hentDokumentlagerUrl(clientProperties, dokumentlagerDokumentId)
         }
-
-//        if (!dokumentlagerDokumentId.isNullOrBlank()){
-//            val hentDokument: Any = fiksClient.hentDokument(digisosId = fiksDigisosId, dokumentlagerId = dokumentlagerDokumentId, requestedClass = Byte.javaClass, token = token)
-//        }
 
         return OrginalSoknadResponse(orginalSoknad, soknadPdfUrl)
     }

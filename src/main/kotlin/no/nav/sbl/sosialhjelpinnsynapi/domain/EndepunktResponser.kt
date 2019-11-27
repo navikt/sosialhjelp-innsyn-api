@@ -103,4 +103,3 @@ data class OrginalSoknadResponse(
         val soknadJson: JsonSoknad?,
         val soknadPdfLink: String?
 )
-

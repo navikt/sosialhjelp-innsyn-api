@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.innsyn
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.springframework.stereotype.Component

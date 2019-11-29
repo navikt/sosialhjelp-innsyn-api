@@ -18,8 +18,8 @@ class InnsynOrginalSoknadService(
 
     fun hentOrginalSoknad(fiksDigisosId: String, token: String): OrginalSoknadResponse {
 
-        val digisosSak: DigisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId;
+        val digisosSak: DigisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
         val orginalSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
 
         var soknadPdfUrl: String? = null

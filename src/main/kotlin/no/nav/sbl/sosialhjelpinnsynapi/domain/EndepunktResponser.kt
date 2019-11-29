@@ -2,7 +2,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

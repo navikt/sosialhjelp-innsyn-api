@@ -16,10 +16,11 @@ class InnsynOrginalSoknadService(
         private val innsynService: InnsynService,
         private val clientProperties: ClientProperties
 ) {
-
     fun hentOrginalJsonSoknad(fiksDigisosId: String, token: String): OrginalJsonSoknadResponse? {
         val digisosSak: DigisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        val orginalJsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
+        val orginalJsonSoknad = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
+                ?: return null
+
         return OrginalJsonSoknadResponse(orginalJsonSoknad)
     }
 

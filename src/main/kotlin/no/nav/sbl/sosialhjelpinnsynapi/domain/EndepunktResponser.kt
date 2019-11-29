@@ -100,9 +100,9 @@ data class KommuneResponse(
 )
 
 data class OrginalJsonSoknadResponse(
-        val soknadJson: JsonSoknad?
+        val jsonSoknad: JsonSoknad
 )
 
 data class OrginalSoknadPdfLinkResponse(
-        val linkTilOrginalSoknadPdfResponse: String?
+        val orginalSoknadPdfLink: String
 )

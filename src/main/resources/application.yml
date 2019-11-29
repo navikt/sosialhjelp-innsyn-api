@@ -43,4 +43,4 @@ innsyn:
     virusscan:
       enabled: true
   cache:
-    redisMocked: false
+    redis_mocked: false

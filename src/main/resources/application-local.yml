@@ -4,7 +4,7 @@ innsyn:
     virusscan:
       enabled: false
   cache:
-    redisMocked: true
+    redis_mocked: true
 
 no.nav.security.jwt:
   issuer.selvbetjening:

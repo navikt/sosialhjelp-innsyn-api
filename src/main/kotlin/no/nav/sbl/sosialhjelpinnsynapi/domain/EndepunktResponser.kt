@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -98,7 +99,10 @@ data class KommuneResponse(
         val erInnsendingEttersendelseMidlertidigDeaktivert: Boolean
 )
 
-data class OrginalSoknadResponse(
-        val soknadJson: JsonSoknad?,
-        val soknadPdfLink: String?
+data class OrginalJsonSoknadResponse(
+        val soknadJson: JsonSoknad?
+)
+
+data class OrginalSoknadPdfLinkResponse(
+        val linkTilOrginalSoknadPdfResponse: String?
 )

@@ -3,7 +3,8 @@ package no.nav.sbl.sosialhjelpinnsynapi.innsynOrginalSoknad
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
@@ -16,17 +17,17 @@ class InnsynOrginalSoknadService(
         private val clientProperties: ClientProperties
 ) {
 
-    fun hentOrginalSoknad(fiksDigisosId: String, token: String): OrginalSoknadResponse {
-
+    fun hentOrginalJsonSoknad(fiksDigisosId: String, token: String): OrginalJsonSoknadResponse? {
         val digisosSak: DigisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
-        val orginalSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
+        val orginalJsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
+        return OrginalJsonSoknadResponse(orginalJsonSoknad)
+    }
 
-        var soknadPdfUrl: String? = null
-        if (dokumentlagerDokumentId != null){
-            soknadPdfUrl = hentDokumentlagerUrl(clientProperties, dokumentlagerDokumentId)
-        }
+    fun hentOrginalSoknadPdfLink(fiksDigisosId: String, token: String): OrginalSoknadPdfLinkResponse? {
+        val digisosSak: DigisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val dokumentlagerDokumentId = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
+                ?: return null
 
-        return OrginalSoknadResponse(orginalSoknad, soknadPdfUrl)
+        return OrginalSoknadPdfLinkResponse(hentDokumentlagerUrl(clientProperties, dokumentlagerDokumentId))
     }
 }

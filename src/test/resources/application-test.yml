@@ -26,3 +26,8 @@ no.nav.security.jwt:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
+
+spring:
+  redis:
+    host: localhost
+    port: 1212

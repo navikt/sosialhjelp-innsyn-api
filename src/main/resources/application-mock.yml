@@ -8,3 +8,8 @@ innsyn:
       enabled: false
   cache:
     redis_mocked: true
+
+spring:
+  redis:
+    host: localhost
+    port: 1212

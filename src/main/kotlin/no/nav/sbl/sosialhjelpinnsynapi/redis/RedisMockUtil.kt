@@ -5,7 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.logger
 
 object RedisMockUtil {
     private val log by logger()
-    private var mockedRedisServer = RedisServer.newRedisServer(6379)
+    private var mockedRedisServer = RedisServer.newRedisServer(1212)
 
     @JvmStatic
     fun startRedisMocked() {

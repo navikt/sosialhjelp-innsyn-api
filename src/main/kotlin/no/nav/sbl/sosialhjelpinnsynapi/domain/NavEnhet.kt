@@ -3,7 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.domain
 data class NavEnhet(
         val enhetId: Int,
         val navn: String,
-        val enhetNr: Int,
+        val enhetNr: String,
         val status: String,
         val antallRessurser: Int,
         val aktiveringsdato: String,

@@ -15,8 +15,8 @@ class NorgClientMock : NorgClient {
         return innsynMap.getOrElse(enhetsnr, {
             val default = NavEnhet(
                     enhetId = 100000367,
-                    navn = enhetsnr,
-                    enhetNr = 1630,
+                    navn = "NAV Longyearbyen",
+                    enhetNr = enhetsnr,
                     antallRessurser = 20,
                     status = "AKTIV",
                     aktiveringsdato = "1982-04-21",

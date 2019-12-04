@@ -19,8 +19,8 @@ class MockController(private val norgClient: NorgClientMock, private val fiksCli
     @PostMapping("/nyNavEnhet", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     fun oppdaterNavEnhetMock(@RequestBody nyeNavEnheter: List<NyNavEnhet>): ResponseEntity<String> {
         nyeNavEnheter.forEach {
-            val navEnhet = NavEnhet(0, it.name, it.id, "", 0, "", "")
-            norgClient.postNavEnhet(navEnhet.enhetNr.toString(), navEnhet)
+            val navEnhet = NavEnhet(0, it.name, it.id.toString(), "", 0, "", "")
+            norgClient.postNavEnhet(navEnhet.enhetNr, navEnhet)
         }
 
         return ResponseEntity.ok("")

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/v1/mock")
 class MockController(private val norgClient: NorgClientMock, private val fiksClientMock: FiksClientMock, private val innsynService: InnsynService) {
 
-    @PostMapping("/nyNavEnhet", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
+    @PostMapping("/nyNavEnhet", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
     fun oppdaterNavEnhetMock(@RequestBody nyeNavEnheter: List<NyNavEnhet>): ResponseEntity<String> {
         nyeNavEnheter.forEach {
             val navEnhet = NavEnhet(0, it.name, it.id.toString(), "", 0, "", "")
@@ -26,17 +26,17 @@ class MockController(private val norgClient: NorgClientMock, private val fiksCli
         return ResponseEntity.ok("")
     }
 
-    @GetMapping("/soknad", produces = [APPLICATION_JSON_VALUE])
+    @GetMapping("/soknad", produces = ["application/json;charset=UTF-8"])
     fun listSoknader(): ResponseEntity<String> {
         return ResponseEntity.ok(objectMapper.writeValueAsString(fiksClientMock.hentAlleDigisosSaker("token")))
     }
 
-    @GetMapping("/soknad/{id}", produces = [APPLICATION_JSON_VALUE])
+    @GetMapping("/soknad/{id}", produces = ["application/json;charset=UTF-8"])
     fun listSoknad(@PathVariable id: String): ResponseEntity<String> {
         return ResponseEntity.ok(objectMapper.writeValueAsString(fiksClientMock.hentAlleDigisosSaker("token").filter { it.fiksDigisosId == id }))
     }
 
-    @GetMapping("/dokument/{fiksdigisosId}/{id}", produces = [APPLICATION_JSON_VALUE])
+    @GetMapping("/dokument/{fiksdigisosId}/{id}", produces = ["application/json;charset=UTF-8"])
     fun listSoknads(@PathVariable fiksdigisosId: String, @PathVariable id: String): ResponseEntity<String> {
         return ResponseEntity.ok(objectMapper.writeValueAsString(innsynService.hentJsonDigisosSoker(fiksdigisosId, id, "token")))
     }

@@ -1,7 +1,7 @@
 spring:
   redis:
     host: ${REDIS_HOST:localhost}
-    port: 6379
+    port: 1212
 
 innsyn:
   vedlegg:
@@ -15,8 +15,3 @@ no.nav.security.jwt:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
-
-spring:
-  redis:
-    host: localhost
-    port: 1212

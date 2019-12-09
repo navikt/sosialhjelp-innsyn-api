@@ -1,7 +1,7 @@
 spring:
   redis:
     host: ${REDIS_HOST:localhost}
-    port: 6379
+    port: 1212
 
 server:
   servlet:
@@ -13,8 +13,3 @@ innsyn:
       enabled: false
   cache:
     redis_mocked: true
-
-spring:
-  redis:
-    host: localhost
-    port: 1212

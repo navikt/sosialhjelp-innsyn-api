@@ -35,5 +35,5 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     val sak = saker.first { it.referanse == hendelse.saksreferanse }
     val beskrivelse = "${sak.tittel ?: DEFAULT_TITTEL} er ferdig behandlet"
 
-    historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), vedtaksfilUrl))
+    historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), UrlResponse("Vis brevet", vedtaksfilUrl)))
 }

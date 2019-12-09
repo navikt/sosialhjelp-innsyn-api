@@ -3,10 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.hendelse
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
@@ -60,7 +57,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Skal returnere respons med 1 hendelse`() {
         val model = InternalDigisosSoker()
-        model.historikk.add(Hendelse(tittel_sendt, tidspunkt_sendt, url))
+        model.historikk.add(Hendelse(tittel_sendt, tidspunkt_sendt, UrlResponse("Vis brevet", url)))
 
         every { eventService.createModel(any(), any()) } returns model
 
@@ -78,9 +75,9 @@ internal class HendelseServiceTest {
     fun `Skal returnere respons med flere hendelser`() {
         val model = InternalDigisosSoker()
         model.historikk.addAll(listOf(
-                Hendelse(tittel_sendt, tidspunkt_sendt, url),
-                Hendelse(tittel_mottatt, tidspunkt_mottatt, url2),
-                Hendelse(tittel3, tidspunkt3, url3)))
+                Hendelse(tittel_sendt, tidspunkt_sendt, UrlResponse("Vis brevet", url)),
+                Hendelse(tittel_mottatt, tidspunkt_mottatt, UrlResponse("Vis brevet", url2)),
+                Hendelse(tittel3, tidspunkt3, UrlResponse("Vis brevet", url3))))
 
         every { eventService.createModel(any(), any()) } returns model
 

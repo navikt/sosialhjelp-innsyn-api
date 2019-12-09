@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import io.mockk.every
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
@@ -47,6 +48,8 @@ internal class EventServiceTest : BaseEventTest() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -60,6 +63,7 @@ internal class EventServiceTest : BaseEventTest() {
         every { mockDigisosSak.digisosSoker } returns null
         every { innsynService.hentJsonDigisosSoker(any(), null, any()) } returns null
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -82,6 +86,8 @@ internal class EventServiceTest : BaseEventTest() {
                                     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3)
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+            every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
             val model = service.createModel(mockDigisosSak, "token")
 
@@ -114,6 +120,8 @@ internal class EventServiceTest : BaseEventTest() {
                                     SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.withHendelsestidspunkt(tidspunkt_3)
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+            every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
             val model = service.createModel(mockDigisosSak, "token")
 
@@ -147,6 +155,8 @@ internal class EventServiceTest : BaseEventTest() {
                                     SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4)
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+            every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
             val model = service.createModel(mockDigisosSak, "token")
 
@@ -169,7 +179,7 @@ internal class EventServiceTest : BaseEventTest() {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
             assertThat(hendelse.tittel).contains("$tittel_1 er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -184,6 +194,8 @@ internal class EventServiceTest : BaseEventTest() {
                                     SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3)
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+            every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
             val model = service.createModel(mockDigisosSak, "token")
 
@@ -206,7 +218,7 @@ internal class EventServiceTest : BaseEventTest() {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -222,6 +234,8 @@ internal class EventServiceTest : BaseEventTest() {
                                     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_4)
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+            every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
             val model = service.createModel(mockDigisosSak, "token")
 
@@ -245,7 +259,7 @@ internal class EventServiceTest : BaseEventTest() {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -262,6 +276,8 @@ internal class EventServiceTest : BaseEventTest() {
                                     SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5)
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+            every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
             val model = service.createModel(mockDigisosSak, "token")
 
@@ -298,6 +314,8 @@ internal class EventServiceTest : BaseEventTest() {
                                     SAK1_VEDTAK_FATTET_UTEN_UTFALL.withHendelsestidspunkt(tidspunkt_4)
                             ))
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+            every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
             val model = service.createModel(mockDigisosSak, "token")
 
@@ -319,7 +337,7 @@ internal class EventServiceTest : BaseEventTest() {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
     }
 
@@ -335,6 +353,8 @@ internal class EventServiceTest : BaseEventTest() {
                                 FORELOPIGSVAR.withHendelsestidspunkt(tidspunkt_3)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any());} returns OrginalSoknadPdfLinkResponse("www.link.til/orginal/soknad")
+
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -346,6 +366,6 @@ internal class EventServiceTest : BaseEventTest() {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
         assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
-        assertThat(hendelse.url).contains("/forsendelse/$svarUtId/$svarUtNr")
+        assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
     }
 }

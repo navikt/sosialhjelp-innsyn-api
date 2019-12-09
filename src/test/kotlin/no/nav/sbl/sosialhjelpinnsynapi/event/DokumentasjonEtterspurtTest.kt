@@ -41,7 +41,7 @@ internal class DokumentasjonEtterspurtTest : BaseEventTest() {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
         assertThat(hendelse.tittel).contains("Du må sende dokumentasjon")
-        assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+        assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
     }
 
     @Test

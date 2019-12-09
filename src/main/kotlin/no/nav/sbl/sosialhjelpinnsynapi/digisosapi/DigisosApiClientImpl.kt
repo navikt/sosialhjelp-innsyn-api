@@ -65,7 +65,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
     // Brukes for å laste opp Pdf-er fra test-fagsystem i q-miljø
     override fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String> {
         val headers = HttpHeaders()
-        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
+        headers.accept = Collections.singletonList(MediaType.ON)
         val accessToken = runBlocking { idPortenService.requestToken() }
         headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
@@ -122,7 +122,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
         headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
-        headers.contentType = MediaType.APPLICATION_JSON
+        headers.contentType = MediaType.ON
         return headers
     }
 }

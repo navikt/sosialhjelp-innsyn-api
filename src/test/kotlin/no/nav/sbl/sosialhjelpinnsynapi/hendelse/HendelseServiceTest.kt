@@ -68,7 +68,7 @@ internal class HendelseServiceTest {
         assertThat(hendelser).hasSize(1)
         assertThat(hendelser[0].beskrivelse).isEqualTo(tittel_sendt)
         assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt_sendt.toString())
-        assertThat(hendelser[0].filUrl).isEqualTo(url)
+        assertThat(hendelser[0].filUrl?.link).isEqualTo(url)
     }
 
     @Test

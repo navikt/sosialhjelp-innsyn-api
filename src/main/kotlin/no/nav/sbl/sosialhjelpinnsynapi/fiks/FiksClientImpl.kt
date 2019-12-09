@@ -282,7 +282,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     private fun setIntegrasjonHeaders(token: String): HttpHeaders {
         val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.ON)
+        headers.accept = singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, token)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)

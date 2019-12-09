@@ -38,7 +38,7 @@ class FiksCheck(private val restTemplate: RestTemplate,
         try {
             val headers = HttpHeaders()
             val accessToken = runBlocking { idPortenService.requestToken() }
-            headers.accept = Collections.singletonList(MediaType.ON)
+            headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
             headers.set(AUTHORIZATION, "Bearer ${accessToken.token}")
             headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)

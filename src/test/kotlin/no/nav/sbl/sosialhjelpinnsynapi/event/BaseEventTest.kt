@@ -13,7 +13,10 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.innsynOrginalSoknad.InnsynOrginalSoknadService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.junit.jupiter.api.BeforeEach
@@ -25,9 +28,10 @@ abstract class BaseEventTest {
     protected val clientProperties: ClientProperties = mockk(relaxed = true)
     protected val innsynService: InnsynService = mockk()
     protected val vedleggService: VedleggService = mockk()
+    protected val innsynOrginalSoknadService: InnsynOrginalSoknadService = mockk()
     protected val norgClient: NorgClient = mockk()
 
-    protected val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+    protected val service = EventService(clientProperties, innsynService, vedleggService, norgClient, innsynOrginalSoknadService)
 
     protected val mockDigisosSak: DigisosSak = mockk()
     protected val mockJsonSoknad: JsonSoknad = mockk()
@@ -87,6 +91,7 @@ abstract class BaseEventTest {
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
+        every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any()) } returns OrginalSoknadPdfLinkResponse("link.til.vis/brevet")
 
         resetHendelser()
     }

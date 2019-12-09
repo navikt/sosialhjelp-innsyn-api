@@ -33,12 +33,15 @@ class EventService(private val clientProperties: ClientProperties,
         if (timestampSendt != null) {
             model.status = SoknadsStatus.SENDT
 
-            if (jsonSoknad != null && jsonSoknad.mottaker != null && orginalSoknadPdfLink != null) {
+            if (jsonSoknad != null && jsonSoknad.mottaker != null ) {
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
                 model.historikk.add(
-                        Hendelse("Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}",
+                        Hendelse(
+                                "Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}",
                                 unixToLocalDateTime(timestampSendt),
-                                UrlResponse("Vis søknaden", orginalSoknadPdfLink.orginalSoknadPdfLink)))
+                                orginalSoknadPdfLink?.orginalSoknadPdfLink?.let { UrlResponse("Vis søknaden", it) }
+                        ))
+
             }
         }
 

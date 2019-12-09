@@ -5,9 +5,12 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.FiksErrorResponse
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.web.client.HttpStatusCodeException
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -90,4 +93,8 @@ fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
 
 fun isRunningInProd(): Boolean {
     return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "default"
+}
+
+fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse {
+    return objectMapper.readValue(this.responseBodyAsString, FiksErrorResponse::class.java)
 }

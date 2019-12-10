@@ -107,13 +107,13 @@ data class OrginalSoknadPdfLinkResponse(
 )
 
 data class FiksErrorResponse(
-    val error: String,
+    val error: String?,
     val errorCode: Any?,
-    val errorId: String,
+    val errorId: String?,
     val errorJson: Any?,
     val message: String?,
     val originalPath: String?,
-    val path: String,
-    val status: Int,
-    val timestamp: Long
+    val path: String?,
+    val status: Int?,
+    val timestamp: Long?
 )

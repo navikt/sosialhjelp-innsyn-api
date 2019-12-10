@@ -174,15 +174,27 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
+        val get: String? = redisStore.get(kommunenummer)
+        if (get != null) {
+            try {
+                val obj = objectMapper.readValue(get, KommuneInfo::class.java)
+                log.info("Hentet kommuneInfo fra cache, kommunenummer=$kommunenummer")
+                return obj
+            } catch (e: IOException) {
+                log.warn("Fant key=$kommunenummer i cache, men value var ikke KommuneInfo")
+            }
+        }
         val virksomhetsToken = runBlocking { idPortenService.requestToken() }
-
         val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
 
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/nav/kommuner/{kommunenummer}"
             val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java, kommunenummer)
 
-            return response.body!!
+            val kommuneInfo = response.body!!
+            cachePut(kommunenummer, objectMapper.writeValueAsString(kommuneInfo))
+
+            return kommuneInfo
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Fiks - hentKommuneInfo feilet - ${e.statusCode} ${e.statusText}", e)

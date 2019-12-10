@@ -10,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
+import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_kommuneinfo_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsonsoknad_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
@@ -230,14 +231,14 @@ internal class FiksClientTest {
     }
 
     @Test
-    fun `GET KommuneInfo for kommunenummer`() {
+    fun `GET KommuneInfo for kommunenummer fra Fiks`() {
+        val kommunenummer = "1234"
         val mockKommuneResponse: ResponseEntity<KommuneInfo> = mockk()
-        val mockKommuneInfo: KommuneInfo = mockk()
+        val kommuneInfo = KommuneInfo(kommunenummer, true, true, false, false, null)
         every { mockKommuneResponse.statusCode.is2xxSuccessful } returns true
-        every { mockKommuneResponse.body } returns mockKommuneInfo
+        every { mockKommuneResponse.body } returns kommuneInfo
         coEvery { idPortenService.requestToken().token } returns "token"
 
-        val kommunenummer = "1234"
         every {
             restTemplate.exchange(
                     any(),
@@ -247,6 +248,16 @@ internal class FiksClientTest {
                     kommunenummer)
         } returns mockKommuneResponse
 
+        val result = fiksClient.hentKommuneInfo(kommunenummer)
+
+        assertThat(result).isNotNull
+    }
+
+    @Test
+    fun `GET KommuneInfo for kommunenummer fra cache`() {
+        every { redisStore.get(any()) } returns ok_kommuneinfo_response
+
+        val kommunenummer = "1234"
         val result = fiksClient.hentKommuneInfo(kommunenummer)
 
         assertThat(result).isNotNull

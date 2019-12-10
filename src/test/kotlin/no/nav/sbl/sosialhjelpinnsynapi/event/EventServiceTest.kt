@@ -422,5 +422,6 @@ internal class EventServiceTest {
         val hendelse = model.historikk[0]
         assertThat(hendelse).isNotNull
         assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til The Office")
+        assertThat(hendelse.url).isNull()
     }
 }

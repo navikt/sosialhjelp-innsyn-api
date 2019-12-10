@@ -32,7 +32,10 @@ spec:
         mountPath: /var/run/secrets/nais.io/vault
       - kvPath: {{virksomhetssertifikat_vault_path}}
         mountPath: /var/run/secrets/nais.io/virksomhetssertifikat
-  ingresses: {{{ingresses}}}
+  ingresses:
+    {{#each ingress}}
+       - "{{this}}"
+    {{/each}}
   resources:
     limits:
       cpu: 500m
@@ -40,28 +43,11 @@ spec:
     requests:
       cpu: 200m
       memory: 256Mi
+
   env:
     - name: REDIS_HOST
       value: sosialhjelp-innsyn-api-redis.default.svc.nais.local
-    - name: FIKS_DIGISOS_ENDPOINT_URL
-      value: {{fiks_digisos_endpoint_url}}
-    - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
-      value: {{fiks_dokumentlager_endpoint_url}}
-    - name: FIKS_SVAR_UT_ENDPOINT_URL
-      value: {{fiks_svar_ut_endpoint_url}}
-    - name: NORG_ENDPOINT_URL
-      value: {{norg_endpoint_url}}
-    - name: ID_PORTEN_TOKEN_URL
-      value: {{id_porten_token_url}}
-    - name: ID_PORTEN_CONFIG_URL
-      value: {{id_porten_config_url}}
-    - name: ID_PORTEN_CLIENT_ID
-      value: {{id_porten_client_id}}
-    - name: ID_PORTEN_SCOPE
-      value: {{id_porten_scope}}
-    - name: AZUREAD_DISCOVERYURL
-      value: {{azuread_discoveryurl}}
-    - name: AZUREAD_CLIENTID
-      value: {{azuread_clientid}}
-    - name: CACHE_TIME_TO_LIVE_SECONDS
-      value: {{cache_time_to_live_seconds}}
+  {{#each env}}
+    - name: {{@key}}
+      value: "{{this}}"
+  {{/each}}

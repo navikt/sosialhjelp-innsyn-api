@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import io.mockk.every
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
@@ -347,5 +348,39 @@ internal class EventServiceTest : BaseEventTest() {
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
         assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
         assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
+    }
+
+    @Test
+    fun `At soknad sendt hendelse blir lagt til og at linkTekst er Vis soknaden`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns "asdf"
+
+        val model = service.createModel(mockDigisosSak, "token")
+        assertThat(model).isNotNull
+        val hendelse: Hendelse = model.historikk[0]
+        assertThat(hendelse).isNotNull
+        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til The Office")
+        assertThat(hendelse.url?.linkTekst).isEqualTo("Vis søknaden")
+    }
+
+    @Test
+    fun `At soknad sendt hendelse blir lagt til selv om soknad pdf ikke eksisterer`() {
+
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
+
+        val model = service.createModel(mockDigisosSak, "token")
+        assertThat(model).isNotNull
+        val hendelse = model.historikk[0]
+        assertThat(hendelse).isNotNull
+        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til The Office")
     }
 }

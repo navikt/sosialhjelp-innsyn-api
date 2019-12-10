@@ -33,9 +33,9 @@ spec:
       - kvPath: {{virksomhetssertifikat_vault_path}}
         mountPath: /var/run/secrets/nais.io/virksomhetssertifikat
   ingresses:
-    {{#each ingress}}
+  {{#each ingress}}
     - "{{this}}"
-    {{/each}}
+  {{/each}}
   resources:
     limits:
       cpu: 500m

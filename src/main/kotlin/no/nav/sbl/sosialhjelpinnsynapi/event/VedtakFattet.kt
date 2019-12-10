@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
+import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_BREVET
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
@@ -35,5 +36,5 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     val sak = saker.first { it.referanse == hendelse.saksreferanse }
     val beskrivelse = "${sak.tittel ?: DEFAULT_TITTEL} er ferdig behandlet"
 
-    historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), UrlResponse("Vis brevet", vedtaksfilUrl)))
+    historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), UrlResponse(VIS_BREVET, vedtaksfilUrl)))
 }

@@ -4,6 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_SOKNADEN
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
@@ -36,7 +37,7 @@ class EventService(private val clientProperties: ClientProperties,
                         Hendelse(
                                 "Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}",
                                 unixToLocalDateTime(timestampSendt),
-                                dokumentlagerDokumentId?.let { UrlResponse("Vis søknaden", hentDokumentlagerUrl(clientProperties, it)) }
+                                dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
                         ))
             }
         }

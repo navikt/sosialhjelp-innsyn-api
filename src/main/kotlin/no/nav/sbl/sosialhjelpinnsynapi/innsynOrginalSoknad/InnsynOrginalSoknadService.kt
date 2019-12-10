@@ -1,10 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.innsynOrginalSoknad
 
-import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService

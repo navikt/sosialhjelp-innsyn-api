@@ -34,7 +34,7 @@ spec:
         mountPath: /var/run/secrets/nais.io/virksomhetssertifikat
   ingresses:
     {{#each ingress}}
-       - "{{this}}"
+    - "{{this}}"
     {{/each}}
   resources:
     limits:

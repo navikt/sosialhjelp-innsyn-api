@@ -46,6 +46,7 @@ internal class EventServiceTest {
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null

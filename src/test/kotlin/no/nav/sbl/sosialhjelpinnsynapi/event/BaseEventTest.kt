@@ -86,6 +86,7 @@ abstract class BaseEventTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns "1234567890-1234567890"
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
 
         resetHendelser()

@@ -25,6 +25,7 @@ innsyn:
       enabled: false
   cache:
     redis_mocked: true
+    time_to_live: 2
 
 no.nav.security.jwt:
   issuer.selvbetjening:

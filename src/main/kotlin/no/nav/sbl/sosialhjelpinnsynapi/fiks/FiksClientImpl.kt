@@ -13,7 +13,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.sbl.sosialhjelpinnsynapi.redis.CACHE_TIME_TO_LIVE_SECONDS
+import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
@@ -38,7 +38,8 @@ import java.util.Collections.singletonList
 class FiksClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate,
                      private val idPortenService: IdPortenService,
-                     private val redisStore: RedisStore) : FiksClient {
+                     private val redisStore: RedisStore,
+                     private val cacheProperties: CacheProperties) : FiksClient {
 
     companion object {
         val log by logger()
@@ -150,7 +151,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
      * lagrer digisosSak i cache i 2s
      */
     private fun cachePut(key: String, value: String) {
-        val set = redisStore.set(key, value, CACHE_TIME_TO_LIVE_SECONDS)
+        val set = redisStore.set(key, value, cacheProperties.timeToLive)
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {

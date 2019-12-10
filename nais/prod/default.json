@@ -15,5 +15,6 @@
 	"id_porten_client_id": "bd520e59-6e01-4669-a7c8-f68fa2cac362",
 	"id_porten_scope": "ks:fiks",
 	"azuread_discoveryurl": "https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
-	"azuread_clientid": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25"
+	"azuread_clientid": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
+	"cache_time_to_live": 180
 }

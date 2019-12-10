@@ -3,17 +3,19 @@
   "ingresses": [
     "https://sosialhjelp-innsyn-api.nais.oera-q.local/sosialhjelp/innsyn-api"
   ],
-  "fiks_digisos_endpoint_url": "https://api.fiks.test.ks.no",
-  "fiks_dokumentlager_endpoint_url": "https://minside.fiks.test.ks.no",
-  "fiks_svar_ut_endpoint_url": "https://test.svarut.ks.no",
-  "norg_endpoint_url": "https://api-gw-q0.oera.no/norg2/api/v1",
   "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/preprod/shared",
   "application_vault_path": "/kv/preprod/sbs/sosialhjelp-innsyn-api/default",
-  "id_porten_token_url": "https://oidc-ver2.difi.no/idporten-oidc-provider/token",
-  "id_porten_config_url": "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
-  "id_porten_client_id": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
-  "id_porten_scope": "ks:fiks",
-  "azuread_discoveryurl": "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1",
-  "azuread_clientid": "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5",
-  "cache_time_to_live_seconds": "10"
+  "env": {
+    "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
+    "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",
+    "FIKS_SVAR_UT_ENDPOINT_URL": "https://test.svarut.ks.no",
+    "NORG_ENDPOINT_URL": "https://api-gw-q0.oera.no/norg2/api/v1",
+    "ID_PORTEN_TOKEN_URL": "https://oidc-ver2.difi.no/idporten-oidc-provider/token",
+    "ID_PORTEN_CONFIG_URL": "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
+    "ID_PORTEN_CLIENT_ID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
+    "ID_PORTEN_SCOPE": "ks:fiks",
+    "AZUREAD_DISCOVERYURL": "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1",
+    "AZUREAD_CLIENTID": "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5",
+    "CACHE_TIME_TO_LIVE_SECONDS": "10"
+  }
 }

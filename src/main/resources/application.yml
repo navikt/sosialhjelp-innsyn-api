@@ -11,7 +11,7 @@ spring:
   application:
     name: "sosialhjelp-innsyn-api"
   redis:
-    host: ${REDIS_HOST:localhost}
+    host: ${REDIS_HOST}
     port: 6379
 
 server:

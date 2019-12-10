@@ -1,3 +1,8 @@
+spring:
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: 1212
+
 server:
   servlet:
     context-path: '/sosialhjelp/innsyn-api'
@@ -8,8 +13,3 @@ innsyn:
       enabled: false
   cache:
     redis_mocked: true
-
-spring:
-  redis:
-    host: localhost
-    port: 1212

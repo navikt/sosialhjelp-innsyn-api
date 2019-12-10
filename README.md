@@ -35,7 +35,7 @@ Dette gjøres manuelt med kubectl både i preprod og prod. Se [nais/doc](https:/
 1. `kubectl config use-context dev-sbs`
 2. `kubectl apply -f redis-config.yml`
 
-For å ta i bruk Redis lokalt anbefaler vi bruk av Docker.
+For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsvare med portnummer i properties)
 1. `docker pull redis` (laster ned image fra docker hub)
 2. `docker run --name <myredis> -d -p 6379:6379 redis` 
 (kjører opp redis (`--name <myredis>` må samsvare med referansen i redis-config.yaml))

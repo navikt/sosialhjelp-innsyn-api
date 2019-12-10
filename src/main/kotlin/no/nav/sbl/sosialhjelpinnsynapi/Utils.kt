@@ -11,6 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.client.HttpStatusCodeException
+import java.io.IOException
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -29,7 +30,7 @@ inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object :
 
 fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
     return when (filreferanse) {
-        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl  + "/dokumentlager/nedlasting/${filreferanse.id}?inline=true"
+        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}?inline=true"
         is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
         else -> throw RuntimeException("Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
     }
@@ -95,6 +96,10 @@ fun isRunningInProd(): Boolean {
     return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "default"
 }
 
-fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse {
-    return objectMapper.readValue(this.responseBodyAsString, FiksErrorResponse::class.java)
+fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
+    return try {
+        objectMapper.readValue(this.responseBodyAsString, FiksErrorResponse::class.java)
+    } catch (e: IOException) {
+        null
+    }
 }

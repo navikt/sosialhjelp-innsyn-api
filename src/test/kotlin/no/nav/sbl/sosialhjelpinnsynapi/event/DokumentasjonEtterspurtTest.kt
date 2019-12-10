@@ -45,6 +45,7 @@ internal class DokumentasjonEtterspurtTest {
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
@@ -83,7 +84,7 @@ internal class DokumentasjonEtterspurtTest {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
         assertThat(hendelse.tittel).contains("Du må sende dokumentasjon")
-        assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+        assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
     }
 
     @Test

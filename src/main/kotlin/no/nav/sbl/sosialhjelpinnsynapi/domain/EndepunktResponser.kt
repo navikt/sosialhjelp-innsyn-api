@@ -26,7 +26,7 @@ data class VedtaksfilUrl(
 data class HendelseResponse(
         val tidspunkt: String,
         val beskrivelse: String,
-        val filUrl: String?
+        val filUrl: UrlResponse?
 )
 
 data class OppgaveResponse(

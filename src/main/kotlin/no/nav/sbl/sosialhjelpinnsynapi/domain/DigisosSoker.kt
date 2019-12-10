@@ -85,10 +85,15 @@ data class Hendelse(
         // type som felt?
         val tittel: String,
         val tidspunkt: LocalDateTime,
-        val url: String?
+        val url: UrlResponse?
 ) {
     constructor(tittel: String, tidspunkt: LocalDateTime) : this(tittel, tidspunkt, null)
 }
+
+data class UrlResponse(
+        val linkTekst: String,
+        val link: String
+)
 
 enum class SoknadsStatus {
     SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE

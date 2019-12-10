@@ -31,6 +31,8 @@ internal class DefaultMockResponseTest {
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
         every { mockDigisosSak.ettersendtInfoNAV } returns null
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
+
 
         assertThatCode { eventService.createModel(mockDigisosSak, "token") }.doesNotThrowAnyException()
     }

@@ -4,10 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.innsynOrginalSoknad.InnsynOrginalSoknadService
 import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.digisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
@@ -20,9 +18,8 @@ internal class DefaultMockResponseTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val norgClient: NorgClient = mockk(relaxed = true)
     private val vedleggService: VedleggService = mockk()
-    private val innsynOrginalSoknadService: InnsynOrginalSoknadService = mockk()
 
-    private val eventService = EventService(clientProperties, innsynService, vedleggService, norgClient, innsynOrginalSoknadService)
+    private val eventService = EventService(clientProperties, innsynService, vedleggService, norgClient)
 
     @Test
     fun `validerer digisosSoker`() {
@@ -34,7 +31,6 @@ internal class DefaultMockResponseTest {
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        every { innsynOrginalSoknadService.hentOrginalSoknadPdfLink(any(), any()) } returns OrginalSoknadPdfLinkResponse("link.til.vis/brevet")
 
         assertThatCode { eventService.createModel(mockDigisosSak, "token") }.doesNotThrowAnyException()
     }

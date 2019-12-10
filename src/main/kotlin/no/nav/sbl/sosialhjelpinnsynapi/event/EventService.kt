@@ -8,7 +8,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.innsynOrginalSoknad.InnsynOrginalSoknadService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
@@ -18,30 +17,27 @@ import org.springframework.stereotype.Component
 class EventService(private val clientProperties: ClientProperties,
                    private val innsynService: InnsynService,
                    private val vedleggService: VedleggService,
-                   private val norgClient: NorgClient,
-                   private val innsynOrginalSoknadService: InnsynOrginalSoknadService
-) {
+                   private val norgClient: NorgClient) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak.fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
         val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
-        val orginalSoknadPdfLink: OrginalSoknadPdfLinkResponse? = innsynOrginalSoknadService.hentOrginalSoknadPdfLink(digisosSak.fiksDigisosId, token);
+        val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 
         val model = InternalDigisosSoker()
 
         if (timestampSendt != null) {
             model.status = SoknadsStatus.SENDT
 
-            if (jsonSoknad != null && jsonSoknad.mottaker != null ) {
+            if (jsonSoknad != null && jsonSoknad.mottaker != null) {
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
                 model.historikk.add(
                         Hendelse(
                                 "Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}",
                                 unixToLocalDateTime(timestampSendt),
-                                orginalSoknadPdfLink?.orginalSoknadPdfLink?.let { UrlResponse("Vis søknaden", it) }
+                                dokumentlagerDokumentId?.let { UrlResponse("Vis søknaden", hentDokumentlagerUrl(clientProperties, it)) }
                         ))
-
             }
         }
 

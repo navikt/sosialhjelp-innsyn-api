@@ -98,8 +98,15 @@ fun isRunningInProd(): Boolean {
 
 fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
     return try {
-        objectMapper.readValue(this.responseBodyAsString, FiksErrorResponse::class.java)
+        objectMapper.readValue(this.responseBodyAsByteArray, FiksErrorResponse::class.java)
     } catch (e: IOException) {
         null
     }
 }
+
+val FiksErrorResponse.feilmeldingUtenFnr: String?
+    get() {
+        return this.message
+                ?.substringBefore("med fnr")
+                ?.substringBefore("fnr")
+    }

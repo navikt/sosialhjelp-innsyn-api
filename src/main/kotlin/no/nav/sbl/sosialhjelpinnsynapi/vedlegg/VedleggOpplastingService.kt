@@ -8,7 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.sbl.sosialhjelpinnsynapi.redis.CACHE_TIME_TO_LIVE_SECONDS
+import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.utils.*
@@ -33,7 +33,8 @@ const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 class VedleggOpplastingService(private val fiksClient: FiksClient,
                                private val krypteringService: KrypteringService,
                                private val virusScanner: VirusScanner,
-                               private val redisStore: RedisStore) {
+                               private val redisStore: RedisStore,
+                               private val cacheProperties: CacheProperties) {
 
     companion object {
         val log by logger()
@@ -159,7 +160,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     private fun cachePut(key: String, value: DigisosSak) {
         val stringValue = objectMapper.writeValueAsString(value)
-        val set = redisStore.set(key, stringValue, CACHE_TIME_TO_LIVE_SECONDS)
+        val set = redisStore.set(key, stringValue, cacheProperties.timeToLiveSeconds)
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {

@@ -147,11 +147,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    /**
-     * lagrer digisosSak i cache i 2s
-     */
     private fun cachePut(key: String, value: String) {
-        val set = redisStore.set(key, value, cacheProperties.timeToLive)
+        val set = redisStore.set(key, value, cacheProperties.timeToLiveSeconds)
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {

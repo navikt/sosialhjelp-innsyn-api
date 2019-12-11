@@ -11,7 +11,7 @@ class CacheProperties {
 
     var redisMocked: Boolean by Delegates.notNull()
 
-    var timeToLive: Long by Delegates.notNull()
+    var timeToLiveSeconds: Long by Delegates.notNull()
 
     fun startInMemoryRedisIfMocked() {
         if (redisMocked) {

@@ -160,7 +160,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     private fun cachePut(key: String, value: DigisosSak) {
         val stringValue = objectMapper.writeValueAsString(value)
-        val set = redisStore.set(key, stringValue, cacheProperties.timeToLive)
+        val set = redisStore.set(key, stringValue, cacheProperties.timeToLiveSeconds)
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {

@@ -1,6 +1,6 @@
 {
   "namespace": "default",
-  "ingresses": [
+  "ingress": [
     "https://sosialhjelp-innsyn-api.nais.oera-q.local/sosialhjelp/innsyn-api"
   ],
   "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/preprod/shared",

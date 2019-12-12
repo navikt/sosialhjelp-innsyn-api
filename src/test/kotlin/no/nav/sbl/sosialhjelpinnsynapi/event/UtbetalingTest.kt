@@ -12,7 +12,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
-import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
@@ -43,6 +42,7 @@ internal class UtbetalingTest {
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
@@ -110,13 +110,8 @@ internal class UtbetalingTest {
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-        assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.saker[0].tittel).isEqualTo(DEFAULT_TITTEL) // default tittel for sak som settes i dersom hverken saksStatus eller vedtakfattet er mottatt
-        assertThat(model.saker[0].utbetalinger).hasSize(1)
-        val utbetaling = model.saker[0].utbetalinger[0]
-        assertThat(utbetaling.belop).isEqualTo("1234.56")
+        assertThat(model.utbetalinger.get(0).belop).isEqualTo("1234.56")
     }
 
 }

@@ -8,6 +8,7 @@ data class InternalDigisosSoker(
         var referanse: String?,
         var status: SoknadsStatus?,
         var saker: MutableList<Sak>,
+        var utbetalinger: MutableList<Utbetaling>,
         var forvaltningsbrev: MutableList<Forvaltningsbrev>,
         var soknadsmottaker: Soknadsmottaker?,
         var tildeltNavKontor: String?,
@@ -15,7 +16,7 @@ data class InternalDigisosSoker(
         var historikk: MutableList<Hendelse>,
         var forelopigSvar: ForelopigSvar
 ) {
-    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, null, mutableListOf(), mutableListOf(), ForelopigSvar(false, null))
+    constructor() : this(null, null, mutableListOf(), mutableListOf(), mutableListOf(), null, null, mutableListOf(), mutableListOf(), ForelopigSvar(false, null))
 }
 
 data class Forvaltningsbrev(
@@ -85,10 +86,15 @@ data class Hendelse(
         // type som felt?
         val tittel: String,
         val tidspunkt: LocalDateTime,
-        val url: String?
+        val url: UrlResponse?
 ) {
     constructor(tittel: String, tidspunkt: LocalDateTime) : this(tittel, tidspunkt, null)
 }
+
+data class UrlResponse(
+        val linkTekst: String,
+        val link: String
+)
 
 enum class SoknadsStatus {
     SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE

@@ -1,14 +1,16 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
-import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
     val utbetaling = Utbetaling(hendelse.utbetalingsreferanse,
             UtbetalingsStatus.valueOf(hendelse.status?.value() ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()),
             BigDecimal.valueOf(hendelse.belop ?: 0.0),
@@ -24,22 +26,11 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     )
 
 
-    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse } ?: saker.firstOrNull { it.referanse == "default" }
+    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
+            ?: saker.firstOrNull { it.referanse == "default" }
 
-    if (sakForReferanse == null) {
-        // Opprett ny Sak
-        sakForReferanse = Sak(
-                hendelse.saksreferanse ?: "default",
-                SaksStatus.UNDER_BEHANDLING,
-                DEFAULT_TITTEL,
-                mutableListOf(),
-                mutableListOf(),
-                mutableListOf(),
-                mutableListOf()
-        )
-        saker.add(sakForReferanse)
-    }
-
-    sakForReferanse.utbetalinger.add(utbetaling)
-
+    sakForReferanse?.utbetalinger?.removeIf { t -> t.referanse == utbetaling.referanse }
+    sakForReferanse?.utbetalinger?.add(utbetaling)
+    utbetalinger.removeIf { t -> t.referanse == utbetaling.referanse }
+    utbetalinger.add(utbetaling)
 }

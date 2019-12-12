@@ -8,6 +8,7 @@ data class InternalDigisosSoker(
         var referanse: String?,
         var status: SoknadsStatus?,
         var saker: MutableList<Sak>,
+        var utbetalinger: MutableList<Utbetaling>,
         var forvaltningsbrev: MutableList<Forvaltningsbrev>,
         var soknadsmottaker: Soknadsmottaker?,
         var tildeltNavKontor: String?,
@@ -15,7 +16,7 @@ data class InternalDigisosSoker(
         var historikk: MutableList<Hendelse>,
         var forelopigSvar: ForelopigSvar
 ) {
-    constructor() : this(null, null, mutableListOf(), mutableListOf(), null, null, mutableListOf(), mutableListOf(), ForelopigSvar(false, null))
+    constructor() : this(null, null, mutableListOf(), mutableListOf(), mutableListOf(), null, null, mutableListOf(), mutableListOf(), ForelopigSvar(false, null))
 }
 
 data class Forvaltningsbrev(

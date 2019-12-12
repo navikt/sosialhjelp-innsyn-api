@@ -26,7 +26,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     )
 
 
-    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
+    val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
             ?: saker.firstOrNull { it.referanse == "default" }
 
     sakForReferanse?.utbetalinger?.removeIf { t -> t.referanse == utbetaling.referanse }

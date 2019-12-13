@@ -26,7 +26,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 
-@Profile("dev-sbs|local")
+@Profile("!(prod-sbs|mock)")
 @Component
 class DigisosApiClientImpl(clientProperties: ClientProperties,
                            private val restTemplate: RestTemplate,

@@ -2,7 +2,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -56,7 +55,13 @@ data class ManedUtbetaling(
         @JsonFormat(pattern = "yyyy-MM-dd")
         val utbetalingsdato: LocalDate?,
         val status: String,
-        val fiksDigisosId: String
+        val fiksDigisosId: String,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val fom: LocalDate?,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val tom: LocalDate?,
+        val annenMottaker: String?,
+        val kontonummer: String?
 )
 
 data class VedleggResponse(

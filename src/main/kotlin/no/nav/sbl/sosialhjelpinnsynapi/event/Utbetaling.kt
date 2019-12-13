@@ -20,11 +20,11 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
             if (hendelse.fom == null) null else LocalDate.parse(hendelse.fom, pattern),
             if (hendelse.tom == null) null else LocalDate.parse(hendelse.tom, pattern),
             hendelse.mottaker,
+            hendelse.kontonummer,
             hendelse.utbetalingsmetode,
             mutableListOf(),
             mutableListOf()
     )
-
 
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
             ?: saker.firstOrNull { it.referanse == "default" }

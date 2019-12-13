@@ -41,7 +41,11 @@ class UtbetalingerService(private val eventService: EventService,
                                                     belop = utbetaling.belop.toDouble(),
                                                     utbetalingsdato = utbetaling.utbetalingsDato,
                                                     status = utbetaling.status.name,
-                                                    fiksDigisosId = digisosSak.fiksDigisosId
+                                                    fiksDigisosId = digisosSak.fiksDigisosId,
+                                                    fom = utbetaling.fom,
+                                                    tom = utbetaling.tom,
+                                                    annenMottaker = utbetaling.mottaker,
+                                                    kontonummer = utbetaling.kontonummer
                                             )
                                         }
                             }

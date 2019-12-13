@@ -56,7 +56,7 @@ internal class UtbetalingerServiceTest {
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(
                         Utbetaling("Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null,
-                                LocalDate.of(2019, 8, 10), null, null, null, null, mutableListOf(), mutableListOf())),
+                                LocalDate.of(2019, 8, 10), LocalDate.of(2019, 8, 1), LocalDate.of(2019, 8, 31), "utleier", "kontonr", null, mutableListOf(), mutableListOf())),
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
         ))
@@ -77,6 +77,10 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].belop).isEqualTo(10.0)
         assertThat(response[0].utbetalinger[0].fiksDigisosId).isEqualTo(digisosId)
         assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-10")
+        assertThat(response[0].utbetalinger[0].fom).isEqualTo("2019-08-01")
+        assertThat(response[0].utbetalinger[0].tom).isEqualTo("2019-08-31")
+        assertThat(response[0].utbetalinger[0].annenMottaker).isEqualTo("utleier")
+        assertThat(response[0].utbetalinger[0].kontonummer).isEqualTo("kontonr")
     }
 
     @Test
@@ -88,8 +92,8 @@ internal class UtbetalingerServiceTest {
                 tittel = tittel,
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(
-                        Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, null, mutableListOf(), mutableListOf()),
-                        Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 8, 12), null, null, null, null, mutableListOf(), mutableListOf())
+                        Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf()),
+                        Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 8, 12), null, null, null, null, null, mutableListOf(), mutableListOf())
                 ),
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
@@ -126,8 +130,8 @@ internal class UtbetalingerServiceTest {
                 tittel = tittel,
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(
-                        Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, null, mutableListOf(), mutableListOf()),
-                        Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 9, 12), null, null, null, null, mutableListOf(), mutableListOf())
+                        Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf()),
+                        Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 9, 12), null, null, null, null, null, mutableListOf(), mutableListOf())
                 ),
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
@@ -167,7 +171,7 @@ internal class UtbetalingerServiceTest {
         val model = InternalDigisosSoker()
         val vilkar = Vilkar("vilkar1", mutableListOf(), "Skal hoppe", false)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
-                null, LocalDate.of(2019, 8, 10), null, null, null, null, mutableListOf(vilkar), mutableListOf())
+                null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(vilkar), mutableListOf())
         vilkar.utbetalinger.add(utbetaling1)
         model.saker.add(Sak(
                 referanse = referanse,
@@ -177,7 +181,7 @@ internal class UtbetalingerServiceTest {
                 utbetalinger = mutableListOf(
                         utbetaling1,
                         Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null,
-                                LocalDate.of(2019, 9, 12), null, null, null, null, mutableListOf(vilkar), mutableListOf())
+                                LocalDate.of(2019, 9, 12), null, null, null, null, null, mutableListOf(vilkar), mutableListOf())
                 ),
                 vilkar = mutableListOf(vilkar),
                 dokumentasjonkrav = mutableListOf()
@@ -199,7 +203,7 @@ internal class UtbetalingerServiceTest {
         val model = InternalDigisosSoker()
         val dokumentasjonkrav = Dokumentasjonkrav("dokumentasjonskrav", mutableListOf(), "Skal hoppe", false)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
-                null, LocalDate.of(2019, 8, 10), null, null, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav))
+                null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav))
         dokumentasjonkrav.utbetalinger.add(utbetaling1)
         model.saker.add(Sak(
                 referanse = referanse,
@@ -231,7 +235,7 @@ internal class UtbetalingerServiceTest {
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(
                         Utbetaling("Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null,
-                                LocalDate.of(2019, 8, 10), null, null, null, null, mutableListOf(), mutableListOf())),
+                                LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf())),
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
         ))
@@ -244,7 +248,7 @@ internal class UtbetalingerServiceTest {
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(
                         Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.ONE, "Barnehage og SFO", null,
-                                LocalDate.of(2019, 9, 12), null, null, null, null, mutableListOf(), mutableListOf())),
+                                LocalDate.of(2019, 9, 12), null, null, null, null, null, mutableListOf(), mutableListOf())),
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
         ))

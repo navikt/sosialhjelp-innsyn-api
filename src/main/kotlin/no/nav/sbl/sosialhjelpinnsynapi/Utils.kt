@@ -107,6 +107,5 @@ fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
 val FiksErrorResponse.feilmeldingUtenFnr: String?
     get() {
         return this.message
-                ?.substringBefore("med fnr")
-                ?.substringBefore("fnr")
+                ?.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
     }

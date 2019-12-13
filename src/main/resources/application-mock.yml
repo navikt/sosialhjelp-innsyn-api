@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: mock
   redis:
     host: ${REDIS_HOST:localhost}
     port: 1212

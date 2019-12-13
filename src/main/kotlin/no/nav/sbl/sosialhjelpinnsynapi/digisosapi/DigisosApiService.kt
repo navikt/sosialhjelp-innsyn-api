@@ -6,12 +6,14 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 import java.util.concurrent.*
 import kotlin.collections.ArrayList
 
+@Profile("!prod-sbs")
 @Component
 class DigisosApiService(private val digisosApiClient: DigisosApiClient,
                         private val krypteringService: KrypteringService,

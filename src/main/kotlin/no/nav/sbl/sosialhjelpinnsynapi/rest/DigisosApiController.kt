@@ -5,12 +5,17 @@ import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
+/**
+ *  Endepunkter som kun tilbys for woldena -> kun tilgjengelig i preprod, ved lokal kjøring og i mock
+ */
+@Profile("!prod-sbs")
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/digisosapi")

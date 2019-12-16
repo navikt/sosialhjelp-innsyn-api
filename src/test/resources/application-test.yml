@@ -1,5 +1,10 @@
 #properties to use in integration tests
 
+spring:
+  redis:
+    host: localhost
+    port: 1212
+
 client:
   fiks_digisos_endpoint_url: 'http://localhost:51111'
   fiks_svar_ut_endpoint_url: 'http://localhost:52222'
@@ -20,6 +25,7 @@ innsyn:
       enabled: false
   cache:
     redis_mocked: true
+    time_to_live_seconds: 2
 
 no.nav.security.jwt:
   issuer.selvbetjening:

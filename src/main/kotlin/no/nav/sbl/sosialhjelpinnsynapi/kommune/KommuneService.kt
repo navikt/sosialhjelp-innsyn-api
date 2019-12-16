@@ -1,17 +1,14 @@
 package no.nav.sbl.sosialhjelpinnsynapi.kommune
 
-import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.*
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 
 @Component
-class KommuneService(private val fiksClient: FiksClient,
-                     private val innsynService: InnsynService) {
+class KommuneService(private val fiksClient: FiksClient) {
 
     companion object {
         val log by logger()
@@ -59,19 +56,12 @@ class KommuneService(private val fiksClient: FiksClient,
 }
 
 class KommuneStatusDetaljer(kommuneInfo: KommuneInfo) {
-    var kommunenummer: String
-    var kanMottaSoknader: Boolean
-    var kanOppdatereStatus: Boolean
-    var harMidlertidigDeaktivertMottak: Boolean
-    var harMidlertidigDeaktivertOppdateringer: Boolean
+    val kommunenummer: String = kommuneInfo.kommunenummer
+    val kanMottaSoknader: Boolean = kommuneInfo.kanMottaSoknader
+    val kanOppdatereStatus: Boolean = kommuneInfo.kanOppdatereStatus
+    val harMidlertidigDeaktivertMottak: Boolean = kommuneInfo.harMidlertidigDeaktivertMottak
+    val harMidlertidigDeaktivertOppdateringer: Boolean = kommuneInfo.harMidlertidigDeaktivertOppdateringer
 
-    init {
-        this.kommunenummer = kommuneInfo.kommunenummer
-        this.kanMottaSoknader = kommuneInfo.kanMottaSoknader
-        this.kanOppdatereStatus = kommuneInfo.kanOppdatereStatus
-        this.harMidlertidigDeaktivertMottak = kommuneInfo.harMidlertidigDeaktivertMottak
-        this.harMidlertidigDeaktivertOppdateringer = kommuneInfo.harMidlertidigDeaktivertOppdateringer
-    }
 }
 
 enum class KommuneStatus {

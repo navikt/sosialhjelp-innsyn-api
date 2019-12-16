@@ -1,16 +1,56 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
+import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
+import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class UtbetalingTest : BaseEventTest() {
+internal class UtbetalingTest {
+
+    private val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val innsynService: InnsynService = mockk()
+    private val vedleggService: VedleggService = mockk()
+    private val norgClient: NorgClient = mockk()
+
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+
+    private val mockDigisosSak: DigisosSak = mockk()
+    private val mockJsonSoknad: JsonSoknad = mockk()
+    private val mockNavEnhet: NavEnhet = mockk()
+
+    private val soknadsmottaker = "The Office"
+    private val enhetsnr = "2317"
+
+    @BeforeEach
+    fun init() {
+        clearAllMocks()
+        every { mockDigisosSak.fiksDigisosId } returns "123"
+        every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
+        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
+        every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
+        every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
+        every { mockDigisosSak.ettersendtInfoNAV } returns null
+        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
+        every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
+
+        resetHendelser()
+    }
 
     @Test
     fun `utbetaling ETTER vedtakFattet og saksStatus`() {
@@ -70,13 +110,8 @@ internal class UtbetalingTest : BaseEventTest() {
 
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-        assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.saker[0].tittel).isEqualTo(DEFAULT_TITTEL) // default tittel for sak som settes i dersom hverken saksStatus eller vedtakfattet er mottatt
-        assertThat(model.saker[0].utbetalinger).hasSize(1)
-        val utbetaling = model.saker[0].utbetalinger[0]
-        assertThat(utbetaling.belop).isEqualTo("1234.56")
+        assertThat(model.utbetalinger.get(0).belop).isEqualTo("1234.56")
     }
 
 }

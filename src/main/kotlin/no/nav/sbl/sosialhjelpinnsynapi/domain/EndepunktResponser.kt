@@ -2,7 +2,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -105,4 +104,16 @@ data class OrginalJsonSoknadResponse(
 
 data class OrginalSoknadPdfLinkResponse(
         val orginalSoknadPdfLink: String
+)
+
+data class FiksErrorResponse(
+    val error: String?,
+    val errorCode: Any?,
+    val errorId: String?,
+    val errorJson: Any?,
+    val message: String?,
+    val originalPath: String?,
+    val path: String?,
+    val status: Int?,
+    val timestamp: Long?
 )

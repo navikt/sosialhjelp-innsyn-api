@@ -1,0 +1,6 @@
+{
+  "namespace": "digisos",
+  "ingresses": [
+    "https://sosialhjelp-veiviser.dev-nav.no/sosialhjelp/innsyn-api"
+  ]
+}

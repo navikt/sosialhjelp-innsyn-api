@@ -50,7 +50,7 @@ data class UtbetalingerResponse(
 )
 
 data class ManedUtbetaling(
-        val tittel: String?,
+        val tittel: String,
         val belop: Double,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val utbetalingsdato: LocalDate?,

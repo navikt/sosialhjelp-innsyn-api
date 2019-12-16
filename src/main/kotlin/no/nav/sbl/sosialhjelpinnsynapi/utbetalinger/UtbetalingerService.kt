@@ -12,6 +12,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 
+const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
+
 @Component
 class UtbetalingerService(private val eventService: EventService,
                           private val fiksClient: FiksClient) {
@@ -37,7 +39,7 @@ class UtbetalingerService(private val eventService: EventService,
                                         .filter { it.utbetalingsDato != null && (it.status == UtbetalingsStatus.UTBETALT || it.status == UtbetalingsStatus.ANNULLERT) }
                                         .map { utbetaling ->
                                             ManedUtbetaling(
-                                                    tittel = utbetaling.beskrivelse,
+                                                    tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
                                                     belop = utbetaling.belop.toDouble(),
                                                     utbetalingsdato = utbetaling.utbetalingsDato,
                                                     status = utbetaling.status.name,

@@ -287,4 +287,30 @@ internal class UtbetalingerServiceTest {
         assertThat(response[1].utbetalinger[0].fiksDigisosId).isEqualTo(id1)
         assertThat(response[1].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-10")
     }
+
+    @Test
+    fun `utbetaling uten beskrivelse gir default tittel`() {
+        val model = InternalDigisosSoker()
+        model.saker.add(Sak(
+                referanse = referanse,
+                saksStatus = SaksStatus.UNDER_BEHANDLING,
+                tittel = tittel,
+                vedtak = mutableListOf(),
+                utbetalinger = mutableListOf(
+                        Utbetaling("Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, null, null,
+                                LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf())),
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf()
+        ))
+
+        every { eventService.createModel(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token)
+
+        assertThat(response).isNotEmpty
+        assertThat(response).hasSize(1)
+        assertThat(response[0].utbetalinger).hasSize(1)
+        assertThat(response[0].utbetalinger[0].tittel).isEqualTo(UTBETALING_DEFAULT_TITTEL)
+    }
 }

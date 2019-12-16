@@ -44,7 +44,7 @@ class UtbetalingerService(private val eventService: EventService,
                                                     fiksDigisosId = digisosSak.fiksDigisosId,
                                                     fom = utbetaling.fom,
                                                     tom = utbetaling.tom,
-                                                    annenMottaker = utbetaling.mottaker,
+                                                    mottaker = utbetaling.mottaker,
                                                     kontonummer = utbetaling.kontonummer
                                             )
                                         }

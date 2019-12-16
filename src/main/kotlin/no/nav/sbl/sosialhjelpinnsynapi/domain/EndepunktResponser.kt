@@ -60,7 +60,7 @@ data class ManedUtbetaling(
         val fom: LocalDate?,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val tom: LocalDate?,
-        val annenMottaker: String?,
+        val mottaker: String?,
         val kontonummer: String?
 )
 

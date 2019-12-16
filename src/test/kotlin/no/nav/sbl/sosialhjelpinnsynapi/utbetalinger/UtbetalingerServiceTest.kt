@@ -79,7 +79,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-10")
         assertThat(response[0].utbetalinger[0].fom).isEqualTo("2019-08-01")
         assertThat(response[0].utbetalinger[0].tom).isEqualTo("2019-08-31")
-        assertThat(response[0].utbetalinger[0].annenMottaker).isEqualTo("utleier")
+        assertThat(response[0].utbetalinger[0].mottaker).isEqualTo("utleier")
         assertThat(response[0].utbetalinger[0].kontonummer).isEqualTo("kontonr")
     }
 

@@ -6,6 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksListeResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.unixTimestampToDate
@@ -35,6 +36,7 @@ class SaksOversiktController(private val fiksClient: FiksClient,
                             IntegrationUtils.KILDE_INNSYN_API
                     )
                 }
+        log.info("Hentet alle (${responselist.size}) DigisosSaker for bruker.")
 
         return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
     }
@@ -72,5 +74,9 @@ class SaksOversiktController(private val fiksClient: FiksClient,
             model.oppgaver.isEmpty() -> null
             else -> oppgaveService.hentOppgaver(fiksDigisosId, token).sumBy { it.oppgaveElementer.size }
         }
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

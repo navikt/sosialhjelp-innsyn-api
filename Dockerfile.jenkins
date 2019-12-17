@@ -3,9 +3,11 @@ WORKDIR /source
 ADD / /source
 COPY gradle.properties $HOME/.gradle/
 RUN gradle test build
+RUN ls -l
+RUN ls -l build
 
 FROM navikt/java:11
 ENV LC_ALL="no_NB.UTF-8"
 ENV LANG="no_NB.UTF-8"
 ENV TZ="Europe/Oslo"
-COPY --from=builder /source/sosialhjelp-innsyn-api-*.jar app.jar
+COPY --from=builder /source/build/sosialhjelp-innsyn-api-*.jar app.jar

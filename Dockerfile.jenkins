@@ -1,0 +1,12 @@
+FROM gradle:6.0.1-jdk11 as builder
+WORKDIR /source
+ADD / /source
+COPY gradle.properties $HOME/.gradle/
+RUN gradle test build
+RUN ls -l build/libs
+
+FROM navikt/java:11
+ENV LC_ALL="no_NB.UTF-8"
+ENV LANG="no_NB.UTF-8"
+ENV TZ="Europe/Oslo"
+COPY --from=builder /source/build/libs/sosialhjelp-innsyn-api-*.jar app.jar

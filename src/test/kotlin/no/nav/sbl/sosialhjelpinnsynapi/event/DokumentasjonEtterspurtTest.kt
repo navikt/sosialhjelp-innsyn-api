@@ -78,11 +78,11 @@ internal class DokumentasjonEtterspurtTest {
         val oppgave = model.oppgaver.last()
         assertThat(oppgave.tittel).isEqualTo(dokumenttype)
         assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
-        assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+        assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
         assertThat(oppgave.erFraInnsyn).isEqualTo(true)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
         assertThat(hendelse.tittel).contains("Du må sende dokumentasjon")
         assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
     }
@@ -110,7 +110,7 @@ internal class DokumentasjonEtterspurtTest {
         val oppgave = model.oppgaver.last()
         assertThat(oppgave.tittel).isEqualTo(dokumenttype)
         assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
-        assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+        assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
         assertThat(oppgave.erFraInnsyn).isEqualTo(true)
     }
 
@@ -163,7 +163,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(oppgave.erFraInnsyn).isEqualTo(false)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
         assertThat(hendelse.tittel).contains("Søknaden er under behandling")
         assertThat(hendelse.url).isNull()
     }
@@ -193,7 +193,7 @@ internal class DokumentasjonEtterspurtTest {
         val oppgave = model.oppgaver.last()
         assertThat(oppgave.tittel).isEqualTo(dokumenttype)
         assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
-        assertThat(oppgave.innsendelsesfrist).isEqualTo(toLocalDateTime(innsendelsesfrist))
+        assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
         assertThat(oppgave.erFraInnsyn).isEqualTo(true)
     }
 }

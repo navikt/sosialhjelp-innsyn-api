@@ -36,7 +36,7 @@ class UtbetalingerService(private val eventService: EventService,
                     model.saker
                             .flatMap { sak ->
                                 sak.utbetalinger
-                                        .filter { it.utbetalingsDato != null && (it.status == UtbetalingsStatus.UTBETALT || it.status == UtbetalingsStatus.ANNULLERT) }
+                                        .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
                                         .map { utbetaling ->
                                             ManedUtbetaling(
                                                     tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,

@@ -58,7 +58,7 @@ data class Utbetaling(
         var status: UtbetalingsStatus,
         var belop: BigDecimal,
         var beskrivelse: String?,
-        var posteringsDato: LocalDate?,
+        var forfallsDato: LocalDate?,
         var utbetalingsDato: LocalDate?,
         var fom: LocalDate?,
         var tom: LocalDate?,

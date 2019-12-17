@@ -82,7 +82,7 @@ internal class UtbetalingTest {
         assertThat(utbetaling.status).isEqualTo(UtbetalingsStatus.UTBETALT)
         assertThat(utbetaling.belop).isEqualTo("1234.56")
         assertThat(utbetaling.beskrivelse).isEqualTo(tittel_1)
-        assertThat(utbetaling.posteringsDato).isEqualTo("2019-12-31")
+        assertThat(utbetaling.forfallsDato).isEqualTo("2019-12-31")
         assertThat(utbetaling.utbetalingsDato).isEqualTo("2019-12-24")
         assertThat(utbetaling.fom).isEqualTo("2019-12-01")
         assertThat(utbetaling.tom).isEqualTo("2019-12-31")
@@ -111,7 +111,7 @@ internal class UtbetalingTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
 
-        assertThat(model.utbetalinger.get(0).belop).isEqualTo("1234.56")
+        assertThat(model.utbetalinger[0].belop).isEqualTo("1234.56")
     }
 
     @Test

@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
@@ -40,6 +41,8 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
                             timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)),
                     ettersendtInfoNAV = EttersendtInfoNAV(Collections.emptyList()),
                     digisosSoker = null))
+        } else {
+            oppdaterOriginalSoknadNavHvisTimestampSendtIkkeErFoerTidligsteHendelse(id, digisosApiWrapper)
         }
 
         val digisosSak = fiksClientMock.hentDigisosSak(id, "", true)
@@ -62,7 +65,21 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
         }
     }
 
+    private fun oppdaterOriginalSoknadNavHvisTimestampSendtIkkeErFoerTidligsteHendelse(id: String, digisosApiWrapper: DigisosApiWrapper) {
+        val digisosSak = fiksClientMock.hentDigisosSak(id, "", true)
+        val timestampSendt = digisosSak.originalSoknadNAV!!.timestampSendt
+        val tidligsteHendelsetidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt
+        if (unixToLocalDateTime(timestampSendt).isAfter(toLocalDateTime(tidligsteHendelsetidspunkt))) {
+            val oppdatertDigisosSak = digisosSak.updateOriginalSoknadNAV(digisosSak.originalSoknadNAV.copy(timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)))
+            fiksClientMock.postDigisosSak(oppdatertDigisosSak)
+        }
+    }
+
     fun DigisosSak.updateDigisosSoker(digisosSoker: DigisosSoker): DigisosSak {
         return this.copy(digisosSoker = digisosSoker)
+    }
+
+    fun DigisosSak.updateOriginalSoknadNAV(originalSoknadNAV: OriginalSoknadNAV): DigisosSak {
+        return this.copy(originalSoknadNAV = originalSoknadNAV)
     }
 }

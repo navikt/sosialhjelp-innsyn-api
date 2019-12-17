@@ -1,6 +1,8 @@
 FROM gradle:6.0.1-jdk11 as builder
 WORKDIR /source
 ADD / /source
+RUN echo $HOME
+RUN ls -l $HOME/.gradle
 RUN gradle test build
 
 FROM navikt/java:11

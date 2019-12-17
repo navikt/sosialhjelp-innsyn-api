@@ -54,6 +54,8 @@ data class ManedUtbetaling(
         val belop: Double,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val utbetalingsdato: LocalDate?,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val forfallsdato: LocalDate?,
         val status: String,
         val fiksDigisosId: String,
         @JsonFormat(pattern = "yyyy-MM-dd")

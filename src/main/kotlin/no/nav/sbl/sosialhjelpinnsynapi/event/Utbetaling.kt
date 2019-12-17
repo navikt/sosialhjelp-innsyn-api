@@ -20,7 +20,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
             tom = if (hendelse.tom == null) null else hendelse.tom.toLocalDate(),
             mottaker = hendelse.mottaker,
             kontonummer = if (hendelse.annenMottaker) null else hendelse.kontonummer,
-            utbetalingsform = hendelse.utbetalingsmetode,
+            utbetalingsmetode = hendelse.utbetalingsmetode,
             vilkar = mutableListOf(),
             dokumentasjonkrav = mutableListOf()
     )

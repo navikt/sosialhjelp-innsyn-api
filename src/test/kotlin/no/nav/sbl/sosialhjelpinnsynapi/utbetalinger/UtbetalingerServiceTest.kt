@@ -54,9 +54,21 @@ internal class UtbetalingerServiceTest {
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
                 tittel = tittel,
                 vedtak = mutableListOf(),
-                utbetalinger = mutableListOf(
-                        Utbetaling("Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null,
-                                LocalDate.of(2019, 8, 10), LocalDate.of(2019, 8, 1), LocalDate.of(2019, 8, 31), "utleier", "kontonr", null, mutableListOf(), mutableListOf())),
+                utbetalinger = mutableListOf(Utbetaling(
+                        referanse = "Sak1",
+                        status = UtbetalingsStatus.UTBETALT,
+                        belop = BigDecimal.TEN,
+                        beskrivelse = "Nødhjelp",
+                        forfallsDato = null,
+                        utbetalingsDato = LocalDate.of(2019, 8, 10),
+                        fom = LocalDate.of(2019, 8, 1),
+                        tom = LocalDate.of(2019, 8, 31),
+                        mottaker = "utleier",
+                        kontonummer = "kontonr",
+                        utbetalingsmetode = "utbetalingsmetode",
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf()
+                )),
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
         ))
@@ -81,6 +93,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].tom).isEqualTo("2019-08-31")
         assertThat(response[0].utbetalinger[0].mottaker).isEqualTo("utleier")
         assertThat(response[0].utbetalinger[0].kontonummer).isEqualTo("kontonr")
+        assertThat(response[0].utbetalinger[0].utbetalingsmetode).isEqualTo("utbetalingsmetode")
     }
 
     @Test

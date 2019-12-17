@@ -88,7 +88,7 @@ internal class UtbetalingTest {
         assertThat(utbetaling.tom).isEqualTo("2019-12-31")
         assertThat(utbetaling.mottaker).isEqualTo("fnr")
         assertThat(utbetaling.kontonummer).isEqualTo("kontonummer")
-        assertThat(utbetaling.utbetalingsform).isEqualTo("pose med krølla femtilapper")
+        assertThat(utbetaling.utbetalingsmetode).isEqualTo("pose med krølla femtilapper")
         assertThat(utbetaling.vilkar).isEmpty()
         assertThat(utbetaling.dokumentasjonkrav).isEmpty()
     }

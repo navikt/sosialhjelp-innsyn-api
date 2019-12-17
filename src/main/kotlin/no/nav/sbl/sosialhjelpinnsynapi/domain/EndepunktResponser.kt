@@ -63,7 +63,8 @@ data class ManedUtbetaling(
         @JsonFormat(pattern = "yyyy-MM-dd")
         val tom: LocalDate?,
         val mottaker: String?,
-        val kontonummer: String?
+        val kontonummer: String?,
+        val utbetalingsmetode: String?
 )
 
 data class VedleggResponse(

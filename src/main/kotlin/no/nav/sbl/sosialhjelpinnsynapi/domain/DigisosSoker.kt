@@ -64,7 +64,7 @@ data class Utbetaling(
         var tom: LocalDate?,
         var mottaker: String?,
         var kontonummer: String?,
-        var utbetalingsform: String?,
+        var utbetalingsmetode: String?,
         var vilkar: MutableList<Vilkar>,
         var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
 )

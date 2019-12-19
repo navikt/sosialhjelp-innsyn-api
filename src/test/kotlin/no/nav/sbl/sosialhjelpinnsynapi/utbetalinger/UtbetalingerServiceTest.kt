@@ -46,6 +46,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isEmpty()
     }
 
+    
     @Test
     fun `Skal returnere response med 1 utbetaling`() {
         val model = InternalDigisosSoker()

@@ -27,15 +27,17 @@ spec:
   webproxy: true
   vault:
     enabled: {{vaultEnabled}}
+{{if vaultEnabled}}
     paths:
       - kvPath: {{application_vault_path}}
         mountPath: /var/run/secrets/nais.io/vault
       - kvPath: {{virksomhetssertifikat_vault_path}}
         mountPath: /var/run/secrets/nais.io/virksomhetssertifikat
+{{/if}}
   ingresses:
-  {{#each ingress}}
+{{#each ingress}}
     - "{{this}}"
-  {{/each}}
+{{/each}}
   resources:
     limits:
       cpu: 500m
@@ -46,7 +48,7 @@ spec:
   env:
     - name: REDIS_HOST
       value: sosialhjelp-innsyn-api-redis.default.svc.nais.local
-  {{#each env}}
+{{#each env}}
     - name: {{@key}}
       value: "{{this}}"
-  {{/each}}
+{{/each}}

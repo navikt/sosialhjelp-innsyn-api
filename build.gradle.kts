@@ -133,14 +133,7 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
 }
 
-buildscript {
-    repositories {
-        maven("https://repo.adeo.no/repository/maven-central")
-    }
-}
-
 repositories {
-    maven("https://repo.adeo.no/repository/maven-central")
     mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")

@@ -31,6 +31,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "https://www-q0.nav.no",
                 "https://www-q1.nav.no",
                 "https://sosialhjelp-innsyn.dev-nav.no",
+                "https://sosialhjelp-innsyn.labs.nais.io",
                 "http://localhost:3000",
                 "http://localhost:3001",
                 "https://www.digisos-test.com")

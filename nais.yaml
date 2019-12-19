@@ -27,7 +27,7 @@ spec:
   webproxy: true
   vault:
     enabled: {{vaultEnabled}}
-{{if vaultEnabled}}
+{{#if vaultEnabled}}
     paths:
       - kvPath: {{application_vault_path}}
         mountPath: /var/run/secrets/nais.io/vault

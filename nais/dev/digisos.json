@@ -8,5 +8,6 @@
     "SPRING_PROFILES_ACTIVE": "mock"
   },
   "prometheusEnabled": false,
+  "webProxyEnabled": false,
   "vaultEnabled": false
 }

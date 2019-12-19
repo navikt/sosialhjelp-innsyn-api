@@ -21,5 +21,6 @@
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local"
   },
   "prometheusEnabled": true,
+  "webProxyEnabled": true,
   "vaultEnabled": true
 }

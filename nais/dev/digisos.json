@@ -1,6 +1,6 @@
 {
   "namespace": "digisos",
-  "ingresses": [
+  "ingress": [
     "https://sosialhjelp-innsyn-api.dev-nav.no/sosialhjelp/innsyn-api"
   ],
   "env": {

@@ -37,7 +37,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val restTemplate: RestTemplate,
                      private val idPortenService: IdPortenService,
                      private val redisStore: RedisStore,
-                     private val cacheProperties: CacheProperties) : FiksClient {
+                     private val cacheProperties: CacheProperties,
+                     private val retryProperties: FiksRetryProperties) : FiksClient {
 
     companion object {
         val log by logger()
@@ -167,8 +168,18 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         val headers = setIntegrasjonHeaders(token)
         try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
-            return response.body.orEmpty()
+
+            return runBlocking {
+                retry(
+                        attempts = retryProperties.attempts,
+                        initialDelay = retryProperties.initialDelay,
+                        maxDelay = retryProperties.maxDelay,
+                        illegalExceptions = *arrayOf(HttpClientErrorException::class)
+                ) {
+                    val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
+                    response.body.orEmpty()
+                }
+            }
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr

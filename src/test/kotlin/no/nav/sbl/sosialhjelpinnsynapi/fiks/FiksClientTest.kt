@@ -39,7 +39,8 @@ internal class FiksClientTest {
     private val idPortenService: IdPortenService = mockk()
     private val redisStore: RedisStore = mockk()
     private val cacheProperties: CacheProperties = mockk(relaxed = true)
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties)
+    private val retryProperties: FiksRetryProperties = mockk()
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties)
 
     private val id = "123"
 
@@ -49,6 +50,10 @@ internal class FiksClientTest {
 
         every { redisStore.get(any()) } returns null
         every { redisStore.set(any(), any(), any()) } returns "OK"
+
+        every { retryProperties.attempts } returns 2
+        every { retryProperties.initialDelay } returns 5
+        every { retryProperties.maxDelay } returns 10
     }
 
     @Test
@@ -136,6 +141,21 @@ internal class FiksClientTest {
         assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentAlleDigisosSaker("Token") }
 
         verify(atLeast = 2) {restTemplate.exchange(any<String>(), any(), any(), typeRef<List<DigisosSak>>())}
+    }
+
+    @Test
+    fun `GET alle DigisosSaker skal ikke bruke retry hvis Fiks gir 4xx-feil`() {
+        every {
+            restTemplate.exchange(
+                    any<String>(),
+                    any(),
+                    any(),
+                    typeRef<List<DigisosSak>>())
+        } throws HttpClientErrorException(HttpStatus.BAD_REQUEST, "some error")
+
+        assertThatExceptionOfType(FiksClientException::class.java).isThrownBy { fiksClient.hentAlleDigisosSaker("Token") }
+
+        verify(exactly = 1) { restTemplate.exchange(any<String>(), any(), any(), typeRef<List<DigisosSak>>()) }
     }
 
     @Test

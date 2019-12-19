@@ -8,6 +8,7 @@ internal suspend fun <T> retry(
         attempts: Int = 10,
         initialDelay: Long = 100L,
         maxDelay: Long = 1000L,
+        factor: Double = 2.0,
         vararg illegalExceptions: KClass<out Throwable> = arrayOf(),
         block: suspend () -> T
 ): T {
@@ -22,7 +23,7 @@ internal suspend fun <T> retry(
             }
         }
         delay(currentDelay)
-        currentDelay = (currentDelay * 2.0).toLong().coerceAtMost(maxDelay)
+        currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelay)
     }
     return try {
         timed { block() }
@@ -39,4 +40,3 @@ private fun countAndRethrowError(e: Throwable, block: () -> Any?): Nothing {
 
 internal suspend inline fun <T> timed(crossinline block: suspend () -> T) =
         block()
-

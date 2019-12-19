@@ -38,5 +38,3 @@ spec:
       value: "true"
     - name: SPRING_PROFILES_ACTIVE
       value: "mock"
-    - name: PORT
-      value: "8080"

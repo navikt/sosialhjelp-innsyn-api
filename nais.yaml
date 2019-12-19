@@ -19,14 +19,14 @@ spec:
     initialDelay: 20
     timeout: 1
   prometheus:
-    enabled: true
+    enabled: {{prometheusEnabled}}
     path: /sosialhjelp/innsyn-api/actuator/prometheus
   replicas:
     min: 1
     max: 4
   webproxy: true
   vault:
-    enabled: true
+    enabled: {{vaultEnabled}}
     paths:
       - kvPath: {{application_vault_path}}
         mountPath: /var/run/secrets/nais.io/vault

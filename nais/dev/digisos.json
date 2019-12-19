@@ -1,6 +1,12 @@
 {
   "namespace": "digisos",
   "ingresses": [
-    "https://sosialhjelp-veiviser.dev-nav.no/sosialhjelp/innsyn-api"
-  ]
+    "https://sosialhjelp-innsyn-api.dev-nav.no/sosialhjelp/innsyn-api"
+  ],
+  "env": {
+    "IS_REDIS_MOCKED": "true",
+    "SPRING_PROFILES_ACTIVE": "mock"
+  },
+  "prometheusEnabled": false,
+  "vaultEnabled": false
 }

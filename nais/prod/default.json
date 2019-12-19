@@ -19,5 +19,7 @@
 		"AZUREAD_DISCOVERYURL": "https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
 		"AZUREAD_CLIENTID": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
 		"CACHE_TIME_TO_LIVE_SECONDS": "180"
-	}
+	},
+	"prometheusEnabled": true,
+	"vaultEnabled": true
 }

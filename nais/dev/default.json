@@ -21,5 +21,6 @@
   },
   "prometheusEnabled": true,
   "webProxyEnabled": true,
+  "accessPoliciesForGcpEnabled": false,
   "vaultEnabled": true
 }

@@ -2,7 +2,10 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksDetaljerResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksListeResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
@@ -48,26 +51,18 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
         val saker = fiksClient.hentAlleDigisosSaker(token)
-        val tempSaker = mutableListOf(saker)
-        tempSaker.addAll(tempSaker)
-        tempSaker.addAll(tempSaker)
-        tempSaker.addAll(tempSaker)
-        tempSaker.addAll(tempSaker)
-        tempSaker.addAll(tempSaker)
 
-        var i = 0
-        val responselist = tempSaker[0]
+        val responselist = saker
                 .map {
                     SaksListeResponse(
-                            it.fiksDigisosId + i++.toString(),
+                            it.fiksDigisosId,
                             "Søknad om økonomisk sosialhjelp",
-                            unixTimestampToDate(it.sistEndret + i),
+                            unixTimestampToDate(it.sistEndret),
                             KILDE_INNSYN_API
                     )
                 }
 
         return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
-//        return ResponseEntity.ok().body(responselist.filter { it.sistOppdatert == DateTime.now().plusYears(100).toDate() })
     }
 
     @GetMapping("/saksDetaljer")

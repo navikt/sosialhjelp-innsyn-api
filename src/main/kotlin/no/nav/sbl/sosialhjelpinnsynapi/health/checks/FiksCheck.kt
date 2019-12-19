@@ -47,10 +47,10 @@ class FiksCheck(private val restTemplate: RestTemplate,
             restTemplate.exchange("$address/digisos/api/v1/nav/kommune/0301", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         } catch (e: HttpStatusCodeException) {
             log.warn("Selftest - Fiks hentKommuneInfo feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksException(e.message, e)
         } catch (e: Exception) {
             log.warn("Selftest - Fiks hentKommuneInfo feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 }

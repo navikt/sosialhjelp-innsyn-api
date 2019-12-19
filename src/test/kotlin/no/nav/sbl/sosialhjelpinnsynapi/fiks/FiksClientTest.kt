@@ -3,7 +3,8 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
@@ -53,7 +54,6 @@ internal class FiksClientTest {
     @Test
     fun `GET eksakt 1 DigisosSak`() {
         val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_digisossak_response
         every {
             restTemplate.exchange(
@@ -83,7 +83,6 @@ internal class FiksClientTest {
     @Test
     fun `GET digisosSak fra cache etter put`() {
         val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_digisossak_response
         every {
             restTemplate.exchange(
@@ -112,9 +111,6 @@ internal class FiksClientTest {
 
     @Test
     fun `GET DigisosSak feiler hvis Fiks gir 500`() {
-        val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
-        every { mockResponse.body } returns ok_digisossak_response
         every {
             restTemplate.exchange(
                     any(),
@@ -123,15 +119,29 @@ internal class FiksClientTest {
                     String::class.java,
                     id)
         } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "some error")
+        assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentDigisosSak(id, "Token", true) }
 
-        assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentDigisosSak(id, "Token", true) }
+    }
+
+    @Test
+    fun `GET alle DigisosSaker skal bruke retry hvis Fiks gir 5xx-feil`() {
+        every {
+            restTemplate.exchange(
+                    any<String>(),
+                    any(),
+                    any(),
+                    typeRef<List<DigisosSak>>())
+        } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "some error")
+
+        assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentAlleDigisosSaker("Token") }
+
+        verify(atLeast = 2) {restTemplate.exchange(any<String>(), any(), any(), typeRef<List<DigisosSak>>())}
     }
 
     @Test
     fun `GET alle DigisosSaker`() {
         val mockListResponse: ResponseEntity<List<DigisosSak>> = mockk()
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        every { mockListResponse.statusCode.is2xxSuccessful } returns true
         every { mockListResponse.body } returns listOf(digisosSakOk, digisosSakOk)
         every {
             restTemplate.exchange(
@@ -150,7 +160,6 @@ internal class FiksClientTest {
     @Test
     fun `GET dokument`() {
         val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_minimal_jsondigisossoker_response
         every {
             restTemplate.exchange(
@@ -180,7 +189,6 @@ internal class FiksClientTest {
     @Test
     fun `GET dokument fra cache etter put`() {
         val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_digisossak_response
         every {
             restTemplate.exchange(
@@ -213,7 +221,6 @@ internal class FiksClientTest {
         every { redisStore.get(any()) } returns ok_minimal_jsonsoknad_response
 
         val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_minimal_jsondigisossoker_response
         every {
             restTemplate.exchange(
@@ -236,7 +243,6 @@ internal class FiksClientTest {
         val kommunenummer = "1234"
         val mockKommuneResponse: ResponseEntity<KommuneInfo> = mockk()
         val kommuneInfo = KommuneInfo(kommunenummer, true, true, false, false, null)
-        every { mockKommuneResponse.statusCode.is2xxSuccessful } returns true
         every { mockKommuneResponse.body } returns kommuneInfo
         coEvery { idPortenService.requestToken().token } returns "token"
 
@@ -268,7 +274,6 @@ internal class FiksClientTest {
     fun `GET KommuneInfo feiler hvis kommuneInfo gir 404`() {
         val mockKommuneResponse: ResponseEntity<KommuneInfo> = mockk()
         val mockKommuneInfo: KommuneInfo = mockk()
-        every { mockKommuneResponse.statusCode.is2xxSuccessful } returns true
         every { mockKommuneResponse.body } returns mockKommuneInfo
         coEvery { idPortenService.requestToken().token } returns "token"
 
@@ -282,7 +287,7 @@ internal class FiksClientTest {
                     kommunenummer)
         } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "not found")
 
-        assertThatExceptionOfType(FiksException::class.java).isThrownBy { fiksClient.hentKommuneInfo(kommunenummer) }
+        assertThatExceptionOfType(FiksClientException::class.java).isThrownBy { fiksClient.hentKommuneInfo(kommunenummer) }
     }
 
     @Test
@@ -293,13 +298,11 @@ internal class FiksClientTest {
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()
-        every { mockDigisosSakResponse.statusCode.is2xxSuccessful } returns true
         every { mockDigisosSakResponse.body } returns ok_digisossak_response
         every { restTemplate.exchange(any(), HttpMethod.GET, any(), String::class.java, id) } returns mockDigisosSakResponse
 
         val slot = slot<HttpEntity<LinkedMultiValueMap<String, Any>>>()
         val mockFiksResponse: ResponseEntity<String> = mockk()
-        every { mockFiksResponse.statusCode.is2xxSuccessful } returns true
         every { restTemplate.exchange(any(), HttpMethod.POST, capture(slot), String::class.java, any()) } returns mockFiksResponse
 
         val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),

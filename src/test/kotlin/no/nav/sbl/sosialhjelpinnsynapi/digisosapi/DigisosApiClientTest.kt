@@ -28,7 +28,6 @@ internal class DigisosApiClientTest {
         val digisosApiClient = DigisosApiClientImpl(clientProperties, restTemplate, idPortenService, fiksClientImpl)
 
         val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.statusCode.is2xxSuccessful } returns true
         every { mockResponse.body } returns ok_komplett_jsondigisossoker_response
         coEvery { idPortenService.requestToken() } returns (AccessToken("Token"))
         every {

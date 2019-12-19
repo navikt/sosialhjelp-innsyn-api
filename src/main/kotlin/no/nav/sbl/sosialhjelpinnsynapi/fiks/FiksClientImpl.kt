@@ -6,8 +6,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.*
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksNotFoundException
+import no.nav.sbl.sosialhjelpinnsynapi.common.*
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
@@ -25,7 +24,8 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
 import java.util.Collections.singletonList
@@ -82,16 +82,20 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.info("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
             val body = response.body!!
             return objectMapper.readValue(body, DigisosSak::class.java)
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
             log.warn("Fiks - hentDigisosSak feilet - ${e.message} - $fiksErrorResponse", e)
             if (e.statusCode == HttpStatus.NOT_FOUND) {
                 throw FiksNotFoundException(e.statusCode, e.message, e)
             }
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
+            log.warn("Fiks - hentDigisosSak feilet - ${e.message} - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDigisosSak feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 
@@ -125,13 +129,17 @@ class FiksClientImpl(clientProperties: ClientProperties,
             cachePut(dokumentlagerId, objectMapper.writeValueAsString(dokument))
             return dokument
 
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
             log.warn("Fiks - hentDokument feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
+            log.warn("Fiks - hentDokument feilet - ${e.message} - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDokument feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 
@@ -162,13 +170,17 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
             return response.body.orEmpty()
 
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
             log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
+            log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.message} - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentAlleDigisosSaker feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 
@@ -195,13 +207,17 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
             return kommuneInfo
 
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
             log.warn("Fiks - hentKommuneInfo feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
+            log.warn("Fiks - hentKommuneInfo feilet - ${e.message} - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentKommuneInfo feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 
@@ -215,13 +231,17 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
             return response.body!!
 
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfo feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksException(e.statusCode, e.message, e)
+            log.warn("Fiks - hentKommuneInfoForAlle feilet - ${e.message} - $fiksErrorResponse", e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
+            log.warn("Fiks - hentKommuneInfoForAlle feilet - ${e.message} - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentKommuneInfo feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 
@@ -254,15 +274,18 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
             log.info("Ettersendelse sendt til Fiks")
 
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
             log.warn("Opplasting av ettersendelse feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
+            log.warn("Opplasting av ettersendelse feilet - ${e.message} - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Opplasting av ettersendelse feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
-
     }
 
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {

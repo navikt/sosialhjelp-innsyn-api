@@ -51,6 +51,20 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(FiksClientException::class)
+    fun handleFiksClientError(e: FiksClientException): ResponseEntity<ErrorMessage> {
+        log.error("Client-feil ved kall til Fiks", e)
+        val error = ErrorMessage(FIKS_ERROR, "Noe uventet feilet")
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @ExceptionHandler(FiksServerException::class)
+    fun handleFiksServerError(e: FiksServerException): ResponseEntity<ErrorMessage> {
+        log.error("Server-feil ved kall til Fiks", e)
+        val error = ErrorMessage(FIKS_ERROR, "Noe uventet feilet")
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
     @ExceptionHandler(NorgException::class)
     fun handleNorgError(e: NorgException): ResponseEntity<ErrorMessage> {
         log.error("Noe feilet ved kall til Norg", e)

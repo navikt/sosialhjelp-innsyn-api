@@ -33,6 +33,7 @@ val lettuceVersion = "5.2.0.RELEASE"
 val springmockkVersion = "1.1.3"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
+val isRunningOnJenkins: String? by project
 
 plugins {
     application
@@ -140,8 +141,7 @@ buildscript {
 }
 
 repositories {
-    maven("https://repo.adeo.no/repository/maven-central")
-    mavenCentral()
+    if (isRunningOnJenkins ?: "" == "true") maven("https://repo.adeo.no/repository/maven-central") else mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")
     maven("http://repo.spring.io/plugins-release/")

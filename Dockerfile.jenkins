@@ -1,8 +1,7 @@
 FROM gradle:6.0.1-jdk11 as builder
 WORKDIR /source
 ADD / /source
-COPY gradle.properties $HOME/.gradle/
-COPY init.gradle.kts $HOME/.gradle/
+COPY jenkins.gradle.properties /source/gradle.properties
 RUN gradle test build
 RUN ls -l build/libs
 

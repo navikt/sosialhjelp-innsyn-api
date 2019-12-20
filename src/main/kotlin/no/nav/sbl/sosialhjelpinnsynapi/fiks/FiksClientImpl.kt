@@ -211,9 +211,17 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/nav/kommuner/{kommunenummer}"
-            val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java, kommunenummer)
-
-            val kommuneInfo = response.body!!
+            val kommuneInfo = runBlocking {
+                retry(
+                        attempts = retryProperties.attempts,
+                        initialDelay = retryProperties.initialDelay,
+                        maxDelay = retryProperties.maxDelay,
+                        illegalExceptions = *arrayOf(HttpClientErrorException::class)
+                ) {
+                    val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java, kommunenummer)
+                    response.body!!
+                }
+            }
             cachePut(kommunenummer, objectMapper.writeValueAsString(kommuneInfo))
 
             return kommuneInfo

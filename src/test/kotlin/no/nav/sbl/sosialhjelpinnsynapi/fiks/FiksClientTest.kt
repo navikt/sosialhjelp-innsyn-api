@@ -292,9 +292,6 @@ internal class FiksClientTest {
 
     @Test
     fun `GET KommuneInfo feiler hvis kommuneInfo gir 404`() {
-        val mockKommuneResponse: ResponseEntity<KommuneInfo> = mockk()
-        val mockKommuneInfo: KommuneInfo = mockk()
-        every { mockKommuneResponse.body } returns mockKommuneInfo
         coEvery { idPortenService.requestToken().token } returns "token"
 
         val kommunenummer = "1234"
@@ -305,9 +302,30 @@ internal class FiksClientTest {
                     any(),
                     KommuneInfo::class.java,
                     kommunenummer)
-        } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "not found")
+        } throws HttpClientErrorException(HttpStatus.NOT_FOUND)
 
         assertThatExceptionOfType(FiksClientException::class.java).isThrownBy { fiksClient.hentKommuneInfo(kommunenummer) }
+
+        verify(exactly = 1) { restTemplate.exchange(any(), HttpMethod.GET, any(), KommuneInfo::class.java, kommunenummer) }
+    }
+
+    @Test
+    fun `GET KommuneInfo skal bruker retry feiler hvis Fiks gir 5xx-feil`() {
+        coEvery { idPortenService.requestToken().token } returns "token"
+
+        val kommunenummer = "1234"
+        every {
+            restTemplate.exchange(
+                    any(),
+                    HttpMethod.GET,
+                    any(),
+                    KommuneInfo::class.java,
+                    kommunenummer)
+        } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
+
+        assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentKommuneInfo(kommunenummer) }
+
+        verify(exactly = 2) { restTemplate.exchange(any(), HttpMethod.GET, any(), KommuneInfo::class.java, kommunenummer) }
     }
 
     @Test

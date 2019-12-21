@@ -1,6 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi.common
 
-import io.ktor.client.features.ClientRequestException
 import kotlinx.coroutines.delay
 import kotlin.reflect.KClass
 
@@ -9,7 +8,7 @@ internal suspend fun <T> retry(
         initialDelay: Long = 100L,
         maxDelay: Long = 1000L,
         factor: Double = 2.0,
-        vararg illegalExceptions: KClass<out Throwable> = arrayOf(),
+        vararg retryableExceptions: KClass<out Throwable> = arrayOf(),
         block: suspend () -> T
 ): T {
     var currentDelay = initialDelay
@@ -17,7 +16,7 @@ internal suspend fun <T> retry(
         try {
             return timed { block() }
         } catch (e: Throwable) {
-            if (illegalExceptions.any { it.isInstance(e) } || (e is ClientRequestException)) {
+            if (retryableExceptions.none { it.isInstance(e) }) {
                 countAndRethrowError(e) {
                 }
             }

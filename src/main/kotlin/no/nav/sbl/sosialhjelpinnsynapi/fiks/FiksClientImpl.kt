@@ -174,7 +174,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                         attempts = retryProperties.attempts,
                         initialDelay = retryProperties.initialDelay,
                         maxDelay = retryProperties.maxDelay,
-                        illegalExceptions = *arrayOf(HttpClientErrorException::class)
+                        retryableExceptions = *arrayOf(HttpServerErrorException::class)
                 ) {
                     val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
                     response.body.orEmpty()
@@ -216,7 +216,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                         attempts = retryProperties.attempts,
                         initialDelay = retryProperties.initialDelay,
                         maxDelay = retryProperties.maxDelay,
-                        illegalExceptions = *arrayOf(HttpClientErrorException::class)
+                        retryableExceptions = *arrayOf(HttpServerErrorException::class)
                 ) {
                     val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java, kommunenummer)
                     response.body!!

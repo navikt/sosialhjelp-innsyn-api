@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.innsynOrginalSoknad
+package no.nav.sbl.sosialhjelpinnsynapi.originalsoknad
 
 import io.mockk.every
 import io.mockk.mockk
@@ -7,26 +7,18 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClientImpl
-import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneService
-import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import org.assertj.core.api.Assertions.assertThat
-import org.glassfish.jersey.client.ClientProperties
 import org.junit.jupiter.api.Test
 
-import org.junit.jupiter.api.Assertions.*
-import org.springframework.web.client.RestTemplate
-
-internal class InnsynOrginalSoknadServiceTest {
+internal class OrginalSoknadServiceTest {
 
     private val fiksClient: FiksClient = mockk()
     private val innsynService: InnsynService = mockk()
     private val clientProperties: no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties = mockk(relaxed = true)
 
 
-    private val service = InnsynOrginalSoknadService(
+    private val service = OrginalSoknadService(
             fiksClient,
             innsynService,
             clientProperties

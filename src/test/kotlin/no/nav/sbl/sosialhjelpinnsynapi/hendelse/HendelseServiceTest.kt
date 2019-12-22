@@ -3,10 +3,8 @@ package no.nav.sbl.sosialhjelpinnsynapi.hendelse
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_BREVET
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
@@ -60,7 +58,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Skal returnere respons med 1 hendelse`() {
         val model = InternalDigisosSoker()
-        model.historikk.add(Hendelse(tittel_sendt, tidspunkt_sendt, url))
+        model.historikk.add(Hendelse(tittel_sendt, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)))
 
         every { eventService.createModel(any(), any()) } returns model
 
@@ -71,16 +69,16 @@ internal class HendelseServiceTest {
         assertThat(hendelser).hasSize(1)
         assertThat(hendelser[0].beskrivelse).isEqualTo(tittel_sendt)
         assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt_sendt.toString())
-        assertThat(hendelser[0].filUrl).isEqualTo(url)
+        assertThat(hendelser[0].filUrl?.link).isEqualTo(url)
     }
 
     @Test
     fun `Skal returnere respons med flere hendelser`() {
         val model = InternalDigisosSoker()
         model.historikk.addAll(listOf(
-                Hendelse(tittel_sendt, tidspunkt_sendt, url),
-                Hendelse(tittel_mottatt, tidspunkt_mottatt, url2),
-                Hendelse(tittel3, tidspunkt3, url3)))
+                Hendelse(tittel_sendt, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)),
+                Hendelse(tittel_mottatt, tidspunkt_mottatt, UrlResponse(VIS_BREVET, url2)),
+                Hendelse(tittel3, tidspunkt3, UrlResponse(VIS_BREVET, url3))))
 
         every { eventService.createModel(any(), any()) } returns model
 

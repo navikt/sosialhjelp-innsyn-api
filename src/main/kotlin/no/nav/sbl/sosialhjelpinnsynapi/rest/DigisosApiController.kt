@@ -30,7 +30,7 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
                            private val eventService: EventService,
                            private val oppgaveService: OppgaveService) {
 
-    @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
+    @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
     fun oppdaterDigisosSak(fiksDigisosId: String?, @RequestBody body: String): ResponseEntity<String> {
         val json = objectMapper.writeValueAsString(objectMapper.readTree(body).at("/sak/soker"))
         JsonSosialhjelpValidator.ensureValidInnsyn(json)

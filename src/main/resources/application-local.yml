@@ -1,8 +1,15 @@
+spring:
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: 1212
 
 innsyn:
   vedlegg:
     virusscan:
       enabled: false
+  cache:
+    redis_mocked: true
+    time_to_live_seconds: 2
 
 no.nav.security.jwt:
   issuer.selvbetjening:

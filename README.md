@@ -35,18 +35,18 @@ Dette gjøres manuelt med kubectl både i preprod og prod. Se [nais/doc](https:/
 1. `kubectl config use-context dev-sbs`
 2. `kubectl apply -f redis-config.yml`
 
-For å ta i bruk Redis lokalt anbefaler vi bruk av Docker.
+For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsvare med portnummer i properties)
 1. `docker pull redis` (laster ned image fra docker hub)
 2. `docker run --name <myredis> -d -p 6379:6379 redis` 
 (kjører opp redis (`--name <myredis>` må samsvare med referansen i redis-config.yaml))
 3. `docker run -it --link myredis:redis --rm redis redis-cli -h redis -p 6379` 
 (kommandolinjeverktøy mot redis for å sjekke innholdet.)
 
-Det er også mulig å kjøre redis *in-memory* ved å sette miljøvariabelen `IS_REDIS_MOCKED=true`. Denne bør være satt i integrasjonstester.
+Propertyen `innsyn.cache.redisMocked` styrer hvorvidt en _in-memory_ Redis instans spinnes opp og tas i bruk. Denne er satt til `true` ved bruk av spring-profilene `mock`, `local` og `test`.
 
 ## Lokal kjøring
-#### uten integrasjon til Fiks og login-api
+#### *uten* integrasjon til Fiks og login-api
 TestApplication og profile=mock
-#### med integrasjon til Fiks og login-api
+#### *med* integrasjon til Fiks og login-api
 TestApplication og profile=local. \
-I tillegg må FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI og IS_REDIS_MOCKED settes som env-variabler
+I tillegg må FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, og VIRKSERT_STI settes som env-variabler

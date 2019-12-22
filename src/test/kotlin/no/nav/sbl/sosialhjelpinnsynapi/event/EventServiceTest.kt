@@ -1,19 +1,56 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
+import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 
-internal class EventServiceTest : BaseEventTest() {
+internal class EventServiceTest {
+
+    private val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val innsynService: InnsynService = mockk()
+    private val vedleggService: VedleggService = mockk()
+    private val norgClient: NorgClient = mockk()
+
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+
+    private val mockDigisosSak: DigisosSak = mockk()
+    private val mockJsonSoknad: JsonSoknad = mockk()
+    private val mockNavEnhet: NavEnhet = mockk()
+
+    private val soknadsmottaker = "The Office"
+    private val enhetsnr = "2317"
+
+    @BeforeEach
+    fun init() {
+        clearAllMocks()
+        every { mockDigisosSak.fiksDigisosId } returns "123"
+        every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
+        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
+        every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
+        every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
+        every { mockDigisosSak.ettersendtInfoNAV } returns null
+        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
+        every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
+
+        resetHendelser()
+    }
 
 /* Test-caser:
  [x] ingen innsyn, ingen sendt soknad
@@ -169,7 +206,7 @@ internal class EventServiceTest : BaseEventTest() {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
             assertThat(hendelse.tittel).contains("$tittel_1 er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -206,7 +243,7 @@ internal class EventServiceTest : BaseEventTest() {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -245,7 +282,7 @@ internal class EventServiceTest : BaseEventTest() {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
 
         @Test
@@ -319,7 +356,7 @@ internal class EventServiceTest : BaseEventTest() {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
-            assertThat(hendelse.url).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
     }
 
@@ -346,6 +383,41 @@ internal class EventServiceTest : BaseEventTest() {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
         assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
-        assertThat(hendelse.url).contains("/forsendelse/$svarUtId/$svarUtNr")
+        assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
+    }
+
+    @Test
+    fun `At soknad sendt hendelse blir lagt til og at linkTekst er Vis soknaden`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns "asdf"
+
+        val model = service.createModel(mockDigisosSak, "token")
+        assertThat(model).isNotNull
+        val hendelse: Hendelse = model.historikk[0]
+        assertThat(hendelse).isNotNull
+        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til The Office")
+        assertThat(hendelse.url?.linkTekst).isEqualTo("Vis søknaden")
+    }
+
+    @Test
+    fun `At soknad sendt hendelse blir lagt til selv om soknad pdf ikke eksisterer`() {
+
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
+
+        val model = service.createModel(mockDigisosSak, "token")
+        assertThat(model).isNotNull
+        val hendelse = model.historikk[0]
+        assertThat(hendelse).isNotNull
+        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til The Office")
+        assertThat(hendelse.url).isNull()
     }
 }

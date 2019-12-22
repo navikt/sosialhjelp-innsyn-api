@@ -5,6 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneResponse
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneService
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatusDetaljer
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -26,6 +27,7 @@ class KommuneController(private val kommuneService: KommuneService) {
                         erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak));
     }
 
+    @Unprotected
     @GetMapping("/kommuner")
     fun hentAlleKommuneStatuser(): ResponseEntity<List<KommuneStatusDetaljer>> {
         val alleKommunerMedStatus = kommuneService.hentAlleKommunerMedStatusStatus()

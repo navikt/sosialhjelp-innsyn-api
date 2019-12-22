@@ -11,7 +11,7 @@ spring:
   application:
     name: "sosialhjelp-innsyn-api"
   redis:
-    host: ${REDIS_HOST:localhost}
+    host: ${REDIS_HOST}
     port: 6379
 
 server:
@@ -42,3 +42,6 @@ innsyn:
   vedlegg:
     virusscan:
       enabled: true
+  cache:
+    redis_mocked: false
+    time_to_live_seconds: ${CACHE_TIME_TO_LIVE_SECONDS}

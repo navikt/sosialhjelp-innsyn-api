@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sbl.sosialhjelpinnsynapi.innsynOrginalSoknad.InnsynOrginalSoknadService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -18,17 +18,17 @@ class InnsynOrginalSoknadController(private val innsynOrginalSoknadService: Inns
     fun getOrginalJsonSoknad(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalJsonSoknadResponse> {
 
         val orginalSoknadResponse: OrginalJsonSoknadResponse = innsynOrginalSoknadService.hentOrginalJsonSoknad(fiksDigisosId, token)
-                ?: return ResponseEntity(HttpStatus.NO_CONTENT);
+                ?: return ResponseEntity(HttpStatus.NO_CONTENT)
 
-        return ResponseEntity.ok().body(orginalSoknadResponse);
+        return ResponseEntity.ok().body(orginalSoknadResponse)
     }
 
     @GetMapping("/{fiksDigisosId}/orginalSoknadPdfLink")
     fun getOrginalSoknadPdfLink(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalSoknadPdfLinkResponse> {
 
         val orginalSoknadPdfLink = (innsynOrginalSoknadService.hentOrginalSoknadPdfLink(fiksDigisosId, token)
-                ?: return ResponseEntity(HttpStatus.NO_CONTENT));
+                ?: return ResponseEntity(HttpStatus.NO_CONTENT))
 
-        return ResponseEntity.ok().body(orginalSoknadPdfLink);
+        return ResponseEntity.ok().body(orginalSoknadPdfLink)
     }
 }

@@ -17,7 +17,6 @@ internal class OrginalSoknadServiceTest {
     private val innsynService: InnsynService = mockk()
     private val clientProperties: no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties = mockk(relaxed = true)
 
-
     private val service = OrginalSoknadService(
             fiksClient,
             innsynService,
@@ -48,5 +47,26 @@ internal class OrginalSoknadServiceTest {
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
 
         assertThat(service.hentOrginalJsonSoknad("1234", "token")).isEqualTo(OrginalJsonSoknadResponse(mockJsonSoknad))
+    }
+
+    @Test
+    fun `skal returnere pdf-link fra dokumentlager`() {
+        val dokumentlagerId = "id"
+        every { mockDigisosSak.originalSoknadNAV } returns orginalSoknadNAV
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId} returns dokumentlagerId
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
+
+        val response = service.hentOrginalSoknadPdfLink("1234", "token")
+        assertThat(response?.orginalSoknadPdfLink).contains(dokumentlagerId)
+    }
+
+    @Test
+    fun `skal returnere null hvis dokumentlagerid ikke finnes`() {
+        every { mockDigisosSak.originalSoknadNAV } returns orginalSoknadNAV
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId} returns null
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
+
+        val response = service.hentOrginalSoknadPdfLink("1234", "token")
+        assertThat(response).isNull()
     }
 }

@@ -62,6 +62,10 @@ val SOKNADS_STATUS_FERDIGBEHANDLET = JsonSoknadsStatus()
         .withType(JsonHendelse.Type.SOKNADS_STATUS)
         .withStatus(JsonSoknadsStatus.Status.FERDIGBEHANDLET)
 
+val SOKNADS_STATUS_BEHANDLES_IKKE = JsonSoknadsStatus()
+        .withType(JsonHendelse.Type.SOKNADS_STATUS)
+        .withStatus(JsonSoknadsStatus.Status.BEHANDLES_IKKE)
+
 val TILDELT_NAV_KONTOR = JsonTildeltNavKontor()
         .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
         .withNavKontor(navKontor)
@@ -169,6 +173,7 @@ fun resetHendelser() {
     SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(null)
     SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
     SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(null)
+    SOKNADS_STATUS_BEHANDLES_IKKE.withHendelsestidspunkt(null)
     TILDELT_NAV_KONTOR.withHendelsestidspunkt(null)
     TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(null)
     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)

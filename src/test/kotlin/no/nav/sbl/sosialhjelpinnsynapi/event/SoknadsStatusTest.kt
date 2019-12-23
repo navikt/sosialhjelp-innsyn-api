@@ -65,7 +65,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(unixToLocalDateTime(tidspunkt_soknad))
-        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til")
+        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til ")
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_1))
-        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er mottatt")
+        assertThat(hendelse.tittel).isEqualTo("Søknaden med vedlegg er mottatt.")
     }
 
     @Test
@@ -134,7 +134,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))
-        assertThat(hendelse.tittel).contains("Søknaden er under behandling")
+        assertThat(hendelse.tittel).isEqualTo("Søknaden er under behandling.")
     }
 
     @Test
@@ -159,6 +159,30 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-        assertThat(hendelse.tittel).contains("Søknaden er ferdig behandlet")
+        assertThat(hendelse.tittel).isEqualTo("Søknaden er ferdig behandlet.")
+    }
+
+    @Test
+    fun `soknadsStatus BEHANDLES_IKKE`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_BEHANDLES_IKKE.withHendelsestidspunkt(tidspunkt_2)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.BEHANDLES_IKKE)
+        assertThat(model.saker).isEmpty()
+        assertThat(model.historikk).hasSize(3)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))
+        assertThat(hendelse.tittel).isEqualTo("Din søknad vil bli behandlet, men vi kan ikke vise behandlingsstatus digitalt.")
     }
 }

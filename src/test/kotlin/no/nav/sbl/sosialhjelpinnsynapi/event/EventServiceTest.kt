@@ -168,7 +168,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
-            assertThat(hendelse.tittel).contains("Saken er under behandling")
+            assertThat(hendelse.tittel).contains("Saken din er under behandling")
         }
 
         @Test

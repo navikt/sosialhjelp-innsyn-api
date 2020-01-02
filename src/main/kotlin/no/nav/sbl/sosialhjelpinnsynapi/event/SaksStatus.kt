@@ -40,7 +40,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                 mutableListOf(),
                 mutableListOf()
         ))
-        val tittel = hendelse.tittel ?: "default tittel"
+        val tittel = hendelse.tittel ?: "Saken"
         val beskrivelse: String? = when (status) {
             SaksStatus.UNDER_BEHANDLING -> "$tittel er under behandling"
             SaksStatus.BEHANDLES_IKKE, SaksStatus.IKKE_INNSYN -> "Vi kan ikke vise behandlingsstatus for $tittel digitalt."

@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.innsynOrginalSoknad
+package no.nav.sbl.sosialhjelpinnsynapi.originalsoknad
 
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -10,7 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import org.springframework.stereotype.Component
 
 @Component
-class InnsynOrginalSoknadService(
+class OrginalSoknadService(
         private val fiksClient: FiksClient,
         private val innsynService: InnsynService,
         private val clientProperties: ClientProperties

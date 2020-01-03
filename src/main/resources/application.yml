@@ -1,15 +1,10 @@
-# Prometheus
-management:
-  endpoints:
-    web:
-      exposure:
-        include: prometheus,metrics
-
 spring:
   main:
     banner-mode: 'off'
   application:
     name: "sosialhjelp-innsyn-api"
+  profiles:
+    active: ${NAIS_CLUSTER_NAME}
   redis:
     host: ${REDIS_HOST}
     port: 6379
@@ -18,20 +13,29 @@ server:
   servlet:
     context-path: '/sosialhjelp/innsyn-api'
 
+# Prometheus
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: '*'
+
+#Environment-variabler som settes av NAIS
 client:
-  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:https://api.fiks.test.ks.no}
-  fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:https://minside.fiks.test.ks.no}
+  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL}
+  fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL}
   fiks_svar_ut_endpoint_url: ${FIKS_SVAR_UT_ENDPOINT_URL}
   fiks_integrasjonid: ${INTEGRASJONSID_FIKS}
   fiks_integrasjonid_kommune: ${INTEGRASJONSID_FIKS_KOMMUNE}
   fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS}
   fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE}
-  id_porten_token_url: ${ID_PORTEN_TOKEN_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/token}
-  id_porten_client_id: ${ID_PORTEN_CLIENT_ID:1c3631f4-dbf2-4c12-bdc4-156cbd53c625}
-  id_porten_scope: ${ID_PORTEN_SCOPE:ks:fiks}
-  id_porten_config_url: ${ID_PORTEN_CONFIG_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration}
-  norg_endpoint_url: ${NORG_ENDPOINT_URL:norg_endpoint_url}
+  id_porten_token_url: ${ID_PORTEN_TOKEN_URL}
+  id_porten_client_id: ${ID_PORTEN_CLIENT_ID}
+  id_porten_scope: ${ID_PORTEN_SCOPE}
+  id_porten_config_url: ${ID_PORTEN_CONFIG_URL}
+  norg_endpoint_url: ${NORG_ENDPOINT_URL}
 
+#Token-validering
 no.nav.security.jwt:
   issuer.selvbetjening:
     discoveryurl: ${AZUREAD_DISCOVERYURL}

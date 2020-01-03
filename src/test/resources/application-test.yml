@@ -1,6 +1,8 @@
 #properties to use in integration tests
 
 spring:
+  profiles:
+    active: test
   redis:
     host: localhost
     port: 1212
@@ -27,6 +29,7 @@ innsyn:
     redis_mocked: true
     time_to_live_seconds: 2
 
+#Token-valdering
 no.nav.security.jwt:
   issuer.selvbetjening:
     discoveryurl: http://metadata

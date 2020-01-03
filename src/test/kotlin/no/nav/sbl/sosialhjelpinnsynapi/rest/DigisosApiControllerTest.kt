@@ -71,7 +71,10 @@ internal class DigisosApiControllerTest {
         every { model2.saker } returns mutableListOf(sak1, sak2)
 
         val response = controller.hentAlleSaker("token")
-        val saker = response.body
+
+        val saksResponse = response.body
+        assertThat(saksResponse).isNotNull
+        val saker = saksResponse?.saksListe
 
         assertThat(saker).isNotNull
         assertThat(saker).hasSize(2)

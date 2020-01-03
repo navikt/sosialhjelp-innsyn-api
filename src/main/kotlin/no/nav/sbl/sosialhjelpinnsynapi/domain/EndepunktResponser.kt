@@ -70,8 +70,12 @@ data class VedleggOpplastingResponse(
         val filnavn: String?,
         val status: String
 )
-
 data class SaksListeResponse(
+        val saksListe: List<SaksListeResponseSak>,
+        val fiksErrorMessage: String?
+)
+
+data class SaksListeResponseSak(
         val fiksDigisosId: String,
         val soknadTittel: String,
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")

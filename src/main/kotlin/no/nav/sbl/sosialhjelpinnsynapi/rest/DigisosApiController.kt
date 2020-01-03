@@ -1,11 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
-import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksDetaljerResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksListeResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
@@ -49,12 +47,17 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
     }
 
     @GetMapping("/saker")
-    fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
-        val saker = fiksClient.hentAlleDigisosSaker(token)
+    fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksListeResponse> {
+        val saker = try {
+            fiksClient.hentAlleDigisosSaker(token)
+        } catch (e: FiksException) {
+            val saksListeResponse = SaksListeResponse(saksListe = listOf(), fiksErrorMessage = e.message)
+            return ResponseEntity.ok().body(saksListeResponse)
+        }
 
-        val responselist = saker
+        val saksliste = saker
                 .map {
-                    SaksListeResponse(
+                    SaksListeResponseSak(
                             it.fiksDigisosId,
                             "Søknad om økonomisk sosialhjelp",
                             unixTimestampToDate(it.sistEndret),
@@ -62,7 +65,10 @@ class DigisosApiController(private val digisosApiService: DigisosApiService,
                     )
                 }
 
-        return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
+        val saksListeResponse = SaksListeResponse(
+                saksListe = saksliste.sortedByDescending { it.sistOppdatert },
+                fiksErrorMessage = null)
+        return ResponseEntity.ok().body(saksListeResponse)
     }
 
     @GetMapping("/saksDetaljer")

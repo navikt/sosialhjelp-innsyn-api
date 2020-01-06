@@ -5,9 +5,13 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.FiksErrorResponse
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.web.client.HttpStatusCodeException
+import java.io.IOException
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -26,7 +30,7 @@ inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object :
 
 fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
     return when (filreferanse) {
-        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl  + "/dokumentlager/nedlasting/${filreferanse.id}?inline=true"
+        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${filreferanse.id}?inline=true"
         is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
         else -> throw RuntimeException("Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
     }
@@ -91,3 +95,17 @@ fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
 fun isRunningInProd(): Boolean {
     return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "default"
 }
+
+fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
+    return try {
+        objectMapper.readValue(this.responseBodyAsByteArray, FiksErrorResponse::class.java)
+    } catch (e: IOException) {
+        null
+    }
+}
+
+val FiksErrorResponse.feilmeldingUtenFnr: String?
+    get() {
+        return this.message
+                ?.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
+    }

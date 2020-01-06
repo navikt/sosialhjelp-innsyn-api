@@ -26,7 +26,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 
-@Profile("!mock")
+@Profile("!(prod-sbs|mock)")
 @Component
 class DigisosApiClientImpl(clientProperties: ClientProperties,
                            private val restTemplate: RestTemplate,
@@ -45,7 +45,7 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
         var id = fiksDigisosId
         if (fiksDigisosId == null || fiksDigisosId == "001" || fiksDigisosId == "002" || fiksDigisosId == "003") {
             id = opprettDigisosSak()
-            log.info("Laget ny digisossak: " + id)
+            log.info("Laget ny digisossak: $id")
         }
         val httpEntity = HttpEntity(objectMapper.writeValueAsString(digisosApiWrapper), headers())
         try {

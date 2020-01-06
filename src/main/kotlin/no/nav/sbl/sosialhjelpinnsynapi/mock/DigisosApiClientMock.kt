@@ -68,7 +68,7 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
         val digisosSak = fiksClientMock.hentDigisosSak(id, "", true)
         val timestampSendt = digisosSak.originalSoknadNAV!!.timestampSendt
         val tidligsteHendelsetidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt
-        if (unixToLocalDateTime(timestampSendt).isAfter(toLocalDateTime(tidligsteHendelsetidspunkt))) {
+        if (unixToLocalDateTime(timestampSendt).isAfter(tidligsteHendelsetidspunkt.toLocalDateTime())) {
             val oppdatertDigisosSak = digisosSak.updateOriginalSoknadNAV(digisosSak.originalSoknadNAV.copy(timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)))
             fiksClientMock.postDigisosSak(oppdatertDigisosSak)
         }

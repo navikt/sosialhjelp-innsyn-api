@@ -34,6 +34,8 @@ internal class DokumentasjonkravTest {
     private val soknadsmottaker = "The Office"
     private val enhetsnr = "2317"
 
+    private val hendelsetekst = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for detaljer hva du må sende inn."
+
     @BeforeEach
     fun init() {
         clearAllMocks()
@@ -81,6 +83,10 @@ internal class DokumentasjonkravTest {
         assertThat(utbetaling.dokumentasjonkrav[0].beskrivelse).isEqualTo("beskrivelse")
         assertThat(utbetaling.dokumentasjonkrav[0].utbetalinger).hasSize(1)
         assertThat(utbetaling.dokumentasjonkrav[0].oppfyllt).isEqualTo(true)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_6))
     }
 
     @Test
@@ -101,7 +107,11 @@ internal class DokumentasjonkravTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
         assertThat(model.saker).hasSize(0)
-        assertThat(model.historikk).hasSize(3)
+        assertThat(model.historikk).hasSize(4)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
     }
 
     @Test
@@ -127,7 +137,7 @@ internal class DokumentasjonkravTest {
         assertThat(model.historikk).hasSize(5)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo("Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for detaljer hva du må sende inn.")
+        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
         assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_5))
     }
 }

@@ -19,6 +19,8 @@
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local"
   },
+  "minReplicas": "2",
+  "maxReplicas": "4",
   "prometheusEnabled": true,
   "webProxyEnabled": true,
   "accessPoliciesForGcpEnabled": false,

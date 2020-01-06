@@ -22,8 +22,8 @@ spec:
     enabled: {{prometheusEnabled}}
     path: /sosialhjelp/innsyn-api/actuator/prometheus
   replicas:
-    min: 2
-    max: 4
+    min: {{minReplicas}}
+    max: {{maxReplicas}}
   webproxy: {{webProxyEnabled}}
 {{#if accessPoliciesForGcpEnabled}}
   accessPolicy:

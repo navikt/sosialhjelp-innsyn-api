@@ -4,27 +4,26 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.toLocalDate
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
-    val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    val utbetaling = Utbetaling(hendelse.utbetalingsreferanse,
-            UtbetalingsStatus.valueOf(hendelse.status?.value() ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()),
-            BigDecimal.valueOf(hendelse.belop ?: 0.0),
-            hendelse.beskrivelse,
-            if (hendelse.forfallsdato == null) null else LocalDate.parse(hendelse.forfallsdato, pattern),
-            if (hendelse.utbetalingsdato == null) null else LocalDate.parse(hendelse.utbetalingsdato, pattern),
-            if (hendelse.fom == null) null else LocalDate.parse(hendelse.fom, pattern),
-            if (hendelse.tom == null) null else LocalDate.parse(hendelse.tom, pattern),
-            hendelse.mottaker,
-            hendelse.utbetalingsmetode,
-            mutableListOf(),
-            mutableListOf()
+    val utbetaling = Utbetaling(
+            referanse = hendelse.utbetalingsreferanse,
+            status = UtbetalingsStatus.valueOf(hendelse.status?.value() ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()),
+            belop = BigDecimal.valueOf(hendelse.belop ?: 0.0),
+            beskrivelse = hendelse.beskrivelse,
+            forfallsDato = if (hendelse.forfallsdato == null) null else hendelse.forfallsdato.toLocalDate(),
+            utbetalingsDato = if (hendelse.utbetalingsdato == null) null else hendelse.utbetalingsdato.toLocalDate(),
+            fom = if (hendelse.fom == null) null else hendelse.fom.toLocalDate(),
+            tom = if (hendelse.tom == null) null else hendelse.tom.toLocalDate(),
+            mottaker = hendelse.mottaker,
+            kontonummer = if (hendelse.annenMottaker) null else hendelse.kontonummer,
+            utbetalingsmetode = hendelse.utbetalingsmetode,
+            vilkar = mutableListOf(),
+            dokumentasjonkrav = mutableListOf()
     )
-
 
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
             ?: saker.firstOrNull { it.referanse == "default" }

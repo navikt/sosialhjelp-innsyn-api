@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
-@RequestMapping("api/v1/innsyn")
+@RequestMapping("/api/v1/innsyn")
 class SaksOversiktController(private val fiksClient: FiksClient,
                              private val eventService: EventService,
                              private val oppgaveService: OppgaveService) {

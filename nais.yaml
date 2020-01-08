@@ -20,7 +20,7 @@ spec:
     timeout: 1
   prometheus:
     enabled: {{prometheusEnabled}}
-    path: /sosialhjelp/innsyn-api/actuator/prometheus
+    path: /sosialhjelp/innsyn-api/internal/prometheus
   replicas:
     min: {{minReplicas}}
     max: {{maxReplicas}}

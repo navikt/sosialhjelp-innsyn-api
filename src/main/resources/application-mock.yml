@@ -9,6 +9,12 @@ server:
   servlet:
     context-path: '/sosialhjelp/innsyn-api'
 
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: '*'
+
 innsyn:
   vedlegg:
     virusscan:

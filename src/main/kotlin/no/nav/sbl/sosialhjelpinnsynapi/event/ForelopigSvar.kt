@@ -18,7 +18,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: Cl
     historikk.add(
             Hendelse(
                     beskrivelse,
-                    toLocalDateTime(hendelse.hendelsestidspunkt),
+                    hendelse.hendelsestidspunkt.toLocalDateTime(),
                     UrlResponse(
                             VIS_BREVET,
                             hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)

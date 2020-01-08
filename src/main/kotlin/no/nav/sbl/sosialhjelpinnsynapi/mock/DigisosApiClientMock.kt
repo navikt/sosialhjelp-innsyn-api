@@ -58,8 +58,7 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
     private fun femMinutterForMottattSoknad(digisosApiWrapper: DigisosApiWrapper): Long {
         val mottattTidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt
         return try {
-            val toLocalDateTime = toLocalDateTime(mottattTidspunkt)
-            toLocalDateTime.minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
+            mottattTidspunkt.toLocalDateTime().minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
         } catch (e: DateTimeParseException) {
             LocalDateTime.now().minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
         }
@@ -69,7 +68,7 @@ class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : Digisos
         val digisosSak = fiksClientMock.hentDigisosSak(id, "", true)
         val timestampSendt = digisosSak.originalSoknadNAV!!.timestampSendt
         val tidligsteHendelsetidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt
-        if (unixToLocalDateTime(timestampSendt).isAfter(toLocalDateTime(tidligsteHendelsetidspunkt))) {
+        if (unixToLocalDateTime(timestampSendt).isAfter(tidligsteHendelsetidspunkt.toLocalDateTime())) {
             val oppdatertDigisosSak = digisosSak.updateOriginalSoknadNAV(digisosSak.originalSoknadNAV.copy(timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)))
             fiksClientMock.postDigisosSak(oppdatertDigisosSak)
         }

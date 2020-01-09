@@ -29,7 +29,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 
-@Profile("!mock")
+@Profile("!(prod-sbs|mock)")
 @Component
 class DigisosApiClientImpl(clientProperties: ClientProperties,
                            private val restTemplate: RestTemplate,

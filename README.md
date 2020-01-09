@@ -1,4 +1,6 @@
-[![CircleCI](https://circleci.com/gh/navikt/sosialhjelp-innsyn-api.svg?style=svg&circle-token=13cea80fe70abf9a4b9dbf02f97622d018cf2e8a)](https://circleci.com/gh/navikt/sosialhjelp-innsyn-api)
+![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Build/badge.svg?branch=master)
+![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Deploy%20Dev/badge.svg?)
+![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Deploy%20Prod/badge.svg?)
 # sosialhjelp-innsyn-api
 Backend-app som skal innsyn i egen sosialhjelp sak.
 

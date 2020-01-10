@@ -21,7 +21,7 @@ jobs:
               --cluster="${MILJO}" \
               --apikey="${APIKEY}" \
               --resource="nais.yaml" \
-              --team=digisos \
+              --team=teamdigisos \
               --owner=navikt \
               --repository="${REPOSITORY_NAME}" \
               --var version=${TAG} \

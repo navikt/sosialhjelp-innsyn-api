@@ -1,11 +1,10 @@
 {
-  "namespace": "q0",
+  "namespace": "default",
   "ingress": [
-    "https://sosialhjelp-innsyn-api-q0.nais.oera-q.local/sosialhjelp/innsyn-api",
-    "https://www-q0.nav.no/sosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api.nais.oera-q.local/sosialhjelp/innsyn-api"
   ],
   "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/preprod/shared",
-  "application_vault_path": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
+  "application_vault_path": "/kv/preprod/sbs/sosialhjelp-innsyn-api/default",
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",

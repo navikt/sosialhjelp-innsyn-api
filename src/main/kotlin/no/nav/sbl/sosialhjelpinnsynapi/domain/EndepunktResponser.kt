@@ -45,7 +45,6 @@ data class UtbetalingerResponse(
         val maned: String,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val foersteIManeden: LocalDate,
-        val sum: Double,
         val utbetalinger: List<ManedUtbetaling>
 )
 

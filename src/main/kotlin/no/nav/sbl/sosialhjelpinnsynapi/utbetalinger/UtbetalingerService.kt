@@ -63,7 +63,6 @@ class UtbetalingerService(private val eventService: EventService,
                             ar = key.year,
                             maned = monthToString(key.monthValue),
                             foersteIManeden = foersteIManeden(key),
-                            sum = value.filter { it.status == UtbetalingsStatus.UTBETALT.name }.sumByDouble { it.belop },
                             utbetalinger = value.sortedByDescending { it.utbetalingsdato }
                     )
                 }

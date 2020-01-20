@@ -3,8 +3,10 @@ package no.nav.sbl.sosialhjelpinnsynapi.utbetalinger
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.event.apply
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -320,5 +322,49 @@ internal class UtbetalingerServiceTest {
         assertThat(response).hasSize(1)
         assertThat(response[0].utbetalinger).hasSize(1)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo(UTBETALING_DEFAULT_TITTEL)
+    }
+
+    @Test
+    fun `utbetalings hendelse til bruker skal gi kontonummer`() {
+        val model = InternalDigisosSoker()
+        val kontonummer = "12345678901"
+        val utbetalingsreferanse = "0987654321"
+        val utbetaling = JsonUtbetaling()
+        utbetaling.kontonummer = kontonummer
+        utbetaling.utbetalingsreferanse = utbetalingsreferanse
+        utbetaling.annenMottaker = false
+        model.apply(utbetaling)
+        assertThat(model.utbetalinger).isNotEmpty
+        assertThat(model.utbetalinger).hasSize(1)
+        assertThat(model.utbetalinger[0].kontonummer).isEqualTo(kontonummer)
+    }
+
+    @Test
+    fun `utbetalings hendelse til annen bruker skal ikke gi kontonummer`() {
+        val model = InternalDigisosSoker()
+        val kontonummer = "12345678901"
+        val utbetalingsreferanse = "0987654321"
+        val utbetaling = JsonUtbetaling()
+        utbetaling.kontonummer = kontonummer
+        utbetaling.utbetalingsreferanse = utbetalingsreferanse
+        utbetaling.annenMottaker = true
+        model.apply(utbetaling)
+        assertThat(model.utbetalinger).isNotEmpty
+        assertThat(model.utbetalinger).hasSize(1)
+        assertThat(model.utbetalinger[0].kontonummer).isNull()
+    }
+
+    @Test
+    fun `utbetalings hendelse nar annen mottaker er null`() {
+        val model = InternalDigisosSoker()
+        val kontonummer = "12345678901"
+        val utbetalingsreferanse = "0987654321"
+        val utbetaling = JsonUtbetaling()
+        utbetaling.kontonummer = kontonummer
+        utbetaling.utbetalingsreferanse = utbetalingsreferanse
+        model.apply(utbetaling)
+        assertThat(model.utbetalinger).isNotEmpty
+        assertThat(model.utbetalinger).hasSize(1)
+        assertThat(model.utbetalinger[0].kontonummer).isNull()
     }
 }

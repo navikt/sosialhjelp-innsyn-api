@@ -35,4 +35,4 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
 }
 
 private fun erForEnAnnenMotaker(hendelse: JsonUtbetaling) =
-        hendelse.annenMottaker || hendelse.annenMottaker == null
+        hendelse.annenMottaker == null || hendelse.annenMottaker

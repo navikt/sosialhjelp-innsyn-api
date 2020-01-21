@@ -2,7 +2,9 @@ package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.VedleggMetadata
@@ -21,12 +23,13 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
 
-@Profile("!mock")
+@Profile("!(prod-sbs|mock)")
 @Component
 class DigisosApiClientImpl(clientProperties: ClientProperties,
                            private val restTemplate: RestTemplate,
@@ -45,20 +48,24 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
         var id = fiksDigisosId
         if (fiksDigisosId == null || fiksDigisosId == "001" || fiksDigisosId == "002" || fiksDigisosId == "003") {
             id = opprettDigisosSak()
-            log.info("Laget ny digisossak: " + id)
+            log.info("Laget ny digisossak: $id")
         }
         val httpEntity = HttpEntity(objectMapper.writeValueAsString(digisosApiWrapper), headers())
         try {
             restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
             log.info("Postet DigisosSak til Fiks")
             return id
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             log.warn(e.responseBodyAsString)
             log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            log.warn(e.responseBodyAsString)
+            log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.error(e.message, e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 
@@ -89,13 +96,17 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
             log.info("Filer sendt til Fiks")
             return opplastingResponse.map { filOpplastingResponse -> filOpplastingResponse.dokumentlagerDokumentId }
 
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             log.warn(e.responseBodyAsString)
             log.warn("Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            log.warn(e.responseBodyAsString)
+            log.warn("Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Opplasting av filer feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
 
     }
@@ -106,12 +117,15 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=26104500284", HttpMethod.POST, httpEntity, String::class.java)
             log.info("Opprettet sak hos Fiks. Digisosid: ${response.body}")
             return response.body?.replace("\"", "")
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.error(e.message, e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 

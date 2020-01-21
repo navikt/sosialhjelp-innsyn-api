@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import io.mockk.*
-import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveResponse
@@ -17,14 +16,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class DigisosApiControllerTest {
+internal class SaksOversiktControllerTest {
 
-    private val digisosApiService: DigisosApiService = mockk()
     private val fiksClient: FiksClient = mockk()
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
 
-    private val controller = DigisosApiController(digisosApiService, fiksClient, eventService, oppgaveService)
+    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -39,7 +37,7 @@ internal class DigisosApiControllerTest {
 
     @BeforeEach
     internal fun setUp() {
-        clearMocks(digisosApiService, fiksClient, eventService, oppgaveService)
+        clearAllMocks()
 
         every { digisosSak1.fiksDigisosId } returns "123"
         every { digisosSak1.sistEndret } returns 0L

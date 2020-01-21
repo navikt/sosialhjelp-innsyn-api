@@ -10,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -20,7 +21,7 @@ import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-
+@Profile("!mock")
 @Component
 class FiksCheck(private val restTemplate: RestTemplate,
                 private val clientProperties: ClientProperties,
@@ -47,10 +48,10 @@ class FiksCheck(private val restTemplate: RestTemplate,
             restTemplate.exchange("$address/digisos/api/v1/nav/kommune/0301", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         } catch (e: HttpStatusCodeException) {
             log.warn("Selftest - Fiks hentKommuneInfo feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksException(e.message, e)
         } catch (e: Exception) {
             log.warn("Selftest - Fiks hentKommuneInfo feilet", e)
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 }

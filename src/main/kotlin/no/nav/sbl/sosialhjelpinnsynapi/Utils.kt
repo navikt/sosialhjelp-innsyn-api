@@ -13,11 +13,9 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.client.HttpStatusCodeException
 import java.io.IOException
 import java.sql.Timestamp
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.time.*
+import java.time.format.DateTimeFormatter.ISO_DATE_TIME
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.util.*
 import kotlin.reflect.full.companionObject
 
@@ -40,10 +38,12 @@ fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: St
     return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/${dokumentlagerId}?inline=true"
 }
 
-fun toLocalDateTime(hendelsetidspunkt: String): LocalDateTime {
-    return ZonedDateTime.parse(hendelsetidspunkt, DateTimeFormatter.ISO_DATE_TIME)
+fun String.toLocalDateTime(): LocalDateTime {
+    return ZonedDateTime.parse(this, ISO_DATE_TIME)
             .withZoneSameInstant(ZoneId.of("Europe/Oslo")).toLocalDateTime()
 }
+
+fun String.toLocalDate(): LocalDate = LocalDate.parse(this, ISO_LOCAL_DATE)
 
 fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime {
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneId.of("Europe/Oslo"))

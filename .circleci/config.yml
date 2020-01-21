@@ -42,7 +42,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: false
       - run:
           name: GitHub package registry login
           command: |
@@ -140,7 +140,7 @@ jobs:
       - run:
           name: Deploy versjon=${VERSION} til miljø=${MILJO} i dev-sbs
           command: |
-            deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=nais.yaml --var version=${TAG} --vars=nais/dev/${MILJO}.json
+            deployment-cli deploy create --cluster=dev-sbs --repository=navikt/sosialhjelp-innsyn-api --team=teamdigisos -r=nais.yaml --var version=${TAG} --vars=nais/dev/${MILJO}.json
 
   deploy_prod:
     docker:
@@ -169,7 +169,24 @@ jobs:
       - run:
           name: Deploy versjon=${VERSION} til prod
           command: |
-            deployment-cli deploy create --cluster=prod-sbs --repository=navikt/sosialhjelp-innsyn-api --team=digisos -r=nais.yaml --var version=${TAG} --vars=nais/prod/default.json
+            deployment-cli deploy create --cluster=prod-sbs --repository=navikt/sosialhjelp-innsyn-api --team=teamdigisos -r=nais.yaml --var version=${TAG} --vars=nais/prod/default.json
+
+  deploy_gcp:
+    docker:
+      - image: navikt/deployment:v1
+    steps:
+      - checkout
+      - run:
+          name: Deploy til miljø i gcp
+          command: |
+            yq w nais/dev/${MILJO}.json version "${TAG}" > deployment.yaml
+            /app/deploy \
+                --apikey="$NAIS_DEPLOY_APIKEY" \
+                --cluster="${MILJO}" \
+                --repository="$CIRCLE_PROJECT_REPONAME" \
+                --resource="nais.yaml" \
+                --vars="deployment.yaml" \
+                --wait=true
 
 workflows:
   version: 2

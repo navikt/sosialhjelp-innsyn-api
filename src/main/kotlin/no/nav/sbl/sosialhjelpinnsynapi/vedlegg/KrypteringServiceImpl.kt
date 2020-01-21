@@ -1,7 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
 import no.ks.kryptering.CMSKrypteringImpl
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
@@ -10,7 +12,8 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.io.*
 import java.security.Security
@@ -88,11 +91,14 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
             } catch (e: CertificateException) {
                 throw RuntimeException(e)
             }
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: HttpClientErrorException) {
             log.warn("Fiks - getDokumentlagerPublicKey feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksException(e.statusCode, e.message, e)
+            throw FiksClientException(e.statusCode, e.message, e)
+        } catch (e: HttpServerErrorException) {
+            log.warn("Fiks - getDokumentlagerPublicKey feilet - ${e.statusCode} ${e.statusText}", e)
+            throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            throw FiksException(null, e.message, e)
+            throw FiksException(e.message, e)
         }
     }
 }

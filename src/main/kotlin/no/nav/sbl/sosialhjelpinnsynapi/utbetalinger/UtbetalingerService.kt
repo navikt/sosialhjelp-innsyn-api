@@ -8,8 +8,11 @@ import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.stereotype.Component
 import java.text.DateFormatSymbols
+import java.time.LocalDate
 import java.time.YearMonth
 
+
+const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
 
 @Component
 class UtbetalingerService(private val eventService: EventService,
@@ -33,14 +36,20 @@ class UtbetalingerService(private val eventService: EventService,
                     model.saker
                             .flatMap { sak ->
                                 sak.utbetalinger
-                                        .filter { it.utbetalingsDato != null && (it.status == UtbetalingsStatus.UTBETALT || it.status == UtbetalingsStatus.ANNULLERT) }
+                                        .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
                                         .map { utbetaling ->
                                             ManedUtbetaling(
-                                                    tittel = utbetaling.beskrivelse,
+                                                    tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
                                                     belop = utbetaling.belop.toDouble(),
                                                     utbetalingsdato = utbetaling.utbetalingsDato,
+                                                    forfallsdato = utbetaling.forfallsDato,
                                                     status = utbetaling.status.name,
-                                                    fiksDigisosId = digisosSak.fiksDigisosId
+                                                    fiksDigisosId = digisosSak.fiksDigisosId,
+                                                    fom = utbetaling.fom,
+                                                    tom = utbetaling.tom,
+                                                    mottaker = utbetaling.mottaker,
+                                                    kontonummer = utbetaling.kontonummer,
+                                                    utbetalingsmetode = utbetaling.utbetalingsmetode
                                             )
                                         }
                             }
@@ -53,11 +62,13 @@ class UtbetalingerService(private val eventService: EventService,
                     UtbetalingerResponse(
                             ar = key.year,
                             maned = monthToString(key.monthValue),
-                            sum = value.filter { it.status == UtbetalingsStatus.UTBETALT.name }.sumByDouble { it.belop },
+                            foersteIManeden = foersteIManeden(key),
                             utbetalinger = value.sortedByDescending { it.utbetalingsdato }
                     )
                 }
     }
+
+    private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)
 
     private fun monthToString(month: Int) = DateFormatSymbols().months[month - 1]
 

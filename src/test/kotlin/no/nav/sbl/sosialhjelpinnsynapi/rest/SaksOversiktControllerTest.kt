@@ -70,10 +70,7 @@ internal class SaksOversiktControllerTest {
 
         val response = controller.hentAlleSaker("token")
 
-        val saksResponse = response.body
-        assertThat(saksResponse).isNotNull
-        val saker = saksResponse?.saksListe
-
+        val saker = response.body
         assertThat(saker).isNotNull
         assertThat(saker).hasSize(2)
 

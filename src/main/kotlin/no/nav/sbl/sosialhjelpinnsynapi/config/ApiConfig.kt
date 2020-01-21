@@ -34,6 +34,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "https://sosialhjelp-innsyn.labs.nais.io",
                 "http://localhost:3000",
                 "http://localhost:3001",
+                "https://digisos.labs.nais.io",
                 "https://www.digisos-test.com")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
         configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization")

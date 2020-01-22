@@ -69,8 +69,8 @@ internal class SaksOversiktControllerTest {
         every { model2.saker } returns mutableListOf(sak1, sak2)
 
         val response = controller.hentAlleSaker("token")
-        val saker = response.body
 
+        val saker = response.body
         assertThat(saker).isNotNull
         assertThat(saker).hasSize(2)
 

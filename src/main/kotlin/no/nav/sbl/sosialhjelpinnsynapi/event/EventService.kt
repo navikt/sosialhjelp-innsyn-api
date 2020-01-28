@@ -76,6 +76,17 @@ class EventService(private val clientProperties: ClientProperties,
         return model
     }
 
+    fun hentAlleUtbetalinger(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
+        val model = InternalDigisosSoker()
+        val jsonDigisosSoker: JsonDigisosSoker = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
+                ?: return model
+        jsonDigisosSoker.hendelser
+                .sortedBy { it.hendelsestidspunkt }
+                .filter { it is JsonUtbetaling }
+                .map { model.applyHendelse(it) }
+        return model
+    }
+
     fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {
         when (hendelse) {
             is JsonSoknadsStatus -> apply(hendelse)

@@ -6,10 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utbetalinger.UtbetalingerService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
@@ -17,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController
 class UtbetalingerController(private val utbetalingerService: UtbetalingerService) {
 
     @GetMapping("utbetalinger")
-    fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<UtbetalingerResponse>> {
+    fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
         // Gitt innlogget bruker
-        return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(token))
+        return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(token, month))
     }
 
 }

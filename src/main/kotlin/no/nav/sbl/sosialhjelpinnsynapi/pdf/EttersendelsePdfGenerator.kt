@@ -24,14 +24,12 @@ class EttersendelsePdfGenerator {
 
             pdf.addText("Følgende vedlegg er sendt " + formatLocalDateTime(LocalDateTime.now()))
 
-            pdf.addBlankLine()
-
             vedleggSpesifikasjon.vedlegg.forEach { vedlegg ->
+                pdf.addBlankLine()
                 pdf.addText("Type: " + vedlegg.type)
                 vedlegg.filer.forEach {fil ->
                     pdf.addText("Filnavn: " + fil.filnavn)
                 }
-                pdf.addBlankLine()
             }
 
             pdf.finish()

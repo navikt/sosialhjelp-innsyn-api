@@ -274,7 +274,11 @@ class FiksClientImpl(clientProperties: ClientProperties,
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggSpesifikasjon), "vedlegg.json"))
         try {
             val digisosSak = hentDigisosSak(digisosId, token, true)
-            body.add("ettersendelse.pdf", ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr))
+            val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
+
+            val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
+            body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
+            body.add("dokument:ettersendelse.pdf", createHttpEntityOfByteArray( ettersendelsePdf, "dokument:ettersendelse.pdf"))
         } catch (e: Exception) {
             log.error("Kunne ikke generere pdf for ettersendelse", e)
         }
@@ -321,6 +325,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
     fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
         return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
+    }
+
+    fun createHttpEntityOfByteArray(byteArray: ByteArray, name: String): HttpEntity<Any> {
+        return createHttpEntity(byteArray, name, name, "application/pdf")
     }
 
     private fun createHttpEntity(body: Any, name: String, filename: String?, contentType: String): HttpEntity<Any> {

@@ -37,7 +37,6 @@ class PdfGenerator internal constructor() {
         y -= 20
     }
 
-    @Throws(IOException::class)
     fun addDividerLine() {
         currentStream.setLineWidth(1f)
         currentStream.moveTo(MARGIN, y)
@@ -60,12 +59,10 @@ class PdfGenerator internal constructor() {
         addCenteredParagraph(text, FONT_BOLD, FONT_H4_SIZE, LEADING_PERCENTAGE)
     }
 
-    @Throws(IOException::class)
     fun addText(text: String) {
         addParagraph(text, FONT_PLAIN, FONT_PLAIN_SIZE, MARGIN)
     }
 
-    @Throws(IOException::class)
     fun addParagraph(text: String, font: PDFont, fontSize: Float, margin: Float) {
         val lines: List<String> = parseLines(text, font, fontSize)
 
@@ -90,7 +87,6 @@ class PdfGenerator internal constructor() {
         currentStream.endText()
     }
 
-    @Throws(IOException::class)
     fun addCenteredParagraph(
             text: String,
             font: PDFont,
@@ -126,7 +122,6 @@ class PdfGenerator internal constructor() {
         currentStream = PDPageContentStream(document, currentPage)
     }
 
-    @Throws(IOException::class)
     private fun parseLines(text: String, font: PDFont, fontSize: Float): List<String> {
         var text: String? = text
         val lines: MutableList<String> = ArrayList()
@@ -154,7 +149,6 @@ class PdfGenerator internal constructor() {
         return lines
     }
 
-    @Throws(IOException::class)
     fun addLogo() {
         val ximage = PDImageXObject.createFromByteArray(document, logo(), "logo")
         currentStream.drawImage(ximage, 27f, 765f, 99f, 62f)

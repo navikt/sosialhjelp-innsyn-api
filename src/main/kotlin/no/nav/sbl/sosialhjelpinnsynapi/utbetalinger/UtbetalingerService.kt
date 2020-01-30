@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.*
 
 
 const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
@@ -67,6 +68,6 @@ class UtbetalingerService(private val eventService: EventService,
 
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)
 
-    private fun monthToString(month: Int) = DateFormatSymbols().months[month - 1]
+    private fun monthToString(month: Int) = DateFormatSymbols(Locale.forLanguageTag("no-NO")).months[month - 1]
 
 }

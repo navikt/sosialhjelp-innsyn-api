@@ -9,6 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
+import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
@@ -40,7 +41,8 @@ internal class FiksClientTest {
     private val redisStore: RedisStore = mockk()
     private val cacheProperties: CacheProperties = mockk(relaxed = true)
     private val retryProperties: FiksRetryProperties = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties)
+    private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties, ettersendelsePdfGenerator)
 
     private val id = "123"
 

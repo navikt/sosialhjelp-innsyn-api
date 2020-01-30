@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
+import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
@@ -38,7 +39,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val idPortenService: IdPortenService,
                      private val redisStore: RedisStore,
                      private val cacheProperties: CacheProperties,
-                     private val retryProperties: FiksRetryProperties) : FiksClient {
+                     private val retryProperties: FiksRetryProperties,
+                     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator) : FiksClient {
 
     companion object {
         val log by logger()
@@ -270,6 +272,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val body = LinkedMultiValueMap<String, Any>()
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggSpesifikasjon), "vedlegg.json"))
+        try {
+            val digisosSak = hentDigisosSak(digisosId, token, true)
+            body.add("ettersendelse.pdf", ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr))
+        } catch (e: Exception) {
+            log.error("Kunne ikke generere pdf for ettersendelse", e)
+        }
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)

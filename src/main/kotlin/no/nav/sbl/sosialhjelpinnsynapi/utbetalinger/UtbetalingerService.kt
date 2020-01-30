@@ -1,15 +1,15 @@
 package no.nav.sbl.sosialhjelpinnsynapi.utbetalinger
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.*
 
 
 const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
@@ -22,7 +22,7 @@ class UtbetalingerService(private val eventService: EventService,
         val log by logger()
     }
 
-    fun hentUtbetalinger(token: String): List<UtbetalingerResponse> {
+    fun hentUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
         if (digisosSaker.isEmpty()) {
@@ -31,28 +31,26 @@ class UtbetalingerService(private val eventService: EventService,
         }
 
         val alleUtbetalinger: List<ManedUtbetaling> = digisosSaker
+                .filter { digisosSak -> digisosSak.sistEndret >= DateTime.now().minusMonths(months).millis }
                 .flatMap { digisosSak ->
-                    val model = eventService.createModel(digisosSak, token)
-                    model.saker
-                            .flatMap { sak ->
-                                sak.utbetalinger
-                                        .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
-                                        .map { utbetaling ->
-                                            ManedUtbetaling(
-                                                    tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
-                                                    belop = utbetaling.belop.toDouble(),
-                                                    utbetalingsdato = utbetaling.utbetalingsDato,
-                                                    forfallsdato = utbetaling.forfallsDato,
-                                                    status = utbetaling.status.name,
-                                                    fiksDigisosId = digisosSak.fiksDigisosId,
-                                                    fom = utbetaling.fom,
-                                                    tom = utbetaling.tom,
-                                                    mottaker = utbetaling.mottaker,
-                                                    kontonummer = utbetaling.kontonummer,
-                                                    utbetalingsmetode = utbetaling.utbetalingsmetode
-                                            )
-                                        }
-                            }
+                    val model = eventService.hentAlleUtbetalinger(token, digisosSak)
+                        model.utbetalinger
+                                .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
+                                .map { utbetaling ->
+                                    ManedUtbetaling(
+                                            tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
+                                            belop = utbetaling.belop.toDouble(),
+                                            utbetalingsdato = utbetaling.utbetalingsDato,
+                                            forfallsdato = utbetaling.forfallsDato,
+                                            status = utbetaling.status.name,
+                                            fiksDigisosId = digisosSak.fiksDigisosId,
+                                            fom = utbetaling.fom,
+                                            tom = utbetaling.tom,
+                                            mottaker = utbetaling.mottaker,
+                                            kontonummer = utbetaling.kontonummer,
+                                            utbetalingsmetode = utbetaling.utbetalingsmetode
+                                    )
+                                }
                 }
 
         return alleUtbetalinger
@@ -70,6 +68,6 @@ class UtbetalingerService(private val eventService: EventService,
 
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)
 
-    private fun monthToString(month: Int) = DateFormatSymbols().months[month - 1]
+    private fun monthToString(month: Int) = DateFormatSymbols(Locale.forLanguageTag("no-NO")).months[month - 1]
 
 }

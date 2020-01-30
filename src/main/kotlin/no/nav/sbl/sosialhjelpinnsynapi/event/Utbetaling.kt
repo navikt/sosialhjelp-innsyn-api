@@ -32,6 +32,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     sakForReferanse?.utbetalinger?.add(utbetaling)
     utbetalinger.removeIf { t -> t.referanse == utbetaling.referanse }
     utbetalinger.add(utbetaling)
+//    if(utbetaling.status == UtbetalingsStatus.UTBETALT) {
+//        historikk.add(Hendelse("Utbetaling: " + utbetaling.beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
+//    }
 }
 
 private fun erForEnAnnenMotaker(hendelse: JsonUtbetaling) =

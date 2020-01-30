@@ -1,9 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.pdf
 
-import jdk.nashorn.internal.ir.annotations.Ignore
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.FileOutputStream
 import java.lang.Exception
@@ -13,7 +13,7 @@ class EttersendelsePdfGeneratorTest {
     private val ettersendelsePdfGenerator  = EttersendelsePdfGenerator()
 
     // TODO: skrive bedre test for generering av pdf, foreløpig kun brukt for å sjekke at pdf ser riktig ut.
-    @Ignore
+    @Disabled
     @Test
     fun `skal generere pdf`() {
         val jsonVedleggSpesifikasjon = JsonVedleggSpesifikasjon()

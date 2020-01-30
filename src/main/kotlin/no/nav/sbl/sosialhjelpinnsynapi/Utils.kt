@@ -56,7 +56,7 @@ fun unixTimestampToDate(tidspunkt: Long): Date {
 }
 
 fun formatLocalDateTime(dato: LocalDateTime): String {
-    val datoFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy HH.mm", Locale.forLanguageTag("nb"))
+    val datoFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy 'kl.' HH.mm", Locale.forLanguageTag("nb"))
     return dato.format(datoFormatter)
 }
 

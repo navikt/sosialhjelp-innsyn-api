@@ -1,7 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.pdf
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.formatLocalDateTime
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class EttersendelsePdfGenerator {
@@ -20,7 +22,7 @@ class EttersendelsePdfGenerator {
 
             pdf.addBlankLine()
 
-            pdf.addText("Følgende vedlegg er sendt ")
+            pdf.addText("Følgende vedlegg er sendt " + formatLocalDateTime(LocalDateTime.now()))
 
             pdf.addBlankLine()
 

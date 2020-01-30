@@ -19,6 +19,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsonsoknad_response
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,7 +43,8 @@ internal class FiksClientTest {
     private val cacheProperties: CacheProperties = mockk(relaxed = true)
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties, ettersendelsePdfGenerator)
+    private val krypteringService: KrypteringService = mockk()
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties, krypteringService, ettersendelsePdfGenerator)
 
     private val id = "123"
 
@@ -336,6 +338,10 @@ internal class FiksClientTest {
         val fil2: InputStream = mockk()
         every { fil1.readAllBytes() } returns "test-fil".toByteArray()
         every { fil2.readAllBytes() } returns "div".toByteArray()
+
+        var ettersendelsPdf = ByteArray(1)
+        every { ettersendelsePdfGenerator.generate(any(), any() ) } returns ettersendelsPdf
+        every { krypteringService.krypter(any(), any(), any()) } returns fil1
 
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()
         every { mockDigisosSakResponse.body } returns ok_digisossak_response

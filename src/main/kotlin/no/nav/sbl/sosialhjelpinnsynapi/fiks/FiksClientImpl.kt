@@ -18,6 +18,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.*
@@ -29,7 +30,10 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
+import java.util.*
 import java.util.Collections.singletonList
+import java.util.concurrent.CompletableFuture
+import kotlin.collections.ArrayList
 
 
 @Profile("!mock")
@@ -40,6 +44,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val redisStore: RedisStore,
                      private val cacheProperties: CacheProperties,
                      private val retryProperties: FiksRetryProperties,
+                     private val krypteringService: KrypteringService,
                      private val ettersendelsePdfGenerator: EttersendelsePdfGenerator) : FiksClient {
 
     companion object {
@@ -273,8 +278,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val body = LinkedMultiValueMap<String, Any>()
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggSpesifikasjon), "vedlegg.json"))
         try {
-            val digisosSak = hentDigisosSak(digisosId, token, true)
-            body.add("ettersendelse.pdf", ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr))
+            createEttersendelsesPdf(vedleggSpesifikasjon, body, digisosId, token)
         } catch (e: Exception) {
             log.error("Kunne ikke generere pdf for ettersendelse", e)
         }
@@ -315,12 +319,26 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
+    private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
+        val digisosSak = hentDigisosSak(digisosId, token, true)
+
+        val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
+        val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
+        val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token)
+        val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
+        body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
+        body.add("dokument:ettersendelse.pdf", createHttpEntity(InputStreamResource(ettersendelseKryptertFil), "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))
+    }
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
     }
 
     fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
         return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
+    }
+
+    fun createHttpEntityOfByteArray(byteArray: ByteArray, name: String): HttpEntity<Any> {
+        return createHttpEntity(byteArray, name, name, "application/pdf")
     }
 
     private fun createHttpEntity(body: Any, name: String, filename: String?, contentType: String): HttpEntity<Any> {

@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksDetaljerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksListeResponse
@@ -25,7 +26,11 @@ class SaksOversiktController(private val fiksClient: FiksClient,
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
-        val saker = fiksClient.hentAlleDigisosSaker(token)
+        val saker = try {
+            fiksClient.hentAlleDigisosSaker(token)
+        } catch (e: FiksException) {
+            return ResponseEntity.status(503).build()
+        }
 
         val responselist = saker
                 .map {

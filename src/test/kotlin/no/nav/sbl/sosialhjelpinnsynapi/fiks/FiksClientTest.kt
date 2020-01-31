@@ -339,6 +339,10 @@ internal class FiksClientTest {
         every { fil1.readAllBytes() } returns "test-fil".toByteArray()
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
+        var ettersendelsPdf = ByteArray(1)
+        every { ettersendelsePdfGenerator.generate(any(), any() ) } returns ettersendelsPdf
+        every { krypteringService.krypter(any(), any(), any()) } returns fil1
+
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()
         every { mockDigisosSakResponse.body } returns ok_digisossak_response
         every { restTemplate.exchange(any(), HttpMethod.GET, any(), String::class.java, id) } returns mockDigisosSakResponse

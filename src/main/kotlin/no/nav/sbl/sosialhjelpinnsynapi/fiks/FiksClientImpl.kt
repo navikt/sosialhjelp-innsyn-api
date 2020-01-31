@@ -327,7 +327,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token)
         val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
         body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
-        body.add("dokument:ettersendelse.pdf", createHttpEntity(ettersendelseKryptertFil, "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))
+        body.add("dokument:ettersendelse.pdf", createHttpEntity(InputStreamResource(ettersendelseKryptertFil), "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))
     }
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")

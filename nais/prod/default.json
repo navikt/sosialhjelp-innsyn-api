@@ -4,7 +4,7 @@
 		"https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
 		"https://www.nav.no/sosialhjelp/innsyn-api"
 	],
-	"virksomhetssertifikat_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
+	"virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/maskinporten",
 	"application_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
 
 	"env": {

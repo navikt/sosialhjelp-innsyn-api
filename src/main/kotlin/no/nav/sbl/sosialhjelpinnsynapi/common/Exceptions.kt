@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus
 class InvalidInputException(message: String) : Exception(message)
 
 class FiksException(override val message: String?, override val cause: Throwable?): RuntimeException(message, cause)
-class FiksClientException(status: HttpStatus, override val message: String?, override val cause: Throwable?): RuntimeException(message, cause)
+class FiksClientException(val status: HttpStatus, override val message: String?, override val cause: Throwable?): RuntimeException(message, cause)
 class FiksServerException(status: HttpStatus, override val message: String?, override val cause: Throwable?): RuntimeException(message, cause)
 class FiksNotFoundException(status: HttpStatus, override val message: String?, override val cause: Throwable?): RuntimeException(message, cause)
 

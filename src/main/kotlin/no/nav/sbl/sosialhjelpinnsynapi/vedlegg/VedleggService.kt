@@ -64,7 +64,7 @@ class VedleggService(private val fiksClient: FiksClient) {
                                 val currentFilIndex = filIndex
                                 filIndex += vedlegg.filer.size
                                 val dokumentInfoList = ettersendelse.vedlegg.subList(currentFilIndex, filIndex)
-                                        .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
+                                        .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn == "ettersendelse.pdf" }
 
                                 if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
                                     throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)

@@ -140,7 +140,6 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             log.warn(MESSAGE_COULD_NOT_LOAD_DOCUMENT + e.stackTrace)
             return MESSAGE_COULD_NOT_LOAD_DOCUMENT
         } finally {
-            log.info("Lukker pdf")
             document.close()
         }
     }

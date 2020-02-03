@@ -116,6 +116,10 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             filename = originalFilename.substring(0, separator)
         }
 
+        if (filename.length > 50) {
+            filename = filename.substring(0, 50)
+        }
+
         val uuid = UUID.randomUUID().toString()
 
         filename += "-" + uuid.split("-")[0]

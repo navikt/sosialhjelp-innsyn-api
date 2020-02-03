@@ -23,6 +23,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.util.*
 import javax.imageio.ImageIO
 import kotlin.test.assertFailsWith
 
@@ -67,6 +68,9 @@ internal class VedleggOpplastingServiceTest {
         every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns "uuid"
+
         val largePngFile = createImageByteArray("png", 2)
         val filnavn3 = "test3.png"
 
@@ -110,7 +114,7 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggSpesifikasjon.vedlegg[1].tilleggsinfo).isEqualTo(tilleggsinfo1)
         assertThat(vedleggSpesifikasjon.vedlegg[1].status).isEqualTo("LastetOpp")
         assertThat(vedleggSpesifikasjon.vedlegg[1].filer.size).isEqualTo(1)
-        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn).isEqualTo(filnavn3)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn.replace("-uuid", "")).isEqualTo(filnavn3)
 
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isNotEqualTo(vedleggSpesifikasjon.vedlegg[0].filer[2].sha512)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isEqualTo(vedleggSpesifikasjon.vedlegg[1].filer[0].sha512)

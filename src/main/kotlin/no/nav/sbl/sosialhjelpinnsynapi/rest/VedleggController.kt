@@ -73,5 +73,5 @@ data class OpplastetVedleggMetadata (
 )
 
 data class OpplastetFil (
-        val filnavn: String
+        var filnavn: String
 )

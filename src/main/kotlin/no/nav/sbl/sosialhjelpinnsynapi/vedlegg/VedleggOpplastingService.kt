@@ -84,7 +84,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                             .withFiler(it.filer.map { fil ->
                                 JsonFiler()
                                         .withFilnavn(fil.filnavn)
-                                        .withSha512(getSha512FromByteArray(files[filIndex++].bytes ?: throw IllegalStateException("Fil mangler metadata")))
+                                        .withSha512(getSha512FromByteArray(files[filIndex++].bytes
+                                                ?: throw IllegalStateException("Fil mangler metadata")))
                             })
                 })
 
@@ -104,7 +105,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
         val filnavnMultipart: List<String> = files.map { it.originalFilename }.filterNotNull()
         return filnavnMetadata.size == filnavnMultipart.size &&
-                filnavnMetadata.filterIndexed{ idx, it -> it == filnavnMultipart[idx] }.size == filnavnMetadata.size
+                filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size == filnavnMetadata.size
     }
 
     fun validateFil(file: MultipartFile): String {
@@ -124,22 +125,23 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     }
 
     private fun checkIfPdfIsValid(data: InputStream): String {
-        val document: PDDocument
+        var document = PDDocument()
         try {
             document = PDDocument.load(data)
+            if (pdfIsSigned(document)) {
+                log.warn(MESSAGE_PDF_IS_SIGNED)
+                return MESSAGE_PDF_IS_SIGNED
+            } else if (document.isEncrypted) {
+                log.warn(MESSAGE_PDF_IS_ENCRYPTED)
+                return MESSAGE_PDF_IS_ENCRYPTED
+            }
+            return "OK"
         } catch (e: IOException) {
             log.warn(MESSAGE_COULD_NOT_LOAD_DOCUMENT + e.stackTrace)
             return MESSAGE_COULD_NOT_LOAD_DOCUMENT
+        } finally {
+            document.close()
         }
-
-        if (pdfIsSigned(document)) {
-            log.warn(MESSAGE_PDF_IS_SIGNED)
-            return MESSAGE_PDF_IS_SIGNED
-        } else if (document.isEncrypted) {
-            log.warn(MESSAGE_PDF_IS_ENCRYPTED)
-            return MESSAGE_PDF_IS_ENCRYPTED
-        }
-        return "OK"
     }
 
     private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {

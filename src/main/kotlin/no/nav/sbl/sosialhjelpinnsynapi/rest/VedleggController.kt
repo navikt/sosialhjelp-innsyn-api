@@ -70,8 +70,10 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     private fun removeUUIDFromFilename(filename: String): String {
         val lastIndex = filename.lastIndexOf(".")
         if (lastIndex != -1 && lastIndex > LENGTH_OF_UUID_PART) {
-            val extention = filename.substring(lastIndex, filename.length)
-            return filename.substring(0, lastIndex - LENGTH_OF_UUID_PART) + extention
+            if (filename.substring(lastIndex - LENGTH_OF_UUID_PART).startsWith("-")) {
+                val extention = filename.substring(lastIndex, filename.length)
+                return filename.substring(0, lastIndex - LENGTH_OF_UUID_PART) + extention
+            }
         }
         return filename;
     }

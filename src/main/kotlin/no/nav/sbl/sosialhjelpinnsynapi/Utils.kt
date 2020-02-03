@@ -1,5 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
@@ -109,3 +112,11 @@ val FiksErrorResponse.feilmeldingUtenFnr: String?
         return this.message
                 ?.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
     }
+
+suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
+    map { async { f(it) } }.awaitAll()
+}
+
+suspend fun <A, B> Iterable<A>.pflatmap(f: suspend (A) -> B): List<B> = coroutineScope {
+    map { async { f(it) } }.awaitAll()
+}

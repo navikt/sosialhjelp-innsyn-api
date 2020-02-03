@@ -91,8 +91,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             }
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
-            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentDigisosSak feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Fiks - hentDigisosSak feilet - ${e.message}", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDigisosSak feilet", e)
@@ -135,8 +134,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Fiks - hentDokument feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
-            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentDokument feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Fiks - hentDokument feilet - ${e.message}", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDokument feilet", e)
@@ -186,8 +184,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
-            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.message}", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentAlleDigisosSaker feilet", e)
@@ -231,8 +228,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Fiks - hentKommuneInfo feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
-            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfo feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Fiks - hentKommuneInfo feilet - ${e.message}", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentKommuneInfo feilet", e)
@@ -255,8 +251,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Fiks - hentKommuneInfoForAlle feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
-            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfoForAlle feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Fiks - hentKommuneInfoForAlle feilet - ${e.message}", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentKommuneInfo feilet", e)
@@ -298,8 +293,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.warn("Opplasting av ettersendelse feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
-            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Opplasting av ettersendelse feilet - ${e.message}", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Opplasting av ettersendelse feilet", e)

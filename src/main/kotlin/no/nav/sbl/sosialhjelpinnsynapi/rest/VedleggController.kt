@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import javax.servlet.http.HttpServletRequest
 
+const val LENGTH_OF_UUID_PART = 9
+
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -54,7 +56,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                 .flatMap {
                     it.dokumentInfoList.map { dokumentInfo ->
                         VedleggResponse(
-                                dokumentInfo.filnavn,
+                                removeUUIDFromFilename(dokumentInfo.filnavn),
                                 dokumentInfo.storrelse,
                                 hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
                                 it.type,
@@ -63,6 +65,15 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                     }
                 }
         return ResponseEntity.ok(vedleggResponses.distinct())
+    }
+
+    private fun removeUUIDFromFilename(filename: String): String {
+        val lastIndex = filename.lastIndexOf(".")
+        if (lastIndex != -1 && lastIndex > LENGTH_OF_UUID_PART) {
+            val extention = filename.substring(lastIndex, filename.length)
+            return filename.substring(0, lastIndex - LENGTH_OF_UUID_PART) + extention
+        }
+        return filename;
     }
 }
 

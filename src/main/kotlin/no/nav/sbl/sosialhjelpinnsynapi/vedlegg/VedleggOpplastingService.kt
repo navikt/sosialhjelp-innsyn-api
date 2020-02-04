@@ -128,22 +128,21 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     }
 
     private fun checkIfPdfIsValid(data: InputStream): String {
-        var document = PDDocument()
         try {
-            document = PDDocument.load(data)
-            if (document.signatureDictionaries.isNotEmpty()) {
-                log.warn(MESSAGE_PDF_IS_SIGNED)
-                return MESSAGE_PDF_IS_SIGNED
-            } else if (document.isEncrypted) {
-                log.warn(MESSAGE_PDF_IS_ENCRYPTED)
-                return MESSAGE_PDF_IS_ENCRYPTED
-            }
-            return "OK"
+            PDDocument.load(data)
+                    .use { document ->
+                        if (document.signatureDictionaries.isNotEmpty()) {
+                            log.warn(MESSAGE_PDF_IS_SIGNED)
+                            return MESSAGE_PDF_IS_SIGNED
+                        } else if (document.isEncrypted) {
+                            log.warn(MESSAGE_PDF_IS_ENCRYPTED)
+                            return MESSAGE_PDF_IS_ENCRYPTED
+                        }
+                        return "OK"
+                    }
         } catch (e: IOException) {
             log.warn(MESSAGE_COULD_NOT_LOAD_DOCUMENT + e.stackTrace)
             return MESSAGE_COULD_NOT_LOAD_DOCUMENT
-        } finally {
-            document.close()
         }
     }
 

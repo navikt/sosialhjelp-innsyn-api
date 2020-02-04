@@ -141,7 +141,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                         return "OK"
                     }
         } catch (e: IOException) {
-            log.warn(MESSAGE_COULD_NOT_LOAD_DOCUMENT + e.stackTrace)
+            log.warn(MESSAGE_COULD_NOT_LOAD_DOCUMENT, e)
             return MESSAGE_COULD_NOT_LOAD_DOCUMENT
         }
     }

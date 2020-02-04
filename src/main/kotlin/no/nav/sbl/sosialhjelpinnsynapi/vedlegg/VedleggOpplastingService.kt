@@ -11,7 +11,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
-import no.nav.sbl.sosialhjelpinnsynapi.utils.*
+import no.nav.sbl.sosialhjelpinnsynapi.utils.getSha512FromByteArray
+import no.nav.sbl.sosialhjelpinnsynapi.utils.isImage
+import no.nav.sbl.sosialhjelpinnsynapi.utils.isPdf
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.stereotype.Component
@@ -128,7 +131,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         var document = PDDocument()
         try {
             document = PDDocument.load(data)
-            if (pdfIsSigned(document)) {
+            if (document.signatureDictionaries.isNotEmpty()) {
                 log.warn(MESSAGE_PDF_IS_SIGNED)
                 return MESSAGE_PDF_IS_SIGNED
             } else if (document.isEncrypted) {

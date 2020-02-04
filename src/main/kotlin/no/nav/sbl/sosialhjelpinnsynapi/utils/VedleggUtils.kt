@@ -1,8 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.utils
 
-import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.tika.Tika
-import java.io.IOException
 import java.io.InputStream
 import java.security.MessageDigest
 
@@ -23,13 +21,4 @@ fun isPdf(inputStream: InputStream): Boolean {
 fun isImage(inputStream: InputStream): Boolean {
     val type = Tika().detect(inputStream)
     return type == "image/png" || type == "image/jpeg"
-}
-
-fun pdfIsSigned(pdf: PDDocument): Boolean {
-    try {
-        return pdf.signatureDictionaries.isNotEmpty()
-    } catch (var3: IOException) {
-        throw RuntimeException("Kunne ikke lese signaturinformasjon fra PDF")
-    }
-
 }

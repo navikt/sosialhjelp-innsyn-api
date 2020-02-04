@@ -14,6 +14,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.commons.io.IOUtils
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
+import org.apache.pdfbox.pdmodel.encryption.AccessPermission
+import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -25,6 +27,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import kotlin.test.assertFailsWith
+
 
 internal class VedleggOpplastingServiceTest {
 
@@ -193,6 +196,29 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
+    fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er passord-beskyttet`() {
+        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+
+        val filnavn1 = "test1.pdf"
+        val filtype = "application/pdf"
+        val pdfFile = createPasswordProtectedPdfByteArray()
+
+        val metadata = mutableListOf(
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(
+                        OpplastetFil(filnavn1))))
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", filnavn1, filtype, pdfFile))
+
+        val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
+
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+
+        assertThat(vedleggOpplastingResponseList[0].filnavn).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].status).isEqualTo(MESSAGE_PDF_IS_ENCRYPTED)
+    }
+
+    @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
         every { virusScanner.scan(any(), any()) } throws OpplastingException("mulig virus!", null)
 
@@ -218,6 +244,22 @@ internal class VedleggOpplastingServiceTest {
         if (signed) {
             document.addSignature(PDSignature())
         }
+        document.save(outputStream)
+        document.close()
+        return outputStream.toByteArray()
+    }
+
+    private fun createPasswordProtectedPdfByteArray(): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        val document = PDDocument()
+        document.addPage(PDPage())
+
+        val ap = AccessPermission()
+        val spp = StandardProtectionPolicy("12345", "secretpw", ap)
+        spp.encryptionKeyLength = 256
+        spp.permissions = ap
+        document.protect(spp)
+
         document.save(outputStream)
         document.close()
         return outputStream.toByteArray()

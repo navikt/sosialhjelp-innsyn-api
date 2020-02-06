@@ -111,9 +111,9 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         }
         var filename = originalFilename
 
-        val separator = originalFilename.lastIndexOf(".")
-        if (separator != -1) {
-            filename = originalFilename.substring(0, separator)
+        val indexOfFileExtention = originalFilename.lastIndexOf(".")
+        if (indexOfFileExtention != -1) {
+            filename = originalFilename.substring(0, indexOfFileExtention)
         }
 
         if (filename.length > 50) {

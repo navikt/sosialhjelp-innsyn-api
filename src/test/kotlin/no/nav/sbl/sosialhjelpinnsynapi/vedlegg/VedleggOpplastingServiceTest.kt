@@ -209,6 +209,27 @@ internal class VedleggOpplastingServiceTest {
                 .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
+    @Test
+    fun `skal legge på UUID på filnavn`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns uuid
+
+        val filnavn = "fil.pdf"
+        assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("fil-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal kutte ned lange filnavn`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns uuid
+
+        val filnavnUtenExtension50Tegn = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        val filnavn = "$filnavnUtenExtension50Tegn-dette-skal-kuttes-bort.pdf"
+        assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("$filnavnUtenExtension50Tegn-$uuid.pdf")
+    }
+
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {
         val outputStream = ByteArrayOutputStream()
         ImageIO.write(BufferedImage(size, size, BufferedImage.TYPE_INT_RGB), type, outputStream)

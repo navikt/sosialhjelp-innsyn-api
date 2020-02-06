@@ -67,12 +67,12 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         return ResponseEntity.ok(vedleggResponses.distinct())
     }
 
-    private fun removeUUIDFromFilename(filename: String): String {
-        val lastIndex = filename.lastIndexOf(".")
-        if (lastIndex != -1 && lastIndex > LENGTH_OF_UUID_PART) {
-            if (filename.substring(lastIndex - LENGTH_OF_UUID_PART).startsWith("-")) {
-                val extention = filename.substring(lastIndex, filename.length)
-                return filename.substring(0, lastIndex - LENGTH_OF_UUID_PART) + extention
+    fun removeUUIDFromFilename(filename: String): String {
+        val indexOfFileExtention = filename.lastIndexOf(".")
+        if (indexOfFileExtention != -1 && indexOfFileExtention > LENGTH_OF_UUID_PART) {
+            if (filename.substring(indexOfFileExtention - LENGTH_OF_UUID_PART).startsWith("-")) {
+                val extention = filename.substring(indexOfFileExtention, filename.length)
+                return filename.substring(0, indexOfFileExtention - LENGTH_OF_UUID_PART) + extention
             }
         }
         return filename;

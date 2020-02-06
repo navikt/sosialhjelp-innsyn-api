@@ -141,6 +141,31 @@ internal class VedleggControllerTest {
         assertFailsWith<IllegalArgumentException> { controller.sendVedlegg(id, files, "token", request) }
     }
 
+    @Test
+    fun `skal fjerne UUID fra filnavn dersom dette er satt`() {
+        val uuid = "12345678"
+        val filnavn = "somefile-$uuid.pdf"
+
+        assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo("somefile.pdf")
+    }
+
+    @Test
+    fun `skal ikke fjerne uuid fra filnavn som er for kort og mangler uuid`() {
+        val filnavn = "123.pdf"
+        assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
+    }
+
+    @Test
+    fun `skal håndtere filnavn uten extention`() {
+        val filnavn = "123"
+        assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
+    }
+
+    @Test
+    fun `skal håndtere passe langt filnavn med strek og seks tegn`() {
+        val filnavn = "filnavn_som_er_passe_langt-123456.pdf"
+        assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
+    }
 
     private fun xsrfCookie(fiksDigisosId: String, token: String): Cookie {
 

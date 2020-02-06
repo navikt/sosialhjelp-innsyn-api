@@ -25,6 +25,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.util.*
 import javax.imageio.ImageIO
 import kotlin.test.assertFailsWith
 
@@ -70,6 +71,9 @@ internal class VedleggOpplastingServiceTest {
         every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns "uuid"
+
         val largePngFile = createImageByteArray("png", 2)
         val filnavn3 = "test3.png"
 
@@ -113,7 +117,7 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggSpesifikasjon.vedlegg[1].tilleggsinfo).isEqualTo(tilleggsinfo1)
         assertThat(vedleggSpesifikasjon.vedlegg[1].status).isEqualTo("LastetOpp")
         assertThat(vedleggSpesifikasjon.vedlegg[1].filer.size).isEqualTo(1)
-        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn).isEqualTo(filnavn3)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn.replace("-uuid", "")).isEqualTo(filnavn3)
 
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isNotEqualTo(vedleggSpesifikasjon.vedlegg[0].filer[2].sha512)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isEqualTo(vedleggSpesifikasjon.vedlegg[1].filer[0].sha512)
@@ -229,6 +233,27 @@ internal class VedleggOpplastingServiceTest {
 
         assertThatExceptionOfType(OpplastingException::class.java)
                 .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
+    }
+
+    @Test
+    fun `skal legge på UUID på filnavn`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns uuid
+
+        val filnavn = "fil.pdf"
+        assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("fil-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal kutte ned lange filnavn`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns uuid
+
+        val filnavnUtenExtension50Tegn = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        val filnavn = "$filnavnUtenExtension50Tegn-dette-skal-kuttes-bort.pdf"
+        assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("$filnavnUtenExtension50Tegn-$uuid.pdf")
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {

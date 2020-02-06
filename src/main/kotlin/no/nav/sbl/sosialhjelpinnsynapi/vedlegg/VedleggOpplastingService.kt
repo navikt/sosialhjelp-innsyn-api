@@ -62,9 +62,13 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
         files.forEach { file ->
             val valideringstatus = validateFil(file)
+            val filename = createFilename(file.originalFilename, file.contentType)
+
+            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+
             if (valideringstatus == "OK") {
                 val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token)
-                filerForOpplasting.add(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
+                filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
             } else {
                 metadata.forEach { filMetadata -> filMetadata.filer.removeIf { fil -> fil.filnavn == file.originalFilename } }
             }
@@ -105,11 +109,52 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         return vedleggOpplastingResponseList
     }
 
+    fun createFilename(originalFilename: String?, contentType: String?): String {
+        if (originalFilename == null) {
+            return ""
+        }
+        var filename = originalFilename
+
+        val indexOfFileExtention = originalFilename.lastIndexOf(".")
+        if (indexOfFileExtention != -1) {
+            filename = originalFilename.substring(0, indexOfFileExtention)
+        }
+
+        if (filename.length > 50) {
+            filename = filename.substring(0, 50)
+        }
+
+        val uuid = UUID.randomUUID().toString()
+
+        filename += "-" + uuid.split("-")[0]
+        filename += contentTypeToExt(contentType)
+
+        return filename
+    }
+
+    private fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
+        metadata.forEach { data -> data.filer.forEach { file ->
+            if (file.filnavn == originalFilename) {
+                file.filnavn = newFilename
+                return
+            }
+         } }
+    }
+
     private fun filenamesMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
         val filnavnMultipart: List<String> = files.map { it.originalFilename }.filterNotNull()
         return filnavnMetadata.size == filnavnMultipart.size &&
                 filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size == filnavnMetadata.size
+    }
+
+    private fun contentTypeToExt(applicationType: String?): String {
+        return when (applicationType) {
+            "application/pdf" -> ".pdf"
+            "image/png" -> ".png"
+            "image/jpeg" -> ".jpg"
+            else -> ""
+        }
     }
 
     fun validateFil(file: MultipartFile): String {

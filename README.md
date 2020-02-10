@@ -2,7 +2,7 @@
 ![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Deploy%20Dev/badge.svg?)
 ![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Deploy%20Prod/badge.svg?)
 # sosialhjelp-innsyn-api
-Backend-app som skal innsyn i egen sosialhjelp sak.
+Backend-app som skal gi innsyn i egen sosialhjelp sak.
 
 ## Henvendelser
 Henvendelser kan sendes via Slack i kanalen #digisos.

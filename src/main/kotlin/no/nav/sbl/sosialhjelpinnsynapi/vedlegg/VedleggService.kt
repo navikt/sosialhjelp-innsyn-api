@@ -93,11 +93,6 @@ class VedleggService(private val fiksClient: FiksClient) {
     }
 
     private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {
-        val dokuemtFilnavn = dokumentInfoList.map { it.filnavn }
-        log.info("dokumentFilnavn: $dokuemtFilnavn")
-        val filesNavn = files.map { fil -> fil.filnavn }
-        log.info("filesFilnavn: $filesNavn")
-
         return dokumentInfoList.size == files.size &&
                 dokumentInfoList.filterIndexed { idx, it -> it.filnavn == files[idx].filnavn }.size == dokumentInfoList.size
     }

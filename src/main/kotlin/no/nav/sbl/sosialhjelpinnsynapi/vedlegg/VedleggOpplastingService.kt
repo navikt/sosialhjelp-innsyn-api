@@ -31,6 +31,7 @@ const val MESSAGE_COULD_NOT_LOAD_DOCUMENT = "COULD_NOT_LOAD_DOCUMENT"
 const val MESSAGE_PDF_IS_SIGNED = "PDF_IS_SIGNED"
 const val MESSAGE_PDF_IS_ENCRYPTED = "PDF_IS_ENCRYPTED"
 const val MESSAGE_ILLEGAL_FILE_TYPE = "ILLEGAL_FILE_TYPE"
+const val MESSAGE_ILLEGAL_FILENAME = "ILLEGAL_FILENAME"
 const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
 @Component
@@ -42,6 +43,16 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     companion object {
         val log by logger()
+
+        fun containsIllegalCharacters(filename: String): Boolean {
+            for (tegn in arrayOf("*", ":", "<", ">", "|", "?", "\\", "/")) {
+                if (filename.contains(tegn)) {
+                    log.warn("Filnavn inneholdt det ugyldige tegnet \"$tegn\", men ble ikke stoppet av frontend.")
+                    return true
+                }
+            }
+            return false
+        }
     }
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
@@ -70,6 +81,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                 val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token)
                 filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
             } else {
+                log.warn("Opplasting av filer for ettersendelse til $fiksDigisosId feilet med status $valideringstatus")
                 metadata.forEach { filMetadata -> filMetadata.filer.removeIf { fil -> fil.filnavn == file.originalFilename } }
             }
             vedleggOpplastingResponseList.add(VedleggOpplastingResponse(file.originalFilename, valideringstatus))
@@ -159,12 +171,14 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     fun validateFil(file: MultipartFile): String {
         if (file.size > MAKS_TOTAL_FILSTORRELSE) {
-            log.warn(MESSAGE_FILE_TOO_LARGE)
             return MESSAGE_FILE_TOO_LARGE
         }
 
+        if (file.originalFilename == null || containsIllegalCharacters(file.originalFilename!!)) {
+            return MESSAGE_ILLEGAL_FILENAME
+        }
+
         if (!(isImage(file.inputStream) || isPdf(file.inputStream))) {
-            log.warn(MESSAGE_ILLEGAL_FILE_TYPE)
             return MESSAGE_ILLEGAL_FILE_TYPE
         }
         if (isPdf(file.inputStream)) {

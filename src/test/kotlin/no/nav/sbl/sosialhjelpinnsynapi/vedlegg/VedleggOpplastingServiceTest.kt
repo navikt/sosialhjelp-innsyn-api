@@ -10,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService.Companion.containsIllegalCharacters
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.commons.io.IOUtils
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -28,6 +29,8 @@ import java.io.ByteArrayOutputStream
 import java.util.*
 import javax.imageio.ImageIO
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 
 internal class VedleggOpplastingServiceTest {
@@ -254,6 +257,17 @@ internal class VedleggOpplastingServiceTest {
         val filnavnUtenExtension50Tegn = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         val filnavn = "$filnavnUtenExtension50Tegn-dette-skal-kuttes-bort.pdf"
         assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("$filnavnUtenExtension50Tegn-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal validere ugyldige tegn i filnavn`() {
+        val ugyldigTegn = arrayOf("*", ":", "<", ">", "|", "?", "\\", "/", "blabla?njn")
+        for (tegn in ugyldigTegn) {
+            assertTrue { containsIllegalCharacters(tegn) }
+        }
+
+        val utvalgAvGyldigeTegn = "aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVwWxXyYzZæÆøØåÅ-_!"
+        assertFalse { containsIllegalCharacters(utvalgAvGyldigeTegn) }
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {

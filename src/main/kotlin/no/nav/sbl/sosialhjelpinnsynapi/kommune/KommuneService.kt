@@ -39,8 +39,8 @@ class KommuneService(private val fiksClient: FiksClient) {
         val kommunenummer: String? = digisosSak.kommunenummer
 
         if (kommunenummer == null) {
-            log.warn("Forsøkte å hente kommuneStatus, men JsonSoknad.mottaker.kommunenummer finnes ikke for $fiksDigisosId")
-            throw RuntimeException("KommuneStatus kan ikke hentes, da kommunenummer mangler i $fiksDigisosId")
+            log.warn("Forsøkte å hente kommuneStatus, men JsonSoknad.mottaker.kommunenummer finnes ikke i soknadJson for $fiksDigisosId")
+            throw RuntimeException("KommuneStatus kan ikke hentes, da kommunenummer mangler for $fiksDigisosId")
         }
 
         return try {

@@ -292,7 +292,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                     String::class.java,
                     mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
-            log.info("Ettersendelse på $digisosId sendt til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId og forsendelseId ${responseEntity.body} (statusCode: ${responseEntity.statusCodeValue}")
+            log.info("Ettersendelse på $digisosId sendt til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId og forsendelseId ${responseEntity.body} (statusCode: ${responseEntity.statusCodeValue})")
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr

@@ -37,7 +37,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     ): ResponseEntity<List<VedleggOpplastingResponse>> {
         sjekkXsrfToken(fiksDigisosId, request)
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
-                ?: throw IllegalStateException("Mangler metadata.json")
+                ?: throw IllegalStateException("Mangler metadata.json på $fiksDigisosId")
         val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)
         files.removeIf { it.originalFilename == "metadata.json" }
 

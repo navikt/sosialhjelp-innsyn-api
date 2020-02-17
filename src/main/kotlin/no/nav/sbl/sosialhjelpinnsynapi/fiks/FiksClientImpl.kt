@@ -264,12 +264,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
+        log.info("Starter sending av ettersendelse med ${files.size} filer til digisosId $digisosId")
         val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
         val body = LinkedMultiValueMap<String, Any>()
-        body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggSpesifikasjon), "vedlegg.json"))
+        body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
@@ -284,25 +285,25 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val requestEntity = HttpEntity(body, headers)
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
-            restTemplate.exchange(
+            val responseEntity = restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.POST,
                     requestEntity,
                     String::class.java,
                     mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
-            log.info("Ettersendelse sendt til Fiks")
+            log.info("Ettersendelse på $digisosId sendt til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId og forsendelseId ${responseEntity.body} (statusCode: ${responseEntity.statusCodeValue}")
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            log.warn("Opplasting av ettersendelse feilet", e)
+            log.warn("Opplasting av ettersendelse på $digisosId feilet", e)
             throw FiksException(e.message, e)
         }
     }

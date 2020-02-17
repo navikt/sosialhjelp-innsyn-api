@@ -341,6 +341,8 @@ internal class FiksClientTest {
 
         val slot = slot<HttpEntity<LinkedMultiValueMap<String, Any>>>()
         val mockFiksResponse: ResponseEntity<String> = mockk()
+        every { mockFiksResponse.body } returns "12345"
+        every { mockFiksResponse.statusCodeValue } returns 200
         every { restTemplate.exchange(any(), HttpMethod.POST, capture(slot), String::class.java, any()) } returns mockFiksResponse
 
         val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),

@@ -32,7 +32,7 @@ class NorgClientImpl(clientProperties: ClientProperties,
         headers.set("Nav-Call-Id", generateCallId())
         headers.set("x-nav-apiKey", norgApiKey)
         try {
-            log.info("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
+            log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
             val urlTemplate = "$baseUrl/enhet/{enhetsnr}"
             val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, enhetsnr)
 

@@ -21,12 +21,12 @@ class SaksStatusService(private val eventService: EventService,
         val model = eventService.createModel(digisosSak, token)
 
         if (model.saker.isEmpty()) {
-            log.info("Fant ingen saker for $fiksDigisosId")
+            log.info("Fant ingen saker for digisosId=$fiksDigisosId")
             return emptyList()
         }
 
         val responseList = model.saker.filter { it.saksStatus != SaksStatus.FEILREGISTRERT }.map { mapToResponse(it) }
-        log.info("Hentet ${responseList.size} sak(er) for $fiksDigisosId")
+        log.info("Hentet ${responseList.size} sak(er) for digisosId=$fiksDigisosId")
         return responseList
     }
 

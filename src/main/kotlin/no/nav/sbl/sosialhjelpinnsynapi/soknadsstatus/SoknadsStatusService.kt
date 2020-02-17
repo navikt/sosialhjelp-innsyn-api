@@ -23,7 +23,7 @@ class SoknadsStatusService(private val eventService: EventService,
             log.warn("SoknadsStatus kan ikke være null")
             throw RuntimeException("SoknadsStatus kan ikke være null")
         }
-        log.info("Hentet nåværende søknadsstatus=${status.name} for $fiksDigisosId")
+        log.info("Hentet nåværende søknadsstatus=${status.name} for digisosId=$fiksDigisosId")
         return SoknadsStatusResponse(status)
     }
 }

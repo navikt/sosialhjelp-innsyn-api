@@ -49,7 +49,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
-        log.info("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
+        log.debug("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         return when {
             useCache -> hentDigisosSakFraCache(digisosId, token)
             else -> hentDigisosSakFraFiks(digisosId, token)
@@ -61,7 +61,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         if (get != null) {
             try {
                 val obj = objectMapper.readValue(get, DigisosSak::class.java)
-                log.info("Hentet digisosSak fra cache, digisosId=$digisosId")
+                log.debug("Hentet digisosSak fra cache, digisosId=$digisosId")
                 return obj
             } catch (e: IOException) {
                 log.warn("Fant key=$digisosId i cache, men value var ikke DigisosSak")
@@ -80,7 +80,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{digisosId}"
             val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, digisosId)
 
-            log.info("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
+            log.debug("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
             val body = response.body!!
             return objectMapper.readValue(body, DigisosSak::class.java)
         } catch (e: HttpClientErrorException) {
@@ -113,7 +113,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             }
         }
 
-        log.info("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
+        log.debug("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
 
         val headers = setIntegrasjonHeaders(token)
         try {
@@ -161,7 +161,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {
-            log.info("Cache put OK $key")
+            log.debug("Cache put OK $key")
         }
     }
 

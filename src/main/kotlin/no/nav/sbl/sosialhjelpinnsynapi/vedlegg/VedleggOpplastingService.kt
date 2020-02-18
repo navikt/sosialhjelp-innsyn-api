@@ -61,7 +61,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
         if (!filenamesMatchInMetadataAndFiles(metadata, files)) {
-            throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata for ettersendelse på $fiksDigisosId", null)
+            throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata for ettersendelse på digisosId=$fiksDigisosId", null)
         }
 
         // Scan for virus
@@ -105,7 +105,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                                 JsonFiler()
                                         .withFilnavn(fil.filnavn)
                                         .withSha512(getSha512FromByteArray(files[filIndex++].bytes
-                                                ?: throw IllegalStateException("Fil mangler metadata i ettersendelse på $fiksDigisosId")))
+                                                ?: throw IllegalStateException("Fil mangler metadata i ettersendelse på digisosId=$fiksDigisosId")))
                             })
                 })
 

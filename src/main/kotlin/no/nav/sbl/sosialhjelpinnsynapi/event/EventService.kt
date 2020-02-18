@@ -99,7 +99,7 @@ class EventService(private val clientProperties: ClientProperties,
             is JsonVilkar -> apply(hendelse)
             is JsonDokumentasjonkrav -> apply(hendelse)
             is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
-            else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping. ")
+            else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }
     }
 }

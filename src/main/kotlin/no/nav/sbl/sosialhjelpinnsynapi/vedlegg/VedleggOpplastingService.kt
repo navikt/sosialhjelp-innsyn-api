@@ -65,7 +65,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         }
 
         // Scan for virus
-        files.forEach { virusScanner.scan(it.name, it.bytes) }
+        files.forEach { virusScanner.scan(it.originalFilename, it.bytes, fiksDigisosId) }
 
         // Valider og krypter
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
@@ -231,7 +231,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {
-            log.info("Cache put OK $key")
+            log.debug("Cache put OK $key")
         }
     }
 }

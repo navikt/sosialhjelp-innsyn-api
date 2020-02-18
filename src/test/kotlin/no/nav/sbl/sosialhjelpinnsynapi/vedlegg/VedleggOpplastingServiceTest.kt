@@ -65,7 +65,7 @@ internal class VedleggOpplastingServiceTest {
 
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
-        every { virusScanner.scan(any(), any()) } just runs
+        every { virusScanner.scan(any(), any(), any()) } just runs
         every { redisStore.set(any(), any(), any()) } returns "OK"
     }
 
@@ -227,7 +227,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
-        every { virusScanner.scan(any(), any()) } throws OpplastingException("mulig virus!", null)
+        every { virusScanner.scan(any(), any(), any()) } throws OpplastingException("mulig virus!", null)
 
         val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))))
         val files = mutableListOf<MultipartFile>(

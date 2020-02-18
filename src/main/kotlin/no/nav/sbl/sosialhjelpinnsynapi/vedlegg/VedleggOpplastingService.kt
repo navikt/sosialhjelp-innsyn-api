@@ -61,7 +61,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
         if (!filenamesMatchInMetadataAndFiles(metadata, files)) {
-            throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata", null)
+            throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata for ettersendelse på digisosId=$fiksDigisosId", null)
         }
 
         // Scan for virus
@@ -81,7 +81,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                 val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token)
                 filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
             } else {
-                log.warn("Opplasting av filer for ettersendelse til $fiksDigisosId feilet med status $valideringstatus")
+                log.warn("Opplasting av filer til ettersendelse feilet med status $valideringstatus, digisosId=$fiksDigisosId")
                 metadata.forEach { filMetadata -> filMetadata.filer.removeIf { fil -> fil.filnavn == file.originalFilename } }
             }
             vedleggOpplastingResponseList.add(VedleggOpplastingResponse(file.originalFilename, valideringstatus))
@@ -105,7 +105,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                                 JsonFiler()
                                         .withFilnavn(fil.filnavn)
                                         .withSha512(getSha512FromByteArray(files[filIndex++].bytes
-                                                ?: throw IllegalStateException("Fil mangler metadata")))
+                                                ?: throw IllegalStateException("Fil mangler metadata i ettersendelse på digisosId=$fiksDigisosId")))
                             })
                 })
 
@@ -192,10 +192,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             PDDocument.load(data)
                     .use { document ->
                         if (document.signatureDictionaries.isNotEmpty()) {
-                            log.warn(MESSAGE_PDF_IS_SIGNED)
                             return MESSAGE_PDF_IS_SIGNED
                         } else if (document.isEncrypted) {
-                            log.warn(MESSAGE_PDF_IS_ENCRYPTED)
                             return MESSAGE_PDF_IS_ENCRYPTED
                         }
                         return "OK"

@@ -5,10 +5,10 @@ val ok_digisossak_response = """
   "fiksDigisosId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "sokerFnr": "string",
   "fiksOrgId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "kommunenummer": "string",
+  "kommunenummer": "1111",
   "sistEndret": 0,
   "originalSoknadNAV": {
-    "navEksternRefId": "string",
+    "navEksternRefId": "11000001",
     "metadata": "3fa85f64-5717-4562-b3fc-2c963f66afa0",
     "vedleggMetadata": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "soknadDokument": {

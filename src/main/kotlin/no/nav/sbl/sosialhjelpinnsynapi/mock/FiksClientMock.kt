@@ -96,7 +96,7 @@ class FiksClientMock : FiksClient {
         return returnValue
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
         val digisosSak = hentDigisosSak(digisosId, token, false)
         val navEksternRefId = lagNavEksternRefId(digisosSak)
         val vedleggMetadata = UUID.randomUUID().toString()
@@ -110,7 +110,7 @@ class FiksClientMock : FiksClient {
         val tidligereEttersendelser: List<Ettersendelse> = digisosSak.ettersendtInfoNAV?.ettersendelser.orEmpty()
         val updatedDigisosSak = digisosSak.updateEttersendtInfoNAV(EttersendtInfoNAV(tidligereEttersendelser.plus(ettersendelse)))
         postDigisosSak(updatedDigisosSak)
-        postDokument(vedleggMetadata, vedleggSpesifikasjon)
+        postDokument(vedleggMetadata, vedleggJson)
     }
 
     fun postDigisosSak(digisosSak: DigisosSak) {

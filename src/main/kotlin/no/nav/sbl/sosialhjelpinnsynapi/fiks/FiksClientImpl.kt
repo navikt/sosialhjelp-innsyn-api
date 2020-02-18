@@ -271,16 +271,17 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggSpesifikasjon: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
+        log.info("Starter sending av ettersendelse med ${files.size} filer til digisosId=$digisosId")
         val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
         val body = LinkedMultiValueMap<String, Any>()
-        body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggSpesifikasjon), "vedlegg.json"))
+        body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
         try {
-            createEttersendelsesPdf(vedleggSpesifikasjon, body, digisosId, token)
+            createEttersendelsesPdf(vedleggJson, body, digisosId, token)
         } catch (e: Exception) {
-            log.error("Kunne ikke generere pdf for ettersendelse", e)
+            log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
         }
 
         files.forEachIndexed { fileId, file ->
@@ -296,25 +297,25 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val requestEntity = HttpEntity(body, headers)
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
-            restTemplate.exchange(
+            val responseEntity = restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.POST,
                     requestEntity,
                     String::class.java,
                     mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
-            log.info("Ettersendelse sendt til Fiks")
+            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            log.warn("Opplasting av ettersendelse feilet", e)
+            log.warn("Opplasting av ettersendelse på $digisosId feilet", e)
             throw FiksException(e.message, e)
         }
     }

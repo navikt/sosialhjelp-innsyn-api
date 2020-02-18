@@ -68,7 +68,7 @@ class VedleggService(private val fiksClient: FiksClient) {
                                         .subList(currentFilIndex, filIndex)
 
                                 if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                    throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
+                                    throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)
                                 }
                                 InternalVedlegg(
                                         vedlegg.type,

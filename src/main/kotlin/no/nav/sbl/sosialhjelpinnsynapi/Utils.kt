@@ -14,8 +14,10 @@ import org.springframework.web.client.HttpStatusCodeException
 import java.io.IOException
 import java.sql.Timestamp
 import java.time.*
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+import java.time.format.DateTimeFormatterBuilder
 import java.util.*
 import kotlin.reflect.full.companionObject
 
@@ -51,6 +53,11 @@ fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime {
 
 fun unixTimestampToDate(tidspunkt: Long): Date {
     return Timestamp.valueOf(unixToLocalDateTime(tidspunkt))
+}
+
+fun formatLocalDateTime(dato: LocalDateTime): String {
+    val datoFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy 'kl.' HH.mm", Locale.forLanguageTag("nb"))
+    return dato.format(datoFormatter)
 }
 
 fun enumNameToLowercase(string: String): String {

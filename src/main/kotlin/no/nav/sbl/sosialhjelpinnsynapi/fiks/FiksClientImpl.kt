@@ -106,7 +106,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
             try {
                 val obj = objectMapper.readValue(get, requestedClass)
                 valider(obj)
-                log.info("Hentet ${requestedClass.simpleName} dokument fra cache, dokumentlagerId=$dokumentlagerId")
+                log.info("Hentet dokument (${requestedClass.simpleName}) fra cache, dokumentlagerId=$dokumentlagerId")
                 return obj
             } catch (e: IOException) {
                 log.warn("Fant key=$dokumentlagerId i cache, men value var ikke ${requestedClass.simpleName}")

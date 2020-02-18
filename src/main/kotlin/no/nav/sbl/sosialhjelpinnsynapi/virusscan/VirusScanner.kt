@@ -6,5 +6,5 @@ package no.nav.sbl.sosialhjelpinnsynapi.virusscan
 interface VirusScanner {
 
     @Throws(RuntimeException::class)
-    fun scan(filnavn: String, data: ByteArray)
+    fun scan(filnavn: String?, data: ByteArray, digisosId: String)
 }

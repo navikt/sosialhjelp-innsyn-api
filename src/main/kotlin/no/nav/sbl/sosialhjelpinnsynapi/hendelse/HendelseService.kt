@@ -29,7 +29,7 @@ class HendelseService(private val eventService: EventService,
         digisosSak.originalSoknadNAV?.timestampSendt?.let { leggTilHendelserForOpplastinger(model, it, vedlegg) }
 
         val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
-        log.info("Hentet historikk for fiksDigisosId=$fiksDigisosId")
+        log.info("Hentet historikk med ${responseList.size} hendelser for digisosId=$fiksDigisosId")
         return responseList
     }
 

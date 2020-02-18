@@ -38,7 +38,7 @@ class OppgaveService(private val eventService: EventService,
                     )
                 }
                 .sortedBy { it.innsendelsesfrist }
-        log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver for fiksDigisosId=$fiksDigisosId")
+        log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver for digisosId=$fiksDigisosId")
         return oppgaveResponseList
     }
 

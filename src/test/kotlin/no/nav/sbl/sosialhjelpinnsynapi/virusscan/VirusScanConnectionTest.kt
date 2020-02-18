@@ -29,7 +29,7 @@ internal class VirusScanConnectionTest {
 
     @Test
     fun scanFile_filenameIsVirustest_isInfected() {
-        assertThat(connection.isInfected("virustest", data)).isTrue()
+        assertThat(connection.isInfected("virustest", data, "digisosId")).isTrue()
 
         verify() {operations wasNot Called }
     }
@@ -37,21 +37,21 @@ internal class VirusScanConnectionTest {
     @Test
     fun scanFile_resultatHasWrongLength_isNotInfected() {
         every { operations.exchange(any(), Array<ScanResult>::class.java) } returns ResponseEntity.ok<Array<ScanResult>>(arrayOf(ScanResult("test", Result.FOUND), ScanResult("test", Result.FOUND)))
-        assertThat(connection.isInfected(filnavn, data)).isFalse()
+        assertThat(connection.isInfected(filnavn, data, "digisosId")).isFalse()
         verify(exactly = 1) { operations.exchange(any(), Array<ScanResult>::class.java)}
     }
 
     @Test
     fun scanFile_resultatIsOK_isNotInfected() {
         every { operations.exchange(any(), Array<ScanResult>::class.java) } returns ResponseEntity.ok<Array<ScanResult>>(arrayOf(ScanResult("test", Result.OK)))
-        assertThat(connection.isInfected(filnavn, data)).isFalse()
+        assertThat(connection.isInfected(filnavn, data,"digisosId")).isFalse()
         verify(exactly = 1) { operations.exchange(any(), Array<ScanResult>::class.java)}
     }
 
     @Test
     fun scanFile_resultatIsNotOK_isInfected() {
         every { operations.exchange(any(), Array<ScanResult>::class.java) } returns ResponseEntity.ok<Array<ScanResult>>(arrayOf(ScanResult("test", Result.FOUND)))
-        assertThat(connection.isInfected(filnavn, data)).isTrue()
+        assertThat(connection.isInfected(filnavn, data,"digisosId")).isTrue()
         verify(exactly = 1) { operations.exchange(any(), Array<ScanResult>::class.java)}
     }
 }

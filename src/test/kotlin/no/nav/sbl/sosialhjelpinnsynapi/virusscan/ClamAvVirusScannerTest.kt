@@ -21,13 +21,13 @@ internal class ClamAvVirusScannerTest {
     @Test
     fun scanFile_scanningIsEnabled_throwsException() {
         every { config.enabled } returns true
-        assertThatExceptionOfType(OpplastingException::class.java).isThrownBy { virusScanner.scan(filnavn, data) }
+        assertThatExceptionOfType(OpplastingException::class.java).isThrownBy { virusScanner.scan(filnavn, data, "digisosId") }
                 .withMessageStartingWith("Fant virus")
     }
 
     @Test
     fun scanFile_scanningIsNotEnabled_doesNotThrowException() {
         every { config.enabled } returns false
-        assertThatCode{ virusScanner.scan(filnavn, data) }.doesNotThrowAnyException()
+        assertThatCode{ virusScanner.scan(filnavn, data,"digisosId") }.doesNotThrowAnyException()
     }
 }

@@ -58,21 +58,16 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
     fun sendVedleggTilFiks(fiksDigisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<VedleggOpplastingResponse> {
-        val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
-
         if (!filenamesMatchInMetadataAndFiles(metadata, files)) {
             throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata for ettersendelse på digisosId=$fiksDigisosId", null)
         }
 
-        // Scan for virus
-        files.forEach { virusScanner.scan(it.originalFilename, it.bytes, fiksDigisosId) }
-
-        // Valider og krypter
+        val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(files.size))
 
         files.forEach { file ->
-            val valideringstatus = validateFil(file)
+            val valideringstatus = validateFil(file, fiksDigisosId)
             val filename = createFilename(file.originalFilename, file.contentType)
 
             renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
@@ -169,10 +164,12 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         }
     }
 
-    fun validateFil(file: MultipartFile): String {
+    fun validateFil(file: MultipartFile, digisosId: String): String {
         if (file.size > MAKS_TOTAL_FILSTORRELSE) {
             return MESSAGE_FILE_TOO_LARGE
         }
+
+        virusScanner.scan(file.originalFilename, file.bytes, digisosId)
 
         if (file.originalFilename == null || containsIllegalCharacters(file.originalFilename!!)) {
             return MESSAGE_ILLEGAL_FILENAME

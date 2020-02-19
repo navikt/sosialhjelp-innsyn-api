@@ -30,6 +30,7 @@ class PdfGenerator internal constructor() {
         val baos = ByteArrayOutputStream()
         currentStream.close()
         document.save(baos)
+        document.close()
         return baos.toByteArray()
     }
 

@@ -163,11 +163,11 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             return MESSAGE_FILE_TOO_LARGE
         }
 
-        virusScanner.scan(file.originalFilename, file.bytes, digisosId)
-
         if (file.originalFilename == null || containsIllegalCharacters(file.originalFilename!!)) {
             return MESSAGE_ILLEGAL_FILENAME
         }
+
+        virusScanner.scan(file.originalFilename, file.bytes, digisosId)
 
         if (!(isImage(file.inputStream) || isPdf(file.inputStream))) {
             return MESSAGE_ILLEGAL_FILE_TYPE

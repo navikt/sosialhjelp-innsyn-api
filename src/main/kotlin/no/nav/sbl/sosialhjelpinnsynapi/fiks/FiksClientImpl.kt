@@ -43,9 +43,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val idPortenService: IdPortenService,
                      private val redisStore: RedisStore,
                      private val cacheProperties: CacheProperties,
-                     private val retryProperties: FiksRetryProperties,
-                     private val krypteringService: KrypteringService,
-                     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator) : FiksClient {
+                     private val retryProperties: FiksRetryProperties
+                     /*private val krypteringService: KrypteringService,
+                     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator*/) : FiksClient {
 
     companion object {
         val log by logger()
@@ -278,11 +278,11 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val body = LinkedMultiValueMap<String, Any>()
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
-        try {
+        /*try {
             createEttersendelsesPdf(vedleggJson, body, digisosId, token)
         } catch (e: Exception) {
             log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
-        }
+        }*/
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
@@ -320,7 +320,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
+    /*private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
         val digisosSak = hentDigisosSak(digisosId, token, true)
 
         val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
@@ -329,7 +329,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
         body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
         body.add("dokument:ettersendelse.pdf", createHttpEntity(InputStreamResource(ettersendelseKryptertFil), "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))
-    }
+    }*/
+
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
     }

@@ -261,12 +261,12 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `skal validere ugyldige tegn i filnavn`() {
-        val ugyldigTegn = arrayOf("*", ":", "<", ">", "|", "?", "\\", "/", "blabla?njn")
+        val ugyldigTegn = arrayOf("*", ":", "<", ">", "|", "?", "\\", "/", "â", "اَلْعَرَبِيَّةُ", "blabla?njn")
         for (tegn in ugyldigTegn) {
             assertTrue { containsIllegalCharacters(tegn) }
         }
 
-        val utvalgAvGyldigeTegn = "aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVwWxXyYzZæÆøØåÅ-_!"
+        val utvalgAvGyldigeTegn = ".aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVw...WxXyYzZæÆøØåÅ-_"
         assertFalse { containsIllegalCharacters(utvalgAvGyldigeTegn) }
     }
 

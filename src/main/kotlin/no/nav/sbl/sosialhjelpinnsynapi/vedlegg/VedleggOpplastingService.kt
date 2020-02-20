@@ -45,13 +45,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val log by logger()
 
         fun containsIllegalCharacters(filename: String): Boolean {
-            for (tegn in arrayOf("*", ":", "<", ">", "|", "?", "\\", "/")) {
-                if (filename.contains(tegn)) {
-                    log.warn("Filnavn inneholdt det ugyldige tegnet \"$tegn\", men ble ikke stoppet av frontend.")
-                    return true
-                }
-            }
-            return false
+            return filename.contains("[^a-zæøåA-ZÆØÅ0-9 ._-]".toRegex())
         }
     }
 

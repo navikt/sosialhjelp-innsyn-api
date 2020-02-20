@@ -55,3 +55,5 @@ innsyn:
       attempts: 5 # number of attempts
       initial_delay: 250 # initial delay in ms
       max_delay: 10000 # max delay in ms
+
+debug: true

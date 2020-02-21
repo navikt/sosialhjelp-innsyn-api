@@ -16,7 +16,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
 
     val vedtakFattet = Vedtak(utfall, vedtaksfilUrl, toLocalDateTime(hendelse.hendelsestidspunkt).toLocalDate())
 
-    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse } ?: saker.firstOrNull { it.referanse == "default" }
+    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse || it.referanse == "default" }
 
     if (sakForReferanse == null) {
         // Opprett ny Sak
@@ -33,8 +33,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     }
     sakForReferanse.vedtak.add(vedtakFattet)
 
-    val sak = saker.first { it.referanse == hendelse.saksreferanse }
-    val beskrivelse = "${sak.tittel ?: DEFAULT_TITTEL} er ferdig behandlet"
+    val beskrivelse = "${sakForReferanse.tittel ?: DEFAULT_TITTEL} er ferdig behandlet"
 
     historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt), UrlResponse(VIS_BREVET, vedtaksfilUrl)))
 }

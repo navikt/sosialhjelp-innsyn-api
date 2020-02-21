@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
-import no.nav.sbl.sosialhjelpinnsynapi.common.UTBETALINGSOVERSIKT
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
@@ -97,8 +96,9 @@ internal class UtbetalingTest {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING.beskrivelse} har blitt sendt fra NAV som pose med krølla femtilapper.")
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
+        assertThat(hendelse.url).isNull()
 //        assertThat(hendelse.url.link).isEqualTo("url goes here")
-        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
+//        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
     }
 
     @Test
@@ -125,8 +125,9 @@ internal class UtbetalingTest {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING_BANKOVERFORING.beskrivelse} har blitt sendt fra NAV til din konto. Du mottar pengene så fort banken har har behandlet utbetalingen.")
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+        assertThat(hendelse.url).isNull()
 //        assertThat(hendelse.url.link).isEqualTo("url goes here")
-        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
+//        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
     }
 
     @Test
@@ -154,8 +155,9 @@ internal class UtbetalingTest {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.beskrivelse} har blitt sendt fra NAV til ${UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.mottaker}.")
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+        assertThat(hendelse.url).isNull()
 //        assertThat(hendelse.url.link).isEqualTo("url goes here")
-        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
+//        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
     }
 
 }

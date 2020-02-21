@@ -87,10 +87,8 @@ data class Hendelse(
         // type som felt?
         val tittel: String,
         val tidspunkt: LocalDateTime,
-        val url: UrlResponse?
-) {
-    constructor(tittel: String, tidspunkt: LocalDateTime) : this(tittel, tidspunkt, null)
-}
+        val url: UrlResponse? = null
+)
 
 data class UrlResponse(
         val linkTekst: String,

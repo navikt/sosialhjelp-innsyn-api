@@ -183,6 +183,6 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.tittel).isEqualTo("Søknaden er ferdig behandlet.")
+        assertThat(hendelse.tittel).isEqualTo("Søknaden din vil bli behandlet, men vi kan ikke vise behandlingsstatus digitalt.")
     }
 }

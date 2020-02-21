@@ -1,9 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksDetaljerResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksListeResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
@@ -18,14 +16,18 @@ import org.springframework.web.bind.annotation.*
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
-@RequestMapping("api/v1/innsyn")
+@RequestMapping("/api/v1/innsyn")
 class SaksOversiktController(private val fiksClient: FiksClient,
                              private val eventService: EventService,
                              private val oppgaveService: OppgaveService) {
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
-        val saker = fiksClient.hentAlleDigisosSaker(token)
+        val saker = try {
+            fiksClient.hentAlleDigisosSaker(token)
+        } catch (e: FiksException) {
+            return ResponseEntity.status(503).build()
+        }
 
         val responselist = saker
                 .map {
@@ -66,7 +68,7 @@ class SaksOversiktController(private val fiksClient: FiksClient,
     }
 
     private fun hentNavn(model: InternalDigisosSoker): String {
-        return model.saker.joinToString { it.tittel ?: DEFAULT_TITTEL }
+        return model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString { it.tittel ?: DEFAULT_TITTEL }
     }
 
     private fun hentAntallNyeOppgaver(model: InternalDigisosSoker, fiksDigisosId: String, token: String): Int? {

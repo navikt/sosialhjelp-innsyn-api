@@ -135,7 +135,7 @@ internal class EventServiceTest {
             assertThat(sak.utbetalinger).isEmpty()
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.tittel).contains("$tittel_1 er under behandling")
         }
 
@@ -167,7 +167,7 @@ internal class EventServiceTest {
             assertThat(sak.utbetalinger).isEmpty()
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.tittel).contains("Saken din er under behandling")
         }
 
@@ -204,7 +204,7 @@ internal class EventServiceTest {
             assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
             assertThat(hendelse.tittel).contains("$tittel_1 er ferdig behandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
@@ -241,7 +241,7 @@ internal class EventServiceTest {
             assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
@@ -280,7 +280,7 @@ internal class EventServiceTest {
             assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
@@ -354,7 +354,7 @@ internal class EventServiceTest {
             assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
             assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/$dokumentlagerId_1")
         }
@@ -385,7 +385,7 @@ internal class EventServiceTest {
             assertThat(sak.tittel).isEqualTo(tittel_1)
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.tittel).contains("Vi kan ikke vise behandlingsstatus for $tittel_1 digitalt.")
         }
 
@@ -416,7 +416,7 @@ internal class EventServiceTest {
             assertThat(sak.tittel).isEqualTo(tittel_1)
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_4))
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
             assertThat(hendelse.tittel).contains("Vi kan ikke vise behandlingsstatus for $tittel_1 digitalt.")
         }
     }
@@ -442,7 +442,7 @@ internal class EventServiceTest {
         assertThat(model.historikk).hasSize(4)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
         assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
         assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
     }

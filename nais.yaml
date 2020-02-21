@@ -4,7 +4,7 @@ metadata:
   name: sosialhjelp-innsyn-api
   namespace: {{namespace}}
   labels:
-    team: digisos
+    team: teamdigisos
 spec:
   image: docker.pkg.github.com/navikt/sosialhjelp-innsyn-api/sosialhjelp-innsyn-api:{{version}}
   port: 8080
@@ -19,34 +19,41 @@ spec:
     initialDelay: 20
     timeout: 1
   prometheus:
-    enabled: true
-    path: /sosialhjelp/innsyn-api/actuator/prometheus
+    enabled: {{prometheusEnabled}}
+    path: /sosialhjelp/innsyn-api/internal/prometheus
   replicas:
-    min: 2
-    max: 4
-  webproxy: true
+    min: {{minReplicas}}
+    max: {{maxReplicas}}
+  webproxy: {{webProxyEnabled}}
+{{#if accessPoliciesForGcpEnabled}}
+  accessPolicy:
+    outbound:
+      external:
+        - host: "oidc-ver2.difi.no"
+      rules: []
+{{/if}}
   vault:
-    enabled: true
+    enabled: {{vaultEnabled}}
+{{#if vaultEnabled}}
     paths:
       - kvPath: {{application_vault_path}}
         mountPath: /var/run/secrets/nais.io/vault
       - kvPath: {{virksomhetssertifikat_vault_path}}
         mountPath: /var/run/secrets/nais.io/virksomhetssertifikat
+{{/if}}
   ingresses:
-  {{#each ingress}}
+{{#each ingress}}
     - "{{this}}"
-  {{/each}}
+{{/each}}
   resources:
     limits:
       cpu: 500m
-      memory: 512Mi
+      memory: 1Gi
     requests:
       cpu: 200m
-      memory: 256Mi
+      memory: 512Mi
   env:
-    - name: REDIS_HOST
-      value: sosialhjelp-innsyn-api-redis.default.svc.nais.local
-  {{#each env}}
+{{#each env}}
     - name: {{@key}}
       value: "{{this}}"
-  {{/each}}
+{{/each}}

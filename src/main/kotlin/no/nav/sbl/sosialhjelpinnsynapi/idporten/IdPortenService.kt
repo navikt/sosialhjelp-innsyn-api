@@ -7,6 +7,7 @@ import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.util.Base64
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import io.ktor.client.features.ServerResponseException
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.url
@@ -38,20 +39,20 @@ class IdPortenService(clientProperties: ClientProperties) {
             ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
 
     val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
-        log.info("Henter config fra $idPortenConfigUrl")
+        log.debug("Forsøker å hente idporten-config fra $idPortenConfigUrl")
         val config = defaultHttpClient.get<IdPortenOidcConfiguration> {
             url(idPortenConfigUrl)
         }
-        log.info("Hentet config fra $idPortenConfigUrl")
+        log.info("Hentet idporten-config fra $idPortenConfigUrl")
         config
     }.also {
-        log.info("IdPorten: OIDC configuration initialized")
+        log.info("idporten-config: OIDC configuration initialized")
     }
 
     suspend fun requestToken(attempts: Int = 10): AccessToken =
-            retry(attempts = attempts) {
+            retry(attempts = attempts, retryableExceptions = *arrayOf(ServerResponseException::class)) {
                 val jws = createJws()
-                log.info("Got jws, getting token")
+                log.info("Got jws, getting token (virksomhetssertifikat)")
                 val response = defaultHttpClient.submitForm<IdPortenAccessTokenResponse>(
                         parametersOf(GRANT_TYPE_PARAM to listOf(GRANT_TYPE), ASSERTION_PARAM to listOf(jws.token))
                 ) {
@@ -97,7 +98,7 @@ class IdPortenService(clientProperties: ClientProperties) {
         }
 
 
-        log.info("Public certificate length " + pair.first.public.encoded.size)
+        log.info("Public certificate length ${pair.first.public.encoded.size} (virksomhetssertifikat)")
 
         return SignedJWT(
                 JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(mutableListOf(Base64.encode(pair.second))).build(),
@@ -112,7 +113,7 @@ class IdPortenService(clientProperties: ClientProperties) {
         ).run {
             sign(RSASSASigner(pair.first.private))
             val jws = Jws(serialize())
-            log.info("Serialized JWS")
+            log.info("Serialized jws (virksomhetssertifikat)")
             jws
         }
     }

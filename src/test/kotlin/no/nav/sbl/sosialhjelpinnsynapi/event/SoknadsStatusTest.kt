@@ -86,7 +86,7 @@ internal class SoknadsStatusTest {
         assertThat(model.historikk).hasSize(2)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_1))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_1.toLocalDateTime())
         assertThat(hendelse.tittel).contains("Søknaden med vedlegg er mottatt hos ")
     }
 
@@ -109,7 +109,7 @@ internal class SoknadsStatusTest {
         assertThat(model.historikk).hasSize(1)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_1))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_1.toLocalDateTime())
         assertThat(hendelse.tittel).isEqualTo("Søknaden med vedlegg er mottatt.")
     }
 
@@ -133,7 +133,7 @@ internal class SoknadsStatusTest {
         assertThat(model.historikk).hasSize(3)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
         assertThat(hendelse.tittel).isEqualTo("Søknaden er under behandling.")
     }
 
@@ -158,7 +158,7 @@ internal class SoknadsStatusTest {
         assertThat(model.historikk).hasSize(4)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
         assertThat(hendelse.tittel).isEqualTo("Søknaden er ferdig behandlet.")
     }
 
@@ -182,7 +182,7 @@ internal class SoknadsStatusTest {
         assertThat(model.historikk).hasSize(3)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_2))
-        assertThat(hendelse.tittel).isEqualTo("Din søknad vil bli behandlet, men vi kan ikke vise behandlingsstatus digitalt.")
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
+        assertThat(hendelse.tittel).isEqualTo("Søknaden er ferdig behandlet.")
     }
 }

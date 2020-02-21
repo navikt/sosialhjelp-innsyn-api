@@ -86,7 +86,7 @@ internal class DokumentasjonkravTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_6))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
     }
 
     @Test
@@ -111,7 +111,7 @@ internal class DokumentasjonkravTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_3))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
     }
 
     @Test
@@ -138,6 +138,6 @@ internal class DokumentasjonkravTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
-        assertThat(hendelse.tidspunkt).isEqualTo(toLocalDateTime(tidspunkt_5))
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_5.toLocalDateTime())
     }
 }

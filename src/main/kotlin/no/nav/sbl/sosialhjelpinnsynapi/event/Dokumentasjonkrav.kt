@@ -43,5 +43,5 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
     }
 
     val beskrivelse = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for detaljer hva du må sende inn."
-    historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt)))
+    historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
 }

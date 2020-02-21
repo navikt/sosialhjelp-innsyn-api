@@ -11,9 +11,13 @@ import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
-import no.nav.sbl.sosialhjelpinnsynapi.utils.*
+import no.nav.sbl.sosialhjelpinnsynapi.utils.getSha512FromByteArray
+import no.nav.sbl.sosialhjelpinnsynapi.utils.isImage
+import no.nav.sbl.sosialhjelpinnsynapi.utils.isPdf
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
@@ -27,6 +31,7 @@ const val MESSAGE_COULD_NOT_LOAD_DOCUMENT = "COULD_NOT_LOAD_DOCUMENT"
 const val MESSAGE_PDF_IS_SIGNED = "PDF_IS_SIGNED"
 const val MESSAGE_PDF_IS_ENCRYPTED = "PDF_IS_ENCRYPTED"
 const val MESSAGE_ILLEGAL_FILE_TYPE = "ILLEGAL_FILE_TYPE"
+const val MESSAGE_ILLEGAL_FILENAME = "ILLEGAL_FILENAME"
 const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
 @Component
@@ -38,6 +43,16 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     companion object {
         val log by logger()
+
+        fun containsIllegalCharacters(filename: String): Boolean {
+            for (tegn in arrayOf("*", ":", "<", ">", "|", "?", "\\", "/")) {
+                if (filename.contains(tegn)) {
+                    log.warn("Filnavn inneholdt det ugyldige tegnet \"$tegn\", men ble ikke stoppet av frontend.")
+                    return true
+                }
+            }
+            return false
+        }
     }
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
@@ -46,11 +61,11 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val vedleggOpplastingResponseList = mutableListOf<VedleggOpplastingResponse>()
 
         if (!filenamesMatchInMetadataAndFiles(metadata, files)) {
-            throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata", null)
+            throw OpplastingFilnavnMismatchException("Det er mismatch mellom opplastede filer og metadata for ettersendelse på digisosId=$fiksDigisosId", null)
         }
 
         // Scan for virus
-        files.forEach { virusScanner.scan(it.name, it.bytes) }
+        files.forEach { virusScanner.scan(it.originalFilename, it.bytes, fiksDigisosId) }
 
         // Valider og krypter
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
@@ -58,10 +73,15 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
         files.forEach { file ->
             val valideringstatus = validateFil(file)
+            val filename = createFilename(file.originalFilename, file.contentType)
+
+            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+
             if (valideringstatus == "OK") {
                 val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token)
-                filerForOpplasting.add(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
+                filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
             } else {
+                log.warn("Opplasting av filer til ettersendelse feilet med status $valideringstatus, digisosId=$fiksDigisosId")
                 metadata.forEach { filMetadata -> filMetadata.filer.removeIf { fil -> fil.filnavn == file.originalFilename } }
             }
             vedleggOpplastingResponseList.add(VedleggOpplastingResponse(file.originalFilename, valideringstatus))
@@ -84,7 +104,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                             .withFiler(it.filer.map { fil ->
                                 JsonFiler()
                                         .withFilnavn(fil.filnavn)
-                                        .withSha512(getSha512FromByteArray(files[filIndex++].bytes ?: throw IllegalStateException("Fil mangler metadata")))
+                                        .withSha512(getSha512FromByteArray(files[filIndex++].bytes
+                                                ?: throw IllegalStateException("Fil mangler metadata i ettersendelse på digisosId=$fiksDigisosId")))
                             })
                 })
 
@@ -100,21 +121,64 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         return vedleggOpplastingResponseList
     }
 
+    fun createFilename(originalFilename: String?, contentType: String?): String {
+        if (originalFilename == null) {
+            return ""
+        }
+        var filename = originalFilename
+
+        val indexOfFileExtention = originalFilename.lastIndexOf(".")
+        if (indexOfFileExtention != -1) {
+            filename = originalFilename.substring(0, indexOfFileExtention)
+        }
+
+        if (filename.length > 50) {
+            filename = filename.substring(0, 50)
+        }
+
+        val uuid = UUID.randomUUID().toString()
+
+        filename += "-" + uuid.split("-")[0]
+        filename += contentTypeToExt(contentType)
+
+        return filename
+    }
+
+    private fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
+        metadata.forEach { data -> data.filer.forEach { file ->
+            if (file.filnavn == originalFilename) {
+                file.filnavn = newFilename
+                return
+            }
+         } }
+    }
+
     private fun filenamesMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>): Boolean {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
         val filnavnMultipart: List<String> = files.map { it.originalFilename }.filterNotNull()
         return filnavnMetadata.size == filnavnMultipart.size &&
-                filnavnMetadata.filterIndexed{ idx, it -> it == filnavnMultipart[idx] }.size == filnavnMetadata.size
+                filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size == filnavnMetadata.size
+    }
+
+    private fun contentTypeToExt(applicationType: String?): String {
+        return when (applicationType) {
+            "application/pdf" -> ".pdf"
+            "image/png" -> ".png"
+            "image/jpeg" -> ".jpg"
+            else -> ""
+        }
     }
 
     fun validateFil(file: MultipartFile): String {
         if (file.size > MAKS_TOTAL_FILSTORRELSE) {
-            log.warn(MESSAGE_FILE_TOO_LARGE)
             return MESSAGE_FILE_TOO_LARGE
         }
 
+        if (file.originalFilename == null || containsIllegalCharacters(file.originalFilename!!)) {
+            return MESSAGE_ILLEGAL_FILENAME
+        }
+
         if (!(isImage(file.inputStream) || isPdf(file.inputStream))) {
-            log.warn(MESSAGE_ILLEGAL_FILE_TYPE)
             return MESSAGE_ILLEGAL_FILE_TYPE
         }
         if (isPdf(file.inputStream)) {
@@ -124,22 +188,23 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     }
 
     private fun checkIfPdfIsValid(data: InputStream): String {
-        val document: PDDocument
         try {
-            document = PDDocument.load(data)
+            PDDocument.load(data)
+                    .use { document ->
+                        if (document.signatureDictionaries.isNotEmpty()) {
+                            return MESSAGE_PDF_IS_SIGNED
+                        } else if (document.isEncrypted) {
+                            return MESSAGE_PDF_IS_ENCRYPTED
+                        }
+                        return "OK"
+                    }
+        } catch (e: InvalidPasswordException) {
+            log.warn(MESSAGE_PDF_IS_ENCRYPTED, e)
+            return MESSAGE_PDF_IS_ENCRYPTED
         } catch (e: IOException) {
-            log.warn(MESSAGE_COULD_NOT_LOAD_DOCUMENT + e.stackTrace)
+            log.warn(MESSAGE_COULD_NOT_LOAD_DOCUMENT, e)
             return MESSAGE_COULD_NOT_LOAD_DOCUMENT
         }
-
-        if (pdfIsSigned(document)) {
-            log.warn(MESSAGE_PDF_IS_SIGNED)
-            return MESSAGE_PDF_IS_SIGNED
-        } else if (document.isEncrypted) {
-            log.warn(MESSAGE_PDF_IS_ENCRYPTED)
-            return MESSAGE_PDF_IS_ENCRYPTED
-        }
-        return "OK"
     }
 
     private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
@@ -164,7 +229,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {
-            log.info("Cache put OK $key")
+            log.debug("Cache put OK $key")
         }
     }
 }

@@ -17,7 +17,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class UtbetalingTest {
 
@@ -83,12 +82,13 @@ internal class UtbetalingTest {
         assertThat(utbetaling.status).isEqualTo(UtbetalingsStatus.UTBETALT)
         assertThat(utbetaling.belop).isEqualTo("1234.56")
         assertThat(utbetaling.beskrivelse).isEqualTo(tittel_1)
-        assertThat(utbetaling.posteringsDato).isEqualTo(LocalDate.of(2019, 12, 31))
-        assertThat(utbetaling.utbetalingsDato).isEqualTo(LocalDate.of(2019, 12, 24))
-        assertThat(utbetaling.fom).isNull()
-        assertThat(utbetaling.tom).isNull()
+        assertThat(utbetaling.forfallsDato).isEqualTo("2019-12-31")
+        assertThat(utbetaling.utbetalingsDato).isEqualTo("2019-12-24")
+        assertThat(utbetaling.fom).isEqualTo("2019-12-01")
+        assertThat(utbetaling.tom).isEqualTo("2019-12-31")
         assertThat(utbetaling.mottaker).isEqualTo("fnr")
-        assertThat(utbetaling.utbetalingsform).isEqualTo("pose med krølla femtilapper")
+        assertThat(utbetaling.kontonummer).isEqualTo("kontonummer")
+        assertThat(utbetaling.utbetalingsmetode).isEqualTo("pose med krølla femtilapper")
         assertThat(utbetaling.vilkar).isEmpty()
         assertThat(utbetaling.dokumentasjonkrav).isEmpty()
     }
@@ -111,7 +111,30 @@ internal class UtbetalingTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
 
-        assertThat(model.utbetalinger.get(0).belop).isEqualTo("1234.56")
+        assertThat(model.utbetalinger[0].belop).isEqualTo("1234.56")
+    }
+
+    @Test
+    fun `utbetaling kontonummer settes kun hvis annenMottaker er false`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                UTBETALING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+
+        assertThat(model.utbetalinger[0].belop).isEqualTo("1234.56")
+        assertThat(model.utbetalinger[0].kontonummer).isNull()
+        assertThat(model.utbetalinger[0].mottaker).isEqualTo("utleier")
     }
 
 }

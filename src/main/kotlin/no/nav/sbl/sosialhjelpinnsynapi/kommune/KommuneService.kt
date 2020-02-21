@@ -1,6 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.kommune
 
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatus.*
@@ -37,12 +39,16 @@ class KommuneService(private val fiksClient: FiksClient) {
         val kommunenummer: String? = digisosSak.kommunenummer
 
         if (kommunenummer == null) {
-            log.warn("Forsøkte å hente kommuneStatus, men JsonSoknad.mottaker.kommunenummer finnes ikke")
-            throw RuntimeException("KommuneStatus kan ikke hentes uten kommunenummer")
+            log.warn("Forsøkte å hente kommuneStatus, men JsonSoknad.mottaker.kommunenummer finnes ikke i soknad.json for digisosId=$fiksDigisosId")
+            throw RuntimeException("KommuneStatus kan ikke hentes fordi kommunenummer mangler for digisosId=$fiksDigisosId")
         }
 
         return try {
             fiksClient.hentKommuneInfo(kommunenummer)
+        } catch (e: FiksClientException) {
+            null
+        } catch (e: FiksServerException) {
+            null
         } catch (e: FiksException) {
             null
         }

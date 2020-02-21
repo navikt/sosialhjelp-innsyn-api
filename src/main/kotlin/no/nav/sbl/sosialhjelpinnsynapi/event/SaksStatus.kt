@@ -22,7 +22,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
 
             if (prevStatus != sakForReferanse.saksStatus
                     && (sakForReferanse.saksStatus == SaksStatus.IKKE_INNSYN || sakForReferanse.saksStatus == SaksStatus.BEHANDLES_IKKE)) {
-                historikk.add(Hendelse("Vi kan ikke vise behandlingsstatus for ${hendelse.tittel} digitalt.", toLocalDateTime(hendelse.hendelsestidspunkt)))
+                historikk.add(Hendelse("Vi kan ikke vise behandlingsstatus for ${hendelse.tittel} digitalt.", hendelse.hendelsestidspunkt.toLocalDateTime()))
             }
         }
 
@@ -47,7 +47,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             else -> null
         }
         if (beskrivelse != null) {
-            historikk.add(Hendelse(beskrivelse, toLocalDateTime(hendelse.hendelsestidspunkt)))
+            historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
         }
     }
 }

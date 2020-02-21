@@ -12,27 +12,27 @@ internal class VirusScanConnection(private val config: VirusScanConfig, private 
     val isEnabled: Boolean
         get() = config.enabled
 
-    fun isInfected(filnavn: String, data: ByteArray): Boolean {
+    fun isInfected(filnavn: String?, data: ByteArray, digisosId: String): Boolean {
         try {
-            if (!isRunningInProd() && filnavn.startsWith("virustest")) {
+            if (!isRunningInProd() && filnavn != null && filnavn.startsWith("virustest")) {
                 return true
             }
-            log.info("Scanner {} bytes", data.size)
+            log.info("Scanner {} bytes for virus", data.size)
             val scanResults = putForObject(config.getUri(), data)
             if (scanResults!!.size != 1) {
-                log.warn("Uventet respons med lengde {}, forventet lengde er 1", scanResults.size)
+                log.warn("Virusscan returnerte uventet respons med lengde ${scanResults.size}, forventet lengde er 1. digisosId=$digisosId")
                 return false
             }
             val scanResult = scanResults[0]
-            log.info("Fikk scan result {}", scanResult)
+            log.debug("Fikk scan result {}", scanResult)
             if (OK == scanResult.result) {
-                log.info("Ingen virus i {}", filnavn)
+                log.debug("Ingen virus i fil")
                 return false
             }
-            log.warn("Fant virus i {}, status {}", filnavn, scanResult.result)
+            log.warn("Fant virus med status ${scanResult.result} i fil forsøkt opplastet til digisosId=$digisosId")
             return true
         } catch (e: Exception) {
-            log.warn("Kunne ikke scanne {}", filnavn, e)
+            log.warn("Kunne ikke scanne fil opplastet til digisosId=$digisosId", e)
             return false
         }
 

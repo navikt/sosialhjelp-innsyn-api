@@ -4,7 +4,7 @@
 		"https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
 		"https://www.nav.no/sosialhjelp/innsyn-api"
 	],
-	"virksomhetssertifikat_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
+	"virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/maskinporten",
 	"application_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
 
 	"env": {
@@ -18,6 +18,13 @@
 		"ID_PORTEN_SCOPE": "ks:fiks",
 		"AZUREAD_DISCOVERYURL": "https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
 		"AZUREAD_CLIENTID": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
-		"CACHE_TIME_TO_LIVE_SECONDS": "180"
-	}
+		"CACHE_TIME_TO_LIVE_SECONDS": "180",
+        "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local"
+	},
+	"minReplicas": "2",
+	"maxReplicas": "4",
+	"prometheusEnabled": true,
+	"webProxyEnabled": true,
+	"accessPoliciesForGcpEnabled": false,
+	"vaultEnabled": true
 }

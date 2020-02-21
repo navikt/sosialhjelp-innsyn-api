@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   labels:
-    team: digisos
+    team: teamdigisos
   name: sosialhjelp-innsyn-api-redis
   namespace: default
 spec:

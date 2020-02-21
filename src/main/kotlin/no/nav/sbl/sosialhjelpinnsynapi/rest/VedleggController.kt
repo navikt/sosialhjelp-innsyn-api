@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import javax.servlet.http.HttpServletRequest
 
+const val LENGTH_OF_UUID_PART = 9
+
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -35,7 +37,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     ): ResponseEntity<List<VedleggOpplastingResponse>> {
         sjekkXsrfToken(fiksDigisosId, request)
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
-                ?: throw IllegalStateException("Mangler metadata.json")
+                ?: throw IllegalStateException("Mangler metadata.json på digisosId=$fiksDigisosId")
         val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)
         files.removeIf { it.originalFilename == "metadata.json" }
 
@@ -54,7 +56,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                 .flatMap {
                     it.dokumentInfoList.map { dokumentInfo ->
                         VedleggResponse(
-                                dokumentInfo.filnavn,
+                                removeUUIDFromFilename(dokumentInfo.filnavn),
                                 dokumentInfo.storrelse,
                                 hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
                                 it.type,
@@ -63,6 +65,17 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                     }
                 }
         return ResponseEntity.ok(vedleggResponses.distinct())
+    }
+
+    fun removeUUIDFromFilename(filename: String): String {
+        val indexOfFileExtention = filename.lastIndexOf(".")
+        if (indexOfFileExtention != -1 && indexOfFileExtention > LENGTH_OF_UUID_PART) {
+            if (filename.substring(indexOfFileExtention - LENGTH_OF_UUID_PART).startsWith("-")) {
+                val extention = filename.substring(indexOfFileExtention, filename.length)
+                return filename.substring(0, indexOfFileExtention - LENGTH_OF_UUID_PART) + extention
+            }
+        }
+        return filename;
     }
 }
 
@@ -73,5 +86,5 @@ data class OpplastetVedleggMetadata (
 )
 
 data class OpplastetFil (
-        val filnavn: String
+        var filnavn: String
 )

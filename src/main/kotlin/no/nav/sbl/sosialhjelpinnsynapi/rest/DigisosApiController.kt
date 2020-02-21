@@ -38,5 +38,4 @@ class DigisosApiController(private val digisosApiService: DigisosApiService) {
 
         return ResponseEntity.ok(dokumentlagerId)
     }
-
 }

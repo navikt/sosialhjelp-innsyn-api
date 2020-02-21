@@ -7,6 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -16,6 +17,10 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 
 @Component
 class VedleggService(private val fiksClient: FiksClient) {
+
+    companion object {
+        val log by logger()
+    }
 
     fun hentAlleOpplastedeVedlegg(fiksDigisosId: String, token: String): List<InternalVedlegg> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
@@ -58,9 +63,12 @@ class VedleggService(private val fiksClient: FiksClient) {
                             .map { vedlegg ->
                                 val currentFilIndex = filIndex
                                 filIndex += vedlegg.filer.size
-                                val dokumentInfoList = ettersendelse.vedlegg.subList(currentFilIndex, filIndex)
+                                val dokumentInfoList = ettersendelse.vedlegg
+                                        .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
+                                        .subList(currentFilIndex, filIndex)
+
                                 if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                    throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
+                                    throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)
                                 }
                                 InternalVedlegg(
                                         vedlegg.type,
@@ -86,7 +94,7 @@ class VedleggService(private val fiksClient: FiksClient) {
 
     private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {
         return dokumentInfoList.size == files.size &&
-                dokumentInfoList.filterIndexed{ idx, it -> it.filnavn == files[idx].filnavn }.size == dokumentInfoList.size
+                dokumentInfoList.filterIndexed { idx, it -> it.filnavn == files[idx].filnavn }.size == dokumentInfoList.size
     }
 
     data class InternalVedlegg(

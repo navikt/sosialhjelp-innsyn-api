@@ -1,10 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import io.mockk.*
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.MOTTATT
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
@@ -69,8 +66,8 @@ internal class SaksOversiktControllerTest {
         every { model2.saker } returns mutableListOf(sak1, sak2)
 
         val response = controller.hentAlleSaker("token")
-        val saker = response.body
 
+        val saker = response.body
         assertThat(saker).isNotNull
         assertThat(saker).hasSize(2)
 
@@ -99,7 +96,9 @@ internal class SaksOversiktControllerTest {
         every { model2.oppgaver.isEmpty() } returns false
 
         every { sak1.tittel } returns "Livsopphold"
+        every { sak1.saksStatus } returns SaksStatus.UNDER_BEHANDLING
         every { sak2.tittel } returns "Strøm"
+        every { sak2.saksStatus } returns SaksStatus.UNDER_BEHANDLING
 
         every { model1.saker } returns mutableListOf()
         every { model2.saker } returns mutableListOf(sak1, sak2)

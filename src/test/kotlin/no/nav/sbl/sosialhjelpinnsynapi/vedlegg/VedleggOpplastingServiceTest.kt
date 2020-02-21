@@ -10,10 +10,13 @@ import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService.Companion.containsIllegalCharacters
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
 import org.apache.commons.io.IOUtils
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
+import org.apache.pdfbox.pdmodel.encryption.AccessPermission
+import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -23,8 +26,12 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.util.*
 import javax.imageio.ImageIO
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
 
 internal class VedleggOpplastingServiceTest {
 
@@ -58,7 +65,7 @@ internal class VedleggOpplastingServiceTest {
 
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
-        every { virusScanner.scan(any(), any()) } just runs
+        every { virusScanner.scan(any(), any(), any()) } just runs
         every { redisStore.set(any(), any(), any()) } returns "OK"
     }
 
@@ -66,6 +73,9 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal kalle FiksClient med gyldige filer for opplasting`() {
         every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns "uuid"
 
         val largePngFile = createImageByteArray("png", 2)
         val filnavn3 = "test3.png"
@@ -110,7 +120,7 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggSpesifikasjon.vedlegg[1].tilleggsinfo).isEqualTo(tilleggsinfo1)
         assertThat(vedleggSpesifikasjon.vedlegg[1].status).isEqualTo("LastetOpp")
         assertThat(vedleggSpesifikasjon.vedlegg[1].filer.size).isEqualTo(1)
-        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn).isEqualTo(filnavn3)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn.replace("-uuid", "")).isEqualTo(filnavn3)
 
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isNotEqualTo(vedleggSpesifikasjon.vedlegg[0].filer[2].sha512)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isEqualTo(vedleggSpesifikasjon.vedlegg[1].filer[0].sha512)
@@ -193,8 +203,31 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
+    fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er passord-beskyttet`() {
+        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+
+        val filnavn1 = "test1.pdf"
+        val filtype = "application/pdf"
+        val pdfFile = createPasswordProtectedPdfByteArray()
+
+        val metadata = mutableListOf(
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(
+                        OpplastetFil(filnavn1))))
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", filnavn1, filtype, pdfFile))
+
+        val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
+
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+
+        assertThat(vedleggOpplastingResponseList[0].filnavn).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].status).isEqualTo(MESSAGE_PDF_IS_ENCRYPTED)
+    }
+
+    @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
-        every { virusScanner.scan(any(), any()) } throws OpplastingException("mulig virus!", null)
+        every { virusScanner.scan(any(), any(), any()) } throws OpplastingException("mulig virus!", null)
 
         val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))))
         val files = mutableListOf<MultipartFile>(
@@ -203,6 +236,38 @@ internal class VedleggOpplastingServiceTest {
 
         assertThatExceptionOfType(OpplastingException::class.java)
                 .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
+    }
+
+    @Test
+    fun `skal legge på UUID på filnavn`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns uuid
+
+        val filnavn = "fil.pdf"
+        assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("fil-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal kutte ned lange filnavn`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString()} returns uuid
+
+        val filnavnUtenExtension50Tegn = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        val filnavn = "$filnavnUtenExtension50Tegn-dette-skal-kuttes-bort.pdf"
+        assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("$filnavnUtenExtension50Tegn-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal validere ugyldige tegn i filnavn`() {
+        val ugyldigTegn = arrayOf("*", ":", "<", ">", "|", "?", "\\", "/", "blabla?njn")
+        for (tegn in ugyldigTegn) {
+            assertTrue { containsIllegalCharacters(tegn) }
+        }
+
+        val utvalgAvGyldigeTegn = "aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVwWxXyYzZæÆøØåÅ-_!"
+        assertFalse { containsIllegalCharacters(utvalgAvGyldigeTegn) }
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {
@@ -218,6 +283,22 @@ internal class VedleggOpplastingServiceTest {
         if (signed) {
             document.addSignature(PDSignature())
         }
+        document.save(outputStream)
+        document.close()
+        return outputStream.toByteArray()
+    }
+
+    private fun createPasswordProtectedPdfByteArray(): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        val document = PDDocument()
+        document.addPage(PDPage())
+
+        val ap = AccessPermission()
+        val spp = StandardProtectionPolicy("12345", "secretpw", ap)
+        spp.encryptionKeyLength = 256
+        spp.permissions = ap
+        document.protect(spp)
+
         document.save(outputStream)
         document.close()
         return outputStream.toByteArray()

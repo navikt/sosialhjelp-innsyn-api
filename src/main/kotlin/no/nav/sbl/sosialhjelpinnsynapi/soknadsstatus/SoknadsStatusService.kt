@@ -20,10 +20,10 @@ class SoknadsStatusService(private val eventService: EventService,
         val model = eventService.createModel(digisosSak, token)
         val status = model.status
         if (status == null) {
-            log.warn("SoknadsStatus kan ikke være null")
-            throw RuntimeException("SoknadsStatus kan ikke være null")
+            log.warn("SoknadsStatus er null på digisosId=$fiksDigisosId")
+            throw RuntimeException("SoknadsStatus er null på digisosId=$fiksDigisosId")
         }
-        log.info("Hentet nåværende søknadsstatus=${status.name} for $fiksDigisosId")
+        log.info("Hentet nåværende søknadsstatus=${status.name} for digisosId=$fiksDigisosId")
         return SoknadsStatusResponse(status)
     }
 }

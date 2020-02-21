@@ -266,7 +266,7 @@ internal class VedleggOpplastingServiceTest {
             assertTrue { containsIllegalCharacters(tegn) }
         }
 
-        val utvalgAvGyldigeTegn = ".aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVw...WxXyYzZæÆøØåÅ-_"
+        val utvalgAvGyldigeTegn = ".aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVw...WxXyYzZæÆøØåÅ-_ (),._–-"
         assertFalse { containsIllegalCharacters(utvalgAvGyldigeTegn) }
     }
 

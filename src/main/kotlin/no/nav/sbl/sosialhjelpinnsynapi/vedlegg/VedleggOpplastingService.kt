@@ -45,7 +45,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val log by logger()
 
         fun containsIllegalCharacters(filename: String): Boolean {
-            return filename.contains("[^a-zæøåA-ZÆØÅ0-9 ._-]".toRegex())
+            return filename.contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
         }
     }
 

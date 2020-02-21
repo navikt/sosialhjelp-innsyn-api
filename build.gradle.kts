@@ -160,7 +160,7 @@ tasks {
             includeEngines("junit-jupiter")
         }
         testLogging {
-            events("passed", "skipped", "failed")
+            events("skipped", "failed")
         }
     }
 }

@@ -31,6 +31,7 @@ val kotlinTestVersion = "1.3.50"
 val redisMockVersion = "0.1.15"
 val lettuceVersion = "5.2.0.RELEASE"
 val springmockkVersion = "1.1.3"
+val navCommonVersion = "1.2020.01.23-17.30-c6684f7b3098"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 val isRunningOnJenkins: String? by project
@@ -88,9 +89,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
 
+    // Metrics
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
+    implementation("no.nav.common:metrics:$navCommonVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")

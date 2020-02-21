@@ -1,11 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.oppgave
 
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveElement
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.createHendelseMetric
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 
@@ -19,14 +21,14 @@ class OppgaveService(private val eventService: EventService,
         val log by logger()
     }
 
-    fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+    fun hentOppgaver(digisosId: String, token: String): List<OppgaveResponse> {
+        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
         if (model.oppgaver.isEmpty()) {
             return emptyList()
         }
 
-        val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+        val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(digisosId, digisosSak.ettersendtInfoNAV, token)
 
         val oppgaveResponseList = model.oppgaver
                 .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
@@ -38,7 +40,14 @@ class OppgaveService(private val eventService: EventService,
                     )
                 }
                 .sortedBy { it.innsendelsesfrist }
-        log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver for digisosId=$fiksDigisosId")
+
+        val antallOppgaver = oppgaveResponseList.sumBy { it.oppgaveElementer.size }
+        log.info("Hentet $antallOppgaver oppgaver for digisosId=$digisosId")
+        createHendelseMetric("sosialhjelp.innsyn.oppgaver", JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT, digisosSak, model)
+                .addFieldToReport("antallEtterspurte", model.oppgaver.size.toString())
+                .addFieldToReport("antallGjenstaende", antallOppgaver.toString())
+                .report()
+
         return oppgaveResponseList
     }
 

@@ -323,7 +323,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
         val digisosSak = hentDigisosSak(digisosId, token, true)
 
+        log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
+        val startTid = System.currentTimeMillis()
         val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
+        val sluttTid = System.currentTimeMillis()
+        log.info("Generering av ettersendelse.pdf tok ${sluttTid - startTid} ms")
+
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
         val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token)
         val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())

@@ -110,7 +110,7 @@ internal class UtbetalingTest {
                         .withHendelser(listOf(
                                 SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                UTBETALING.withUtbetalingsmetode("bankoverføring").withHendelsestidspunkt(tidspunkt_3)
+                                UTBETALING_BANKOVERFORING.withHendelsestidspunkt(tidspunkt_3)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
@@ -123,7 +123,7 @@ internal class UtbetalingTest {
         assertThat(utbetaling.belop).isEqualTo("1234.56")
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING.beskrivelse} har blitt sendt fra NAV til din konto. Du mottar pengene så fort banken har har behandlet utbetalingen.")
+        assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING_BANKOVERFORING.beskrivelse} har blitt sendt fra NAV til din konto. Du mottar pengene så fort banken har har behandlet utbetalingen.")
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
 //        assertThat(hendelse.url.link).isEqualTo("url goes here")
         assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
@@ -138,7 +138,7 @@ internal class UtbetalingTest {
                         .withHendelser(listOf(
                                 SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                UTBETALING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3)
+                                UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
@@ -152,7 +152,7 @@ internal class UtbetalingTest {
         assertThat(model.utbetalinger[0].mottaker).isEqualTo("utleier")
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING_ANNEN_MOTTAKER.beskrivelse} har blitt sendt fra NAV til ${UTBETALING_ANNEN_MOTTAKER.mottaker}.")
+        assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.beskrivelse} har blitt sendt fra NAV til ${UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.mottaker}.")
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
 //        assertThat(hendelse.url.link).isEqualTo("url goes here")
         assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)

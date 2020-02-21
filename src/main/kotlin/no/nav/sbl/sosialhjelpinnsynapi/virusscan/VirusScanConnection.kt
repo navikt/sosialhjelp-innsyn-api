@@ -17,7 +17,7 @@ internal class VirusScanConnection(private val config: VirusScanConfig, private 
             if (!isRunningInProd() && filnavn != null && filnavn.startsWith("virustest")) {
                 return true
             }
-            log.info("Scanner {} bytes for virus", data.size)
+            log.info("Scanner ${data.size} bytes for virus")
             val scanResults = putForObject(config.getUri(), data)
             if (scanResults!!.size != 1) {
                 log.warn("Virusscan returnerte uventet respons med lengde ${scanResults.size}, forventet lengde er 1. digisosId=$digisosId")
@@ -26,7 +26,7 @@ internal class VirusScanConnection(private val config: VirusScanConfig, private 
             val scanResult = scanResults[0]
             log.debug("Fikk scan result {}", scanResult)
             if (OK == scanResult.result) {
-                log.debug("Ingen virus i fil")
+                log.info("Ingen virus i fil (${data.size} bytes)")
                 return false
             }
             log.warn("Fant virus med status ${scanResult.result} i fil forsøkt opplastet til digisosId=$digisosId")

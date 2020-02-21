@@ -10,5 +10,5 @@ import org.springframework.context.annotation.Import
 class TestApplication
 
 fun main(args: Array<String>) {
-    runApplication<TestApplication>(*args)
+    runApplication<TestApplication>(*args).registerShutdownHook()
 }

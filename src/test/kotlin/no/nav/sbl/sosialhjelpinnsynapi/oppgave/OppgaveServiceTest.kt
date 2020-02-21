@@ -49,6 +49,8 @@ internal class OppgaveServiceTest {
         clearAllMocks()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
+        every { mockDigisosSak.fiksDigisosId } returns "12345"
+        every { mockDigisosSak.kommunenummer } returns "1234"
     }
 
     @Test

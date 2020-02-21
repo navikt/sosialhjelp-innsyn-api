@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.common.UTBETALINGSOVERSIKT
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
@@ -12,6 +13,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
+import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
@@ -72,7 +74,7 @@ internal class UtbetalingTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
         assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(6)
+        assertThat(model.historikk).hasSize(7)
 
         assertThat(model.saker[0].tittel).isEqualTo(tittel_1) // tittel for sak fra saksstatus-hendelse
 
@@ -91,6 +93,12 @@ internal class UtbetalingTest {
         assertThat(utbetaling.utbetalingsmetode).isEqualTo("pose med krølla femtilapper")
         assertThat(utbetaling.vilkar).isEmpty()
         assertThat(utbetaling.dokumentasjonkrav).isEmpty()
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING.beskrivelse} har blitt sendt fra NAV som pose med krølla femtilapper.")
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
+//        assertThat(hendelse.url.link).isEqualTo("url goes here")
+        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
     }
 
     @Test
@@ -102,7 +110,7 @@ internal class UtbetalingTest {
                         .withHendelser(listOf(
                                 SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                UTBETALING.withHendelsestidspunkt(tidspunkt_3)
+                                UTBETALING.withUtbetalingsmetode("bankoverføring").withHendelsestidspunkt(tidspunkt_3)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
@@ -111,7 +119,14 @@ internal class UtbetalingTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
 
-        assertThat(model.utbetalinger[0].belop).isEqualTo("1234.56")
+        val utbetaling = model.utbetalinger[0]
+        assertThat(utbetaling.belop).isEqualTo("1234.56")
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING.beskrivelse} har blitt sendt fra NAV til din konto. Du mottar pengene så fort banken har har behandlet utbetalingen.")
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+//        assertThat(hendelse.url.link).isEqualTo("url goes here")
+        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
     }
 
     @Test
@@ -135,6 +150,12 @@ internal class UtbetalingTest {
         assertThat(model.utbetalinger[0].belop).isEqualTo("1234.56")
         assertThat(model.utbetalinger[0].kontonummer).isNull()
         assertThat(model.utbetalinger[0].mottaker).isEqualTo("utleier")
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo("Utbetalingen for ${UTBETALING_ANNEN_MOTTAKER.beskrivelse} har blitt sendt fra NAV til ${UTBETALING_ANNEN_MOTTAKER.mottaker}.")
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+//        assertThat(hendelse.url.link).isEqualTo("url goes here")
+        assertThat(hendelse.url?.linkTekst).isEqualTo(UTBETALINGSOVERSIKT)
     }
 
 }

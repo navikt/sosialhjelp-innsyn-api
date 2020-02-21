@@ -168,7 +168,7 @@ val UTBETALING_ANNEN_MOTTAKER = JsonUtbetaling()
         .withAnnenMottaker(true)
         .withMottaker("utleier")
         .withKontonummer(null)
-        .withUtbetalingsmetode("pose med krølla femtilapper")
+        .withUtbetalingsmetode("bankoverføring")
 
 val VILKAR_OPPFYLT = JsonVilkar()
         .withType(JsonHendelse.Type.VILKAR)

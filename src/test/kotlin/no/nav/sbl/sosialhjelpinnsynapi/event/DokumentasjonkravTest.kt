@@ -74,7 +74,7 @@ internal class DokumentasjonkravTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
         assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(6)
+        assertThat(model.historikk).hasSize(7)
 
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
@@ -134,7 +134,7 @@ internal class DokumentasjonkravTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
         assertThat(model.saker).hasSize(0)
-        assertThat(model.historikk).hasSize(5)
+        assertThat(model.historikk).hasSize(6)
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tittel).isEqualTo(hendelsetekst)

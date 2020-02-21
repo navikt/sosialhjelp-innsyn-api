@@ -1,10 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
-import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
-import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.common.UTBETALINGSOVERSIKT
+import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDate
+import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 import java.math.BigDecimal
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
@@ -32,9 +32,19 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     sakForReferanse?.utbetalinger?.add(utbetaling)
     utbetalinger.removeIf { t -> t.referanse == utbetaling.referanse }
     utbetalinger.add(utbetaling)
-//    if(utbetaling.status == UtbetalingsStatus.UTBETALT) {
-//        historikk.add(Hendelse("Utbetaling: " + utbetaling.beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
-//    }
+
+    if(utbetaling.status == UtbetalingsStatus.UTBETALT) {
+        val beskrivelse = if (utbetaling.utbetalingsmetode.equals(other = "bankoverføring", ignoreCase = true)) {
+            if (erForEnAnnenMotaker(hendelse)) {
+                "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV til ${utbetaling.mottaker}."
+            } else {
+                "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV til din konto. Du mottar pengene så fort banken har har behandlet utbetalingen."
+            }
+        } else {
+            "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV som ${utbetaling.utbetalingsmetode}."
+        }
+        historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(UTBETALINGSOVERSIKT, "url til utbetalingsoversikt??"))) //FIXME url til utbetalingsoversikt
+    }
 }
 
 private fun erForEnAnnenMotaker(hendelse: JsonUtbetaling) =

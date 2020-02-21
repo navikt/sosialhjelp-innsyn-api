@@ -13,7 +13,6 @@
     </appender>
 
     <logger name="no.nav.sbl.sosialhjelpinnsynapi" level="INFO"/>
-    <logger name="org.springframework.context.support" level="DEBUG"/>
 
     <logger name="klientlogger" level="debug"/>
 
@@ -32,7 +31,6 @@
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.springframework.security" level="INFO"/>
         <logger name="org.springframework.web" level="INFO"/>
-        <logger name="org.springframework.context.support" level="DEBUG"/>
 
     </springProfile>
 

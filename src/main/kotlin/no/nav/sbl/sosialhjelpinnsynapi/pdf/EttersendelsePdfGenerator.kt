@@ -11,8 +11,8 @@ class EttersendelsePdfGenerator {
 
     fun generate(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, fodselsnummer: String): ByteArray {
         return try {
-            PDDocument().use { document ->
-                val pdf = PdfGenerator(document)
+            //PDDocument().use { document ->
+                val pdf = PdfGenerator(PDDocument())
 
                 pdf.addCenteredH1Bold("Ettersendelse av vedlegg")
                 pdf.addCenteredH1Bold("Søknad om økonomisk sosialhjelp")
@@ -35,7 +35,7 @@ class EttersendelsePdfGenerator {
                 }
 
                 pdf.finish()
-            }
+//            }
         } catch (e: Exception) {
             throw RuntimeException("Error while creating pdf", e)
         }

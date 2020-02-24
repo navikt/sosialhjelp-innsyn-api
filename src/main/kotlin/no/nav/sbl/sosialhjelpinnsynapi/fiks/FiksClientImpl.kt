@@ -43,9 +43,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val idPortenService: IdPortenService,
                      private val redisStore: RedisStore,
                      private val cacheProperties: CacheProperties,
-                     private val retryProperties: FiksRetryProperties
-                     /*private val krypteringService: KrypteringService,
-                     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator*/) : FiksClient {
+                     private val retryProperties: FiksRetryProperties,
+                     private val krypteringService: KrypteringService,
+                     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator) : FiksClient {
 
     companion object {
         val log by logger()
@@ -278,11 +278,15 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val body = LinkedMultiValueMap<String, Any>()
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
-        /*try {
+
+        val startTid = System.currentTimeMillis()
+        try {
             createEttersendelsesPdf(vedleggJson, body, digisosId, token)
         } catch (e: Exception) {
             log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
-        }*/
+        }
+        val sluttTid = System.currentTimeMillis()
+        log.info("Generering, kryptering og inkludering av ettersendelse.pdf tok ${sluttTid - startTid} ms for digisosId=$digisosId")
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
@@ -320,21 +324,23 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    /*private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
+    private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
         val digisosSak = hentDigisosSak(digisosId, token, true)
 
         log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
         val startTid = System.currentTimeMillis()
         val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
         val sluttTid = System.currentTimeMillis()
-        log.info("Generering av ettersendelse.pdf tok ${sluttTid - startTid} ms")
+        log.info("Generering av ettersendelse.pdf tok ${sluttTid - startTid} ms for digisosId=$digisosId")
 
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
         val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token)
+        log.info("Kryptering ferdig for digisosId=$digisosId")
         val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
         body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
         body.add("dokument:ettersendelse.pdf", createHttpEntity(InputStreamResource(ettersendelseKryptertFil), "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))
-    }*/
+        log.info("Ettersendelse.pdf lagt til i request-body for digisosId=$digisosId")
+    }
 
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")

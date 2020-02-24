@@ -291,12 +291,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         files.forEachIndexed { fileId, file ->
             val filStartTid = System.currentTimeMillis()
-            log.info("Fil - ${file.filnavn}: Start filinkludering: Inkluderer filen ${file.filnavn} i request-body for digisosId=$digisosId")
+            log.info("Fil: Start - ${file.filnavn}: Inkluderer filen ${file.filnavn} i request-body for digisosId=$digisosId")
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
             val filSluttTid = System.currentTimeMillis()
-            log.info("Fil - ${file.filnavn}: Stopp filinkludering: Inkludering av filen ${file.filnavn} tok ${filSluttTid - filStartTid} ms for digisosId=$digisosId")
+            log.info("Fil: Stopp - ${file.filnavn}: Inkludering av filen ${file.filnavn} tok ${filSluttTid - filStartTid} ms for digisosId=$digisosId")
         }
 
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
@@ -304,7 +304,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
         val forberedeSluttTid = System.currentTimeMillis()
-        log.info("Forberedelse: Slutt: innsending tok ${forberedeSluttTid - forberedeStartTid} ms for digisosId=$digisosId")
+        log.info("Forberedelse: Slutt: forberedelse tok ${forberedeSluttTid - forberedeStartTid} ms for digisosId=$digisosId")
 
 
         val innsendingStartTid = System.currentTimeMillis()
@@ -317,7 +317,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                     urlTemplate,
                     HttpMethod.POST,
                     requestEntity,
-                    String::class.java,
+                    Void::class.java,
                     mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
             val innsendingSluttTid = System.currentTimeMillis()

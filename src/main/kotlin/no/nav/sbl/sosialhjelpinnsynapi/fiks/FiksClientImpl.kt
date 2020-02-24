@@ -274,7 +274,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
         val forberedeStartTid = System.currentTimeMillis()
         log.info("Forberedelse: Start: Starter sending av ettersendelse med ${files.size} filer til digisosId=$digisosId")
-        val headers = setIntegrasjonHeaders(token)
+        val headers = setIntegrasjonHeadersWithoutAccept(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
         val body = LinkedMultiValueMap<String, Any>()
@@ -390,6 +390,14 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private fun setIntegrasjonHeaders(token: String): HttpHeaders {
         val headers = HttpHeaders()
         headers.accept = singletonList(MediaType.APPLICATION_JSON)
+        headers.set(AUTHORIZATION, token)
+        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
+        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
+        return headers
+    }
+
+    private fun setIntegrasjonHeadersWithoutAccept(token: String): HttpHeaders {
+        val headers = HttpHeaders()
         headers.set(AUTHORIZATION, token)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)

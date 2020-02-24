@@ -17,22 +17,22 @@ internal class VirusScanConnection(private val config: VirusScanConfig, private 
             if (!isRunningInProd() && filnavn != null && filnavn.startsWith("virustest")) {
                 return true
             }
-            log.info("Scanner ${data.size} bytes for virus")
+            log.info("Virus: Scanner ${data.size} bytes for virus filnavn=$filnavn")
             val scanResults = putForObject(config.getUri(), data)
             if (scanResults!!.size != 1) {
-                log.warn("Virusscan returnerte uventet respons med lengde ${scanResults.size}, forventet lengde er 1. digisosId=$digisosId")
+                log.warn("Virus: Virusscan returnerte uventet respons med lengde ${scanResults.size}, forventet lengde er 1. digisosId=$digisosId  filnavn=$filnavn")
                 return false
             }
             val scanResult = scanResults[0]
-            log.debug("Fikk scan result {}", scanResult)
+            log.debug("Virus: Fikk scan result {}", scanResult)
             if (OK == scanResult.result) {
-                log.info("Ingen virus i fil (${data.size} bytes)")
+                log.info("Virus: Ingen virus i fil (${data.size} bytes) filnavn=$filnavn")
                 return false
             }
-            log.warn("Fant virus med status ${scanResult.result} i fil forsøkt opplastet til digisosId=$digisosId")
+            log.warn("Virus: Fant virus med status ${scanResult.result} i fil forsøkt opplastet til digisosId=$digisosId  filnavn=$filnavn")
             return true
         } catch (e: Exception) {
-            log.warn("Kunne ikke scanne fil opplastet til digisosId=$digisosId", e)
+            log.warn("Virus: Kunne ikke scanne fil opplastet til digisosId=$digisosId  filnavn=$filnavn", e)
             return false
         }
 

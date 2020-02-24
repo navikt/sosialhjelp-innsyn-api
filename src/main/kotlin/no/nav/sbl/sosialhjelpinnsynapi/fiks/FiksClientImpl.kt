@@ -272,7 +272,8 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
-        log.info("Starter sending av ettersendelse med ${files.size} filer til digisosId=$digisosId")
+        val forberedeStartTid = System.currentTimeMillis()
+        log.info("Forberedelse: Start: Starter sending av ettersendelse med ${files.size} filer til digisosId=$digisosId")
         val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
@@ -283,24 +284,35 @@ class FiksClientImpl(clientProperties: ClientProperties,
         try {
             createEttersendelsesPdf(vedleggJson, body, digisosId, token)
         } catch (e: Exception) {
-            log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
+            log.error("Ettersendelse: Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
         }
         val sluttTid = System.currentTimeMillis()
-        log.info("Generering, kryptering og inkludering av ettersendelse.pdf tok ${sluttTid - startTid} ms for digisosId=$digisosId")
+        log.info("Ettersendelse: Generering, kryptering og inkludering av ettersendelse.pdf tok ${sluttTid - startTid} ms for digisosId=$digisosId")
 
         files.forEachIndexed { fileId, file ->
+            val filStartTid = System.currentTimeMillis()
+            log.info("Fil - ${file.filnavn}: Start filinkludering: Inkluderer filen ${file.filnavn} i request-body for digisosId=$digisosId")
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
+            val filSluttTid = System.currentTimeMillis()
+            log.info("Fil - ${file.filnavn}: Stopp filinkludering: Inkludering av filen ${file.filnavn} tok ${filSluttTid - filStartTid} ms for digisosId=$digisosId")
         }
 
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
         val kommunenummer = digisosSak.kommunenummer
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
+        val forberedeSluttTid = System.currentTimeMillis()
+        log.info("Forberedelse: Slutt: innsending tok ${forberedeSluttTid - forberedeStartTid} ms for digisosId=$digisosId")
+
+
+        val innsendingStartTid = System.currentTimeMillis()
         val requestEntity = HttpEntity(body, headers)
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
+
+            log.info("Innsending: start: tiden er nå ${System.currentTimeMillis() - innsendingStartTid} ms for digisosId=$digisosId")
             val responseEntity = restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.POST,
@@ -308,18 +320,19 @@ class FiksClientImpl(clientProperties: ClientProperties,
                     String::class.java,
                     mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
-            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")
+            val innsendingSluttTid = System.currentTimeMillis()
+            log.info("Innsending: Slutt: Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue})  innsending tok ${innsendingSluttTid - innsendingStartTid} ms   digisosId=$digisosId")
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Innsending: Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
+            log.warn("Innsending: Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
             throw FiksServerException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            log.warn("Opplasting av ettersendelse på $digisosId feilet", e)
+            log.warn("Innsending: Opplasting av ettersendelse på $digisosId feilet", e)
             throw FiksException(e.message, e)
         }
     }
@@ -327,19 +340,19 @@ class FiksClientImpl(clientProperties: ClientProperties,
     private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
         val digisosSak = hentDigisosSak(digisosId, token, true)
 
-        log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
+        log.info("Ettersendelse: Start: Starter generering av ettersendelse.pdf for digisosId=$digisosId")
         val startTid = System.currentTimeMillis()
         val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
         val sluttTid = System.currentTimeMillis()
-        log.info("Generering av ettersendelse.pdf tok ${sluttTid - startTid} ms for digisosId=$digisosId")
+        log.info("Ettersendelse: Generering av ettersendelse.pdf tok ${sluttTid - startTid} ms for digisosId=$digisosId")
 
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
         val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token)
-        log.info("Kryptering ferdig for digisosId=$digisosId")
+        log.info("Ettersendelse: Kryptering av ettersendelse ferdig for digisosId=$digisosId")
         val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
         body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
         body.add("dokument:ettersendelse.pdf", createHttpEntity(InputStreamResource(ettersendelseKryptertFil), "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))
-        log.info("Ettersendelse.pdf lagt til i request-body for digisosId=$digisosId")
+        log.info("Ettersendelse: Ettersendelse.pdf lagt til i request-body for digisosId=$digisosId")
     }
 
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {

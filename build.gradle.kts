@@ -1,6 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 group = "no.nav.sbl"
-version = "1.0-SNAPSHOT"
 
 val kotlinVersion = "1.3.50"
 val springBootVersion = "2.2.0.RELEASE"
@@ -40,7 +43,7 @@ plugins {
     kotlin("jvm") version "1.3.50"
 
     id("org.jetbrains.kotlin.plugin.spring") version "1.3.50"
-    id("org.springframework.boot") version "2.2.0.RELEASE"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
 }
 
@@ -151,7 +154,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"
-            freeCompilerArgs = listOf("-Xjsr305=strict")
+            freeCompilerArgs = listOf("-Xjsr305=strict", "-XXLanguage:+InlineClasses")
         }
     }
 
@@ -163,6 +166,19 @@ tasks {
             events("passed", "skipped", "failed")
         }
     }
+
+    withType<ShadowJar> {
+        classifier = ""
+        transform(ServiceFileTransformer::class.java) {
+            setPath("META-INF/cxf")
+            include("bus-extensions.txt")
+        }
+        transform(PropertiesFileTransformer::class.java) {
+            paths = listOf("META-INF/spring.factories")
+            mergeStrategy = "append"
+        }
+        mergeServiceFiles()
+    }
 }
 
 tasks.register("stage") {
@@ -171,9 +187,4 @@ tasks.register("stage") {
         delete(fileTree("dir" to "build", "exclude" to "libs"))
         delete(fileTree("dir" to "build/libs", "exclude" to "*.jar"))
     }
-}
-
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
 }

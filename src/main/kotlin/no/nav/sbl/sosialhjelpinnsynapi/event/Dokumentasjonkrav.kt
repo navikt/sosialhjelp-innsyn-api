@@ -46,6 +46,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
         utbetaling.dokumentasjonkrav.add(dokumentasjonkrav)
     }
 
-    val beskrivelse = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for detaljer."
+    val beskrivelse = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for mer detaljer."
     historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
 }

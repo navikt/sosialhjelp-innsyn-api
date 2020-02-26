@@ -34,7 +34,7 @@ internal class DokumentasjonkravTest {
     private val soknadsmottaker = "The Office"
     private val enhetsnr = "2317"
 
-    private val hendelsetekst = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for detaljer hva du må sende inn."
+    private val hendelsetekst = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for detaljer."
 
     @BeforeEach
     fun init() {

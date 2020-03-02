@@ -6,6 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator.sjekkXsrfToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
@@ -28,6 +29,9 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                         private val vedleggService: VedleggService,
                         private val clientProperties: ClientProperties) {
 
+    companion object {
+        val log by logger()
+    }
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(@PathVariable fiksDigisosId: String,
@@ -36,6 +40,17 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                     request: HttpServletRequest
     ): ResponseEntity<List<VedleggOpplastingResponse>> {
         sjekkXsrfToken(fiksDigisosId, request)
+
+        val runtime = Runtime.getRuntime()
+        val maxMemory = runtime.maxMemory()
+        val allocatedMemory = runtime.totalMemory()
+
+        val mb = 1024 * 1024
+
+        log.info("maxMemory MB: ${maxMemory / mb}")
+        log.info("allocated MB: ${allocatedMemory / mb}")
+        log.info("free MB: ${runtime.freeMemory() / mb}")
+
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
                 ?: throw IllegalStateException("Mangler metadata.json på digisosId=$fiksDigisosId")
         val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)
@@ -75,7 +90,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                 return filename.substring(0, indexOfFileExtention - LENGTH_OF_UUID_PART) + extention
             }
         }
-        return filename;
+        return filename
     }
 }
 

@@ -1,8 +1,11 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-group = "no.nav.sbl"
-version = "1.0-SNAPSHOT"
 
-val kotlinVersion = "1.3.50"
+group = "no.nav.sbl"
+
+val kotlinVersion = "1.3.60"
 val springBootVersion = "2.2.0.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "5.3"
@@ -27,7 +30,6 @@ val fileUploadVersion = "1.4"
 val tikaVersion = "1.22"
 val pdfBoxVersion = "2.0.16"
 val fiksKrypteringVersion = "1.0.7"
-val kotlinTestVersion = "1.3.50"
 val redisMockVersion = "0.1.15"
 val lettuceVersion = "5.2.0.RELEASE"
 val springmockkVersion = "1.1.3"
@@ -37,11 +39,12 @@ val isRunningOnJenkins: String? by project
 
 plugins {
     application
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.60"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.3.50"
-    id("org.springframework.boot") version "2.2.0.RELEASE"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.3.60"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
+    id("com.github.ben-manes.versions") version "0.28.0"
 }
 
 application {
@@ -130,7 +133,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("no.nav.security:token-validation-test-support:$tokenValidationVersion")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
 }
 
@@ -151,7 +154,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"
-            freeCompilerArgs = listOf("-Xjsr305=strict")
+            freeCompilerArgs = listOf("-Xjsr305=strict", "-XXLanguage:+InlineClasses")
         }
     }
 
@@ -160,8 +163,21 @@ tasks {
             includeEngines("junit-jupiter")
         }
         testLogging {
-            events("passed", "skipped", "failed")
+            events("skipped", "failed")
         }
+    }
+
+    withType<ShadowJar> {
+        classifier = ""
+        transform(ServiceFileTransformer::class.java) {
+            setPath("META-INF/cxf")
+            include("bus-extensions.txt")
+        }
+        transform(PropertiesFileTransformer::class.java) {
+            paths = listOf("META-INF/spring.factories")
+            mergeStrategy = "append"
+        }
+        mergeServiceFiles()
     }
 }
 
@@ -171,9 +187,4 @@ tasks.register("stage") {
         delete(fileTree("dir" to "build", "exclude" to "libs"))
         delete(fileTree("dir" to "build/libs", "exclude" to "*.jar"))
     }
-}
-
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
 }

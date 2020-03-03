@@ -196,4 +196,86 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
         assertThat(oppgave.erFraInnsyn).isEqualTo(true)
     }
+
+    @Test
+    internal fun `ny dokumentasjonEtterspurt uten oppgaver skal overstyre og gi hendelse i historikk`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
+                                DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+                listOf(VedleggService.InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+        assertThat(model.saker).isEmpty()
+        assertThat(model.oppgaver).isEmpty()
+        assertThat(model.historikk).hasSize(5)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo("Vi har sett på dokumentene dine og vil gi beskjed om vi trenger mer fra deg.")
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
+    }
+
+    @Test
+    internal fun `ny dokumentasjonEtterspurt uten oppgaver skal ikke gi hendelse i historikk ved soknadstatus ferdigbehandlet`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_2),
+                                DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
+                                DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+                listOf(VedleggService.InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
+        assertThat(model.saker).isEmpty()
+        assertThat(model.oppgaver).isEmpty()
+        assertThat(model.historikk).hasSize(4)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+    }
+
+    @Test
+    internal fun `ny dokumentasjonEtterspurt uten oppgaver skal ikke gi hendelse i historikk ved soknadstatus behandles_ikke`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_BEHANDLES_IKKE.withHendelsestidspunkt(tidspunkt_2),
+                                DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
+                                DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+                listOf(VedleggService.InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.BEHANDLES_IKKE)
+        assertThat(model.saker).isEmpty()
+        assertThat(model.oppgaver).isEmpty()
+        assertThat(model.historikk).hasSize(4)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+    }
 }

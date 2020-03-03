@@ -48,3 +48,4 @@ TestApplication og profile=mock
 #### *med* integrasjon til Fiks og login-api
 TestApplication og profile=local. \
 I tillegg må FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, og VIRKSERT_STI settes som env-variabler
+

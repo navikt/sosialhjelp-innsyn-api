@@ -40,7 +40,7 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
 
     private val executor = Executors.newFixedThreadPool(4)
 
-    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String): InputStream {
+    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream {
         val kryptering = CMSKrypteringImpl()
         val certificate = getDokumentlagerPublicKeyX509Certificate(token)
 
@@ -49,17 +49,17 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
             val pipedOutputStream = PipedOutputStream(pipedInputStream)
             val krypteringFuture = CompletableFuture.runAsync(Runnable {
                 try {
-                    log.debug("Starting encryption...")
+                    log.info("Starter kryptering, digisosId=$digisosId")
                     kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
-                    log.debug("Encryption completed")
+                    log.info("Ferdig med kryptring, digisosId=$digisosId")
                 } catch (e: Exception) {
-                    log.error("Encryption failed, setting exception on encrypted InputStream", e)
+                    log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 } finally {
                     try {
-                        log.debug("Closing encryption OutputStream")
+                        log.info("Lukker kryptering OutputStream, digisosId=$digisosId")
                         pipedOutputStream.close()
-                        log.debug("Encryption OutputStream closed")
+                        log.info("Kryptering OutputStream er lukket, digisosId=$digisosId")
                     } catch (e: IOException) {
                         log.error("Failed closing encryption OutputStream", e)
                     }

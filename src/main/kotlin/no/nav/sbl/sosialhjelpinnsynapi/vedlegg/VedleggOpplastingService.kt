@@ -67,7 +67,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
 
             if (valideringstatus == "OK") {
-                val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token)
+                val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token, fiksDigisosId)
                 filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
             } else {
                 log.warn("Opplasting av filer til ettersendelse feilet med status $valideringstatus, digisosId=$fiksDigisosId")
@@ -201,7 +201,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
         val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
         try {
-            allFutures.get(300, TimeUnit.SECONDS)
+            allFutures.get(30, TimeUnit.SECONDS)
         } catch (e: CompletionException) {
             throw IllegalStateException(e.cause)
         } catch (e: ExecutionException) {

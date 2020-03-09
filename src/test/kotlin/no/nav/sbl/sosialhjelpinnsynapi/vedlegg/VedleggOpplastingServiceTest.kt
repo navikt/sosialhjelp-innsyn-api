@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.util.*
 import javax.imageio.ImageIO
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -268,6 +269,24 @@ internal class VedleggOpplastingServiceTest {
 
         val utvalgAvGyldigeTegn = ".aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVw...WxXyYzZæÆøØåÅ-_ (),._–-"
         assertFalse { containsIllegalCharacters(utvalgAvGyldigeTegn) }
+    }
+
+    @Test
+    fun `getOpplastetVedleggMetadataAsString skal returnere antall filer per element i listen`() {
+        val metadataList = mutableListOf(
+            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
+                    OpplastetFil("fil1"),
+                    OpplastetFil("fil2"),
+                    OpplastetFil("fil3")
+            )),
+            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(OpplastetFil("fil4"))),
+            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
+                    OpplastetFil("fil5"),
+                    OpplastetFil("fil6")
+            ))
+        )
+
+        assertEquals("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ", service.getMetadataAsString(metadataList) )
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {

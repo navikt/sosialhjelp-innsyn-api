@@ -6,7 +6,7 @@ metadata:
   labels:
     team: teamdigisos
 spec:
-  image: docker.pkg.github.com/navikt/sosialhjelp-innsyn-api/sosialhjelp-innsyn-api:{{version}}
+  image: {{image}}
   port: 8080
   liveness:
     path: /sosialhjelp/innsyn-api/internal/isAlive
@@ -48,10 +48,10 @@ spec:
   resources:
     limits:
       cpu: 500m
-      memory: 1Gi
+      memory: 2Gi
     requests:
       cpu: 200m
-      memory: 512Mi
+      memory: 1Gi
   env:
 {{#each env}}
     - name: {{@key}}

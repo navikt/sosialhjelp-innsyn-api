@@ -1,47 +1,50 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-group = "no.nav.sbl"
-version = "1.0-SNAPSHOT"
 
-val kotlinVersion = "1.3.50"
-val springBootVersion = "2.2.0.RELEASE"
+group = "no.nav.sbl"
+
+val kotlinVersion = "1.3.70"
+val springBootVersion = "2.2.5.RELEASE"
 val logbackVersion = "1.2.3"
-val logstashVersion = "5.3"
-val junitJupiterVersion = "5.5.2"
+val logstashVersion = "6.3"
+val junitJupiterVersion = "5.6.0"
 val mockkVersion = "1.9.3"
 val filformatVersion = "1.2020.01.09-15.55-f18d10d7d76a"
-val micrometerRegistryVersion = "1.1.7"
-val prometheusVersion = "0.7.0"
-val tokenValidationVersion = "1.1.3"
-val jacksonVersion = "2.10.1"
-val jacksonDatabindVersion = "2.10.1"
-val guavaVersion = "28.0-jre"
+val micrometerRegistryVersion = "1.3.5"
+val prometheusVersion = "0.8.1"
+val tokenValidationVersion = "1.1.4"
+val jacksonVersion = "2.10.3"
+val jacksonDatabindVersion = "2.10.3"
+val guavaVersion = "28.2-jre"
 val swaggerVersion = "2.9.2"
-val resilience4jVersion = "1.0.0"
+val resilience4jVersion = "1.3.1"
 val rxKotlinVersion = "2.4.0"
-val vavrKotlinVersion = "0.10.0"
-val ktorVersion = "1.2.2"
+val vavrKotlinVersion = "0.10.2"
+val ktorVersion = "1.3.1"
 val konfigVersion = "1.6.10.0"
-val kotlinCoroutinesVersion = "1.3.2"
+val kotlinCoroutinesVersion = "1.3.3"
 val commonsIoVersion = "2.6"
 val fileUploadVersion = "1.4"
-val tikaVersion = "1.22"
-val pdfBoxVersion = "2.0.16"
+val tikaVersion = "1.23"
+val pdfBoxVersion = "2.0.19"
 val fiksKrypteringVersion = "1.0.7"
-val kotlinTestVersion = "1.3.50"
-val redisMockVersion = "0.1.15"
-val lettuceVersion = "5.2.0.RELEASE"
-val springmockkVersion = "1.1.3"
+val redisMockVersion = "0.1.16"
+val lettuceVersion = "5.2.2.RELEASE"
+val springmockkVersion = "2.0.0"
 
 val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 val isRunningOnJenkins: String? by project
 
 plugins {
     application
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.70"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.3.50"
-    id("org.springframework.boot") version "2.2.0.RELEASE"
-    id("io.spring.dependency-management") version "1.0.8.RELEASE"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.3.70"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("io.spring.dependency-management") version "1.0.9.RELEASE"
+    id("com.github.ben-manes.versions") version "0.28.0"
 }
 
 application {
@@ -130,7 +133,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("no.nav.security:token-validation-test-support:$tokenValidationVersion")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
 }
 
@@ -144,14 +147,14 @@ repositories {
     if (isRunningOnJenkins ?: "" == "true") maven("https://repo.adeo.no/repository/maven-central") else mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")
-    maven("http://repo.spring.io/plugins-release/")
+    maven("https://repo.spring.io/plugins-release/")
 }
 
 tasks {
     withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "1.8"
-            freeCompilerArgs = listOf("-Xjsr305=strict")
+            jvmTarget = "11"
+            freeCompilerArgs = listOf("-Xjsr305=strict", "-XXLanguage:+InlineClasses")
         }
     }
 
@@ -163,6 +166,19 @@ tasks {
             events("skipped", "failed")
         }
     }
+
+    withType<ShadowJar> {
+        classifier = ""
+        transform(ServiceFileTransformer::class.java) {
+            setPath("META-INF/cxf")
+            include("bus-extensions.txt")
+        }
+        transform(PropertiesFileTransformer::class.java) {
+            paths = listOf("META-INF/spring.factories")
+            mergeStrategy = "append"
+        }
+        mergeServiceFiles()
+    }
 }
 
 tasks.register("stage") {
@@ -171,9 +187,4 @@ tasks.register("stage") {
         delete(fileTree("dir" to "build", "exclude" to "libs"))
         delete(fileTree("dir" to "build/libs", "exclude" to "*.jar"))
     }
-}
-
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
 }

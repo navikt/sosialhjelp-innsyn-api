@@ -71,7 +71,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal kalle FiksClient med gyldige filer for opplasting`() {
-        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         mockkStatic(UUID::class)
@@ -137,7 +137,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ikke alle filene blir validert ok`() {
-        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val metadata = mutableListOf(
@@ -175,7 +175,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er signert`() {
-        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val filnavn1 = "test1.pdf"
@@ -204,7 +204,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er passord-beskyttet`() {
-        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val filnavn1 = "test1.pdf"

@@ -13,8 +13,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
 
-class PdfGenerator internal constructor() {
-    private val document = PDDocument()
+class PdfGenerator internal constructor(private var document: PDDocument) {
     private var currentPage = PDPage(PDRectangle.A4)
     private var currentStream: PDPageContentStream
     private var y: Float
@@ -28,8 +27,7 @@ class PdfGenerator internal constructor() {
         val baos = ByteArrayOutputStream()
         currentStream.close()
         document.save(baos)
-        document.close()
-        return baos.toByteArray()
+            return baos.toByteArray()
     }
 
     fun addBlankLine() {

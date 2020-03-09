@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture
 @Profile("mock")
 @Component
 class KrypteringServiceMock : KrypteringService {
-    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String): InputStream {
+    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream {
         return fileInputStream
     }
 

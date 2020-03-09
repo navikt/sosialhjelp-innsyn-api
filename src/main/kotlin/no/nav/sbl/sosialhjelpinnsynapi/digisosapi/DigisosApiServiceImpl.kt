@@ -29,7 +29,7 @@ class DigisosApiServiceImpl(private val digisosApiClient: DigisosApiClient,
         val accessToken = runBlocking { idPortenService.requestToken() }
 
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
-        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, "Bearer " + accessToken.token)
+        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, "Bearer " + accessToken.token, fiksDigisosId)
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         val fiksIder = digisosApiClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
         waitForFutures(krypteringFutureList)

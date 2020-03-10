@@ -66,6 +66,8 @@ configurations {
         exclude(group = "junit", module = "junit")
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+        exclude(group = "org.mockito", module = "mockito-core")
     }
 }
 
@@ -127,9 +129,7 @@ dependencies {
     implementation ("io.vavr:vavr-kotlin:$vavrKotlinVersion")
 
     //Test dependencies
-    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
-        exclude(group = "org.mockito", module = "mockito-core")
-    }
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("no.nav.security:token-validation-test-support:$tokenValidationVersion")

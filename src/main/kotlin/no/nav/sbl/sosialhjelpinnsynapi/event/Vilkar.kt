@@ -5,6 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
+import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 
@@ -19,14 +20,31 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
             }
         }
     }
-    val vilkar = Vilkar(hendelse.vilkarreferanse, utbetalinger, hendelse.beskrivelse, hendelse.status == JsonVilkar.Status.OPPFYLT)
+    val vilkar = Vilkar(
+            referanse = hendelse.vilkarreferanse,
+            utbetalinger = utbetalinger,
+            beskrivelse = hendelse.beskrivelse,
+            oppfyllt = hendelse.status == JsonVilkar.Status.OPPFYLT,
+            datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
+            datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime()
+    )
 
-    vilkarSaker.forEach { sak ->
-        sak.vilkar.add(vilkar)
+    vilkarSaker.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }
+    utbetalinger.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }
+
+}
+
+private fun MutableList<Vilkar>.oppdaterEllerLeggTilVilkar(hendelse: JsonVilkar, vilkar: Vilkar) {
+    if (any { it.referanse == hendelse.vilkarreferanse }) {
+        filter { it.referanse == hendelse.vilkarreferanse }
+                .forEach { it.oppdaterFelter(hendelse) }
+    } else {
+        add(vilkar)
     }
+}
 
-    utbetalinger.forEach { utbetaling ->
-        utbetaling.vilkar.add(vilkar)
-    }
-
+private fun Vilkar.oppdaterFelter(hendelse: JsonVilkar) {
+    datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime()
+    beskrivelse = hendelse.beskrivelse
+    oppfyllt = hendelse.status == JsonVilkar.Status.OPPFYLT
 }

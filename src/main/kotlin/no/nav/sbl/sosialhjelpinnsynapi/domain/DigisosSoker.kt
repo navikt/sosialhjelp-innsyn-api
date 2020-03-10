@@ -73,7 +73,9 @@ data class Vilkar(
         var referanse: String,
         var utbetalinger: MutableList<Utbetaling>,
         var beskrivelse: String?,
-        var oppfyllt: Boolean
+        var oppfyllt: Boolean,
+        var datoLagtTil: LocalDateTime,
+        var datoSistEndret: LocalDateTime
 )
 
 data class Dokumentasjonkrav(

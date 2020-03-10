@@ -10,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.springframework.stereotype.Component
+import java.time.temporal.ChronoUnit
 
 
 @Component
@@ -26,24 +27,40 @@ class HendelseService(private val eventService: EventService,
         val model = eventService.createModel(digisosSak, token)
 
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
-        digisosSak.originalSoknadNAV?.timestampSendt?.let { leggTilHendelserForOpplastinger(model, it, vedlegg) }
+        digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
-        val responseList = model.historikk.map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
+        model.leggTilHendelserForVilkar()
+        // model.leggTilHendelserForUtbetalingerOgRammevedtak()
+
+        val responseList = model.historikk
+                .sortedBy { it.tidspunkt }
+                .map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
         log.info("Hentet historikk med ${responseList.size} hendelser for digisosId=$fiksDigisosId")
         return responseList
     }
 
-    private fun leggTilHendelserForOpplastinger(model: InternalDigisosSoker, timestampSoknadSendt: Long, vedlegg: List<InternalVedlegg>) {
+    private fun InternalDigisosSoker.leggTilHendelserForOpplastinger(timestampSoknadSendt: Long, vedlegg: List<InternalVedlegg>) {
         vedlegg
                 .filter { it.tidspunktLastetOpp.isAfter(unixToLocalDateTime(timestampSoknadSendt)) }
                 .filter { it.dokumentInfoList.isNotEmpty() }
                 .groupBy { it.tidspunktLastetOpp }
                 .forEach { (tidspunkt, samtidigOpplastedeVedlegg) ->
                     val antallVedleggForTidspunkt = samtidigOpplastedeVedlegg.sumBy { it.dokumentInfoList.size }
-                    model.historikk.add(
+                    historikk.add(
                             Hendelse("Du har sendt $antallVedleggForTidspunkt vedlegg til NAV", tidspunkt)
                     )
                 }
-        model.historikk.sortBy { it.tidspunkt }
     }
+
+    private fun InternalDigisosSoker.leggTilHendelserForVilkar() {
+        saker
+                .flatMap { it.vilkar }
+                .groupBy { it.datoSistEndret.truncatedTo(ChronoUnit.MINUTES) }
+                .forEach { (_, grupperteVilkar) ->
+                    historikk.add(
+                            Hendelse("Dine vilkår har blitt oppdatert, les vedtaket for mer detaljer", grupperteVilkar[0].datoSistEndret)
+                    )
+                }
+    }
+
 }

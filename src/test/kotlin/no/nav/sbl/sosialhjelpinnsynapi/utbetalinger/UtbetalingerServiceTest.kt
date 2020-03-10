@@ -4,7 +4,15 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Dokumentasjonkrav
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.event.apply
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
@@ -15,6 +23,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class UtbetalingerServiceTest {
     private val eventService: EventService = mockk()
@@ -159,7 +168,8 @@ internal class UtbetalingerServiceTest {
     @Test
     fun `Skal returnere response med 1 utbetaling med vilkar`() {
         val model = InternalDigisosSoker()
-        val vilkar = Vilkar("vilkar1", mutableListOf(), "Skal hoppe", false)
+        val now = LocalDateTime.now()
+        val vilkar = Vilkar("vilkar1", mutableListOf(), "Skal hoppe", false, now, now)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(vilkar), mutableListOf())
         vilkar.utbetalinger.add(utbetaling1)

@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.time.LocalDate
 import java.util.*
 import javax.imageio.ImageIO
 import kotlin.test.assertEquals
@@ -82,8 +83,8 @@ internal class VedleggOpplastingServiceTest {
         val filnavn3 = "test3.png"
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1))),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn3))))
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1)), null),
+                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn3)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile),
@@ -126,14 +127,14 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isNotEqualTo(vedleggSpesifikasjon.vedlegg[0].filer[2].sha512)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isEqualTo(vedleggSpesifikasjon.vedlegg[1].filer[0].sha512)
 
-        assertThat(vedleggOpplastingResponseList[0].filnavn == filnavn0)
-        assertThat(vedleggOpplastingResponseList[0].status == "OK")
-        assertThat(vedleggOpplastingResponseList[1].filnavn == filnavn1)
-        assertThat(vedleggOpplastingResponseList[1].status == "OK")
-        assertThat(vedleggOpplastingResponseList[2].filnavn == filnavn1)
-        assertThat(vedleggOpplastingResponseList[2].status == "OK")
-        assertThat(vedleggOpplastingResponseList[3].filnavn == filnavn3)
-        assertThat(vedleggOpplastingResponseList[2].status == "OK")
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn == filnavn0)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status == "OK")
+        assertThat(vedleggOpplastingResponseList[0].filer[1].filnavn == filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].status == "OK")
+        assertThat(vedleggOpplastingResponseList[0].filer[2].filnavn == filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[2].status == "OK")
+        assertThat(vedleggOpplastingResponseList[1].filer[0].filnavn == filnavn3)
+        assertThat(vedleggOpplastingResponseList[1].filer[0].status == "OK")
     }
 
     @Test
@@ -142,8 +143,8 @@ internal class VedleggOpplastingServiceTest {
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2))))
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null),
+                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile),
@@ -153,19 +154,19 @@ internal class VedleggOpplastingServiceTest {
 
         verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
-        assertThat(vedleggOpplastingResponseList[0].filnavn == filnavn0)
-        assertThat(vedleggOpplastingResponseList[0].status == "OK")
-        assertThat(vedleggOpplastingResponseList[1].filnavn == filnavn1)
-        assertThat(vedleggOpplastingResponseList[1].status == "OK")
-        assertThat(vedleggOpplastingResponseList[2].filnavn == filnavn2)
-        assertThat(vedleggOpplastingResponseList[2].status == MESSAGE_ILLEGAL_FILE_TYPE)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn == filnavn0)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status == "OK")
+        assertThat(vedleggOpplastingResponseList[0].filer[1].filnavn == filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].status == "OK")
+        assertThat(vedleggOpplastingResponseList[1].filer[0].filnavn == filnavn2)
+        assertThat(vedleggOpplastingResponseList[1].filer[0].status == MESSAGE_ILLEGAL_FILE_TYPE)
     }
 
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis filnavn i metadata ikke matcher med filene som sendes`() {
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil("feilFilnavn.rar"))),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2))))
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil("feilFilnavn.rar")), null),
+                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile),
@@ -188,7 +189,7 @@ internal class VedleggOpplastingServiceTest {
         val metadata = mutableListOf(
                 OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(
                         OpplastetFil(filnavn1),
-                        OpplastetFil(filnavn2))))
+                        OpplastetFil(filnavn2)), LocalDate.now()))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn1, filtype, pdfFile),
                 MockMultipartFile("files", filnavn2, filtype, signedPdfFile))
@@ -197,10 +198,10 @@ internal class VedleggOpplastingServiceTest {
 
         verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
-        assertThat(vedleggOpplastingResponseList[0].filnavn).isEqualTo(filnavn1)
-        assertThat(vedleggOpplastingResponseList[0].status).isEqualTo("OK")
-        assertThat(vedleggOpplastingResponseList[1].filnavn).isEqualTo(filnavn2)
-        assertThat(vedleggOpplastingResponseList[1].status).isEqualTo(MESSAGE_PDF_IS_SIGNED)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo("OK")
+        assertThat(vedleggOpplastingResponseList[0].filer[1].filnavn).isEqualTo(filnavn2)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].status).isEqualTo(MESSAGE_PDF_IS_SIGNED)
     }
 
     @Test
@@ -214,7 +215,7 @@ internal class VedleggOpplastingServiceTest {
 
         val metadata = mutableListOf(
                 OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(
-                        OpplastetFil(filnavn1))))
+                        OpplastetFil(filnavn1)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn1, filtype, pdfFile))
 
@@ -222,15 +223,15 @@ internal class VedleggOpplastingServiceTest {
 
         verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
-        assertThat(vedleggOpplastingResponseList[0].filnavn).isEqualTo(filnavn1)
-        assertThat(vedleggOpplastingResponseList[0].status).isEqualTo(MESSAGE_PDF_IS_ENCRYPTED)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo(MESSAGE_PDF_IS_ENCRYPTED)
     }
 
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
         every { virusScanner.scan(any(), any(), any()) } throws OpplastingException("mulig virus!", null)
 
-        val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1))))
+        val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile))
@@ -278,12 +279,12 @@ internal class VedleggOpplastingServiceTest {
                     OpplastetFil("fil1"),
                     OpplastetFil("fil2"),
                     OpplastetFil("fil3")
-            )),
-            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(OpplastetFil("fil4"))),
+            ), null),
+            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(OpplastetFil("fil4")), null),
             OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
                     OpplastetFil("fil5"),
                     OpplastetFil("fil6")
-            ))
+            ), LocalDate.now())
         )
 
         assertEquals("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ", service.getMetadataAsString(metadataList) )

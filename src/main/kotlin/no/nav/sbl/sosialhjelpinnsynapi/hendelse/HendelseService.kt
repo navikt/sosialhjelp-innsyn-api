@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.springframework.stereotype.Component
 import java.time.temporal.ChronoUnit
+import kotlin.math.floor
 
 
 @Component
@@ -20,6 +21,8 @@ class HendelseService(private val eventService: EventService,
 
     companion object {
         val log by logger()
+
+        const val RUND_NED_TIL_NAERMESTE_5_MINUTT = 5.0
     }
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
@@ -55,7 +58,10 @@ class HendelseService(private val eventService: EventService,
     private fun InternalDigisosSoker.leggTilHendelserForVilkar() {
         saker
                 .flatMap { it.vilkar }
-                .groupBy { it.datoSistEndret.truncatedTo(ChronoUnit.MINUTES) }
+                .groupBy { it.datoSistEndret
+                        .withMinute((floor(it.datoSistEndret.minute / RUND_NED_TIL_NAERMESTE_5_MINUTT) * RUND_NED_TIL_NAERMESTE_5_MINUTT).toInt()) // rund av til nærmeste 5-minutt
+                        .truncatedTo(ChronoUnit.MINUTES)
+                }
                 .forEach { (_, grupperteVilkar) ->
                     historikk.add(
                             Hendelse("Dine vilkår har blitt oppdatert, les vedtaket for mer detaljer", grupperteVilkar[0].datoSistEndret)

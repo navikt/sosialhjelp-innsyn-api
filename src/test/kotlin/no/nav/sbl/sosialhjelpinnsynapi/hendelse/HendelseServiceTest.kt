@@ -187,7 +187,7 @@ internal class HendelseServiceTest {
                         vilkar = mutableListOf(
                                 Vilkar("ref1", mutableListOf(), "beskrivelse", false, time, time),
                                 Vilkar("ref2", mutableListOf(), "beskrivelse2", false, time, time.plusSeconds(28)),
-                                Vilkar("ref3", mutableListOf(), "beskrivelse3", true, time, time.plusSeconds(60))), // grense 1 min as of now
+                                Vilkar("ref3", mutableListOf(), "beskrivelse3", true, time, time.plusMinutes(5))), // grense 5 min as of now
                         dokumentasjonkrav = mutableListOf()
                 )
         )
@@ -202,6 +202,6 @@ internal class HendelseServiceTest {
         assertThat(first.tidspunkt).isEqualTo(time.toString())
 
         val second = hendelser[1]
-        assertThat(second.tidspunkt).isEqualTo(time.plusSeconds(60).toString())
+        assertThat(second.tidspunkt).isEqualTo(time.plusMinutes(5).toString())
     }
 }

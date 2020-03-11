@@ -21,8 +21,6 @@ class HendelseService(private val eventService: EventService,
 
     companion object {
         val log by logger()
-
-        const val RUND_NED_TIL_NAERMESTE_5_MINUTT = 5.0
     }
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
@@ -59,7 +57,7 @@ class HendelseService(private val eventService: EventService,
         saker
                 .flatMap { it.vilkar }
                 .groupBy { it.datoSistEndret
-                        .withMinute((floor(it.datoSistEndret.minute / RUND_NED_TIL_NAERMESTE_5_MINUTT) * RUND_NED_TIL_NAERMESTE_5_MINUTT).toInt()) // rund av til nærmeste 5-minutt
+                        .withMinute((floor(it.datoSistEndret.minute / 5.0) * 5.0).toInt()) // rund ned til nærmeste 5-minutt
                         .truncatedTo(ChronoUnit.MINUTES)
                 }
                 .forEach { (_, grupperteVilkar) ->

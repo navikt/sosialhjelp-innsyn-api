@@ -6,7 +6,17 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonForvaltningsbrev
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumenter
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtaksfil
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -150,7 +160,7 @@ val UTBETALING = JsonUtbetaling()
         .withTom("2019-12-31")
         .withAnnenMottaker(false)
         .withMottaker("fnr")
-        .withKontonummer("kontonummer")
+        .withKontonummer(null)
         .withUtbetalingsmetode("pose med krølla femtilapper")
 
 val UTBETALING_BANKOVERFORING = JsonUtbetaling()
@@ -184,7 +194,7 @@ val UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER = JsonUtbetaling()
         .withTom(null)
         .withAnnenMottaker(true)
         .withMottaker("utleier")
-        .withKontonummer(null)
+        .withKontonummer("utleierKontonummer")
         .withUtbetalingsmetode("bankoverføring")
 
 val VILKAR_OPPFYLT = JsonVilkar()

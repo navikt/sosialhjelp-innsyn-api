@@ -36,14 +36,14 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     utbetalinger.add(utbetaling)
 
     if(utbetaling.status == UtbetalingsStatus.UTBETALT) {
-        val beskrivelse = if (utbetaling.utbetalingsmetode.equals(other = "bankoverføring", ignoreCase = true)) {
+        val beskrivelse = if (hendelse.kontonummer.isNullOrBlank()) {
+            "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV som ${utbetaling.utbetalingsmetode}."
+        } else {
             if (erForEnAnnenMotaker(hendelse)) {
                 "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV til ${utbetaling.mottaker}."
             } else {
                 "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV til din konto. Du mottar pengene så fort banken har har behandlet utbetalingen."
             }
-        } else {
-            "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV som ${utbetaling.utbetalingsmetode}."
         }
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime())) //FIXME url til utbetalingsoversikt
     }

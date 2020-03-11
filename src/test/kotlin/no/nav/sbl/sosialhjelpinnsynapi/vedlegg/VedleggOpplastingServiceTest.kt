@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.util.*
 import javax.imageio.ImageIO
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -71,7 +72,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal kalle FiksClient med gyldige filer for opplasting`() {
-        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         mockkStatic(UUID::class)
@@ -137,7 +138,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ikke alle filene blir validert ok`() {
-        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val metadata = mutableListOf(
@@ -175,7 +176,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er signert`() {
-        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val filnavn1 = "test1.pdf"
@@ -204,7 +205,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er passord-beskyttet`() {
-        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val filnavn1 = "test1.pdf"
@@ -268,6 +269,24 @@ internal class VedleggOpplastingServiceTest {
 
         val utvalgAvGyldigeTegn = ".aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVw...WxXyYzZæÆøØåÅ-_ (),._–-"
         assertFalse { containsIllegalCharacters(utvalgAvGyldigeTegn) }
+    }
+
+    @Test
+    fun `getOpplastetVedleggMetadataAsString skal returnere antall filer per element i listen`() {
+        val metadataList = mutableListOf(
+            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
+                    OpplastetFil("fil1"),
+                    OpplastetFil("fil2"),
+                    OpplastetFil("fil3")
+            )),
+            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(OpplastetFil("fil4"))),
+            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
+                    OpplastetFil("fil5"),
+                    OpplastetFil("fil6")
+            ))
+        )
+
+        assertEquals("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ", service.getMetadataAsString(metadataList) )
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {

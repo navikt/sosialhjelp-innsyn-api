@@ -5,5 +5,5 @@ import java.util.concurrent.CompletableFuture
 
 interface KrypteringService {
 
-    fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String): InputStream
+    fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream
 }

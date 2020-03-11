@@ -10,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.floor
 
@@ -31,7 +32,7 @@ class HendelseService(private val eventService: EventService,
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
         model.leggTilHendelserForVilkar()
-        // model.leggTilHendelserForUtbetalingerOgRammevedtak()
+        model.leggTilHendelserForUtbetalinger()
 
         val responseList = model.historikk
                 .sortedBy { it.tidspunkt }
@@ -56,15 +57,28 @@ class HendelseService(private val eventService: EventService,
     private fun InternalDigisosSoker.leggTilHendelserForVilkar() {
         saker
                 .flatMap { it.vilkar }
-                .groupBy { it.datoSistEndret
-                        .withMinute((floor(it.datoSistEndret.minute / 5.0) * 5.0).toInt()) // rund ned til nærmeste 5-minutt
-                        .truncatedTo(ChronoUnit.MINUTES)
-                }
+                .groupBy { it.datoSistEndret.rundNedTilNaermeste5Minutt() }
                 .forEach { (_, grupperteVilkar) ->
                     historikk.add(
-                            Hendelse("Dine vilkår har blitt oppdatert, les vedtaket for mer detaljer", grupperteVilkar[0].datoSistEndret)
+                            Hendelse("Dine vilkår har blitt oppdatert, les vedtaket for mer detaljer.", grupperteVilkar[0].datoSistEndret)
                     )
                 }
+    }
+
+    private fun InternalDigisosSoker.leggTilHendelserForUtbetalinger() {
+        utbetalinger
+//                .filterNot { it.status == UtbetalingsStatus.ANNULLERT } // Finn ut om annullert skal gi melding i historikk
+                .groupBy { it.datoHendelse.rundNedTilNaermeste5Minutt() }
+                .forEach { (_, grupperteVilkar) ->
+                    historikk.add(
+                            Hendelse("Utbetalingsplanen din har blitt oppdatert.", grupperteVilkar[0].datoHendelse) // TODO: lenke til utbetalingsplan
+                    )
+                }
+    }
+
+    private fun LocalDateTime.rundNedTilNaermeste5Minutt(): LocalDateTime {
+        return withMinute((floor(this.minute / 5.0) * 5.0).toInt())
+                .truncatedTo(ChronoUnit.MINUTES)
     }
 
 }

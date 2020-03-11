@@ -11,6 +11,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
@@ -19,6 +21,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
@@ -173,7 +177,7 @@ internal class HendelseServiceTest {
     }
 
     @Test
-    internal fun `hendelser for vilkar - grupper vilkar `() {
+    internal fun `hendelser for vilkar - grupper vilkar`() {
         val model = InternalDigisosSoker()
 
         val time = LocalDateTime.of(2020, 3, 1, 12, 30, 1)
@@ -189,6 +193,75 @@ internal class HendelseServiceTest {
                                 Vilkar("ref2", mutableListOf(), "beskrivelse2", false, time, time.plusSeconds(28)),
                                 Vilkar("ref3", mutableListOf(), "beskrivelse3", true, time, time.plusMinutes(5))), // grense 5 min as of now
                         dokumentasjonkrav = mutableListOf()
+                )
+        )
+
+        every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+
+        val hendelser = service.hentHendelser("123", "Token")
+
+        assertThat(hendelser).hasSize(2)
+        val first = hendelser[0]
+        assertThat(first.tidspunkt).isEqualTo(time.toString())
+
+        val second = hendelser[1]
+        assertThat(second.tidspunkt).isEqualTo(time.plusMinutes(5).toString())
+    }
+
+    @Test
+    internal fun `hendelser for utbetalinger - grupper utbetalinger`() {
+        val model = InternalDigisosSoker()
+
+        val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
+        model.utbetalinger = mutableListOf(
+                Utbetaling(
+                        referanse = "utbetalref",
+                        status = UtbetalingsStatus.UTBETALT,
+                        belop = BigDecimal.valueOf(1337.0),
+                        beskrivelse = "beskrivelse",
+                        forfallsDato = null,
+                        utbetalingsDato = LocalDate.now(),
+                        fom = null,
+                        tom = null,
+                        mottaker = "mottaker",
+                        kontonummer = "kontonummer",
+                        utbetalingsmetode = "utbetalingsmetode",
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf(),
+                        datoHendelse = time
+                ),
+                Utbetaling(
+                        referanse = "utbetalref",
+                        status = UtbetalingsStatus.UTBETALT,
+                        belop = BigDecimal.valueOf(1337.0),
+                        beskrivelse = "beskrivelse",
+                        forfallsDato = null,
+                        utbetalingsDato = LocalDate.now(),
+                        fom = null,
+                        tom = null,
+                        mottaker = "mottaker",
+                        kontonummer = "kontonummer",
+                        utbetalingsmetode = "utbetalingsmetode",
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf(),
+                        datoHendelse = time.plusMinutes(4).plusSeconds(59)
+                ),
+                Utbetaling(
+                        referanse = "utbetalref",
+                        status = UtbetalingsStatus.UTBETALT,
+                        belop = BigDecimal.valueOf(1337.0),
+                        beskrivelse = "beskrivelse",
+                        forfallsDato = null,
+                        utbetalingsDato = LocalDate.now(),
+                        fom = null,
+                        tom = null,
+                        mottaker = "mottaker",
+                        kontonummer = "kontonummer",
+                        utbetalingsmetode = "utbetalingsmetode",
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf(),
+                        datoHendelse = time.plusMinutes(5)
                 )
         )
 

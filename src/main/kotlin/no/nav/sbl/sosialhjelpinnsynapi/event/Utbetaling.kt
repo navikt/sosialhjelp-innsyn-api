@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
@@ -13,7 +12,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
 
     val utbetaling = Utbetaling(
             referanse = hendelse.utbetalingsreferanse,
-            status = UtbetalingsStatus.valueOf(hendelse.status?.value() ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()),
+            status = UtbetalingsStatus.valueOf(hendelse.status?.value()
+                    ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()),
             belop = BigDecimal.valueOf(hendelse.belop ?: 0.0),
             beskrivelse = hendelse.beskrivelse,
             forfallsDato = if (hendelse.forfallsdato == null) null else hendelse.forfallsdato.toLocalDate(),
@@ -24,7 +24,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
             kontonummer = if (erForEnAnnenMotaker(hendelse)) null else hendelse.kontonummer,
             utbetalingsmetode = hendelse.utbetalingsmetode,
             vilkar = mutableListOf(),
-            dokumentasjonkrav = mutableListOf()
+            dokumentasjonkrav = mutableListOf(),
+            datoHendelse = hendelse.hendelsestidspunkt.toLocalDateTime()
     )
 
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
@@ -34,19 +35,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     sakForReferanse?.utbetalinger?.add(utbetaling)
     utbetalinger.removeIf { t -> t.referanse == utbetaling.referanse }
     utbetalinger.add(utbetaling)
-
-    if(utbetaling.status == UtbetalingsStatus.UTBETALT) {
-        val beskrivelse = if (hendelse.kontonummer.isNullOrBlank()) {
-            "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV som ${utbetaling.utbetalingsmetode}."
-        } else {
-            if (erForEnAnnenMotaker(hendelse)) {
-                "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV til ${utbetaling.mottaker}."
-            } else {
-                "Utbetalingen for ${utbetaling.beskrivelse} har blitt sendt fra NAV til din konto. Du mottar pengene så fort banken har har behandlet utbetalingen."
-            }
-        }
-        historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime())) //FIXME url til utbetalingsoversikt
-    }
 }
 
 private fun erForEnAnnenMotaker(hendelse: JsonUtbetaling) =

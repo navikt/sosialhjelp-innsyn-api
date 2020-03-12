@@ -3,7 +3,13 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_BREVET
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Vedtak
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
@@ -24,7 +30,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
                 hendelse.saksreferanse ?: "default",
                 SaksStatus.UNDER_BEHANDLING,
                 DEFAULT_TITTEL,
-                mutableListOf(),
                 mutableListOf(),
                 mutableListOf(),
                 mutableListOf()

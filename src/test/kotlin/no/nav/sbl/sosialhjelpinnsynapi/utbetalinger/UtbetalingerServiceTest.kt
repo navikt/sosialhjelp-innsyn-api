@@ -185,7 +185,6 @@ internal class UtbetalingerServiceTest {
                         Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null,
                                 LocalDate.of(2019, 9, 12), null, null, null, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now())
                 ),
-                vilkar = mutableListOf(vilkar),
                 dokumentasjonkrav = mutableListOf()
         ))
 
@@ -213,7 +212,6 @@ internal class UtbetalingerServiceTest {
                 tittel = tittel,
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(utbetaling1),
-                vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf(dokumentasjonkrav)
         ))
 

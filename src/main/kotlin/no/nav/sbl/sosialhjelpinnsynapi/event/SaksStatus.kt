@@ -37,7 +37,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                 hendelse.tittel,
                 mutableListOf(),
                 mutableListOf(),
-                mutableListOf(),
                 mutableListOf()
         ))
         val tittel = hendelse.tittel ?: "Saken din"

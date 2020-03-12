@@ -2,16 +2,16 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
-import no.nav.sbl.sosialhjelpinnsynapi.hendelse.HendelseService.Companion.log
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 
+    val log by logger()
+
     val utbetalinger = mutableListOf<Utbetaling>()
-    val vilkarSaker = mutableListOf<Sak>()
     for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
         for (sak in saker) {
             for (utbetaling in sak.utbetalinger) {
@@ -21,6 +21,12 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
             }
         }
     }
+
+    if (utbetalinger.isEmpty()) {
+        log.warn("Fant ingen utbetalinger å knytte vilkår til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
+        return
+    }
+
     val vilkar = Vilkar(
             referanse = hendelse.vilkarreferanse,
             utbetalinger = utbetalinger,
@@ -30,7 +36,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
             datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime()
     )
 
-    vilkarSaker.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }
     utbetalinger.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }
 
 }
@@ -38,13 +43,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 private fun MutableList<Vilkar>.oppdaterEllerLeggTilVilkar(hendelse: JsonVilkar, vilkar: Vilkar) {
     if (any { it.referanse == hendelse.vilkarreferanse }) {
         filter { it.referanse == hendelse.vilkarreferanse }
-                .forEach {
-                    it.oppdaterFelter(hendelse)
-                    log.warn("Vilkar endret - vilkarreferanse:${hendelse.vilkarreferanse}")
-                }
+                .forEach { it.oppdaterFelter(hendelse) }
     } else {
         this.add(vilkar)
-        log.warn("Nytt Vilkar lagt til - vilkarreferanse:${hendelse.vilkarreferanse}")
     }
 }
 

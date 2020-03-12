@@ -56,6 +56,7 @@ class HendelseService(private val eventService: EventService,
 
     private fun InternalDigisosSoker.leggTilHendelserForVilkar() {
         saker
+                .flatMap { it.utbetalinger }
                 .flatMap { it.vilkar }
                 .groupBy { it.datoSistEndret.rundNedTilNaermeste5Minutt() }
                 .forEach { (_, grupperteVilkar) ->

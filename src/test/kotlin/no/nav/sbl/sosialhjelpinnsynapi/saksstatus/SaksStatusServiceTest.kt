@@ -3,7 +3,15 @@ package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Dokumentasjonkrav
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Vedtak
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
@@ -51,7 +59,6 @@ internal class SaksStatusServiceTest {
                 tittel = tittel,
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
         ))
 
@@ -79,7 +86,6 @@ internal class SaksStatusServiceTest {
                         dato = LocalDate.now()
                 )),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
         ))
 
@@ -108,7 +114,6 @@ internal class SaksStatusServiceTest {
                         dato = LocalDate.now()
                 )),
                 utbetalinger = mutableListOf(),
-                vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf()
         ))
 
@@ -142,7 +147,6 @@ internal class SaksStatusServiceTest {
                                         vedtaksFilUrl = vedtaksfilUrl,
                                         dato = LocalDate.now())),
                         utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf(),
                         dokumentasjonkrav = mutableListOf()),
                 Sak(
                         referanse = referanse,
@@ -150,7 +154,6 @@ internal class SaksStatusServiceTest {
                         tittel = DEFAULT_TITTEL,
                         vedtak = mutableListOf(),
                         utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf(),
                         dokumentasjonkrav = mutableListOf()
                 )
         ))
@@ -202,7 +205,6 @@ internal class SaksStatusServiceTest {
                 "Tittel på sak",
                 vedtak = mutableListOf<Vedtak>(vedtak1, vedtak2),
                 utbetalinger = mutableListOf<Utbetaling>(),
-                vilkar = mutableListOf<Vilkar>(),
                 dokumentasjonkrav = mutableListOf<Dokumentasjonkrav>()
         )
         val sakSomSkalGiFalse: Sak = Sak(
@@ -211,7 +213,6 @@ internal class SaksStatusServiceTest {
                 "Tittel på sak",
                 vedtak = mutableListOf<Vedtak>(vedtak1, vedtak2, vedtak3, vedtak4, vedtak5),
                 utbetalinger = mutableListOf<Utbetaling>(),
-                vilkar = mutableListOf<Vilkar>(),
                 dokumentasjonkrav = mutableListOf<Dokumentasjonkrav>()
         )
 

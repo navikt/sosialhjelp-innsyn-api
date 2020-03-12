@@ -187,11 +187,27 @@ internal class HendelseServiceTest {
                         saksStatus = SaksStatus.UNDER_BEHANDLING,
                         tittel = "tittel",
                         vedtak = mutableListOf(),
-                        utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf(
-                                Vilkar("ref1", mutableListOf(), "beskrivelse", false, time, time),
-                                Vilkar("ref2", mutableListOf(), "beskrivelse2", false, time, time.plusSeconds(28)),
-                                Vilkar("ref3", mutableListOf(), "beskrivelse3", true, time, time.plusMinutes(5))), // grense 5 min as of now
+                        utbetalinger = mutableListOf(
+                                Utbetaling(
+                                        referanse = "utbetalref",
+                                        status = UtbetalingsStatus.UTBETALT,
+                                        belop = BigDecimal.valueOf(1337.0),
+                                        beskrivelse = "beskrivelse",
+                                        forfallsDato = null,
+                                        utbetalingsDato = LocalDate.now(),
+                                        fom = null,
+                                        tom = null,
+                                        mottaker = "mottaker",
+                                        kontonummer = "kontonummer",
+                                        utbetalingsmetode = "utbetalingsmetode",
+                                        vilkar = mutableListOf(
+                                                Vilkar("ref1", mutableListOf(), "beskrivelse", false, time, time),
+                                                Vilkar("ref2", mutableListOf(), "beskrivelse2", false, time, time.plusSeconds(28)),
+                                                Vilkar("ref3", mutableListOf(), "beskrivelse3", true, time, time.plusMinutes(5))),
+                                        dokumentasjonkrav = mutableListOf(),
+                                        datoHendelse = time
+                                )
+                        ),
                         dokumentasjonkrav = mutableListOf()
                 )
         )

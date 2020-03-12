@@ -5,7 +5,8 @@
   ],
   "env": {
     "IS_REDIS_MOCKED": "true",
-    "SPRING_PROFILES_ACTIVE": "mock"
+    "SPRING_PROFILES_ACTIVE": "mock",
+    "UTBETALINGER_ENABLED": "true"
   },
   "minReplicas": "1",
   "maxReplicas": "1",

@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.hendelse
 
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
@@ -18,7 +19,8 @@ import kotlin.math.floor
 @Component
 class HendelseService(private val eventService: EventService,
                       private val vedleggService: VedleggService,
-                      private val fiksClient: FiksClient) {
+                      private val fiksClient: FiksClient,
+                      private val featureToggles: FeatureToggles) {
 
     companion object {
         val log by logger()
@@ -31,8 +33,10 @@ class HendelseService(private val eventService: EventService,
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
-        model.leggTilHendelserForVilkar()
-        model.leggTilHendelserForUtbetalinger()
+        if (featureToggles.utbetalingerEnabled) {
+            model.leggTilHendelserForVilkar()
+            model.leggTilHendelserForUtbetalinger()
+        }
 
         val responseList = model.historikk
                 .sortedBy { it.tidspunkt }

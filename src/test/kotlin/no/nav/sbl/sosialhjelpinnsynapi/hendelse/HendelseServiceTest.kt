@@ -4,6 +4,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_BREVET
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
@@ -32,7 +33,8 @@ internal class HendelseServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
-    private val service = HendelseService(eventService, vedleggService, fiksClient)
+    private val featureToggles: FeatureToggles = mockk()
+    private val service = HendelseService(eventService, vedleggService, fiksClient, featureToggles)
 
     private val mockDigisosSak: DigisosSak = mockk()
 
@@ -64,6 +66,7 @@ internal class HendelseServiceTest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
+        every { featureToggles.utbetalingerEnabled } returns true
     }
 
     @Test

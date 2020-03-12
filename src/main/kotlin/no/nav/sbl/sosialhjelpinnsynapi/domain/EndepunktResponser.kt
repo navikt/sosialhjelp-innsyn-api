@@ -81,6 +81,14 @@ data class VedleggOpplastingResponse(
         val status: String
 )
 
+data class OppgaveOpplastingResponse(
+        val type: String,
+        val tilleggsinfo: String?,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val innsendelsesfrist: LocalDate?,
+        val filer: List<VedleggOpplastingResponse>
+)
+
 data class SaksListeResponse(
         val fiksDigisosId: String,
         val soknadTittel: String,

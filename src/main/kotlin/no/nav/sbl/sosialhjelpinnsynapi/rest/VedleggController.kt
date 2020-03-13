@@ -32,23 +32,6 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                         private val clientProperties: ClientProperties) {
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
-    @PostMapping("/{fiksDigisosId}/vedlegg/send", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendVedleggReturnFlatList(@PathVariable fiksDigisosId: String,
-                    @RequestParam("files") files: MutableList<MultipartFile>,
-                    @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-                    request: HttpServletRequest
-    ): ResponseEntity<List<VedleggOpplastingResponse>> {
-        sjekkXsrfToken(fiksDigisosId, request)
-        val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
-                ?: throw IllegalStateException("Mangler metadata.json på digisosId=$fiksDigisosId")
-        val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)
-        files.removeIf { it.originalFilename == "metadata.json" }
-
-        val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiksReturnFlatList(fiksDigisosId, files, metadata, token)
-        return ResponseEntity.ok(vedleggOpplastingResponseList)
-    }
-
-    // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(@PathVariable fiksDigisosId: String,
                     @RequestParam("files") files: MutableList<MultipartFile>,

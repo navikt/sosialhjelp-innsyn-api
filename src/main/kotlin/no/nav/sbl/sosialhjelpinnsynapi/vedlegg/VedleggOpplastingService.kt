@@ -52,36 +52,6 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
-    fun sendVedleggTilFiksReturnFlatList(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<VedleggOpplastingResponse> {
-        val vedleggOpplastingResponse = validateFilerReturnFlatList(digisosId, files, metadata)
-        if (vedleggOpplastingResponse.any { it.status != "OK" }) {
-            return vedleggOpplastingResponse
-        }
-
-        val filerForOpplasting = mutableListOf<FilForOpplasting>()
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size))
-
-        files.forEach { file ->
-            val filename = createFilename(file.originalFilename, file.contentType)
-            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
-
-            val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token, digisosId)
-            filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
-        }
-        metadata.removeIf { it.filer.isEmpty() }
-
-        fiksClient.lastOppNyEttersendelse(filerForOpplasting, createVedleggJson(files, metadata), digisosId, token)
-
-        waitForFutures(krypteringFutureList)
-
-        // opppdater cache med digisossak
-        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
-        cachePut(digisosId, digisosSak)
-
-        return vedleggOpplastingResponse
-    }
-
-
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveOpplastingResponse> {
         val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
         if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" }}) {
@@ -186,19 +156,6 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             "image/jpeg" -> ".jpg"
             else -> ""
         }
-    }
-
-    fun validateFilerReturnFlatList(fiksDigisosId: String, files: List<MultipartFile>, metadataListe: MutableList<OpplastetVedleggMetadata>): List<VedleggOpplastingResponse>  {
-        val vedleggOpplastingResponse = mutableListOf<VedleggOpplastingResponse>()
-        validateFilenameMatchInMetadataAndFiles(metadataListe, files)
-
-        files.forEach { file ->
-            val valideringstatus = validateFil(file, fiksDigisosId)
-            if (valideringstatus != "OK") log.warn("Opplasting av filer til ettersendelse feilet med status $valideringstatus, digisosId=$fiksDigisosId")
-            vedleggOpplastingResponse.add(VedleggOpplastingResponse(file.originalFilename, valideringstatus))
-        }
-
-        return vedleggOpplastingResponse
     }
 
     fun validateFiler(fiksDigisosId: String, files: List<MultipartFile>, metadataListe: MutableList<OpplastetVedleggMetadata>): List<OppgaveOpplastingResponse>  {

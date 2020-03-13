@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Dokumentasjonkrav
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
@@ -8,7 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
-fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
+fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, featureToggles: FeatureToggles) {
 
     val utbetalingerMedSakKnytning = mutableListOf<Utbetaling>()
     val utbetalingerUtenSakKnytning = mutableListOf<Utbetaling>()
@@ -46,6 +47,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
         utbetaling.dokumentasjonkrav.add(dokumentasjonkrav)
     }
 
-    val beskrivelse = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for mer detaljer."
-    historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
+    if (featureToggles.utbetalingerEnabled) {
+        val beskrivelse = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for mer detaljer."
+        historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
+    }
 }

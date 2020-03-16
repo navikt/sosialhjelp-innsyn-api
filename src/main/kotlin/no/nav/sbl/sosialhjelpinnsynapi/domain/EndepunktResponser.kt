@@ -113,7 +113,9 @@ data class KommuneResponse(
         val erInnsynDeaktivert: Boolean,
         val erInnsynMidlertidigDeaktivert: Boolean,
         val erInnsendingEttersendelseDeaktivert: Boolean,
-        val erInnsendingEttersendelseMidlertidigDeaktivert: Boolean
+        val erInnsendingEttersendelseMidlertidigDeaktivert: Boolean,
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+        val tidspunkt: Date
 )
 
 data class OrginalJsonSoknadResponse(

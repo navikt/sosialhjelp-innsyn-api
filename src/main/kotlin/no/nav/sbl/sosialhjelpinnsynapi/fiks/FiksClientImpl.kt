@@ -64,7 +64,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     private fun hentDigisosSakFraCache(digisosId: String, token: String): DigisosSak {
-        val get: String? = redisStore.get(digisosId)
+        val get: String? = redisStore.get(digisosId) // Redis har konfigurert timout for disse.
         if (get != null) {
             try {
                 val obj = objectMapper.readValue(get, DigisosSak::class.java)
@@ -108,7 +108,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val get: String? = redisStore.get(dokumentlagerId)
+        val get: String? = redisStore.get(dokumentlagerId) // Redis har konfigurert timout for disse.
         if (get != null) {
             try {
                 val obj = objectMapper.readValue(get, requestedClass)
@@ -203,7 +203,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
-        val get: String? = redisStore.get(kommunenummer)
+        val get: String? = redisStore.get(kommunenummer) // Redis har konfigurert timout for disse.
         if (get != null) {
             try {
                 val obj = objectMapper.readValue(get, KommuneInfo::class.java)

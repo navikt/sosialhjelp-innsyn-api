@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator.sjekkXsrfToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
@@ -44,6 +43,9 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)
         files.removeIf { it.originalFilename == "metadata.json" }
 
+        if(files.isEmpty()) {
+            throw IllegalStateException("Ingen filer i forsendelse på digisosId=$fiksDigisosId")
+        }
         val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
         return ResponseEntity.ok(vedleggOpplastingResponseList)
     }
@@ -78,7 +80,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                 return filename.substring(0, indexOfFileExtention - LENGTH_OF_UUID_PART) + extention
             }
         }
-        return filename;
+        return filename
     }
 }
 

@@ -23,8 +23,7 @@ innsyn:
     redis_mocked: true
     time_to_live_seconds: 2
   features:
-    utbetalinger:
-      enabled: true
+    utbetalinger_enabled: true
 
 client:
   fiks_digisos_endpoint_url: digisosapiurl

@@ -56,5 +56,4 @@ innsyn:
       initial_delay: 250 # initial delay in ms
       max_delay: 10000 # max delay in ms
   features:
-    utbetalinger:
-      enabled: ${UTBETALINGER_ENABLED}
+    utbetalinger_enabled: ${UTBETALINGER_ENABLED}

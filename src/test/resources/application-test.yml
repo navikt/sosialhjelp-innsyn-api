@@ -29,8 +29,7 @@ innsyn:
     redis_mocked: true
     time_to_live_seconds: 2
   features:
-    utbetalinger:
-      enabled: true
+    utbetalinger_enabled: true
 
 #Token-valdering
 no.nav.security.jwt:

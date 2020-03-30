@@ -82,6 +82,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         }
         catch (e: Exception) {
             waitForFutures(krypteringFutureList)
+            log.error("Ettersendelse feilet ved generering av ettersendelsePdf, kryptering av filer eller sending til FIKS", e)
             throw e
         }
         finally {

@@ -30,10 +30,8 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
-import java.util.*
 import java.util.Collections.singletonList
 import java.util.concurrent.CompletableFuture
-import kotlin.collections.ArrayList
 
 
 @Profile("!mock")
@@ -43,9 +41,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val idPortenService: IdPortenService,
                      private val redisStore: RedisStore,
                      private val cacheProperties: CacheProperties,
-                     private val retryProperties: FiksRetryProperties
-                     /*private val krypteringService: KrypteringService,
-                     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator*/) : FiksClient {
+                     private val retryProperties: FiksRetryProperties,
+                     private val krypteringService: KrypteringService,
+                     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator) : FiksClient {
 
     companion object {
         val log by logger()
@@ -271,40 +269,46 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String, ettersendelsePdf: FilForOpplasting) {
         log.info("Starter sending av ettersendelse med ${files.size} filer til digisosId=$digisosId")
         val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
         val body = LinkedMultiValueMap<String, Any>()
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
-        /*try {
-            createEttersendelsesPdf(vedleggJson, body, digisosId, token)
-        } catch (e: Exception) {
-            log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
-        }*/
 
+        //val ettersendelsesMetadata = VedleggMetadata(ettersendelsePdf.filnavn, ettersendelsePdf.mimetype, ettersendelsePdf.storrelse)
+        //body.add("vedleggSpesifikasjon:${ettersendelsePdf.filnavn}", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:${ettersendelsePdf.filnavn}"))
+        //body.add("dokument:${ettersendelsePdf.filnavn}", createHttpEntityOfFile(ettersendelsePdf, "dokument:${ettersendelsePdf.filnavn}"))
+
+        log.info("Lager metadata")
         files.forEachIndexed { fileId, file ->
+            log.info("Lager metadata for filnavn ${file.filnavn}")
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
         }
+
+        log.info("Read all bytes for input stream: ${ettersendelsePdf.filnavn}")
+        ettersendelsePdf.fil.readAllBytes()
 
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
         val kommunenummer = digisosSak.kommunenummer
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
         val requestEntity = HttpEntity(body, headers)
+        log.info("requestEntity ${requestEntity.body}")
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
-            val responseEntity = restTemplate.exchange(
+            log.info("Sender ettersendelse til $baseUrl/digisos/api/v1/soknader/${kommunenummer}/${digisosId}/${navEksternRefId}")
+            /*val responseEntity = restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.POST,
                     requestEntity,
                     String::class.java,
                     mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
-            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")
+            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")*/
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
@@ -320,21 +324,22 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    /*private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
+    private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String, krypteringFutureList: MutableList<CompletableFuture<Void>>) {
         val digisosSak = hentDigisosSak(digisosId, token, true)
 
         log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
         val startTid = System.currentTimeMillis()
         val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
-        val sluttTid = System.currentTimeMillis()
-        log.info("Generering av ettersendelse.pdf tok ${sluttTid - startTid} ms")
+        val genereringFerdigTidspunkt = System.currentTimeMillis()
+        log.info("Generering av ettersendelse.pdf tok ${genereringFerdigTidspunkt - startTid} ms")
 
-        val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
-        val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token)
+        val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
+        val krypteringFerdigTidspunkt = System.currentTimeMillis()
+        log.info("Kryptering av ettersendelse.pdf tok ${krypteringFerdigTidspunkt - genereringFerdigTidspunkt} ms")
         val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
         body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
         body.add("dokument:ettersendelse.pdf", createHttpEntity(InputStreamResource(ettersendelseKryptertFil), "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))
-    }*/
+    }
 
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")

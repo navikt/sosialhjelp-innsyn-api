@@ -22,6 +22,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -32,6 +33,9 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.io.InputStream
+import java.util.*
+import java.util.concurrent.CompletableFuture
+import kotlin.collections.ArrayList
 
 
 internal class FiksClientTest {
@@ -44,7 +48,7 @@ internal class FiksClientTest {
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties /*, krypteringService, ettersendelsePdfGenerator*/)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties, krypteringService, ettersendelsePdfGenerator)
 
     private val id = "123"
 
@@ -332,6 +336,7 @@ internal class FiksClientTest {
         verify(exactly = 2) { restTemplate.exchange(any(), HttpMethod.GET, any(), KommuneInfo::class.java, kommunenummer) }
     }
 
+    @Disabled
     @Test
     fun `POST ny ettersendelse`() {
         val fil1: InputStream = mockk()
@@ -339,7 +344,7 @@ internal class FiksClientTest {
         every { fil1.readAllBytes() } returns "test-fil".toByteArray()
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
-        var ettersendelsPdf = ByteArray(1)
+        val ettersendelsPdf = ByteArray(1)
         every { ettersendelsePdfGenerator.generate(any(), any() ) } returns ettersendelsPdf
         every { krypteringService.krypter(any(), any(), any(), any()) } returns fil1
 
@@ -355,7 +360,8 @@ internal class FiksClientTest {
         val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
                 FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))
 
-        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
+        val ettersendelsePdf = FilForOpplasting("ettersendelse.pdf", "application/pdf", 1L, fil1);
+        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token", ettersendelsePdf) }.doesNotThrowAnyException()
 
         val httpEntity = slot.captured
 

@@ -8,7 +8,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
@@ -21,6 +23,7 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
@@ -40,7 +43,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                                private val krypteringService: KrypteringService,
                                private val virusScanner: VirusScanner,
                                private val redisStore: RedisStore,
-                               private val cacheProperties: CacheProperties) {
+                               private val cacheProperties: CacheProperties,
+                               private val ettersendelsePdfGenerator: EttersendelsePdfGenerator) {
 
     companion object {
         val log by logger()
@@ -60,25 +64,61 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         metadata.removeIf { it.filer.isEmpty() }
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size))
+        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size + 1))
 
-        files.forEach { file ->
-            val filename = createFilename(file.originalFilename, file.contentType)
-            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+        try {
+            files.forEach { file ->
+                val filename = createFilename(file.originalFilename, file.contentType)
+                renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
 
-            val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token, digisosId)
-            filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
+                log.info("Starter kryptering av $filename")
+                val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token, digisosId)
+                filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
+            }
+
+            val vedleggSpesifikasjon = createVedleggJson(files, metadata)
+            val ettersendelsePdf = createEttersendelsePdf(vedleggSpesifikasjon, krypteringFutureList, digisosId, token)
+
+            fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, digisosId, token, ettersendelsePdf)
+
+            waitForFutures(krypteringFutureList)
+
+            // opppdater cache med digisossak
+            val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
+            cachePut(digisosId, digisosSak)
+
+            return valideringResultatResponseList
+        }
+        catch (e: Exception) {
+            log.error("Ettersendelse feilet ved generering av ettersendelsePdf, kryptering av filer eller sending til FIKS", e)
+            throw e
+        }
+        finally {
+            val notCancelledFutureList = krypteringFutureList
+                    .filter { !it.isDone && !it.isCancelled }
+            log.error("Antall krypteringer som ikke er canceled var ${notCancelledFutureList.size}")
+            notCancelledFutureList
+                    .forEach { it.cancel(true) }
+
+        }
+    }
+
+    fun createEttersendelsePdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, krypteringFutureList: MutableList<CompletableFuture<Void>>, digisosId: String, token: String): FilForOpplasting {
+        try {
+            log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
+            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, token, true)
+            val startTid = System.currentTimeMillis()
+            val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, currentDigisosSak.sokerFnr)
+            val genereringFerdigTidspunkt = System.currentTimeMillis()
+            log.info("Generering av ettersendelse.pdf tok ${genereringFerdigTidspunkt - startTid} ms")
+            log.info("Starter kryptering av ettersendelse.pdf")
+            val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
+            return FilForOpplasting("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong(), ettersendelseKryptertFil)
+        } catch (e: Exception) {
+            log.error("Generering av ettersendelse.pdf feilet.", e)
+            throw e
         }
 
-        fiksClient.lastOppNyEttersendelse(filerForOpplasting, createVedleggJson(files, metadata), digisosId, token)
-
-        waitForFutures(krypteringFutureList)
-
-        // opppdater cache med digisossak
-        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
-        cachePut(digisosId, digisosSak)
-
-        return valideringResultatResponseList
     }
 
     fun createVedleggJson(files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>) : JsonVedleggSpesifikasjon{
@@ -220,6 +260,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
         val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
+        log.info("Waiting for futures to complete")
         try {
             allFutures.get(30, TimeUnit.SECONDS)
         } catch (e: CompletionException) {

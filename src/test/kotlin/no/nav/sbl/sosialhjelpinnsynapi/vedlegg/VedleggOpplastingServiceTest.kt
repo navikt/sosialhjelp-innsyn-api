@@ -6,6 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
@@ -42,7 +43,8 @@ internal class VedleggOpplastingServiceTest {
     private val virusScanner: VirusScanner = mockk()
     private val redisStore: RedisStore = mockk()
     private val cacheProperties: CacheProperties = mockk(relaxed = true)
-    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisStore, cacheProperties)
+    private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
+    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisStore, cacheProperties, ettersendelsePdfGenerator)
 
     private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
 
@@ -74,7 +76,10 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal kalle FiksClient med gyldige filer for opplasting`() {
         every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
-        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) } answers { nothing }
+
+        val ettersendelsPdf = ByteArray(1)
+        every { ettersendelsePdfGenerator.generate(any(), any())} returns ettersendelsPdf
 
         mockkStatic(UUID::class)
         every { UUID.randomUUID().toString()} returns "uuid"
@@ -95,7 +100,7 @@ internal class VedleggOpplastingServiceTest {
 
         val filerForOpplastingSlot = slot<List<FilForOpplasting>>()
         val vedleggSpesifikasjonSlot = slot<JsonVedleggSpesifikasjon>()
-        verify(exactly = 1) { fiksClient.lastOppNyEttersendelse(capture(filerForOpplastingSlot), capture(vedleggSpesifikasjonSlot), any(), any()) }
+        verify(exactly = 1) { fiksClient.lastOppNyEttersendelse(capture(filerForOpplastingSlot), capture(vedleggSpesifikasjonSlot), any(), any(), any()) }
         val filerForOpplasting = filerForOpplastingSlot.captured
         val vedleggSpesifikasjon = vedleggSpesifikasjonSlot.captured
 
@@ -140,7 +145,7 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ikke alle filene blir validert ok`() {
         every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
-        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) } answers { nothing }
 
         val metadata = mutableListOf(
                 OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null),
@@ -152,7 +157,7 @@ internal class VedleggOpplastingServiceTest {
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) }
 
         assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn == filnavn0)
         assertThat(vedleggOpplastingResponseList[0].filer[0].status == "OK")
@@ -178,7 +183,7 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er signert`() {
         every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
-        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) } answers { nothing }
 
         val filnavn1 = "test1.pdf"
         val filnavn2 = "test2.pdf"
@@ -196,7 +201,7 @@ internal class VedleggOpplastingServiceTest {
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) }
 
         assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
         assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo("OK")
@@ -207,7 +212,7 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er passord-beskyttet`() {
         every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
-        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) } answers { nothing }
 
         val filnavn1 = "test1.pdf"
         val filtype = "application/pdf"
@@ -221,7 +226,7 @@ internal class VedleggOpplastingServiceTest {
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) }
 
         assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
         assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo(MESSAGE_PDF_IS_ENCRYPTED)

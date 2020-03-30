@@ -60,7 +60,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         metadata.removeIf { it.filer.isEmpty() }
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size))
+        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size + 1))
 
         files.forEach { file ->
             val filename = createFilename(file.originalFilename, file.contentType)
@@ -70,7 +70,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
         }
 
-        fiksClient.lastOppNyEttersendelse(filerForOpplasting, createVedleggJson(files, metadata), digisosId, token)
+        fiksClient.lastOppNyEttersendelse(filerForOpplasting, createVedleggJson(files, metadata), digisosId, token, krypteringFutureList)
 
         waitForFutures(krypteringFutureList)
 

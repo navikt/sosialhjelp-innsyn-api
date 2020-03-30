@@ -61,24 +61,32 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
         val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size + 1))
+        try {
+            files.forEach { file ->
+                val filename = createFilename(file.originalFilename, file.contentType)
+                renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
 
-        files.forEach { file ->
-            val filename = createFilename(file.originalFilename, file.contentType)
-            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+                val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token, digisosId)
+                filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
+            }
 
-            val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token, digisosId)
-            filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
+            fiksClient.lastOppNyEttersendelse(filerForOpplasting, createVedleggJson(files, metadata), digisosId, token, krypteringFutureList)
+
+            waitForFutures(krypteringFutureList)
+
+            // opppdater cache med digisossak
+            val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
+            cachePut(digisosId, digisosSak)
+
+            return valideringResultatResponseList
         }
-
-        fiksClient.lastOppNyEttersendelse(filerForOpplasting, createVedleggJson(files, metadata), digisosId, token, krypteringFutureList)
-
-        waitForFutures(krypteringFutureList)
-
-        // opppdater cache med digisossak
-        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
-        cachePut(digisosId, digisosSak)
-
-        return valideringResultatResponseList
+        catch (e: Exception) {
+            waitForFutures(krypteringFutureList)
+            throw e
+        }
+        finally {
+            waitForFutures(krypteringFutureList)
+        }
     }
 
     fun createVedleggJson(files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>) : JsonVedleggSpesifikasjon{

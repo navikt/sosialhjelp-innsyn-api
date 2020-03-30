@@ -30,10 +30,8 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
-import java.util.*
 import java.util.Collections.singletonList
 import java.util.concurrent.CompletableFuture
-import kotlin.collections.ArrayList
 
 
 @Profile("!mock")
@@ -326,10 +324,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
         log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
         val startTid = System.currentTimeMillis()
         val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
-        val sluttTid = System.currentTimeMillis()
-        log.info("Generering av ettersendelse.pdf tok ${sluttTid - startTid} ms")
+        val genereringFerdigTidspunkt = System.currentTimeMillis()
+        log.info("Generering av ettersendelse.pdf tok ${genereringFerdigTidspunkt - startTid} ms")
 
         val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
+        val krypteringFerdigTidspunkt = System.currentTimeMillis()
+        log.info("Kryptering av ettersendelse.pdf tok ${krypteringFerdigTidspunkt - genereringFerdigTidspunkt} ms")
         val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
         body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
         body.add("dokument:ettersendelse.pdf", createHttpEntity(InputStreamResource(ettersendelseKryptertFil), "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))

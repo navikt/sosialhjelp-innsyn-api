@@ -4,6 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
+import no.nav.sbl.sosialhjelpinnsynapi.config.MAKS_TOTAL_FILSTORRELSE
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
@@ -50,7 +51,6 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         }
     }
 
-    val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveOpplastingResponse> {
         val valideringResultatResponseList = validateFiler(digisosId, files, metadata)

@@ -14,6 +14,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
     if (sakForReferanse != null) {
         // Oppdater felter
 
+        sakForReferanse.tittel = hendelse.tittel
+
         if (hendelse.status != null) {
             val prevStatus = sakForReferanse.saksStatus
 
@@ -22,11 +24,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
 
             if (prevStatus != sakForReferanse.saksStatus
                     && (sakForReferanse.saksStatus == SaksStatus.IKKE_INNSYN || sakForReferanse.saksStatus == SaksStatus.BEHANDLES_IKKE)) {
-                historikk.add(Hendelse("Vi kan ikke vise behandlingsstatus for ${hendelse.tittel} digitalt.", hendelse.hendelsestidspunkt.toLocalDateTime()))
+                val tittel = sakForReferanse.tittel ?: "Saken din"
+                historikk.add(Hendelse("Vi kan ikke vise behandlingsstatus for $tittel digitalt.", hendelse.hendelsestidspunkt.toLocalDateTime()))
             }
         }
-
-        sakForReferanse.tittel = hendelse.tittel
 
     } else {
         // Opprett ny Sak

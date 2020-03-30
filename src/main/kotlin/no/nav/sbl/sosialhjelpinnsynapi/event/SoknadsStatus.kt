@@ -22,7 +22,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
         }
         JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling."
         JsonSoknadsStatus.Status.FERDIGBEHANDLET -> "Søknaden er ferdig behandlet."
-        JsonSoknadsStatus.Status.BEHANDLES_IKKE -> "Søknaden din vil bli behandlet, men vi kan ikke vise behandlingsstatus digitalt." // TODO: mulig tittelen endres
+        JsonSoknadsStatus.Status.BEHANDLES_IKKE -> "Din søknad vil bli behandlet, men vi kan ikke vise behandlingsstatus digitalt."
         else -> throw RuntimeException("Statustype ${hendelse.status.value()} mangler mapping")
     }
 

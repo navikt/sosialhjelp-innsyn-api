@@ -81,12 +81,16 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             return valideringResultatResponseList
         }
         catch (e: Exception) {
-            waitForFutures(krypteringFutureList)
             log.error("Ettersendelse feilet ved generering av ettersendelsePdf, kryptering av filer eller sending til FIKS", e)
             throw e
         }
         finally {
-            waitForFutures(krypteringFutureList)
+            val notCancelledFutureList = krypteringFutureList
+                    .filter { !it.isDone && !it.isCancelled }
+            log.error("Antall krypteringer som ikke er canceled var ${notCancelledFutureList.size}")
+            notCancelledFutureList
+                    .forEach { it.cancel(true) }
+
         }
     }
 

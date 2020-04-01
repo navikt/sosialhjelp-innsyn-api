@@ -65,18 +65,18 @@ class HendelseService(private val eventService: EventService,
                 .groupBy { it.datoSistEndret.rundNedTilNaermeste5Minutt() }
                 .forEach { (_, grupperteVilkar) ->
                     historikk.add(
-                            Hendelse("Dine vilkår har blitt oppdatert, les vedtaket for mer detaljer.", grupperteVilkar[0].datoSistEndret)
+                            Hendelse("Vilkårene dine er oppdatert, les vedtaket for mer detaljer.", grupperteVilkar[0].datoSistEndret)
                     )
                 }
     }
 
     private fun InternalDigisosSoker.leggTilHendelserForUtbetalinger() {
         utbetalinger
-//                .filterNot { it.status == UtbetalingsStatus.ANNULLERT } // Finn ut om annullert skal gi melding i historikk
+//                .filterNot { it.status == UtbetalingsStatus.ANNULLERT } // TODO - utbetalingerEnabled: Finn ut om annullert skal gi melding i historikk
                 .groupBy { it.datoHendelse.rundNedTilNaermeste5Minutt() }
                 .forEach { (_, grupperteVilkar) ->
                     historikk.add(
-                            Hendelse("Utbetalingsplanen din har blitt oppdatert.", grupperteVilkar[0].datoHendelse) // TODO: lenke til utbetalingsplan
+                            Hendelse("Utbetalingsplanen din har blitt oppdatert.", grupperteVilkar[0].datoHendelse) // TODO - utbetalingerEnabled: lenke til utbetalingsplan
                     )
                 }
     }

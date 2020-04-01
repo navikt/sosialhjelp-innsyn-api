@@ -48,7 +48,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, featureToggles: 
     }
 
     if (featureToggles.utbetalingerEnabled) {
-        val beskrivelse = "Dine dokumentasjonskrav har blitt oppdatert, les vedtaket for mer detaljer."
+        val beskrivelse = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
     }
 }

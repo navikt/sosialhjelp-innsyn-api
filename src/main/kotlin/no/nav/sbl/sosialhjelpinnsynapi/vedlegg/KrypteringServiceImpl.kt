@@ -51,7 +51,7 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
                 try {
                     log.info("Starter kryptering, digisosId=$digisosId")
                     kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
-                    log.info("Ferdig med kryptring, digisosId=$digisosId")
+                    log.info("Ferdig med kryptering, digisosId=$digisosId")
                 } catch (e: Exception) {
                     log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)
                     throw IllegalStateException("An error occurred during encryption", e)
@@ -59,9 +59,9 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
                     try {
                         log.info("Lukker kryptering OutputStream, digisosId=$digisosId")
                         pipedOutputStream.close()
-                        log.info("Kryptering OutputStream er lukket, digisosId=$digisosId")
+                        log.info("OutputStream for kryptering er lukket, digisosId=$digisosId")
                     } catch (e: IOException) {
-                        log.error("Failed closing encryption OutputStream", e)
+                        log.error("Lukking av Outpustream for kryptering feilet", e)
                     }
                 }
             }, executor)

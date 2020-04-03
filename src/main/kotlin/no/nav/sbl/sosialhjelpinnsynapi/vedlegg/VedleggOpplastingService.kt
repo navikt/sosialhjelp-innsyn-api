@@ -169,7 +169,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             metadata.filer.forEach {
                 val file = files[filesIndex]
                 val valideringstatus = validateFil(file, fiksDigisosId)
-                if (valideringstatus != "OK") log.warn("Opplasting av filer til ettersendelse feilet med status $valideringstatus, digisosId=$fiksDigisosId")
+                if (valideringstatus != "OK") log.warn("Opplasting av fil $filesIndex av ${files.size} til ettersendelse feilet. Det var ${metadataListe.size} oppgaveElement. Status: $valideringstatus, digisosId=$fiksDigisosId")
                 vedleggOpplastingResponse.add(VedleggOpplastingResponse(file.originalFilename, valideringstatus))
                 filesIndex++
             }

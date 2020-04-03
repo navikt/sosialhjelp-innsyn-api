@@ -40,4 +40,4 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
 }
 
 private fun isAnnenMottaker(hendelse: JsonUtbetaling) =
-        hendelse.annenMottaker || (hendelse.annenMottaker == null && hendelse.mottaker != SubjectHandler.getUserIdFromToken())
+        (hendelse.annenMottaker == null && hendelse.mottaker != SubjectHandler.getUserIdFromToken()) || hendelse.annenMottaker

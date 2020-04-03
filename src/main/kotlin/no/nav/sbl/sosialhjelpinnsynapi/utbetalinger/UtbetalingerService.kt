@@ -47,6 +47,7 @@ class UtbetalingerService(private val eventService: EventService,
                                             fom = utbetaling.fom,
                                             tom = utbetaling.tom,
                                             mottaker = utbetaling.mottaker,
+                                            annenMottaker = utbetaling.annenMottaker,
                                             kontonummer = utbetaling.kontonummer,
                                             utbetalingsmetode = utbetaling.utbetalingsmetode
                                     )

@@ -4,6 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.subjectHandler.SubjectHandler
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDate
 import java.math.BigDecimal
 
@@ -19,7 +20,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
             fom = if (hendelse.fom == null) null else hendelse.fom.toLocalDate(),
             tom = if (hendelse.tom == null) null else hendelse.tom.toLocalDate(),
             mottaker = hendelse.mottaker,
-            kontonummer = if (erForEnAnnenMotaker(hendelse)) null else hendelse.kontonummer,
+            annenMottaker = isAnnenMottaker(hendelse),
+            kontonummer = if (isAnnenMottaker(hendelse)) null else hendelse.kontonummer,
             utbetalingsmetode = hendelse.utbetalingsmetode,
             vilkar = mutableListOf(),
             dokumentasjonkrav = mutableListOf()
@@ -37,5 +39,5 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
 //    }
 }
 
-private fun erForEnAnnenMotaker(hendelse: JsonUtbetaling) =
-        hendelse.annenMottaker == null || hendelse.annenMottaker
+private fun isAnnenMottaker(hendelse: JsonUtbetaling) =
+        hendelse.annenMottaker || (hendelse.annenMottaker == null && hendelse.mottaker != SubjectHandler.getUserIdFromToken())

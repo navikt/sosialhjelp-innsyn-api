@@ -7,6 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -37,7 +38,6 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
-    private val provider = Security.getProvider("BC")
     private var certificate: X509Certificate? = null
     private val kryptering = CMSKrypteringImpl()
 
@@ -47,6 +47,9 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
         if (certificate == null) {
             certificate = getDokumentlagerPublicKeyX509Certificate(token)
         }
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(BouncyCastleProvider())
+        }
 
         val pipedInputStream = PipedInputStream()
         try {
@@ -54,7 +57,7 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
             val krypteringFuture = CompletableFuture.runAsync(Runnable {
                 try {
                     log.info("Starter kryptering, digisosId=$digisosId")
-                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, provider)
+                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
                     log.info("Ferdig med kryptring, digisosId=$digisosId")
                 } catch (e: Exception) {
                     log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)

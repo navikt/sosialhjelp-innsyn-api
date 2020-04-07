@@ -278,11 +278,14 @@ class FiksClientImpl(clientProperties: ClientProperties,
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
         try {
             createEttersendelsesPdf(vedleggJson, body, digisosId, token, krypteringFutureList)
+            log.info("Ferdig med generering og kryptering av ettersendelse")
         } catch (e: Exception) {
             log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
         }
 
+        log.info("Lager metadata")
         files.forEachIndexed { fileId, file ->
+            log.info("Lager metadata for filnavn ${file.filnavn}")
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
@@ -295,6 +298,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val requestEntity = HttpEntity(body, headers)
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
+            log.info("Sender ettersendelse til $urlTemplate")
             val responseEntity = restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.POST,

@@ -283,9 +283,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
         }*/
 
-        val ettersendelsesMetadata = VedleggMetadata(ettersendelsePdf.filnavn, ettersendelsePdf.mimetype, ettersendelsePdf.storrelse)
-        body.add("vedleggSpesifikasjon:${ettersendelsePdf.filnavn}", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:${ettersendelsePdf.filnavn}"))
-        body.add("dokument:${ettersendelsePdf.filnavn}", createHttpEntityOfFile(ettersendelsePdf, "dokument:${ettersendelsePdf.filnavn}"))
+        //val ettersendelsesMetadata = VedleggMetadata(ettersendelsePdf.filnavn, ettersendelsePdf.mimetype, ettersendelsePdf.storrelse)
+        //body.add("vedleggSpesifikasjon:${ettersendelsePdf.filnavn}", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:${ettersendelsePdf.filnavn}"))
+        //body.add("dokument:${ettersendelsePdf.filnavn}", createHttpEntityOfFile(ettersendelsePdf, "dokument:${ettersendelsePdf.filnavn}"))
 
         log.info("Lager metadata")
         files.forEachIndexed { fileId, file ->

@@ -24,6 +24,7 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
@@ -75,12 +76,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                 filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
             }
 
-            waitForFutures(krypteringFutureList)
-
             val vedleggSpesifikasjon = createVedleggJson(files, metadata)
             val ettersendelsePdf = createEttersendelsePdf(vedleggSpesifikasjon, krypteringFutureList, digisosId, token)
-
-            waitForFutures(krypteringFutureList)
 
             fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, digisosId, token, ettersendelsePdf)
 
@@ -113,7 +110,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             val genereringFerdigTidspunkt = System.currentTimeMillis()
             log.info("Generering av ettersendelse.pdf tok ${genereringFerdigTidspunkt - startTid} ms")
             log.info("Starter kryptering av ettersendelse.pdf")
-            val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
+            val ettersendelseKryptertFil = ettersendelsePdf.inputStream() // krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
             val krypteringFerdigTidspunkt = System.currentTimeMillis()
             log.info("Kryptering av ettersendelse.pdf tok ${krypteringFerdigTidspunkt - genereringFerdigTidspunkt} ms")
             return FilForOpplasting("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong(), ettersendelseKryptertFil)

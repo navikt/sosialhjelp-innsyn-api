@@ -81,6 +81,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
             fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, digisosId, token, ettersendelsePdf)
 
+            waitForFutures(krypteringFutureList)
+
             // opppdater cache med digisossak
             val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
             cachePut(digisosId, digisosSak)
@@ -111,8 +113,6 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             log.info("Generering av ettersendelse.pdf tok ${genereringFerdigTidspunkt - startTid} ms")
             log.info("Starter kryptering av ettersendelse.pdf")
             val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
-            val krypteringFerdigTidspunkt = System.currentTimeMillis()
-            log.info("Kryptering av ettersendelse.pdf tok ${krypteringFerdigTidspunkt - genereringFerdigTidspunkt} ms")
             return FilForOpplasting("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong(), ettersendelseKryptertFil)
         } catch (e: Exception) {
             log.error("Generering av ettersendelse.pdf feilet.", e)

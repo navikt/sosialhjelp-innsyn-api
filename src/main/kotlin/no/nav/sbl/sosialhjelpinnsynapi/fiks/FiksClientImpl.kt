@@ -296,7 +296,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
         val requestEntity = HttpEntity(body, headers)
-        log.info("requestEntity ${requestEntity.body}")
+        log.info("requestEntity ${requestEntity}")
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
             log.info("Sender ettersendelse til $urlTemplate")

@@ -299,7 +299,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         log.info("requestEntity ${requestEntity}")
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
-            log.info("Sender ettersendelse til $urlTemplate")
+            log.info("Sender ettersendelse til $baseUrl/digisos/api/v1/soknader/${kommunenummer}/${digisosId}/${navEksternRefId}")
             val responseEntity = restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.POST,

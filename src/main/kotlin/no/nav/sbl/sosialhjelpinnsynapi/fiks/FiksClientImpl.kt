@@ -276,16 +276,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val body = LinkedMultiValueMap<String, Any>()
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
-        /*try {
-            createEttersendelsesPdf(vedleggJson, body, digisosId, token, krypteringFutureList)
-            log.info("Ferdig med generering og kryptering av ettersendelse")
-        } catch (e: Exception) {
-            log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
-        }*/
 
-        val ettersendelsesMetadata = VedleggMetadata(ettersendelsePdf.filnavn, ettersendelsePdf.mimetype, ettersendelsePdf.storrelse)
-        body.add("vedleggSpesifikasjon:${ettersendelsePdf.filnavn}", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:${ettersendelsePdf.filnavn}"))
-        body.add("dokument:${ettersendelsePdf.filnavn}", createHttpEntityOfFile(ettersendelsePdf, "dokument:${ettersendelsePdf.filnavn}"))
+        //val ettersendelsesMetadata = VedleggMetadata(ettersendelsePdf.filnavn, ettersendelsePdf.mimetype, ettersendelsePdf.storrelse)
+        //body.add("vedleggSpesifikasjon:${ettersendelsePdf.filnavn}", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:${ettersendelsePdf.filnavn}"))
+        //body.add("dokument:${ettersendelsePdf.filnavn}", createHttpEntityOfFile(ettersendelsePdf, "dokument:${ettersendelsePdf.filnavn}"))
 
         log.info("Lager metadata")
         files.forEachIndexed { fileId, file ->
@@ -293,9 +287,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
-
-            log.info("Read all bytes for input stream: ${file.filnavn}")
-            file.fil.readAllBytes()
         }
 
         log.info("Read all bytes for input stream: ${ettersendelsePdf.filnavn}")

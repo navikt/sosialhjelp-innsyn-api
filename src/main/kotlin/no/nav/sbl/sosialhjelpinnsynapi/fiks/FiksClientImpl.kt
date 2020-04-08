@@ -283,9 +283,9 @@ class FiksClientImpl(clientProperties: ClientProperties,
             log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
         }*/
 
-        //val ettersendelsesMetadata = VedleggMetadata(ettersendelsePdf.filnavn, ettersendelsePdf.mimetype, ettersendelsePdf.storrelse)
-        //body.add("vedleggSpesifikasjon:${ettersendelsePdf.filnavn}", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:${ettersendelsePdf.filnavn}"))
-        //body.add("dokument:${ettersendelsePdf.filnavn}", createHttpEntityOfFile(ettersendelsePdf, "dokument:${ettersendelsePdf.filnavn}"))
+        val ettersendelsesMetadata = VedleggMetadata(ettersendelsePdf.filnavn, ettersendelsePdf.mimetype, ettersendelsePdf.storrelse)
+        body.add("vedleggSpesifikasjon:${ettersendelsePdf.filnavn}", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:${ettersendelsePdf.filnavn}"))
+        body.add("dokument:${ettersendelsePdf.filnavn}", createHttpEntityOfFile(ettersendelsePdf, "dokument:${ettersendelsePdf.filnavn}"))
 
         log.info("Lager metadata")
         files.forEachIndexed { fileId, file ->
@@ -293,7 +293,13 @@ class FiksClientImpl(clientProperties: ClientProperties,
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
+
+            log.info("Read all bytes for input stream: ${file.filnavn}")
+            file.fil.readAllBytes()
         }
+
+        log.info("Read all bytes for input stream: ${ettersendelsePdf.filnavn}")
+        ettersendelsePdf.fil.readAllBytes()
 
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
         val kommunenummer = digisosSak.kommunenummer
@@ -304,14 +310,14 @@ class FiksClientImpl(clientProperties: ClientProperties,
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
             log.info("Sender ettersendelse til $baseUrl/digisos/api/v1/soknader/${kommunenummer}/${digisosId}/${navEksternRefId}")
-            val responseEntity = restTemplate.exchange(
+            /*val responseEntity = restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.POST,
                     requestEntity,
                     String::class.java,
                     mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
-            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")
+            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")*/
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr

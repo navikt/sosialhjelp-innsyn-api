@@ -110,7 +110,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             val genereringFerdigTidspunkt = System.currentTimeMillis()
             log.info("Generering av ettersendelse.pdf tok ${genereringFerdigTidspunkt - startTid} ms")
             log.info("Starter kryptering av ettersendelse.pdf")
-            val ettersendelseKryptertFil = ettersendelsePdf.inputStream() // krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
+            val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
             val krypteringFerdigTidspunkt = System.currentTimeMillis()
             log.info("Kryptering av ettersendelse.pdf tok ${krypteringFerdigTidspunkt - genereringFerdigTidspunkt} ms")
             return FilForOpplasting("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong(), ettersendelseKryptertFil)

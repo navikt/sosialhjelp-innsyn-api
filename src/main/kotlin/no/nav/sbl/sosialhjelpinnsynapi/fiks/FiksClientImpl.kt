@@ -269,19 +269,23 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String, krypteringFutureList: MutableList<CompletableFuture<Void>>) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String, ettersendelsePdf: FilForOpplasting) {
         log.info("Starter sending av ettersendelse med ${files.size} filer til digisosId=$digisosId")
         val headers = setIntegrasjonHeaders(token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
         val body = LinkedMultiValueMap<String, Any>()
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
-        try {
+        /*try {
             createEttersendelsesPdf(vedleggJson, body, digisosId, token, krypteringFutureList)
             log.info("Ferdig med generering og kryptering av ettersendelse")
         } catch (e: Exception) {
             log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
-        }
+        }*/
+
+        val ettersendelsesMetadata = VedleggMetadata(ettersendelsePdf.filnavn, ettersendelsePdf.mimetype, ettersendelsePdf.storrelse)
+        body.add("vedleggSpesifikasjon:${ettersendelsePdf.filnavn}", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:${ettersendelsePdf.filnavn}"))
+        body.add("dokument:${ettersendelsePdf.filnavn}", createHttpEntityOfFile(ettersendelsePdf, "dokument:${ettersendelsePdf.filnavn}"))
 
         log.info("Lager metadata")
         files.forEachIndexed { fileId, file ->
@@ -296,7 +300,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
         val requestEntity = HttpEntity(body, headers)
-        log.info("requestEntity ${requestEntity}")
+        log.info("requestEntity ${requestEntity.body}")
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
             log.info("Sender ettersendelse til $baseUrl/digisos/api/v1/soknader/${kommunenummer}/${digisosId}/${navEksternRefId}")

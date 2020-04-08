@@ -9,7 +9,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
@@ -41,7 +43,8 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                                private val krypteringService: KrypteringService,
                                private val virusScanner: VirusScanner,
                                private val redisStore: RedisStore,
-                               private val cacheProperties: CacheProperties) {
+                               private val cacheProperties: CacheProperties,
+                               private val ettersendelsePdfGenerator: EttersendelsePdfGenerator) {
 
     companion object {
         val log by logger()
@@ -61,6 +64,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
         val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size + 1))
+
         try {
             files.forEach { file ->
                 val filename = createFilename(file.originalFilename, file.contentType)
@@ -70,7 +74,21 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                 filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
             }
 
-            fiksClient.lastOppNyEttersendelse(filerForOpplasting, createVedleggJson(files, metadata), digisosId, token, krypteringFutureList)
+            val vedleggSpesifikasjon = createVedleggJson(files, metadata)
+
+            log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
+            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, token, true)
+            val startTid = System.currentTimeMillis()
+            val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, currentDigisosSak.sokerFnr)
+            val genereringFerdigTidspunkt = System.currentTimeMillis()
+            log.info("Generering av ettersendelse.pdf tok ${genereringFerdigTidspunkt - startTid} ms")
+
+            val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
+            val krypteringFerdigTidspunkt = System.currentTimeMillis()
+            log.info("Kryptering av ettersendelse.pdf tok ${krypteringFerdigTidspunkt - genereringFerdigTidspunkt} ms")
+            val ettersendelse = FilForOpplasting("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong(), ettersendelseKryptertFil)
+
+            fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, digisosId, token, ettersendelse)
 
             waitForFutures(krypteringFutureList)
 

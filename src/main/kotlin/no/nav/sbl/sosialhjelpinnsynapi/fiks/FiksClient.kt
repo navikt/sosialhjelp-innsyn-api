@@ -16,7 +16,7 @@ interface FiksClient {
 
     fun hentKommuneInfoForAlle(): List<KommuneInfo>
 
-    fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String, krypteringFutureList: MutableList<CompletableFuture<Void>>)
+    fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String, ettersendelsePdf: FilForOpplasting)
 
     fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any
 }

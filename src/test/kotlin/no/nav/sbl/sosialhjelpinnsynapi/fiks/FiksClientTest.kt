@@ -342,7 +342,7 @@ internal class FiksClientTest {
         every { fil1.readAllBytes() } returns "test-fil".toByteArray()
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
-        var ettersendelsPdf = ByteArray(1)
+        val ettersendelsPdf = ByteArray(1)
         every { ettersendelsePdfGenerator.generate(any(), any() ) } returns ettersendelsPdf
         every { krypteringService.krypter(any(), any(), any(), any()) } returns fil1
 
@@ -358,8 +358,8 @@ internal class FiksClientTest {
         val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
                 FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))
 
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(1))
-        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token", krypteringFutureList) }.doesNotThrowAnyException()
+        val ettersendelsePdf = FilForOpplasting("ettersendelse.pdf", "application/pdf", 1L, fil1);
+        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token", ettersendelsePdf) }.doesNotThrowAnyException()
 
         val httpEntity = slot.captured
 

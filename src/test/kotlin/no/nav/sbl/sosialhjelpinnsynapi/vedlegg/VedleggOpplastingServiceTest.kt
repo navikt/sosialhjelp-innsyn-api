@@ -6,6 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
@@ -42,7 +43,8 @@ internal class VedleggOpplastingServiceTest {
     private val virusScanner: VirusScanner = mockk()
     private val redisStore: RedisStore = mockk()
     private val cacheProperties: CacheProperties = mockk(relaxed = true)
-    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisStore, cacheProperties)
+    private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
+    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisStore, cacheProperties, ettersendelsePdfGenerator)
 
     private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
 
@@ -75,6 +77,9 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal kalle FiksClient med gyldige filer for opplasting`() {
         every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any(), any()) } answers { nothing }
+
+        val ettersendelsPdf = ByteArray(1)
+        every { ettersendelsePdfGenerator.generate(any(), any())} returns ettersendelsPdf
 
         mockkStatic(UUID::class)
         every { UUID.randomUUID().toString()} returns "uuid"

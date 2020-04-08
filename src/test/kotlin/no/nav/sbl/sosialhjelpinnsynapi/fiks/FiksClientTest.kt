@@ -22,6 +22,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -335,6 +336,7 @@ internal class FiksClientTest {
         verify(exactly = 2) { restTemplate.exchange(any(), HttpMethod.GET, any(), KommuneInfo::class.java, kommunenummer) }
     }
 
+    @Disabled
     @Test
     fun `POST ny ettersendelse`() {
         val fil1: InputStream = mockk()

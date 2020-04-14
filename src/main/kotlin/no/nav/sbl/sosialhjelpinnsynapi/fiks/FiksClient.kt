@@ -4,7 +4,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
-import java.util.concurrent.CompletableFuture
 
 interface FiksClient {
 
@@ -16,7 +15,7 @@ interface FiksClient {
 
     fun hentKommuneInfoForAlle(): List<KommuneInfo>
 
-    fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String, ettersendelsePdf: FilForOpplasting)
+    fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String)
 
     fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any
 }

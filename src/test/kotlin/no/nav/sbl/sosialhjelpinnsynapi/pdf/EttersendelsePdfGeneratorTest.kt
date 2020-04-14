@@ -1,12 +1,11 @@
 package no.nav.sbl.sosialhjelpinnsynapi.pdf
 
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.FileOutputStream
 import java.lang.Exception
+import java.util.*
 
 class EttersendelsePdfGeneratorTest {
 
@@ -16,24 +15,9 @@ class EttersendelsePdfGeneratorTest {
     @Disabled
     @Test
     fun `skal generere pdf`() {
-        val jsonVedleggSpesifikasjon = JsonVedleggSpesifikasjon()
+        val metadata = Collections.emptyList<OpplastetVedleggMetadata>()
 
-        jsonVedleggSpesifikasjon.withVedlegg(
-                listOf(
-                        JsonVedlegg()
-                                .withType("arbeid")
-                                .withFiler(
-                                        listOf(
-                                                JsonFiler()
-                                                        .withFilnavn("arbeid-123.pdf"),
-                                                JsonFiler()
-                                                        .withFilnavn("arbeod2.pdf")
-                                        )
-                                )
-                )
-        )
-
-        val bytes = ettersendelsePdfGenerator.generate(jsonVedleggSpesifikasjon, "26104500284")
+        val bytes = ettersendelsePdfGenerator.generate(metadata, "26104500284")
 
         try {
             val out = FileOutputStream("./starcraft.pdf")

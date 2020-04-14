@@ -7,7 +7,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -38,18 +37,12 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
-    private var certificate: X509Certificate? = null
-    private val kryptering = CMSKrypteringImpl()
 
     private val executor = Executors.newFixedThreadPool(4)
 
     override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream {
-        if (certificate == null) {
-            certificate = getDokumentlagerPublicKeyX509Certificate(token)
-        }
-        if (Security.getProvider("BC") == null) {
-            Security.addProvider(BouncyCastleProvider())
-        }
+        val kryptering = CMSKrypteringImpl()
+        val certificate = getDokumentlagerPublicKeyX509Certificate(token)
 
         val pipedInputStream = PipedInputStream()
         try {

@@ -331,7 +331,6 @@ internal class FiksClientTest {
         verify(exactly = 2) { restTemplate.exchange(any(), HttpMethod.GET, any(), KommuneInfo::class.java, kommunenummer) }
     }
 
-    // @Disabled
     @Test
     fun `POST ny ettersendelse`() {
         val fil1: InputStream = mockk()

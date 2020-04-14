@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
-import java.util.concurrent.CompletableFuture
 
 @Profile("mock")
 @Component
@@ -97,7 +96,7 @@ class FiksClientMock : FiksClient {
         return returnValue
     }
 
-    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String, ettersendelsePdf: FilForOpplasting) {
+    override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
         val digisosSak = hentDigisosSak(digisosId, token, false)
         val navEksternRefId = lagNavEksternRefId(digisosSak)
         val vedleggMetadata = UUID.randomUUID().toString()

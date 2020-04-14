@@ -64,22 +64,28 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         metadata.removeIf { it.filer.isEmpty() }
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size + 1))
+
+        files.forEach { file ->
+            val filename = createFilename(file.originalFilename, file.contentType)
+            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+            filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, file.inputStream))
+        }
+
+        // Generere pdf og legge til i listen over filer som skal krypteres og lastes opp
+        val ettersendelsePdf = createEttersendelsePdf(metadata, digisosId, token)
+        filerForOpplasting.add(ettersendelsePdf)
+
+        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(filerForOpplasting.size))
 
         try {
-            files.forEach { file ->
-                val filename = createFilename(file.originalFilename, file.contentType)
-                renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
-
-                log.info("Starter kryptering av $filename")
-                val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token, digisosId)
-                filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
+            val filerForOpplastingEtterKryptering = mutableListOf<FilForOpplasting>()
+            filerForOpplasting.forEach { file ->
+                val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, token, digisosId)
+                filerForOpplastingEtterKryptering.add(FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream))
             }
 
             val vedleggSpesifikasjon = createVedleggJson(files, metadata)
-            val ettersendelsePdf = createEttersendelsePdf(vedleggSpesifikasjon, krypteringFutureList, digisosId, token)
-
-            fiksClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon, digisosId, token, ettersendelsePdf)
+            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
 
             waitForFutures(krypteringFutureList)
 
@@ -99,21 +105,15 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             log.error("Antall krypteringer som ikke er canceled var ${notCancelledFutureList.size}")
             notCancelledFutureList
                     .forEach { it.cancel(true) }
-
         }
     }
 
-    fun createEttersendelsePdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, krypteringFutureList: MutableList<CompletableFuture<Void>>, digisosId: String, token: String): FilForOpplasting {
+    fun createEttersendelsePdf(metadata: MutableList<OpplastetVedleggMetadata>, digisosId: String, token: String): FilForOpplasting {
         try {
             log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
             val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, token, true)
-            val startTid = System.currentTimeMillis()
-            val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, currentDigisosSak.sokerFnr)
-            val genereringFerdigTidspunkt = System.currentTimeMillis()
-            log.info("Generering av ettersendelse.pdf tok ${genereringFerdigTidspunkt - startTid} ms")
-            log.info("Starter kryptering av ettersendelse.pdf")
-            val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token, digisosId)
-            return FilForOpplasting("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong(), ettersendelseKryptertFil)
+            val ettersendelsePdf = ettersendelsePdfGenerator.generate(metadata, currentDigisosSak.sokerFnr)
+            return FilForOpplasting("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong(), ettersendelsePdf.inputStream())
         } catch (e: Exception) {
             log.error("Generering av ettersendelse.pdf feilet.", e)
             throw e
@@ -260,7 +260,6 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
         val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
-        log.info("Waiting for futures to complete")
         try {
             allFutures.get(30, TimeUnit.SECONDS)
         } catch (e: CompletionException) {

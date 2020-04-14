@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.pdf
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.formatLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -14,9 +15,10 @@ class EttersendelsePdfGenerator {
         val log by logger()
     }
 
-    fun generate(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, fodselsnummer: String): ByteArray {
-        return try {
-            PDDocument().use { document ->
+    fun generate(metadata: MutableList<OpplastetVedleggMetadata>, fodselsnummer: String): ByteArray {
+        val byteArray: ByteArray
+        try {
+             byteArray = PDDocument().use { document ->
                 log.info("Genererer ettersendelse.pdf")
                 val pdf = PdfGenerator(document)
 
@@ -32,7 +34,7 @@ class EttersendelsePdfGenerator {
 
                 pdf.addText("Følgende vedlegg er sendt " + formatLocalDateTime(LocalDateTime.now()))
 
-                vedleggSpesifikasjon.vedlegg.forEach { vedlegg ->
+                 metadata.forEach { vedlegg ->
                     pdf.addBlankLine()
                     pdf.addText("Type: " + vedlegg.type)
                     vedlegg.filer.forEach { fil ->
@@ -41,11 +43,16 @@ class EttersendelsePdfGenerator {
                     }
                 }
 
+                log.info("Ferdig å skrive PDF")
+
                 pdf.finish()
             }
         } catch (e: Exception) {
             log.info("Kunne ikke generere ettersendelse.pdf")
             throw RuntimeException("Error while creating pdf", e)
         }
+
+        log.info("Ute av PDDocument().use")
+        return byteArray
     }
 }

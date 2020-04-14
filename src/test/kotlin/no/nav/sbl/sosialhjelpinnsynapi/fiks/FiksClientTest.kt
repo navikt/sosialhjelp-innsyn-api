@@ -360,8 +360,7 @@ internal class FiksClientTest {
         val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
                 FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))
 
-        val ettersendelsePdf = FilForOpplasting("ettersendelse.pdf", "application/pdf", 1L, fil1);
-        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token", ettersendelsePdf) }.doesNotThrowAnyException()
+        assertThatCode { fiksClient.lastOppNyEttersendelse(files, JsonVedleggSpesifikasjon(), id, "token") }.doesNotThrowAnyException()
 
         val httpEntity = slot.captured
 

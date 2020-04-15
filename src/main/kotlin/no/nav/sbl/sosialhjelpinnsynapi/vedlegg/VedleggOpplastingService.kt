@@ -102,7 +102,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         finally {
             val notCancelledFutureList = krypteringFutureList
                     .filter { !it.isDone && !it.isCancelled }
-            log.error("Antall krypteringer som ikke er canceled var ${notCancelledFutureList.size}")
+            log.info("Antall krypteringer som ikke er canceled var ${notCancelledFutureList.size}")
             notCancelledFutureList
                     .forEach { it.cancel(true) }
         }

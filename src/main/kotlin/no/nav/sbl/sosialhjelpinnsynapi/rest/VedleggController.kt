@@ -58,29 +58,25 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
     fun streamTest1(request: HttpServletRequest, digisosId: String, token: String): ResponseEntity<List<OppgaveOpplastingResponse>> {
 
+        //var filesSeqStream : SequenceInputStream = SequenceInputStream(null, null)
         var metadata = mutableListOf<OpplastetVedleggMetadata>()
         // Create a new file upload handler
         val upload = ServletFileUpload();
 
         // Parse the request
         var iter = upload.getItemIterator(request)
-        var includesMetadata = false
-        var metadataStream : InputStream
         var filerInputStream : InputStream? = null
         while (iter.hasNext()) {
             var item = iter.next()
             var name = item.fieldName
-            var stream = item.openStream()
             if (item.isFormField) {
                 log.info("Form field $name with value") // ${Streams.asString(stream)} detected.")
             } else {
                 if (item.name == "metadata.json") {
-                    metadataStream = item.openStream()
-                    includesMetadata = true
 
                     try {
-                        metadataStream.use {
-                            metadata = objectMapper.readValue(metadataStream.readBytes())
+                        item.openStream().use {
+                            metadata = objectMapper.readValue(it.readBytes())
                         }
                     } catch (e: Exception) {
                         log.error("klarte ikke lese metadata", e)
@@ -88,13 +84,13 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
 
                 }
                 else {
-
-
+                    filerInputStream = item.openStream()
+                    //filesSeqStream = SequenceInputStream(filesSeqStream, item.openStream())
                 }
                 log.info("File field $name with file name ${item.name} detected ") //${Streams.asString(stream)}.")
             }
         }
-        if (!includesMetadata) {
+        if (metadata.size < 1) {
             throw IllegalStateException("Mangler metadata.json på digisosId=$digisosId")
         }
 
@@ -107,6 +103,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         }
         */
         val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(digisosId, filerInputStream!!, metadata, token)
+        filerInputStream.close()
         return ResponseEntity.ok(vedleggOpplastingResponseList)
     }
 

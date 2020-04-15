@@ -8,7 +8,7 @@ private const val MAX_UPLOAD_SIZE = 350 * 1024 * 1024L //350 MB. Summen av filer
 
 @Configuration
 class MulitpartConfig {
-
+/*
     @Bean(name = ["multipartResolver"])
     fun multipartResolver(): CommonsMultipartResolver {
         val multipartResolver = CommonsMultipartResolver()
@@ -16,4 +16,5 @@ class MulitpartConfig {
         return multipartResolver
     }
 
+ */
 }

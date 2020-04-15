@@ -4,6 +4,9 @@ spring:
   redis:
     host: ${REDIS_HOST:localhost}
     port: 1212
+  servlet:
+    multipart:
+      enabled: false
 
 server:
   servlet:

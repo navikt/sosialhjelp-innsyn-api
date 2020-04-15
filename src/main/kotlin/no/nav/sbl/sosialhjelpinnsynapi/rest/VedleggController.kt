@@ -46,7 +46,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         if(files.isEmpty()) {
             throw IllegalStateException("Ingen filer i forsendelse på digisosId=$fiksDigisosId")
         }
-        val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+        val vedleggOpplastingResponseList = arrayListOf<OppgaveOpplastingResponse>() //vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
         return ResponseEntity.ok(vedleggOpplastingResponseList)
     }
 

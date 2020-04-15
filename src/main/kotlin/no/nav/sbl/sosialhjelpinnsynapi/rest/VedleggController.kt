@@ -40,19 +40,25 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
     }
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
-    @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendVedlegg(@PathVariable fiksDigisosId: String,
+    @PostMapping("/{digisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun sendVedlegg(@PathVariable digisosId: String,
                     //@RequestParam("files") files: MutableList<MultipartFile>,
                     @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
                     request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
-        sjekkXsrfToken(fiksDigisosId, request)
+        sjekkXsrfToken(digisosId, request)
 
         val isMultipart = ServletFileUpload.isMultipartContent(request)
         log.info("isMultipart: $isMultipart")
 
+        return streamTest1(request, digisosId, token)
+        //return streamTest2(request, digisosId, token)
+    }
 
-        /*
+
+    fun streamTest1(request: HttpServletRequest, digisosId: String, token: String): ResponseEntity<List<OppgaveOpplastingResponse>> {
+
+        var metadata = mutableListOf<OpplastetVedleggMetadata>()
         // Create a new file upload handler
         val upload = ServletFileUpload();
 
@@ -60,6 +66,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         var iter = upload.getItemIterator(request)
         var includesMetadata = false
         var metadataStream : InputStream
+        var filerInputStream : InputStream? = null
         while (iter.hasNext()) {
             var item = iter.next()
             var name = item.fieldName
@@ -70,21 +77,48 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                 if (item.name == "metadata.json") {
                     metadataStream = item.openStream()
                     includesMetadata = true
+
+                    try {
+                        metadataStream.use {
+                            metadata = objectMapper.readValue(metadataStream.readBytes())
+                        }
+                    } catch (e: Exception) {
+                        log.error("klarte ikke lese metadata", e)
+                    }
+
                 }
                 else {
+
 
                 }
                 log.info("File field $name with file name ${item.name} detected ") //${Streams.asString(stream)}.")
             }
         }
         if (!includesMetadata) {
-            throw IllegalStateException("Mangler metadata.json på digisosId=$fiksDigisosId")
+            throw IllegalStateException("Mangler metadata.json på digisosId=$digisosId")
         }
 
-*/
 
 
 
+        /*
+        if(files.isEmpty()) {
+            throw IllegalStateException("Ingen filer i forsendelse på digisosId=$fiksDigisosId")
+        }
+        */
+        val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(digisosId, filerInputStream!!, metadata, token)
+        return ResponseEntity.ok(vedleggOpplastingResponseList)
+    }
+
+
+
+
+
+
+    fun streamTest2(request: HttpServletRequest, digisosId: String, token: String): ResponseEntity<List<OppgaveOpplastingResponse>> {
+
+
+        var metadata = mutableListOf<OpplastetVedleggMetadata>()
         var isMetadataIcluded = false
         val metadataInputStream = PipedInputStream()
         val filerInputStream = PipedInputStream()
@@ -103,6 +137,7 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                 if (headers.contains("filename=\"metadata.json\"")) {
                     isMetadataIcluded = true
                     multipartStream.readBodyData(pipedMetadataOutputStream)
+
                 } else {
                     multipartStream.readBodyData(pipedFilerOutputStream)
                 }
@@ -116,8 +151,29 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
         }
 
         if (!isMetadataIcluded) {
-            throw IllegalStateException("Mangler metadata.json på digisosId=$fiksDigisosId")
+            throw IllegalStateException("Mangler metadata.json på digisosId=$digisosId")
         }
+
+
+        try {
+            metadataInputStream.use {
+                metadata = objectMapper.readValue(metadataInputStream.readBytes())
+            }
+        } catch (e: Exception) {
+            log.error("klarte ikke lese metadata", e)
+        }
+
+
+
+        /*
+        if(files.isEmpty()) {
+            throw IllegalStateException("Ingen filer i forsendelse på digisosId=$fiksDigisosId")
+        }
+        */
+        val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(digisosId, filerInputStream, metadata, token)
+        return ResponseEntity.ok(vedleggOpplastingResponseList)
+
+
 
 
 /*
@@ -130,22 +186,9 @@ class VedleggController(private val vedleggOpplastingService: VedleggOpplastingS
                 processUploadedFile(item)
             }
         }
-
 */
-
-//        val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
-//                ?: throw IllegalStateException("Mangler metadata.json på digisosId=$fiksDigisosId")
-        val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataInputStream.readBytes())
-//        files.removeIf { it.originalFilename == "metadata.json" }
-
-        /*
-        if(files.isEmpty()) {
-            throw IllegalStateException("Ingen filer i forsendelse på digisosId=$fiksDigisosId")
-        }
-        */
-        val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, filerInputStream, metadata, token)
-        return ResponseEntity.ok(vedleggOpplastingResponseList)
     }
+
 
     fun getMetadata() : PipedInputStream {
         val pipedInputStream = PipedInputStream()

@@ -56,6 +56,40 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
+    fun sendVedleggTilFiks(digisosId: String, files: InputStream, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveOpplastingResponse> {
+        val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
+        /* TODO: sendVedleggTilFiks() med streams
+        if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" }}) {
+            return valideringResultatResponseList
+        }
+        metadata.removeIf { it.filer.isEmpty() }
+
+        val filerForOpplasting = mutableListOf<FilForOpplasting>()
+        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size))
+
+        files.forEach { file ->
+            val filename = createFilename(file.originalFilename, file.contentType)
+            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+
+            val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, token, digisosId)
+            filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, inputStream))
+        }
+
+        fiksClient.lastOppNyEttersendelse(filerForOpplasting, createVedleggJson(files, metadata), digisosId, token)
+
+        waitForFutures(krypteringFutureList)
+
+        // opppdater cache med digisossak
+        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
+        cachePut(digisosId, digisosSak)
+        */
+
+        return valideringResultatResponseList
+    }
+
+
+
+
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveOpplastingResponse> {
         val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
         if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" }}) {
@@ -183,6 +217,24 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                     "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
         }
     }
+
+    private fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: InputStream) {
+        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
+        /* TODO: validateFilenameMatchInMetadataAndFiles() for streams
+        val filnavnMultipart: List<String> = files.map { it.originalFilename }.filterNotNull()
+        if (filnavnMetadata.size != filnavnMultipart.size) {
+            throw OpplastingFilnavnMismatchException("FilnavnMetadata (size ${filnavnMetadata.size}) og filnavnMultipart (size ${filnavnMultipart.size}) har forskjellig antall. " +
+                    "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
+        }
+
+        val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
+        if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
+            throw OpplastingFilnavnMismatchException("Antall filnavn som matcher i metadata og files (size ${nofFilenameMatchInMetadataAndFiles}) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
+                    "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
+        }
+         */
+    }
+
     fun getMetadataAsString(metadata: MutableList<OpplastetVedleggMetadata>): String {
         var filstring = ""
         metadata.forEachIndexed{index, data -> filstring += "metadata[$index].filer.size: ${data.filer.size}, " }
@@ -197,6 +249,31 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             else -> ""
         }
     }
+
+
+    fun validateFiler(fiksDigisosId: String, files: InputStream, metadataListe: MutableList<OpplastetVedleggMetadata>): List<OppgaveOpplastingResponse>  {
+        val vedleggOpplastingListResponse = mutableListOf<OppgaveOpplastingResponse>()
+
+        validateFilenameMatchInMetadataAndFiles(metadataListe, files)
+
+        /* TODO: Fikse validateFiler() med stream
+        var filesIndex = 0;
+        metadataListe.forEach { metadata ->
+            val vedleggOpplastingResponse = mutableListOf<VedleggOpplastingResponse>()
+
+            metadata.filer.forEach {
+                val file = files[filesIndex]
+                val valideringstatus = validateFil(file, fiksDigisosId)
+                if (valideringstatus != "OK") log.warn("Opplasting av filer til ettersendelse feilet med status $valideringstatus, digisosId=$fiksDigisosId")
+                vedleggOpplastingResponse.add(VedleggOpplastingResponse(file.originalFilename, valideringstatus))
+                filesIndex++
+            }
+            vedleggOpplastingListResponse.add(OppgaveOpplastingResponse(metadata.type, metadata.tilleggsinfo, metadata.innsendelsesfrist, vedleggOpplastingResponse))
+        }
+         */
+        return vedleggOpplastingListResponse
+    }
+
 
     fun validateFiler(fiksDigisosId: String, files: List<MultipartFile>, metadataListe: MutableList<OpplastetVedleggMetadata>): List<OppgaveOpplastingResponse>  {
         val vedleggOpplastingListResponse = mutableListOf<OppgaveOpplastingResponse>()

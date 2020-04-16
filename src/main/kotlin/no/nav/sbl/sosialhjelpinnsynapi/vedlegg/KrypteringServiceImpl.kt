@@ -50,7 +50,7 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
             val krypteringFuture = CompletableFuture.runAsync(Runnable {
                 try {
                     log.info("Starter kryptering, digisosId=$digisosId")
-                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
+                    //kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
                     log.info("Ferdig med kryptring, digisosId=$digisosId")
                 } catch (e: Exception) {
                     log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)

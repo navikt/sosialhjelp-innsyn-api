@@ -66,6 +66,7 @@ internal class UtbetalingerServiceTest {
                         mottaker = "utleier",
                         kontonummer = "kontonr",
                         utbetalingsmetode = "utbetalingsmetode",
+                        annenMottaker = false,
                         vilkar = mutableListOf(),
                         dokumentasjonkrav = mutableListOf()
                 ))
@@ -96,8 +97,8 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 2 utbetalinger for 1 maned`() {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(
-                Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf()),
-                Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 8, 12), null, null, null, null, null, mutableListOf(), mutableListOf())
+                Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf()),
+                Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 8, 12), null, null, null, false, null, null, mutableListOf(), mutableListOf())
         )
 
         every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
@@ -125,8 +126,8 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling for 2 maneder`() {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(
-                Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf()),
-                Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 9, 12), null, null, null, null, null, mutableListOf(), mutableListOf())
+                Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf()),
+                Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 9, 12), null, null, null, false, null, null, mutableListOf(), mutableListOf())
         )
 
         every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
@@ -161,7 +162,7 @@ internal class UtbetalingerServiceTest {
         val model = InternalDigisosSoker()
         val vilkar = Vilkar("vilkar1", mutableListOf(), "Skal hoppe", false)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
-                null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(vilkar), mutableListOf())
+                null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf())
         vilkar.utbetalinger.add(utbetaling1)
         model.saker.add(Sak(
                 referanse = referanse,
@@ -171,7 +172,7 @@ internal class UtbetalingerServiceTest {
                 utbetalinger = mutableListOf(
                         utbetaling1,
                         Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null,
-                                LocalDate.of(2019, 9, 12), null, null, null, null, null, mutableListOf(vilkar), mutableListOf())
+                                LocalDate.of(2019, 9, 12), null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf())
                 ),
                 vilkar = mutableListOf(vilkar),
                 dokumentasjonkrav = mutableListOf()
@@ -193,7 +194,7 @@ internal class UtbetalingerServiceTest {
         val model = InternalDigisosSoker()
         val dokumentasjonkrav = Dokumentasjonkrav("dokumentasjonskrav", mutableListOf(), "Skal hoppe", false)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
-                null, LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav))
+                null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav))
         dokumentasjonkrav.utbetalinger.add(utbetaling1)
         model.saker.add(Sak(
                 referanse = referanse,
@@ -220,13 +221,13 @@ internal class UtbetalingerServiceTest {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(
                 Utbetaling("Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null,
-                        LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf())
+                        LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf())
         )
 
         val model2 = InternalDigisosSoker()
         model2.utbetalinger = mutableListOf(
                 Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.ONE, "Barnehage og SFO", null,
-                        LocalDate.of(2019, 9, 12), null, null, null, null, null, mutableListOf(), mutableListOf())
+                        LocalDate.of(2019, 9, 12), null, null, null, false, null, null, mutableListOf(), mutableListOf())
         )
 
         val mockDigisosSak2: DigisosSak = mockk()
@@ -269,7 +270,7 @@ internal class UtbetalingerServiceTest {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(
                         Utbetaling("Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, null, null,
-                                LocalDate.of(2019, 8, 10), null, null, null, null, null, mutableListOf(), mutableListOf()))
+                                LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf()))
 
         every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)

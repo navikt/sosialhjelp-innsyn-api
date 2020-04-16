@@ -8,8 +8,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.*
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.event.apply
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-//import no.nav.sbl.sosialhjelpinnsynapi.subjectHandler.StaticSubjectHandlerImpl
-//import no.nav.sbl.sosialhjelpinnsynapi.subjectHandler.SubjectHandler
 import org.assertj.core.api.Assertions.assertThat
 import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
@@ -317,7 +315,6 @@ internal class UtbetalingerServiceTest {
 
     @Test
     fun `utbetalings hendelse nar annen mottaker er null`() {
-        //SubjectHandler.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
         val model = InternalDigisosSoker()
         val kontonummer = "12345678901"
         val utbetalingsreferanse = "0987654321"

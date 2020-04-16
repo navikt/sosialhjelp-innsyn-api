@@ -1,5 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
-
+/*
 import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
@@ -328,4 +328,4 @@ internal class VedleggOpplastingServiceTest {
         document.close()
         return outputStream.toByteArray()
     }
-}
+}*/

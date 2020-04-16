@@ -85,7 +85,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             }
 
             val vedleggSpesifikasjon = createVedleggJson(files, metadata)
-            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
+            //fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
 
             waitForFutures(krypteringFutureList)
 

@@ -33,7 +33,6 @@ import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.io.InputStream
 
-
 internal class FiksClientTest {
 
     private val clientProperties: ClientProperties = mockk(relaxed = true)
@@ -44,7 +43,7 @@ internal class FiksClientTest {
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties /*, krypteringService, ettersendelsePdfGenerator*/)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties)
 
     private val id = "123"
 
@@ -339,7 +338,7 @@ internal class FiksClientTest {
         every { fil1.readAllBytes() } returns "test-fil".toByteArray()
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
-        var ettersendelsPdf = ByteArray(1)
+        val ettersendelsPdf = ByteArray(1)
         every { ettersendelsePdfGenerator.generate(any(), any() ) } returns ettersendelsPdf
         every { krypteringService.krypter(any(), any(), any(), any()) } returns fil1
 

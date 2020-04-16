@@ -57,10 +57,10 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveOpplastingResponse> {
-        // val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
-        // if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" }}) {
-        //     return valideringResultatResponseList
-        // }
+        val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
+        if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" }}) {
+            return valideringResultatResponseList
+        }
         metadata.removeIf { it.filer.isEmpty() }
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
@@ -85,7 +85,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             }
 
             val vedleggSpesifikasjon = createVedleggJson(files, metadata)
-            //fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
+            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
 
             waitForFutures(krypteringFutureList)
 
@@ -93,7 +93,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
             cachePut(digisosId, digisosSak)
 
-            return listOf<OppgaveOpplastingResponse>()
+            return valideringResultatResponseList
         }
         catch (e: Exception) {
             log.error("Ettersendelse feilet ved generering av ettersendelsePdf, kryptering av filer eller sending til FIKS", e)

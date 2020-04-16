@@ -1,4 +1,4 @@
-/*package no.nav.sbl.sosialhjelpinnsynapi.subjectHandler
+package no.nav.sbl.sosialhjelpinnsynapi.subjectHandler
 
 class StaticSubjectHandlerImpl : SubjectHandlerInterface {
     private val DEFAULT_USER = "26104500284" //Testbruker i idporten.
@@ -30,4 +30,4 @@ class StaticSubjectHandlerImpl : SubjectHandlerInterface {
         this.user = DEFAULT_USER
         this.token = DEFAULT_TOKEN
     }
-}*/
+}

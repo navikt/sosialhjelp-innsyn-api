@@ -1,4 +1,4 @@
-/*package no.nav.sbl.sosialhjelpinnsynapi.subjectHandler
+package no.nav.sbl.sosialhjelpinnsynapi.subjectHandler
 
 import no.nav.sbl.sosialhjelpinnsynapi.isRunningInProd
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
@@ -33,4 +33,4 @@ object SubjectHandler {
     fun resetSubjectHandlerImpl() {
         subjectHandlerService = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
     }
-}*/
+}

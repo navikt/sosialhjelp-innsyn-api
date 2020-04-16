@@ -1,4 +1,4 @@
-/*package no.nav.sbl.sosialhjelpinnsynapi.subjectHandler
+package no.nav.sbl.sosialhjelpinnsynapi.subjectHandler
 
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
@@ -36,4 +36,3 @@ class AzureAdSubjectHandlerImpl(val tokenValidationContextHolder: TokenValidatio
         private val logger = LoggerFactory.getLogger(AzureAdSubjectHandlerImpl::class.java)
     }
 }
-*/

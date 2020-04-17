@@ -121,6 +121,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     }
 
+
     fun createVedleggJson(files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>) : JsonVedleggSpesifikasjon{
         var filIndex = 0
         return JsonVedleggSpesifikasjon()

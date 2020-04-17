@@ -261,7 +261,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
         val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
         try {
-            allFutures.get(30, TimeUnit.SECONDS)
+            allFutures.get(300, TimeUnit.SECONDS)
         } catch (e: CompletionException) {
             throw IllegalStateException(e.cause)
         } catch (e: ExecutionException) {

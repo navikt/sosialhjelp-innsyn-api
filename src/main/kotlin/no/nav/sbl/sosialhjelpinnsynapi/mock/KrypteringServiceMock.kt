@@ -5,11 +5,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringServiceImpl
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.io.IOException
-import java.io.InputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
+import java.io.*
 import java.security.Security
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
@@ -20,7 +19,7 @@ class KrypteringServiceMock : KrypteringService {
 
     override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream {
         val kryptering = CMSKrypteringImpl()
-        //val certificate = getDokumentlagerPublicKeyX509Certificate(token)
+        val certificate = getDokumentlagerPublicKeyX509Certificate(token)
 
         val pipedInputStream = PipedInputStream()
         try {
@@ -28,7 +27,7 @@ class KrypteringServiceMock : KrypteringService {
             val krypteringFuture = CompletableFuture.runAsync(Runnable {
                 try {
                     KrypteringServiceImpl.log.info("Starter kryptering, digisosId=$digisosId")
-                    //kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
+                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
                     KrypteringServiceImpl.log.info("Ferdig med kryptring, digisosId=$digisosId")
                 } catch (e: Exception) {
                     KrypteringServiceImpl.log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)
@@ -50,4 +49,11 @@ class KrypteringServiceMock : KrypteringService {
         return pipedInputStream
     }
 
+    private fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
+        val fact: CertificateFactory = CertificateFactory.getInstance("X.509")
+        val pemInputStream = File("C:/Users/H154390/TestCertificate/cert.pem").inputStream()
+        val x509Certificate = fact.generateCertificate(pemInputStream) as X509Certificate
+        pemInputStream.close()
+        return x509Certificate
+    }
 }

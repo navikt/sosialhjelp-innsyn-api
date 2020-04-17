@@ -103,6 +103,10 @@ fun isRunningInProd(): Boolean {
     return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "default"
 }
 
+fun isRunningLocally(): Boolean {
+    return System.getenv(NAIS_CLUSTER_NAME) == null && System.getenv(NAIS_NAMESPACE) == null
+}
+
 fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
     return try {
         objectMapper.readValue(this.responseBodyAsByteArray, FiksErrorResponse::class.java)

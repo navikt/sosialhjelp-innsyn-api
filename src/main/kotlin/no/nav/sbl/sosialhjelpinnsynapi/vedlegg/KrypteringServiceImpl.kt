@@ -28,7 +28,7 @@ import java.util.concurrent.Executors
 @Profile("!mock")
 @Component
 class KrypteringServiceImpl(clientProperties: ClientProperties,
-                            private val restTemplate: RestTemplate) : KrypteringService {
+                            private val restTemplate: RestTemplate) : KrypteringService, AutoCloseable {
 
     companion object {
         val log by logger()
@@ -73,9 +73,6 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-        finally {
-            executor.shutdownNow()
-        }
         return pipedInputStream
     }
 
@@ -107,5 +104,9 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
         } catch (e: Exception) {
             throw FiksException(e.message, e)
         }
+    }
+
+    override fun close() {
+        executor.shutdownNow()
     }
 }

@@ -37,14 +37,18 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
+    private val executor = Executors.newFixedThreadPool(1)
     private var certificate: X509Certificate? = null
-
-    private val executor = Executors.newFixedThreadPool(4)
+    private var securityProvider = Security.getProvider("BC")
+    private val kryptering = CMSKrypteringImpl()
 
     override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream {
-        val kryptering = CMSKrypteringImpl()
+
         if (certificate == null) {
             certificate = getDokumentlagerPublicKeyX509Certificate(token)
+        }
+        if (securityProvider == null) {
+            securityProvider = Security.getProvider("BC")
         }
 
         val pipedInputStream = PipedInputStream()
@@ -53,8 +57,7 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
             val krypteringFuture = CompletableFuture.runAsync(Runnable {
                 try {
                     log.info("Starter kryptering, digisosId=$digisosId")
-                    //kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
-                    Security.getProvider("BC")
+                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, securityProvider)
                     log.info("Ferdig med kryptring, digisosId=$digisosId")
                 } catch (e: Exception) {
                     log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)
@@ -76,7 +79,7 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
         return pipedInputStream
     }
 
-    private fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
+    public fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
         val headers = HttpHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         headers.set(HttpHeaders.AUTHORIZATION, token)

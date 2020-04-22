@@ -2,6 +2,7 @@
   "namespace": "q1",
   "ingress": [
     "https://sosialhjelp-innsyn-api-q1.nais.oera-q.local/sosialhjelp/innsyn-api",
+    "https://sosialhjelp-innsyn-api-q1.dev-sbs.nais.io/sosialhjelp/innsyn-api",
     "https://www-q1.nav.no/sosialhjelp/innsyn-api"
   ],
   "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/preprod/shared",

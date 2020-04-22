@@ -3,8 +3,6 @@ spring:
     banner-mode: 'off'
   application:
     name: "sosialhjelp-innsyn-api"
-  profiles:
-    active: ${NAIS_CLUSTER_NAME}
   redis:
     host: ${REDIS_HOST}
     port: 6379

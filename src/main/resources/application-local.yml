@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: local
   redis:
     host: ${REDIS_HOST:localhost}
     port: 1212

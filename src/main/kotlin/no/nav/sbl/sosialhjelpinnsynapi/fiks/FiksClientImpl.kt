@@ -5,24 +5,35 @@ import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.*
-import no.nav.sbl.sosialhjelpinnsynapi.common.*
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksNotFoundException
+import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
+import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
+import no.nav.sbl.sosialhjelpinnsynapi.feilmeldingUtenFnr
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
-import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
+import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
+import no.nav.sbl.sosialhjelpinnsynapi.toFiksErrorResponse
+import no.nav.sbl.sosialhjelpinnsynapi.typeRef
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
-import org.springframework.http.*
+import org.springframework.http.ContentDisposition
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
@@ -30,10 +41,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.io.IOException
-import java.util.*
 import java.util.Collections.singletonList
-import java.util.concurrent.CompletableFuture
-import kotlin.collections.ArrayList
 
 
 @Profile("!mock")
@@ -43,9 +51,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
                      private val idPortenService: IdPortenService,
                      private val redisStore: RedisStore,
                      private val cacheProperties: CacheProperties,
-                     private val retryProperties: FiksRetryProperties
-                     /*private val krypteringService: KrypteringService,
-                     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator*/) : FiksClient {
+                     private val retryProperties: FiksRetryProperties) : FiksClient {
 
     companion object {
         val log by logger()
@@ -64,7 +70,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     private fun hentDigisosSakFraCache(digisosId: String, token: String): DigisosSak {
-        val get: String? = redisStore.get(digisosId)
+        val get: String? = redisStore.get(digisosId) // Redis har konfigurert timout for disse.
         if (get != null) {
             try {
                 val obj = objectMapper.readValue(get, DigisosSak::class.java)
@@ -108,7 +114,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val get: String? = redisStore.get(dokumentlagerId)
+        val get: String? = redisStore.get(dokumentlagerId) // Redis har konfigurert timout for disse.
         if (get != null) {
             try {
                 val obj = objectMapper.readValue(get, requestedClass)
@@ -203,7 +209,7 @@ class FiksClientImpl(clientProperties: ClientProperties,
     }
 
     override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
-        val get: String? = redisStore.get(kommunenummer)
+        val get: String? = redisStore.get(kommunenummer) // Redis har konfigurert timout for disse.
         if (get != null) {
             try {
                 val obj = objectMapper.readValue(get, KommuneInfo::class.java)
@@ -278,11 +284,6 @@ class FiksClientImpl(clientProperties: ClientProperties,
 
         val body = LinkedMultiValueMap<String, Any>()
         body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
-        /*try {
-            createEttersendelsesPdf(vedleggJson, body, digisosId, token)
-        } catch (e: Exception) {
-            log.error("Kunne ikke generere pdf for ettersendelse til digisosId=$digisosId", e)
-        }*/
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
@@ -320,32 +321,12 @@ class FiksClientImpl(clientProperties: ClientProperties,
         }
     }
 
-    /*private fun createEttersendelsesPdf(vedleggSpesifikasjon: JsonVedleggSpesifikasjon, body: LinkedMultiValueMap<String, Any>, digisosId: String, token: String) {
-        val digisosSak = hentDigisosSak(digisosId, token, true)
-
-        log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
-        val startTid = System.currentTimeMillis()
-        val ettersendelsePdf = ettersendelsePdfGenerator.generate(vedleggSpesifikasjon, digisosSak.sokerFnr)
-        val sluttTid = System.currentTimeMillis()
-        log.info("Generering av ettersendelse.pdf tok ${sluttTid - startTid} ms")
-
-        val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
-        val ettersendelseKryptertFil = krypteringService.krypter(ettersendelsePdf.inputStream(), krypteringFutureList, token)
-        val ettersendelsesMetadata = VedleggMetadata("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong())
-        body.add("vedleggSpesifikasjon:ettersendelse.pdf", createHttpEntityOfString(serialiser(ettersendelsesMetadata), "vedleggSpesifikasjon:ettersendelse.pdf"))
-        body.add("dokument:ettersendelse.pdf", createHttpEntity(InputStreamResource(ettersendelseKryptertFil), "dokument:ettersendelse.pdf", "ettersendelse.pdf", "application/octet-stream"))
-    }*/
-
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
     }
 
     fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
         return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
-    }
-
-    fun createHttpEntityOfByteArray(byteArray: ByteArray, name: String): HttpEntity<Any> {
-        return createHttpEntity(byteArray, name, name, "application/pdf")
     }
 
     private fun createHttpEntity(body: Any, name: String, filename: String?, contentType: String): HttpEntity<Any> {

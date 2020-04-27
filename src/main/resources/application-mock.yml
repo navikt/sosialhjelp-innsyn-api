@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: mock
   redis:
     host: ${REDIS_HOST:localhost}
     port: 1212
@@ -18,7 +16,7 @@ management:
 innsyn:
   vedlegg:
     virusscan:
-      enabled: false
+      enabled: true
   cache:
     redis_mocked: true
     time_to_live_seconds: 2

@@ -2,6 +2,7 @@
   "namespace": "q1",
   "ingress": [
     "https://sosialhjelp-innsyn-api-q1.nais.oera-q.local/sosialhjelp/innsyn-api",
+    "https://sosialhjelp-innsyn-api-q1.dev-sbs.nais.io/sosialhjelp/innsyn-api",
     "https://www-q1.nav.no/sosialhjelp/innsyn-api"
   ],
   "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/preprod/shared",
@@ -19,7 +20,8 @@
     "AZUREAD_CLIENTID": "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
-    "UTBETALINGER_ENABLED": "true"
+    "UTBETALINGER_ENABLED": "true",
+    "SPRING_PROFILES_ACTIVE": "dev-sbs,log-kibana"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

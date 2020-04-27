@@ -2,6 +2,7 @@
 	"namespace": "default",
 	"ingress": [
 		"https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
+		"https://sosialhjelp-innsyn-api.prod-sbs.nais.io/sosialhjelp/innsyn-api",
 		"https://www.nav.no/sosialhjelp/innsyn-api"
 	],
 	"virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/maskinporten",
@@ -20,7 +21,8 @@
 		"AZUREAD_CLIENTID": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
 		"CACHE_TIME_TO_LIVE_SECONDS": "180",
         "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
-		"UTBETALINGER_ENABLED": "false"
+		"UTBETALINGER_ENABLED": "false",
+		"SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana"
 	},
 	"minReplicas": "2",
 	"maxReplicas": "4",

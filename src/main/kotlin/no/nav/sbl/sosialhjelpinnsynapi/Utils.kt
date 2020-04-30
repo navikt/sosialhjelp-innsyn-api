@@ -115,8 +115,13 @@ fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
     }
 }
 
+
+val String.feilmeldingUtenFnr: String?
+    get() {
+        return this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
+    }
+
 val FiksErrorResponse.feilmeldingUtenFnr: String?
     get() {
-        return this.message
-                ?.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
+        return this.message?.feilmeldingUtenFnr
     }

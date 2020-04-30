@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClientImpl
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksEttersendelseClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.AccessToken
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
@@ -24,8 +25,9 @@ internal class DigisosApiClientTest {
         val restTemplate: RestTemplate = mockk()
         val idPortenService: IdPortenService = mockk()
         val fiksClientImpl: FiksClientImpl = mockk()
+        val fiksEttersendelseClientImpl: FiksEttersendelseClientImpl = mockk()
 
-        val digisosApiClient = DigisosApiClientImpl(clientProperties, restTemplate, idPortenService, fiksClientImpl)
+        val digisosApiClient = DigisosApiClientImpl(clientProperties, restTemplate, idPortenService, fiksClientImpl, fiksEttersendelseClientImpl)
 
         val mockResponse: ResponseEntity<String> = mockk()
         every { mockResponse.body } returns ok_komplett_jsondigisossoker_response

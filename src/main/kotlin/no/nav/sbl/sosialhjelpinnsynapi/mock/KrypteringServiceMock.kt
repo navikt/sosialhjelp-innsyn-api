@@ -17,7 +17,7 @@ import java.util.concurrent.Executors
 class KrypteringServiceMock : KrypteringService {
     private val executor = Executors.newFixedThreadPool(4)
 
-    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream {
+    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, filDigisosId: String): InputStream {
         val kryptering = CMSKrypteringImpl()
         val certificate = getDokumentlagerPublicKeyX509Certificate(token)
 
@@ -26,17 +26,17 @@ class KrypteringServiceMock : KrypteringService {
             val pipedOutputStream = PipedOutputStream(pipedInputStream)
             val krypteringFuture = CompletableFuture.runAsync(Runnable {
                 try {
-                    KrypteringServiceImpl.log.info("Starter kryptering, digisosId=$digisosId")
+                    KrypteringServiceImpl.log.info("Starter kryptering, filDigisosId=$filDigisosId")
                     kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
-                    KrypteringServiceImpl.log.info("Ferdig med kryptring, digisosId=$digisosId")
+                    KrypteringServiceImpl.log.info("Ferdig med kryptering, filDigisosId=$filDigisosId")
                 } catch (e: Exception) {
-                    KrypteringServiceImpl.log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)
+                    KrypteringServiceImpl.log.error("Encryption failed, setting exception on encrypted InputStream filDigisosId=$filDigisosId", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 } finally {
                     try {
-                        KrypteringServiceImpl.log.info("Lukker kryptering OutputStream, digisosId=$digisosId")
+                        KrypteringServiceImpl.log.info("Lukker kryptering OutputStream, filDigisosId=$filDigisosId")
                         pipedOutputStream.close()
-                        KrypteringServiceImpl.log.info("Kryptering OutputStream er lukket, digisosId=$digisosId")
+                        KrypteringServiceImpl.log.info("OutputStream for kryptering er lukket, filDigisosId=$filDigisosId")
                     } catch (e: IOException) {
                         KrypteringServiceImpl.log.error("Failed closing encryption OutputStream", e)
                     }

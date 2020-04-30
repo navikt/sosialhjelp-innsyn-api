@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sbl"
 
 val kotlinVersion = "1.3.70"
-val springBootVersion = "2.2.5.RELEASE"
+val springBootVersion = "2.2.6.RELEASE"
 val logbackVersion = "1.2.3"
 val logstashVersion = "6.3"
 val junitJupiterVersion = "5.6.0"
@@ -28,6 +28,7 @@ val kotlinCoroutinesVersion = "1.3.3"
 val commonsIoVersion = "2.6"
 val fileUploadVersion = "1.4"
 val tikaVersion = "1.23"
+val httpmimeVersion = "4.5.12"
 val pdfBoxVersion = "2.0.19"
 val fiksKrypteringVersion = "1.0.8"
 val redisMockVersion = "0.1.16"
@@ -112,6 +113,7 @@ dependencies {
     implementation("commons-fileupload:commons-fileupload:$fileUploadVersion")
     implementation("org.apache.tika:tika-core:$tikaVersion")
     implementation("org.apache.pdfbox:preflight:$pdfBoxVersion")
+    implementation("org.apache.httpcomponents:httpmime:$httpmimeVersion")
     implementation("no.ks.fiks:kryptering:$fiksKrypteringVersion")
 
     implementation("io.lettuce:lettuce-core:$lettuceVersion")

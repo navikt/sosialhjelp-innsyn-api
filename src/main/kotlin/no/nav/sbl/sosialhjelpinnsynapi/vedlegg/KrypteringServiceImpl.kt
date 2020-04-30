@@ -37,12 +37,12 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
-    private val executor = Executors.newFixedThreadPool(1)
+    private val executor = Executors.newFixedThreadPool(4)
     private var certificate: X509Certificate? = null
     private var securityProvider = Security.getProvider("BC")
     private val kryptering = CMSKrypteringImpl()
 
-    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream {
+    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, filDigisosId: String): InputStream {
 
         if (certificate == null) {
             certificate = getDokumentlagerPublicKeyX509Certificate(token)
@@ -56,19 +56,20 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
             val pipedOutputStream = PipedOutputStream(pipedInputStream)
             val krypteringFuture = CompletableFuture.runAsync(Runnable {
                 try {
-                    log.info("Starter kryptering, digisosId=$digisosId")
+                    log.info("Starter kryptering, filDigisosId=$filDigisosId")
                     kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, securityProvider)
-                    log.info("Ferdig med kryptring, digisosId=$digisosId")
+                    log.info("Ferdig med kryptering, filDigisosId=$filDigisosId")
                 } catch (e: Exception) {
-                    log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)
+                    log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream, filDigisosId=$filDigisosId", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 } finally {
                     try {
-                        log.info("Lukker kryptering OutputStream, digisosId=$digisosId")
+                        log.info("Lukker kryptering OutputStream, filDigisosId=$filDigisosId")
                         pipedOutputStream.close()
-                        log.info("Kryptering OutputStream er lukket, digisosId=$digisosId")
+                        fileInputStream.close()
+                        log.info("OutputStream for kryptering er lukket, filDigisosId=$filDigisosId")
                     } catch (e: IOException) {
-                        log.error("Failed closing encryption OutputStream", e)
+                        log.error("Lukking av Outputstream for kryptering feilet, filDigisosId=$filDigisosId", e)
                     }
                 }
             }, executor)
@@ -79,7 +80,7 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
         return pipedInputStream
     }
 
-    public fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
+    fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
         val headers = HttpHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         headers.set(HttpHeaders.AUTHORIZATION, token)

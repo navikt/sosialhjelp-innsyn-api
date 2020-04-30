@@ -8,7 +8,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClientImpl
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksEttersendelseClient
+import no.nav.sbl.sosialhjelpinnsynapi.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
@@ -23,12 +24,9 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
-import java.util.concurrent.*
-import kotlin.collections.ArrayList
 
 
 const val MESSAGE_COULD_NOT_LOAD_DOCUMENT = "COULD_NOT_LOAD_DOCUMENT"
@@ -40,7 +38,7 @@ const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
 @Component
 class VedleggOpplastingService(private val fiksClient: FiksClient,
-                               private val krypteringService: KrypteringService,
+                               private val fiksEttersendelseClient: FiksEttersendelseClient,
                                private val virusScanner: VirusScanner,
                                private val redisStore: RedisStore,
                                private val cacheProperties: CacheProperties,
@@ -75,37 +73,20 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         val ettersendelsePdf = createEttersendelsePdf(metadata, digisosId, token)
         filerForOpplasting.add(ettersendelsePdf)
 
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(filerForOpplasting.size))
+        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, true)
+        val kommunenummer = digisosSak.kommunenummer
+        val navEksternRefId = lagNavEksternRefId(digisosSak)
+        val vedleggSpesifikasjon = createVedleggJson(files, metadata)
 
-        try {
-            val filerForOpplastingEtterKryptering = mutableListOf<FilForOpplasting>()
-            filerForOpplasting.forEach { file ->
-                val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, token, digisosId)
-                filerForOpplastingEtterKryptering.add(FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream))
-            }
 
-            val vedleggSpesifikasjon = createVedleggJson(files, metadata)
-            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
+        fiksEttersendelseClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon,
+                digisosId, navEksternRefId, kommunenummer, token)
 
-            waitForFutures(krypteringFutureList)
+        // opppdater cache med digisossak
+        val oppdatertDigisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
+        cachePut(digisosId, oppdatertDigisosSak)
 
-            // opppdater cache med digisossak
-            val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
-            cachePut(digisosId, digisosSak)
-
-            return valideringResultatResponseList
-        }
-        catch (e: Exception) {
-            log.error("Ettersendelse feilet ved generering av ettersendelsePdf, kryptering av filer eller sending til FIKS", e)
-            throw e
-        }
-        finally {
-            val notCancelledFutureList = krypteringFutureList
-                    .filter { !it.isDone && !it.isCancelled }
-            log.info("Antall krypteringer som ikke er canceled var ${notCancelledFutureList.size}")
-            notCancelledFutureList
-                    .forEach { it.cancel(true) }
-        }
+        return valideringResultatResponseList
     }
 
     fun createEttersendelsePdf(metadata: MutableList<OpplastetVedleggMetadata>, digisosId: String, token: String): FilForOpplasting {
@@ -153,12 +134,21 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             filename = filename.substring(0, 50)
         }
 
+        filename = renameLangBindestrekToKort(filename)
         val uuid = UUID.randomUUID().toString()
 
         filename += "-" + uuid.split("-")[0]
         filename += contentTypeToExt(contentType)
 
         return filename
+    }
+
+    /**
+     * Apache client takler ikke lang bindestrek og vil omgjøre det til ? ved sending til FIKS. FIKS takler ikke spørsmålstegn.
+     * Endrer derfor alle lange bindestreker til korte. Lange bindestreker forekommer ofte på filer fra Windows.
+     */
+    fun renameLangBindestrekToKort(filename: String) : String{
+        return filename.replace('–', '-')
     }
 
     private fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
@@ -259,21 +249,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         }
     }
 
-    private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
-        val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
-        try {
-            allFutures.get(300, TimeUnit.SECONDS)
-        } catch (e: CompletionException) {
-            throw IllegalStateException(e.cause)
-        } catch (e: ExecutionException) {
-            throw IllegalStateException(e)
-        } catch (e: TimeoutException) {
-            throw IllegalStateException(e)
-        } catch (e: InterruptedException) {
-            throw IllegalStateException(e)
-        }
 
-    }
 
     private fun cachePut(key: String, value: DigisosSak) {
         val stringValue = objectMapper.writeValueAsString(value)

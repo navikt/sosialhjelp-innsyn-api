@@ -7,6 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClientImpl
+import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksEttersendelseClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.VedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.logger
@@ -16,11 +17,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.*
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
@@ -34,7 +33,8 @@ import java.util.*
 class DigisosApiClientImpl(clientProperties: ClientProperties,
                            private val restTemplate: RestTemplate,
                            private val idPortenService: IdPortenService,
-                           private val fiksClientImpl: FiksClientImpl) : DigisosApiClient {
+                           private val fiksClientImpl: FiksClientImpl,
+                           private val fiksEttersendelseClientImpl: FiksEttersendelseClientImpl) : DigisosApiClient {
 
     companion object {
         val log by logger()
@@ -83,8 +83,8 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
-            body.add("vedleggSpesifikasjon:$fileId", fiksClientImpl.createHttpEntityOfString(fiksClientImpl.serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
-            body.add("dokument:$fileId", fiksClientImpl.createHttpEntityOfFile(file, "dokument:$fileId"))
+            body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(fiksEttersendelseClientImpl.serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
+            body.add("dokument:$fileId", createHttpEntityOfFile(file,"dokument:$fileId"))
         }
 
         val requestEntity = HttpEntity(body, headers)
@@ -128,6 +128,27 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
             throw FiksException(e.message, e)
         }
     }
+
+    fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
+        return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
+    }
+
+    fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
+        return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
+    }
+
+    private fun createHttpEntity(body: Any, name: String, filename: String?, contentType: String): HttpEntity<Any> {
+        val headerMap = LinkedMultiValueMap<String, String>()
+        val builder: ContentDisposition.Builder = ContentDisposition
+                .builder("form-data")
+                .name(name)
+        val contentDisposition: ContentDisposition = if (filename == null) builder.build() else builder.filename(filename).build()
+
+        headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+        headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
+        return HttpEntity(body, headerMap)
+    }
+
 
     private fun headers(): HttpHeaders {
         val headers = HttpHeaders()

@@ -29,7 +29,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 
     val vilkar = Vilkar(
             referanse = hendelse.vilkarreferanse,
-            utbetalinger = utbetalinger,
             beskrivelse = hendelse.beskrivelse,
             oppfyllt = hendelse.status == JsonVilkar.Status.OPPFYLT,
             datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
@@ -37,7 +36,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
     )
 
     utbetalinger.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }
-
 }
 
 private fun MutableList<Vilkar>.oppdaterEllerLeggTilVilkar(hendelse: JsonVilkar, vilkar: Vilkar) {

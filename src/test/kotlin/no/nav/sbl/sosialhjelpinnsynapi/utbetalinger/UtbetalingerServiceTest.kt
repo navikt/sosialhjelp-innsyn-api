@@ -172,10 +172,9 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling med vilkar`() {
         val model = InternalDigisosSoker()
         val now = LocalDateTime.now()
-        val vilkar = Vilkar("vilkar1", mutableListOf(), "Skal hoppe", false, now, now)
+        val vilkar = Vilkar("vilkar1", "Skal hoppe", false, now, now)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now())
-        vilkar.utbetalinger.add(utbetaling1)
         model.saker.add(Sak(
                 referanse = referanse,
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
@@ -202,10 +201,9 @@ internal class UtbetalingerServiceTest {
     @Test
     fun `Skal returnere response med 1 utbetaling med dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
-        val dokumentasjonkrav = Dokumentasjonkrav("dokumentasjonkrav", mutableListOf(), "Skal hoppe", false)
+        val dokumentasjonkrav = Dokumentasjonkrav("dokumentasjonkrav", "Skal hoppe", false)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now())
-        dokumentasjonkrav.utbetalinger.add(utbetaling1)
         model.saker.add(Sak(
                 referanse = referanse,
                 saksStatus = SaksStatus.UNDER_BEHANDLING,

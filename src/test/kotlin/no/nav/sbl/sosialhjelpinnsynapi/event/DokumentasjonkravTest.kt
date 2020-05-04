@@ -85,7 +85,6 @@ internal class DokumentasjonkravTest {
         assertThat(utbetaling.dokumentasjonkrav).hasSize(1)
         assertThat(utbetaling.dokumentasjonkrav[0].referanse).isEqualTo(dokumentasjonkrav_ref_1)
         assertThat(utbetaling.dokumentasjonkrav[0].beskrivelse).isEqualTo("beskrivelse")
-        assertThat(utbetaling.dokumentasjonkrav[0].utbetalinger).hasSize(1)
         assertThat(utbetaling.dokumentasjonkrav[0].oppfyllt).isEqualTo(true)
 
         val hendelse = model.historikk.last()
@@ -142,5 +141,33 @@ internal class DokumentasjonkravTest {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_5.toLocalDateTime())
+    }
+
+    @Test
+    fun `dokumentasjonkrav samme dokumentasjonkravreferanse to ganger`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3),
+                                UTBETALING.withHendelsestidspunkt(tidspunkt_4),
+                                DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
+                                DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
+        assertThat(model.saker).hasSize(0)
+        assertThat(model.historikk).hasSize(6)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
     }
 }

@@ -205,9 +205,9 @@ internal class HendelseServiceTest {
                                         kontonummer = "kontonummer",
                                         utbetalingsmetode = "utbetalingsmetode",
                                         vilkar = mutableListOf(
-                                                Vilkar("ref1", mutableListOf(), "beskrivelse", false, time, time),
-                                                Vilkar("ref2", mutableListOf(), "beskrivelse2", false, time, time.plusSeconds(28)),
-                                                Vilkar("ref3", mutableListOf(), "beskrivelse3", true, time, time.plusMinutes(5))),
+                                                Vilkar("ref1", "beskrivelse", false, time, time),
+                                                Vilkar("ref2", "beskrivelse2", false, time, time.plusSeconds(28)),
+                                                Vilkar("ref3", "beskrivelse3", true, time, time.plusMinutes(5))),
                                         dokumentasjonkrav = mutableListOf(),
                                         datoHendelse = time
                                 )

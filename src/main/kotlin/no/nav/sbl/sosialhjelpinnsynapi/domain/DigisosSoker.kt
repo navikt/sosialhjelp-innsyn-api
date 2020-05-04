@@ -71,7 +71,6 @@ data class Utbetaling(
 
 data class Vilkar(
         var referanse: String,
-        var utbetalinger: MutableList<Utbetaling>,
         var beskrivelse: String?,
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
@@ -80,7 +79,6 @@ data class Vilkar(
 
 data class Dokumentasjonkrav(
         var referanse: String,
-        var utbetalinger: MutableList<Utbetaling>,
         var beskrivelse: String?,
         var oppfyllt: Boolean
 )

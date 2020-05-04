@@ -39,17 +39,29 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, featureToggles: 
 
     val dokumentasjonkrav = Dokumentasjonkrav(
             referanse = hendelse.dokumentasjonkravreferanse,
-            utbetalinger = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning).toMutableList(),
             beskrivelse = hendelse.beskrivelse,
             oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT
     )
 
-    dokumentasjonkrav.utbetalinger.forEach { utbetaling ->
-        utbetaling.dokumentasjonkrav.add(dokumentasjonkrav)
-    }
+    val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
+    union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav) }
 
     if (featureToggles.dokumentasjonkravEnabled) {
         val beskrivelse = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
     }
+}
+
+private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(hendelse: JsonDokumentasjonkrav, dokumentasjonkrav: Dokumentasjonkrav) {
+    if (any { it.referanse == hendelse.dokumentasjonkravreferanse }) {
+        filter { it.referanse == hendelse.dokumentasjonkravreferanse }
+                .forEach { it.oppdaterFelter(hendelse) }
+    } else {
+        this.add(dokumentasjonkrav)
+    }
+}
+
+private fun Dokumentasjonkrav.oppdaterFelter(hendelse: JsonDokumentasjonkrav) {
+    beskrivelse = hendelse.beskrivelse
+    oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT
 }

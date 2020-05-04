@@ -8,12 +8,10 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class SoknadsStatusService(private val eventService: EventService,
-                           private val fiksClient: FiksClient) {
-
-    companion object {
-        val log by logger()
-    }
+class SoknadsStatusService(
+        private val eventService: EventService,
+        private val fiksClient: FiksClient
+) {
 
     fun hentSoknadsStatus(fiksDigisosId: String, token: String): SoknadsStatusResponse {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
@@ -25,5 +23,9 @@ class SoknadsStatusService(private val eventService: EventService,
         }
         log.info("Hentet nåværende søknadsstatus=${status.name} for digisosId=$fiksDigisosId")
         return SoknadsStatusResponse(status)
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

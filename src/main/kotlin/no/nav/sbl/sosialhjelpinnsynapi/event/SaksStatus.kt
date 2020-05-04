@@ -33,12 +33,11 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
         // Opprett ny Sak
         val status = SaksStatus.valueOf(hendelse.status?.name ?: JsonSaksStatus.Status.UNDER_BEHANDLING.name)
         saker.add(Sak(
-                hendelse.referanse,
-                status,
-                hendelse.tittel,
-                mutableListOf(),
-                mutableListOf(),
-                mutableListOf()
+                referanse = hendelse.referanse,
+                saksStatus = status,
+                tittel = hendelse.tittel,
+                vedtak = mutableListOf(),
+                utbetalinger = mutableListOf()
         ))
         val tittel = hendelse.tittel ?: "saken din"
         val beskrivelse: String? = when (status) {

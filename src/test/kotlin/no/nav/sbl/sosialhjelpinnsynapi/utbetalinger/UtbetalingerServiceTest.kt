@@ -185,8 +185,7 @@ internal class UtbetalingerServiceTest {
                         utbetaling1,
                         Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null,
                                 LocalDate.of(2019, 9, 12), null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now())
-                ),
-                dokumentasjonkrav = mutableListOf()
+                )
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -212,8 +211,7 @@ internal class UtbetalingerServiceTest {
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
                 tittel = tittel,
                 vedtak = mutableListOf(),
-                utbetalinger = mutableListOf(utbetaling1),
-                dokumentasjonkrav = mutableListOf(dokumentasjonkrav)
+                utbetalinger = mutableListOf(utbetaling1)
         ))
 
         every { eventService.createModel(any(), any()) } returns model

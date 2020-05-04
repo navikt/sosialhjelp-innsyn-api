@@ -42,8 +42,7 @@ data class Sak(
         var saksStatus: SaksStatus?,
         var tittel: String?,
         var vedtak: MutableList<Vedtak>,
-        var utbetalinger: MutableList<Utbetaling>,
-        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
+        var utbetalinger: MutableList<Utbetaling>
 )
 
 data class Vedtak(

@@ -5,15 +5,16 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Dokumentasjonkrav
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
+import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, featureToggles: FeatureToggles) {
 
+    val log by logger()
+
     val utbetalingerMedSakKnytning = mutableListOf<Utbetaling>()
     val utbetalingerUtenSakKnytning = mutableListOf<Utbetaling>()
-    val dokumentasjonkravsaker = mutableListOf<Sak>()
     for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
         // utbetalinger knyttet til sak
         for (sak in saker) {
@@ -28,8 +29,12 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, featureToggles: 
             if (utbetalingUtenSak.referanse == utbetalingsreferanse) {
                 utbetalingerUtenSakKnytning.add(utbetalingUtenSak)
             }
-
         }
+    }
+
+    if (utbetalingerMedSakKnytning.isEmpty() && utbetalingerUtenSakKnytning.isEmpty()) {
+        log.warn("Fant ingen utbetalinger å knytte dokumentasjonkrav til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
+        return
     }
 
     val dokumentasjonkrav = Dokumentasjonkrav(
@@ -39,11 +44,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, featureToggles: 
             oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT
     )
 
-    dokumentasjonkravsaker.forEach { sak ->
-        sak.dokumentasjonkrav.add(dokumentasjonkrav)
-    }
-
-    utbetalinger.forEach { utbetaling ->
+    dokumentasjonkrav.utbetalinger.forEach { utbetaling ->
         utbetaling.dokumentasjonkrav.add(dokumentasjonkrav)
     }
 

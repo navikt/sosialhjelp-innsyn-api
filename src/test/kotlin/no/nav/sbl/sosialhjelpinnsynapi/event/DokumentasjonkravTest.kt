@@ -94,7 +94,7 @@ internal class DokumentasjonkravTest {
     }
 
     @Test
-    fun `dokumentasjonkrav UTEN utbetaling`() {
+    fun `dokumentasjonkrav UTEN utbetaling - skal ikke legge til dokumentasjonkrav eller historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -111,11 +111,10 @@ internal class DokumentasjonkravTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
         assertThat(model.saker).hasSize(0)
-        assertThat(model.historikk).hasSize(4)
+        assertThat(model.historikk).hasSize(3)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
-        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+        assertThat(hendelse.tittel).isNotEqualTo(hendelsetekst)
     }
 
     @Test

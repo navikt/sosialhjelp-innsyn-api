@@ -211,8 +211,7 @@ internal class HendelseServiceTest {
                                         dokumentasjonkrav = mutableListOf(),
                                         datoHendelse = time
                                 )
-                        ),
-                        dokumentasjonkrav = mutableListOf()
+                        )
                 )
         )
 

@@ -29,7 +29,7 @@ const val svarUtNr = 42
 const val navKontor = "1337"
 const val navKontor2 = "2244"
 
-const val tittel_1 = "tittel"
+const val tittel_1 = "tittelen din"
 const val tittel_2 = "tittel2"
 
 const val referanse_1 = "sak1"

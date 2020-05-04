@@ -24,7 +24,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
 
             if (prevStatus != sakForReferanse.saksStatus
                     && (sakForReferanse.saksStatus == SaksStatus.IKKE_INNSYN || sakForReferanse.saksStatus == SaksStatus.BEHANDLES_IKKE)) {
-                val tittel = sakForReferanse.tittel ?: "Saken din"
+                val tittel = sakForReferanse.tittel ?: "saken din"
                 historikk.add(Hendelse("Vi kan ikke vise behandlingsstatus for $tittel digitalt.", hendelse.hendelsestidspunkt.toLocalDateTime()))
             }
         }
@@ -40,9 +40,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                 mutableListOf(),
                 mutableListOf()
         ))
-        val tittel = hendelse.tittel ?: "Saken din"
+        val tittel = hendelse.tittel ?: "saken din"
         val beskrivelse: String? = when (status) {
-            SaksStatus.UNDER_BEHANDLING -> "$tittel er under behandling"
+            SaksStatus.UNDER_BEHANDLING -> "${tittel.capitalize()} er under behandling"
             SaksStatus.BEHANDLES_IKKE, SaksStatus.IKKE_INNSYN -> "Vi kan ikke vise behandlingsstatus for $tittel digitalt."
             else -> null
         }

@@ -8,5 +8,6 @@ import kotlin.properties.Delegates
 @ConfigurationProperties(prefix = "innsyn.features")
 class FeatureToggles {
 
-    var utbetalingerEnabled: Boolean by Delegates.notNull()
+    var vilkarEnabled: Boolean by Delegates.notNull()
+    var dokumentasjonkravEnabled: Boolean by Delegates.notNull()
 }

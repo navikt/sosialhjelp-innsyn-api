@@ -20,7 +20,8 @@
     "AZUREAD_CLIENTID": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
     "CACHE_TIME_TO_LIVE_SECONDS": "180",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
-    "UTBETALINGER_ENABLED": "false",
+    "VILKAR_ENABLED": "false",
+    "DOKUMENTASJONKRAV_ENABLED": "false",
     "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana"
   },
   "minReplicas": "2",

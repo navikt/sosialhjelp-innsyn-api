@@ -52,13 +52,13 @@ internal class DokumentasjonkravTest {
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
-        every { featureToggles.utbetalingerEnabled } returns true
+        every { featureToggles.dokumentasjonkravEnabled } returns true
 
         resetHendelser()
     }
 
     @Test
-    fun `dokumentasjonskrav ETTER utbetaling`() {
+    fun `dokumentasjonkrav ETTER utbetaling`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)

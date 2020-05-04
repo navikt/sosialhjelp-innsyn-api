@@ -77,7 +77,7 @@ internal class EventServiceTest {
  [ ] forelopigSvar - flere caser?
  [x] utbetaling
  [?] utbetaling - flere caser?
- [x] dokumentasjonskrav
+ [x] dokumentasjonkrav
  [x] vilkår
  [x] tildeltNavKontor - OK response fra Norg
  [x] tildeltNavKontor - generell melding ved Norg-feil
@@ -143,7 +143,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$tittel_1 er under behandling")
+            assertThat(hendelse.tittel).contains("${tittel_1.capitalize()} er under behandling")
         }
 
         @Test

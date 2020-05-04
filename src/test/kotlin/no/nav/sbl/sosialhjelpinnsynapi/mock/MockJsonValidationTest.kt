@@ -35,7 +35,8 @@ internal class DefaultMockResponseTest {
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
-        every { featureToggles.utbetalingerEnabled } returns true
+        every { featureToggles.vilkarEnabled } returns true
+        every { featureToggles.dokumentasjonkravEnabled } returns true
 
         assertThatCode { eventService.createModel(mockDigisosSak, "token") }.doesNotThrowAnyException()
     }

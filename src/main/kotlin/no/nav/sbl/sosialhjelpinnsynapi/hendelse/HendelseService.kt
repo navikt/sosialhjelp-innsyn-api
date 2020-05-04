@@ -33,9 +33,10 @@ class HendelseService(private val eventService: EventService,
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
-        if (featureToggles.utbetalingerEnabled) {
+        model.leggTilHendelserForUtbetalinger()
+
+        if (featureToggles.vilkarEnabled) {
             model.leggTilHendelserForVilkar()
-            model.leggTilHendelserForUtbetalinger()
         }
 
         val responseList = model.historikk

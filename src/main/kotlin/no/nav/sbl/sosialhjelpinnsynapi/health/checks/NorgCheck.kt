@@ -17,16 +17,15 @@ import org.springframework.web.client.RestTemplate
 
 @Profile("!mock")
 @Component
-class NorgCheck(private val restTemplate: RestTemplate,
-                clientProperties: ClientProperties) : AbstractDependencyCheck(
+class NorgCheck(
+        private val restTemplate: RestTemplate,
+        clientProperties: ClientProperties
+) : AbstractDependencyCheck(
         DependencyType.REST,
         "NORG2",
         clientProperties.norgEndpointUrl,
         Importance.WARNING
 ) {
-    companion object {
-        val log by logger()
-    }
 
     override fun doCheck() {
         try {
@@ -44,5 +43,9 @@ class NorgCheck(private val restTemplate: RestTemplate,
             log.warn("Selftest - noe feilet ved kall mot NORG", e)
             throw NorgException(null, e.message, e)
         }
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

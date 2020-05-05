@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
 @Component
-class ClamAvVirusScanner(config: VirusScanConfig, restTemplate: RestTemplate) : VirusScanner {
+class ClamAvVirusScanner(
+        config: VirusScanConfig,
+        restTemplate: RestTemplate
+) : VirusScanner {
 
     private val connection: VirusScanConnection = VirusScanConnection(config, restTemplate)
 

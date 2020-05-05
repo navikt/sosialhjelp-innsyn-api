@@ -29,7 +29,9 @@ import java.util.*
 
 @Profile("!mock")
 @Component
-class IdPortenService(clientProperties: ClientProperties) {
+class IdPortenService(
+        clientProperties: ClientProperties
+) {
 
     private val idPortenTokenUrl = clientProperties.idPortenTokenUrl
     private val idPortenClientId = clientProperties.idPortenClientId
@@ -119,16 +121,20 @@ class IdPortenService(clientProperties: ClientProperties) {
     }
 
     companion object {
-        internal const val MAX_EXPIRY_SECONDS = 120
-        internal const val CLAIMS_SCOPE = "scope"
-        internal const val GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer"
+        private const val MAX_EXPIRY_SECONDS = 120
+        private const val CLAIMS_SCOPE = "scope"
+        private const val GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 
         private const val GRANT_TYPE_PARAM = "grant_type"
         private const val ASSERTION_PARAM = "assertion"
 
-        val log by logger()
+        private val log by logger()
     }
 
-    private data class VirksertCredentials(val alias: String, val password: String, val type: String)
+    private data class VirksertCredentials(
+            val alias: String,
+            val password: String,
+            val type: String
+    )
 
 }

@@ -1,13 +1,14 @@
 package no.nav.sbl.sosialhjelpinnsynapi.innsyn
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.springframework.stereotype.Component
 
 @Component
-class InnsynService(private val fiksClient: FiksClient) {
+class InnsynService(
+        private val fiksClient: FiksClient
+) {
 
     fun hentJsonDigisosSoker(digisosId: String, digisosSokerMetadata: String?, token: String): JsonDigisosSoker? {
         return when {

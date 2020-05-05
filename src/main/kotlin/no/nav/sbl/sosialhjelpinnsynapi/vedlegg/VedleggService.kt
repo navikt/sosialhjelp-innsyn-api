@@ -16,11 +16,9 @@ const val LASTET_OPP_STATUS = "LastetOpp"
 const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 
 @Component
-class VedleggService(private val fiksClient: FiksClient) {
-
-    companion object {
-        val log by logger()
-    }
+class VedleggService(
+        private val fiksClient: FiksClient
+) {
 
     fun hentAlleOpplastedeVedlegg(fiksDigisosId: String, token: String): List<InternalVedlegg> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
@@ -97,10 +95,15 @@ class VedleggService(private val fiksClient: FiksClient) {
                 dokumentInfoList.filterIndexed { idx, it -> it.filnavn == files[idx].filnavn }.size == dokumentInfoList.size
     }
 
-    data class InternalVedlegg(
-            val type: String,
-            val tilleggsinfo: String?,
-            val dokumentInfoList: List<DokumentInfo>,
-            val tidspunktLastetOpp: LocalDateTime
-    )
+
+    companion object {
+        private val log by logger()
+    }
 }
+
+data class InternalVedlegg(
+        val type: String,
+        val tilleggsinfo: String?,
+        val dokumentInfoList: List<DokumentInfo>,
+        val tidspunktLastetOpp: LocalDateTime
+)

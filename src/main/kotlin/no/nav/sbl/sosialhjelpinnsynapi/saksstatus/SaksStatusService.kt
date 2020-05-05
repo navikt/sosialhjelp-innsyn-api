@@ -1,6 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.VedtaksfilUrl
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
@@ -9,12 +13,10 @@ import org.springframework.stereotype.Component
 const val DEFAULT_TITTEL: String = "Økonomisk sosialhjelp"
 
 @Component
-class SaksStatusService(private val eventService: EventService,
-                        private val fiksClient: FiksClient) {
-
-    companion object {
-        val log by logger()
-    }
+class SaksStatusService(
+        private val eventService: EventService,
+        private val fiksClient: FiksClient
+) {
 
     fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
@@ -58,5 +60,9 @@ class SaksStatusService(private val eventService: EventService,
             }
         }
         return sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget;
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

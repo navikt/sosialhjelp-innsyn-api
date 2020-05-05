@@ -2,11 +2,25 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonRammevedtak
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_SOKNADEN
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Soknadsmottaker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
 import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
@@ -15,10 +29,12 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 
 @Component
-class EventService(private val clientProperties: ClientProperties,
-                   private val innsynService: InnsynService,
-                   private val vedleggService: VedleggService,
-                   private val norgClient: NorgClient) {
+class EventService(
+        private val clientProperties: ClientProperties,
+        private val innsynService: InnsynService,
+        private val vedleggService: VedleggService,
+        private val norgClient: NorgClient
+) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)

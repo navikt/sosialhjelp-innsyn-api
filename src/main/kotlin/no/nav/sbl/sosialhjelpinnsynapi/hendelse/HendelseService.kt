@@ -8,8 +8,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.InternalVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -17,14 +17,12 @@ import kotlin.math.floor
 
 
 @Component
-class HendelseService(private val eventService: EventService,
-                      private val vedleggService: VedleggService,
-                      private val fiksClient: FiksClient,
-                      private val featureToggles: FeatureToggles) {
-
-    companion object {
-        val log by logger()
-    }
+class HendelseService(
+        private val eventService: EventService,
+        private val vedleggService: VedleggService,
+        private val fiksClient: FiksClient,
+        private val featureToggles: FeatureToggles
+) {
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
@@ -87,4 +85,7 @@ class HendelseService(private val eventService: EventService,
                 .truncatedTo(ChronoUnit.MINUTES)
     }
 
+    companion object {
+        private val log by logger()
+    }
 }

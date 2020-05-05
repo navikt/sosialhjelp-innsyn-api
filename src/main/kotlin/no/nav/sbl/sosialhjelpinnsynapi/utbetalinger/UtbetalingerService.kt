@@ -17,12 +17,10 @@ import java.util.*
 const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
 
 @Component
-class UtbetalingerService(private val eventService: EventService,
-                          private val fiksClient: FiksClient) {
-
-    companion object {
-        val log by logger()
-    }
+class UtbetalingerService(
+        private val eventService: EventService,
+        private val fiksClient: FiksClient
+) {
 
     fun hentUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
@@ -36,28 +34,28 @@ class UtbetalingerService(private val eventService: EventService,
                 .filter { digisosSak -> digisosSak.sistEndret >= DateTime.now().minusMonths(months).millis }
                 .flatMap { digisosSak ->
                     val model = eventService.hentAlleUtbetalinger(token, digisosSak)
-                        model.utbetalinger
-                                .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
-                                .map { utbetaling ->
-                                    ManedUtbetaling(
-                                            tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
-                                            belop = utbetaling.belop.toDouble(),
-                                            utbetalingsdato = utbetaling.utbetalingsDato,
-                                            forfallsdato = utbetaling.forfallsDato,
-                                            status = utbetaling.status.name,
-                                            fiksDigisosId = digisosSak.fiksDigisosId,
-                                            fom = utbetaling.fom,
-                                            tom = utbetaling.tom,
-                                            mottaker = utbetaling.mottaker,
-                                            annenMottaker = utbetaling.annenMottaker,
-                                            kontonummer = utbetaling.kontonummer,
-                                            utbetalingsmetode = utbetaling.utbetalingsmetode
-                                    )
-                                }
+                    model.utbetalinger
+                            .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
+                            .map { utbetaling ->
+                                ManedUtbetaling(
+                                        tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
+                                        belop = utbetaling.belop.toDouble(),
+                                        utbetalingsdato = utbetaling.utbetalingsDato,
+                                        forfallsdato = utbetaling.forfallsDato,
+                                        status = utbetaling.status.name,
+                                        fiksDigisosId = digisosSak.fiksDigisosId,
+                                        fom = utbetaling.fom,
+                                        tom = utbetaling.tom,
+                                        mottaker = utbetaling.mottaker,
+                                        annenMottaker = utbetaling.annenMottaker,
+                                        kontonummer = utbetaling.kontonummer,
+                                        utbetalingsmetode = utbetaling.utbetalingsmetode
+                                )
+                            }
                 }
 
         return alleUtbetalinger
-                .sortedByDescending { it.utbetalingsdato}
+                .sortedByDescending { it.utbetalingsdato }
                 .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
                 .map { (key, value) ->
                     UtbetalingerResponse(
@@ -73,4 +71,7 @@ class UtbetalingerService(private val eventService: EventService,
 
     private fun monthToString(month: Int) = DateFormatSymbols(Locale.forLanguageTag("no-NO")).months[month - 1]
 
+    companion object {
+        private val log by logger()
+    }
 }

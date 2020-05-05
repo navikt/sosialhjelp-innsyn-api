@@ -30,11 +30,13 @@ import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 
 @Component
-class EventService(private val clientProperties: ClientProperties,
-                   private val innsynService: InnsynService,
-                   private val vedleggService: VedleggService,
-                   private val norgClient: NorgClient,
-                   private val featureToggles: FeatureToggles) {
+class EventService(
+        private val clientProperties: ClientProperties,
+        private val innsynService: InnsynService,
+        private val vedleggService: VedleggService,
+        private val norgClient: NorgClient,
+        private val featureToggles: FeatureToggles
+) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)

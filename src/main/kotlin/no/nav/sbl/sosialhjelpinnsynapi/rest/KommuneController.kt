@@ -18,7 +18,9 @@ import java.util.*
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/innsyn")
-class KommuneController(private val kommuneService: KommuneService) {
+class KommuneController(
+        private val kommuneService: KommuneService
+) {
 
     @GetMapping("/{fiksDigisosId}/kommune")
     fun hentKommuneInfo(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<KommuneResponse> {

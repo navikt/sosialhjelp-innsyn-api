@@ -46,16 +46,14 @@ import java.util.Collections.singletonList
 
 @Profile("!mock")
 @Component
-class FiksClientImpl(clientProperties: ClientProperties,
-                     private val restTemplate: RestTemplate,
-                     private val idPortenService: IdPortenService,
-                     private val redisStore: RedisStore,
-                     private val cacheProperties: CacheProperties,
-                     private val retryProperties: FiksRetryProperties) : FiksClient {
-
-    companion object {
-        val log by logger()
-    }
+class FiksClientImpl(
+        clientProperties: ClientProperties,
+        private val restTemplate: RestTemplate,
+        private val idPortenService: IdPortenService,
+        private val redisStore: RedisStore,
+        private val cacheProperties: CacheProperties,
+        private val retryProperties: FiksRetryProperties
+) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
@@ -356,6 +354,10 @@ class FiksClientImpl(clientProperties: ClientProperties,
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
         return headers
+    }
+
+    companion object {
+        private val log by logger()
     }
 }
 

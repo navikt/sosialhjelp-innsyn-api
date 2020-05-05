@@ -96,18 +96,20 @@ class FiksClientImpl(
             return objectMapper.readValue(body, DigisosSak::class.java)
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentDigisosSak feilet - ${e.message} - $fiksErrorResponse", e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentDigisosSak feilet - $errorMessage - $fiksErrorResponse", e)
             if (e.statusCode == HttpStatus.NOT_FOUND) {
-                throw FiksNotFoundException(e.statusCode, e.message, e)
+                throw FiksNotFoundException(e.statusCode, errorMessage, e)
             }
             throw FiksClientException(e.statusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentDigisosSak feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentDigisosSak feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, errorMessage, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDigisosSak feilet", e)
-            throw FiksException(e.message, e)
+            throw FiksException(e.message?.feilmeldingUtenFnr, e)
         }
     }
 
@@ -143,15 +145,17 @@ class FiksClientImpl(
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentDokument feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksClientException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentDokument feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksClientException(e.statusCode, errorMessage, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentDokument feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentDokument feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, errorMessage, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDokument feilet", e)
-            throw FiksException(e.message, e)
+            throw FiksException(e.message?.feilmeldingUtenFnr, e)
         }
     }
 
@@ -194,15 +198,17 @@ class FiksClientImpl(
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksClientException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentAlleDigisosSaker feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksClientException(e.statusCode, errorMessage, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentAlleDigisosSaker feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentAlleDigisosSaker feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, errorMessage, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentAlleDigisosSaker feilet", e)
-            throw FiksException(e.message, e)
+            throw FiksException(e.message?.feilmeldingUtenFnr, e)
         }
     }
 
@@ -239,15 +245,17 @@ class FiksClientImpl(
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfo feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksClientException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentKommuneInfo feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksClientException(e.statusCode, errorMessage, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfo feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentKommuneInfo feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, errorMessage, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentKommuneInfo feilet", e)
-            throw FiksException(e.message, e)
+            throw FiksException(e.message?.feilmeldingUtenFnr, e)
         }
     }
 
@@ -263,15 +271,17 @@ class FiksClientImpl(
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfoForAlle feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksClientException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentKommuneInfoForAlle feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksClientException(e.statusCode, errorMessage, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfoForAlle feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Fiks - hentKommuneInfoForAlle feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, errorMessage, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentKommuneInfo feilet", e)
-            throw FiksException(e.message, e)
+            throw FiksException(e.message?.feilmeldingUtenFnr, e)
         }
     }
 
@@ -307,15 +317,17 @@ class FiksClientImpl(
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksClientException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Opplasting av ettersendelse på $digisosId feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksClientException(e.statusCode, errorMessage, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-            log.warn("Opplasting av ettersendelse på $digisosId feilet - ${e.message} - $fiksErrorResponse", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Opplasting av ettersendelse på $digisosId feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, errorMessage, e)
         } catch (e: Exception) {
             log.warn("Opplasting av ettersendelse på $digisosId feilet", e)
-            throw FiksException(e.message, e)
+            throw FiksException(e.message?.feilmeldingUtenFnr, e)
         }
     }
 

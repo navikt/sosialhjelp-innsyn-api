@@ -23,17 +23,16 @@ import java.util.*
 
 @Profile("!mock")
 @Component
-class FiksCheck(private val restTemplate: RestTemplate,
-                private val clientProperties: ClientProperties,
-                private val idPortenService: IdPortenService) : AbstractDependencyCheck(
+class FiksCheck(
+        private val restTemplate: RestTemplate,
+        private val clientProperties: ClientProperties,
+        private val idPortenService: IdPortenService
+) : AbstractDependencyCheck(
         DependencyType.REST,
         "Fiks Digisos API",
         clientProperties.fiksDigisosEndpointUrl,
         Importance.WARNING
 ) {
-    companion object {
-        val log by logger()
-    }
 
     override fun doCheck() {
         try {
@@ -53,5 +52,9 @@ class FiksCheck(private val restTemplate: RestTemplate,
             log.warn("Selftest - Fiks hentKommuneInfo feilet", e)
             throw FiksException(e.message, e)
         }
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

@@ -15,7 +15,11 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.io.*
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
 import java.security.Security
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
@@ -27,12 +31,10 @@ import java.util.concurrent.Executors
 
 @Profile("!mock")
 @Component
-class KrypteringServiceImpl(clientProperties: ClientProperties,
-                            private val restTemplate: RestTemplate) : KrypteringService {
-
-    companion object {
-        val log by logger()
-    }
+class KrypteringServiceImpl(
+        clientProperties: ClientProperties,
+        private val restTemplate: RestTemplate
+) : KrypteringService {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
@@ -51,17 +53,17 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
                 try {
                     log.info("Starter kryptering, digisosId=$digisosId")
                     kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
-                    log.info("Ferdig med kryptring, digisosId=$digisosId")
+                    log.info("Ferdig med kryptering, digisosId=$digisosId")
                 } catch (e: Exception) {
-                    log.error("Encryption failed, setting exception on encrypted InputStream digisosId=$digisosId", e)
+                    log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream, digisosId=$digisosId", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 } finally {
                     try {
                         log.info("Lukker kryptering OutputStream, digisosId=$digisosId")
                         pipedOutputStream.close()
-                        log.info("Kryptering OutputStream er lukket, digisosId=$digisosId")
+                        log.info("OutputStream for kryptering er lukket, digisosId=$digisosId")
                     } catch (e: IOException) {
-                        log.error("Failed closing encryption OutputStream", e)
+                        log.error("Lukking av Outputstream for kryptering feilet, digisosId=$digisosId", e)
                     }
                 }
             }, executor)
@@ -100,5 +102,9 @@ class KrypteringServiceImpl(clientProperties: ClientProperties,
         } catch (e: Exception) {
             throw FiksException(e.message, e)
         }
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

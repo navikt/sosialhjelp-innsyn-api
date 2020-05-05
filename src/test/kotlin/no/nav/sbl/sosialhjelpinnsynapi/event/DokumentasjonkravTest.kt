@@ -6,11 +6,13 @@ import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
+import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
@@ -23,8 +25,9 @@ internal class DokumentasjonkravTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
+    private val featureToggles: FeatureToggles = mockk()
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, featureToggles)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
@@ -32,6 +35,8 @@ internal class DokumentasjonkravTest {
 
     private val soknadsmottaker = "The Office"
     private val enhetsnr = "2317"
+
+    private val hendelsetekst = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."
 
     @BeforeEach
     fun init() {
@@ -47,11 +52,13 @@ internal class DokumentasjonkravTest {
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
+        every { featureToggles.dokumentasjonkravEnabled } returns true
+
         resetHendelser()
     }
 
     @Test
-    fun `dokumentasjonskrav ETTER utbetaling`() {
+    fun `dokumentasjonkrav ETTER utbetaling`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -59,7 +66,7 @@ internal class DokumentasjonkravTest {
                         .withHendelser(listOf(
                                 SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
+                                SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
                                 SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
                                 UTBETALING.withHendelsestidspunkt(tidspunkt_5),
                                 DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
@@ -71,19 +78,22 @@ internal class DokumentasjonkravTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
         assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(5)
+        assertThat(model.historikk).hasSize(6)
 
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
         assertThat(utbetaling.dokumentasjonkrav).hasSize(1)
         assertThat(utbetaling.dokumentasjonkrav[0].referanse).isEqualTo(dokumentasjonkrav_ref_1)
         assertThat(utbetaling.dokumentasjonkrav[0].beskrivelse).isEqualTo("beskrivelse")
-        assertThat(utbetaling.dokumentasjonkrav[0].utbetalinger).hasSize(1)
         assertThat(utbetaling.dokumentasjonkrav[0].oppfyllt).isEqualTo(true)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
     }
 
     @Test
-    fun `dokumentasjonkrav UTEN utbetaling`() {
+    fun `dokumentasjonkrav UTEN utbetaling - skal ikke legge til dokumentasjonkrav eller historikk`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -101,5 +111,63 @@ internal class DokumentasjonkravTest {
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isNotEqualTo(hendelsetekst)
+    }
+
+    @Test
+    fun `dokumentasjonkrav ETTER utbetaling UTEN saksreferanse`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3),
+                                UTBETALING.withHendelsestidspunkt(tidspunkt_4),
+                                DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
+        assertThat(model.saker).hasSize(0)
+        assertThat(model.historikk).hasSize(5)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_5.toLocalDateTime())
+    }
+
+    @Test
+    fun `dokumentasjonkrav samme dokumentasjonkravreferanse to ganger`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                                SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3),
+                                UTBETALING.withHendelsestidspunkt(tidspunkt_4),
+                                DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
+                                DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
+        assertThat(model.saker).hasSize(0)
+        assertThat(model.historikk).hasSize(6)
+
+        val hendelse = model.historikk.last()
+        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
     }
 }

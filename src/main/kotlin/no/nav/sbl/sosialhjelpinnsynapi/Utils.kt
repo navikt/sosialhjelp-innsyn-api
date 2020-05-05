@@ -17,7 +17,6 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-import java.time.format.DateTimeFormatterBuilder
 import java.util.*
 import kotlin.reflect.full.companionObject
 
@@ -111,8 +110,13 @@ fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
     }
 }
 
+
+val String.feilmeldingUtenFnr: String?
+    get() {
+        return this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
+    }
+
 val FiksErrorResponse.feilmeldingUtenFnr: String?
     get() {
-        return this.message
-                ?.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
+        return this.message?.feilmeldingUtenFnr
     }

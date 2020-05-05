@@ -1,30 +1,33 @@
 {
-	"namespace": "default",
-	"ingress": [
-		"https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
-		"https://www.nav.no/sosialhjelp/innsyn-api"
-	],
-	"virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/maskinporten",
-	"application_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
-
-	"env": {
-		"FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.ks.no",
-		"FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.kommune.no",
-		"FIKS_SVAR_UT_ENDPOINT_URL": "https://svarut.ks.no",
-		"NORG_ENDPOINT_URL": "https://api-gw.oera.no/norg2/api/v1",
-		"ID_PORTEN_TOKEN_URL": "https://oidc.difi.no/idporten-oidc-provider/token",
-		"ID_PORTEN_CONFIG_URL": "https://oidc.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
-		"ID_PORTEN_CLIENT_ID": "bd520e59-6e01-4669-a7c8-f68fa2cac362",
-		"ID_PORTEN_SCOPE": "ks:fiks",
-		"AZUREAD_DISCOVERYURL": "https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
-		"AZUREAD_CLIENTID": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
-		"CACHE_TIME_TO_LIVE_SECONDS": "180",
-        "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local"
-	},
-	"minReplicas": "2",
-	"maxReplicas": "4",
-	"prometheusEnabled": true,
-	"webProxyEnabled": true,
-	"accessPoliciesForGcpEnabled": false,
-	"vaultEnabled": true
+  "namespace": "default",
+  "ingress": [
+    "https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
+    "https://sosialhjelp-innsyn-api.prod-sbs.nais.io/sosialhjelp/innsyn-api",
+    "https://www.nav.no/sosialhjelp/innsyn-api"
+  ],
+  "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/maskinporten",
+  "application_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
+  "env": {
+    "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.ks.no",
+    "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.kommune.no",
+    "FIKS_SVAR_UT_ENDPOINT_URL": "https://svarut.ks.no",
+    "NORG_ENDPOINT_URL": "https://api-gw.oera.no/norg2/api/v1",
+    "ID_PORTEN_TOKEN_URL": "https://oidc.difi.no/idporten-oidc-provider/token",
+    "ID_PORTEN_CONFIG_URL": "https://oidc.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
+    "ID_PORTEN_CLIENT_ID": "bd520e59-6e01-4669-a7c8-f68fa2cac362",
+    "ID_PORTEN_SCOPE": "ks:fiks",
+    "AZUREAD_DISCOVERYURL": "https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten",
+    "AZUREAD_CLIENTID": "45104d6a-f5bc-4e8c-b352-4bbfc9381f25",
+    "CACHE_TIME_TO_LIVE_SECONDS": "180",
+    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
+    "VILKAR_ENABLED": "false",
+    "DOKUMENTASJONKRAV_ENABLED": "false",
+    "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana"
+  },
+  "minReplicas": "2",
+  "maxReplicas": "4",
+  "prometheusEnabled": true,
+  "webProxyEnabled": true,
+  "accessPoliciesForGcpEnabled": false,
+  "vaultEnabled": true
 }

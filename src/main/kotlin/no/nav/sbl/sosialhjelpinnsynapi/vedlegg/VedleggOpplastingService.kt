@@ -8,7 +8,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
@@ -23,11 +22,14 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.collections.ArrayList
 
 
@@ -39,26 +41,21 @@ const val MESSAGE_ILLEGAL_FILENAME = "ILLEGAL_FILENAME"
 const val MESSAGE_FILE_TOO_LARGE = "FILE_TOO_LARGE"
 
 @Component
-class VedleggOpplastingService(private val fiksClient: FiksClient,
-                               private val krypteringService: KrypteringService,
-                               private val virusScanner: VirusScanner,
-                               private val redisStore: RedisStore,
-                               private val cacheProperties: CacheProperties,
-                               private val ettersendelsePdfGenerator: EttersendelsePdfGenerator) {
+class VedleggOpplastingService(
+        private val fiksClient: FiksClient,
+        private val krypteringService: KrypteringService,
+        private val virusScanner: VirusScanner,
+        private val redisStore: RedisStore,
+        private val cacheProperties: CacheProperties,
+        private val ettersendelsePdfGenerator: EttersendelsePdfGenerator
+) {
 
-    companion object {
-        val log by logger()
-
-        fun containsIllegalCharacters(filename: String): Boolean {
-            return filename.contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
-        }
-    }
 
     val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveOpplastingResponse> {
         val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
-        if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" }}) {
+        if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" } }) {
             return valideringResultatResponseList
         }
         metadata.removeIf { it.filer.isEmpty() }
@@ -94,12 +91,10 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             cachePut(digisosId, digisosSak)
 
             return valideringResultatResponseList
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             log.error("Ettersendelse feilet ved generering av ettersendelsePdf, kryptering av filer eller sending til FIKS", e)
             throw e
-        }
-        finally {
+        } finally {
             val notCancelledFutureList = krypteringFutureList
                     .filter { !it.isDone && !it.isCancelled }
             if (notCancelledFutureList.isNotEmpty()) {
@@ -123,7 +118,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
 
     }
 
-    fun createVedleggJson(files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>) : JsonVedleggSpesifikasjon{
+    fun createVedleggJson(files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon {
         var filIndex = 0
         return JsonVedleggSpesifikasjon()
                 .withVedlegg(metadata.map {
@@ -163,12 +158,14 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
     }
 
     private fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
-        metadata.forEach { data -> data.filer.forEach { file ->
-            if (file.filnavn == originalFilename) {
-                file.filnavn = newFilename
-                return
+        metadata.forEach { data ->
+            data.filer.forEach { file ->
+                if (file.filnavn == originalFilename) {
+                    file.filnavn = newFilename
+                    return
+                }
             }
-         } }
+        }
     }
 
     private fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>) {
@@ -185,9 +182,10 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
                     "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
         }
     }
+
     fun getMetadataAsString(metadata: MutableList<OpplastetVedleggMetadata>): String {
         var filstring = ""
-        metadata.forEachIndexed{index, data -> filstring += "metadata[$index].filer.size: ${data.filer.size}, " }
+        metadata.forEachIndexed { index, data -> filstring += "metadata[$index].filer.size: ${data.filer.size}, " }
         return filstring
     }
 
@@ -200,7 +198,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
         }
     }
 
-    fun validateFiler(fiksDigisosId: String, files: List<MultipartFile>, metadataListe: MutableList<OpplastetVedleggMetadata>): List<OppgaveOpplastingResponse>  {
+    fun validateFiler(fiksDigisosId: String, files: List<MultipartFile>, metadataListe: MutableList<OpplastetVedleggMetadata>): List<OppgaveOpplastingResponse> {
         val vedleggOpplastingListResponse = mutableListOf<OppgaveOpplastingResponse>()
         validateFilenameMatchInMetadataAndFiles(metadataListe, files)
 
@@ -211,7 +209,7 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             metadata.filer.forEach {
                 val file = files[filesIndex]
                 val valideringstatus = validateFil(file, fiksDigisosId)
-                if (valideringstatus != "OK") log.warn("Opplasting av filer til ettersendelse feilet med status $valideringstatus, digisosId=$fiksDigisosId")
+                if (valideringstatus != "OK") log.warn("Opplasting av fil $filesIndex av ${files.size} til ettersendelse feilet. Det var ${metadataListe.size} oppgaveElement. Status: $valideringstatus, digisosId=$fiksDigisosId")
                 vedleggOpplastingResponse.add(VedleggOpplastingResponse(file.originalFilename, valideringstatus))
                 filesIndex++
             }
@@ -283,6 +281,14 @@ class VedleggOpplastingService(private val fiksClient: FiksClient,
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {
             log.debug("Cache put OK $key")
+        }
+    }
+
+    companion object {
+        private val log by logger()
+
+        fun containsIllegalCharacters(filename: String): Boolean {
+            return filename.contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
         }
     }
 }

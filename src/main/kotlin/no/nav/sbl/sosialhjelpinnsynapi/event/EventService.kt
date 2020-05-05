@@ -15,6 +15,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_SOKNADEN
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
@@ -33,7 +34,8 @@ class EventService(
         private val clientProperties: ClientProperties,
         private val innsynService: InnsynService,
         private val vedleggService: VedleggService,
-        private val norgClient: NorgClient
+        private val norgClient: NorgClient,
+        private val featureToggles: FeatureToggles
 ) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
@@ -113,7 +115,7 @@ class EventService(
             is JsonForelopigSvar -> apply(hendelse, clientProperties)
             is JsonUtbetaling -> apply(hendelse)
             is JsonVilkar -> apply(hendelse)
-            is JsonDokumentasjonkrav -> apply(hendelse)
+            is JsonDokumentasjonkrav -> apply(hendelse, featureToggles)
             is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }

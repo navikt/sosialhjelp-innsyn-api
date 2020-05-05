@@ -5,7 +5,9 @@
   ],
   "env": {
     "IS_REDIS_MOCKED": "true",
-    "SPRING_PROFILES_ACTIVE": "mock,log-kibana"
+    "SPRING_PROFILES_ACTIVE": "mock,log-kibana",
+    "VILKAR_ENABLED": "true",
+    "DOKUMENTASJONKRAV_ENABLED": "true"
   },
   "minReplicas": "1",
   "maxReplicas": "1",

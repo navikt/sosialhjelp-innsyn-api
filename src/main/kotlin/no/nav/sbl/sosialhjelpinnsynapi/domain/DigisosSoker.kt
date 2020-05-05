@@ -42,9 +42,7 @@ data class Sak(
         var saksStatus: SaksStatus?,
         var tittel: String?,
         var vedtak: MutableList<Vedtak>,
-        var utbetalinger: MutableList<Utbetaling>,
-        var vilkar: MutableList<Vilkar>,
-        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
+        var utbetalinger: MutableList<Utbetaling>
 )
 
 data class Vedtak(
@@ -63,22 +61,24 @@ data class Utbetaling(
         var fom: LocalDate?,
         var tom: LocalDate?,
         var mottaker: String?,
+        var annenMottaker: Boolean,
         var kontonummer: String?,
         var utbetalingsmetode: String?,
         var vilkar: MutableList<Vilkar>,
-        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
+        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>,
+        var datoHendelse: LocalDateTime
 )
 
 data class Vilkar(
         var referanse: String,
-        var utbetalinger: MutableList<Utbetaling>,
         var beskrivelse: String?,
-        var oppfyllt: Boolean
+        var oppfyllt: Boolean,
+        var datoLagtTil: LocalDateTime,
+        var datoSistEndret: LocalDateTime
 )
 
 data class Dokumentasjonkrav(
         var referanse: String,
-        var utbetalinger: MutableList<Utbetaling>,
         var beskrivelse: String?,
         var oppfyllt: Boolean
 )
@@ -87,10 +87,8 @@ data class Hendelse(
         // type som felt?
         val tittel: String,
         val tidspunkt: LocalDateTime,
-        val url: UrlResponse?
-) {
-    constructor(tittel: String, tidspunkt: LocalDateTime) : this(tittel, tidspunkt, null)
-}
+        val url: UrlResponse? = null
+)
 
 data class UrlResponse(
         val linkTekst: String,

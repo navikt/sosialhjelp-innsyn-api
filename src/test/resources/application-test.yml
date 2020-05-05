@@ -28,6 +28,9 @@ innsyn:
   cache:
     redis_mocked: true
     time_to_live_seconds: 2
+  features:
+    vilkar_enabled: true
+    dokumentasjonkrav_enabled: true
 
 #Token-valdering
 no.nav.security.jwt:

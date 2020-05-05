@@ -17,12 +17,10 @@ import org.springframework.web.client.RestTemplate
 
 @Profile("!(mock | local)")
 @Component
-class NorgClientImpl(clientProperties: ClientProperties,
-                     private val restTemplate: RestTemplate) : NorgClient {
-
-    companion object {
-        val log by logger()
-    }
+class NorgClientImpl(
+        clientProperties: ClientProperties,
+        private val restTemplate: RestTemplate
+) : NorgClient {
 
     private val baseUrl = clientProperties.norgEndpointUrl
 
@@ -46,5 +44,9 @@ class NorgClientImpl(clientProperties: ClientProperties,
             log.warn("Noe feilet ved kall mot NORG", e)
             throw NorgException(null, e.message, e)
         }
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

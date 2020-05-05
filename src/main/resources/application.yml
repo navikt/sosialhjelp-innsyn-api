@@ -3,8 +3,6 @@ spring:
     banner-mode: 'off'
   application:
     name: "sosialhjelp-innsyn-api"
-  profiles:
-    active: ${NAIS_CLUSTER_NAME}
   redis:
     host: ${REDIS_HOST}
     port: 6379
@@ -55,3 +53,6 @@ innsyn:
       attempts: 5 # number of attempts
       initial_delay: 250 # initial delay in ms
       max_delay: 10000 # max delay in ms
+  features:
+    vilkar_enabled: ${VILKAR_ENABLED}
+    dokumentasjonkrav_enabled: ${DOKUMENTASJONKRAV_ENABLED}

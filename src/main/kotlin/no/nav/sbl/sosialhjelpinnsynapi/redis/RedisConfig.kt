@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @EnableConfigurationProperties(RedisProperties::class)
-class RedisConfig(private val cacheProperties: CacheProperties) {
+class RedisConfig(
+        private val cacheProperties: CacheProperties
+) {
 
     @Bean
     fun redisClient(properties: RedisProperties): RedisClient {

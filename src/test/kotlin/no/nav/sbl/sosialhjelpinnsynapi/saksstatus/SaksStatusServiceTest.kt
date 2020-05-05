@@ -3,7 +3,13 @@ package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Vedtak
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
 import org.assertj.core.api.Assertions.assertThat
@@ -50,9 +56,7 @@ internal class SaksStatusServiceTest {
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
                 tittel = tittel,
                 vedtak = mutableListOf(),
-                utbetalinger = mutableListOf(),
-                vilkar = mutableListOf(),
-                dokumentasjonkrav = mutableListOf()
+                utbetalinger = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -78,9 +82,7 @@ internal class SaksStatusServiceTest {
                         vedtaksFilUrl = vedtaksfilUrl,
                         dato = LocalDate.now()
                 )),
-                utbetalinger = mutableListOf(),
-                vilkar = mutableListOf(),
-                dokumentasjonkrav = mutableListOf()
+                utbetalinger = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -107,9 +109,7 @@ internal class SaksStatusServiceTest {
                         vedtaksFilUrl = vedtaksfilUrl,
                         dato = LocalDate.now()
                 )),
-                utbetalinger = mutableListOf(),
-                vilkar = mutableListOf(),
-                dokumentasjonkrav = mutableListOf()
+                utbetalinger = mutableListOf()
         ))
 
         every { eventService.createModel(any(), any()) } returns model
@@ -141,17 +141,13 @@ internal class SaksStatusServiceTest {
                                         utfall = UtfallVedtak.INNVILGET,
                                         vedtaksFilUrl = vedtaksfilUrl,
                                         dato = LocalDate.now())),
-                        utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf()),
+                        utbetalinger = mutableListOf()),
                 Sak(
                         referanse = referanse,
                         saksStatus = SaksStatus.IKKE_INNSYN,
                         tittel = DEFAULT_TITTEL,
                         vedtak = mutableListOf(),
-                        utbetalinger = mutableListOf(),
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf()
+                        utbetalinger = mutableListOf()
                 )
         ))
 
@@ -171,48 +167,44 @@ internal class SaksStatusServiceTest {
     @Test
     fun `teste at getSkalViseVedtakInfoPanel gir riktig svar`() {
 
-        val vedtak1: Vedtak = Vedtak(
+        val vedtak1 = Vedtak(
                 utfall = UtfallVedtak.INNVILGET,
                 vedtaksFilUrl = "en link til noe",
                 dato = null
         )
-        val vedtak2: Vedtak = Vedtak(
+        val vedtak2 = Vedtak(
                 utfall = UtfallVedtak.DELVIS_INNVILGET,
                 vedtaksFilUrl = "en link til noe",
                 dato = null
         )
-        val vedtak3: Vedtak = Vedtak(
+        val vedtak3 = Vedtak(
                 utfall = UtfallVedtak.AVVIST,
                 vedtaksFilUrl = "en link til noe",
                 dato = null
         )
-        val vedtak4: Vedtak = Vedtak(
+        val vedtak4 = Vedtak(
                 utfall = UtfallVedtak.AVSLATT,
                 vedtaksFilUrl = "en link til noe",
                 dato = null
         )
-        val vedtak5: Vedtak = Vedtak(
+        val vedtak5 = Vedtak(
                 utfall = null,
                 vedtaksFilUrl = "en link til noe",
                 dato = null
         )
-        val sakSomSkalGiTrue: Sak = Sak(
+        val sakSomSkalGiTrue = Sak(
                 "ref1",
                 SaksStatus.FERDIGBEHANDLET,
                 "Tittel på sak",
-                vedtak = mutableListOf<Vedtak>(vedtak1, vedtak2),
-                utbetalinger = mutableListOf<Utbetaling>(),
-                vilkar = mutableListOf<Vilkar>(),
-                dokumentasjonkrav = mutableListOf<Dokumentasjonkrav>()
+                vedtak = mutableListOf(vedtak1, vedtak2),
+                utbetalinger = mutableListOf()
         )
-        val sakSomSkalGiFalse: Sak = Sak(
+        val sakSomSkalGiFalse = Sak(
                 "ref1",
                 SaksStatus.FERDIGBEHANDLET,
                 "Tittel på sak",
-                vedtak = mutableListOf<Vedtak>(vedtak1, vedtak2, vedtak3, vedtak4, vedtak5),
-                utbetalinger = mutableListOf<Utbetaling>(),
-                vilkar = mutableListOf<Vilkar>(),
-                dokumentasjonkrav = mutableListOf<Dokumentasjonkrav>()
+                vedtak = mutableListOf(vedtak1, vedtak2, vedtak3, vedtak4, vedtak5),
+                utbetalinger = mutableListOf()
         )
 
         assertThat(service.getSkalViseVedtakInfoPanel(sakSomSkalGiTrue)).isEqualTo(true)

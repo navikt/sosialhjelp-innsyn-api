@@ -9,7 +9,9 @@ import org.springframework.web.multipart.MultipartFile
 
 @Profile("mock")
 @Component
-class DigisosApiServiceMock(private val digisosApiClient: DigisosApiClient): DigisosApiService {
+class DigisosApiServiceMock(
+        private val digisosApiClient: DigisosApiClient
+): DigisosApiService {
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
         return digisosApiClient.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)

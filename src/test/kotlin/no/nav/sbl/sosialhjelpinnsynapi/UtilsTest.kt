@@ -93,6 +93,10 @@ internal class UtilsTest {
         assertThat(res)
                 .doesNotContain(fnr)
                 .contains("feilmelding som har fnr [FNR]")
+
+        assertThat(str.feilmeldingUtenFnr)
+                .doesNotContain(fnr)
+                .contains("feilmelding som har fnr [FNR]")
     }
 
     @Test
@@ -104,6 +108,7 @@ internal class UtilsTest {
         val res = fiksErrorResponse.feilmeldingUtenFnr
 
         assertThat(res).contains("feilmelding som har fnr $forLangtFnr")
+        assertThat(str.feilmeldingUtenFnr).contains("feilmelding som har fnr $forLangtFnr")
     }
 
     @Test
@@ -115,6 +120,7 @@ internal class UtilsTest {
         val res = fiksErrorResponse.feilmeldingUtenFnr
 
         assertThat(res).contains("feilmelding som har fnr $forKortFnr")
+        assertThat(str.feilmeldingUtenFnr).contains("feilmelding som har fnr $forKortFnr")
     }
 
     @Test

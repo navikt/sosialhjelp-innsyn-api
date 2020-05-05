@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
-@RequestMapping("/api/v1/innsyn/")
+@RequestMapping("/api/v1/innsyn")
 class UtbetalingerController(
         private val utbetalingerService: UtbetalingerService
 ) {
 
-    @GetMapping("utbetalinger")
+    @GetMapping("/utbetalinger")
     fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
         // Gitt innlogget bruker
         try {

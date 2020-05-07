@@ -50,9 +50,6 @@ class VedleggOpplastingService(
         private val ettersendelsePdfGenerator: EttersendelsePdfGenerator
 ) {
 
-
-    val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10
-
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveOpplastingResponse> {
         val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
         if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" } }) {
@@ -286,6 +283,8 @@ class VedleggOpplastingService(
 
     companion object {
         private val log by logger()
+
+        const val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10 // 10 MB
 
         fun containsIllegalCharacters(filename: String): Boolean {
             return filename.contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())

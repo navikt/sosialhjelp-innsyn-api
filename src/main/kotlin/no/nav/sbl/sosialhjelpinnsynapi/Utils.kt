@@ -6,18 +6,26 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilrefe
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.FiksErrorResponse
+import no.nav.sbl.sosialhjelpinnsynapi.utils.MDCUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.client.HttpStatusCodeException
 import java.io.IOException
 import java.sql.Timestamp
-import java.time.*
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutorService
 import kotlin.reflect.full.companionObject
 
 const val NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
@@ -120,3 +128,15 @@ val FiksErrorResponse.feilmeldingUtenFnr: String?
     get() {
         return this.message?.feilmeldingUtenFnr
     }
+
+fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
+    val previous: Map<String, String> = MDC.getCopyOfContextMap()
+    return CompletableFuture.runAsync( Runnable{
+        MDC.setContextMap(previous)
+        try {
+            runnable.run()
+        } finally {
+            MDCUtils.clearCallId()
+        }
+    }, executor)
+}

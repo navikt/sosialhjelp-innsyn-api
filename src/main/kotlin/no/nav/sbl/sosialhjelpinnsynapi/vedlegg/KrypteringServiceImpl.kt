@@ -6,6 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.runAsyncWithMDC
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
@@ -49,7 +50,7 @@ class KrypteringServiceImpl(
         val pipedInputStream = PipedInputStream()
         try {
             val pipedOutputStream = PipedOutputStream(pipedInputStream)
-            val krypteringFuture = CompletableFuture.runAsync(Runnable {
+            val krypteringFuture = runAsyncWithMDC( Runnable {
                 try {
                     log.debug("Starter kryptering, digisosId=$digisosId")
                     kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))

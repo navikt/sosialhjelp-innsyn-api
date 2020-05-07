@@ -4,7 +4,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.sbl.sosialhjelpinnsynapi.utils.generateCallId
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_NAV_APIKEY
+import no.nav.sbl.sosialhjelpinnsynapi.utils.MDCUtils.getCallId
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
@@ -27,8 +29,8 @@ class NorgClientImpl(
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
         val norgApiKey = System.getenv("NORG_PASSWORD")
         val headers = HttpHeaders()
-        headers.set("Nav-Call-Id", generateCallId())
-        headers.set("x-nav-apiKey", norgApiKey)
+        headers.set(HEADER_CALL_ID, getCallId())
+        headers.set(HEADER_NAV_APIKEY, norgApiKey)
         try {
             log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
             val urlTemplate = "$baseUrl/enhet/{enhetsnr}"

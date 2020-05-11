@@ -31,14 +31,12 @@ import java.util.*
 
 @Profile("!(prod-sbs|mock)")
 @Component
-class DigisosApiClientImpl(clientProperties: ClientProperties,
-                           private val restTemplate: RestTemplate,
-                           private val idPortenService: IdPortenService,
-                           private val fiksClientImpl: FiksClientImpl) : DigisosApiClient {
-
-    companion object {
-        val log by logger()
-    }
+class DigisosApiClientImpl(
+        clientProperties: ClientProperties,
+        private val restTemplate: RestTemplate,
+        private val idPortenService: IdPortenService,
+        private val fiksClientImpl: FiksClientImpl
+) : DigisosApiClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonIdKommune = clientProperties.fiksIntegrasjonIdKommune
@@ -138,6 +136,10 @@ class DigisosApiClientImpl(clientProperties: ClientProperties,
         headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
         headers.contentType = MediaType.APPLICATION_JSON
         return headers
+    }
+
+    companion object {
+        private val log by logger()
     }
 }
 

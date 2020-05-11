@@ -7,7 +7,10 @@ import org.springframework.http.RequestEntity
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-internal class VirusScanConnection(private val config: VirusScanConfig, private val operations: RestOperations) {
+internal class VirusScanConnection(
+        private val config: VirusScanConfig,
+        private val operations: RestOperations
+) {
 
     val isEnabled: Boolean
         get() = config.enabled

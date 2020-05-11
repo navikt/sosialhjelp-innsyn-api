@@ -3,7 +3,13 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_BREVET
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Vedtak
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
@@ -16,25 +22,22 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
 
     val vedtakFattet = Vedtak(utfall, vedtaksfilUrl, hendelse.hendelsestidspunkt.toLocalDateTime().toLocalDate())
 
-    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse } ?: saker.firstOrNull { it.referanse == "default" }
+    var sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse || it.referanse == "default" }
 
     if (sakForReferanse == null) {
         // Opprett ny Sak
         sakForReferanse = Sak(
-                hendelse.saksreferanse ?: "default",
-                SaksStatus.UNDER_BEHANDLING,
-                DEFAULT_TITTEL,
-                mutableListOf(),
-                mutableListOf(),
-                mutableListOf(),
-                mutableListOf()
+                referanse = hendelse.saksreferanse ?: "default",
+                saksStatus = SaksStatus.UNDER_BEHANDLING,
+                tittel = DEFAULT_TITTEL,
+                vedtak = mutableListOf(),
+                utbetalinger = mutableListOf()
         )
         saker.add(sakForReferanse)
     }
     sakForReferanse.vedtak.add(vedtakFattet)
 
-    val sak = saker.first { it.referanse == hendelse.saksreferanse }
-    val beskrivelse = "${sak.tittel ?: DEFAULT_TITTEL} er ferdig behandlet"
+    val beskrivelse = "${sakForReferanse.tittel ?: DEFAULT_TITTEL} er ferdig behandlet"
 
     historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, vedtaksfilUrl)))
 }

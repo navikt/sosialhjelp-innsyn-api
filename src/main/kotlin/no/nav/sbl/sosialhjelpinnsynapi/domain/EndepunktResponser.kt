@@ -29,6 +29,7 @@ data class HendelseResponse(
 )
 
 data class OppgaveResponse(
+        val oppgaveId: String,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val innsendelsesfrist: LocalDate?,
         val oppgaveElementer: List<OppgaveElement>

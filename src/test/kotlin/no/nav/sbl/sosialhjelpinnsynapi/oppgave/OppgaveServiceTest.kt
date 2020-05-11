@@ -66,7 +66,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return oppgave`() {
         val model = InternalDigisosSoker()
-        model.oppgaver.add(Oppgave(type, tillegg, frist, tidspunktForKrav, true))
+        model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, frist, tidspunktForKrav, true))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -84,7 +84,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return oppgave without tilleggsinformasjon`() {
         val model = InternalDigisosSoker()
-        model.oppgaver.add(Oppgave(type, null, frist, tidspunktForKrav, true))
+        model.oppgaver.add(Oppgave("oppgaveId1", type, null, frist, tidspunktForKrav, true))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -103,10 +103,10 @@ internal class OppgaveServiceTest {
     fun `Should return list of oppgaver sorted by frist`() {
         val model = InternalDigisosSoker()
         model.oppgaver.addAll(listOf(
-                Oppgave(type, tillegg, frist, tidspunktForKrav, true),
-                Oppgave(type3, tillegg3, frist3, tidspunktForKrav, true),
-                Oppgave(type4, tillegg4, frist4, tidspunktForKrav, true),
-                Oppgave(type2, tillegg2, frist2, tidspunktForKrav, true)))
+                Oppgave("oppgaveId1", type, tillegg, frist, tidspunktForKrav, true),
+                Oppgave("oppgaveId2", type3, tillegg3, frist3, tidspunktForKrav, true),
+                Oppgave("oppgaveId3", type4, tillegg4, frist4, tidspunktForKrav, true),
+                Oppgave("oppgaveId4", type2, tillegg2, frist2, tidspunktForKrav, true)))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -140,9 +140,9 @@ internal class OppgaveServiceTest {
     fun `Skal filtrere ut oppgaver der brukeren har lastet opp filer av samme type etter kravet ble gitt`() {
         val model = InternalDigisosSoker()
         model.oppgaver.addAll(listOf(
-                Oppgave(type, tillegg, frist, tidspunktForKrav, true),
-                Oppgave(type2, null, frist2, tidspunktForKrav, true),
-                Oppgave(type3, tillegg3, frist3, tidspunktForKrav, true)))
+                Oppgave("oppgaveId1", type, tillegg, frist, tidspunktForKrav, true),
+                Oppgave("oppgaveId2", type2, null, frist2, tidspunktForKrav, true),
+                Oppgave("oppgaveId3", type3, tillegg3, frist3, tidspunktForKrav, true)))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(

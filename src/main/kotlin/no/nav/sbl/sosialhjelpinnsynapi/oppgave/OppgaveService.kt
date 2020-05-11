@@ -34,12 +34,17 @@ class OppgaveService(private val eventService: EventService,
                 .map { (key, value) ->
                     OppgaveResponse(
                             innsendelsesfrist = key,
+                            oppgaveId = value[0].oppgaveId,  // oppgaveId og innsendelsefrist er alltid 1-1
                             oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.erFraInnsyn) }
                     )
                 }
                 .sortedBy { it.innsendelsesfrist }
         log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver for digisosId=$fiksDigisosId")
         return oppgaveResponseList
+    }
+
+    fun hentOppgaverMedOppgaveId(fiksDigisosId: String, token: String, oppgaveId: String): List<OppgaveResponse> {
+        return hentOppgaver(fiksDigisosId, token).filter { it.oppgaveId == oppgaveId }
     }
 
     private fun erAlleredeLastetOpp(oppgave: Oppgave, vedleggListe: List<VedleggService.InternalVedlegg>): Boolean {

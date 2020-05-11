@@ -30,6 +30,7 @@ data class Soknadsmottaker(
 )
 
 data class Oppgave(
+        var oppgaveId: String,
         var tittel: String,
         var tilleggsinfo: String?,
         var innsendelsesfrist: LocalDateTime?,

@@ -9,10 +9,11 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.utils.sha256
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProperties: ClientProperties) {
     oppgaver = hendelse.dokumenter
-            .map { Oppgave(it.dokumenttype, it.tilleggsinformasjon, it.innsendelsesfrist.toLocalDateTime(), hendelse.hendelsestidspunkt.toLocalDateTime(), true) }
+            .map { Oppgave(sha256(it.innsendelsesfrist), it.dokumenttype, it.tilleggsinformasjon, it.innsendelsesfrist.toLocalDateTime(), hendelse.hendelsestidspunkt.toLocalDateTime(), true) }
             .toMutableList()
 
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {

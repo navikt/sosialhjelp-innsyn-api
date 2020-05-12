@@ -29,4 +29,13 @@ class OppgaveController(
         }
         return ResponseEntity.ok(oppgaver)
     }
+
+    @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}", produces = ["application/json;charset=UTF-8"])
+    fun hentOppgaveMedId(@PathVariable fiksDigisosId: String, @PathVariable oppgaveId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+        val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, token, oppgaveId)
+        if (oppgaver.isEmpty()) {
+            return ResponseEntity(HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.ok(oppgaver)
+    }
 }

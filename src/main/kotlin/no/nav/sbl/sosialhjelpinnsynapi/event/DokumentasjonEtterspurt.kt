@@ -10,12 +10,13 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
 import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.utils.sha256
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProperties: ClientProperties) {
     val prevSize = oppgaver.size
 
     oppgaver = hendelse.dokumenter
-            .map { Oppgave(it.dokumenttype, it.tilleggsinformasjon, it.innsendelsesfrist.toLocalDateTime(), hendelse.hendelsestidspunkt.toLocalDateTime(), true) }
+            .map { Oppgave(sha256(it.innsendelsesfrist), it.dokumenttype, it.tilleggsinformasjon, it.innsendelsesfrist.toLocalDateTime(), hendelse.hendelsestidspunkt.toLocalDateTime(), true) }
             .toMutableList()
 
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {
@@ -23,6 +24,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
         val url = hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, url)))
     }
+
     if (prevSize > 0 && oppgaver.size == 0 && status != SoknadsStatus.FERDIGBEHANDLET && status != SoknadsStatus.BEHANDLES_IKKE) {
         val beskrivelse = "Vi har sett på dokumentene dine og vil gi beskjed om vi trenger mer fra deg."
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), null))

@@ -33,6 +33,7 @@ class OppgaveService(
                 .map { (key, value) ->
                     OppgaveResponse(
                             innsendelsesfrist = key,
+                            oppgaveId = value[0].oppgaveId,  // oppgaveId og innsendelsefrist er alltid 1-1
                             oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.erFraInnsyn) }
                     )
                 }
@@ -41,7 +42,12 @@ class OppgaveService(
         return oppgaveResponseList
     }
 
+    fun hentOppgaverMedOppgaveId(fiksDigisosId: String, token: String, oppgaveId: String): List<OppgaveResponse> {
+        return hentOppgaver(fiksDigisosId, token).filter { it.oppgaveId == oppgaveId }
+    }
+  
     private fun erAlleredeLastetOpp(oppgave: Oppgave, vedleggListe: List<InternalVedlegg>): Boolean {
+
         return vedleggListe
                 .filter { it.type == oppgave.tittel }
                 .filter { it.tilleggsinfo == oppgave.tilleggsinfo }

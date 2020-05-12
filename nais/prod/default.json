@@ -7,6 +7,9 @@
   ],
   "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/maskinporten",
   "application_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
+  "kvPaths": {
+    "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss"
+  },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.kommune.no",
@@ -22,7 +25,9 @@
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
     "VILKAR_ENABLED": "false",
     "DOKUMENTASJONKRAV_ENABLED": "false",
-    "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana"
+    "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana",
+    "PDL_ENDPOINT_URL": "some-apigw url",
+    "STS_TOKEN_ENDPOINT_URL": "another qpigw url"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

@@ -8,7 +8,8 @@
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",
     "/var/run/secrets/nais.io/vault": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
-    "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss"
+    "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss",
+    "/apigw/securitytokenservicetoken": "apikey/apigw/prod/security-token-service-token/sosialhjelp-soknad-api"
   },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.ks.no",

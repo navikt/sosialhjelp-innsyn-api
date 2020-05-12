@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 @Profile("!(mock | local)")
 @Component
 class StsClient(
-        private val serviceuserBasicAuthRestTemplate: RestTemplate,
+        private val stsRestTemplate: RestTemplate,
         clientProperties: ClientProperties
 ) {
 
@@ -26,7 +26,7 @@ class StsClient(
             try {
                 log.info("Henter nytt token fra STS")
                 val requestUrl = lagRequest(baseUrl)
-                val response = serviceuserBasicAuthRestTemplate.exchange(requestUrl, HttpMethod.GET, null, STSToken::class.java)
+                val response = stsRestTemplate.exchange(requestUrl, HttpMethod.GET, null, STSToken::class.java)
 
                 cachedToken = response.body
                 return response.body!!.access_token
@@ -41,7 +41,7 @@ class StsClient(
 
     fun ping() {
         try {
-            serviceuserBasicAuthRestTemplate.exchange(baseUrl, HttpMethod.OPTIONS, null, String::class.java)
+            stsRestTemplate.exchange(baseUrl, HttpMethod.OPTIONS, null, String::class.java)
         } catch (e: RestClientException) {
             log.warn("STS - Ping feilet. message: ${e.message}", e)
             throw e

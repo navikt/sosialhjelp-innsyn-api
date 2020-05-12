@@ -16,8 +16,8 @@ class ApplicationContextTest {
     @MockkBean
     private lateinit var idPortenService: IdPortenService
 
-    @MockkBean(name = "serviceuserBasicAuthRestTemplate")
-    private lateinit var serviceuserBasicAuthRestTemplate: RestTemplate
+    @MockkBean(name = "stsRestTemplate")
+    private lateinit var stsRestTemplate: RestTemplate
 
     @AfterEach
     internal fun tearDown() {

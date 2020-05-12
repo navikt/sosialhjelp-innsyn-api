@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.config
 
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_NAV_APIKEY
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -21,9 +22,10 @@ class RestConfig {
 
     @Bean
     @Profile("!(mock | local)")
-    fun serviceuserBasicAuthRestTemplate(builder: RestTemplateBuilder): RestTemplate =
+    fun stsRestTemplate(builder: RestTemplateBuilder): RestTemplate =
             builder
                     .basicAuthentication(System.getenv(SRVSOSIALHJELP_INNSYN_API_USERNAME), System.getenv(SRVSOSIALHJELP_INNSYN_API_PASSWORD), StandardCharsets.UTF_8)
+                    .defaultHeader(HEADER_NAV_APIKEY, System.getenv(STSTOKEN_APIKEY))
                     .build()
 
     @Bean
@@ -49,5 +51,7 @@ class RestConfig {
     companion object {
         private const val SRVSOSIALHJELP_INNSYN_API_USERNAME: String = "SRVSOSIALHJELP_INNSYN_API_USERNAME"
         private const val SRVSOSIALHJELP_INNSYN_API_PASSWORD: String = "SRVSOSIALHJELP_INNSYN_API_PASSWORD"
+
+        private const val STSTOKEN_APIKEY: String = "SOSIALHJELP_INNSYN_API_STSTOKEN_APIKEY_PASSWORD"
     }
 }

@@ -25,7 +25,9 @@
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
     "VILKAR_ENABLED": "false",
     "DOKUMENTASJONKRAV_ENABLED": "false",
-    "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana"
+    "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana",
+    "PDL_ENDPOINT_URL": "https://api-gw.oera.no/pdl-api/graphql",
+    "STS_TOKEN_ENDPOINT_URL": "https://api-gw-q1.oera.no/security-token-service/rest/v1/sts/token"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

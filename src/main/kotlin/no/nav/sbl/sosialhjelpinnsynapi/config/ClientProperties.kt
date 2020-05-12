@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component
 class ClientProperties {
 
     lateinit var fiksDigisosEndpointUrl: String
-
     lateinit var fiksDokumentlagerEndpointUrl: String
-
     lateinit var fiksSvarUtEndpointUrl: String
 
     lateinit var fiksIntegrasjonId: String
@@ -26,4 +24,6 @@ class ClientProperties {
     lateinit var idPortenScope: String
     lateinit var idPortenConfigUrl: String
 
+    lateinit var pdlEndpointUrl: String
+    lateinit var stsTokenEndpointUrl: String
 }

@@ -20,6 +20,8 @@ client:
   idPortenClientId: "test"
   idPortenScope: "test"
   idPortenConfigUrl: 'http://localhost:55555'
+  pdl_endpoint_url: 'http://localhost:56666'
+  sts_token_endpoint_url: 'http://localhost:57777'
 
 innsyn:
   vedlegg:

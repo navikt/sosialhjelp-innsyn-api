@@ -4,7 +4,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.FileOutputStream
-import java.lang.Exception
 import java.util.*
 
 class EttersendelsePdfGeneratorTest {

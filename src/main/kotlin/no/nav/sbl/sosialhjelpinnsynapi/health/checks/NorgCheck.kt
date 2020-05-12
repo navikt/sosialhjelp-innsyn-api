@@ -6,7 +6,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
 import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.sbl.sosialhjelpinnsynapi.utils.generateCallId
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_NAV_APIKEY
+import no.nav.sbl.sosialhjelpinnsynapi.utils.MDCUtils.getCallId
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -17,23 +19,22 @@ import org.springframework.web.client.RestTemplate
 
 @Profile("!mock")
 @Component
-class NorgCheck(private val restTemplate: RestTemplate,
-                clientProperties: ClientProperties) : AbstractDependencyCheck(
+class NorgCheck(
+        private val restTemplate: RestTemplate,
+        clientProperties: ClientProperties
+) : AbstractDependencyCheck(
         DependencyType.REST,
         "NORG2",
         clientProperties.norgEndpointUrl,
         Importance.WARNING
 ) {
-    companion object {
-        val log by logger()
-    }
 
     override fun doCheck() {
         try {
             val norgApiKey = System.getenv("NORG_PASSWORD")
             val headers = HttpHeaders()
-            headers.set("Nav-Call-Id", generateCallId())
-            headers.set("x-nav-apiKey", norgApiKey)
+            headers.set(HEADER_CALL_ID, getCallId())
+            headers.set(HEADER_NAV_APIKEY, norgApiKey)
 
             // samme kall som selftest i soknad-api
             restTemplate.exchange("$address/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
@@ -44,5 +45,9 @@ class NorgCheck(private val restTemplate: RestTemplate,
             log.warn("Selftest - noe feilet ved kall mot NORG", e)
             throw NorgException(null, e.message, e)
         }
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

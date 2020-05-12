@@ -29,10 +29,6 @@ class VeiviserController {
 
 private class KommunenummerCache {
 
-    companion object {
-        val log by logger()
-    }
-
     private val referanse = AtomicReference(Intern())
 
     private class Intern {
@@ -58,5 +54,9 @@ private class KommunenummerCache {
             }
         }
         return referanse.get().data
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

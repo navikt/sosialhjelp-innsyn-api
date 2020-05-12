@@ -1,17 +1,29 @@
 package no.nav.sbl.sosialhjelpinnsynapi.hendelse
 
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_BREVET
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.InternalVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService.InternalVedlegg
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
@@ -21,7 +33,8 @@ internal class HendelseServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
-    private val service = HendelseService(eventService, vedleggService, fiksClient)
+    private val featureToggles: FeatureToggles = mockk()
+    private val service = HendelseService(eventService, vedleggService, fiksClient, featureToggles)
 
     private val mockDigisosSak: DigisosSak = mockk()
 
@@ -48,11 +61,12 @@ internal class HendelseServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService, vedleggService, fiksClient)
+        clearAllMocks()
 
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
+        every { featureToggles.vilkarEnabled } returns true
     }
 
     @Test
@@ -61,7 +75,6 @@ internal class HendelseServiceTest {
         model.historikk.add(Hendelse(tittel_sendt, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)))
 
         every { eventService.createModel(any(), any()) } returns model
-
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
@@ -81,7 +94,6 @@ internal class HendelseServiceTest {
                 Hendelse(tittel3, tidspunkt3, UrlResponse(VIS_BREVET, url3))))
 
         every { eventService.createModel(any(), any()) } returns model
-
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
@@ -92,7 +104,6 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg`() {
         every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
-
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(dokumenttype_1, null, listOf(dok1), tidspunkt4),
                 InternalVedlegg(dokumenttype_2, null, listOf(dok2, dok3), tidspunkt5))
@@ -110,7 +121,6 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg - tom fil-liste skal ikke resultere i hendelse`() {
         every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
-
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(dokumenttype_2, null, emptyList(), tidspunkt5))
 
@@ -124,7 +134,6 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
 
         every { eventService.createModel(any(), any()) } returns model
-
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(dokumenttype_1, null, listOf(dok1, dok2), tidspunkt4),
                 InternalVedlegg(dokumenttype_2, null, listOf(dok2, dok3), tidspunkt5))
@@ -144,7 +153,6 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
 
         every { eventService.createModel(any(), any()) } returns model
-
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(dokumenttype_1, null, listOf(dok1), tidspunkt4),
                 InternalVedlegg(dokumenttype_2, null, listOf(dok2), tidspunkt4))
@@ -162,7 +170,6 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
 
         every { eventService.createModel(any(), any()) } returns model
-
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
                 InternalVedlegg(dokumenttype_1, null, listOf(dok1), tidspunkt4),
                 InternalVedlegg(dokumenttype_2, null, listOf(dok2), tidspunkt4.plus(1, ChronoUnit.MILLIS)))
@@ -170,5 +177,126 @@ internal class HendelseServiceTest {
         val hendelser = service.hentHendelser("123", "Token")
 
         assertThat(hendelser).hasSize(2)
+    }
+
+    @Test
+    internal fun `hendelser for vilkar - grupper vilkar`() {
+        val model = InternalDigisosSoker()
+
+        val time = LocalDateTime.of(2020, 3, 1, 12, 30, 1)
+        model.saker = mutableListOf(
+                Sak(
+                        referanse = "saksref",
+                        saksStatus = SaksStatus.UNDER_BEHANDLING,
+                        tittel = "tittel",
+                        vedtak = mutableListOf(),
+                        utbetalinger = mutableListOf(
+                                Utbetaling(
+                                        referanse = "utbetalref",
+                                        status = UtbetalingsStatus.UTBETALT,
+                                        belop = BigDecimal.valueOf(1337.0),
+                                        beskrivelse = "beskrivelse",
+                                        forfallsDato = null,
+                                        utbetalingsDato = LocalDate.now(),
+                                        fom = null,
+                                        tom = null,
+                                        mottaker = "mottaker",
+                                        annenMottaker = false,
+                                        kontonummer = "kontonummer",
+                                        utbetalingsmetode = "utbetalingsmetode",
+                                        vilkar = mutableListOf(
+                                                Vilkar("ref1", "beskrivelse", false, time, time),
+                                                Vilkar("ref2", "beskrivelse2", false, time, time.plusSeconds(28)),
+                                                Vilkar("ref3", "beskrivelse3", true, time, time.plusMinutes(5))),
+                                        dokumentasjonkrav = mutableListOf(),
+                                        datoHendelse = time
+                                )
+                        )
+                )
+        )
+
+        every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+
+        val hendelser = service.hentHendelser("123", "Token")
+
+        assertThat(hendelser).hasSize(2)
+        val first = hendelser[0]
+        assertThat(first.tidspunkt).isEqualTo(time.toString())
+
+        val second = hendelser[1]
+        assertThat(second.tidspunkt).isEqualTo(time.plusMinutes(5).toString())
+    }
+
+    @Test
+    internal fun `hendelser for utbetalinger - grupper utbetalinger`() {
+        val model = InternalDigisosSoker()
+
+        val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
+        model.utbetalinger = mutableListOf(
+                Utbetaling(
+                        referanse = "utbetalref",
+                        status = UtbetalingsStatus.UTBETALT,
+                        belop = BigDecimal.valueOf(1337.0),
+                        beskrivelse = "beskrivelse",
+                        forfallsDato = null,
+                        utbetalingsDato = LocalDate.now(),
+                        fom = null,
+                        tom = null,
+                        mottaker = "mottaker",
+                        annenMottaker = false,
+                        kontonummer = "kontonummer",
+                        utbetalingsmetode = "utbetalingsmetode",
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf(),
+                        datoHendelse = time
+                ),
+                Utbetaling(
+                        referanse = "utbetalref",
+                        status = UtbetalingsStatus.UTBETALT,
+                        belop = BigDecimal.valueOf(1337.0),
+                        beskrivelse = "beskrivelse",
+                        forfallsDato = null,
+                        utbetalingsDato = LocalDate.now(),
+                        fom = null,
+                        tom = null,
+                        mottaker = "mottaker",
+                        annenMottaker = false,
+                        kontonummer = "kontonummer",
+                        utbetalingsmetode = "utbetalingsmetode",
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf(),
+                        datoHendelse = time.plusMinutes(4).plusSeconds(59)
+                ),
+                Utbetaling(
+                        referanse = "utbetalref",
+                        status = UtbetalingsStatus.UTBETALT,
+                        belop = BigDecimal.valueOf(1337.0),
+                        beskrivelse = "beskrivelse",
+                        forfallsDato = null,
+                        utbetalingsDato = LocalDate.now(),
+                        fom = null,
+                        tom = null,
+                        mottaker = "mottaker",
+                        annenMottaker = false,
+                        kontonummer = "kontonummer",
+                        utbetalingsmetode = "utbetalingsmetode",
+                        vilkar = mutableListOf(),
+                        dokumentasjonkrav = mutableListOf(),
+                        datoHendelse = time.plusMinutes(5)
+                )
+        )
+
+        every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+
+        val hendelser = service.hentHendelser("123", "Token")
+
+        assertThat(hendelser).hasSize(2)
+        val first = hendelser[0]
+        assertThat(first.tidspunkt).isEqualTo(time.toString())
+
+        val second = hendelser[1]
+        assertThat(second.tidspunkt).isEqualTo(time.plusMinutes(5).toString())
     }
 }

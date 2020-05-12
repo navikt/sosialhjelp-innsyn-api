@@ -1,6 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
 
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.runs
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException

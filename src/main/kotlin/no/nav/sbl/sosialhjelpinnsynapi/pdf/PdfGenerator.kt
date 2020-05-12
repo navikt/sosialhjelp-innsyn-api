@@ -6,11 +6,9 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType1Font
-import org.apache.pdfbox.pdmodel.graphics.color.PDColor
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
 import org.springframework.core.io.ClassPathResource
 import org.springframework.util.StreamUtils
-import java.awt.Color
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
@@ -165,24 +163,24 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     }
 
     companion object {
-        const val MARGIN = 40F
+        private const val MARGIN = 40F
 
-        val FONT_PLAIN: PDFont = PDType1Font.HELVETICA
-        val FONT_BOLD: PDFont = PDType1Font.HELVETICA_BOLD
+        private val FONT_PLAIN: PDFont = PDType1Font.HELVETICA
+        private val FONT_BOLD: PDFont = PDType1Font.HELVETICA_BOLD
 
-        const val FONT_PLAIN_SIZE = 12F
-        const val FONT_H1_SIZE = 20F
-        const val FONT_H4_SIZE = 14F
+        private const val FONT_PLAIN_SIZE = 12F
+        private const val FONT_H1_SIZE = 20F
+        private const val FONT_H4_SIZE = 14F
 
-        const val LEADING_PERCENTAGE = 1.5F
+        private const val LEADING_PERCENTAGE = 1.5F
 
-        val WIDTH_OF_CONTENT_COLUMN = PDPage(PDRectangle.A4).mediaBox.width - (MARGIN * 2)
-        val MEDIA_BOX = PDPage(PDRectangle.A4).mediaBox
+        private val WIDTH_OF_CONTENT_COLUMN = PDPage(PDRectangle.A4).mediaBox.width - (MARGIN * 2)
+        private val MEDIA_BOX = PDPage(PDRectangle.A4).mediaBox
     }
 
     init {
         currentStream = PDPageContentStream(document, currentPage)
         y = calculateStartY()
-        addLogo()
+        // addLogo() Fjerner logo midlertidig da den ikke er PDF/A
     }
 }

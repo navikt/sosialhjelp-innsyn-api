@@ -25,9 +25,7 @@
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
     "VILKAR_ENABLED": "false",
     "DOKUMENTASJONKRAV_ENABLED": "false",
-    "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana",
-    "PDL_ENDPOINT_URL": "some-apigw url",
-    "STS_TOKEN_ENDPOINT_URL": "another qpigw url"
+    "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

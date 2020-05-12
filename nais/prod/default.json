@@ -5,9 +5,9 @@
     "https://sosialhjelp-innsyn-api.prod-sbs.nais.io/sosialhjelp/innsyn-api",
     "https://www.nav.no/sosialhjelp/innsyn-api"
   ],
-  "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/prod/maskinporten",
-  "application_vault_path": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
   "kvPaths": {
+    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",
+    "/var/run/secrets/nais.io/vault": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss"
   },
   "env": {

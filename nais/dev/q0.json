@@ -5,8 +5,11 @@
     "https://sosialhjelp-innsyn-api-q0.dev-sbs.nais.io/sosialhjelp/innsyn-api",
     "https://www-q0.nav.no/sosialhjelp/innsyn-api"
   ],
-  "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/preprod/shared",
-  "application_vault_path": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
+  "kvPaths": {
+    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
+    "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
+    "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss"
+  },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",

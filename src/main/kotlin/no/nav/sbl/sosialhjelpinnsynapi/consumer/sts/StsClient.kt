@@ -4,6 +4,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.consumer.sts.STSToken.Companion.shouldRenewToken
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
@@ -25,8 +26,9 @@ class StsClient(
         if (shouldRenewToken(cachedToken)) {
             try {
                 log.info("Henter nytt token fra STS")
-                val requestUrl = lagRequest(baseUrl)
-                val response = stsRestTemplate.exchange(requestUrl, HttpMethod.GET, null, STSToken::class.java)
+                val requestUrl = "$baseUrl/token?grant_type=client_credentials&scope=openid"
+                val requestEntity = requestEntity()
+                val response = stsRestTemplate.exchange(requestUrl, HttpMethod.POST, requestEntity, STSToken::class.java)
 
                 cachedToken = response.body
                 return response.body!!.access_token
@@ -48,8 +50,8 @@ class StsClient(
         }
     }
 
-    private fun lagRequest(baseurl: String): String {
-        return "$baseurl/token?grant_type=client_credentials&scope=openid"
+    private fun requestEntity(): HttpEntity<Nothing> {
+        return HttpEntity(null, null)
     }
 
     companion object {

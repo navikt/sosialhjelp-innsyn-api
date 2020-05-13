@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.sts.StsClient
+import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.PdlClient
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
@@ -10,17 +10,16 @@ import org.springframework.stereotype.Component
 
 @Profile("!mock")
 @Component
-class StsCheck(
+class PdlCheck(
         clientProperties: ClientProperties,
-        private val stsClient: StsClient
+        private val pdlClient: PdlClient
 ) : AbstractDependencyCheck(
         DependencyType.REST,
-        "STS",
-        clientProperties.stsTokenEndpointUrl,
+        "PDL",
+        clientProperties.pdlEndpointUrl,
         Importance.WARNING
 ) {
-
     override fun doCheck() {
-        stsClient.ping()
+        pdlClient.ping()
     }
 }

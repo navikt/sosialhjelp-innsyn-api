@@ -63,6 +63,13 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(PdlException::class)
+    fun handlePdlError(e: PdlException): ResponseEntity<ErrorMessage> {
+        log.error("Noe feilet ved kall til Pdl", e)
+        val error = ErrorMessage(PDL_ERROR, "Noe uventet feilet")
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
     @ExceptionHandler(OpplastingException::class)
     fun handleOpplastingError(e: OpplastingException): ResponseEntity<ErrorMessage> {
         log.error("Noe feilet ved opplasting av vedlegg", e)
@@ -91,6 +98,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         private const val FIKS_ERROR = "fiks_error"
         private const val NORG_ERROR = "norg_error"
         private const val FILOPPLASTING_ERROR = "FILOPPLASTING_ERROR"
+        private const val PDL_ERROR = "pdl_error"
     }
 }
 

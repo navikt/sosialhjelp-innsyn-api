@@ -19,6 +19,9 @@ class ApplicationContextTest {
     @MockkBean(name = "stsRestTemplate")
     private lateinit var stsRestTemplate: RestTemplate
 
+    @MockkBean(name = "pdlRestTemplate")
+    private lateinit var pdlRestTemplate: RestTemplate
+
     @AfterEach
     internal fun tearDown() {
         stopRedisMocked()

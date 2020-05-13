@@ -29,6 +29,14 @@ class RestConfig {
                     .build()
 
     @Bean
+    @Profile("!(mock | local)")
+    fun pdlRestTemplate(builder: RestTemplateBuilder): RestTemplate =
+            builder
+                    .basicAuthentication(System.getenv(SRVSOSIALHJELP_INNSYN_API_USERNAME), System.getenv(SRVSOSIALHJELP_INNSYN_API_PASSWORD), StandardCharsets.UTF_8)
+                    .defaultHeader(HEADER_NAV_APIKEY, System.getenv(PDL_APIKEY))
+                    .build()
+
+    @Bean
     fun objectMapperCustomizer(): Jackson2ObjectMapperBuilderCustomizer {
         return Jackson2ObjectMapperBuilderCustomizer { jacksonObjectMapperBuilder ->
             jacksonObjectMapperBuilder.configure(objectMapper)
@@ -53,5 +61,6 @@ class RestConfig {
         private const val SRVSOSIALHJELP_INNSYN_API_PASSWORD: String = "SRVSOSIALHJELP_INNSYN_API_PASSWORD"
 
         private const val STSTOKEN_APIKEY: String = "SOSIALHJELP_INNSYN_API_STSTOKEN_APIKEY_PASSWORD"
+        private const val PDL_APIKEY: String = "SOSIALHJELP_INNSYN_API_PDL_APIKEY_PASSWORD"
     }
 }

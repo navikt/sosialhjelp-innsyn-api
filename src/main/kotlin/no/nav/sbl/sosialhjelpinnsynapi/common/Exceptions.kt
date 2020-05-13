@@ -49,3 +49,8 @@ class NedlastingFilnavnMismatchException(
         override val message: String?,
         override val cause: Throwable?
 ) : RuntimeException(message, cause)
+
+class PdlException(
+        status: HttpStatus?,
+        override val message: String?
+) : RuntimeException(message)

@@ -9,7 +9,8 @@
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
     "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
-    "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q0"
+    "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q0",
+    "/apigw/pdl-api": "/apikey/apigw/dev/pdl-api/sosialhjelp-innsyn-api_q1"
   },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",

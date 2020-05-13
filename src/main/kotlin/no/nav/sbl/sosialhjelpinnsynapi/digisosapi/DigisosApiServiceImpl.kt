@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.BEARER
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
 import no.nav.sbl.sosialhjelpinnsynapi.virusscan.VirusScanner
@@ -35,7 +36,7 @@ class DigisosApiServiceImpl(
         val accessToken = runBlocking { idPortenService.requestToken() }
 
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
-        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, "Bearer " + accessToken.token, fiksDigisosId)
+        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, BEARER + accessToken.token, fiksDigisosId)
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         val fiksIder = digisosApiClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
         waitForFutures(krypteringFutureList)

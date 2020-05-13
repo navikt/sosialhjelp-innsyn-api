@@ -21,6 +21,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.toFiksErrorResponse
 import no.nav.sbl.sosialhjelpinnsynapi.typeRef
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.BEARER
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
@@ -224,7 +225,7 @@ class FiksClientImpl(
             }
         }
         val virksomhetsToken = runBlocking { idPortenService.requestToken() }
-        val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
+        val headers = setIntegrasjonHeaders(BEARER + virksomhetsToken.token)
 
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/nav/kommuner/{kommunenummer}"
@@ -262,7 +263,7 @@ class FiksClientImpl(
     override fun hentKommuneInfoForAlle(): List<KommuneInfo> {
         val virksomhetsToken = runBlocking { idPortenService.requestToken() }
 
-        val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
+        val headers = setIntegrasjonHeaders(BEARER + virksomhetsToken.token)
 
         try {
             val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommuner", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<KommuneInfo>>())

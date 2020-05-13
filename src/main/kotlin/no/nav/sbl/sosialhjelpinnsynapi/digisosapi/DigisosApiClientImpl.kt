@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.fiks.VedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.BEARER
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
@@ -72,7 +73,7 @@ class DigisosApiClientImpl(
         val headers = HttpHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         val accessToken = runBlocking { idPortenService.requestToken() }
-        headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
+        headers.set(AUTHORIZATION, BEARER + accessToken.token)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
@@ -133,7 +134,7 @@ class DigisosApiClientImpl(
         headers.accept = Collections.singletonList(MediaType.ALL)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
-        headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
+        headers.set(AUTHORIZATION, BEARER + accessToken.token)
         headers.contentType = MediaType.APPLICATION_JSON
         return headers
     }

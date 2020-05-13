@@ -26,9 +26,9 @@ class StsClient(
         if (shouldRenewToken(cachedToken)) {
             try {
                 log.info("Henter nytt token fra STS")
-                val requestUrl = "$baseUrl/token?grant_type=client_credentials&scope=openid"
+                val requestUrl = "$baseUrl?grant_type=client_credentials&scope=openid"
                 val requestEntity = requestEntity()
-                val response = stsRestTemplate.exchange(requestUrl, HttpMethod.POST, requestEntity, STSToken::class.java)
+                val response = stsRestTemplate.exchange(requestUrl, HttpMethod.POST, null, STSToken::class.java)
 
                 cachedToken = response.body
                 return response.body!!.access_token

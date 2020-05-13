@@ -5,7 +5,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.consumer.sts.StsClient
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
-import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
@@ -22,11 +21,6 @@ class StsCheck(
 ) {
 
     override fun doCheck() {
-        val token = stsClient.token()
-        log.info("hentet token OK")
-    }
-
-    companion object {
-        private val log by logger()
+        stsClient.ping()
     }
 }

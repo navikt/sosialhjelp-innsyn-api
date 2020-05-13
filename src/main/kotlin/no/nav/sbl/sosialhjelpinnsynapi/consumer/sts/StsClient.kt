@@ -4,7 +4,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.consumer.sts.STSToken.Companion.shouldRenewToken
 import no.nav.sbl.sosialhjelpinnsynapi.logger
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
@@ -27,7 +26,6 @@ class StsClient(
             try {
                 log.info("Henter nytt token fra STS")
                 val requestUrl = "$baseUrl?grant_type=client_credentials&scope=openid"
-                val requestEntity = requestEntity()
                 val response = stsRestTemplate.exchange(requestUrl, HttpMethod.POST, null, STSToken::class.java)
 
                 cachedToken = response.body
@@ -48,10 +46,6 @@ class StsClient(
             log.warn("STS - Ping feilet. message: ${e.message}", e)
             throw e
         }
-    }
-
-    private fun requestEntity(): HttpEntity<Nothing> {
-        return HttpEntity(null, null)
     }
 
     companion object {

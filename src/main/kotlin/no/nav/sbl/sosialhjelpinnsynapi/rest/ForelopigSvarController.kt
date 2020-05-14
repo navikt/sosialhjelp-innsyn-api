@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ForelopigSvarResponse
-import no.nav.sbl.sosialhjelpinnsynapi.forelopigsvar.ForelopigSvarService
+import no.nav.sbl.sosialhjelpinnsynapi.service.forelopigsvar.ForelopigSvarService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
@@ -23,6 +23,6 @@ class ForelopigSvarController(
         val forelopigSvarResponse: ForelopigSvarResponse = forelopigSvarService.hentForelopigSvar(fiksDigisosId, token)
 
 
-        return ResponseEntity.ok().body(forelopigSvarResponse);
+        return ResponseEntity.ok().body(forelopigSvarResponse)
     }
 }

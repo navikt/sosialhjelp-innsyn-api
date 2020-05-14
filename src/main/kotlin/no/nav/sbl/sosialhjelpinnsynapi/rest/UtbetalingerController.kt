@@ -3,8 +3,8 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
-import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.sbl.sosialhjelpinnsynapi.utbetalinger.UtbetalingerService
+import no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger.UtbetalingerService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus

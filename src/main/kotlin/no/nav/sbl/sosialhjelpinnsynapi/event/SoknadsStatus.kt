@@ -4,7 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
 

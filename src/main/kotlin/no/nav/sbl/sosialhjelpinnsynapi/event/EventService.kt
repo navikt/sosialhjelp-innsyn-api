@@ -13,6 +13,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_SOKNADEN
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
@@ -22,11 +23,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Soknadsmottaker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
-import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
-import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.hentDokumentlagerUrl
+import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import org.springframework.stereotype.Component
 
 @Component

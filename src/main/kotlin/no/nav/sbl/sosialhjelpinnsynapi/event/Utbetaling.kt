@@ -4,8 +4,8 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.toLocalDate
-import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDate
+import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
 import java.math.BigDecimal
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {

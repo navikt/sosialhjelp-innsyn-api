@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.hendelse
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_BREVET
 import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
@@ -16,9 +17,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.InternalVedlegg
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.service.hendelse.HendelseService
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

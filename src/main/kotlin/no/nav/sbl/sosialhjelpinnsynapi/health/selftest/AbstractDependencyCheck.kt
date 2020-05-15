@@ -6,7 +6,7 @@ import io.github.resilience4j.timelimiter.TimeLimiterConfig
 import io.vavr.control.Try
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
-import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.Callable

@@ -2,14 +2,14 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.digisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 

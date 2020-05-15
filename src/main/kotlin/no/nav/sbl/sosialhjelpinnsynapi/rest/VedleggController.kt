@@ -6,11 +6,11 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator.sjekkXsrfToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
-import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggOpplastingService
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.InternalVedlegg
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggOpplastingService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus

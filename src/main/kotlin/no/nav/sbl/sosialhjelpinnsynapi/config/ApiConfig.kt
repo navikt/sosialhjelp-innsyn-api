@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.config
 
-import no.nav.sbl.sosialhjelpinnsynapi.utils.MDCFilter
+import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile

@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.context.annotation.Profile

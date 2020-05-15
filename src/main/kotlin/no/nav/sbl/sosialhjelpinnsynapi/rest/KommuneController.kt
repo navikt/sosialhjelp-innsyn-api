@@ -2,8 +2,8 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneResponse
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneService
-import no.nav.sbl.sosialhjelpinnsynapi.kommune.KommuneStatusDetaljer
+import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneService
+import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatusDetaljer
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -32,7 +32,7 @@ class KommuneController(
                         erInnsynMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertOppdateringer,
                         erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
                         erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak,
-                        tidspunkt = Date()));
+                        tidspunkt = Date()))
     }
 
     @Unprotected

@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator.generateXsrfToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatusResponse
-import no.nav.sbl.sosialhjelpinnsynapi.soknadsstatus.SoknadsStatusService
+import no.nav.sbl.sosialhjelpinnsynapi.service.soknadsstatus.SoknadsStatusService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
@@ -42,7 +42,7 @@ class SoknadsStatusController(
 
         val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", generateXsrfToken(fiksDigisosId, idportenIdtoken))
         xsrfCookie.path = "/"
-        xsrfCookie.isHttpOnly = true;
+        xsrfCookie.isHttpOnly = true
         return xsrfCookie
     }
 }

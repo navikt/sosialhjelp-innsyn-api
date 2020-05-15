@@ -1,8 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
-import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
-import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.service.digisosapi.DigisosApiService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile

@@ -2,7 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
-import no.nav.sbl.sosialhjelpinnsynapi.originalsoknad.OrginalSoknadService
+import no.nav.sbl.sosialhjelpinnsynapi.service.originalsoknad.OrginalSoknadService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus

@@ -10,9 +10,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vedtak
-import no.nav.sbl.sosialhjelpinnsynapi.hentUrlFraFilreferanse
-import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
-import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.service.saksstatus.DEFAULT_TITTEL
+import no.nav.sbl.sosialhjelpinnsynapi.utils.hentUrlFraFilreferanse
+import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
 

@@ -1,8 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.PdlClient
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.PdlHentPerson
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.PdlPerson
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlHentPerson
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlPerson
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 

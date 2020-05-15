@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.PdlClient
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance

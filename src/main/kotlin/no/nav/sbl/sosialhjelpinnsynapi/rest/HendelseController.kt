@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
-import no.nav.sbl.sosialhjelpinnsynapi.hendelse.HendelseService
+import no.nav.sbl.sosialhjelpinnsynapi.service.hendelse.HendelseService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity

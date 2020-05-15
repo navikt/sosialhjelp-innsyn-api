@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi
 
 import com.ninjasquad.springmockk.MockkBean
-import no.nav.sbl.sosialhjelpinnsynapi.idporten.IdPortenService
+import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisMockUtil.stopRedisMocked
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

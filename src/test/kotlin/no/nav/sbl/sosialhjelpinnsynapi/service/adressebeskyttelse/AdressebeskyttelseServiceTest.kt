@@ -3,10 +3,10 @@ package no.nav.sbl.sosialhjelpinnsynapi.service.adressebeskyttelse
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.common.PdlException
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.Adressebeskyttelse
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.Gradering
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.PdlClient
-import no.nav.sbl.sosialhjelpinnsynapi.consumer.pdl.PdlHentPerson
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Adressebeskyttelse
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Gradering
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test

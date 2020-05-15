@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.fiks
+package no.nav.sbl.sosialhjelpinnsynapi.client.fiks
 
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -8,8 +8,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClientImpl
-import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksRetryProperties
 import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException

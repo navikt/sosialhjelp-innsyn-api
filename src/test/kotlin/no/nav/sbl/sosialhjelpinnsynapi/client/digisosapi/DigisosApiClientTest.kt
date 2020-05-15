@@ -1,10 +1,9 @@
-package no.nav.sbl.sosialhjelpinnsynapi.digisosapi
+package no.nav.sbl.sosialhjelpinnsynapi.client.digisosapi
 
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.client.digisosapi.DigisosApiClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.AccessToken
 import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService

@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.hendelse
+package no.nav.sbl.sosialhjelpinnsynapi.service.hendelse
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -17,7 +17,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.service.hendelse.HendelseService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat

@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
+package no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -18,12 +18,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.service.pdf.EttersendelsePdfGenerator
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.MESSAGE_ILLEGAL_FILE_TYPE
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.MESSAGE_PDF_IS_ENCRYPTED
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.MESSAGE_PDF_IS_SIGNED
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggOpplastingService.Companion.containsIllegalCharacters
 import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.VirusScanner
 import org.apache.commons.io.IOUtils

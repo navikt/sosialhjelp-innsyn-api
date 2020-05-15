@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.vedlegg
+package no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -11,9 +11,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Ettersendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.LASTET_OPP_STATUS
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VEDLEGG_KREVES_STATUS
-import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

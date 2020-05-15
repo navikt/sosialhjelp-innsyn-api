@@ -54,3 +54,7 @@ class PdlException(
         status: HttpStatus?,
         override val message: String?
 ) : RuntimeException(message)
+
+class TilgangskontrollExpcetion(
+        override val message: String?
+) : RuntimeException(message)

@@ -41,8 +41,7 @@ enum class Gradering {
     UGRADERT
 }
 
-fun PdlHentPerson.isKode6Or7(): Boolean {
-    val adressebeskyttelse = this.hentPerson?.adressebeskyttelse
+fun PdlPerson.isKode6Or7(): Boolean {
     return if (adressebeskyttelse.isNullOrEmpty()) {
         false
     } else {

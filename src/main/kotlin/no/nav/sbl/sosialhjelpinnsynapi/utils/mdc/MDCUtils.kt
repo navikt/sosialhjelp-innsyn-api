@@ -6,6 +6,7 @@ import java.security.SecureRandom
 object MDCUtils {
 
     private const val CALL_ID = "callId"
+    private const val DIGISOS_ID = "digisosId"
 
     private val RANDOM = SecureRandom()
 
@@ -17,22 +18,24 @@ object MDCUtils {
         MDC.put(CALL_ID, callId)
     }
 
-    fun clearCallId() {
+    fun getDigisosId(): String? {
+        return MDC.get(DIGISOS_ID)
+    }
+
+    fun setDigisosId(digisosId: String) {
+        MDC.put(DIGISOS_ID, digisosId)
+    }
+
+    fun clearMDC() {
         MDC.remove(CALL_ID)
+        MDC.remove(DIGISOS_ID)
     }
 
     fun generateCallId(): String {
-        val randomNr = getRandomNumber()
-        val systemTime = getSystemTime()
+        val randomNr = RANDOM.nextInt(Integer.MAX_VALUE)
+        val systemTime = System.currentTimeMillis()
 
         return "CallId_${systemTime}_${randomNr}"
     }
 
-    private fun getRandomNumber(): Int {
-        return RANDOM.nextInt(Integer.MAX_VALUE)
-    }
-
-    private fun getSystemTime(): Long {
-        return System.currentTimeMillis()
-    }
 }

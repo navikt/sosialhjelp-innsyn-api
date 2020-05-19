@@ -8,6 +8,7 @@
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console",
     "VILKAR_ENABLED": "true",
     "DOKUMENTASJONKRAV_ENABLED": "true",
+    "METADATA_URL": "https://sosialhjelp-mock-alt-apu.labs.nais.io//sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/token",
     "FIKS_DIGISOS_ENDPOINT_URL": "https://sosialhjelp-mock-alt-apu.labs.nais.io/sosialhjelp/mock-alt-api/fiks",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://sosialhjelp-mock-alt-apu.labs.nais.io//sosialhjelp/mock-alt-api/fiks/dokumentlager",
     "FIKS_SVAR_UT_ENDPOINT_URL": "https://sosialhjelp-mock-alt-apu.labs.nais.io//sosialhjelp/mock-alt-api/fiks/svarut",

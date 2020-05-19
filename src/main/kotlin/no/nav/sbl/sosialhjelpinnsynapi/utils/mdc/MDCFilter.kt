@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.utils.mdc
 
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.clearMDC
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.generateCallId
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.setCallId
@@ -28,23 +29,34 @@ class MDCFilter : OncePerRequestFilter() {
     private fun addCallId(request: HttpServletRequest) {
         Optional.ofNullable(request.getHeader(HEADER_CALL_ID))
                 .ifPresentOrElse(
-                        { setCallId(it) },
-                        { setCallId(generateCallId()) }
+                        {
+                            log.info("Bruker call-id fra request: $it")
+                            setCallId(it)
+                        },
+                        {
+                            val callId = generateCallId()
+                            log.info("Genererer ny call-id: $callId")
+                            setCallId(callId)
+                        }
                 )
     }
 
     private fun addDigisosId(request: HttpServletRequest) {
         if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)|orginalJsonSoknad|orginalSoknadPdlLink|saksStatus|soknadsStatus|vedlegg)"))) {
             val digisosId = request.requestURI.substringAfter(INNSYN_BASE_URL).substringBefore("/")
+            log.info("Setter digisosId til mdc: $digisosId, requesturi: ${request.requestURI}")
             setDigisosId(digisosId)
         } else if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}saksDetaljer")) && request.parameterMap.containsKey("id")) {
             val digisosId = request.getParameter("id")
+            log.info("Setter digisosId til mdc (saksDetaljer): $digisosId, requesturi: ${request.requestURI}")
             setDigisosId(digisosId)
         }
     }
 
     companion object {
         private const val INNSYN_BASE_URL = "/sosialhjelp/innsyn-api/api/v1/innsyn/"
+
+        private val log by logger()
     }
 
 }

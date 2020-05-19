@@ -30,7 +30,8 @@ spec:
     outbound:
       external:
         - host: "oidc-ver2.difi.no"
-      rules: []
+      rules:
+        - application: sosialhjelp-mock-alt-api
 {{/if}}
   vault:
     enabled: {{vaultEnabled}}

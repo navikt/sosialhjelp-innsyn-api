@@ -8,59 +8,57 @@ import com.nimbusds.jose.util.Base64
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import io.ktor.client.features.ServerResponseException
-import io.ktor.client.request.forms.submitForm
-import io.ktor.client.request.get
-import io.ktor.client.request.url
-import io.ktor.http.parametersOf
-import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.utils.defaultHttpClient
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 import java.io.File
 import java.security.KeyPair
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
-import java.util.*
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.Calendar
+import java.util.Date
+import java.util.UUID
 
 @Profile("!mock")
 @Component
 class IdPortenService(
-        clientProperties: ClientProperties
+        clientProperties: ClientProperties,
+        private val restTemplate: RestTemplate
 ) {
 
     private val idPortenTokenUrl = clientProperties.idPortenTokenUrl
     private val idPortenClientId = clientProperties.idPortenClientId
     private val idPortenScope = clientProperties.idPortenScope
     private val idPortenConfigUrl = clientProperties.idPortenConfigUrl
-    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI")
-            ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
+    private val idPortenDefaultIssuer = clientProperties.idPortenDefaultIssuer
+    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI") ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
 
-    val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
-        log.debug("Forsøker å hente idporten-config fra $idPortenConfigUrl")
-        val config = defaultHttpClient.get<IdPortenOidcConfiguration> {
-            url(idPortenConfigUrl)
-        }
-        log.info("Hentet idporten-config fra $idPortenConfigUrl")
-        config
-    }.also {
-        log.info("idporten-config: OIDC configuration initialized")
-    }
+    private var oidcConfigurationTimeStamp: Long = -1
+    private var oidcConfiguration: IdPortenOidcConfiguration = IdPortenOidcConfiguration(idPortenDefaultIssuer, idPortenTokenUrl)
 
     suspend fun requestToken(attempts: Int = 10): AccessToken =
             retry(attempts = attempts, retryableExceptions = *arrayOf(ServerResponseException::class)) {
-                val jws = createJws()
-                log.info("Got jws, getting token (virksomhetssertifikat)")
-                val response = defaultHttpClient.submitForm<IdPortenAccessTokenResponse>(
-                        parametersOf(GRANT_TYPE_PARAM to listOf(GRANT_TYPE), ASSERTION_PARAM to listOf(jws.token))
-                ) {
-                    url(idPortenTokenUrl)
-                }
-                AccessToken(response.accessToken)
+                val jws = createJws() // TODO: Burde ikke denne brukes?
+                log.info("Got jws, getting token")
+                val uriComponents = UriComponentsBuilder.fromHttpUrl(idPortenTokenUrl).build()
+                val body = LinkedMultiValueMap<String, String>()
+                body.add(GRANT_TYPE_PARAM, GRANT_TYPE).toString()
+                body.add(ASSERTION_PARAM, jws.token).toString()
+                val response = restTemplate.exchange(uriComponents.toUriString(), HttpMethod.POST, HttpEntity(body, HttpHeaders()), String::class.java)
+                val returnObject : IdPortenAccessTokenResponse = objectMapper.readValue(response.body!!)
+                AccessToken(returnObject.accessToken)
             }
 
     fun createJws(
@@ -99,8 +97,20 @@ class IdPortenService(
             ) to cert.encoded
         }
 
+        if(oidcConfigurationTimeStamp == -1L) {
+            try {
+                val uriComponents = UriComponentsBuilder.fromHttpUrl(idPortenConfigUrl).build()
+                val response = restTemplate.exchange(uriComponents.toUriString(), HttpMethod.GET, HttpEntity<Nothing>(HttpHeaders()), String::class.java)
+                val returnObject: IdPortenOidcConfiguration = objectMapper.readValue(response.body!!)
+                log.info("Hentet config fra $idPortenConfigUrl")
+                oidcConfiguration = returnObject
+                oidcConfigurationTimeStamp = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+            } catch (e:Exception) {
+                log.error("Feil har oppstått når vi henter IdPorten konfiguration fra: $idPortenConfigUrl", e)
+            }
+        }
 
-        log.info("Public certificate length ${pair.first.public.encoded.size} (virksomhetssertifikat)")
+        log.info("Public certificate length " + pair.first.public.encoded.size)
 
         return SignedJWT(
                 JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(mutableListOf(Base64.encode(pair.second))).build(),
@@ -115,7 +125,7 @@ class IdPortenService(
         ).run {
             sign(RSASSASigner(pair.first.private))
             val jws = Jws(serialize())
-            log.info("Serialized jws (virksomhetssertifikat)")
+            log.info("Serialized JWS")
             jws
         }
     }

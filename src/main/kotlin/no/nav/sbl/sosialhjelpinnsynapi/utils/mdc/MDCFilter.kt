@@ -2,10 +2,12 @@ package no.nav.sbl.sosialhjelpinnsynapi.utils.mdc
 
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.CALL_ID
+import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.DIGISOS_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.clearMDC
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.generateCallId
-import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.setCallId
-import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.setDigisosId
+import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.put
+import org.springframework.http.HttpHeaders
 
 import org.springframework.web.filter.OncePerRequestFilter
 import java.util.*
@@ -19,6 +21,9 @@ class MDCFilter : OncePerRequestFilter() {
         if (request.requestURI.startsWith(INNSYN_BASE_URL) || request.requestURI.startsWith(KLIENTLOGGER_BASE_URL) || request.requestURI.startsWith(VEIVISER_BASE_URL)) {
             addCallId(request)
             addDigisosId(request)
+            put(MDCUtils.PATH, request.requestURI)
+            request.getHeader(HttpHeaders.USER_AGENT)?.let { put(MDCUtils.USER_AGENT, it) }
+            request.getHeader(HttpHeaders.REFERER)?.let { put(MDCUtils.REFERER, it) }
         }
 
         try {
@@ -32,12 +37,12 @@ class MDCFilter : OncePerRequestFilter() {
         Optional.ofNullable(request.getHeader(HEADER_CALL_ID))
                 .ifPresentOrElse(
                         {
-                            setCallId(it)
+                            put(CALL_ID, it)
                             log.info("Bruker call-id fra request: $it")
                         },
                         {
                             val callId = generateCallId()
-                            setCallId(callId)
+                            put(CALL_ID, callId)
                             log.info("Genererte ny call-id: $callId, requestUri: ${request.requestURI}")
                         }
                 )
@@ -46,11 +51,11 @@ class MDCFilter : OncePerRequestFilter() {
     private fun addDigisosId(request: HttpServletRequest) {
         if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)|orginalJsonSoknad|orginalSoknadPdlLink|saksStatus|soknadsStatus|vedlegg)"))) {
             val digisosId = request.requestURI.substringAfter(INNSYN_BASE_URL).substringBefore("/")
-            setDigisosId(digisosId)
+            put(DIGISOS_ID, digisosId)
             log.info("Setter digisosId til mdc: $digisosId, requesturi: ${request.requestURI}")
         } else if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}saksDetaljer")) && request.parameterMap.containsKey("id")) {
             val digisosId = request.getParameter("id")
-            setDigisosId(digisosId)
+            put(DIGISOS_ID, digisosId)
             log.info("Setter digisosId til mdc (saksDetaljer): $digisosId, requesturi: ${request.requestURI}")
         }
     }

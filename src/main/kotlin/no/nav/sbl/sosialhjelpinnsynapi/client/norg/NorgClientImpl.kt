@@ -6,7 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_NAV_APIKEY
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
-import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.getCallId
+import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
@@ -29,7 +29,7 @@ class NorgClientImpl(
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
         val norgApiKey = System.getenv("NORG_PASSWORD")
         val headers = HttpHeaders()
-        headers.set(HEADER_CALL_ID, getCallId())
+        headers.set(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
         headers.set(HEADER_NAV_APIKEY, norgApiKey)
         try {
             log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")

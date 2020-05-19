@@ -38,7 +38,7 @@ class MDCFilter : OncePerRequestFilter() {
                         {
                             val callId = generateCallId()
                             setCallId(callId)
-                            log.info("Genererte ny call-id: $callId")
+                            log.info("Genererte ny call-id: $callId, requestUri: ${request.requestURI}")
                         }
                 )
     }

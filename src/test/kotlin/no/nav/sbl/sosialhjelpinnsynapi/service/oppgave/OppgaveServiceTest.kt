@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.oppgave
+package no.nav.sbl.sosialhjelpinnsynapi.service.oppgave
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -9,7 +9,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Oppgave
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.service.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat

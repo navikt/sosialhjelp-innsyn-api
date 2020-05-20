@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.saksstatus
+package no.nav.sbl.sosialhjelpinnsynapi.service.saksstatus
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -12,8 +12,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vedtak
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.service.saksstatus.DEFAULT_TITTEL
-import no.nav.sbl.sosialhjelpinnsynapi.service.saksstatus.SaksStatusService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -1,7 +1,6 @@
-package no.nav.sbl.sosialhjelpinnsynapi.pdf
+package no.nav.sbl.sosialhjelpinnsynapi.service.pdf
 
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
-import no.nav.sbl.sosialhjelpinnsynapi.service.pdf.EttersendelsePdfGenerator
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.FileOutputStream

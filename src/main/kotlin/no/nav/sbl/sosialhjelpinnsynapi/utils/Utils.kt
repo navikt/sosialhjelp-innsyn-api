@@ -135,7 +135,7 @@ fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableF
         try {
             runnable.run()
         } finally {
-            MDCUtils.clearCallId()
+            MDCUtils.clearMDC()
         }
     }, executor)
 }

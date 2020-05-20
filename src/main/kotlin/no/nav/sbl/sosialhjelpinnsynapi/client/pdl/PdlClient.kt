@@ -9,7 +9,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CONSUMER_TO
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
-import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.getCallId
+import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
+import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.CALL_ID
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -77,7 +78,7 @@ class PdlClientImpl(
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        headers.set(HEADER_CALL_ID, getCallId())
+        headers.set(HEADER_CALL_ID, MDCUtils.get(CALL_ID))
         headers.set(HEADER_CONSUMER_TOKEN, BEARER + stsToken)
         headers.set(HttpHeaders.AUTHORIZATION, BEARER + stsToken)
         headers.set(HEADER_TEMA, TEMA_KOM)

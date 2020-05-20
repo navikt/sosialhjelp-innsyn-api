@@ -7,7 +7,7 @@ import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 object SubjectHandlerUtils {
 
     private val log by logger()
-    private var subjectHandlerService: SubjectHandler = IdportenSubjectHandlerImpl(SpringTokenValidationContextHolder())
+    private var subjectHandlerService: SubjectHandler = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
 
     fun getUserIdFromToken() : String {
         return subjectHandlerService.getUserIdFromToken()
@@ -31,6 +31,6 @@ object SubjectHandlerUtils {
     }
 
     fun resetSubjectHandlerImpl() {
-        subjectHandlerService = IdportenSubjectHandlerImpl(SpringTokenValidationContextHolder())
+        subjectHandlerService = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
     }
 }

@@ -113,7 +113,6 @@ dependencies {
 
 //    Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jackson}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${Versions.jackson}")
 
 //    Token-validering
     implementation("no.nav.security:token-validation-spring:${Versions.tokenValidation}")

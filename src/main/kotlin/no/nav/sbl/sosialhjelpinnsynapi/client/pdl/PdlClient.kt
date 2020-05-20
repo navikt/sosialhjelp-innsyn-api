@@ -56,7 +56,7 @@ class PdlClientImpl(
             }
             return pdlPersonResponse.data
         } catch (e: RestClientResponseException) {
-            log.error("PDL - ${e.rawStatusCode} ${e.statusText} feil ved henting av navn, requesturl: $baseurl", e)
+            log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
             throw PdlException(HttpStatus.valueOf(e.rawStatusCode), e.message)
         }
     }
@@ -65,7 +65,7 @@ class PdlClientImpl(
         try {
             pdlRestTemplate.exchange(baseurl, HttpMethod.OPTIONS, HttpEntity(null, null), String::class.java)
         } catch (e: RestClientException) {
-            log.error("PDL - ping feilet, requesturl: $baseurl", e)
+            log.error("PDL - ping feilet", e)
             throw e
         }
     }

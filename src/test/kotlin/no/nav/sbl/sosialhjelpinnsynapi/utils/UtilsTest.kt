@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi
+package no.nav.sbl.sosialhjelpinnsynapi.utils
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -6,9 +6,6 @@ import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Ettersendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.FiksErrorResponse
-import no.nav.sbl.sosialhjelpinnsynapi.utils.COUNTER_SUFFIX_LENGTH
-import no.nav.sbl.sosialhjelpinnsynapi.utils.feilmeldingUtenFnr
-import no.nav.sbl.sosialhjelpinnsynapi.utils.lagNavEksternRefId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

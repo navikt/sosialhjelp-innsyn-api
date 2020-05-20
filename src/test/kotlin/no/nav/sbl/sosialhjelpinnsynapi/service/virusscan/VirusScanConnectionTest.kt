@@ -1,13 +1,9 @@
-package no.nav.sbl.sosialhjelpinnsynapi.virusscan
+package no.nav.sbl.sosialhjelpinnsynapi.service.virusscan
 
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.Result
-import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.ScanResult
-import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.VirusScanConfig
-import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.VirusScanConnection
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

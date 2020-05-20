@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.kommune
+package no.nav.sbl.sosialhjelpinnsynapi.service.kommune
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -6,7 +6,6 @@ import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneService
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.HAR_KONFIGURASJON_MEN_SKAL_SENDE_VIA_SVARUT
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_IKKE_MULIG

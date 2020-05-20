@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.originalsoknad
+package no.nav.sbl.sosialhjelpinnsynapi.service.originalsoknad
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,7 +8,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.service.originalsoknad.OrginalSoknadService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

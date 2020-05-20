@@ -1,10 +1,8 @@
-package no.nav.sbl.sosialhjelpinnsynapi.virusscan
+package no.nav.sbl.sosialhjelpinnsynapi.service.virusscan
 
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
-import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.ClamAvVirusScanner
-import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.VirusScanConfig
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test

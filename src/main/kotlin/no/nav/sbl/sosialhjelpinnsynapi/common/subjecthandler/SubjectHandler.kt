@@ -48,7 +48,7 @@ class AzureAdSubjectHandlerImpl(
 }
 
 class StaticSubjectHandlerImpl : SubjectHandler {
-    private val DEFAULT_USER = "26104500284" //Testbruker i idporten.
+    private val DEFAULT_USER = "11111111111"
     private val DEFAULT_TOKEN = "token"
     private var user = DEFAULT_USER
     private var token = DEFAULT_TOKEN

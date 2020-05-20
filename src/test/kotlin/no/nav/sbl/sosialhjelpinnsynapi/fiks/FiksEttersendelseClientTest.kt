@@ -27,7 +27,7 @@ internal class FiksEttersendelseClientTest {
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val fiksEttersendelseClient = FiksEttersendelseClientImpl(clientProperties, krypteringService)
+    private val fiksEttersendelseClient = FiksEttersendelseClientImpl(clientProperties, krypteringService, restTemplate)
 
     private val id = "123"
 

@@ -141,7 +141,7 @@ class FiksEttersendelseClientImpl(
             body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
 
             val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, token, "$fileId - $digisosId")
-            body.add("dokument:$fileId", createHttpEntity(inputStream, "dokument:$fileId", file.filnavn,  "application/octet-stream"))
+            body.add("dokument:$fileId", createHttpEntity(InputStreamResource(inputStream), "dokument:$fileId", file.filnavn,  "application/octet-stream"))
         }
     }
 
@@ -233,10 +233,6 @@ class FiksEttersendelseClientImpl(
 
     fun createHttpEntityOfString(body: String, name: String): HttpEntity<Any> {
         return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
-    }
-
-    fun createHttpEntityOfFile(file: FilForOpplasting, name: String): HttpEntity<Any> {
-        return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
     }
 
     private fun createHttpEntity(body: Any, name: String, filename: String?, contentType: String): HttpEntity<Any> {

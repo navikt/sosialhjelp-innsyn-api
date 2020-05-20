@@ -1,4 +1,4 @@
-package no.nav.sbl.sosialhjelpinnsynapi.utbetalinger
+package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -16,8 +16,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.event.apply
-import no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger.UTBETALING_DEFAULT_TITTEL
-import no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger.UtbetalingerService
 import org.assertj.core.api.Assertions.assertThat
 import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach

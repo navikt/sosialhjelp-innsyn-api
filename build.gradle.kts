@@ -126,7 +126,7 @@ dependencies {
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")
     
 //    Http Clients
-    implementation("org.apache.httpcomponents:httpmime:${Versions.httpmimeVersion}")
+    implementation("org.apache.httpcomponents:httpmime:${Versions.httpmime}")
 
 //    Redis
     implementation("io.lettuce:lettuce-core:${Versions.lettuce}")

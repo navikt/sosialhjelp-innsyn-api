@@ -47,4 +47,4 @@ Propertyen `innsyn.cache.redisMocked` styrer hvorvidt en _in-memory_ Redis insta
 TestApplication og profile=mock,log-console
 #### *med* integrasjon til Fiks og login-api
 TestApplication og profile=local,log-console. \
-Da må følgende env-variabler settes: FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, og VIRKSERT_STI
+Da må følgende env-variabler settes: FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI og TESTBRUKER_NATALIE

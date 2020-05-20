@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
+import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -24,19 +25,13 @@ class KrypteringServiceMock : KrypteringService {
             val pipedOutputStream = PipedOutputStream(pipedInputStream)
             val krypteringFuture = CompletableFuture.runAsync(Runnable {
                 try {
-                    KrypteringServiceImpl.log.info("Starter kryptering, filDigisosId=$filDigisosId")
                     kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
-                    KrypteringServiceImpl.log.info("Ferdig med kryptering, filDigisosId=$filDigisosId")
                 } catch (e: Exception) {
-                    KrypteringServiceImpl.log.error("Encryption failed, setting exception on encrypted InputStream filDigisosId=$filDigisosId", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 } finally {
                     try {
-                        KrypteringServiceImpl.log.info("Lukker kryptering OutputStream, filDigisosId=$filDigisosId")
                         pipedOutputStream.close()
-                        KrypteringServiceImpl.log.info("OutputStream for kryptering er lukket, filDigisosId=$filDigisosId")
                     } catch (e: IOException) {
-                        KrypteringServiceImpl.log.error("Failed closing encryption OutputStream", e)
                     }
                 }
             }, executor)

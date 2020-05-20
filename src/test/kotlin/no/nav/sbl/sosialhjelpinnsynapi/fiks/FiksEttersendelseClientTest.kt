@@ -2,12 +2,14 @@ package no.nav.sbl.sosialhjelpinnsynapi.fiks
 
 import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksEttersendelseClientImpl
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksRetryProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
+import no.nav.sbl.sosialhjelpinnsynapi.service.pdf.EttersendelsePdfGenerator
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

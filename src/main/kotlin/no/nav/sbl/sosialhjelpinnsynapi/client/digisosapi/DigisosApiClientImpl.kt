@@ -3,7 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.digisosapi
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClientImpl
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksEttersendelseClientImpl
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksEttersendelseClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.VedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
@@ -17,8 +17,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.*
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap

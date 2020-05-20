@@ -1,16 +1,12 @@
-package no.nav.sbl.sosialhjelpinnsynapi.fiks
+package no.nav.sbl.sosialhjelpinnsynapi.client.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.common.*
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.feilmeldingUtenFnr
-import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.sbl.sosialhjelpinnsynapi.toFiksErrorResponse
-import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
-import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.*
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpPost

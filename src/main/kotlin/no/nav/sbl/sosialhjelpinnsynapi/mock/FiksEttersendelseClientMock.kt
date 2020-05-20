@@ -2,9 +2,9 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.domain.*
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksEttersendelseClient
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksEttersendelseClient
 import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.*
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime

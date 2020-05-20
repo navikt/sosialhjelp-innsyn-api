@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClientImpl
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksEttersendelseClientImpl
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksEttersendelseClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.AccessToken
 import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties

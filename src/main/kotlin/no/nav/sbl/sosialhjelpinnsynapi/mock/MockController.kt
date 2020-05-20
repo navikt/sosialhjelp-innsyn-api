@@ -1,20 +1,29 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 
 @Profile("mock")
 @Unprotected
 @RestController
 @RequestMapping("/api/v1/mock")
-class MockController(private val norgClient: NorgClientMock, private val fiksClientMock: FiksClientMock, private val innsynService: InnsynService) {
+class MockController(
+        private val norgClient: NorgClientMock,
+        private val fiksClientMock: FiksClientMock,
+        private val innsynService: InnsynService
+) {
 
     @PostMapping("/nyNavEnhet", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
     fun oppdaterNavEnhetMock(@RequestBody nyeNavEnheter: List<NyNavEnhet>): ResponseEntity<String> {

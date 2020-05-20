@@ -4,14 +4,16 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.toLocalDate
+import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDate
+import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
 import java.math.BigDecimal
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
 
     val utbetaling = Utbetaling(
             referanse = hendelse.utbetalingsreferanse,
-            status = UtbetalingsStatus.valueOf(hendelse.status?.value() ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()),
+            status = UtbetalingsStatus.valueOf(hendelse.status?.value()
+                    ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()),
             belop = BigDecimal.valueOf(hendelse.belop ?: 0.0),
             beskrivelse = hendelse.beskrivelse,
             forfallsDato = if (hendelse.forfallsdato == null) null else hendelse.forfallsdato.toLocalDate(),
@@ -23,7 +25,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
             kontonummer = if (isAnnenMottaker(hendelse)) null else hendelse.kontonummer,
             utbetalingsmetode = hendelse.utbetalingsmetode,
             vilkar = mutableListOf(),
-            dokumentasjonkrav = mutableListOf()
+            dokumentasjonkrav = mutableListOf(),
+            datoHendelse = hendelse.hendelsestidspunkt.toLocalDateTime()
     )
 
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
@@ -33,9 +36,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     sakForReferanse?.utbetalinger?.add(utbetaling)
     utbetalinger.removeIf { t -> t.referanse == utbetaling.referanse }
     utbetalinger.add(utbetaling)
-//    if(utbetaling.status == UtbetalingsStatus.UTBETALT) {
-//        historikk.add(Hendelse("Utbetaling: " + utbetaling.beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
-//    }
 }
 
 private fun isAnnenMottaker(hendelse: JsonUtbetaling) =

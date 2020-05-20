@@ -3,8 +3,6 @@ spring:
     banner-mode: 'off'
   application:
     name: "sosialhjelp-innsyn-api"
-  profiles:
-    active: ${NAIS_CLUSTER_NAME}
   redis:
     host: ${REDIS_HOST}
     port: 6379
@@ -35,6 +33,8 @@ client:
   id_porten_scope: ${ID_PORTEN_SCOPE}
   id_porten_config_url: ${ID_PORTEN_CONFIG_URL}
   norg_endpoint_url: ${NORG_ENDPOINT_URL}
+  pdl_endpoint_url: ${PDL_ENDPOINT_URL}
+  sts_token_endpoint_url: ${STS_TOKEN_ENDPOINT_URL}
 
 #Token-validering
 no.nav.security.jwt:
@@ -55,3 +55,6 @@ innsyn:
       attempts: 5 # number of attempts
       initial_delay: 250 # initial delay in ms
       max_delay: 10000 # max delay in ms
+  features:
+    vilkar_enabled: ${VILKAR_ENABLED}
+    dokumentasjonkrav_enabled: ${DOKUMENTASJONKRAV_ENABLED}

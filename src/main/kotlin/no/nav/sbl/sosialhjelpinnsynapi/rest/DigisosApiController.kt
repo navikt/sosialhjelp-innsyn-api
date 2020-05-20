@@ -1,15 +1,20 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
-import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiService
-import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.service.digisosapi.DigisosApiService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
 /**
@@ -19,7 +24,9 @@ import org.springframework.web.multipart.MultipartFile
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/digisosapi")
-class DigisosApiController(private val digisosApiService: DigisosApiService) {
+class DigisosApiController(
+        private val digisosApiService: DigisosApiService
+) {
 
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
     fun oppdaterDigisosSak(fiksDigisosId: String?, @RequestBody body: String): ResponseEntity<String> {

@@ -2,10 +2,15 @@
   "namespace": "q0",
   "ingress": [
     "https://sosialhjelp-innsyn-api-q0.nais.oera-q.local/sosialhjelp/innsyn-api",
+    "https://sosialhjelp-innsyn-api-q0.dev-sbs.nais.io/sosialhjelp/innsyn-api",
     "https://www-q0.nav.no/sosialhjelp/innsyn-api"
   ],
-  "virksomhetssertifikat_vault_path": "/secret/virksomhetssertifikat/preprod/shared",
-  "application_vault_path": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
+  "kvPaths": {
+    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
+    "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
+    "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
+    "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q0"
+  },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",
@@ -18,7 +23,12 @@
     "AZUREAD_DISCOVERYURL": "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1",
     "AZUREAD_CLIENTID": "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
-    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local"
+    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
+    "VILKAR_ENABLED": "true",
+    "DOKUMENTASJONKRAV_ENABLED": "true",
+    "SPRING_PROFILES_ACTIVE": "dev-sbs,log-kibana",
+    "PDL_ENDPOINT_URL": "https://api-gw-q0.oera.no/pdl-api/graphql",
+    "STS_TOKEN_ENDPOINT_URL": "https://api-gw-q0.oera.no/security-token-service/rest/v1/sts/token"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

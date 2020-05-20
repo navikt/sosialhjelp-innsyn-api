@@ -1,11 +1,15 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
-import no.nav.sbl.sosialhjelpinnsynapi.digisosapi.DigisosApiClient
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
-import no.nav.sbl.sosialhjelpinnsynapi.toLocalDateTime
-import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
-import no.nav.sbl.sosialhjelpinnsynapi.utils.DigisosApiWrapper
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.FilForOpplasting
+import no.nav.sbl.sosialhjelpinnsynapi.client.digisosapi.DigisosApiClient
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
+import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
+import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
+import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -15,7 +19,9 @@ import java.util.*
 
 @Profile("mock")
 @Component
-class DigisosApiClientMock(private val fiksClientMock: FiksClientMock) : DigisosApiClient {
+class DigisosApiClientMock(
+        private val fiksClientMock: FiksClientMock
+) : DigisosApiClient {
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
         val dokumentlagerId = UUID.randomUUID().toString()

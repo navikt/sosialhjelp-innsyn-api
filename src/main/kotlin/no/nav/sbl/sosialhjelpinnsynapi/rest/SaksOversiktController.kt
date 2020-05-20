@@ -1,25 +1,35 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksDetaljerResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksListeResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.sbl.sosialhjelpinnsynapi.oppgave.OppgaveService
-import no.nav.sbl.sosialhjelpinnsynapi.saksstatus.DEFAULT_TITTEL
-import no.nav.sbl.sosialhjelpinnsynapi.unixTimestampToDate
+import no.nav.sbl.sosialhjelpinnsynapi.service.oppgave.OppgaveService
+import no.nav.sbl.sosialhjelpinnsynapi.service.saksstatus.DEFAULT_TITTEL
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.unixTimestampToDate
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/innsyn")
-class SaksOversiktController(private val fiksClient: FiksClient,
-                             private val eventService: EventService,
-                             private val oppgaveService: OppgaveService) {
+class SaksOversiktController(
+        private val fiksClient: FiksClient,
+        private val eventService: EventService,
+        private val oppgaveService: OppgaveService
+) {
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
@@ -68,7 +78,9 @@ class SaksOversiktController(private val fiksClient: FiksClient,
     }
 
     private fun hentNavn(model: InternalDigisosSoker): String {
-        return model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString { it.tittel ?: DEFAULT_TITTEL }
+        return model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString {
+            it.tittel ?: DEFAULT_TITTEL
+        }
     }
 
     private fun hentAntallNyeOppgaver(model: InternalDigisosSoker, fiksDigisosId: String, token: String): Int? {

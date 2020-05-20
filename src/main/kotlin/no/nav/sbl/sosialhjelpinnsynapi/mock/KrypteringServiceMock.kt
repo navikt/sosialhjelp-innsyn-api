@@ -1,8 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
-import no.ks.kryptering.CMSKrypteringImpl
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringService
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.KrypteringServiceImpl
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.io.*

@@ -5,15 +5,16 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VEDLEGG_KREVES_STATUS
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,8 +25,9 @@ internal class UtbetalingTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
+    private val featureToggles: FeatureToggles = mockk()
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, featureToggles)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
@@ -72,7 +74,7 @@ internal class UtbetalingTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
         assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(5)
+        assertThat(model.historikk).hasSize(6)
 
         assertThat(model.saker[0].tittel).isEqualTo(tittel_1) // tittel for sak fra saksstatus-hendelse
 
@@ -87,7 +89,7 @@ internal class UtbetalingTest {
         assertThat(utbetaling.fom).isEqualTo("2019-12-01")
         assertThat(utbetaling.tom).isEqualTo("2019-12-31")
         assertThat(utbetaling.mottaker).isEqualTo("fnr")
-        assertThat(utbetaling.kontonummer).isEqualTo("kontonummer")
+        assertThat(utbetaling.kontonummer).isNull()
         assertThat(utbetaling.utbetalingsmetode).isEqualTo("pose med krølla femtilapper")
         assertThat(utbetaling.vilkar).isEmpty()
         assertThat(utbetaling.dokumentasjonkrav).isEmpty()
@@ -102,7 +104,7 @@ internal class UtbetalingTest {
                         .withHendelser(listOf(
                                 SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                UTBETALING.withHendelsestidspunkt(tidspunkt_3)
+                                UTBETALING_BANKOVERFORING.withHendelsestidspunkt(tidspunkt_3)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 
@@ -111,7 +113,8 @@ internal class UtbetalingTest {
         assertThat(model).isNotNull
         assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
 
-        assertThat(model.utbetalinger[0].belop).isEqualTo("1234.56")
+        val utbetaling = model.utbetalinger[0]
+        assertThat(utbetaling.belop).isEqualTo("1234.56")
     }
 
     @Test
@@ -123,7 +126,7 @@ internal class UtbetalingTest {
                         .withHendelser(listOf(
                                 SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                UTBETALING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3)
+                                UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
 

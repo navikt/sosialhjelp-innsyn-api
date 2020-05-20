@@ -6,7 +6,17 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonForvaltningsbrev
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumenter
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtaksfil
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -19,7 +29,7 @@ const val svarUtNr = 42
 const val navKontor = "1337"
 const val navKontor2 = "2244"
 
-const val tittel_1 = "tittel"
+const val tittel_1 = "tittelen din"
 const val tittel_2 = "tittel2"
 
 const val referanse_1 = "sak1"
@@ -61,6 +71,10 @@ val SOKNADS_STATUS_UNDERBEHANDLING = JsonSoknadsStatus()
 val SOKNADS_STATUS_FERDIGBEHANDLET = JsonSoknadsStatus()
         .withType(JsonHendelse.Type.SOKNADS_STATUS)
         .withStatus(JsonSoknadsStatus.Status.FERDIGBEHANDLET)
+
+val SOKNADS_STATUS_BEHANDLES_IKKE = JsonSoknadsStatus()
+        .withType(JsonHendelse.Type.SOKNADS_STATUS)
+        .withStatus(JsonSoknadsStatus.Status.BEHANDLES_IKKE)
 
 val TILDELT_NAV_KONTOR = JsonTildeltNavKontor()
         .withType(JsonHendelse.Type.TILDELT_NAV_KONTOR)
@@ -146,10 +160,27 @@ val UTBETALING = JsonUtbetaling()
         .withTom("2019-12-31")
         .withAnnenMottaker(false)
         .withMottaker("fnr")
-        .withKontonummer("kontonummer")
+        .withKontonummer(null)
         .withUtbetalingsmetode("pose med krølla femtilapper")
 
-val UTBETALING_ANNEN_MOTTAKER = JsonUtbetaling()
+val UTBETALING_BANKOVERFORING = JsonUtbetaling()
+        .withType(JsonHendelse.Type.UTBETALING)
+        .withUtbetalingsreferanse(utbetaling_ref_1)
+        .withSaksreferanse(referanse_1)
+        .withRammevedtaksreferanse(null)
+        .withStatus(JsonUtbetaling.Status.UTBETALT)
+        .withBelop(1234.56)
+        .withBeskrivelse(tittel_1)
+        .withForfallsdato("2019-12-31")
+        .withUtbetalingsdato("2019-12-24")
+        .withFom("2019-12-01")
+        .withTom("2019-12-31")
+        .withAnnenMottaker(false)
+        .withMottaker("fnr")
+        .withKontonummer("kontonummer")
+        .withUtbetalingsmetode("bankoverføring")
+
+val UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER = JsonUtbetaling()
         .withType(JsonHendelse.Type.UTBETALING)
         .withUtbetalingsreferanse(utbetaling_ref_1)
         .withSaksreferanse(referanse_1)
@@ -163,8 +194,8 @@ val UTBETALING_ANNEN_MOTTAKER = JsonUtbetaling()
         .withTom(null)
         .withAnnenMottaker(true)
         .withMottaker("utleier")
-        .withKontonummer(null)
-        .withUtbetalingsmetode("pose med krølla femtilapper")
+        .withKontonummer("utleierKontonummer")
+        .withUtbetalingsmetode("bankoverføring")
 
 val VILKAR_OPPFYLT = JsonVilkar()
         .withType(JsonHendelse.Type.VILKAR)
@@ -184,6 +215,7 @@ fun resetHendelser() {
     SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(null)
     SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
     SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(null)
+    SOKNADS_STATUS_BEHANDLES_IKKE.withHendelsestidspunkt(null)
     TILDELT_NAV_KONTOR.withHendelsestidspunkt(null)
     TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(null)
     SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(null)
@@ -197,6 +229,8 @@ fun resetHendelser() {
     DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(null)
     FORELOPIGSVAR.withHendelsestidspunkt(null)
     UTBETALING.withHendelsestidspunkt(null)
+    UTBETALING_BANKOVERFORING.withHendelsestidspunkt(null)
+    UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.withHendelsestidspunkt(null)
     DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(null)
     VILKAR_OPPFYLT.withHendelsestidspunkt(null)
 }

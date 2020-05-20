@@ -3,24 +3,26 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
-import no.nav.sbl.sosialhjelpinnsynapi.logger
-import no.nav.sbl.sosialhjelpinnsynapi.utbetalinger.UtbetalingerService
+import no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger.UtbetalingerService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
-@RequestMapping("/api/v1/innsyn/")
-class UtbetalingerController(private val utbetalingerService: UtbetalingerService) {
+@RequestMapping("/api/v1/innsyn")
+class UtbetalingerController(
+        private val utbetalingerService: UtbetalingerService
+) {
 
-    companion object {
-        val log by logger()
-    }
-
-    @GetMapping("utbetalinger")
+    @GetMapping("/utbetalinger")
     fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
         // Gitt innlogget bruker
         try {
@@ -34,4 +36,7 @@ class UtbetalingerController(private val utbetalingerService: UtbetalingerServic
         }
     }
 
+    companion object {
+        private val log by logger()
+    }
 }

@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.redis
 
 import com.github.fppt.jedismock.RedisServer
-import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 
 object RedisMockUtil {
     private val log by logger()

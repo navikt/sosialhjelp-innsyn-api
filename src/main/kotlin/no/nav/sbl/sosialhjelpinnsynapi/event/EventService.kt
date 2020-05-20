@@ -2,23 +2,41 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonRammevedtak
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_SOKNADEN
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
-import no.nav.sbl.sosialhjelpinnsynapi.hentDokumentlagerUrl
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
-import no.nav.sbl.sosialhjelpinnsynapi.unixToLocalDateTime
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
+import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Soknadsmottaker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
+import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.hentDokumentlagerUrl
+import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import org.springframework.stereotype.Component
 
 @Component
-class EventService(private val clientProperties: ClientProperties,
-                   private val innsynService: InnsynService,
-                   private val vedleggService: VedleggService,
-                   private val norgClient: NorgClient) {
+class EventService(
+        private val clientProperties: ClientProperties,
+        private val innsynService: InnsynService,
+        private val vedleggService: VedleggService,
+        private val norgClient: NorgClient,
+        private val featureToggles: FeatureToggles
+) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
@@ -97,7 +115,7 @@ class EventService(private val clientProperties: ClientProperties,
             is JsonForelopigSvar -> apply(hendelse, clientProperties)
             is JsonUtbetaling -> apply(hendelse)
             is JsonVilkar -> apply(hendelse)
-            is JsonDokumentasjonkrav -> apply(hendelse)
+            is JsonDokumentasjonkrav -> apply(hendelse, featureToggles)
             is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }

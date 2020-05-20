@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.common
 
-import no.nav.sbl.sosialhjelpinnsynapi.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -13,15 +13,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
-
-    companion object {
-        val log by logger()
-
-        private const val UNEXPECTED_ERROR = "unexpected_error"
-        private const val FIKS_ERROR = "fiks_error"
-        private const val NORG_ERROR = "norg_error"
-        private const val FILOPPLASTING_ERROR = "FILOPPLASTING_ERROR"
-    }
 
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<ErrorMessage> {
@@ -91,6 +82,15 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         log.error("Det er mismatch mellom nedlastede filer og metadata", e)
         val error = ErrorMessage(FIKS_ERROR, "Det er mismatch mellom nedlastede filer og metadata")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    companion object {
+        private val log by logger()
+
+        private const val UNEXPECTED_ERROR = "unexpected_error"
+        private const val FIKS_ERROR = "fiks_error"
+        private const val NORG_ERROR = "norg_error"
+        private const val FILOPPLASTING_ERROR = "FILOPPLASTING_ERROR"
     }
 }
 

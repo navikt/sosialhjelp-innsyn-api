@@ -5,15 +5,16 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
-import no.nav.sbl.sosialhjelpinnsynapi.innsyn.InnsynService
-import no.nav.sbl.sosialhjelpinnsynapi.norg.NorgClient
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VEDLEGG_KREVES_STATUS
-import no.nav.sbl.sosialhjelpinnsynapi.vedlegg.VedleggService
+import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VEDLEGG_KREVES_STATUS
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,8 +26,9 @@ internal class TildeltNavKontorTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
+    private val featureToggles: FeatureToggles = mockk()
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, featureToggles)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()

@@ -2,7 +2,9 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger.UtbetalingerService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,16 +21,18 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class UtbetalingerController(
-        private val utbetalingerService: UtbetalingerService
+        private val utbetalingerService: UtbetalingerService,
+        private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/utbetalinger")
     fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
-        // Gitt innlogget bruker
+        tilgangskontrollService.harTilgang(getUserIdFromToken())
+
         try {
             return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(token, month))
         } catch (e: FiksClientException) {
-            if(e.status == HttpStatus.FORBIDDEN) {
+            if (e.status == HttpStatus.FORBIDDEN) {
                 log.error("FiksClientException i UtbetalingerController status: ${e.status.value()} message: ${e.message}", e)
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
             }

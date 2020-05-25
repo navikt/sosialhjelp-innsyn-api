@@ -1,11 +1,15 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.StaticSubjectHandlerImpl
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveResponse
@@ -15,6 +19,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.MOTTATT
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.service.oppgave.OppgaveService
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
 import org.apache.http.HttpStatus
 import org.assertj.core.api.Assertions.assertThat
@@ -26,8 +31,9 @@ internal class SaksOversiktControllerTest {
     private val fiksClient: FiksClient = mockk()
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
+    private val tilgangskontrollService: TilgangskontrollService = mockk()
 
-    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService)
+    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontrollService)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -43,6 +49,10 @@ internal class SaksOversiktControllerTest {
     @BeforeEach
     internal fun setUp() {
         clearAllMocks()
+
+        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
+
+        every { tilgangskontrollService.harTilgang(any()) } just Runs
 
         every { digisosSak1.fiksDigisosId } returns "123"
         every { digisosSak1.sistEndret } returns 0L

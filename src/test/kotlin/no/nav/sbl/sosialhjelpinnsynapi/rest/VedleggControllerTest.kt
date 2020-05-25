@@ -1,12 +1,17 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.StaticSubjectHandlerImpl
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
@@ -27,8 +32,9 @@ internal class VedleggControllerTest {
     private val vedleggOpplastingService: VedleggOpplastingService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val tilgangskontrollService: TilgangskontrollService = mockk()
 
-    private val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties)
+    private val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontrollService)
 
     private val id = "123"
 
@@ -51,6 +57,9 @@ internal class VedleggControllerTest {
     @BeforeEach
     internal fun setUp() {
         clearMocks(vedleggOpplastingService, vedleggService)
+        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
+
+        every { tilgangskontrollService.harTilgang(any()) } just Runs
     }
 
     @Test

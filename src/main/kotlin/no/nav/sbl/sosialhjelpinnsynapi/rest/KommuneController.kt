@@ -1,9 +1,11 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneService
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatusDetaljer
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -19,11 +21,14 @@ import java.util.*
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class KommuneController(
-        private val kommuneService: KommuneService
+        private val kommuneService: KommuneService,
+        private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/{fiksDigisosId}/kommune")
     fun hentKommuneInfo(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<KommuneResponse> {
+        tilgangskontrollService.harTilgang(SubjectHandlerUtils.getUserIdFromToken())
+
         val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
 
         return ResponseEntity.ok().body(

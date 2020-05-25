@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksDetaljerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksListeResponse
@@ -10,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.service.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.service.saksstatus.DEFAULT_TITTEL
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixTimestampToDate
@@ -28,11 +30,14 @@ import org.springframework.web.bind.annotation.RestController
 class SaksOversiktController(
         private val fiksClient: FiksClient,
         private val eventService: EventService,
-        private val oppgaveService: OppgaveService
+        private val oppgaveService: OppgaveService,
+        private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
+        tilgangskontrollService.harTilgang(getUserIdFromToken())
+
         val saker = try {
             fiksClient.hentAlleDigisosSaker(token)
         } catch (e: FiksException) {
@@ -55,6 +60,8 @@ class SaksOversiktController(
 
     @GetMapping("/saksDetaljer")
     fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
+        tilgangskontrollService.harTilgang(getUserIdFromToken())
+
         if (id.isEmpty()) {
             return ResponseEntity.noContent().build()
         }

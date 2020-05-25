@@ -2,10 +2,12 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator.sjekkXsrfToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
@@ -35,7 +37,8 @@ const val LENGTH_OF_UUID_PART = 9
 class VedleggController(
         private val vedleggOpplastingService: VedleggOpplastingService,
         private val vedleggService: VedleggService,
-        private val clientProperties: ClientProperties
+        private val clientProperties: ClientProperties,
+        private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
@@ -45,13 +48,15 @@ class VedleggController(
                     @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
                     request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
+        tilgangskontrollService.harTilgang(getUserIdFromToken())
+
         sjekkXsrfToken(fiksDigisosId, request)
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
                 ?: throw IllegalStateException("Mangler metadata.json på digisosId=$fiksDigisosId")
         val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)
         files.removeIf { it.originalFilename == "metadata.json" }
 
-        if(files.isEmpty()) {
+        if (files.isEmpty()) {
             throw IllegalStateException("Ingen filer i forsendelse på digisosId=$fiksDigisosId")
         }
         val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
@@ -60,6 +65,8 @@ class VedleggController(
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
     fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
+        tilgangskontrollService.harTilgang(getUserIdFromToken())
+
         val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(fiksDigisosId, token)
         if (internalVedleggList.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
@@ -92,7 +99,7 @@ class VedleggController(
     }
 }
 
-data class OpplastetVedleggMetadata (
+data class OpplastetVedleggMetadata(
         val type: String,
         val tilleggsinfo: String?,
         val filer: MutableList<OpplastetFil>,
@@ -100,6 +107,6 @@ data class OpplastetVedleggMetadata (
         val innsendelsesfrist: LocalDate?
 )
 
-data class OpplastetFil (
+data class OpplastetFil(
         var filnavn: String
 )

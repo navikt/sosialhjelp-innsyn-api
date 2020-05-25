@@ -28,7 +28,7 @@
     "VILKAR_ENABLED": "true",
     "DOKUMENTASJONKRAV_ENABLED": "true",
     "SPRING_PROFILES_ACTIVE": "dev-sbs,log-kibana",
-    "PDL_ENDPOINT_URL": "https://api-gw-q0.oera.no/pdl-api/graphql",
+    "PDL_ENDPOINT_URL": "https://api-gw-q1.oera.no/pdl-api/graphql",
     "STS_TOKEN_ENDPOINT_URL": "https://api-gw-q0.oera.no/security-token-service/rest/v1/sts/token"
   },
   "minReplicas": "2",

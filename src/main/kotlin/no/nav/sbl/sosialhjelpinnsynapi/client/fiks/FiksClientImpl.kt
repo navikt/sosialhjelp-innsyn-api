@@ -76,7 +76,6 @@ class FiksClientImpl(
                 return obj
             } catch (e: IOException) {
                 log.debug("Error mapping cache to DigisosSak:", e)
-                log.debug("DEBUG innhold: $get") //TODO: fjern
                 log.warn("Fant key=$digisosId i cache, men value var ikke DigisosSak")
             }
         }

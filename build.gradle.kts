@@ -7,11 +7,11 @@ group = "no.nav.sbl"
 
 object Versions {
     const val kotlin = "1.3.70"
-    const val springBoot = "2.2.7.RELEASE"
+    const val springBoot = "2.3.0.RELEASE"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
-    const val micrometerRegistry = "1.3.8"
+    const val micrometerRegistry = "1.5.1"
     const val prometheus = "0.8.1"
     const val tokenValidation = "1.1.5"
     const val jackson = "2.11.0"
@@ -88,6 +88,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
+    implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
 
 //    Micrometer/Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")

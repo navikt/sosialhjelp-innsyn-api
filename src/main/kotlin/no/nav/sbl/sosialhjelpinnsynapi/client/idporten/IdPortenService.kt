@@ -7,19 +7,20 @@ import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.util.Base64
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.ktor.client.features.ServerResponseException
-import io.ktor.client.request.forms.submitForm
-import io.ktor.client.request.get
-import io.ktor.client.request.url
-import io.ktor.http.parametersOf
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.utils.defaultHttpClient
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 import java.io.File
 import java.security.KeyPair
 import java.security.KeyStore
@@ -30,37 +31,39 @@ import java.util.*
 @Profile("!mock")
 @Component
 class IdPortenService(
-        clientProperties: ClientProperties
+        clientProperties: ClientProperties,
+        private val restTemplate: RestTemplate
 ) {
 
     private val idPortenTokenUrl = clientProperties.idPortenTokenUrl
     private val idPortenClientId = clientProperties.idPortenClientId
     private val idPortenScope = clientProperties.idPortenScope
     private val idPortenConfigUrl = clientProperties.idPortenConfigUrl
-    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI")
-            ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
+    private val VIRKSERT_STI: String? = System.getenv("VIRKSERT_STI") ?: "/var/run/secrets/nais.io/virksomhetssertifikat"
+    private val idPortenOidcConfiguration: IdPortenOidcConfiguration
 
-    val oidcConfiguration: IdPortenOidcConfiguration = runBlocking {
-        log.debug("Forsøker å hente idporten-config fra $idPortenConfigUrl")
-        val config = defaultHttpClient.get<IdPortenOidcConfiguration> {
-            url(idPortenConfigUrl)
+    init {
+        idPortenOidcConfiguration = runBlocking {
+            log.debug("Forsøker å hente idporten-config fra $idPortenConfigUrl")
+            val uriComponents = UriComponentsBuilder.fromHttpUrl(idPortenConfigUrl).build()
+            val response = restTemplate.exchange(uriComponents.toUriString(), HttpMethod.GET, HttpEntity<Nothing>(HttpHeaders()), IdPortenOidcConfiguration::class.java)
+            log.info("Hentet idporten-config fra $idPortenConfigUrl")
+            response.body!!
+        }.also {
+            log.info("idporten-config: OIDC configuration initialized")
         }
-        log.info("Hentet idporten-config fra $idPortenConfigUrl")
-        config
-    }.also {
-        log.info("idporten-config: OIDC configuration initialized")
     }
 
     suspend fun requestToken(attempts: Int = 10): AccessToken =
-            retry(attempts = attempts, retryableExceptions = *arrayOf(ServerResponseException::class)) {
+            retry(attempts = attempts, retryableExceptions = *arrayOf(HttpServerErrorException::class)) {
                 val jws = createJws()
                 log.info("Got jws, getting token (virksomhetssertifikat)")
-                val response = defaultHttpClient.submitForm<IdPortenAccessTokenResponse>(
-                        parametersOf(GRANT_TYPE_PARAM to listOf(GRANT_TYPE), ASSERTION_PARAM to listOf(jws.token))
-                ) {
-                    url(idPortenTokenUrl)
-                }
-                AccessToken(response.accessToken)
+                val uriComponents = UriComponentsBuilder.fromHttpUrl(idPortenTokenUrl).build()
+                val body = LinkedMultiValueMap<String, String>()
+                body.add(GRANT_TYPE_PARAM, GRANT_TYPE)
+                body.add(ASSERTION_PARAM, jws.token)
+                val response = restTemplate.exchange(uriComponents.toUriString(), HttpMethod.POST, HttpEntity(body, HttpHeaders()), IdPortenAccessTokenResponse::class.java)
+                AccessToken(response.body!!.accessToken)
             }
 
     fun createJws(
@@ -105,7 +108,7 @@ class IdPortenService(
         return SignedJWT(
                 JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(mutableListOf(Base64.encode(pair.second))).build(),
                 JWTClaimsSet.Builder()
-                        .audience(oidcConfiguration.issuer)
+                        .audience(idPortenOidcConfiguration.issuer)
                         .issuer(issuer)
                         .issueTime(date)
                         .jwtID(UUID.randomUUID().toString())

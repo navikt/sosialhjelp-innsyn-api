@@ -20,9 +20,9 @@ object Versions {
     const val resilience4j = "1.3.1"
     const val rxKotlin = "2.4.0"
     const val vavrKotlin = "0.10.2"
-    const val ktor = "1.3.1"
     const val konfig = "1.6.10.0"
     const val kotlinCoroutines = "1.3.3"
+    const val commonsCodec = "1.14"
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
     const val tika = "1.23"
@@ -79,16 +79,6 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-//    Ktor
-    implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
-    implementation("io.ktor:ktor-auth:${Versions.ktor}")
-    implementation("io.ktor:ktor-auth-jwt:${Versions.ktor}")
-    implementation("io.ktor:ktor-jackson:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-core:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-apache:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-json:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-jackson:${Versions.ktor}")
-
 //    Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.kotlinCoroutines}")
 
@@ -130,6 +120,7 @@ dependencies {
     implementation("com.github.fppt:jedis-mock:${Versions.redisMock}")
 
 //    Div
+    implementation("commons-codec:commons-codec:${Versions.commonsCodec}")
     implementation("commons-io:commons-io:${Versions.commonsIo}")
     implementation("commons-fileupload:commons-fileupload:${Versions.fileUpload}")
     implementation("org.apache.tika:tika-core:${Versions.tika}")

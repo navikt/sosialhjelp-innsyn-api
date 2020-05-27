@@ -7,6 +7,7 @@ group = "no.nav.sbl"
 
 object Versions {
     const val kotlin = "1.3.70"
+    const val coroutines = "1.3.7"
     const val springBoot = "2.3.0.RELEASE"
     const val logback = "1.2.3"
     const val logstash = "6.3"
@@ -17,11 +18,7 @@ object Versions {
     const val jackson = "2.11.0"
     const val guava = "28.2-jre"
     const val swagger = "2.9.2"
-    const val resilience4j = "1.3.1"
-    const val rxKotlin = "2.4.0"
-    const val vavrKotlin = "0.10.2"
     const val konfig = "1.6.10.0"
-    const val kotlinCoroutines = "1.3.3"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
@@ -80,7 +77,7 @@ dependencies {
     implementation(kotlin("reflect"))
 
 //    Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.kotlinCoroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
 
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
@@ -130,13 +127,6 @@ dependencies {
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     implementation("com.google.guava:guava:${Versions.guava}")
     implementation("io.netty:netty-codec-http2:${Versions.nettyCodec}")
-
-//    Selftest
-    implementation ("io.github.resilience4j:resilience4j-kotlin:${Versions.resilience4j}")
-    implementation ("io.github.resilience4j:resilience4j-timelimiter:${Versions.resilience4j}")
-    implementation ("io.github.resilience4j:resilience4j-circuitbreaker:${Versions.resilience4j}")
-    implementation ("io.reactivex.rxjava2:rxkotlin:${Versions.rxKotlin}")
-    implementation ("io.vavr:vavr-kotlin:${Versions.vavrKotlin}")
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")

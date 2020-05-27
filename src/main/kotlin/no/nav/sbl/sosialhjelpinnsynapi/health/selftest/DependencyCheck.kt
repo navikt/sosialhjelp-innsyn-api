@@ -1,9 +1,5 @@
-package no.nav.sbl.sosialhjelpinnsynapi.health.ny
+package no.nav.sbl.sosialhjelpinnsynapi.health.selftest
 
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyCheckResult
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Result
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import java.util.concurrent.TimeoutException
 

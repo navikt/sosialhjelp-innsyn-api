@@ -1,9 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import no.nav.sbl.sosialhjelpinnsynapi.health.ny.DependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyCheckResult
 import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Result
@@ -23,7 +27,8 @@ const val APPLICATION_READY = "Application is ready!"
 @RestController
 @RequestMapping(value = ["/internal"])
 class HealthController(
-        private val dependencyCheckList: List<AbstractDependencyCheck>
+        private val dependencyCheckList: List<AbstractDependencyCheck>,
+        private val dependencyChecks: List<DependencyCheck>
 ) {
 
     val isAlive: String
@@ -50,6 +55,18 @@ class HealthController(
         )
     }
 
+    @GetMapping("/nySelftest")
+    fun nySelftest(): SelftestResult {
+        val results = mutableListOf<DependencyCheckResult>()
+        runBlocking { nyCheckDependencies(results) }
+        return SelftestResult(
+                appName = "sosialhjelp-innsyn-api",
+                version = "version",
+                result = getOverallSelftestResult(results),
+                dependencyCheckResults = results
+        )
+    }
+
     private fun getOverallSelftestResult(results: List<DependencyCheckResult>): Result {
         if (results.stream().anyMatch { result -> result.result == Result.ERROR }) {
             return Result.ERROR
@@ -64,5 +81,13 @@ class HealthController(
         dependencyCheckList
                 .asFlow()
                 .collect { results.add(it.check().get()) }
+    }
+
+    private suspend fun nyCheckDependencies(results: MutableList<DependencyCheckResult>) {
+        coroutineScope {
+            dependencyChecks.forEach {
+                withContext(Dispatchers.Default) { results.add(it.check()) }
+            }
+        }
     }
 }

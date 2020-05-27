@@ -23,9 +23,9 @@ abstract class DependencyCheck(
 
         try {
             doCheck()
-        } catch (e: Exception) {
+        } catch (t: Throwable) {
             log.warn("Call to dependency=$name with type=$type at url=$address timed out or circuitbreaker was tripped.", throwable)
-            throwable = e
+            throwable = t
         }
 
         val endTime = System.currentTimeMillis()

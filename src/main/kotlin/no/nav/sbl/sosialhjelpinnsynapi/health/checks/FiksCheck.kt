@@ -22,11 +22,7 @@ class FiksCheck(
 ) {
 
     override fun doCheck() {
-        try {
-            fiksClient.hentKommuneInfoForAlle()
-        } catch (e: Exception) {
-            log.warn("Selftest - Fiks hentKommuneInfo feilet", e)
-        }
+        fiksClient.hentKommuneInfoForAlle()
     }
 
     companion object {

@@ -27,7 +27,6 @@ object Versions {
     const val fileUpload = "1.4"
     const val tika = "1.23"
     const val pdfBox = "2.0.19"
-    const val httpmime = "4.5.12"
     const val fiksKryptering = "1.0.9"
     const val redisMock = "0.1.16"
     const val lettuce = "5.2.2.RELEASE"
@@ -124,9 +123,6 @@ dependencies {
 
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")
-    
-//    Http Clients
-    implementation("org.apache.httpcomponents:httpmime:${Versions.httpmime}")
 
 //    Redis
     implementation("io.lettuce:lettuce-core:${Versions.lettuce}")

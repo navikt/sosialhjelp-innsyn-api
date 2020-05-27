@@ -147,7 +147,6 @@ class DigisosApiClientImpl(
         return HttpEntity(body, headerMap)
     }
 
-
     private fun headers(): HttpHeaders {
         val headers = HttpHeaders()
         val accessToken = runBlocking { idPortenService.requestToken() }

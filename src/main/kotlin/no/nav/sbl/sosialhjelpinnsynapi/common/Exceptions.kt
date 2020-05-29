@@ -55,6 +55,6 @@ class PdlException(
         override val message: String?
 ) : RuntimeException(message)
 
-class TilgangskontrollExpcetion(
+class TilgangskontrollException(
         override val message: String?
 ) : RuntimeException(message)

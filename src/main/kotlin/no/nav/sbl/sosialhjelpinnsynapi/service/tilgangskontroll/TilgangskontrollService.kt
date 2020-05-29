@@ -4,7 +4,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlPerson
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.isKode6Or7
 import no.nav.sbl.sosialhjelpinnsynapi.common.PdlException
-import no.nav.sbl.sosialhjelpinnsynapi.common.TilgangskontrollExpcetion
+import no.nav.sbl.sosialhjelpinnsynapi.common.TilgangskontrollException
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,7 +16,7 @@ class TilgangskontrollService(
         val hentPerson: PdlPerson = pdlClient.hentPerson(ident)?.hentPerson ?: throw PdlException(null, "PDL returnerte PdlPersonResponse.data = null")
 
         if (hentPerson.isKode6Or7()) {
-            throw TilgangskontrollExpcetion("Bruker har ikke tilgang til innsyn")
+            throw TilgangskontrollException("Bruker har ikke tilgang til innsyn")
         }
     }
 

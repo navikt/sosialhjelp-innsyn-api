@@ -7,7 +7,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Gradering
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlHentPerson
 import no.nav.sbl.sosialhjelpinnsynapi.common.PdlException
-import no.nav.sbl.sosialhjelpinnsynapi.common.TilgangskontrollExpcetion
+import no.nav.sbl.sosialhjelpinnsynapi.common.TilgangskontrollException
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
@@ -61,7 +61,7 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertThatExceptionOfType(TilgangskontrollExpcetion::class.java)
+        assertThatExceptionOfType(TilgangskontrollException::class.java)
                 .isThrownBy { service.harTilgang(ident) }
     }
 
@@ -70,7 +70,7 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.FORTROLIG))
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertThatExceptionOfType(TilgangskontrollExpcetion::class.java)
+        assertThatExceptionOfType(TilgangskontrollException::class.java)
                 .isThrownBy { service.harTilgang(ident) }
 
     }

@@ -24,7 +24,7 @@ class SaksStatusController(
 
     @GetMapping("/{fiksDigisosId}/saksStatus", produces = ["application/json;charset=UTF-8"])
     fun hentSaksStatuser(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<SaksStatusResponse>> {
-        tilgangskontrollService.harTilgang(getUserIdFromToken())
+        tilgangskontrollService.sjekkTilgang(getUserIdFromToken())
 
         val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
         if (saksStatuser.isEmpty()) {

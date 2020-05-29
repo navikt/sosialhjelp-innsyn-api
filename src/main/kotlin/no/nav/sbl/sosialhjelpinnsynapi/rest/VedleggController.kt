@@ -48,7 +48,7 @@ class VedleggController(
                     @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
                     request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
-        tilgangskontrollService.harTilgang(getUserIdFromToken())
+        tilgangskontrollService.sjekkTilgang(getUserIdFromToken())
 
         sjekkXsrfToken(fiksDigisosId, request)
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
@@ -65,7 +65,7 @@ class VedleggController(
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
     fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
-        tilgangskontrollService.harTilgang(getUserIdFromToken())
+        tilgangskontrollService.sjekkTilgang(getUserIdFromToken())
 
         val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(fiksDigisosId, token)
         if (internalVedleggList.isEmpty()) {

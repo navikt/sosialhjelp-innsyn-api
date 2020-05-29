@@ -27,7 +27,7 @@ class KommuneController(
 
     @GetMapping("/{fiksDigisosId}/kommune")
     fun hentKommuneInfo(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<KommuneResponse> {
-        tilgangskontrollService.harTilgang(SubjectHandlerUtils.getUserIdFromToken())
+        tilgangskontrollService.sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken())
 
         val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
 

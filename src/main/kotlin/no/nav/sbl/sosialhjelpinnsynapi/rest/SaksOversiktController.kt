@@ -36,7 +36,7 @@ class SaksOversiktController(
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
-        tilgangskontrollService.harTilgang(getUserIdFromToken())
+        tilgangskontrollService.sjekkTilgang(getUserIdFromToken())
 
         val saker = try {
             fiksClient.hentAlleDigisosSaker(token)
@@ -60,7 +60,7 @@ class SaksOversiktController(
 
     @GetMapping("/saksDetaljer")
     fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
-        tilgangskontrollService.harTilgang(getUserIdFromToken())
+        tilgangskontrollService.sjekkTilgang(getUserIdFromToken())
 
         if (id.isEmpty()) {
             return ResponseEntity.noContent().build()

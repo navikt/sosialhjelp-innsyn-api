@@ -27,7 +27,7 @@ class UtbetalingerController(
 
     @GetMapping("/utbetalinger")
     fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
-        tilgangskontrollService.harTilgang(getUserIdFromToken())
+        tilgangskontrollService.sjekkTilgang(getUserIdFromToken())
 
         try {
             return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(token, month))

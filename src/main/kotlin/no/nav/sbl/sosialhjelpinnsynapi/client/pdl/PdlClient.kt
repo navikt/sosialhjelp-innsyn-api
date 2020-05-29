@@ -51,14 +51,14 @@ class PdlClientImpl(
                         .forEach { log.error("PDL - noe feilet. Message=${it.message}, path=${it.path}, code=${it.extensions.code}, classification=${it.extensions.classification}") }
                 val firstError = pdlPersonResponse.errors[0]
                 throw PdlException(
-                        firstError.extensions.code?.toUpperCase()?.let { HttpStatus.valueOf(it) },
+                        firstError.extensions.code?.toUpperCase()?.let { HttpStatus.valueOf(it) } ?: HttpStatus.INTERNAL_SERVER_ERROR,
                         "Message: ${firstError.message}, Classification: ${firstError.extensions.classification}"
                 )
             }
             return pdlPersonResponse.data
         } catch (e: RestClientResponseException) {
             log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
-            throw PdlException(HttpStatus.valueOf(e.rawStatusCode), e.message)
+            throw PdlException(HttpStatus.valueOf(e.rawStatusCode), e.message!!)
         }
     }
 

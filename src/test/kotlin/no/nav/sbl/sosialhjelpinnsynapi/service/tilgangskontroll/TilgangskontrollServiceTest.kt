@@ -6,11 +6,12 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Adressebeskyttelse
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Gradering
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlHentPerson
-import no.nav.sbl.sosialhjelpinnsynapi.common.PdlException
 import no.nav.sbl.sosialhjelpinnsynapi.common.TilgangskontrollException
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 internal class TilgangskontrollServiceTest {
 
@@ -22,11 +23,11 @@ internal class TilgangskontrollServiceTest {
     private val clientResponse: PdlHentPerson = mockk()
 
     @Test
-    internal fun `skal kaste feil hvis client returnerer null`() {
+    internal fun `skal ikke kaste feil hvis client returnerer null`() {
         every { pdlClientMock.hentPerson(any()) } returns null
 
-        assertThatExceptionOfType(PdlException::class.java)
-                .isThrownBy { service.harTilgang(ident) }
+        assertThatCode { service.sjekkTilgang(ident) }
+                .doesNotThrowAnyException()
     }
 
     @Test
@@ -34,16 +35,7 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson } returns null
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertThatExceptionOfType(PdlException::class.java)
-                .isThrownBy { service.harTilgang(ident) }
-    }
-
-    @Test
-    internal fun `skal ikke kaste feil hvis person ikke har adressebeskyttelse`() {
-        every { clientResponse.hentPerson?.adressebeskyttelse } returns null
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
-
-        assertThatCode { service.harTilgang(ident) }
+        assertThatCode { service.sjekkTilgang(ident) }
                 .doesNotThrowAnyException()
     }
 
@@ -52,7 +44,7 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns emptyList()
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertThatCode { service.harTilgang(ident) }
+        assertThatCode { service.sjekkTilgang(ident) }
                 .doesNotThrowAnyException()
     }
 
@@ -62,7 +54,7 @@ internal class TilgangskontrollServiceTest {
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
         assertThatExceptionOfType(TilgangskontrollException::class.java)
-                .isThrownBy { service.harTilgang(ident) }
+                .isThrownBy { service.sjekkTilgang(ident) }
     }
 
     @Test
@@ -71,8 +63,22 @@ internal class TilgangskontrollServiceTest {
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
         assertThatExceptionOfType(TilgangskontrollException::class.java)
-                .isThrownBy { service.harTilgang(ident) }
-
+                .isThrownBy { service.sjekkTilgang(ident) }
     }
 
+    @Test
+    internal fun `harTilgang - skal gi true hvis ingen adressebeskyttelse`() {
+        every { clientResponse.hentPerson?.adressebeskyttelse } returns emptyList()
+        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+
+        assertTrue { service.harTilgang(ident) }
+    }
+
+    @Test
+    internal fun `harTilgang - skal gi false hvis adressebeskyttelse`() {
+        every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
+        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+
+        assertFalse { service.harTilgang(ident) }
+    }
 }

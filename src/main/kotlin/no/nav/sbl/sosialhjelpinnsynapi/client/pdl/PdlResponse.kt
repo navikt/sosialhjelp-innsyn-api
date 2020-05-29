@@ -27,7 +27,7 @@ data class PdlHentPerson(
 )
 
 data class PdlPerson(
-        val adressebeskyttelse: List<Adressebeskyttelse>?
+        val adressebeskyttelse: List<Adressebeskyttelse>
 )
 
 data class Adressebeskyttelse(
@@ -42,12 +42,8 @@ enum class Gradering {
 }
 
 fun PdlPerson.isKode6Or7(): Boolean {
-    return if (adressebeskyttelse.isNullOrEmpty()) {
-        false
-    } else {
-        return adressebeskyttelse.any {
-            it.isKode6() || it.isKode7()
-        }
+    return adressebeskyttelse.any {
+        it.isKode6() || it.isKode7()
     }
 }
 

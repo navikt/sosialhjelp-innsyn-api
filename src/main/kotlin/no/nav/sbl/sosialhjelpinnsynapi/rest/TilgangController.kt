@@ -1,14 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
+import no.nav.sbl.sosialhjelpinnsynapi.common.PdlException
 import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
-import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
-import no.nav.sbl.sosialhjelpinnsynapi.service.hendelse.HendelseService
 import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -16,16 +15,27 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/innsyn")
-class HendelseController(
-        private val hendelseService: HendelseService,
+class TilgangController(
         private val tilgangskontrollService: TilgangskontrollService
 ) {
 
-    @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
-    fun hentHendelser(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<HendelseResponse>> {
-        tilgangskontrollService.sjekkTilgang(getUserIdFromToken())
+    @GetMapping("/tilgang")
+    fun harTilgang(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<TilgangResponse> {
+        try {
+            val harTilgang = tilgangskontrollService.harTilgang(getUserIdFromToken())
+            return ResponseEntity.ok().body(TilgangResponse(harTilgang))
+        } catch (e: PdlException) {
+            log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")
+            return ResponseEntity.ok().body(TilgangResponse(true))
+        }
+    }
 
-        val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
-        return ResponseEntity.ok(hendelser)
+    data class TilgangResponse(
+            val harTilgang: Boolean
+    )
+
+    companion object {
+        private val log by logger()
     }
 }
+

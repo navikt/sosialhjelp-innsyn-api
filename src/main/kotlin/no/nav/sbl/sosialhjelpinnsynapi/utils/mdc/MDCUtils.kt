@@ -5,34 +5,35 @@ import java.security.SecureRandom
 
 object MDCUtils {
 
-    private const val CALL_ID = "callId"
+    const val CALL_ID = "callId"
+    const val DIGISOS_ID = "digisosId"
+    const val PATH = "path"
+    const val USER_AGENT = "userAgent"
+    const val REFERER = "request_Referer"
 
     private val RANDOM = SecureRandom()
 
-    fun getCallId(): String? {
-        return MDC.get(CALL_ID)
+    fun get(key: String): String? {
+        return MDC.get(key)
     }
 
-    fun setCallId(callId: String) {
-        MDC.put(CALL_ID, callId)
+    fun put(key: String, value: String) {
+        MDC.put(key, value)
     }
 
-    fun clearCallId() {
+    fun clearMDC() {
         MDC.remove(CALL_ID)
+        MDC.remove(DIGISOS_ID)
+        MDC.remove(PATH)
+        MDC.remove(USER_AGENT)
+        MDC.remove(REFERER)
     }
 
     fun generateCallId(): String {
-        val randomNr = getRandomNumber()
-        val systemTime = getSystemTime()
+        val randomNr = RANDOM.nextInt(Integer.MAX_VALUE)
+        val systemTime = System.currentTimeMillis()
 
         return "CallId_${systemTime}_${randomNr}"
     }
 
-    private fun getRandomNumber(): Int {
-        return RANDOM.nextInt(Integer.MAX_VALUE)
-    }
-
-    private fun getSystemTime(): Long {
-        return System.currentTimeMillis()
-    }
 }

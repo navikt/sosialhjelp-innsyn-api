@@ -5,8 +5,12 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDateTime
@@ -48,22 +52,26 @@ class StsClient(
         }
     }
 
-    private fun requestEntity(): HttpEntity<STSRequest> {
-        return HttpEntity(STSRequest(CLIENT_CREDENTIALS, OPENID))
+    private fun requestEntity(): HttpEntity<MultiValueMap<String, String>> {
+        val headers = HttpHeaders()
+        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+
+        val map = LinkedMultiValueMap<String, String>()
+        map.add(GRANT_TYPE, CLIENT_CREDENTIALS)
+        map.add(SCOPE, OPENID)
+
+        return HttpEntity(map, headers)
     }
 
     companion object {
         private val log by logger()
 
+        private const val GRANT_TYPE = "grant_type"
         private const val CLIENT_CREDENTIALS = "client_credentials"
+        private const val SCOPE = "scope"
         private const val OPENID = "openid"
     }
 }
-
-data class STSRequest(
-        val grant_type: String,
-        val scope: String
-)
 
 data class STSToken(
         val access_token: String,

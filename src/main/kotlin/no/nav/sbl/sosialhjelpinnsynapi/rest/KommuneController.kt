@@ -4,10 +4,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneService
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatusDetaljer
 import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -38,12 +36,5 @@ class KommuneController(
                         erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
                         erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak,
                         tidspunkt = Date()))
-    }
-
-    @Unprotected
-    @GetMapping("/kommuner")
-    fun hentAlleKommuneStatuser(): ResponseEntity<List<KommuneStatusDetaljer>> {
-        val alleKommunerMedStatus = kommuneService.hentAlleKommunerMedStatusStatus()
-        return ResponseEntity.ok(alleKommunerMedStatus)
     }
 }

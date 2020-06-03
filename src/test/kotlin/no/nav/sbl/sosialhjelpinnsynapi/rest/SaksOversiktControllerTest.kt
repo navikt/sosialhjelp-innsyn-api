@@ -21,10 +21,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.service.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.KILDE_INNSYN_API
-import org.apache.http.HttpStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
 
 internal class SaksOversiktControllerTest {
 
@@ -124,7 +124,7 @@ internal class SaksOversiktControllerTest {
         val response1 = controller.hentSaksDetaljer("123", "token")
         val sak1 = response1.body
 
-        assertThat(response1.statusCode.value()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(response1.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(sak1).isNotNull
         assertThat(sak1?.soknadTittel).isEqualTo("")
         assertThat(sak1?.antallNyeOppgaver).isEqualTo(2)
@@ -132,7 +132,7 @@ internal class SaksOversiktControllerTest {
         val response2 = controller.hentSaksDetaljer("456", "token")
         val sak2 = response2.body
 
-        assertThat(response2.statusCode.value()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(response2.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(sak2).isNotNull
         assertThat(sak2?.soknadTittel).contains("Livsopphold", "Strøm")
         assertThat(sak2?.status).isEqualTo("UNDER BEHANDLING")
@@ -152,7 +152,7 @@ internal class SaksOversiktControllerTest {
         val sak = response.body
 
         assertThat(sak).isNotNull
-        assertThat(response.statusCode.value()).isEqualTo(HttpStatus.SC_OK)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
         verify { oppgaveService wasNot Called }
 

@@ -7,11 +7,11 @@ group = "no.nav.sbl"
 
 object Versions {
     const val kotlin = "1.3.70"
-    const val springBoot = "2.2.7.RELEASE"
+    const val springBoot = "2.3.0.RELEASE"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
-    const val micrometerRegistry = "1.3.8"
+    const val micrometerRegistry = "1.5.1"
     const val prometheus = "0.8.1"
     const val tokenValidation = "1.1.5"
     const val jackson = "2.11.0"
@@ -20,9 +20,9 @@ object Versions {
     const val resilience4j = "1.3.1"
     const val rxKotlin = "2.4.0"
     const val vavrKotlin = "0.10.2"
-    const val ktor = "1.3.1"
     const val konfig = "1.6.10.0"
     const val kotlinCoroutines = "1.3.3"
+    const val commonsCodec = "1.14"
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
     const val tika = "1.23"
@@ -79,16 +79,6 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-//    Ktor
-    implementation("io.ktor:ktor-server-netty:${Versions.ktor}")
-    implementation("io.ktor:ktor-auth:${Versions.ktor}")
-    implementation("io.ktor:ktor-auth-jwt:${Versions.ktor}")
-    implementation("io.ktor:ktor-jackson:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-core:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-apache:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-json:${Versions.ktor}")
-    implementation("io.ktor:ktor-client-jackson:${Versions.ktor}")
-
 //    Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.kotlinCoroutines}")
 
@@ -98,6 +88,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
+    implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
 
 //    Micrometer/Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
@@ -129,6 +120,7 @@ dependencies {
     implementation("com.github.fppt:jedis-mock:${Versions.redisMock}")
 
 //    Div
+    implementation("commons-codec:commons-codec:${Versions.commonsCodec}")
     implementation("commons-io:commons-io:${Versions.commonsIo}")
     implementation("commons-fileupload:commons-fileupload:${Versions.fileUpload}")
     implementation("org.apache.tika:tika-core:${Versions.tika}")

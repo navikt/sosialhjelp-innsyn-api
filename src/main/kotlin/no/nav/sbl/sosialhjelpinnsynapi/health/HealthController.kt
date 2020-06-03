@@ -1,14 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyCheck
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyCheckResult
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Result
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.SelftestResult
+import no.nav.sbl.sosialhjelpinnsynapi.utils.Miljo
 import no.nav.security.token.support.core.api.Unprotected
+import no.nav.sosialhjelp.selftest.DependencyCheck
+import no.nav.sosialhjelp.selftest.SelftestResult
+import no.nav.sosialhjelp.selftest.SelftestService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -22,8 +18,10 @@ const val APPLICATION_READY = "Application is ready!"
 @RestController
 @RequestMapping(value = ["/internal"])
 class HealthController(
-        private val dependencyChecks: List<DependencyCheck>
+        dependencyChecks: List<DependencyCheck>
 ) {
+
+    private val selftestService = SelftestService("sosialhjelp-innsyn-api", Miljo.getAppImage(), dependencyChecks)
 
     val isAlive: String
         @ResponseBody
@@ -37,28 +35,6 @@ class HealthController(
 
     @GetMapping("/selftest")
     fun nySelftest(): SelftestResult {
-        val results = runBlocking { checkDependencies() }
-        return SelftestResult(
-                appName = "sosialhjelp-innsyn-api",
-                version = "version",
-                result = getOverallSelftestResult(results),
-                dependencyCheckResults = results
-        )
-    }
-
-    private fun getOverallSelftestResult(results: List<DependencyCheckResult>): Result {
-        return when {
-            results.any { it.result == Result.ERROR } -> Result.ERROR
-            results.any { it.result == Result.WARNING } -> Result.WARNING
-            else -> Result.OK
-        }
-    }
-
-    private suspend fun checkDependencies(): List<DependencyCheckResult> {
-        return coroutineScope {
-            dependencyChecks.map {
-                withContext(Dispatchers.Default) { it.check() }
-            }
-        }
+        return selftestService.getSelftest()
     }
 }

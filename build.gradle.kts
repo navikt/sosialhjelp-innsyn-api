@@ -9,6 +9,7 @@ object Versions {
     const val kotlin = "1.3.70"
     const val coroutines = "1.3.7"
     const val springBoot = "2.3.0.RELEASE"
+    const val sosialhjelpCommon = "1.614f573"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
@@ -29,7 +30,7 @@ object Versions {
     const val lettuce = "5.2.2.RELEASE"
     const val nettyCodec = "4.1.50.Final"
 
-//    Test only
+    //    Test only
     const val junitJupiter = "5.6.0"
     const val mockk = "1.9.3"
     const val springmockk = "2.0.0"
@@ -87,6 +88,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
 
+//    Sosialhjelp-common
+    implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")
+
 //    Micrometer/Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
     implementation("io.prometheus:simpleclient_common:${Versions.prometheus}")
@@ -143,11 +147,21 @@ buildscript {
     }
 }
 
+val githubUser: String by project
+val githubPassword: String by project
+
 repositories {
     if (isRunningOnJenkins ?: "" == "true") maven("https://repo.adeo.no/repository/maven-central") else mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")
     maven("https://repo.spring.io/plugins-release/")
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/sosialhjelp-common")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
 }
 
 tasks {

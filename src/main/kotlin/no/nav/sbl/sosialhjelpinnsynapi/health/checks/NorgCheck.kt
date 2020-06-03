@@ -2,12 +2,12 @@ package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import no.nav.sbl.sosialhjelpinnsynapi.common.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyCheck
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
+import no.nav.sosialhjelp.selftest.DependencyCheck
+import no.nav.sosialhjelp.selftest.DependencyType
+import no.nav.sosialhjelp.selftest.Importance
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -22,10 +22,10 @@ class NorgCheck(
         private val restTemplate: RestTemplate,
         clientProperties: ClientProperties
 ) : DependencyCheck(
-        DependencyType.REST,
-        "NORG2",
-        clientProperties.norgEndpointUrl,
-        Importance.WARNING
+        type = DependencyType.REST,
+        name = "NORG2",
+        address = clientProperties.norgEndpointUrl,
+        importance = Importance.WARNING
 ) {
 
     override fun doCheck() {

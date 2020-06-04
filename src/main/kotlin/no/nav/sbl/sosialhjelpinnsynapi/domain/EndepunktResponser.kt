@@ -117,7 +117,8 @@ data class KommuneResponse(
         val erInnsendingEttersendelseDeaktivert: Boolean,
         val erInnsendingEttersendelseMidlertidigDeaktivert: Boolean,
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-        val tidspunkt: Date
+        val tidspunkt: Date,
+        val kommunenummer: String?
 )
 
 data class OrginalJsonSoknadResponse(

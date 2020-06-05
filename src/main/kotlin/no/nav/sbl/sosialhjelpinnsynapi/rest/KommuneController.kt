@@ -30,6 +30,7 @@ class KommuneController(
                         erInnsynMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertOppdateringer,
                         erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
                         erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak,
-                        tidspunkt = Date()))
+                        tidspunkt = Date(),
+                        kommunenummer = kommuneInfo?.kommunenummer))
     }
 }

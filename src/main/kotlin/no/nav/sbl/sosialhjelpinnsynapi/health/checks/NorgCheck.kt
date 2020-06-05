@@ -2,13 +2,12 @@ package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import no.nav.sbl.sosialhjelpinnsynapi.common.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
-import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
-import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_NAV_APIKEY
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
+import no.nav.sosialhjelp.selftest.DependencyCheck
+import no.nav.sosialhjelp.selftest.DependencyType
+import no.nav.sosialhjelp.selftest.Importance
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -22,19 +21,19 @@ import org.springframework.web.client.RestTemplate
 class NorgCheck(
         private val restTemplate: RestTemplate,
         clientProperties: ClientProperties
-) : AbstractDependencyCheck(
-        DependencyType.REST,
-        "NORG2",
-        clientProperties.norgEndpointUrl,
-        Importance.WARNING
+) : DependencyCheck(
+        type = DependencyType.REST,
+        name = "NORG2",
+        address = clientProperties.norgEndpointUrl,
+        importance = Importance.WARNING
 ) {
 
     override fun doCheck() {
         try {
             val norgApiKey = System.getenv("NORG_PASSWORD")
             val headers = HttpHeaders()
-            headers.set(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-            headers.set(HEADER_NAV_APIKEY, norgApiKey)
+            headers.set(IntegrationUtils.HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+            headers.set(IntegrationUtils.HEADER_NAV_APIKEY, norgApiKey)
 
             // samme kall som selftest i soknad-api
             restTemplate.exchange("$address/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)

@@ -2,9 +2,9 @@ package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
+import no.nav.sosialhjelp.selftest.DependencyCheck
+import no.nav.sosialhjelp.selftest.DependencyType
+import no.nav.sosialhjelp.selftest.Importance
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
@@ -13,11 +13,11 @@ import org.springframework.stereotype.Component
 class NorgCheck(
         private val norgClient: NorgClient,
         clientProperties: ClientProperties
-) : AbstractDependencyCheck(
-        DependencyType.REST,
-        "NORG2",
-        clientProperties.norgEndpointUrl,
-        Importance.WARNING
+) : DependencyCheck(
+        type = DependencyType.REST,
+        name = "NORG2",
+        address = clientProperties.norgEndpointUrl,
+        importance = Importance.WARNING
 ) {
 
     override fun doCheck() {

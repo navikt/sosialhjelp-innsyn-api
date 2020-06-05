@@ -1,20 +1,15 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health
 
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.runBlocking
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyCheckResult
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Result
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.SelftestResult
+import no.nav.sbl.sosialhjelpinnsynapi.utils.Miljo
 import no.nav.security.token.support.core.api.Unprotected
+import no.nav.sosialhjelp.selftest.DependencyCheck
+import no.nav.sosialhjelp.selftest.SelftestResult
+import no.nav.sosialhjelp.selftest.SelftestService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 const val APPLICATION_LIVENESS = "Application is alive!"
 const val APPLICATION_READY = "Application is ready!"
@@ -23,8 +18,10 @@ const val APPLICATION_READY = "Application is ready!"
 @RestController
 @RequestMapping(value = ["/internal"])
 class HealthController(
-        private val dependencyCheckList: List<AbstractDependencyCheck>
+        dependencyChecks: List<DependencyCheck>
 ) {
+
+    private val selftestService = SelftestService("sosialhjelp-innsyn-api", Miljo.getAppImage(), dependencyChecks)
 
     val isAlive: String
         @ResponseBody
@@ -36,33 +33,8 @@ class HealthController(
         @GetMapping(value = ["/isReady"], produces = [MediaType.TEXT_PLAIN_VALUE])
         get() = APPLICATION_READY
 
-    @FlowPreview
     @GetMapping("/selftest")
-    @ResponseBody
-    fun selftest(): SelftestResult {
-        val results = ArrayList<DependencyCheckResult>()
-        runBlocking { checkDependencies(results) }
-        return SelftestResult(
-                "sosialhjelp-innsyn-api",
-                "version",
-                getOverallSelftestResult(results),
-                results
-        )
-    }
-
-    private fun getOverallSelftestResult(results: List<DependencyCheckResult>): Result {
-        if (results.stream().anyMatch { result -> result.result == Result.ERROR }) {
-            return Result.ERROR
-        } else if (results.stream().anyMatch { result -> result.result == Result.WARNING }) {
-            return Result.WARNING
-        }
-        return Result.OK
-    }
-
-    @FlowPreview
-    private suspend fun checkDependencies(results: MutableList<DependencyCheckResult>) {
-        dependencyCheckList
-                .asFlow()
-                .collect { results.add(it.check().get()) }
+    fun nySelftest(): SelftestResult {
+        return selftestService.getSelftest()
     }
 }

@@ -37,10 +37,10 @@ class NorgClientImpl(
             return objectMapper.readValue(response.body!!, NavEnhet::class.java)
 
         } catch (e: HttpStatusCodeException) {
-            log.warn("Noe feilet ved kall mot NORG - ${e.statusCode} ${e.statusText}", e)
+            log.warn("Noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
             throw NorgException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            log.warn("Noe feilet ved kall mot NORG", e)
+            log.warn("Noe feilet ved kall mot NORG2", e)
             throw NorgException(null, e.message, e)
         }
     }
@@ -51,10 +51,10 @@ class NorgClientImpl(
             // samme kall som selftest i soknad-api
             restTemplate.exchange("$baseUrl/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         } catch (e: HttpStatusCodeException) {
-            log.warn("Selftest - noe feilet ved kall mot NORG - ${e.statusCode} ${e.statusText}", e)
+            log.warn("Selftest - noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
             throw NorgException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            log.warn("Selftest - noe feilet ved kall mot NORG", e)
+            log.warn("Selftest - noe feilet ved kall mot NORG2", e)
             throw NorgException(null, e.message, e)
         }
     }

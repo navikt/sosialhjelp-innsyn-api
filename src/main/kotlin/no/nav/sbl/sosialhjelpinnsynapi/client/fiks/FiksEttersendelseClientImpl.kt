@@ -47,35 +47,35 @@ class FiksEttersendelseClientImpl(
         val krypteringFutureList =
                 Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(files.size))
 
-            try {
-                appendAndEncryptFilesForRestTemplate(body, files, krypteringFutureList, token, digisosId)
+        try {
+            appendAndEncryptFilesForRestTemplate(body, files, krypteringFutureList, token, digisosId)
 
-                val startTime = System.currentTimeMillis()
-                val responseEntity = restTemplate.exchange(
-                        uri,
-                        HttpMethod.POST,
-                        requestEntity,
-                        String::class.java)
-                val endTime = System.currentTimeMillis()
-                log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks. Tok ${endTime - startTime} ms. Fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")
+            val startTime = System.currentTimeMillis()
+            val responseEntity = restTemplate.exchange(
+                    uri,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String::class.java)
+            val endTime = System.currentTimeMillis()
+            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks. Tok ${endTime - startTime} ms. Fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")
 
-                waitForEncryption(krypteringFutureList)
-            } catch (e: HttpClientErrorException) {
-                val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-                val errorMessage = e.message?.feilmeldingUtenFnr
-                log.warn("Opplasting av ettersendelse på $digisosId feilet - $errorMessage - $fiksErrorResponse", e)
-                throw FiksClientException(e.statusCode, errorMessage, e)
-            } catch (e: HttpServerErrorException) {
-                val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
-                val errorMessage = e.message?.feilmeldingUtenFnr
-                log.warn("Opplasting av ettersendelse på $digisosId feilet - $errorMessage - $fiksErrorResponse", e)
-                throw FiksServerException(e.statusCode, errorMessage, e)
-            } catch (e: Exception) {
-                log.warn("Opplasting av ettersendelse på $digisosId feilet", e)
-                throw FiksException(e.message?.feilmeldingUtenFnr, e)
-            } finally {
-                cancelFailedEncryptions(krypteringFutureList)
-            }
+            waitForEncryption(krypteringFutureList)
+        } catch (e: HttpClientErrorException) {
+            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Opplasting av ettersendelse på $digisosId feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksClientException(e.statusCode, errorMessage, e)
+        } catch (e: HttpServerErrorException) {
+            val fiksErrorResponse = e.toFiksErrorResponse()?.feilmeldingUtenFnr
+            val errorMessage = e.message?.feilmeldingUtenFnr
+            log.warn("Opplasting av ettersendelse på $digisosId feilet - $errorMessage - $fiksErrorResponse", e)
+            throw FiksServerException(e.statusCode, errorMessage, e)
+        } catch (e: Exception) {
+            log.warn("Opplasting av ettersendelse på $digisosId feilet", e)
+            throw FiksException(e.message?.feilmeldingUtenFnr, e)
+        } finally {
+            cancelFailedEncryptions(krypteringFutureList)
+        }
     }
 
     private fun setRestTemplateHeaders(token: String): HttpHeaders {

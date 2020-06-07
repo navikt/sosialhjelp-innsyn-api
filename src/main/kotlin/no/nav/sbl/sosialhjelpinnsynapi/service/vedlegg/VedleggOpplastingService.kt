@@ -44,36 +44,54 @@ class VedleggOpplastingService(
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveOpplastingResponse> {
+        log.info("SEND 1")
         val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
+        log.info("SEND 2")
         if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status != "OK" } }) {
+            log.info("SEND 3")
             return valideringResultatResponseList
         }
+        log.info("SEND 4")
         metadata.removeIf { it.filer.isEmpty() }
+        log.info("SEND 5")
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
+        log.info("SEND 6")
 
         files.forEach { file ->
             val filename = createFilename(file.originalFilename, file.contentType)
+            log.info("SEND 7")
             renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+            log.info("SEND 8")
             filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, file.inputStream))
+            log.info("SEND 9")
         }
 
+        log.info("SEND 10")
         // Generere pdf og legge til i listen over filer som skal krypteres og lastes opp
         val ettersendelsePdf = createEttersendelsePdf(metadata, digisosId, token)
+        log.info("SEND 11")
         filerForOpplasting.add(ettersendelsePdf)
+        log.info("SEND 12")
 
         val digisosSak = fiksClient.hentDigisosSak(digisosId, token, true)
+        log.info("SEND 13")
         val kommunenummer = digisosSak.kommunenummer
+        log.info("SEND 14")
         val navEksternRefId = lagNavEksternRefId(digisosSak)
+        log.info("SEND 15")
         val vedleggSpesifikasjon = createVedleggJson(files, metadata)
+        log.info("SEND 16")
 
 
         fiksEttersendelseClient.lastOppNyEttersendelse(filerForOpplasting, vedleggSpesifikasjon,
                 digisosId, navEksternRefId, kommunenummer, token)
-
+        log.info("SEND 17")
         // opppdater cache med digisossak
         val oppdatertDigisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
+        log.info("SEND 18")
         cachePut(digisosId, oppdatertDigisosSak)
+        log.info("SEND 19")
 
         return valideringResultatResponseList
     }

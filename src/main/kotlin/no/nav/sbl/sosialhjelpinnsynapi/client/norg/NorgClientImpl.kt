@@ -27,10 +27,7 @@ class NorgClientImpl(
     private val baseUrl = clientProperties.norgEndpointUrl
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
-        val norgApiKey = System.getenv("NORG_PASSWORD")
-        val headers = HttpHeaders()
-        headers.set(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-        headers.set(HEADER_NAV_APIKEY, norgApiKey)
+        val headers = headers()
         try {
             log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
             val urlTemplate = "$baseUrl/enhet/{enhetsnr}"
@@ -40,15 +37,38 @@ class NorgClientImpl(
             return objectMapper.readValue(response.body!!, NavEnhet::class.java)
 
         } catch (e: HttpStatusCodeException) {
-            log.warn("Noe feilet ved kall mot NORG - ${e.statusCode} ${e.statusText}", e)
+            log.warn("Noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
             throw NorgException(e.statusCode, e.message, e)
         } catch (e: Exception) {
-            log.warn("Noe feilet ved kall mot NORG", e)
+            log.warn("Noe feilet ved kall mot NORG2", e)
             throw NorgException(null, e.message, e)
         }
     }
 
+    override fun ping() {
+        try {
+            val headers = headers()
+            // samme kall som selftest i soknad-api
+            restTemplate.exchange("$baseUrl/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
+        } catch (e: HttpStatusCodeException) {
+            log.warn("Selftest - noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
+            throw NorgException(e.statusCode, e.message, e)
+        } catch (e: Exception) {
+            log.warn("Selftest - noe feilet ved kall mot NORG2", e)
+            throw NorgException(null, e.message, e)
+        }
+    }
+
+    private fun headers(): HttpHeaders {
+        val headers = HttpHeaders()
+        headers.set(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+        headers.set(HEADER_NAV_APIKEY, System.getenv(NORG2_APIKEY))
+        return headers
+    }
+
     companion object {
         private val log by logger()
+
+        private const val NORG2_APIKEY = "SOSIALHJELP_INNSYN_API_NORG2_APIKEY_PASSWORD"
     }
 }

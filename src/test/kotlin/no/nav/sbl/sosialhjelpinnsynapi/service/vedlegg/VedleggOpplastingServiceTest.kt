@@ -86,10 +86,10 @@ internal class VedleggOpplastingServiceTest {
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val ettersendelsPdf = ByteArray(1)
-        every { ettersendelsePdfGenerator.generate(any(), any())} returns ettersendelsPdf
+        every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
 
         mockkStatic(UUID::class)
-        every { UUID.randomUUID().toString()} returns "uuid"
+        every { UUID.randomUUID().toString() } returns "uuid"
 
         val largePngFile = createImageByteArray("png", 2)
         val filnavn3 = "test3.png"
@@ -184,7 +184,7 @@ internal class VedleggOpplastingServiceTest {
                 MockMultipartFile("files", filnavn1, filtype0, pngFile),
                 MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
 
-        assertFailsWith<OpplastingFilnavnMismatchException>{ service.sendVedleggTilFiks(id, files, metadata, "token") }
+        assertFailsWith<OpplastingFilnavnMismatchException> { service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
     @Test
@@ -256,7 +256,7 @@ internal class VedleggOpplastingServiceTest {
     fun `skal legge på UUID på filnavn`() {
         val uuid = "12345678"
         mockkStatic(UUID::class)
-        every { UUID.randomUUID().toString()} returns uuid
+        every { UUID.randomUUID().toString() } returns uuid
 
         val filnavn = "fil.pdf"
         assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("fil-$uuid.pdf")
@@ -266,7 +266,7 @@ internal class VedleggOpplastingServiceTest {
     fun `skal kutte ned lange filnavn`() {
         val uuid = "12345678"
         mockkStatic(UUID::class)
-        every { UUID.randomUUID().toString()} returns uuid
+        every { UUID.randomUUID().toString() } returns uuid
 
         val filnavnUtenExtension50Tegn = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         val filnavn = "$filnavnUtenExtension50Tegn-dette-skal-kuttes-bort.pdf"
@@ -287,19 +287,19 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `getOpplastetVedleggMetadataAsString skal returnere antall filer per element i listen`() {
         val metadataList = mutableListOf(
-            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
-                    OpplastetFil("fil1"),
-                    OpplastetFil("fil2"),
-                    OpplastetFil("fil3")
-            ), null),
-            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(OpplastetFil("fil4")), null),
-            OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
-                    OpplastetFil("fil5"),
-                    OpplastetFil("fil6")
-            ), LocalDate.now())
+                OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
+                        OpplastetFil("fil1"),
+                        OpplastetFil("fil2"),
+                        OpplastetFil("fil3")
+                ), null),
+                OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(OpplastetFil("fil4")), null),
+                OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
+                        OpplastetFil("fil5"),
+                        OpplastetFil("fil6")
+                ), LocalDate.now())
         )
 
-        assertEquals("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ", service.getMetadataAsString(metadataList) )
+        assertEquals("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ", service.getMetadataAsString(metadataList))
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {

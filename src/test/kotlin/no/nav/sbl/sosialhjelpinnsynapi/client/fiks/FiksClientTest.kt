@@ -150,7 +150,7 @@ internal class FiksClientTest {
 
         assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentAlleDigisosSaker("Token") }
 
-        verify(atLeast = 2) {restTemplate.exchange(any<String>(), any(), any(), typeRef<List<DigisosSak>>())}
+        verify(atLeast = 2) { restTemplate.exchange(any<String>(), any(), any(), typeRef<List<DigisosSak>>()) }
     }
 
     @Test
@@ -346,7 +346,7 @@ internal class FiksClientTest {
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
         val ettersendelsPdf = ByteArray(1)
-        every { ettersendelsePdfGenerator.generate(any(), any() ) } returns ettersendelsPdf
+        every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
         every { krypteringService.krypter(any(), any(), any(), any()) } returns fil1
 
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()

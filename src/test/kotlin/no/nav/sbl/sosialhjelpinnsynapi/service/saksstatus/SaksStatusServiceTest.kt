@@ -33,7 +33,7 @@ internal class SaksStatusServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService, fiksClient )
+        clearMocks(eventService, fiksClient)
 
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
     }

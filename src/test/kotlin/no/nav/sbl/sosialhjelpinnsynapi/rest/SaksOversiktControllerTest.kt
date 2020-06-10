@@ -55,7 +55,7 @@ internal class SaksOversiktControllerTest {
         every { oppgaveResponseMock.oppgaveElementer.size } returns 1
 
         every { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
-        every { oppgaveService.hentOppgaver("456", any()) }  returns listOf(oppgaveResponseMock) // 1 oppgave
+        every { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
     }
 
     @Test

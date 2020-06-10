@@ -31,7 +31,7 @@ internal class UtilsTest {
     fun `lagNavEksternId ingen ettersendelser eller originalSoknad `() {
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
         every { mockDigisosSak.originalSoknadNAV } returns null
-        every { mockDigisosSak.fiksDigisosId} returns fiksDigisosId
+        every { mockDigisosSak.fiksDigisosId } returns fiksDigisosId
 
         val navEksternRefId = lagNavEksternRefId(mockDigisosSak)
 
@@ -42,7 +42,7 @@ internal class UtilsTest {
     fun `lagNavEksternId ingen ettersendelser eller originalSoknad og neste vedlegg bruker samme uuid `() {
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
         every { mockDigisosSak.originalSoknadNAV } returns null
-        every { mockDigisosSak.fiksDigisosId} returns fiksDigisosId
+        every { mockDigisosSak.fiksDigisosId } returns fiksDigisosId
 
         val id1 = lagNavEksternRefId(mockDigisosSak)
 

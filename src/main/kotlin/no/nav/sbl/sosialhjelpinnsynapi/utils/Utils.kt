@@ -130,7 +130,7 @@ val ErrorMessage.feilmeldingUtenFnr: String?
 
 fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()
-    return CompletableFuture.runAsync( Runnable{
+    return CompletableFuture.runAsync(Runnable {
         MDC.setContextMap(previous)
         try {
             runnable.run()

@@ -28,7 +28,7 @@ internal class KommuneServiceTest {
         clearMocks(fiksClient, mockDigisosSak)
 
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
-        every { mockDigisosSak.originalSoknadNAV?.metadata }  returns "some id"
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some id"
         every { mockDigisosSak.kommunenummer } returns kommuneNr
     }
 
@@ -85,7 +85,7 @@ internal class KommuneServiceTest {
 
     @Test
     fun `Ingen originalSoknad - skal ikke kaste feil`() {
-        every { mockDigisosSak.originalSoknadNAV?.metadata }  returns null
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns null
         every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, true, false, false, null, true, null)
 
         val status = service.hentKommuneStatus("123", "token")

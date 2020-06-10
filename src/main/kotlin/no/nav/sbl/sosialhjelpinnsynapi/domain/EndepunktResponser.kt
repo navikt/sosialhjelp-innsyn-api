@@ -22,6 +22,7 @@ data class VedtaksfilUrl(
         val dato: LocalDate?,
         val vedtaksfilUrl: String
 )
+
 data class HendelseResponse(
         val tidspunkt: String,
         val beskrivelse: String,
@@ -108,7 +109,7 @@ data class SaksDetaljerResponse(
 
 data class ForelopigSvarResponse(
         val harMottattForelopigSvar: Boolean,
-        val link: String?  
+        val link: String?
 )
 
 data class KommuneResponse(

@@ -4,9 +4,9 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.FiksErrorResponse
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.ErrorMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -109,9 +109,9 @@ fun isRunningInProd(): Boolean {
     return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "default"
 }
 
-fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
+fun <T : HttpStatusCodeException> T.toFiksErrorMessage(): ErrorMessage? {
     return try {
-        objectMapper.readValue(this.responseBodyAsByteArray, FiksErrorResponse::class.java)
+        objectMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
     } catch (e: IOException) {
         null
     }
@@ -123,7 +123,7 @@ val String.feilmeldingUtenFnr: String?
         return this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
     }
 
-val FiksErrorResponse.feilmeldingUtenFnr: String?
+val ErrorMessage.feilmeldingUtenFnr: String?
     get() {
         return this.message?.feilmeldingUtenFnr
     }

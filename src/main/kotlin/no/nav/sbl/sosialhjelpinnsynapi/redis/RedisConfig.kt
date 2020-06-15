@@ -17,9 +17,9 @@ class RedisConfig(
     fun redisClient(properties: RedisProperties): RedisClient {
         cacheProperties.startInMemoryRedisIfMocked()
 
-        val redisUri = RedisURI
-                .create(properties.host, properties.port)
+        val redisUri = RedisURI.create(properties.host, properties.port)
         redisUri.setPassword(properties.password)
+
         return RedisClient.create(redisUri)
     }
 

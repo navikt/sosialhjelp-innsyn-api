@@ -50,7 +50,7 @@ innsyn:
       enabled: true
   cache:
     redis_mocked: false
-    time_to_live_seconds: ${CACHE_TIME_TO_LIVE_SECONDS}ca
+    time_to_live_seconds: ${CACHE_TIME_TO_LIVE_SECONDS}
   retry:
     fiks:
       attempts: 5 # number of attempts

@@ -7,7 +7,9 @@ group = "no.nav.sbl"
 
 object Versions {
     const val kotlin = "1.3.70"
+    const val coroutines = "1.3.7"
     const val springBoot = "2.3.0.RELEASE"
+    const val sosialhjelpCommon = "1.614f573"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
@@ -17,11 +19,7 @@ object Versions {
     const val jackson = "2.11.0"
     const val guava = "28.2-jre"
     const val swagger = "2.9.2"
-    const val resilience4j = "1.3.1"
-    const val rxKotlin = "2.4.0"
-    const val vavrKotlin = "0.10.2"
     const val konfig = "1.6.10.0"
-    const val kotlinCoroutines = "1.3.3"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
@@ -32,7 +30,7 @@ object Versions {
     const val lettuce = "5.2.2.RELEASE"
     const val nettyCodec = "4.1.50.Final"
 
-//    Test only
+    //    Test only
     const val junitJupiter = "5.6.0"
     const val mockk = "1.9.3"
     const val springmockk = "2.0.0"
@@ -80,7 +78,7 @@ dependencies {
     implementation(kotlin("reflect"))
 
 //    Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.kotlinCoroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
 
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
@@ -89,6 +87,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
+
+//    Sosialhjelp-common
+    implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")
 
 //    Micrometer/Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
@@ -131,13 +132,6 @@ dependencies {
     implementation("com.google.guava:guava:${Versions.guava}")
     implementation("io.netty:netty-codec-http2:${Versions.nettyCodec}")
 
-//    Selftest
-    implementation ("io.github.resilience4j:resilience4j-kotlin:${Versions.resilience4j}")
-    implementation ("io.github.resilience4j:resilience4j-timelimiter:${Versions.resilience4j}")
-    implementation ("io.github.resilience4j:resilience4j-circuitbreaker:${Versions.resilience4j}")
-    implementation ("io.reactivex.rxjava2:rxkotlin:${Versions.rxKotlin}")
-    implementation ("io.vavr:vavr-kotlin:${Versions.vavrKotlin}")
-
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
@@ -153,11 +147,21 @@ buildscript {
     }
 }
 
+val githubUser: String by project
+val githubPassword: String by project
+
 repositories {
     if (isRunningOnJenkins ?: "" == "true") maven("https://repo.adeo.no/repository/maven-central") else mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")
     maven("https://repo.spring.io/plugins-release/")
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/sosialhjelp-common")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
 }
 
 tasks {

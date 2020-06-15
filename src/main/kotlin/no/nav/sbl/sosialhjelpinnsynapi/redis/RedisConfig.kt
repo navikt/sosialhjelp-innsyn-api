@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.redis
 
 import io.lettuce.core.RedisClient
+import io.lettuce.core.RedisURI
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -16,7 +17,10 @@ class RedisConfig(
     fun redisClient(properties: RedisProperties): RedisClient {
         cacheProperties.startInMemoryRedisIfMocked()
 
-        return RedisClient.create("redis://${properties.host}:${properties.port}")
+        val redisUri = RedisURI
+                .create(properties.host, properties.port)
+        redisUri.setPassword(properties.password)
+        return RedisClient.create(redisUri)
     }
 
 }

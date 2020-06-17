@@ -8,7 +8,7 @@ group = "no.nav.sbl"
 object Versions {
     const val kotlin = "1.3.70"
     const val coroutines = "1.3.7"
-    const val springBoot = "2.3.0.RELEASE"
+    const val springBoot = "2.3.1.RELEASE"
     const val sosialhjelpCommon = "1.945f462"
     const val logback = "1.2.3"
     const val logstash = "6.3"
@@ -27,7 +27,7 @@ object Versions {
     const val pdfBox = "2.0.19"
     const val fiksKryptering = "1.0.9"
     const val redisMock = "0.1.16"
-    const val lettuce = "5.2.2.RELEASE"
+    const val lettuce = "5.3.1.RELEASE"
     const val nettyCodec = "4.1.50.Final"
 
     //    Test only
@@ -87,6 +87,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.springBoot}")
 
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")

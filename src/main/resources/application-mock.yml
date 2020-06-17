@@ -2,6 +2,7 @@ spring:
   redis:
     host: ${REDIS_HOST:localhost}
     port: 1212
+    password: ${REDIS_PASSWORD:foobar}
 
 server:
   servlet:

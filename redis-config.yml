@@ -6,7 +6,7 @@ metadata:
   name: sosialhjelp-innsyn-api-redis
   namespace: default
 spec:
-  image: redis:5-alpine # or a custom Redis-image
+  image: navikt/secure-redis:5.0.3-alpine-2
   port: 6379
   replicas: # A single Redis-app doesn't scale
     min: 1
@@ -20,3 +20,5 @@ spec:
       memory: 256Mi
   service:
     port: 6379
+  vault:
+    enabled: true

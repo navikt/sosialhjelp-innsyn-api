@@ -4,11 +4,11 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.NedlastingFilnavnMismatchException
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
-import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 

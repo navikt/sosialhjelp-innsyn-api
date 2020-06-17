@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component
 class StsCheck(
         clientProperties: ClientProperties,
         private val stsClient: StsClient
-) : DependencyCheck(
-        type = DependencyType.REST,
-        name = "STS",
-        address = clientProperties.stsTokenEndpointUrl,
-        importance = Importance.WARNING
-) {
+) : DependencyCheck {
+
+    override val type = DependencyType.REST
+    override val name = "STS"
+    override val address = clientProperties.stsTokenEndpointUrl
+    override val importance = Importance.WARNING
 
     override fun doCheck() {
         stsClient.ping()

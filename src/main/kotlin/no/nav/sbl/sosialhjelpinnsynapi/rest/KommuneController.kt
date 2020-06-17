@@ -1,9 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

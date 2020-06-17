@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component
 class FiksCheck(
         clientProperties: ClientProperties,
         private val fiksClient: FiksClient
-) : DependencyCheck(
-        type = DependencyType.REST,
-        name = "Fiks Digisos API",
-        address = clientProperties.fiksDigisosEndpointUrl,
-        importance = Importance.WARNING
-) {
+) : DependencyCheck {
+
+    override val type = DependencyType.REST
+    override val name = "Fiks Digisos API"
+    override val address = clientProperties.fiksDigisosEndpointUrl
+    override val importance = Importance.WARNING
 
     override fun doCheck() {
         fiksClient.hentKommuneInfoForAlle()

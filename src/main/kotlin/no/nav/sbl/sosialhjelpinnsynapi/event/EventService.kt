@@ -17,7 +17,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_SOKNADEN
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
@@ -27,6 +26,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.hentDokumentlagerUrl
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import org.springframework.stereotype.Component
 
 @Component
@@ -68,9 +69,9 @@ class EventService(
 
             ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         }
-
-        if (digisosSak.originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
-            model.applySoknadKrav(digisosSak.fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
+        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
+        if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
+            model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, timestampSendt!!, token)
         }
 
         return model

@@ -12,8 +12,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
@@ -25,6 +23,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.typeRef
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -150,7 +150,7 @@ internal class FiksClientTest {
 
         assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentAlleDigisosSaker("Token") }
 
-        verify(atLeast = 2) {restTemplate.exchange(any<String>(), any(), any(), typeRef<List<DigisosSak>>())}
+        verify(atLeast = 2) { restTemplate.exchange(any<String>(), any(), any(), typeRef<List<DigisosSak>>()) }
     }
 
     @Test
@@ -272,7 +272,7 @@ internal class FiksClientTest {
     fun `GET KommuneInfo for kommunenummer fra Fiks`() {
         val kommunenummer = "1234"
         val mockKommuneResponse: ResponseEntity<KommuneInfo> = mockk()
-        val kommuneInfo = KommuneInfo(kommunenummer, true, true, false, false, null)
+        val kommuneInfo = KommuneInfo(kommunenummer, true, true, false, false, null, true, null)
         every { mockKommuneResponse.body } returns kommuneInfo
         coEvery { idPortenService.requestToken().token } returns "token"
 
@@ -346,7 +346,7 @@ internal class FiksClientTest {
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
         val ettersendelsPdf = ByteArray(1)
-        every { ettersendelsePdfGenerator.generate(any(), any() ) } returns ettersendelsPdf
+        every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
         every { krypteringService.krypter(any(), any(), any(), any()) } returns fil1
 
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()

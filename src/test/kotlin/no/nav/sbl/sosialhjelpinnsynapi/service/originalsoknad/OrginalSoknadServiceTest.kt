@@ -4,10 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -31,7 +31,7 @@ internal class OrginalSoknadServiceTest {
     fun `sjekk at hentOrginalJsonSoknad returnerer null hvis hentOrginalSoknad returnerer null`() {
 
         every { mockDigisosSak.originalSoknadNAV } returns orginalSoknadNAV
-        every { mockDigisosSak.originalSoknadNAV?.metadata} returns "metadata"
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "metadata"
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
 
@@ -42,7 +42,7 @@ internal class OrginalSoknadServiceTest {
     fun `sjekk at hentOrginalJsonSoknad returnerer en gyldig JsonSoknad hvis hentOrginalSoknad gir en gyldig JsonSoknad`() {
 
         every { mockDigisosSak.originalSoknadNAV } returns orginalSoknadNAV
-        every { mockDigisosSak.originalSoknadNAV?.metadata} returns "metadata"
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "metadata"
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
 
@@ -53,7 +53,7 @@ internal class OrginalSoknadServiceTest {
     fun `skal returnere pdf-link fra dokumentlager`() {
         val dokumentlagerId = "id"
         every { mockDigisosSak.originalSoknadNAV } returns orginalSoknadNAV
-        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId} returns dokumentlagerId
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns dokumentlagerId
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
 
         val response = service.hentOrginalSoknadPdfLink("1234", "token")
@@ -63,7 +63,7 @@ internal class OrginalSoknadServiceTest {
     @Test
     fun `skal returnere null hvis dokumentlagerid ikke finnes`() {
         every { mockDigisosSak.originalSoknadNAV } returns orginalSoknadNAV
-        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId} returns null
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
 
         val response = service.hentOrginalSoknadPdfLink("1234", "token")

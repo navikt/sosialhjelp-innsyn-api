@@ -1,8 +1,11 @@
 package no.nav.sbl.sosialhjelpinnsynapi.client.fiks
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -12,12 +15,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
-import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_kommuneinfo_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsondigisossoker_response
-import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsonsoknad_response
 import no.nav.sbl.sosialhjelpinnsynapi.service.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
@@ -45,12 +46,11 @@ internal class FiksClientTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val restTemplate: RestTemplate = mockk()
     private val idPortenService: IdPortenService = mockk()
-    private val redisStore: RedisStore = mockk()
-    private val cacheProperties: CacheProperties = mockk(relaxed = true)
+    private val redisService: RedisService = mockk()
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, redisStore, cacheProperties, retryProperties)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, retryProperties, redisService)
 
     private val id = "123"
 
@@ -58,8 +58,8 @@ internal class FiksClientTest {
     fun init() {
         clearAllMocks()
 
-        every { redisStore.get(any()) } returns null
-        every { redisStore.set(any(), any(), any()) } returns "OK"
+        every { redisService.get(any(), any()) } returns null
+        every { redisService.put(any(), any()) } just Runs
 
         every { retryProperties.attempts } returns 2
         every { retryProperties.initialDelay } returns 5
@@ -86,13 +86,14 @@ internal class FiksClientTest {
 
     @Test
     fun `GET digisosSak fra cache`() {
-        every { redisStore.get(id) } returns ok_digisossak_response
+        val digisosSak = objectMapper.readValue<DigisosSak>(ok_digisossak_response)
+        every { redisService.get(id, DigisosSak::class.java) } returns digisosSak
 
         val result2 = fiksClient.hentDigisosSak(id, "Token", true)
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 0) { redisStore.set(any(), any(), any()) }
+        verify(exactly = 0) { redisService.put(any(), any()) }
     }
 
     @Test
@@ -111,17 +112,18 @@ internal class FiksClientTest {
         val result1 = fiksClient.hentDigisosSak(id, "Token", true)
 
         assertThat(result1).isNotNull
-        verify(exactly = 1) { redisStore.set(any(), any(), any()) }
-        verify(exactly = 1) { redisStore.get(any()) }
+        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.get(any(), DigisosSak::class.java) }
 
-        every { redisStore.get(id) } returns ok_digisossak_response
+        val digisosSak: DigisosSak = objectMapper.readValue<DigisosSak>(ok_digisossak_response)
+        every { redisService.get(id, DigisosSak::class.java) } returns digisosSak
 
         val result = fiksClient.hentDigisosSak(id, "Token", true)
 
         assertThat(result).isNotNull
 
-        verify(exactly = 1) { redisStore.set(any(), any(), any()) }
-        verify(exactly = 2) { redisStore.get(any()) }
+        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 2) { redisService.get(any(), any()) }
     }
 
     @Test
@@ -134,7 +136,8 @@ internal class FiksClientTest {
                     String::class.java,
                     id)
         } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "some error")
-        assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentDigisosSak(id, "Token", true) }
+        assertThatExceptionOfType(FiksServerException::class.java)
+                .isThrownBy { fiksClient.hentDigisosSak(id, "Token", true) }
 
     }
 
@@ -207,13 +210,14 @@ internal class FiksClientTest {
 
     @Test
     fun `GET dokument fra cache`() {
-        every { redisStore.get(any()) } returns ok_minimal_jsondigisossoker_response
+        val jsonDigisosSoker = objectMapper.readValue<JsonDigisosSoker>(ok_minimal_jsondigisossoker_response)
+        every { redisService.get(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker
 
         val result2 = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 0) { redisStore.set(any(), any(), any()) }
+        verify(exactly = 0) { redisService.put(any(), any()) }
     }
 
     @Test
@@ -232,23 +236,24 @@ internal class FiksClientTest {
         val result1 = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
 
         assertThat(result1).isNotNull
-        verify(exactly = 1) { redisStore.set(any(), any(), any()) }
-        verify(exactly = 1) { redisStore.get(any()) }
+        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.get(any(), JsonDigisosSoker::class.java) }
 
-        every { redisStore.get(any()) } returns ok_minimal_jsondigisossoker_response
+        val jsonDigisosSoker = objectMapper.readValue<JsonDigisosSoker>(ok_minimal_jsondigisossoker_response)
+        every { redisService.get(any(), JsonDigisosSoker::class.java) } returns jsonDigisosSoker
 
         val result = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
 
         assertThat(result).isNotNull
 
-        verify(exactly = 1) { redisStore.set(any(), any(), any()) }
-        verify(exactly = 2) { redisStore.get(any()) }
+        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 2) { redisService.get(any(), JsonDigisosSoker::class.java) }
     }
 
     @Test
     fun `GET dokument - get fra cache returnerer feil type`() {
         // cache returnerer jsonsoknad, men vi forventer jsondigisossoker
-        every { redisStore.get(any()) } returns ok_minimal_jsonsoknad_response
+        every { redisService.get(any(), JsonDigisosSoker::class.java) } returns null
 
         val mockResponse: ResponseEntity<String> = mockk()
         every { mockResponse.body } returns ok_minimal_jsondigisossoker_response
@@ -265,7 +270,7 @@ internal class FiksClientTest {
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 1) { redisStore.set(any(), any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any()) }
     }
 
     @Test
@@ -292,7 +297,8 @@ internal class FiksClientTest {
 
     @Test
     fun `GET KommuneInfo for kommunenummer fra cache`() {
-        every { redisStore.get(any()) } returns ok_kommuneinfo_response
+        val kommuneInfo = objectMapper.readValue<KommuneInfo>(ok_kommuneinfo_response)
+        every { redisService.get(any(), KommuneInfo::class.java) } returns kommuneInfo
 
         val kommunenummer = "1234"
         val result = fiksClient.hentKommuneInfo(kommunenummer)

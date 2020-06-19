@@ -3,7 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.redis
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.common.CacheTilhorerAnnenBrukerException
+import no.nav.sbl.sosialhjelpinnsynapi.common.DigisosSakTilhorerAnnenBrukerException
 import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
@@ -28,7 +28,7 @@ class RedisService(
             } catch (e: IOException) {
                 log.warn("Fant key=$key i cache, men value var ikke ${requestedClass.simpleName}")
                 null
-            } catch (e: CacheTilhorerAnnenBrukerException) {
+            } catch (e: DigisosSakTilhorerAnnenBrukerException) {
                 log.warn("DigisosSak i cache tilhører en annen bruker enn brukeren fra token.")
                 return null
             }
@@ -52,7 +52,7 @@ class RedisService(
      */
     private fun valider(obj: Any?) {
         when {
-            obj is DigisosSak && obj.sokerFnr != getUserIdFromToken() -> throw CacheTilhorerAnnenBrukerException("DigisosSak tilhører annen bruker")
+            obj is DigisosSak && obj.sokerFnr != getUserIdFromToken() -> throw DigisosSakTilhorerAnnenBrukerException("DigisosSak tilhører annen bruker")
             obj is JsonDigisosSoker && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonDigisosSoker har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
             obj is JsonSoknad && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonSoknad har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
             obj is JsonVedleggSpesifikasjon && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonVedleggSpesifikasjon har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")

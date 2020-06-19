@@ -50,6 +50,6 @@ class NedlastingFilnavnMismatchException(
         override val cause: Throwable?
 ) : RuntimeException(message, cause)
 
-class CacheTilhorerAnnenBrukerException(
+class DigisosSakTilhorerAnnenBrukerException(
         override val message: String?
 ) : RuntimeException(message)

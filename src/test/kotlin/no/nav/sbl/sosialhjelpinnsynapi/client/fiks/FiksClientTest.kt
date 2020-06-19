@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.fiks
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -11,13 +10,11 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_digisossak_response
-import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_kommuneinfo_response
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sbl.sosialhjelpinnsynapi.service.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
@@ -25,7 +22,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.typeRef
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -45,12 +41,11 @@ internal class FiksClientTest {
 
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val restTemplate: RestTemplate = mockk()
-    private val idPortenService: IdPortenService = mockk()
     private val redisService: RedisService = mockk()
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, idPortenService, retryProperties, redisService)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, retryProperties, redisService)
 
     private val id = "123"
 
@@ -271,77 +266,6 @@ internal class FiksClientTest {
         assertThat(result2).isNotNull
 
         verify(exactly = 1) { redisService.put(any(), any()) }
-    }
-
-    @Test
-    fun `GET KommuneInfo for kommunenummer fra Fiks`() {
-        val kommunenummer = "1234"
-        val mockKommuneResponse: ResponseEntity<KommuneInfo> = mockk()
-        val kommuneInfo = KommuneInfo(kommunenummer, true, true, false, false, null, true, null)
-        every { mockKommuneResponse.body } returns kommuneInfo
-        coEvery { idPortenService.requestToken().token } returns "token"
-
-        every {
-            restTemplate.exchange(
-                    any(),
-                    HttpMethod.GET,
-                    any(),
-                    KommuneInfo::class.java,
-                    kommunenummer)
-        } returns mockKommuneResponse
-
-        val result = fiksClient.hentKommuneInfo(kommunenummer)
-
-        assertThat(result).isNotNull
-    }
-
-    @Test
-    fun `GET KommuneInfo for kommunenummer fra cache`() {
-        val kommuneInfo = objectMapper.readValue<KommuneInfo>(ok_kommuneinfo_response)
-        every { redisService.get(any(), KommuneInfo::class.java) } returns kommuneInfo
-
-        val kommunenummer = "1234"
-        val result = fiksClient.hentKommuneInfo(kommunenummer)
-
-        assertThat(result).isNotNull
-    }
-
-    @Test
-    fun `GET KommuneInfo feiler hvis kommuneInfo gir 404`() {
-        coEvery { idPortenService.requestToken().token } returns "token"
-
-        val kommunenummer = "1234"
-        every {
-            restTemplate.exchange(
-                    any(),
-                    HttpMethod.GET,
-                    any(),
-                    KommuneInfo::class.java,
-                    kommunenummer)
-        } throws HttpClientErrorException(HttpStatus.NOT_FOUND)
-
-        assertThatExceptionOfType(FiksClientException::class.java).isThrownBy { fiksClient.hentKommuneInfo(kommunenummer) }
-
-        verify(exactly = 1) { restTemplate.exchange(any(), HttpMethod.GET, any(), KommuneInfo::class.java, kommunenummer) }
-    }
-
-    @Test
-    fun `GET KommuneInfo skal bruker retry feiler hvis Fiks gir 5xx-feil`() {
-        coEvery { idPortenService.requestToken().token } returns "token"
-
-        val kommunenummer = "1234"
-        every {
-            restTemplate.exchange(
-                    any(),
-                    HttpMethod.GET,
-                    any(),
-                    KommuneInfo::class.java,
-                    kommunenummer)
-        } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
-
-        assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentKommuneInfo(kommunenummer) }
-
-        verify(exactly = 2) { restTemplate.exchange(any(), HttpMethod.GET, any(), KommuneInfo::class.java, kommunenummer) }
     }
 
     @Test

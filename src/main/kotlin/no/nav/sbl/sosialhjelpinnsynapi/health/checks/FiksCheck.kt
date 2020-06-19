@@ -1,8 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
-import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sosialhjelp.client.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.selftest.DependencyCheck
 import no.nav.sosialhjelp.selftest.DependencyType
 import no.nav.sosialhjelp.selftest.Importance
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class FiksCheck(
         clientProperties: ClientProperties,
-        private val fiksClient: FiksClient
+        private val kommuneInfoClient: KommuneInfoClient
 ) : DependencyCheck {
 
     override val type = DependencyType.REST
@@ -22,10 +21,7 @@ class FiksCheck(
     override val importance = Importance.WARNING
 
     override fun doCheck() {
-        fiksClient.hentKommuneInfoForAlle()
+        kommuneInfoClient.getAll()
     }
 
-    companion object {
-        private val log by logger()
-    }
 }

@@ -20,10 +20,10 @@ class RedisService(
             try {
                 val obj = objectMapper.readValue(get, requestedClass)
                 valider(obj)
-                log.info("Hentet ${requestedClass.simpleName} fra cache, key=$key")
+                log.debug("Hentet ${requestedClass.simpleName}} fra cache, key=$key")
                 obj
             } catch (e: IOException) {
-                log.info("Fant key=$key i cache, men value var ikke ${requestedClass.simpleName}")
+                log.warn("Fant key=$key i cache, men value var ikke ${requestedClass.simpleName}")
                 null
             }
         } else {
@@ -36,7 +36,7 @@ class RedisService(
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {
-            log.info("Cache put OK $key")
+            log.debug("Cache put OK $key")
         }
     }
 

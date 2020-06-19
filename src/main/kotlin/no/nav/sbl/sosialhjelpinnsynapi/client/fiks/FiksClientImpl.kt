@@ -2,8 +2,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import kotlinx.coroutines.runBlocking
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
@@ -12,8 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.FiksNotFoundException
 import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
-import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -40,7 +37,6 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.io.IOException
 import java.util.Collections.singletonList
 
 
@@ -50,9 +46,8 @@ class FiksClientImpl(
         clientProperties: ClientProperties,
         private val restTemplate: RestTemplate,
         private val idPortenService: IdPortenService,
-        private val redisStore: RedisStore,
-        private val cacheProperties: CacheProperties,
-        private val retryProperties: FiksRetryProperties
+        private val retryProperties: FiksRetryProperties,
+        private val redisService: RedisService
 ) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
@@ -68,20 +63,13 @@ class FiksClientImpl(
     }
 
     private fun hentDigisosSakFraCache(digisosId: String, token: String): DigisosSak {
-        val get: String? = redisStore.get(digisosId) // Redis har konfigurert timout for disse.
-        if (get != null) {
-            try {
-                val obj = objectMapper.readValue(get, DigisosSak::class.java)
-                log.debug("Hentet digisosSak fra cache, digisosId=$digisosId")
-                return obj
-            } catch (e: IOException) {
-                log.warn("Fant key=$digisosId i cache, men value var ikke DigisosSak")
-            }
+        val cachedDigisosSak: DigisosSak? = redisService.get(digisosId, DigisosSak::class.java) as DigisosSak?
+        if (cachedDigisosSak != null) {
+            return cachedDigisosSak
         }
 
-        // kunne ikke finne digisosSak i cache. Henter fra Fiks og lagrer til cache
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
-        cachePut(digisosId, objectMapper.writeValueAsString(digisosSak))
+        redisService.put(digisosId, objectMapper.writeValueAsString(digisosSak))
         return digisosSak
     }
 
@@ -114,16 +102,9 @@ class FiksClientImpl(
     }
 
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val get: String? = redisStore.get(dokumentlagerId) // Redis har konfigurert timout for disse.
-        if (get != null) {
-            try {
-                val obj = objectMapper.readValue(get, requestedClass)
-                valider(obj)
-                log.info("Hentet dokument (${requestedClass.simpleName}) fra cache, dokumentlagerId=$dokumentlagerId")
-                return obj
-            } catch (e: IOException) {
-                log.warn("Fant key=$dokumentlagerId i cache, men value var ikke ${requestedClass.simpleName}")
-            }
+        val cachedDokument: Any? = redisService.get(dokumentlagerId, requestedClass)
+        if (cachedDokument != null) {
+            return cachedDokument
         }
 
         log.debug("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
@@ -140,7 +121,7 @@ class FiksClientImpl(
 
             log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
             val dokument = objectMapper.readValue(response.body!!, requestedClass)
-            cachePut(dokumentlagerId, objectMapper.writeValueAsString(dokument))
+            redisService.put(dokumentlagerId, objectMapper.writeValueAsString(dokument))
             return dokument
 
         } catch (e: HttpClientErrorException) {
@@ -156,27 +137,6 @@ class FiksClientImpl(
         } catch (e: Exception) {
             log.warn("Fiks - hentDokument feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)
-        }
-    }
-
-    /**
-     * Kaster feil hvis det finnes additionalProperties på mappet objekt.
-     * Tyder på at noe feil har skjedd ved mapping.
-     */
-    private fun valider(obj: Any?) {
-        when {
-            obj is JsonDigisosSoker && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonDigisosSoker har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
-            obj is JsonSoknad && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonSoknad har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
-            obj is JsonVedleggSpesifikasjon && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonVedleggSpesifikasjon har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
-        }
-    }
-
-    private fun cachePut(key: String, value: String) {
-        val set = redisStore.set(key, value, cacheProperties.timeToLiveSeconds)
-        if (set == null) {
-            log.warn("Cache put feilet eller fikk timeout")
-        } else if (set == "OK") {
-            log.debug("Cache put OK $key")
         }
     }
 
@@ -213,15 +173,9 @@ class FiksClientImpl(
     }
 
     override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
-        val get: String? = redisStore.get(kommunenummer) // Redis har konfigurert timout for disse.
-        if (get != null) {
-            try {
-                val obj = objectMapper.readValue(get, KommuneInfo::class.java)
-                log.info("Hentet kommuneInfo fra cache, kommunenummer=$kommunenummer")
-                return obj
-            } catch (e: IOException) {
-                log.warn("Fant key=$kommunenummer i cache, men value var ikke KommuneInfo")
-            }
+        val cachedKommuneInfo: KommuneInfo? = redisService.get(kommunenummer, KommuneInfo::class.java) as KommuneInfo?
+        if (cachedKommuneInfo != null) {
+            return cachedKommuneInfo
         }
         val virksomhetsToken = runBlocking { idPortenService.requestToken() }
         val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
@@ -239,7 +193,7 @@ class FiksClientImpl(
                     response.body!!
                 }
             }
-            cachePut(kommunenummer, objectMapper.writeValueAsString(kommuneInfo))
+            redisService.put(kommunenummer, objectMapper.writeValueAsString(kommuneInfo))
 
             return kommuneInfo
 

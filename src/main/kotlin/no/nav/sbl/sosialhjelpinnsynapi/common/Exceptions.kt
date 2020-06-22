@@ -49,3 +49,7 @@ class NedlastingFilnavnMismatchException(
         override val message: String?,
         override val cause: Throwable?
 ) : RuntimeException(message, cause)
+
+class DigisosSakTilhorerAnnenBrukerException(
+        override val message: String?
+) : RuntimeException(message)

@@ -11,9 +11,9 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import no.nav.sosialhjelp.api.fiks.FiksClientException
-import no.nav.sosialhjelp.api.fiks.FiksException
-import no.nav.sosialhjelp.api.fiks.FiksServerException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.idporten.client.IdPortenClient
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
@@ -60,11 +60,11 @@ class DigisosApiClientImpl(
         } catch (e: HttpClientErrorException) {
             log.warn(e.responseBodyAsString)
             log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksClientException(e.statusCode, e.message, e)
+            throw FiksClientException(e.rawStatusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             log.warn(e.responseBodyAsString)
             log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            throw FiksServerException(e.rawStatusCode, e.message, e)
         } catch (e: Exception) {
             log.error(e.message, e)
             throw FiksException(e.message, e)
@@ -101,11 +101,11 @@ class DigisosApiClientImpl(
         } catch (e: HttpClientErrorException) {
             log.warn(e.responseBodyAsString)
             log.warn("Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksClientException(e.statusCode, e.message, e)
+            throw FiksClientException(e.rawStatusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             log.warn(e.responseBodyAsString)
             log.warn("Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            throw FiksServerException(e.rawStatusCode, e.message, e)
         } catch (e: Exception) {
             log.warn("Opplasting av filer feilet", e)
             throw FiksException(e.message, e)
@@ -121,10 +121,10 @@ class DigisosApiClientImpl(
             return response.body?.replace("\"", "")
         } catch (e: HttpClientErrorException) {
             log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksClientException(e.statusCode, e.message, e)
+            throw FiksClientException(e.rawStatusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksServerException(e.statusCode, e.message, e)
+            throw FiksServerException(e.rawStatusCode, e.message, e)
         } catch (e: Exception) {
             log.error(e.message, e)
             throw FiksException(e.message, e)

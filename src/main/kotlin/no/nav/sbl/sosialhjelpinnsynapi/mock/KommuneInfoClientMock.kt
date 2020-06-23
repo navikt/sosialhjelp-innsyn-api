@@ -1,21 +1,14 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
-import no.nav.sosialhjelp.client.kommuneinfo.FiksProperties
 import no.nav.sosialhjelp.client.kommuneinfo.KommuneInfoClient
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Profile("mock")
 @Component
 class KommuneInfoClientMock : KommuneInfoClient {
-
-    override val fiksProperties: FiksProperties
-        get() = TODO("Not yet implemented")
-    override val restTemplate: RestTemplate
-        get() = TODO("Not yet implemented")
 
     override fun get(kommunenummer: String): KommuneInfo {
         return KommuneInfo(kommunenummer, true, true, false, false, null, true, null)

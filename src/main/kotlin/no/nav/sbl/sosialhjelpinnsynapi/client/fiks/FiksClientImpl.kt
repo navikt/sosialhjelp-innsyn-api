@@ -3,10 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.fiks
 import com.fasterxml.jackson.core.JsonProcessingException
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksNotFoundException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
@@ -19,6 +15,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.toFiksErrorMessage
 import no.nav.sbl.sosialhjelpinnsynapi.utils.typeRef
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
@@ -80,14 +80,14 @@ class FiksClientImpl(
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentDigisosSak feilet - $message - $fiksErrorMessage", e)
             if (e.statusCode == HttpStatus.NOT_FOUND) {
-                throw FiksNotFoundException(e.statusCode, message, e)
+                throw FiksNotFoundException(message, e)
             }
-            throw FiksClientException(e.statusCode, e.message, e)
+            throw FiksClientException(e.rawStatusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentDigisosSak feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
+            throw FiksServerException(e.rawStatusCode, message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDigisosSak feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)
@@ -122,12 +122,12 @@ class FiksClientImpl(
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentDokument feilet - $message - $fiksErrorMessage", e)
-            throw FiksClientException(e.statusCode, message, e)
+            throw FiksClientException(e.rawStatusCode, message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentDokument feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
+            throw FiksServerException(e.rawStatusCode, message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDokument feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)
@@ -155,12 +155,12 @@ class FiksClientImpl(
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentAlleDigisosSaker feilet - $message - $fiksErrorMessage", e)
-            throw FiksClientException(e.statusCode, message, e)
+            throw FiksClientException(e.rawStatusCode, message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentAlleDigisosSaker feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
+            throw FiksServerException(e.rawStatusCode, message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentAlleDigisosSaker feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)
@@ -201,12 +201,12 @@ class FiksClientImpl(
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Opplasting av ettersendelse på $digisosId feilet - $message - $fiksErrorMessage", e)
-            throw FiksClientException(e.statusCode, message, e)
+            throw FiksClientException(e.rawStatusCode, message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Opplasting av ettersendelse på $digisosId feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
+            throw FiksServerException(e.rawStatusCode, message, e)
         } catch (e: Exception) {
             log.warn("Opplasting av ettersendelse på $digisosId feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)

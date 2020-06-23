@@ -23,6 +23,8 @@ class ClientProperties {
     lateinit var idPortenClientId: String
     lateinit var idPortenScope: String
     lateinit var idPortenConfigUrl: String
+    lateinit var idPortenTruststoreType: String
+    lateinit var idPortenTruststoreFilePath: String
 
     lateinit var pdlEndpointUrl: String
     lateinit var stsTokenEndpointUrl: String

@@ -24,7 +24,9 @@ class IdPortenClientConfig {
                 clientProperties.idPortenClientId,
                 clientProperties.idPortenScope,
                 clientProperties.idPortenConfigUrl,
-                getenv("VIRKSERT_STI", "/var/run/secrets/nais.io/virksomhetssertifikat")
+                getenv("VIRKSERT_STI", "/var/run/secrets/nais.io/virksomhetssertifikat"),
+                clientProperties.idPortenTruststoreType,
+                clientProperties.idPortenTruststoreFilePath
         )
     }
 }

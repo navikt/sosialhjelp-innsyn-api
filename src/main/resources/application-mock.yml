@@ -37,6 +37,8 @@ client:
   id_porten_client_id: clientid
   id_porten_scope: scope
   id_porten_config_url: configurl
+  id_porten_truststore_type: truststoretype
+  id_porten_truststore_filepath: filepath
   norg_endpoint_url: norgurl
   pdl_endpoint_url: pdlurl
   sts_token_endpoint_url: stsurl

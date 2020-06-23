@@ -9,7 +9,7 @@ object Versions {
     const val kotlin = "1.3.70"
     const val coroutines = "1.3.7"
     const val springBoot = "2.3.1.RELEASE"
-    const val sosialhjelpCommon = "1.cd430b6-SNAPSHOT"
+    const val sosialhjelpCommon = "1.34091a0-SNAPSHOT"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
@@ -65,7 +65,7 @@ configurations {
     }
     "testImplementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
-        exclude(group = "junit", module = "junit")
+        exclude(group = "jreadunit", module = "junit")
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
@@ -155,7 +155,6 @@ val githubUser: String by project
 val githubPassword: String by project
 
 repositories {
-    mavenLocal()
     if (isRunningOnJenkins ?: "" == "true") maven("https://repo.adeo.no/repository/maven-central") else mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")

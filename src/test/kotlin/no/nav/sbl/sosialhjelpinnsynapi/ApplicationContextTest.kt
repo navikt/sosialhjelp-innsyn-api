@@ -1,8 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi
 
 import com.ninjasquad.springmockk.MockkBean
-import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisMockUtil.stopRedisMocked
+import no.nav.sosialhjelp.idporten.client.IdPortenClient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 class ApplicationContextTest {
 
     @MockkBean
-    private lateinit var idPortenService: IdPortenService
+    private lateinit var idPortenClient: IdPortenClient
 
     @MockkBean(name = "stsRestTemplate")
     private lateinit var stsRestTemplate: RestTemplate

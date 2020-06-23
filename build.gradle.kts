@@ -9,7 +9,7 @@ object Versions {
     const val kotlin = "1.3.70"
     const val coroutines = "1.3.7"
     const val springBoot = "2.3.1.RELEASE"
-    const val sosialhjelpCommon = "1.e904399"
+    const val sosialhjelpCommon = "1.71758b9-SNAPSHOT"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
@@ -93,6 +93,7 @@ dependencies {
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-api:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-kommuneinfo-client:${Versions.sosialhjelpCommon}")
+    implementation("no.nav.sosialhjelp:sosialhjelp-common-idporten-client:${Versions.sosialhjelpCommon}")
 
 //    Micrometer/Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
@@ -154,6 +155,7 @@ val githubUser: String by project
 val githubPassword: String by project
 
 repositories {
+    mavenLocal()
     if (isRunningOnJenkins ?: "" == "true") maven("https://repo.adeo.no/repository/maven-central") else mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")

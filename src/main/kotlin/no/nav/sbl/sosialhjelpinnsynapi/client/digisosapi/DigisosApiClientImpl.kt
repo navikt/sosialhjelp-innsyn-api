@@ -4,10 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClientImpl
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.VedleggMetadata
-import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
@@ -15,6 +11,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
+import no.nav.sosialhjelp.api.fiks.FiksClientException
+import no.nav.sosialhjelp.api.fiks.FiksException
+import no.nav.sosialhjelp.api.fiks.FiksServerException
+import no.nav.sosialhjelp.idporten.client.IdPortenClient
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -36,7 +36,7 @@ import java.util.*
 class DigisosApiClientImpl(
         clientProperties: ClientProperties,
         private val restTemplate: RestTemplate,
-        private val idPortenService: IdPortenService,
+        private val idPortenClient: IdPortenClient,
         private val fiksClientImpl: FiksClientImpl
 ) : DigisosApiClient {
 
@@ -75,7 +75,7 @@ class DigisosApiClientImpl(
     override fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String> {
         val headers = HttpHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-        val accessToken = runBlocking { idPortenService.requestToken() }
+        val accessToken = runBlocking { idPortenClient.requestToken() }
         headers.set(AUTHORIZATION, "Bearer " + accessToken.token)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
@@ -133,7 +133,7 @@ class DigisosApiClientImpl(
 
     private fun headers(): HttpHeaders {
         val headers = HttpHeaders()
-        val accessToken = runBlocking { idPortenService.requestToken() }
+        val accessToken = runBlocking { idPortenClient.requestToken() }
         headers.accept = Collections.singletonList(MediaType.ALL)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
         headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)

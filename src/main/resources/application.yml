@@ -33,7 +33,7 @@ client:
   pdl_endpoint_url: ${PDL_ENDPOINT_URL}
   sts_token_endpoint_url: ${STS_TOKEN_ENDPOINT_URL}
 
-idporten:
+no.nav.sosialhjelp.idporten:
   token_url: ${ID_PORTEN_TOKEN_URL}
   client_id: ${ID_PORTEN_CLIENT_ID}
   scope: ${ID_PORTEN_SCOPE}

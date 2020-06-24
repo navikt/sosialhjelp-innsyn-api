@@ -37,7 +37,7 @@ client:
   pdl_endpoint_url: pdlurl
   sts_token_endpoint_url: stsurl
 
-idporten:
+no.nav.sosialhjelp.idporten:
   token_url: tokenurl
   client_id: clientid
   scope: scope

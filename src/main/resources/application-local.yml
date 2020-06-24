@@ -34,7 +34,7 @@ client:
   pdl_endpoint_url: ${PDL_ENDPOINT_URL:pdl_endpoint_url}
   sts_token_endpoint_url: ${STS_TOKEN_ENDPOINT_URL:sts_token_endpoint_url}
 
-idporten:
+no.nav.sosialhjelp.idporten:
   token_url: ${ID_PORTEN_TOKEN_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/token}
   client_id: ${ID_PORTEN_CLIENT_ID:1c3631f4-dbf2-4c12-bdc4-156cbd53c625}
   scope: ${ID_PORTEN_SCOPE:ks:fiks}

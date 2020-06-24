@@ -65,7 +65,7 @@ configurations {
     }
     "testImplementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
-        exclude(group = "jreadunit", module = "junit")
+        exclude(group = "junit", module = "junit")
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")

@@ -1,6 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.common
 
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

@@ -2,21 +2,12 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import kotlinx.coroutines.runBlocking
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.client.idporten.IdPortenService
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksNotFoundException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
-import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
-import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
-import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.fiksHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.feilmeldingUtenFnr
 import no.nav.sbl.sosialhjelpinnsynapi.utils.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
@@ -24,13 +15,15 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.toFiksErrorMessage
 import no.nav.sbl.sosialhjelpinnsynapi.utils.typeRef
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.KommuneInfo
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -40,27 +33,20 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.io.IOException
-import java.util.Collections.singletonList
 
 
 @Profile("!mock")
 @Component
 class FiksClientImpl(
-        clientProperties: ClientProperties,
+        private val clientProperties: ClientProperties,
         private val restTemplate: RestTemplate,
-        private val idPortenService: IdPortenService,
-        private val redisStore: RedisStore,
-        private val cacheProperties: CacheProperties,
-        private val retryProperties: FiksRetryProperties
+        private val retryProperties: FiksRetryProperties,
+        private val redisService: RedisService
 ) : FiksClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
-    private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
-    private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
-        log.debug("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
         return when {
             useCache -> hentDigisosSakFraCache(digisosId, token)
             else -> hentDigisosSakFraFiks(digisosId, token)
@@ -68,27 +54,22 @@ class FiksClientImpl(
     }
 
     private fun hentDigisosSakFraCache(digisosId: String, token: String): DigisosSak {
-        val get: String? = redisStore.get(digisosId) // Redis har konfigurert timout for disse.
-        if (get != null) {
-            try {
-                val obj = objectMapper.readValue(get, DigisosSak::class.java)
-                log.debug("Hentet digisosSak fra cache, digisosId=$digisosId")
-                return obj
-            } catch (e: IOException) {
-                log.warn("Fant key=$digisosId i cache, men value var ikke DigisosSak")
-            }
+        val cachedDigisosSak: DigisosSak? = redisService.get(digisosId, DigisosSak::class.java) as DigisosSak?
+        if (cachedDigisosSak != null) {
+            return cachedDigisosSak
         }
 
-        // kunne ikke finne digisosSak i cache. Henter fra Fiks og lagrer til cache
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
-        cachePut(digisosId, objectMapper.writeValueAsString(digisosSak))
+        redisService.put(digisosId, objectMapper.writeValueAsString(digisosSak))
         return digisosSak
     }
 
     private fun hentDigisosSakFraFiks(digisosId: String, token: String): DigisosSak {
-        val headers = setIntegrasjonHeaders(token)
+        log.debug("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
+
         try {
-            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{digisosId}"
+            val headers = fiksHeaders(clientProperties, token)
+            val urlTemplate = baseUrl + FiksPaths.PATH_DIGISOSSAK
             val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, digisosId)
 
             log.debug("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
@@ -99,14 +80,14 @@ class FiksClientImpl(
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentDigisosSak feilet - $message - $fiksErrorMessage", e)
             if (e.statusCode == HttpStatus.NOT_FOUND) {
-                throw FiksNotFoundException(e.statusCode, message, e)
+                throw FiksNotFoundException(message, e)
             }
-            throw FiksClientException(e.statusCode, e.message, e)
+            throw FiksClientException(e.rawStatusCode, e.message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentDigisosSak feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
+            throw FiksServerException(e.rawStatusCode, message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDigisosSak feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)
@@ -114,75 +95,49 @@ class FiksClientImpl(
     }
 
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val get: String? = redisStore.get(dokumentlagerId) // Redis har konfigurert timout for disse.
-        if (get != null) {
-            try {
-                val obj = objectMapper.readValue(get, requestedClass)
-                valider(obj)
-                log.info("Hentet dokument (${requestedClass.simpleName}) fra cache, dokumentlagerId=$dokumentlagerId")
-                return obj
-            } catch (e: IOException) {
-                log.warn("Fant key=$dokumentlagerId i cache, men value var ikke ${requestedClass.simpleName}")
-            }
+        val cachedDokument: Any? = redisService.get(dokumentlagerId, requestedClass)
+        if (cachedDokument != null) {
+            return cachedDokument
         }
 
         log.debug("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
 
-        val headers = setIntegrasjonHeaders(token)
         try {
-            val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{digisosId}/dokumenter/{dokumentlagerId}"
+            val headers = fiksHeaders(clientProperties, token)
+            val urlTemplate = baseUrl + FiksPaths.PATH_DOKUMENT
+            val vars = mapOf("digisosId" to digisosId, "dokumentlagerId" to dokumentlagerId)
             val response = restTemplate.exchange(
                     urlTemplate,
                     HttpMethod.GET,
                     HttpEntity<Nothing>(headers),
                     String::class.java,
-                    mapOf("digisosId" to digisosId, "dokumentlagerId" to dokumentlagerId))
+                    vars)
 
             log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
             val dokument = objectMapper.readValue(response.body!!, requestedClass)
-            cachePut(dokumentlagerId, objectMapper.writeValueAsString(dokument))
+            redisService.put(dokumentlagerId, objectMapper.writeValueAsString(dokument))
             return dokument
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentDokument feilet - $message - $fiksErrorMessage", e)
-            throw FiksClientException(e.statusCode, message, e)
+            throw FiksClientException(e.rawStatusCode, message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentDokument feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
+            throw FiksServerException(e.rawStatusCode, message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentDokument feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)
         }
     }
 
-    /**
-     * Kaster feil hvis det finnes additionalProperties på mappet objekt.
-     * Tyder på at noe feil har skjedd ved mapping.
-     */
-    private fun valider(obj: Any?) {
-        when {
-            obj is JsonDigisosSoker && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonDigisosSoker har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
-            obj is JsonSoknad && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonSoknad har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
-            obj is JsonVedleggSpesifikasjon && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonVedleggSpesifikasjon har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
-        }
-    }
-
-    private fun cachePut(key: String, value: String) {
-        val set = redisStore.set(key, value, cacheProperties.timeToLiveSeconds)
-        if (set == null) {
-            log.warn("Cache put feilet eller fikk timeout")
-        } else if (set == "OK") {
-            log.debug("Cache put OK $key")
-        }
-    }
-
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        val headers = setIntegrasjonHeaders(token)
         try {
+            val headers = fiksHeaders(clientProperties, token)
+            val url = baseUrl + FiksPaths.PATH_ALLE_DIGISOSSAKER
 
             return runBlocking {
                 retry(
@@ -191,7 +146,7 @@ class FiksClientImpl(
                         maxDelay = retryProperties.maxDelay,
                         retryableExceptions = *arrayOf(HttpServerErrorException::class)
                 ) {
-                    val response = restTemplate.exchange("$baseUrl/digisos/api/v1/soknader/soknader", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
+                    val response = restTemplate.exchange(url, HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
                     response.body.orEmpty()
                 }
             }
@@ -200,94 +155,21 @@ class FiksClientImpl(
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentAlleDigisosSaker feilet - $message - $fiksErrorMessage", e)
-            throw FiksClientException(e.statusCode, message, e)
+            throw FiksClientException(e.rawStatusCode, message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Fiks - hentAlleDigisosSaker feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
+            throw FiksServerException(e.rawStatusCode, message, e)
         } catch (e: Exception) {
             log.warn("Fiks - hentAlleDigisosSaker feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)
         }
     }
 
-    override fun hentKommuneInfo(kommunenummer: String): KommuneInfo {
-        val get: String? = redisStore.get(kommunenummer) // Redis har konfigurert timout for disse.
-        if (get != null) {
-            try {
-                val obj = objectMapper.readValue(get, KommuneInfo::class.java)
-                log.info("Hentet kommuneInfo fra cache, kommunenummer=$kommunenummer")
-                return obj
-            } catch (e: IOException) {
-                log.warn("Fant key=$kommunenummer i cache, men value var ikke KommuneInfo")
-            }
-        }
-        val virksomhetsToken = runBlocking { idPortenService.requestToken() }
-        val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
-
-        try {
-            val urlTemplate = "$baseUrl/digisos/api/v1/nav/kommuner/{kommunenummer}"
-            val kommuneInfo = runBlocking {
-                retry(
-                        attempts = retryProperties.attempts,
-                        initialDelay = retryProperties.initialDelay,
-                        maxDelay = retryProperties.maxDelay,
-                        retryableExceptions = *arrayOf(HttpServerErrorException::class)
-                ) {
-                    val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), KommuneInfo::class.java, kommunenummer)
-                    response.body!!
-                }
-            }
-            cachePut(kommunenummer, objectMapper.writeValueAsString(kommuneInfo))
-
-            return kommuneInfo
-
-        } catch (e: HttpClientErrorException) {
-            val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
-            val message = e.message?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfo feilet - $message - $fiksErrorMessage", e)
-            throw FiksClientException(e.statusCode, message, e)
-        } catch (e: HttpServerErrorException) {
-            val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
-            val message = e.message?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfo feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
-        } catch (e: Exception) {
-            log.warn("Fiks - hentKommuneInfo feilet", e)
-            throw FiksException(e.message?.feilmeldingUtenFnr, e)
-        }
-    }
-
-    override fun hentKommuneInfoForAlle(): List<KommuneInfo> {
-        val virksomhetsToken = runBlocking { idPortenService.requestToken() }
-
-        val headers = setIntegrasjonHeaders("Bearer ${virksomhetsToken.token}")
-
-        try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/nav/kommuner", HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<KommuneInfo>>())
-
-            return response.body!!
-
-        } catch (e: HttpClientErrorException) {
-            val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
-            val message = e.message?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfoForAlle feilet - $message - $fiksErrorMessage", e)
-            throw FiksClientException(e.statusCode, message, e)
-        } catch (e: HttpServerErrorException) {
-            val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
-            val message = e.message?.feilmeldingUtenFnr
-            log.warn("Fiks - hentKommuneInfoForAlle feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
-        } catch (e: Exception) {
-            log.warn("Fiks - hentKommuneInfo feilet", e)
-            throw FiksException(e.message?.feilmeldingUtenFnr, e)
-        }
-    }
-
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
         log.info("Starter sending av ettersendelse med ${files.size} filer til digisosId=$digisosId")
-        val headers = setIntegrasjonHeaders(token)
+        val headers = fiksHeaders(clientProperties, token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
         val body = LinkedMultiValueMap<String, Any>()
@@ -319,12 +201,12 @@ class FiksClientImpl(
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Opplasting av ettersendelse på $digisosId feilet - $message - $fiksErrorMessage", e)
-            throw FiksClientException(e.statusCode, message, e)
+            throw FiksClientException(e.rawStatusCode, message, e)
         } catch (e: HttpServerErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
             log.warn("Opplasting av ettersendelse på $digisosId feilet - $message - $fiksErrorMessage", e)
-            throw FiksServerException(e.statusCode, message, e)
+            throw FiksServerException(e.rawStatusCode, message, e)
         } catch (e: Exception) {
             log.warn("Opplasting av ettersendelse på $digisosId feilet", e)
             throw FiksException(e.message?.feilmeldingUtenFnr, e)
@@ -357,15 +239,6 @@ class FiksClientImpl(
         } catch (e: JsonProcessingException) {
             throw RuntimeException("Feil under serialisering av metadata", e)
         }
-    }
-
-    private fun setIntegrasjonHeaders(token: String): HttpHeaders {
-        val headers = HttpHeaders()
-        headers.accept = singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonid)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonpassord)
-        return headers
     }
 
     companion object {

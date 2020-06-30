@@ -1,9 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.kommune
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksClientException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksException
-import no.nav.sbl.sosialhjelpinnsynapi.common.FiksServerException
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.HAR_KONFIGURASJON_MEN_SKAL_SENDE_VIA_SVARUT
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.IKKE_STOTTET_CASE
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.MANGLER_KONFIGURASJON
@@ -13,11 +10,16 @@ import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_M
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SOM_VANLIG
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.client.kommuneinfo.KommuneInfoClient
 import org.springframework.stereotype.Component
 
 @Component
 class KommuneService(
-        private val fiksClient: FiksClient
+        private val fiksClient: FiksClient,
+        private val kommuneInfoClient: KommuneInfoClient
 ) {
 
     fun hentKommuneStatus(fiksDigisosId: String, token: String): KommuneStatus {
@@ -48,7 +50,7 @@ class KommuneService(
         }
 
         return try {
-            fiksClient.hentKommuneInfo(kommunenummer)
+            kommuneInfoClient.get(kommunenummer)
         } catch (e: FiksClientException) {
             null
         } catch (e: FiksServerException) {
@@ -60,7 +62,7 @@ class KommuneService(
 
 
     fun hentAlleKommunerMedStatusStatus(): List<KommuneStatusDetaljer> {
-        val alleKommunerMedStatus = fiksClient.hentKommuneInfoForAlle()
+        val alleKommunerMedStatus = kommuneInfoClient.getAll()
         return alleKommunerMedStatus.map { info -> KommuneStatusDetaljer(info) }
     }
 

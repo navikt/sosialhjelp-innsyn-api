@@ -147,7 +147,7 @@ dependencies {
 
 buildscript {
     repositories {
-        maven("https://repo.adeo.no/repository/maven-central")
+        mavenCentral()
     }
 }
 

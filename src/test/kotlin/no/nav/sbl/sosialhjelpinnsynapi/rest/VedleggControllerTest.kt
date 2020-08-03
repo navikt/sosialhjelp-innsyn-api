@@ -44,7 +44,7 @@ internal class VedleggControllerTest {
   "type": "brukskonto",
   "tilleggsinfo": "kontoutskrift",
   "filer": [{
-    "filnavn": "d test.jpg"
+    "filnavn": "test.jpg"
     }]
   }]"""
 

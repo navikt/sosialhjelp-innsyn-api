@@ -29,6 +29,7 @@ object Versions {
     const val redisMock = "0.1.16"
     const val lettuce = "5.3.1.RELEASE"
     const val nettyCodec = "4.1.50.Final"
+    const val jempbox = "1.8.16"
 
     //    Test only
     const val junitJupiter = "5.6.0"
@@ -131,6 +132,8 @@ dependencies {
     implementation("org.apache.tika:tika-core:${Versions.tika}")
     implementation("org.apache.pdfbox:preflight:${Versions.pdfBox}")
     implementation("com.natpryce:konfig:${Versions.konfig}")
+    implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
+
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     implementation("com.google.guava:guava:${Versions.guava}")

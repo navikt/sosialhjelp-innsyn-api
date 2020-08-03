@@ -1,28 +1,59 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.pdf
 
+import org.apache.jempbox.xmp.XMPMetadata
+import org.apache.jempbox.xmp.pdfa.XMPSchemaPDFAId
 import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
+import org.apache.pdfbox.pdmodel.common.PDMetadata
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
 import org.springframework.core.io.ClassPathResource
 import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.util.*
+
 
 class PdfGenerator internal constructor(private var document: PDDocument) {
     private var currentPage = PDPage(PDRectangle.A4)
     private var currentStream: PDPageContentStream
     private var y: Float
 
+    private var xmp: XMPMetadata = XMPMetadata()
+    private var pdfaid: XMPSchemaPDFAId = XMPSchemaPDFAId(xmp)
+
+    private var colorProfile: InputStream? = ClassPathResource("sRGB.icc").inputStream
+    private var oi = PDOutputIntent(document, colorProfile)
+
+    private var cat: PDDocumentCatalog = document.getDocumentCatalog()
+    private var metadata: PDMetadata = PDMetadata(document)
+
+
     private fun calculateStartY(): Float {
         return MEDIA_BOX.upperRightY - MARGIN
     }
 
     fun finish(): ByteArray {
+        cat.setMetadata(metadata)
+
+        xmp.addSchema(pdfaid)
+        pdfaid.setConformance("B")
+        pdfaid.setPart(1)
+        pdfaid.setAbout("")
+        metadata.importXMPMetadata(xmp.asByteArray())
+
+        oi.setInfo("sRGB IEC61966-2.1")
+        oi.setOutputCondition("sRGB IEC61966-2.1")
+        oi.setOutputConditionIdentifier("sRGB IEC61966-2.1")
+        oi.setRegistryName("http://www.color.org")
+        cat.addOutputIntent(oi)
+
         document.addPage(currentPage)
         val baos = ByteArrayOutputStream()
         currentStream.close()
@@ -62,7 +93,6 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
 
     fun addParagraph(text: String, font: PDFont, fontSize: Float, margin: Float) {
         val lines: List<String> = parseLines(text, font, fontSize)
-
         currentStream.setFont(font, fontSize)
         currentStream.beginText()
         currentStream.newLineAtOffset(margin, y)

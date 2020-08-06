@@ -9,7 +9,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDMetadata
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
-import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
 import org.springframework.core.io.ClassPathResource
@@ -18,7 +18,6 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
-
 
 class PdfGenerator internal constructor(private var document: PDDocument) {
     private var currentPage = PDPage(PDRectangle.A4)
@@ -34,6 +33,10 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     private var cat: PDDocumentCatalog = document.getDocumentCatalog()
     private var metadata: PDMetadata = PDMetadata(document)
 
+    private var fontStream1: InputStream? = ClassPathResource("SourceSansPro-Bold.ttf").inputStream
+    val FONT_BOLD: PDFont = PDType0Font.load(document, fontStream1)
+    private val fontStream2: InputStream? = ClassPathResource("SourceSansPro-Regular.ttf").inputStream
+    val FONT_PLAIN: PDFont = PDType0Font.load(document, fontStream2)
 
     private fun calculateStartY(): Float {
         return MEDIA_BOX.upperRightY - MARGIN
@@ -194,9 +197,6 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
 
     companion object {
         private const val MARGIN = 40F
-
-        private val FONT_PLAIN: PDFont = PDType1Font.HELVETICA
-        private val FONT_BOLD: PDFont = PDType1Font.HELVETICA_BOLD
 
         private const val FONT_PLAIN_SIZE = 12F
         private const val FONT_H1_SIZE = 20F

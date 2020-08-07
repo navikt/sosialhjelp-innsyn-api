@@ -5,6 +5,7 @@ import org.apache.pdfbox.preflight.PreflightDocument
 import org.apache.pdfbox.preflight.ValidationResult
 import org.apache.pdfbox.preflight.exception.SyntaxValidationException
 import org.apache.pdfbox.preflight.parser.PreflightParser
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
@@ -40,36 +41,38 @@ class EttersendelsePdfGeneratorTest {
         val metadata = Collections.emptyList<OpplastetVedleggMetadata>()
 
         val bytes = ettersendelsePdfGenerator.generate(metadata, ident)
-        val file = File("123")
+        val file = File("pdfaTest")
         file.writeBytes(bytes)
 
         val parser = PreflightParser(file)
-
-        var result: ValidationResult
+        val result: ValidationResult
 
         try {
             parser.parse()
-
             val document = parser.preflightDocument
             document.validate()
             result = document.result
-            document.close()
-        }
-        catch(e: SyntaxValidationException){
-            result = e.result
-            println("errors: " + result)
-            e.printStackTrace()
-        }
 
-        if(result.isValid){
-            println("The file $file is a valid PDF/A-1b file")
-        }
-        else{
-            println("The file $file is not valid, error(s): ")
-            for(error: ValidationResult.ValidationError in result.errorsList){
-                println(error.errorCode + " : " + error.details)
+            if(result.isValid){
+                document.close()
+                println("The file $file is a valid PDF/A-1b file")
+            }
+            else{
+                document.close()
+                //for(error: ValidationResult.ValidationError in result.errorsList){
+                //    println(error.errorCode + " : " + error.details)
+                //}
+                Assertions.assertTrue(false, "The file $file is not valid")
             }
         }
-
+        catch(e: SyntaxValidationException){
+            //result = e.result
+            //println("errors: " + result)
+            //e.printStackTrace()
+            Assertions.assertTrue(false, "Exception when checking validity of pdf/a. Exception message: ${e.message}")
+        }
+        finally {
+            file.deleteOnExit()
+        }
     }
 }

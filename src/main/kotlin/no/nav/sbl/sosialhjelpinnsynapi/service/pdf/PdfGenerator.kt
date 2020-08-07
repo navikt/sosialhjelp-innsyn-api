@@ -186,7 +186,7 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
 
     private fun logo(): ByteArray? {
         try {
-            val classPathResource = ClassPathResource("/pdf/nav-logo_alphaless.png")
+            val classPathResource = ClassPathResource("/pdf/nav-logo_alphaless.jpg")
             val inputStream = classPathResource.inputStream
             return StreamUtils.copyToByteArray(inputStream)
         } catch (e: IOException) { // FIXME: Handle it
@@ -211,6 +211,6 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     init {
         currentStream = PDPageContentStream(document, currentPage)
         y = calculateStartY()
-        // addLogo() Fjerner logo midlertidig da den ikke er PDF/A
+        addLogo()
     }
 }

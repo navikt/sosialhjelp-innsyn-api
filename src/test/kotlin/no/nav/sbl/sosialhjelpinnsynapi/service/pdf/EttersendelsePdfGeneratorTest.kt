@@ -41,7 +41,7 @@ class EttersendelsePdfGeneratorTest {
         val metadata = Collections.emptyList<OpplastetVedleggMetadata>()
 
         val bytes = ettersendelsePdfGenerator.generate(metadata, ident)
-        val file = File("pdfaTest")
+        val file = File("pdfaTest.pdf")
         file.writeBytes(bytes)
 
         val parser = PreflightParser(file)

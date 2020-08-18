@@ -1,7 +1,7 @@
 {
   "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api.dev-nav.no/sosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api.dev.nav.no/sosialhjelp/innsyn-api"
   ],
   "env": {
     "IS_REDIS_MOCKED": "true",

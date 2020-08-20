@@ -6,6 +6,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import java.text.DateFormatSymbols
@@ -31,7 +32,7 @@ class UtbetalingerService(
         }
 
         val alleUtbetalinger: List<ManedUtbetaling> = digisosSaker
-                .filter { digisosSak -> digisosSak.sistEndret >= DateTime.now().minusMonths(months).millis }
+                .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
                 .flatMap { digisosSak ->
                     val model = eventService.hentAlleUtbetalinger(token, digisosSak)
                     model.utbetalinger
@@ -65,6 +66,30 @@ class UtbetalingerService(
                             utbetalinger = value.sortedByDescending { it.utbetalingsdato }
                     )
                 }
+    }
+
+    fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean {
+        return digisosSak.sistEndret >= DateTime.now().minusMonths(months).millis
+    }
+
+    fun utbetalingExists(token: String, months: Int): Boolean {
+        val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
+
+        if (digisosSaker.isEmpty()) {
+            log.info("Fant ingen søknader for bruker")
+            return false
+        }
+
+        digisosSaker
+                .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
+                .forEach { digisosSak ->
+                    val model = eventService.hentAlleUtbetalinger(token, digisosSak)
+                    if (model.utbetalinger.isNotEmpty()) {
+                        return true
+                    }
+                }
+
+        return false
     }
 
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)

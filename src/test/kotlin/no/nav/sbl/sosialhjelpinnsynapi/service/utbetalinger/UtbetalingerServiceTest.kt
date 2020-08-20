@@ -58,6 +58,8 @@ internal class UtbetalingerServiceTest {
         val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
 
         assertThat(response).isEmpty()
+
+        assertThat(service.utbetalingExists(token, 6)).isFalse()
     }
 
 
@@ -102,6 +104,8 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].mottaker).isEqualTo("utleier")
         assertThat(response[0].utbetalinger[0].kontonummer).isEqualTo("kontonr")
         assertThat(response[0].utbetalinger[0].utbetalingsmetode).isEqualTo("utbetalingsmetode")
+
+        assertThat(service.utbetalingExists(token, 6)).isTrue()
     }
 
     @Test
@@ -131,6 +135,8 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[1].belop).isEqualTo(10.0)
         assertThat(response[0].utbetalinger[1].fiksDigisosId).isEqualTo(digisosId)
         assertThat(response[0].utbetalinger[1].utbetalingsdato).isEqualTo("2019-08-10")
+
+        assertThat(service.utbetalingExists(token, 6)).isTrue()
     }
 
     @Test
@@ -165,6 +171,8 @@ internal class UtbetalingerServiceTest {
         assertThat(response[1].utbetalinger[0].belop).isEqualTo(10.0)
         assertThat(response[1].utbetalinger[0].fiksDigisosId).isEqualTo(digisosId)
         assertThat(response[1].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-10")
+
+        assertThat(service.utbetalingExists(token, 6)).isTrue()
     }
 
     @Disabled("disabled frem til det blir bekreftet om vilkår skal være med i response")
@@ -195,6 +203,8 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
         assertThat(response[0].utbetalinger).hasSize(2)
+
+        assertThat(service.utbetalingExists(token, 6)).isTrue()
     }
 
     @Disabled("disabled frem til det blir bekreftet om dokumentasjonkrav skal være med i response")
@@ -220,6 +230,8 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
         assertThat(response[0].utbetalinger).hasSize(1)
+
+        assertThat(service.utbetalingExists(token, 6)).isTrue()
     }
 
     @Test
@@ -269,6 +281,8 @@ internal class UtbetalingerServiceTest {
         assertThat(response[1].utbetalinger[0].belop).isEqualTo(10.0)
         assertThat(response[1].utbetalinger[0].fiksDigisosId).isEqualTo(id1)
         assertThat(response[1].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-10")
+
+        assertThat(service.utbetalingExists(token, 6)).isTrue()
     }
 
     @Test
@@ -287,6 +301,8 @@ internal class UtbetalingerServiceTest {
         assertThat(response).hasSize(1)
         assertThat(response[0].utbetalinger).hasSize(1)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo(UTBETALING_DEFAULT_TITTEL)
+
+        assertThat(service.utbetalingExists(token, 6)).isTrue()
     }
 
     @Test

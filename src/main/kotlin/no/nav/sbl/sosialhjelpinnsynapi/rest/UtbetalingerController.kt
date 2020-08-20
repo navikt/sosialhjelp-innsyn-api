@@ -36,6 +36,19 @@ class UtbetalingerController(
         }
     }
 
+    @GetMapping("/utbetalinger/exists")
+    fun getUtbetalingExists(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "12") month: Int): ResponseEntity<Boolean> {
+        try {
+            return ResponseEntity.ok().body(utbetalingerService.utbetalingExists(token, month))
+        } catch (e: FiksClientException) {
+            if(e.status == HttpStatus.FORBIDDEN) {
+                log.error("FiksClientException i UtbetalingerController status: ${e.status.value()} message: ${e.message}", e)
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            }
+            throw e
+        }
+    }
+
     companion object {
         private val log by logger()
     }

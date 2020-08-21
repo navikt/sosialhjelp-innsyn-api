@@ -41,8 +41,8 @@ class UtbetalingerController(
         try {
             return ResponseEntity.ok().body(utbetalingerService.utbetalingExists(token, month))
         } catch (e: FiksClientException) {
-            if(e.status == HttpStatus.FORBIDDEN) {
-                log.error("FiksClientException i UtbetalingerController status: ${e.status.value()} message: ${e.message}", e)
+            if (e.status == HttpStatus.FORBIDDEN.value()) {
+                log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
             }
             throw e

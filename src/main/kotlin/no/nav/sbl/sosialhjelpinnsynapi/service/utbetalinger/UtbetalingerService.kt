@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
@@ -72,6 +73,17 @@ class UtbetalingerService(
         return digisosSak.sistEndret >= DateTime.now().minusMonths(months).millis
     }
 
+    fun isDateNewerThanMonths(date: LocalDate, months: Int): Boolean {
+        return date >= LocalDate.now().minusMonths(months.toLong())
+    }
+
+    fun containsUtbetalingNewerThanMonth(model: InternalDigisosSoker, months: Int): Boolean {
+        return model.utbetalinger
+                .any { it.status == UtbetalingsStatus.UTBETALT
+                        && it.utbetalingsDato != null
+                        && isDateNewerThanMonths(it.utbetalingsDato!!, months) }
+    }
+
     fun utbetalingExists(token: String, months: Int): Boolean {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
@@ -84,9 +96,7 @@ class UtbetalingerService(
                 .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
                 .forEach { digisosSak ->
                     val model = eventService.hentAlleUtbetalinger(token, digisosSak)
-                    if (model.utbetalinger.isNotEmpty()) {
-                        return true
-                    }
+                    if (containsUtbetalingNewerThanMonth(model, months)) return true
                 }
 
         return false

@@ -145,17 +145,11 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
 }
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 val githubUser: String by project
 val githubPassword: String by project
 
 repositories {
-    if (isRunningOnJenkins ?: "" == "true") maven("https://repo.adeo.no/repository/maven-central") else mavenCentral()
+    mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")
     maven("https://repo.spring.io/plugins-release/")

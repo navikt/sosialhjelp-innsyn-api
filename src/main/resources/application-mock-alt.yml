@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: "sosialhjelp-innsyn-api"
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: 1212
+
+server:
+  servlet:
+    context-path: '/sosialhjelp/innsyn-api'
+
+management:
+  endpoints:
+    web:
+      base-path: "/internal"
+      exposure:
+        exclude: '*'
+
+innsyn:
+  vedlegg:
+    virusscan:
+      enabled: false
+  cache:
+    redis_mocked: true
+    time_to_live_seconds: 2
+  features:
+    vilkar_enabled: true
+    dokumentasjonkrav_enabled: true
+
+#Token-validering
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: ${METADATA_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/.well-known/openid-configuration}
+    accepted_audience: aud-localhost
+    cookie_name: localhost-idtoken
+
+client:
+  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/fiks}
+  fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/fiks/dokumentlager}
+  fiks_svar_ut_endpoint_url: ${FIKS_SVAR_UT_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/fiks/svarut}
+  fiks_integrasjonid: ${INTEGRASJONSID_FIKS:id1}
+  fiks_integrasjonid_kommune: ${INTEGRASJONSID_FIKS_KOMMUNE:id2}
+  fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS:pw1}
+  fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE:pw2}
+  norg_endpoint_url: ${NORG_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/norg/norg2/api/v1}
+  pdl_endpoint_url: ${PDL_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/pdl_endpoint_url}
+  sts_token_endpoint_url: ${STS_TOKEN_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/sts_token_endpoint_url}
+
+no.nav.sosialhjelp.idporten:
+  token_url: ${ID_PORTEN_TOKEN_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/token}
+  client_id: ${ID_PORTEN_CLIENT_ID:1c3631f4-dbf2-4c12-bdc4-156cbd53c625}
+  scope: ${ID_PORTEN_SCOPE:ks:fiks}
+  config_url: ${ID_PORTEN_CONFIG_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/.well-known/openid-configuration}
+  truststore_type: ${TRUSTSTORE_TYPE:PKCS12}
+  truststore_filepath: ${TRUSTSTORE_FILEPATH:key.p12.b64}

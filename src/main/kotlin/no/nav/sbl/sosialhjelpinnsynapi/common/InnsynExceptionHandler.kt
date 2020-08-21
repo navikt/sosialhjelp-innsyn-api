@@ -1,6 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.common
 
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -66,6 +70,10 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(OpplastingException::class)
     fun handleOpplastingError(e: OpplastingException): ResponseEntity<FrontendErrorMessage> {
         log.error("Noe feilet ved opplasting av vedlegg", e)
+        if(e.message?.contains("Fant virus i fil") == true) {
+            val error = FrontendErrorMessage(FILOPPLASTING_ERROR, "Mulig virus funnet")
+            return ResponseEntity(error, HttpStatus.PAYLOAD_TOO_LARGE)
+        }
         val error = FrontendErrorMessage(FILOPPLASTING_ERROR, "Noe uventet feilet")
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }

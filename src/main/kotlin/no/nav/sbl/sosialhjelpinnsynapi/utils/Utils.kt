@@ -139,3 +139,11 @@ fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableF
         }
     }, executor)
 }
+
+fun getenv(key: String, default: String): String {
+    return try {
+        System.getenv(key)
+    } catch (e: Exception) {
+        default
+    }
+}

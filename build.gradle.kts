@@ -6,10 +6,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sbl"
 
 object Versions {
-    const val kotlin = "1.3.70"
+    const val kotlin = "1.3.72"
     const val coroutines = "1.3.7"
-    const val springBoot = "2.3.2.RELEASE"
-    const val sosialhjelpCommon = "1.a615c63"
+    const val springBoot = "2.3.3.RELEASE"
+    const val sosialhjelpCommon = "1.2d56711"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
@@ -29,6 +29,7 @@ object Versions {
     const val redisMock = "0.1.16"
     const val lettuce = "5.3.1.RELEASE"
     const val nettyCodec = "4.1.50.Final"
+    const val jerseyMediaJaxb = "2.31"
 
     //    Test only
     const val junitJupiter = "5.6.0"
@@ -41,9 +42,9 @@ val isRunningOnJenkins: String? by project
 
 plugins {
     application
-    kotlin("jvm") version "1.3.70"
+    kotlin("jvm") version "1.3.72"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.3.70"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.3.72"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
     id("com.github.ben-manes.versions") version "0.28.0"
@@ -135,6 +136,7 @@ dependencies {
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     implementation("com.google.guava:guava:${Versions.guava}")
     implementation("io.netty:netty-codec-http2:${Versions.nettyCodec}")
+    implementation("org.glassfish.jersey.media:jersey-media-jaxb:${Versions.jerseyMediaJaxb}")
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")

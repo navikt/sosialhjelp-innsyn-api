@@ -9,7 +9,7 @@ import java.util.*
 data class SoknadsStatusResponse(
         val status: SoknadsStatus,
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-        val sendtTidspunkt: LocalDateTime?
+        val tidspunktSendt: LocalDateTime?
 )
 
 data class SaksStatusResponse(

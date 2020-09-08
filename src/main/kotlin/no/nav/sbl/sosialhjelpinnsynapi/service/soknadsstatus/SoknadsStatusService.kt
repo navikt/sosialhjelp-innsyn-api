@@ -22,7 +22,7 @@ class SoknadsStatusService(
             throw RuntimeException("SoknadsStatus er null på digisosId=$fiksDigisosId")
         }
         log.info("Hentet nåværende søknadsstatus=${status.name} for digisosId=$fiksDigisosId")
-        return SoknadsStatusResponse(status)
+        return SoknadsStatusResponse(status, model.tidspunktSendt)
     }
 
     companion object {

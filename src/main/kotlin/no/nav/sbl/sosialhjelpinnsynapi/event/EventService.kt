@@ -25,6 +25,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.hentDokumentlagerUrl
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
@@ -48,6 +49,8 @@ class EventService(
         val model = InternalDigisosSoker()
 
         if (timestampSendt != null) {
+            setTidspunktSendtIfNotZero(model, timestampSendt)
+            model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
             model.status = SoknadsStatus.SENDT
 
             if (jsonSoknad != null && jsonSoknad.mottaker != null) {
@@ -75,6 +78,14 @@ class EventService(
         }
 
         return model
+    }
+
+    fun setTidspunktSendtIfNotZero(model: InternalDigisosSoker, timestampSendt : Long) {
+        if (timestampSendt == 0L) {
+            log.error("Søknadens timestampSendt er 0")
+        } else {
+            model.tidspunktSendt = unixToLocalDateTime(timestampSendt)
+        }
     }
 
     fun createSaksoversiktModel(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
@@ -120,5 +131,8 @@ class EventService(
             is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }
+    }
+    companion object {
+        private val log by logger()
     }
 }

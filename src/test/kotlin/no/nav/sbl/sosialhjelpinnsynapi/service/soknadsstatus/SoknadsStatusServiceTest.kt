@@ -35,6 +35,7 @@ internal class SoknadsStatusServiceTest {
     fun `Skal returnere mest nylige SoknadsStatus`() {
         every { eventService.createModel(any(), any()) } returns mockInternalDigisosSoker
         every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
+        every { mockInternalDigisosSoker.tidspunktSendt } returns null
 
         val response: SoknadsStatusResponse = service.hentSoknadsStatus("123", token)
 

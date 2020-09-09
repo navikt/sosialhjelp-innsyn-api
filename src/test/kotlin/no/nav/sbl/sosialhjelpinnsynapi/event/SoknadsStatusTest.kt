@@ -67,7 +67,7 @@ internal class SoknadsStatusTest {
         assertThat(model.historikk).hasSize(1)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(unixToLocalDateTime(tidspunkt_soknad))
+        assertThat(hendelse.tidspunkt).isEqualTo(unixToLocalDateTime(tidspunkt_soknad_fixed))
         assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til ")
     }
 

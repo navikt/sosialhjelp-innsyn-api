@@ -14,9 +14,10 @@ data class InternalDigisosSoker(
         var tildeltNavKontor: String?,
         var oppgaver: MutableList<Oppgave>,
         var historikk: MutableList<Hendelse>,
-        var forelopigSvar: ForelopigSvar
+        var forelopigSvar: ForelopigSvar,
+        var tidspunktSendt: LocalDateTime?
 ) {
-    constructor() : this(null, null, mutableListOf(), mutableListOf(), mutableListOf(), null, null, mutableListOf(), mutableListOf(), ForelopigSvar(false, null))
+    constructor() : this(null, null, mutableListOf(), mutableListOf(), mutableListOf(), null, null, mutableListOf(), mutableListOf(), ForelopigSvar(false, null), null)
 }
 
 data class Forvaltningsbrev(

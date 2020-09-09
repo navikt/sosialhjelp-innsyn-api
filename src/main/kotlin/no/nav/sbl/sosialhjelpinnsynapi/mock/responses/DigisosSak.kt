@@ -28,7 +28,7 @@ val defaultDigisosSak = DigisosSak(
                                 filnavn = "soknad vedlegg filnavn 1",
                                 dokumentlagerDokumentId = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                                 storrelse = 0)),
-                timestampSendt = 0
+                timestampSendt = 1539430000000
         ),
         ettersendtInfoNAV = EttersendtInfoNAV(
                 ettersendelser = listOf(

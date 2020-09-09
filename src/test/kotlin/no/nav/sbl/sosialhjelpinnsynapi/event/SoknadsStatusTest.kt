@@ -43,7 +43,8 @@ internal class SoknadsStatusTest {
         every { mockDigisosSak.fiksDigisosId } returns "123"
         every { mockDigisosSak.digisosSoker?.metadata } returns "some id"
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some other id"
-        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad
+        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_soknad_fixed
+        every { mockDigisosSak.originalSoknadNAV?.navEksternRefId } returns "1100001"
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
@@ -66,7 +67,7 @@ internal class SoknadsStatusTest {
         assertThat(model.historikk).hasSize(1)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tidspunkt).isEqualTo(unixToLocalDateTime(tidspunkt_soknad))
+        assertThat(hendelse.tidspunkt).isEqualTo(unixToLocalDateTime(tidspunkt_soknad_fixed))
         assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til ")
     }
 
@@ -186,5 +187,26 @@ internal class SoknadsStatusTest {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
         assertThat(hendelse.tittel).isEqualTo("Din søknad vil bli behandlet, men vi kan ikke vise behandlingsstatus digitalt.")
+    }
+
+    @Test
+    fun `modell inneholder referanse`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns JsonDigisosSoker()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.referanse).isEqualTo("1100001")
+    }
+
+    @Test
+    fun `soknadsStatus inneholder tidspunktSendt`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns JsonDigisosSoker()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model.tidspunktSendt).isEqualTo(tidspunkt_soknad_fixed_localDateTime)
     }
 }

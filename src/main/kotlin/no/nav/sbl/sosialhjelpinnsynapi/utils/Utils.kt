@@ -78,7 +78,7 @@ fun enumNameToLowercase(string: String): String {
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser
-            ?.map { it.navEksternRefId }?.maxBy { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
+            ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
             ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
             ?: digisosSak.fiksDigisosId.plus("0000")
 

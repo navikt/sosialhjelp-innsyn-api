@@ -12,6 +12,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class SoknadsStatusServiceTest {
 
@@ -41,5 +42,13 @@ internal class SoknadsStatusServiceTest {
 
         assertThat(response).isNotNull
         assertThat(response.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+    }
+
+    @Test
+    fun `Skal regne soknadens alder`() {
+        val tidspunktSendt = LocalDateTime.now().minusDays(1).plusHours(2).minusMinutes(3) // (24-2)h * 60 m/h - 3 = 22*60-3 =
+        val response = service.soknadsalderIMinutter(tidspunktSendt)
+
+        assertThat(response).isEqualTo(1323) // (24-2)h * 60 m/h + 3 = 22*60+3
     }
 }

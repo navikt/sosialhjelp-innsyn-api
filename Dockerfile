@@ -1,4 +1,6 @@
-FROM navikt/java:11
+FROM navikt/java:11-appdynamics
+
+ENV APPD_ENABLED=true
 
 ENV LC_ALL="no_NB.UTF-8"
 ENV LANG="no_NB.UTF-8"

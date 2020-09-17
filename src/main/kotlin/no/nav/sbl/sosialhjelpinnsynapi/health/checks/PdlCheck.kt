@@ -2,9 +2,10 @@ package no.nav.sbl.sosialhjelpinnsynapi.health.checks
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.AbstractDependencyCheck
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.DependencyType
-import no.nav.sbl.sosialhjelpinnsynapi.health.selftest.Importance
+import no.nav.sosialhjelp.selftest.DependencyCheck
+import no.nav.sosialhjelp.selftest.DependencyType
+import no.nav.sosialhjelp.selftest.Importance
+
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
@@ -13,12 +14,13 @@ import org.springframework.stereotype.Component
 class PdlCheck(
         clientProperties: ClientProperties,
         private val pdlClient: PdlClient
-) : AbstractDependencyCheck(
-        DependencyType.REST,
-        "PDL",
-        clientProperties.pdlEndpointUrl,
-        Importance.WARNING
-) {
+) : DependencyCheck {
+
+    override val type = DependencyType.REST
+    override val name = "PDL"
+    override val address = clientProperties.pdlEndpointUrl
+    override val importance = Importance.WARNING
+
     override fun doCheck() {
         pdlClient.ping()
     }

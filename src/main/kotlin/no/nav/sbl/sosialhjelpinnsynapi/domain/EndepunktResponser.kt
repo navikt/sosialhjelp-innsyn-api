@@ -7,7 +7,10 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class SoknadsStatusResponse(
-        val status: SoknadsStatus
+        val status: SoknadsStatus,
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+        val tidspunktSendt: LocalDateTime?,
+        val soknadsalderIMinutter: Long?
 )
 
 data class SaksStatusResponse(
@@ -22,6 +25,7 @@ data class VedtaksfilUrl(
         val dato: LocalDate?,
         val vedtaksfilUrl: String
 )
+
 data class HendelseResponse(
         val tidspunkt: String,
         val beskrivelse: String,
@@ -108,7 +112,7 @@ data class SaksDetaljerResponse(
 
 data class ForelopigSvarResponse(
         val harMottattForelopigSvar: Boolean,
-        val link: String?  
+        val link: String?
 )
 
 data class KommuneResponse(
@@ -117,7 +121,8 @@ data class KommuneResponse(
         val erInnsendingEttersendelseDeaktivert: Boolean,
         val erInnsendingEttersendelseMidlertidigDeaktivert: Boolean,
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-        val tidspunkt: Date
+        val tidspunkt: Date,
+        val kommunenummer: String?
 )
 
 data class OrginalJsonSoknadResponse(
@@ -126,16 +131,4 @@ data class OrginalJsonSoknadResponse(
 
 data class OrginalSoknadPdfLinkResponse(
         val orginalSoknadPdfLink: String
-)
-
-data class FiksErrorResponse(
-    val error: String?,
-    val errorCode: Any?,
-    val errorId: String?,
-    val errorJson: Any?,
-    val message: String?,
-    val originalPath: String?,
-    val path: String?,
-    val status: Int?,
-    val timestamp: Long?
 )

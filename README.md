@@ -7,6 +7,42 @@ Backend-app som skal gi innsyn i egen sosialhjelp sak.
 ## Henvendelser
 Henvendelser kan sendes via Slack i kanalen #digisos.
 
+## Hvordan komme i gang
+### Hente github-package-registry pakker fra NAV-IT
+Enkelte pakker brukt i repoet er lastet opp til Github Package Registry, som krever autentisering for å kunne lastes ned.
+Ved bruk av f.eks Gradle, kan det løses slik:
+```
+val githubUser: String by project
+val githubPassword: String by project
+repositories {
+    maven {
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+        setUrl("https://maven.pkg.github.com/navikt/sosialhjelp-common")
+    }
+}
+```
+
+`githubUser` og `githubPassword` er da properties som settes i `~/.gradle/gradle.properties`:
+
+```                                                     
+githubUser=x-access-token
+githubPassword=<token>
+```
+
+Hvor `<token>` er et personal access token med scope `read:packages`.
+
+Alternativt kan variablene kan også konfigureres som miljøvariabler, eller brukes i kommandolinjen:
+
+* `ORG_GRADLE_PROJECT_githubUser`
+* `ORG_GRADLE_PROJECT_githubPassword`
+
+```
+./gradlew -PgithubUser=x-access-token -PgithubPassword=[token]
+```
+
 ## Oppsett av nytt prosjekt
 Dette prosjektet bygger og deployer vha Github Actions
 
@@ -47,4 +83,4 @@ Propertyen `innsyn.cache.redisMocked` styrer hvorvidt en _in-memory_ Redis insta
 TestApplication og profile=mock,log-console
 #### *med* integrasjon til Fiks og login-api
 TestApplication og profile=local,log-console. \
-Da må følgende env-variabler settes: FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI og TESTBRUKER_NATALIE
+Da må følgende env-variabler settes (hentes fra vault): FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI, TRUSTSTORE_TYPE, TRUSTSTORE_FILEPATH og TESTBRUKER_NATALIE.

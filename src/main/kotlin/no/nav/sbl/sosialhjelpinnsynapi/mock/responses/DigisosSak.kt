@@ -1,6 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock.responses
 
-import no.nav.sbl.sosialhjelpinnsynapi.domain.*
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.DigisosSoker
+import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.api.fiks.Ettersendelse
+import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
+import no.nav.sosialhjelp.api.fiks.Tilleggsinformasjon
+
 
 val defaultDigisosSak = DigisosSak(
         fiksDigisosId = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -21,7 +28,7 @@ val defaultDigisosSak = DigisosSak(
                                 filnavn = "soknad vedlegg filnavn 1",
                                 dokumentlagerDokumentId = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                                 storrelse = 0)),
-                timestampSendt = 0
+                timestampSendt = 1539430000000
         ),
         ettersendtInfoNAV = EttersendtInfoNAV(
                 ettersendelser = listOf(
@@ -61,5 +68,8 @@ val defaultDigisosSak = DigisosSak(
                         )
                 ),
                 timestampSistOppdatert = 0
+        ),
+        tilleggsinformasjon = Tilleggsinformasjon(
+                enhetsnummer = "1234"
         )
 )

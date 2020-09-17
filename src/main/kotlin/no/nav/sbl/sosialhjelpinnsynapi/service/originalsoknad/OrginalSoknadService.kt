@@ -2,11 +2,11 @@ package no.nav.sbl.sosialhjelpinnsynapi.service.originalsoknad
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.hentDokumentlagerUrl
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.springframework.stereotype.Component
 
 @Component

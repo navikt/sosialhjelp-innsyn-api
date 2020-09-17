@@ -17,6 +17,8 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtaksfil
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -48,6 +50,9 @@ val avsender = JsonAvsender().withSystemnavn("test").withSystemversjon("123")
 
 private val now = ZonedDateTime.now()
 val tidspunkt_soknad = now.minusHours(11).toEpochSecond() * 1000L
+val tidspunkt_soknad_fixed_localDateTime = LocalDateTime.of(2020,10,10,10,10,10,0)
+var zone = ZoneId.of("Europe/Berlin")
+val tidspunkt_soknad_fixed = tidspunkt_soknad_fixed_localDateTime.atZone(zone).toEpochSecond()  * 1000L
 val tidspunkt_1 = now.minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME)
 val tidspunkt_2 = now.minusHours(9).format(DateTimeFormatter.ISO_DATE_TIME)
 val tidspunkt_3 = now.minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)

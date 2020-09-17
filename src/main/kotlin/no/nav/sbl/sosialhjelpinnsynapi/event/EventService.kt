@@ -17,7 +17,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_SOKNADEN
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
@@ -26,7 +25,10 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.UrlResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.hentDokumentlagerUrl
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import org.springframework.stereotype.Component
 
 @Component
@@ -47,6 +49,8 @@ class EventService(
         val model = InternalDigisosSoker()
 
         if (timestampSendt != null) {
+            setTidspunktSendtIfNotZero(model, timestampSendt)
+            model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
             model.status = SoknadsStatus.SENDT
 
             if (jsonSoknad != null && jsonSoknad.mottaker != null) {
@@ -68,12 +72,20 @@ class EventService(
 
             ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         }
-
-        if (digisosSak.originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
-            model.applySoknadKrav(digisosSak.fiksDigisosId, digisosSak.originalSoknadNAV, vedleggService, timestampSendt!!, token)
+        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
+        if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
+            model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, timestampSendt!!, token)
         }
 
         return model
+    }
+
+    fun setTidspunktSendtIfNotZero(model: InternalDigisosSoker, timestampSendt : Long) {
+        if (timestampSendt == 0L) {
+            log.error("Søknadens timestampSendt er 0")
+        } else {
+            model.tidspunktSendt = unixToLocalDateTime(timestampSendt)
+        }
     }
 
     fun createSaksoversiktModel(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
@@ -119,5 +131,8 @@ class EventService(
             is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }
+    }
+    companion object {
+        private val log by logger()
     }
 }

@@ -6,22 +6,20 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sbl"
 
 object Versions {
-    const val kotlin = "1.3.70"
-    const val springBoot = "2.3.0.RELEASE"
+    const val kotlin = "1.4.0"
+    const val coroutines = "1.3.9"
+    const val springBoot = "2.3.3.RELEASE"
+    const val sosialhjelpCommon = "1.2d56711"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
-    const val micrometerRegistry = "1.5.1"
+    const val micrometerRegistry = "1.5.4"
     const val prometheus = "0.8.1"
-    const val tokenValidation = "1.1.5"
-    const val jackson = "2.11.0"
+    const val tokenValidation = "1.3.0"
+    const val jackson = "2.11.2"
     const val guava = "28.2-jre"
     const val swagger = "2.9.2"
-    const val resilience4j = "1.3.1"
-    const val rxKotlin = "2.4.0"
-    const val vavrKotlin = "0.10.2"
     const val konfig = "1.6.10.0"
-    const val kotlinCoroutines = "1.3.3"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
@@ -29,12 +27,13 @@ object Versions {
     const val pdfBox = "2.0.19"
     const val fiksKryptering = "1.0.9"
     const val redisMock = "0.1.16"
-    const val lettuce = "5.2.2.RELEASE"
+    const val lettuce = "5.3.3.RELEASE"
     const val nettyCodec = "4.1.50.Final"
+    const val jerseyMediaJaxb = "2.31"
 
-//    Test only
+    //    Test only
     const val junitJupiter = "5.6.0"
-    const val mockk = "1.9.3"
+    const val mockk = "1.10.0"
     const val springmockk = "2.0.0"
 }
 
@@ -43,9 +42,9 @@ val isRunningOnJenkins: String? by project
 
 plugins {
     application
-    kotlin("jvm") version "1.3.70"
+    kotlin("jvm") version "1.4.0"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.3.70"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.4.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
     id("com.github.ben-manes.versions") version "0.28.0"
@@ -80,7 +79,7 @@ dependencies {
     implementation(kotlin("reflect"))
 
 //    Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.kotlinCoroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
 
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
@@ -89,6 +88,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.springBoot}")
+
+//    Sosialhjelp-common
+    implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")
+    implementation("no.nav.sosialhjelp:sosialhjelp-common-api:${Versions.sosialhjelpCommon}")
+    implementation("no.nav.sosialhjelp:sosialhjelp-common-kommuneinfo-client:${Versions.sosialhjelpCommon}")
+    implementation("no.nav.sosialhjelp:sosialhjelp-common-idporten-client:${Versions.sosialhjelpCommon}")
 
 //    Micrometer/Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
@@ -130,13 +136,7 @@ dependencies {
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     implementation("com.google.guava:guava:${Versions.guava}")
     implementation("io.netty:netty-codec-http2:${Versions.nettyCodec}")
-
-//    Selftest
-    implementation ("io.github.resilience4j:resilience4j-kotlin:${Versions.resilience4j}")
-    implementation ("io.github.resilience4j:resilience4j-timelimiter:${Versions.resilience4j}")
-    implementation ("io.github.resilience4j:resilience4j-circuitbreaker:${Versions.resilience4j}")
-    implementation ("io.reactivex.rxjava2:rxkotlin:${Versions.rxKotlin}")
-    implementation ("io.vavr:vavr-kotlin:${Versions.vavrKotlin}")
+    implementation("org.glassfish.jersey.media:jersey-media-jaxb:${Versions.jerseyMediaJaxb}")
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
@@ -147,17 +147,21 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
 }
 
-buildscript {
-    repositories {
-        maven("https://repo.adeo.no/repository/maven-central")
-    }
-}
+val githubUser: String by project
+val githubPassword: String by project
 
 repositories {
-    if (isRunningOnJenkins ?: "" == "true") maven("https://repo.adeo.no/repository/maven-central") else mavenCentral()
+    mavenCentral()
     jcenter()
     maven("https://plugins.gradle.org/m2/")
     maven("https://repo.spring.io/plugins-release/")
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/sosialhjelp-common")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
 }
 
 tasks {

@@ -1,5 +1,10 @@
 package no.nav.sbl.sosialhjelpinnsynapi.utils
 
+import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import java.util.*
+
 object IntegrationUtils {
     const val HEADER_INTEGRASJON_ID = "IntegrasjonId"
     const val HEADER_INTEGRASJON_PASSORD = "IntegrasjonPassord"
@@ -14,4 +19,13 @@ object IntegrationUtils {
     const val HEADER_TEMA = "Tema"
 
     const val TEMA_KOM = "KOM"
+
+    fun fiksHeaders(clientProperties: ClientProperties, token: String): HttpHeaders {
+        val headers = HttpHeaders()
+        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
+        headers.set(HttpHeaders.AUTHORIZATION, token)
+        headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
+        headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
+        return headers
+    }
 }

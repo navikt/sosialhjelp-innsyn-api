@@ -4,9 +4,9 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.FiksErrorResponse
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.ErrorMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -78,7 +78,7 @@ fun enumNameToLowercase(string: String): String {
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser
-            ?.map { it.navEksternRefId }?.maxBy { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
+            ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
             ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
             ?: digisosSak.fiksDigisosId.plus("0000")
 
@@ -109,9 +109,9 @@ fun isRunningInProd(): Boolean {
     return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "default"
 }
 
-fun <T : HttpStatusCodeException> T.toFiksErrorResponse(): FiksErrorResponse? {
+fun <T : HttpStatusCodeException> T.toFiksErrorMessage(): ErrorMessage? {
     return try {
-        objectMapper.readValue(this.responseBodyAsByteArray, FiksErrorResponse::class.java)
+        objectMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
     } catch (e: IOException) {
         null
     }
@@ -123,14 +123,14 @@ val String.feilmeldingUtenFnr: String?
         return this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
     }
 
-val FiksErrorResponse.feilmeldingUtenFnr: String?
+val ErrorMessage.feilmeldingUtenFnr: String?
     get() {
         return this.message?.feilmeldingUtenFnr
     }
 
 fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()
-    return CompletableFuture.runAsync( Runnable{
+    return CompletableFuture.runAsync(Runnable {
         MDC.setContextMap(previous)
         try {
             runnable.run()
@@ -138,4 +138,12 @@ fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableF
             MDCUtils.clearMDC()
         }
     }, executor)
+}
+
+fun getenv(key: String, default: String): String {
+    return try {
+        System.getenv(key)
+    } catch (e: Exception) {
+        default
+    }
 }

@@ -4,13 +4,14 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.KommuneInfo
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.HAR_KONFIGURASJON_MEN_SKAL_SENDE_VIA_SVARUT
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_IKKE_MULIG
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SKAL_VISE_FEILSIDE
 import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SOM_VANLIG
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.KommuneInfo
+import no.nav.sosialhjelp.client.kommuneinfo.KommuneInfoClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,7 +19,8 @@ import org.junit.jupiter.api.Test
 internal class KommuneServiceTest {
 
     private val fiksClient: FiksClient = mockk()
-    private val service = KommuneService(fiksClient)
+    private val kommuneInfoClient: KommuneInfoClient = mockk()
+    private val service = KommuneService(fiksClient, kommuneInfoClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val kommuneNr = "1234"
@@ -28,13 +30,13 @@ internal class KommuneServiceTest {
         clearMocks(fiksClient, mockDigisosSak)
 
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
-        every { mockDigisosSak.originalSoknadNAV?.metadata }  returns "some id"
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some id"
         every { mockDigisosSak.kommunenummer } returns kommuneNr
     }
 
     @Test
     fun `Kommune har konfigurasjon men skal sende via svarut`() {
-        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, false, false, false, false, null)
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, false, false, false, false, null, true, null)
 
         val status = service.hentKommuneStatus("123", "token")
 
@@ -43,13 +45,13 @@ internal class KommuneServiceTest {
 
     @Test
     fun `Kommune skal sende soknader og ettersendelser via FIKS API`() {
-        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, false, false, false, null)
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, true, false, false, false, null, true, null)
 
         val status1 = service.hentKommuneStatus("123", "token")
 
         assertThat(status1).isEqualTo(SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA)
 
-        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, true, false, false, null)
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, true, true, false, false, null, true, null)
 
         val status2 = service.hentKommuneStatus("123", "token")
 
@@ -58,7 +60,7 @@ internal class KommuneServiceTest {
 
     @Test
     fun `Kommune skal vise midlertidig feilside og innsyn som vanlig`() {
-        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, true, true, false, null)
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, true, true, true, false, null, true, null)
 
         val status = service.hentKommuneStatus("123", "token")
 
@@ -67,7 +69,7 @@ internal class KommuneServiceTest {
 
     @Test
     fun `Kommune skal vise midlertidig feilside og innsyn er ikke mulig`() {
-        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, false, true, false, null)
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, true, false, true, false, null, true, null)
 
         val status = service.hentKommuneStatus("123", "token")
 
@@ -76,7 +78,7 @@ internal class KommuneServiceTest {
 
     @Test
     fun `Kommune skal vise midlertidig feilside og innsyn skal vise feilside`() {
-        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, true, true, true, null)
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, true, true, true, true, null, true, null)
 
         val status = service.hentKommuneStatus("123", "token")
 
@@ -85,8 +87,8 @@ internal class KommuneServiceTest {
 
     @Test
     fun `Ingen originalSoknad - skal ikke kaste feil`() {
-        every { mockDigisosSak.originalSoknadNAV?.metadata }  returns null
-        every { fiksClient.hentKommuneInfo(any()) } returns KommuneInfo(kommuneNr, true, true, false, false, null)
+        every { mockDigisosSak.originalSoknadNAV?.metadata } returns null
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, true, true, false, false, null, true, null)
 
         val status = service.hentKommuneStatus("123", "token")
 
@@ -96,12 +98,12 @@ internal class KommuneServiceTest {
     @Test
     fun `Alle kommuner paa FIKS med status`() {
         val kommuneStatusListe = ArrayList<KommuneInfo>()
-        kommuneStatusListe.add(KommuneInfo("0001", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null))
-        kommuneStatusListe.add(KommuneInfo("0002", kanMottaSoknader = false, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null))
-        kommuneStatusListe.add(KommuneInfo("0003", kanMottaSoknader = true, kanOppdatereStatus = false, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null))
-        kommuneStatusListe.add(KommuneInfo("0004", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = true, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null))
-        kommuneStatusListe.add(KommuneInfo("0005", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = true, kontaktPersoner = null))
-        every { fiksClient.hentKommuneInfoForAlle() } returns kommuneStatusListe
+        kommuneStatusListe.add(KommuneInfo("0001", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0002", kanMottaSoknader = false, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0003", kanMottaSoknader = true, kanOppdatereStatus = false, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0004", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = true, harMidlertidigDeaktivertOppdateringer = false, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0005", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = true, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        every { kommuneInfoClient.getAll() } returns kommuneStatusListe
 
         val status = service.hentAlleKommunerMedStatusStatus()
 

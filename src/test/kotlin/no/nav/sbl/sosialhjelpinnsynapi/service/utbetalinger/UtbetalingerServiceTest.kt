@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Dokumentasjonkrav
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
@@ -16,6 +15,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.event.apply
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.assertj.core.api.Assertions.assertThat
 import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
@@ -49,10 +49,102 @@ internal class UtbetalingerServiceTest {
         every { mockDigisosSak.sistEndret } returns DateTime.now().millis
     }
 
+
+    @Test
+    fun `Skal returnere at utbetalinger ikke eksisterer om soker ikke har noen digisosSaker`() {
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
+
+        val response = service.utbetalingExists(token, 6)
+
+        assertThat(response).isFalse()
+    }
+
+    @Test
+    fun `Skal returnere at utbetalinger ikke eksisterer om soker ikke har utbetalinger på noen digisosSaker`() {
+        val model = InternalDigisosSoker()
+        every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val response = service.utbetalingExists(token, 6)
+
+        assertThat(response).isFalse()
+    }
+
+
+    @Test
+    fun `Skal returnere at utbetalinger ikke eksisterer om det digisosSak inneholder utebtalinger som tom liste`() {
+        val model = InternalDigisosSoker()
+        model.utbetalinger = mutableListOf()
+
+        every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val response = service.utbetalingExists(token, 6)
+
+        assertThat(response).isFalse()
+    }
+
+
+    @Test
+    fun `Skal returnere at utbetalinger ikke eksisterer om det finnes 1 gammel utbetaling`() {
+        val model = InternalDigisosSoker()
+        model.utbetalinger = mutableListOf(Utbetaling(
+                referanse = "Sak1",
+                status = UtbetalingsStatus.UTBETALT,
+                belop = BigDecimal.TEN,
+                beskrivelse = "Nødhjelp",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.now().minusMonths(13),
+                fom = LocalDate.now().minusMonths(13).withDayOfMonth(1),
+                tom = LocalDate.now().minusMonths(13).withDayOfMonth(28),
+                mottaker = "utleier",
+                kontonummer = "kontonr",
+                utbetalingsmetode = "utbetalingsmetode",
+                annenMottaker = false,
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = LocalDateTime.now()
+        ))
+
+        every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val response = service.utbetalingExists(token, 12)
+
+        assertThat(response).isFalse()
+    }
+
+    @Test
+    fun `Skal returnere at utbetalinger eksisterer om det finnes 1 utbetaling`() {
+        val model = InternalDigisosSoker()
+        model.utbetalinger = mutableListOf(Utbetaling(
+                referanse = "Sak1",
+                status = UtbetalingsStatus.UTBETALT,
+                belop = BigDecimal.TEN,
+                beskrivelse = "Nødhjelp",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.now().minusMonths(12),
+                fom = LocalDate.now().minusMonths(12).withDayOfMonth(1),
+                tom = LocalDate.now().minusMonths(12).withDayOfMonth(28),
+                mottaker = "utleier",
+                kontonummer = "kontonr",
+                utbetalingsmetode = "utbetalingsmetode",
+                annenMottaker = false,
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = LocalDateTime.now()
+        ))
+
+        every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val response = service.utbetalingExists(token, 12)
+
+        assertThat(response).isTrue()
+    }
+
     @Test
     fun `Skal returnere emptyList hvis soker ikke har noen digisosSaker`() {
-        val model = InternalDigisosSoker()
-        every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
 
         val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
@@ -60,27 +152,26 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isEmpty()
     }
 
-
     @Test
     fun `Skal returnere response med 1 utbetaling`() {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(Utbetaling(
-                        referanse = "Sak1",
-                        status = UtbetalingsStatus.UTBETALT,
-                        belop = BigDecimal.TEN,
-                        beskrivelse = "Nødhjelp",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.of(2019, 8, 10),
-                        fom = LocalDate.of(2019, 8, 1),
-                        tom = LocalDate.of(2019, 8, 31),
-                        mottaker = "utleier",
-                        kontonummer = "kontonr",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        annenMottaker = false,
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = LocalDateTime.now()
-                ))
+                referanse = "Sak1",
+                status = UtbetalingsStatus.UTBETALT,
+                belop = BigDecimal.TEN,
+                beskrivelse = "Nødhjelp",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.of(2019, 8, 10),
+                fom = LocalDate.of(2019, 8, 1),
+                tom = LocalDate.of(2019, 8, 31),
+                mottaker = "utleier",
+                kontonummer = "kontonr",
+                utbetalingsmetode = "utbetalingsmetode",
+                annenMottaker = false,
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = LocalDateTime.now()
+        ))
 
         every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
@@ -275,8 +366,8 @@ internal class UtbetalingerServiceTest {
     fun `utbetaling uten beskrivelse gir default tittel`() {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(
-                        Utbetaling("Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, null, null,
-                                LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()))
+                Utbetaling("Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, null, null,
+                        LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()))
 
         every { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)

@@ -2,14 +2,14 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.digisosapi.DigisosApiClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosApiWrapper
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSak
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosSoker
-import no.nav.sbl.sosialhjelpinnsynapi.domain.DokumentInfo
-import no.nav.sbl.sosialhjelpinnsynapi.domain.EttersendtInfoNAV
-import no.nav.sbl.sosialhjelpinnsynapi.domain.OriginalSoknadNAV
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.DigisosSoker
+import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -46,7 +46,8 @@ class DigisosApiClientMock(
                             vedlegg = Collections.emptyList(),
                             timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)),
                     ettersendtInfoNAV = EttersendtInfoNAV(Collections.emptyList()),
-                    digisosSoker = null))
+                    digisosSoker = null,
+                    tilleggsinformasjon = null))
         } else {
             oppdaterOriginalSoknadNavHvisTimestampSendtIkkeErFoerTidligsteHendelse(id, digisosApiWrapper)
         }
@@ -62,7 +63,7 @@ class DigisosApiClientMock(
     }
 
     private fun femMinutterForMottattSoknad(digisosApiWrapper: DigisosApiWrapper): Long {
-        val mottattTidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt
+        val mottattTidspunkt = digisosApiWrapper.sak.soker.hendelser.minByOrNull { it.hendelsestidspunkt }!!.hendelsestidspunkt
         return try {
             mottattTidspunkt.toLocalDateTime().minusMinutes(5).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
         } catch (e: DateTimeParseException) {
@@ -73,9 +74,9 @@ class DigisosApiClientMock(
     private fun oppdaterOriginalSoknadNavHvisTimestampSendtIkkeErFoerTidligsteHendelse(id: String, digisosApiWrapper: DigisosApiWrapper) {
         val digisosSak = fiksClientMock.hentDigisosSak(id, "", true)
         val timestampSendt = digisosSak.originalSoknadNAV!!.timestampSendt
-        val tidligsteHendelsetidspunkt = digisosApiWrapper.sak.soker.hendelser.minBy { it.hendelsestidspunkt }!!.hendelsestidspunkt
+        val tidligsteHendelsetidspunkt = digisosApiWrapper.sak.soker.hendelser.minByOrNull { it.hendelsestidspunkt }!!.hendelsestidspunkt
         if (unixToLocalDateTime(timestampSendt).isAfter(tidligsteHendelsetidspunkt.toLocalDateTime())) {
-            val oppdatertDigisosSak = digisosSak.updateOriginalSoknadNAV(digisosSak.originalSoknadNAV.copy(timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)))
+            val oppdatertDigisosSak = digisosSak.updateOriginalSoknadNAV(digisosSak.originalSoknadNAV!!.copy(timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)))
             fiksClientMock.postDigisosSak(oppdatertDigisosSak)
         }
     }

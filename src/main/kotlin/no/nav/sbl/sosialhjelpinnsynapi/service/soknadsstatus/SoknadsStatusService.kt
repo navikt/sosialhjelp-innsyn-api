@@ -5,6 +5,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 
 @Component
@@ -22,7 +24,11 @@ class SoknadsStatusService(
             throw RuntimeException("SoknadsStatus er null på digisosId=$fiksDigisosId")
         }
         log.info("Hentet nåværende søknadsstatus=${status.name} for digisosId=$fiksDigisosId")
-        return SoknadsStatusResponse(status)
+        return SoknadsStatusResponse(status, model.tidspunktSendt, soknadsalderIMinutter(model.tidspunktSendt))
+    }
+
+    fun soknadsalderIMinutter(tidspunktSendt : LocalDateTime?) : Long {
+        return tidspunktSendt?.until(LocalDateTime.now(), ChronoUnit.MINUTES) ?: -1
     }
 
     companion object {

@@ -1,5 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
@@ -32,29 +35,33 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val alleUtbetalinger: List<ManedUtbetaling> = digisosSaker
-                .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
-                .flatMap { digisosSak ->
-                    val model = eventService.hentAlleUtbetalinger(token, digisosSak)
-                    model.utbetalinger
-                            .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
-                            .map { utbetaling ->
-                                ManedUtbetaling(
-                                        tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
-                                        belop = utbetaling.belop.toDouble(),
-                                        utbetalingsdato = utbetaling.utbetalingsDato,
-                                        forfallsdato = utbetaling.forfallsDato,
-                                        status = utbetaling.status.name,
-                                        fiksDigisosId = digisosSak.fiksDigisosId,
-                                        fom = utbetaling.fom,
-                                        tom = utbetaling.tom,
-                                        mottaker = utbetaling.mottaker,
-                                        annenMottaker = utbetaling.annenMottaker,
-                                        kontonummer = utbetaling.kontonummer,
-                                        utbetalingsmetode = utbetaling.utbetalingsmetode
-                                )
-                            }
-                }
+        val alleUtbetalinger = runBlocking {
+            digisosSaker
+                    .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
+                    .flatMap { digisosSak ->
+                        withContext(Dispatchers.Default) {
+                            val model = eventService.hentAlleUtbetalinger(token, digisosSak)
+                            model.utbetalinger
+                                    .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
+                                    .map { utbetaling ->
+                                        ManedUtbetaling(
+                                                tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
+                                                belop = utbetaling.belop.toDouble(),
+                                                utbetalingsdato = utbetaling.utbetalingsDato,
+                                                forfallsdato = utbetaling.forfallsDato,
+                                                status = utbetaling.status.name,
+                                                fiksDigisosId = digisosSak.fiksDigisosId,
+                                                fom = utbetaling.fom,
+                                                tom = utbetaling.tom,
+                                                mottaker = utbetaling.mottaker,
+                                                annenMottaker = utbetaling.annenMottaker,
+                                                kontonummer = utbetaling.kontonummer,
+                                                utbetalingsmetode = utbetaling.utbetalingsmetode
+                                        )
+                                    }
+                        }
+                    }
+        }
 
         return alleUtbetalinger
                 .sortedByDescending { it.utbetalingsdato }
@@ -79,9 +86,11 @@ class UtbetalingerService(
 
     fun containsUtbetalingNewerThanMonth(model: InternalDigisosSoker, months: Int): Boolean {
         return model.utbetalinger
-                .any { it.status == UtbetalingsStatus.UTBETALT
-                        && it.utbetalingsDato != null
-                        && isDateNewerThanMonths(it.utbetalingsDato!!, months) }
+                .any {
+                    it.status == UtbetalingsStatus.UTBETALT
+                            && it.utbetalingsDato != null
+                            && isDateNewerThanMonths(it.utbetalingsDato!!, months)
+                }
     }
 
     fun utbetalingExists(token: String, months: Int): Boolean {

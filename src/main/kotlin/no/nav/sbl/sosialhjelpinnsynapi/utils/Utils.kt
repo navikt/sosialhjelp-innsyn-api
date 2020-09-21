@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.utils
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
@@ -156,27 +157,13 @@ fun <A, B> Iterable<A>.flatMapParallel(f: suspend (A) -> List<B>): List<B> = run
         async(Dispatchers.IO) {
             f(it)
         }
-    }.flatMap {
-        it.await()
-    }
+    }.flatMap { it.await() }
 }
 
-fun <A, B> List<A>.mapParallel(f: suspend (A) -> B): List<B> = runBlocking {
+fun <A, B> Iterable<A>.mapParallel(f: suspend (A) -> B): List<B> = runBlocking {
     map {
         async(Dispatchers.IO) {
             f(it)
         }
-    }.map {
-        it.await()
-    }
-}
-
-fun <A> Iterable<A>.anyParallel(f: suspend (A) -> Boolean): Boolean = runBlocking {
-    map {
-        async(Dispatchers.IO) {
-            f(it)
-        }
-    }.any {
-        it.await()
-    }
+    }.awaitAll()
 }

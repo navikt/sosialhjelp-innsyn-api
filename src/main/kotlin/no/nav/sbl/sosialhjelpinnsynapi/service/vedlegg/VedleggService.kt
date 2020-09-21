@@ -4,6 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.NedlastingFilnavnMismatchException
+import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallel
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
@@ -52,8 +53,9 @@ class VedleggService(
     }
 
     fun hentEttersendteVedlegg(fiksDigisosId: String, ettersendtInfoNAV: EttersendtInfoNAV?, token: String): List<InternalVedlegg> {
-        return ettersendtInfoNAV?.ettersendelser
-                ?.flatMap { ettersendelse ->
+        return ettersendtInfoNAV
+                ?.ettersendelser
+                ?.flatMapParallel { ettersendelse ->
                     var filIndex = 0
                     val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)
                     jsonVedleggSpesifikasjon.vedlegg

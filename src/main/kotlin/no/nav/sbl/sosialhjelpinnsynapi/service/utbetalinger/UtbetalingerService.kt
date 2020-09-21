@@ -1,14 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallell
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.joda.time.DateTime
@@ -35,33 +33,9 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val alleUtbetalinger = runBlocking {
-            digisosSaker
-                    .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
-                    .flatMap { digisosSak ->
-                        withContext(Dispatchers.Default) {
-                            val model = eventService.hentAlleUtbetalinger(token, digisosSak)
-                            model.utbetalinger
-                                    .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
-                                    .map { utbetaling ->
-                                        ManedUtbetaling(
-                                                tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
-                                                belop = utbetaling.belop.toDouble(),
-                                                utbetalingsdato = utbetaling.utbetalingsDato,
-                                                forfallsdato = utbetaling.forfallsDato,
-                                                status = utbetaling.status.name,
-                                                fiksDigisosId = digisosSak.fiksDigisosId,
-                                                fom = utbetaling.fom,
-                                                tom = utbetaling.tom,
-                                                mottaker = utbetaling.mottaker,
-                                                annenMottaker = utbetaling.annenMottaker,
-                                                kontonummer = utbetaling.kontonummer,
-                                                utbetalingsmetode = utbetaling.utbetalingsmetode
-                                        )
-                                    }
-                        }
-                    }
-        }
+        val alleUtbetalinger: List<ManedUtbetaling> = digisosSaker
+                .filter { isDigisosSakNewerThanMonths(it, months) }
+                .flatMapParallell { manedsutbetalinger(token, it) }
 
         return alleUtbetalinger
                 .sortedByDescending { it.utbetalingsdato }
@@ -72,6 +46,28 @@ class UtbetalingerService(
                             maned = monthToString(key.monthValue),
                             foersteIManeden = foersteIManeden(key),
                             utbetalinger = value.sortedByDescending { it.utbetalingsdato }
+                    )
+                }
+    }
+
+    private fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {
+        val model = eventService.hentAlleUtbetalinger(token, digisosSak)
+        return model.utbetalinger
+                .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
+                .map { utbetaling ->
+                    ManedUtbetaling(
+                            tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
+                            belop = utbetaling.belop.toDouble(),
+                            utbetalingsdato = utbetaling.utbetalingsDato,
+                            forfallsdato = utbetaling.forfallsDato,
+                            status = utbetaling.status.name,
+                            fiksDigisosId = digisosSak.fiksDigisosId,
+                            fom = utbetaling.fom,
+                            tom = utbetaling.tom,
+                            mottaker = utbetaling.mottaker,
+                            annenMottaker = utbetaling.annenMottaker,
+                            kontonummer = utbetaling.kontonummer,
+                            utbetalingsmetode = utbetaling.utbetalingsmetode
                     )
                 }
     }

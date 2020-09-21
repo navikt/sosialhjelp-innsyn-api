@@ -6,7 +6,8 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallell
+import no.nav.sbl.sosialhjelpinnsynapi.utils.anyParallel
+import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallel
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.joda.time.DateTime
@@ -35,7 +36,7 @@ class UtbetalingerService(
 
         val alleUtbetalinger: List<ManedUtbetaling> = digisosSaker
                 .filter { isDigisosSakNewerThanMonths(it, months) }
-                .flatMapParallell { manedsutbetalinger(token, it) }
+                .flatMapParallel { manedsutbetalinger(token, it) }
 
         return alleUtbetalinger
                 .sortedByDescending { it.utbetalingsdato }
@@ -97,14 +98,21 @@ class UtbetalingerService(
             return false
         }
 
-        digisosSaker
+//        digisosSaker
+//                .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
+//                .forEach { digisosSak ->
+//                    val model = eventService.hentAlleUtbetalinger(token, digisosSak)
+//                    if (containsUtbetalingNewerThanMonth(model, months)) return true
+//                }
+
+        return digisosSaker
                 .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
-                .forEach { digisosSak ->
-                    val model = eventService.hentAlleUtbetalinger(token, digisosSak)
-                    if (containsUtbetalingNewerThanMonth(model, months)) return true
+                .anyParallel {
+                    val model = eventService.hentAlleUtbetalinger(token, it)
+                    containsUtbetalingNewerThanMonth(model, months)
                 }
 
-        return false
+//        return false
     }
 
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)

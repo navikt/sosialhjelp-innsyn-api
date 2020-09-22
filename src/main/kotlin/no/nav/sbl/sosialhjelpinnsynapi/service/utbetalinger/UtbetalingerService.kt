@@ -1,5 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
@@ -33,9 +35,11 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val alleUtbetalinger: List<ManedUtbetaling> = digisosSaker
-                .filter { isDigisosSakNewerThanMonths(it, months) }
-                .flatMapParallel { manedsutbetalinger(token, it) }
+        val alleUtbetalinger: List<ManedUtbetaling> = runBlocking(Dispatchers.IO) {
+            digisosSaker
+                    .filter { isDigisosSakNewerThanMonths(it, months) }
+                    .flatMapParallel { manedsutbetalinger(token, it) }
+        }
 
         return alleUtbetalinger
                 .sortedByDescending { it.utbetalingsdato }

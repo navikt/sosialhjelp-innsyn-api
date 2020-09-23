@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-if [test -d /var/run/secrets/nais.io/appdynamics];
+if test -d /var/run/secrets/nais.io/appdynamics;
 then
   export APPD_ENABLED="true"
     for FILE in /var/run/secrets/nais.io/appdynamics/*.env

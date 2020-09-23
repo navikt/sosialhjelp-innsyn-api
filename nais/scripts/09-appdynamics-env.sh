@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+echo "Export appdynamics environment variables if mounted from vault"
+
 if test -d /var/run/secrets/nais.io/appdynamics;
 then
   export APPD_ENABLED="true"

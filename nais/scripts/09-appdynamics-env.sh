@@ -23,4 +23,6 @@ then
         done
         IFS=$_oldIFS
     done
-fi 
+else
+  export APPD_ENABLED="false"
+fi

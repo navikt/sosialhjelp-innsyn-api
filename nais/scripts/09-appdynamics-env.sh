@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-if [$APPD_ENABLED -eq "true" && test -d /var/run/secrets/nais.io/appdynamics];
+if [$APPD_ENABLED == 'true'] && [test -d /var/run/secrets/nais.io/appdynamics];
 then
     for FILE in /var/run/secrets/nais.io/appdynamics/*.env
     do

@@ -7,6 +7,7 @@
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
+    "/var/run/secrets/nais.io/appdynamics": "/apikey/appdynamics/dev",
     "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
     "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q0",
@@ -30,11 +31,7 @@
     "SPRING_PROFILES_ACTIVE": "dev-sbs,log-kibana",
     "PDL_ENDPOINT_URL": "https://api-gw-q0.oera.no/pdl-api/graphql",
     "STS_TOKEN_ENDPOINT_URL": "https://api-gw-q0.oera.no/security-token-service/rest/v1/sts/token",
-    "APP_NAME": "sosialhjelp-innsyn-api",
-    "APPDYNAMICS_CONTROLLER_HOST_NAME": "appdynamics.adeo.no",
-    "APPDYNAMICS_CONTROLLER_PORT": "443",
-    "APPDYNAMICS_CONTROLLER_SSL_ENABLED": "true",
-    "APPDYNAMICS_AGENT_ACCOUNT_NAME": "NON-PROD"
+    "APPD_ENABLED": "true"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

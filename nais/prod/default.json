@@ -7,7 +7,6 @@
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",
-    "/var/run/secrets/nais.io/appdynamics": "/apikey/appdynamics/prod",
     "/var/run/secrets/nais.io/vault": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss",
     "/apigw/securitytokenservicetoken": "/apikey/apigw/prod/security-token-service-token/sosialhjelp-innsyn-api",
@@ -30,7 +29,8 @@
     "DOKUMENTASJONKRAV_ENABLED": "false",
     "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana",
     "PDL_ENDPOINT_URL": "https://api-gw.oera.no/pdl-api/graphql",
-    "STS_TOKEN_ENDPOINT_URL": "https://api-gw.oera.no/security-token-service/rest/v1/sts/token"
+    "STS_TOKEN_ENDPOINT_URL": "https://api-gw.oera.no/security-token-service/rest/v1/sts/token",
+    "APPD_ENABLED": "false"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

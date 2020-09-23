@@ -144,7 +144,7 @@ class FiksClientImpl(
                         attempts = retryProperties.attempts,
                         initialDelay = retryProperties.initialDelay,
                         maxDelay = retryProperties.maxDelay,
-                        retryableExceptions = *arrayOf(HttpServerErrorException::class)
+                        retryableExceptions = arrayOf(HttpServerErrorException::class)
                 ) {
                     val response = restTemplate.exchange(url, HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
                     response.body.orEmpty()

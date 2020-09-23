@@ -98,11 +98,11 @@ internal class KommuneServiceTest {
     @Test
     fun `Alle kommuner paa FIKS med status`() {
         val kommuneStatusListe = ArrayList<KommuneInfo>()
-        kommuneStatusListe.add(KommuneInfo("0001", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
-        kommuneStatusListe.add(KommuneInfo("0002", kanMottaSoknader = false, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
-        kommuneStatusListe.add(KommuneInfo("0003", kanMottaSoknader = true, kanOppdatereStatus = false, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
-        kommuneStatusListe.add(KommuneInfo("0004", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = true, harMidlertidigDeaktivertOppdateringer = false, kontaktPersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
-        kommuneStatusListe.add(KommuneInfo("0005", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = true, kontaktPersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0001", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0002", kanMottaSoknader = false, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0003", kanMottaSoknader = true, kanOppdatereStatus = false, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = false, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0004", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = true, harMidlertidigDeaktivertOppdateringer = false, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
+        kommuneStatusListe.add(KommuneInfo("0005", kanMottaSoknader = true, kanOppdatereStatus = true, harMidlertidigDeaktivertMottak = false, harMidlertidigDeaktivertOppdateringer = true, kontaktpersoner = null, harNksTilgang = true, behandlingsansvarlig = null))
         every { kommuneInfoClient.getAll() } returns kommuneStatusListe
 
         val status = service.hentAlleKommunerMedStatusStatus()

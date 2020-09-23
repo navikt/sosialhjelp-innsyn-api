@@ -59,16 +59,10 @@ class EttersendelsePdfGeneratorTest {
             }
             else{
                 document.close()
-                //for(error: ValidationResult.ValidationError in result.errorsList){
-                //    println(error.errorCode + " : " + error.details)
-                //}
                 Assertions.assertTrue(false, "The file $file is not valid")
             }
         }
         catch(e: SyntaxValidationException){
-            //result = e.result
-            //println("errors: " + result)
-            //e.printStackTrace()
             Assertions.assertTrue(false, "Exception when checking validity of pdf/a. Exception message: ${e.message}")
         }
         finally {

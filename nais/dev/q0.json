@@ -1,8 +1,8 @@
 {
   "namespace": "q0",
   "ingress": [
-    "https://sosialhjelp-innsyn-api-q0.nais.oera-q.local/sosialhjelp/innsyn-api",
     "https://sosialhjelp-innsyn-api-q0.dev-sbs.nais.io/sosialhjelp/innsyn-api",
+    "https://www-q0.dev.nav.no/sosialhjelp/innsyn-api",
     "https://www-q0.nav.no/sosialhjelp/innsyn-api"
   ],
   "kvPaths": {

@@ -8,6 +8,7 @@ import org.apache.pdfbox.preflight.parser.PreflightParser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 
 import java.io.File
 import java.io.FileOutputStream
@@ -52,18 +53,11 @@ class EttersendelsePdfGeneratorTest {
             val document = parser.preflightDocument
             document.validate()
             result = document.result
-
-            if(result.isValid){
-                document.close()
-                println("The file $file is a valid PDF/A-1b file")
-            }
-            else{
-                document.close()
-                Assertions.assertTrue(false, "The file $file is not valid")
-            }
+            Assertions.assertTrue(result.isValid)
+            document.close()
         }
         catch(e: SyntaxValidationException){
-            Assertions.assertTrue(false, "Exception when checking validity of pdf/a. Exception message: ${e.message}")
+            fail("Exception when checking validity of pdf/a. Exception message", e)
         }
         finally {
             file.deleteOnExit()

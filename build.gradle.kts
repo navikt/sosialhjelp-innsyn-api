@@ -34,7 +34,7 @@ object Versions {
 
     //    Test only
     const val junitJupiter = "5.6.0"
-    const val mockk = "1.10.0"
+    const val mockk = "1.9.3"
     const val springmockk = "2.0.0"
 }
 

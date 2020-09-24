@@ -112,7 +112,7 @@ class EventService(
                 ?: return model
         jsonDigisosSoker.hendelser
                 .sortedBy { it.hendelsestidspunkt }
-                .filter { it is JsonUtbetaling }
+                .filterIsInstance<JsonUtbetaling>()
                 .map { model.applyHendelse(it) }
         return model
     }

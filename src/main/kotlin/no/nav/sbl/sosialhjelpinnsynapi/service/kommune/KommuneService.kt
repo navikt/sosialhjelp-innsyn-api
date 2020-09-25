@@ -1,7 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.kommune
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
@@ -12,7 +14,8 @@ import org.springframework.stereotype.Component
 @Component
 class KommuneService(
         private val fiksClient: FiksClient,
-        private val kommuneInfoClient: KommuneInfoClient
+        private val kommuneInfoClient: KommuneInfoClient,
+        private val redisService: RedisService
 ) {
 
     fun hentKommuneInfo(fiksDigisosId: String, token: String): KommuneInfo? {
@@ -24,8 +27,14 @@ class KommuneService(
             throw RuntimeException("KommuneStatus kan ikke hentes fordi kommunenummer mangler for digisosId=$fiksDigisosId")
         }
 
+        return redisService.get(kommunenummer, KommuneInfo::class.java) as KommuneInfo?
+                ?: hentKommuneInfoFraFiks(kommunenummer)
+    }
+
+    private fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {
             kommuneInfoClient.get(kommunenummer)
+                    .also { redisService.put(kommunenummer, objectMapper.writeValueAsString(it)) }
         } catch (e: FiksClientException) {
             null
         } catch (e: FiksServerException) {

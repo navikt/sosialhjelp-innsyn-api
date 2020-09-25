@@ -35,6 +35,11 @@ class KommuneService(
         }
     }
 
+    fun erInnsynDeaktivertForKommune(fiksDigisosId: String, token: String): Boolean {
+        val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
+        return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
+    }
+
     companion object {
         private val log by logger()
     }

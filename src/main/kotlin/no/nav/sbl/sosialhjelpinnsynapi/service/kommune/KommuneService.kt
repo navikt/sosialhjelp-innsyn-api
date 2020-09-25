@@ -60,6 +60,10 @@ class KommuneService(
         }
     }
 
+    fun erInnsynDeaktivertForKommune(fiksDigisosId: String, token: String): Boolean {
+        val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
+        return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
+    }
 
     fun hentAlleKommunerMedStatusStatus(): List<KommuneStatusDetaljer> {
         val alleKommunerMedStatus = kommuneInfoClient.getAll()

@@ -116,4 +116,22 @@ internal class KommuneServiceTest {
         assertThat(status[3].harMidlertidigDeaktivertMottak).isEqualTo(kommuneStatusListe[3].harMidlertidigDeaktivertMottak)
         assertThat(status[4].harMidlertidigDeaktivertOppdateringer).isEqualTo(kommuneStatusListe[4].harMidlertidigDeaktivertOppdateringer)
     }
+
+    @Test
+    internal fun `innsyn er deaktivert`() {
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, false, false, false, false, null, true, null)
+
+        val svar = service.erInnsynDeaktivertForKommune("123", "token")
+
+        assertThat(svar).isTrue
+    }
+
+    @Test
+    internal fun `innsyn er aktivert`() {
+        every { kommuneInfoClient.get(any()) } returns KommuneInfo(kommuneNr, false, true, false, false, null, true, null)
+
+        val svar = service.erInnsynDeaktivertForKommune("123", "token")
+
+        assertThat(svar).isFalse
+    }
 }

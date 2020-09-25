@@ -1,11 +1,13 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.innsyn
 
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,15 +15,18 @@ import org.junit.jupiter.api.Test
 internal class InnsynServiceTest {
 
     private val fiksClient: FiksClient = mockk()
-    private val service = InnsynService(fiksClient)
+    private val kommuneService: KommuneService = mockk()
+    private val service = InnsynService(fiksClient, kommuneService)
 
     @BeforeEach
     fun init() {
-        clearMocks(fiksClient)
+        clearAllMocks()
+
+        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
     }
 
     @Test
-    fun `Should gather innsyn data`() {
+    fun `Skal hente innsyn data`() {
         val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
 
         every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, "token") } returns mockJsonDigisosSoker
@@ -32,14 +37,14 @@ internal class InnsynServiceTest {
     }
 
     @Test
-    fun `Should return null if DigisosSoker is null`() {
+    fun `Skal returnere null hvis JsonDigisosSoker er null`() {
         val jsonDigisosSoker = service.hentJsonDigisosSoker("123", null, "token")
 
         assertThat(jsonDigisosSoker).isNull()
     }
 
     @Test
-    fun `Should return originalSoknad`() {
+    fun `Skal returnere originalSoknad`() {
         val mockJsonSoknad: JsonSoknad = mockk()
         every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, "token") } returns mockJsonSoknad
 
@@ -49,9 +54,17 @@ internal class InnsynServiceTest {
     }
 
     @Test
-    fun `Should return null if originalSoknadNAV is null`() {
+    fun `Skal returnere null hvis originalSoknadNAV er null`() {
         val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad("123", null, "token")
 
         assertThat(jsonSoknad).isNull()
+    }
+
+    @Test
+    internal fun `Skal ikke hente innsynsdata hvis kommunen har deaktivert innsyn`() {
+        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns true
+
+        assertThat(service.hentJsonDigisosSoker("123", "abc", "token")).isNull()
+        verify(exactly = 0) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
     }
 }

@@ -15,7 +15,7 @@ class InnsynService(
 
     fun hentJsonDigisosSoker(digisosId: String, digisosSokerMetadata: String?, token: String): JsonDigisosSoker? {
         return when {
-            kommuneService.erInnsynDeaktivertForKommune(digisosId, token) -> log.info("Kommune har deaktivert innsyn -> henter ikke innsynsdata").let { null }
+            kommuneService.erInnsynDeaktivertForKommune(digisosId, token) -> log.debug("Kommune har deaktivert innsyn -> henter ikke innsynsdata").let { null }
             digisosSokerMetadata != null -> fiksClient.hentDokument(digisosId, digisosSokerMetadata, JsonDigisosSoker::class.java, token) as JsonDigisosSoker
             else -> null
         }

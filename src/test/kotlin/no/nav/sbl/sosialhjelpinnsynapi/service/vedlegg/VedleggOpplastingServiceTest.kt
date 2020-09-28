@@ -153,8 +153,6 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ikke alle filene blir validert ok`() {
         every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
-        val ettersendelsPdf = ByteArray(1)
-        every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
 
         val metadata = mutableListOf(
                 OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null),
@@ -193,6 +191,7 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal ikke gi feilmelding hvis pdf-filen er signert`() {
         every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+        every { ettersendelsePdfGenerator.generate(any(), any()) } returns ByteArray(1)
 
         val filnavn1 = "test1.pdf"
         val filnavn2 = "test2.pdf"
@@ -210,7 +209,7 @@ internal class VedleggOpplastingServiceTest {
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+        verify(exactly = 1) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
         assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
         assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo("OK")

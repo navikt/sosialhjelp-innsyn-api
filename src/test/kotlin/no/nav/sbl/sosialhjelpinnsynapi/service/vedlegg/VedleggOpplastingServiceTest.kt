@@ -213,7 +213,7 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
         assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo("OK")
         assertThat(vedleggOpplastingResponseList[0].filer[1].filnavn).isEqualTo(filnavn2)
-        assertThat(vedleggOpplastingResponseList[0].filer[1].status).isEqualTo(MESSAGE_PDF_IS_SIGNED)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].status).isEqualTo("OK")
     }
 
     @Test

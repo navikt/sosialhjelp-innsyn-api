@@ -60,16 +60,7 @@ class FiksClientImpl(
         }
 
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
-
-        val start = System.currentTimeMillis()
-        val value = objectMapper.writeValueAsString(digisosSak)
-        log.info("writeValueAsString tok: ${System.currentTimeMillis()-start}")
-
-        val start2 = System.currentTimeMillis()
-        val value2 = objectMapper.writeValueAsBytes(digisosSak)
-        log.info("writeValueAsBytes tok: ${System.currentTimeMillis()-start2}")
-
-        redisService.put(digisosId, value2)
+        redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
         return digisosSak
     }
 

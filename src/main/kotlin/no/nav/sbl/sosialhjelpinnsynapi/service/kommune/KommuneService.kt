@@ -34,7 +34,7 @@ class KommuneService(
     private fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {
             kommuneInfoClient.get(kommunenummer)
-                    .also { redisService.put(kommunenummer, objectMapper.writeValueAsString(it)) }
+                    .also { redisService.put(kommunenummer, objectMapper.writeValueAsBytes(it)) }
         } catch (e: FiksClientException) {
             null
         } catch (e: FiksServerException) {

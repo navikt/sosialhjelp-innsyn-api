@@ -1,6 +1,5 @@
 package no.nav.sbl.sosialhjelpinnsynapi.utils
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -154,7 +153,7 @@ fun getenv(key: String, default: String): String {
 
 suspend fun <A, B> Iterable<A>.flatMapParallel(f: suspend (A) -> List<B>): List<B> = coroutineScope {
     map {
-        async(Dispatchers.IO) {
+        async {
             f(it)
         }
     }.awaitAll().flatten()

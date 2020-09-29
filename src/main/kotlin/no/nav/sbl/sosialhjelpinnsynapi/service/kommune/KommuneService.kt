@@ -1,14 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.kommune
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.HAR_KONFIGURASJON_MEN_SKAL_SENDE_VIA_SVARUT
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.IKKE_STOTTET_CASE
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.MANGLER_KONFIGURASJON
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_IKKE_MULIG
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SKAL_VISE_FEILSIDE
-import no.nav.sbl.sosialhjelpinnsynapi.service.kommune.KommuneStatus.SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SOM_VANLIG
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
@@ -19,26 +14,9 @@ import org.springframework.stereotype.Component
 @Component
 class KommuneService(
         private val fiksClient: FiksClient,
-        private val kommuneInfoClient: KommuneInfoClient
+        private val kommuneInfoClient: KommuneInfoClient,
+        private val redisService: RedisService
 ) {
-
-    fun hentKommuneStatus(fiksDigisosId: String, token: String): KommuneStatus {
-        val kommuneInfo = hentKommuneInfo(fiksDigisosId, token) ?: return MANGLER_KONFIGURASJON
-
-        return when {
-            !kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus && !kommuneInfo.harMidlertidigDeaktivertMottak && !kommuneInfo.harMidlertidigDeaktivertOppdateringer -> HAR_KONFIGURASJON_MEN_SKAL_SENDE_VIA_SVARUT
-            kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus && !kommuneInfo.harMidlertidigDeaktivertMottak && !kommuneInfo.harMidlertidigDeaktivertOppdateringer -> SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA
-            kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus && !kommuneInfo.harMidlertidigDeaktivertMottak && !kommuneInfo.harMidlertidigDeaktivertOppdateringer -> SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA
-            kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus && kommuneInfo.harMidlertidigDeaktivertMottak && !kommuneInfo.harMidlertidigDeaktivertOppdateringer -> SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SOM_VANLIG
-            kommuneInfo.kanMottaSoknader && !kommuneInfo.kanOppdatereStatus && kommuneInfo.harMidlertidigDeaktivertMottak && !kommuneInfo.harMidlertidigDeaktivertOppdateringer -> SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_IKKE_MULIG
-            kommuneInfo.kanMottaSoknader && kommuneInfo.kanOppdatereStatus && kommuneInfo.harMidlertidigDeaktivertMottak && kommuneInfo.harMidlertidigDeaktivertOppdateringer -> SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SKAL_VISE_FEILSIDE
-
-            else -> {
-                log.warn("Forsøkte å hente kommunestatus, men caset er ikke dekket: $kommuneInfo")
-                return IKKE_STOTTET_CASE
-            }
-        }
-    }
 
     fun hentKommuneInfo(fiksDigisosId: String, token: String): KommuneInfo? {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
@@ -49,8 +27,14 @@ class KommuneService(
             throw RuntimeException("KommuneStatus kan ikke hentes fordi kommunenummer mangler for digisosId=$fiksDigisosId")
         }
 
+        return redisService.get(kommunenummer, KommuneInfo::class.java) as KommuneInfo?
+                ?: hentKommuneInfoFraFiks(kommunenummer)
+    }
+
+    private fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {
             kommuneInfoClient.get(kommunenummer)
+                    .also { redisService.put(kommunenummer, objectMapper.writeValueAsString(it)) }
         } catch (e: FiksClientException) {
             null
         } catch (e: FiksServerException) {
@@ -60,32 +44,12 @@ class KommuneService(
         }
     }
 
-
-    fun hentAlleKommunerMedStatusStatus(): List<KommuneStatusDetaljer> {
-        val alleKommunerMedStatus = kommuneInfoClient.getAll()
-        return alleKommunerMedStatus.map { info -> KommuneStatusDetaljer(info) }
+    fun erInnsynDeaktivertForKommune(fiksDigisosId: String, token: String): Boolean {
+        val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
+        return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
     }
 
     companion object {
         private val log by logger()
     }
-}
-
-class KommuneStatusDetaljer(kommuneInfo: KommuneInfo) {
-    val kommunenummer: String = kommuneInfo.kommunenummer
-    val kanMottaSoknader: Boolean = kommuneInfo.kanMottaSoknader
-    val kanOppdatereStatus: Boolean = kommuneInfo.kanOppdatereStatus
-    val harMidlertidigDeaktivertMottak: Boolean = kommuneInfo.harMidlertidigDeaktivertMottak
-    val harMidlertidigDeaktivertOppdateringer: Boolean = kommuneInfo.harMidlertidigDeaktivertOppdateringer
-
-}
-
-enum class KommuneStatus {
-    HAR_KONFIGURASJON_MEN_SKAL_SENDE_VIA_SVARUT,
-    MANGLER_KONFIGURASJON,
-    SKAL_SENDE_SOKNADER_OG_ETTERSENDELSER_VIA_FDA,
-    SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SOM_VANLIG,
-    SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_IKKE_MULIG,
-    SKAL_VISE_MIDLERTIDIG_FEILSIDE_FOR_SOKNAD_OG_ETTERSENDELSER_INNSYN_SKAL_VISE_FEILSIDE,
-    IKKE_STOTTET_CASE
 }

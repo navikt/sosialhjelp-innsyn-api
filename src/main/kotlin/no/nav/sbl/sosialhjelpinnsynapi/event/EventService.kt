@@ -48,10 +48,12 @@ class EventService(
 
         val model = InternalDigisosSoker()
 
+        // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
+        model.status = SoknadsStatus.SENDT
+
         if (timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
-            model.status = SoknadsStatus.SENDT
 
             if (jsonSoknad != null && jsonSoknad.mottaker != null) {
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)

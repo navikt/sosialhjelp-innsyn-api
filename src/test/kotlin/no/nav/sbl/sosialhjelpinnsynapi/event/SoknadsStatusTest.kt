@@ -94,6 +94,35 @@ internal class SoknadsStatusTest {
     }
 
     @Test
+    fun `soknadsStatus SENDT innsynDeaktivert`() {
+        every { mockJsonSoknad.mottaker } returns null
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
+        assertThat(model.historikk).hasSize(0)
+    }
+
+    @Test
+    fun `soknadsStatus SENDT papirsoknad`() {
+        every { mockJsonSoknad.mottaker } returns null
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns JsonDigisosSoker()
+                .withAvsender(avsender)
+                .withVersion("123")
+                .withHendelser(emptyList())
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
+        assertThat(model.historikk).hasSize(0)
+    }
+
+    @Test
     fun `soknadsStatus MOTTATT papirsoknad`() {
         every { mockJsonSoknad.mottaker } returns null
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns

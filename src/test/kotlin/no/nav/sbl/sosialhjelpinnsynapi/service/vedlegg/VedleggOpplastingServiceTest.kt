@@ -13,7 +13,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
-import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.service.pdf.EttersendelsePdfGenerator
@@ -48,10 +48,10 @@ internal class VedleggOpplastingServiceTest {
     private val fiksClient: FiksClient = mockk()
     private val krypteringService: KrypteringService = mockk()
     private val virusScanner: VirusScanner = mockk()
-    private val redisStore: RedisStore = mockk()
+    private val redisService: RedisService = mockk()
     private val cacheProperties: CacheProperties = mockk(relaxed = true)
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
-    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisStore, cacheProperties, ettersendelsePdfGenerator)
+    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisService, cacheProperties, ettersendelsePdfGenerator)
 
     private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
 
@@ -77,7 +77,7 @@ internal class VedleggOpplastingServiceTest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
         every { virusScanner.scan(any(), any(), any()) } just runs
-        every { redisStore.set(any(), any(), any()) } returns "OK"
+        every { redisService.put(any(), any()) } just runs
     }
 
     @Test

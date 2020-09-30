@@ -20,7 +20,7 @@ class RedisStore @Autowired constructor(redisClient: RedisClient) {
 
     fun get(key: String): ByteArray? {
         val get: RedisFuture<ByteArray> = async.get(key)
-        val await = get.await(1, TimeUnit.SECONDS)
+        val await = get.await(500, TimeUnit.MILLISECONDS)
         return if (await) {
             get.get()
         } else null
@@ -28,7 +28,7 @@ class RedisStore @Autowired constructor(redisClient: RedisClient) {
 
     fun set(key: String, value: ByteArray, timeToLive: Long): String? {
         val set: RedisFuture<String> = async.setex(key, timeToLive, value)
-        return if (set.await(1, TimeUnit.SECONDS)) {
+        return if (set.await(500, TimeUnit.MILLISECONDS)) {
             set.get()
         } else null
     }

@@ -1,12 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.NedlastingFilnavnMismatchException
-import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallel
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
@@ -55,33 +52,31 @@ class VedleggService(
     }
 
     fun hentEttersendteVedlegg(fiksDigisosId: String, ettersendtInfoNAV: EttersendtInfoNAV?, token: String): List<InternalVedlegg> {
-        return runBlocking(Dispatchers.IO) {
-            ettersendtInfoNAV
-                    ?.ettersendelser
-                    ?.flatMapParallel { ettersendelse ->
-                        var filIndex = 0
-                        val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)
-                        jsonVedleggSpesifikasjon.vedlegg
-                                .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
-                                .map { vedlegg ->
-                                    val currentFilIndex = filIndex
-                                    filIndex += vedlegg.filer.size
-                                    val dokumentInfoList = ettersendelse.vedlegg
-                                            .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
-                                            .subList(currentFilIndex, filIndex)
+        return ettersendtInfoNAV
+                ?.ettersendelser
+                ?.flatMap { ettersendelse ->
+                    var filIndex = 0
+                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)
+                    jsonVedleggSpesifikasjon.vedlegg
+                            .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                            .map { vedlegg ->
+                                val currentFilIndex = filIndex
+                                filIndex += vedlegg.filer.size
+                                val dokumentInfoList = ettersendelse.vedlegg
+                                        .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
+                                        .subList(currentFilIndex, filIndex)
 
-                                    if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                        throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)
-                                    }
-                                    InternalVedlegg(
-                                            vedlegg.type,
-                                            vedlegg.tilleggsinfo,
-                                            dokumentInfoList,
-                                            unixToLocalDateTime(ettersendelse.timestampSendt)
-                                    )
+                                if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
+                                    throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)
                                 }
-                    } ?: emptyList()
-        }
+                                InternalVedlegg(
+                                        vedlegg.type,
+                                        vedlegg.tilleggsinfo,
+                                        dokumentInfoList,
+                                        unixToLocalDateTime(ettersendelse.timestampSendt)
+                                )
+                            }
+                } ?: emptyList()
     }
 
     private fun hentVedleggSpesifikasjon(fiksDigisosId: String, dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {

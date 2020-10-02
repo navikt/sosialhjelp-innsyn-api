@@ -1,5 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.utils
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
@@ -146,4 +149,12 @@ fun getenv(key: String, default: String): String {
     } catch (e: Exception) {
         default
     }
+}
+
+suspend fun <A, B> Iterable<A>.flatMapParallel(f: suspend (A) -> List<B>): List<B> = coroutineScope {
+    map {
+        async {
+            f(it)
+        }
+    }.awaitAll().flatten()
 }

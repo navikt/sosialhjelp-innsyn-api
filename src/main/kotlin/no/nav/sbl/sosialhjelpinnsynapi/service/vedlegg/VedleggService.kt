@@ -52,7 +52,8 @@ class VedleggService(
     }
 
     fun hentEttersendteVedlegg(fiksDigisosId: String, ettersendtInfoNAV: EttersendtInfoNAV?, token: String): List<InternalVedlegg> {
-        return ettersendtInfoNAV?.ettersendelser
+        return ettersendtInfoNAV
+                ?.ettersendelser
                 ?.flatMap { ettersendelse ->
                     var filIndex = 0
                     val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)

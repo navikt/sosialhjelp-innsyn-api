@@ -1,16 +1,22 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.pdf
 
+import org.apache.jempbox.xmp.XMPMetadata
+import org.apache.jempbox.xmp.pdfa.XMPSchemaPDFAId
 import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
+import org.apache.pdfbox.pdmodel.common.PDMetadata
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
-import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.apache.pdfbox.pdmodel.font.PDType0Font
+import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
 import org.springframework.core.io.ClassPathResource
 import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.util.*
 
 class PdfGenerator internal constructor(private var document: PDDocument) {
@@ -18,11 +24,39 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     private var currentStream: PDPageContentStream
     private var y: Float
 
+    private var xmp: XMPMetadata = XMPMetadata()
+    private var pdfaid: XMPSchemaPDFAId = XMPSchemaPDFAId(xmp)
+
+    private var colorProfile: InputStream? = ClassPathResource("sRGB.icc").inputStream
+    private var oi = PDOutputIntent(document, colorProfile)
+
+    private var cat: PDDocumentCatalog = document.getDocumentCatalog()
+    private var metadata: PDMetadata = PDMetadata(document)
+
+    private var fontStream1: InputStream? = ClassPathResource("SourceSansPro-Bold.ttf").inputStream
+    val FONT_BOLD: PDFont = PDType0Font.load(document, fontStream1)
+    private val fontStream2: InputStream? = ClassPathResource("SourceSansPro-Regular.ttf").inputStream
+    val FONT_PLAIN: PDFont = PDType0Font.load(document, fontStream2)
+
     private fun calculateStartY(): Float {
         return MEDIA_BOX.upperRightY - MARGIN
     }
 
     fun finish(): ByteArray {
+        cat.setMetadata(metadata)
+
+        xmp.addSchema(pdfaid)
+        pdfaid.setConformance("B")
+        pdfaid.setPart(1)
+        pdfaid.setAbout("")
+        metadata.importXMPMetadata(xmp.asByteArray())
+
+        oi.setInfo("sRGB IEC61966-2.1")
+        oi.setOutputCondition("sRGB IEC61966-2.1")
+        oi.setOutputConditionIdentifier("sRGB IEC61966-2.1")
+        oi.setRegistryName("http://www.color.org")
+        cat.addOutputIntent(oi)
+
         document.addPage(currentPage)
         val baos = ByteArrayOutputStream()
         currentStream.close()
@@ -62,7 +96,6 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
 
     fun addParagraph(text: String, font: PDFont, fontSize: Float, margin: Float) {
         val lines: List<String> = parseLines(text, font, fontSize)
-
         currentStream.setFont(font, fontSize)
         currentStream.beginText()
         currentStream.newLineAtOffset(margin, y)
@@ -153,7 +186,7 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
 
     private fun logo(): ByteArray? {
         try {
-            val classPathResource = ClassPathResource("/pdf/nav-logo_alphaless.png")
+            val classPathResource = ClassPathResource("/pdf/nav-logo_alphaless.jpg")
             val inputStream = classPathResource.inputStream
             return StreamUtils.copyToByteArray(inputStream)
         } catch (e: IOException) { // FIXME: Handle it
@@ -164,9 +197,6 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
 
     companion object {
         private const val MARGIN = 40F
-
-        private val FONT_PLAIN: PDFont = PDType1Font.HELVETICA
-        private val FONT_BOLD: PDFont = PDType1Font.HELVETICA_BOLD
 
         private const val FONT_PLAIN_SIZE = 12F
         private const val FONT_H1_SIZE = 20F
@@ -181,6 +211,6 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     init {
         currentStream = PDPageContentStream(document, currentPage)
         y = calculateStartY()
-        // addLogo() Fjerner logo midlertidig da den ikke er PDF/A
+        addLogo()
     }
 }

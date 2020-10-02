@@ -60,7 +60,7 @@ class FiksClientImpl(
         }
 
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
-        redisService.put(digisosId, objectMapper.writeValueAsString(digisosSak))
+        redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
         return digisosSak
     }
 
@@ -115,7 +115,7 @@ class FiksClientImpl(
 
             log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
             val dokument = objectMapper.readValue(response.body!!, requestedClass)
-            redisService.put(dokumentlagerId, objectMapper.writeValueAsString(dokument))
+            redisService.put(dokumentlagerId, objectMapper.writeValueAsBytes(dokument))
             return dokument
 
         } catch (e: HttpClientErrorException) {

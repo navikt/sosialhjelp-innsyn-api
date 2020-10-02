@@ -38,6 +38,8 @@ class SaksOversiktController(
         } catch (e: FiksException) {
             return ResponseEntity.status(503).build()
         }
+        //test
+        fiksClient.hentAlleDigisosSaker2(token)
 
         val responselist = saker
                 .map {

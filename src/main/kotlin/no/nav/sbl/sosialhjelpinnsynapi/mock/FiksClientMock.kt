@@ -78,6 +78,10 @@ class FiksClientMock : FiksClient {
         }
     }
 
+    override fun hentAlleDigisosSaker2(token: String): List<DigisosSak> {
+        return emptyList()
+    }
+
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
         val digisosSak = hentDigisosSak(digisosId, token, false)
         val navEksternRefId = lagNavEksternRefId(digisosSak)

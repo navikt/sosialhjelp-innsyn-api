@@ -9,6 +9,7 @@ interface FiksClient {
     fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak
 
     fun hentAlleDigisosSaker(token: String): List<DigisosSak>
+    fun hentAlleDigisosSaker2(token: String): List<DigisosSak>
 
     fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String)
 

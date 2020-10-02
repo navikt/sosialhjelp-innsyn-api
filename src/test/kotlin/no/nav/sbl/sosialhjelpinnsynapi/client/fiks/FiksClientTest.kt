@@ -45,7 +45,7 @@ internal class FiksClientTest {
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, retryProperties, redisService)
+    private val fiksClient = FiksClientImpl(clientProperties, restTemplate, retryProperties, redisService, mockk())
 
     private val id = "123"
 

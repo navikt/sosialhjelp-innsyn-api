@@ -10,11 +10,11 @@ import java.util.*
 @Component
 class KommuneInfoClientMock : KommuneInfoClient {
 
-    override fun get(kommunenummer: String): KommuneInfo {
+    override fun get(kommunenummer: String, token: String): KommuneInfo {
         return KommuneInfo(kommunenummer, true, true, false, false, null, true, null)
     }
 
-    override fun getAll(): List<KommuneInfo> {
+    override fun getAll(token: String): List<KommuneInfo> {
         val returnValue = ArrayList<KommuneInfo>()
         returnValue.add(KommuneInfo("0001", true, true, false, false, null, true, null))
         returnValue.add(KommuneInfo("1123", true, true, false, false, null, true, null))

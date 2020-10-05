@@ -1,11 +1,14 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.coroutines.RequestContextService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallel
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.joda.time.DateTime
@@ -21,7 +24,8 @@ const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
 @Component
 class UtbetalingerService(
         private val eventService: EventService,
-        private val fiksClient: FiksClient
+        private val fiksClient: FiksClient,
+        private val requestContextService: RequestContextService
 ) {
 
     fun hentUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
@@ -32,11 +36,20 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val alleUtbetalinger: List<ManedUtbetaling> =
-                    digisosSaker
-                            .filter { isDigisosSakNewerThanMonths(it, months) }
-                            .flatMap { manedsutbetalinger(token, it) }
+//        val alleUtbetalinger: List<ManedUtbetaling> =
+//                    digisosSaker
+//                            .filter { isDigisosSakNewerThanMonths(it, months) }
+//                            .flatMap { manedsutbetalinger(token, it) }
 
+        val start = System.currentTimeMillis()
+        val alleUtbetalinger = runBlocking(requestContextService.getCoroutineContext()) {
+            digisosSaker
+                    .filter { isDigisosSakNewerThanMonths(it, months) }
+                    .flatMapParallel { manedsutbetalinger(token, it) }
+        }
+        log.info("hentAlleUtbetalinger (før gruppering): ${System.currentTimeMillis()-start}ms")
+
+        val start2 = System.currentTimeMillis()
         return alleUtbetalinger
                 .sortedByDescending { it.utbetalingsdato }
                 .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
@@ -47,7 +60,7 @@ class UtbetalingerService(
                             foersteIManeden = foersteIManeden(key),
                             utbetalinger = value.sortedByDescending { it.utbetalingsdato }
                     )
-                }
+                }.also { log.info("hentAlleUtbetalinger (gruppering): ${System.currentTimeMillis()-start2}ms") }
     }
 
     private fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {

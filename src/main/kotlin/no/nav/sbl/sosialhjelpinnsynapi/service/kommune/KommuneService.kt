@@ -51,7 +51,6 @@ class KommuneService(
     }
 
     fun erInnsynDeaktivertForKommune(fiksDigisosId: String, token: String): Boolean {
-        log.info("sjekker om innsyn er deaktivert for kommune")
         val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
         return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
     }

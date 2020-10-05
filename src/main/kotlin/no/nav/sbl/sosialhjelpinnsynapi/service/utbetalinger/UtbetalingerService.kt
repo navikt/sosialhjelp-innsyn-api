@@ -63,7 +63,7 @@ class UtbetalingerService(
                 }.also { log.info("hentAlleUtbetalinger (gruppering): ${System.currentTimeMillis()-start2}ms") }
     }
 
-    private fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {
+    private suspend fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {
         val model = eventService.hentAlleUtbetalinger(token, digisosSak)
         return model.utbetalinger
                 .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }

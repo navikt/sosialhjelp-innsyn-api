@@ -9,8 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SakWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.responses.ok_komplett_jsondigisossoker_response
-import no.nav.sosialhjelp.idporten.client.AccessToken
-import no.nav.sosialhjelp.idporten.client.IdPortenClient
+import no.nav.sbl.sosialhjelpinnsynapi.service.idporten.IdPortenService
 import org.junit.jupiter.api.Test
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
@@ -22,14 +21,14 @@ internal class DigisosApiClientTest {
     @Test
     fun `Post digisos sak til mock`() {
         val restTemplate: RestTemplate = mockk()
-        val idPortenClient: IdPortenClient = mockk()
+        val idPortenService: IdPortenService = mockk()
         val fiksClientImpl: FiksClientImpl = mockk()
 
-        val digisosApiClient = DigisosApiClientImpl(clientProperties, restTemplate, idPortenClient, fiksClientImpl)
+        val digisosApiClient = DigisosApiClientImpl(clientProperties, restTemplate, idPortenService, fiksClientImpl)
 
         val mockResponse: ResponseEntity<String> = mockk()
         every { mockResponse.body } returns ok_komplett_jsondigisossoker_response
-        coEvery { idPortenClient.requestToken() } returns AccessToken("Token")
+        coEvery { idPortenService.getToken().token } returns "Token"
         every {
             restTemplate.exchange(
                     any<String>(),

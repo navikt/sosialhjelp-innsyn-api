@@ -96,8 +96,8 @@ class UtbetalingerService(
             log.info("Fant ingen søknader for bruker")
             return false
         }
-
         return digisosSaker
+                .asSequence()
                 .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
                 .any { digisosSak ->
                     val model = eventService.hentAlleUtbetalinger(token, digisosSak)

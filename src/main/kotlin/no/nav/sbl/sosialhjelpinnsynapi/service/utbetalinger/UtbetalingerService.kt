@@ -107,7 +107,6 @@ class UtbetalingerService(
             log.info("Fant ingen søknader for bruker")
             return false
         }
-        val start = System.currentTimeMillis()
         return digisosSaker
                 .asSequence()
                 .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
@@ -115,7 +114,6 @@ class UtbetalingerService(
                     val model = eventService.hentAlleUtbetalinger(token, digisosSak)
                     (containsUtbetalingNewerThanMonth(model, months))
                 }
-                .also { log.info("exists tok: ${System.currentTimeMillis()-start}ms") }
     }
 
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)

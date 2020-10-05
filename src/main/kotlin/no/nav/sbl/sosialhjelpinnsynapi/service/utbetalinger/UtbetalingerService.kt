@@ -36,11 +36,6 @@ class UtbetalingerService(
             return emptyList()
         }
 
-//        val alleUtbetalinger: List<ManedUtbetaling> =
-//                    digisosSaker
-//                            .filter { isDigisosSakNewerThanMonths(it, months) }
-//                            .flatMap { manedsutbetalinger(token, it) }
-
         val start = System.currentTimeMillis()
         val alleUtbetalinger = runBlocking(requestContextService.getCoroutineContext()) {
             digisosSaker
@@ -111,6 +106,7 @@ class UtbetalingerService(
         }
 
         return digisosSaker
+                .asSequence()
                 .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
                 .any { digisosSak ->
                     val model = eventService.hentAlleUtbetalinger(token, digisosSak)

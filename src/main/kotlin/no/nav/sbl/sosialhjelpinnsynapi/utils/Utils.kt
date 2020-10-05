@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.context.request.RequestAttributes
+import org.springframework.web.context.request.RequestContextHolder
 import java.io.IOException
 import java.sql.Timestamp
 import java.time.Instant
@@ -157,4 +159,8 @@ suspend fun <A, B> Iterable<A>.flatMapParallel(f: suspend (A) -> List<B>): List<
             f(it)
         }
     }.awaitAll().flatten()
+}
+
+internal fun setRequestAttributes(requestAttributes: RequestAttributes?) {
+    requestAttributes?.let { RequestContextHolder.setRequestAttributes(it) }
 }

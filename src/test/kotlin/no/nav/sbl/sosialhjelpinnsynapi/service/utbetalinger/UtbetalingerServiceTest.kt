@@ -16,8 +16,6 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Vilkar
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.event.apply
-import no.nav.sbl.sosialhjelpinnsynapi.utils.coroutines.RequestContextService
-import no.nav.sbl.sosialhjelpinnsynapi.utils.coroutines.RequestContextServiceImpl
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.assertj.core.api.Assertions.assertThat
 import org.joda.time.DateTime
@@ -32,9 +30,8 @@ import java.time.ZonedDateTime
 internal class UtbetalingerServiceTest {
     private val eventService: EventService = mockk()
     private val fiksClient: FiksClient = mockk()
-    private val requestContextService: RequestContextService = RequestContextServiceImpl()
 
-    private val service = UtbetalingerService(eventService, fiksClient, requestContextService)
+    private val service = UtbetalingerService(eventService, fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
 

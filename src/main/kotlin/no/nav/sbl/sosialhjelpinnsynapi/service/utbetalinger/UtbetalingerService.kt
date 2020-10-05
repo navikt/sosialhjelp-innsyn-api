@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
@@ -7,12 +8,13 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.utils.coroutines.RequestContextService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallel
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.setRequestAttributes
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.YearMonth
@@ -24,8 +26,7 @@ const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
 @Component
 class UtbetalingerService(
         private val eventService: EventService,
-        private val fiksClient: FiksClient,
-        private val requestContextService: RequestContextService
+        private val fiksClient: FiksClient
 ) {
 
     fun hentUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
@@ -36,15 +37,17 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val start = System.currentTimeMillis()
-        val alleUtbetalinger = runBlocking(requestContextService.getCoroutineContext()) {
+        val requestAttributes = RequestContextHolder.getRequestAttributes()
+
+        val alleUtbetalinger = runBlocking(Dispatchers.IO) {
             digisosSaker
                     .filter { isDigisosSakNewerThanMonths(it, months) }
-                    .flatMapParallel { manedsutbetalinger(token, it) }
+                    .flatMapParallel {
+                        setRequestAttributes(requestAttributes)
+                        manedsutbetalinger(token, it)
+                    }
         }
-        log.info("hentAlleUtbetalinger (før gruppering): ${System.currentTimeMillis()-start}ms")
 
-        val start2 = System.currentTimeMillis()
         return alleUtbetalinger
                 .sortedByDescending { it.utbetalingsdato }
                 .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
@@ -55,7 +58,7 @@ class UtbetalingerService(
                             foersteIManeden = foersteIManeden(key),
                             utbetalinger = value.sortedByDescending { it.utbetalingsdato }
                     )
-                }.also { log.info("hentAlleUtbetalinger (gruppering): ${System.currentTimeMillis()-start2}ms") }
+                }
     }
 
     private suspend fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {
@@ -104,7 +107,7 @@ class UtbetalingerService(
             log.info("Fant ingen søknader for bruker")
             return false
         }
-
+        val start = System.currentTimeMillis()
         return digisosSaker
                 .asSequence()
                 .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
@@ -112,6 +115,7 @@ class UtbetalingerService(
                     val model = eventService.hentAlleUtbetalinger(token, digisosSak)
                     (containsUtbetalingNewerThanMonth(model, months))
                 }
+                .also { log.info("exists tok: ${System.currentTimeMillis()-start}ms") }
     }
 
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)

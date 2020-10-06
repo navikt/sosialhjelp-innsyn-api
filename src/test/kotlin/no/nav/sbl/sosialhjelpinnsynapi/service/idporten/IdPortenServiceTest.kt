@@ -15,7 +15,7 @@ internal class IdPortenServiceTest {
 
     private val idPortenClient: IdPortenClient = mockk()
 
-    private val idPortenService = IdPortenService(idPortenClient)
+    private val idPortenService = IdPortenServiceImpl(idPortenClient)
 
     private val accessToken = AccessToken("token", 99)
     private val nextAccessToken = AccessToken("token2", 100)

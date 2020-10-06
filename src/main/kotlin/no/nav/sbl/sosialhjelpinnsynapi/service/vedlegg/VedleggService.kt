@@ -67,15 +67,11 @@ class VedleggService(
                                         .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
                                 val dokumentInfoList:List<DokumentInfo>
                                 if(filIndex > filtrerteEttersendelsesVedlegg.size) {
-                                    log.warn(objectMapper.writeValueAsString(ettersendtInfoNAV)) //TODO ta bort denne igjen!!!
-                                    log.warn(objectMapper.writeValueAsString(jsonVedleggSpesifikasjon)) //TODO ta bort denne igjen!!!
-                                    log.warn(objectMapper.writeValueAsString(ettersendelse)) //TODO ta bort denne igjen!!!
-                                    log.warn(objectMapper.writeValueAsString(vedlegg)) //TODO ta bort denne igjen!!!
                                     log.error(
                                             "Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId " +
                                                     "Det er flere filer enn vi har Metadata! " +
                                                     "Filer: ${filIndex} Metadata: ${filtrerteEttersendelsesVedlegg.size}")
-                                    dokumentInfoList = listOf(DokumentInfo("Error", "Error", -1))
+                                    dokumentInfoList = vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }
                                 } else {
                                     dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)
 

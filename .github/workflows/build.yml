@@ -6,14 +6,15 @@ on:
     tags-ignore:
       - '**' # Don't build any tags
 
-env:
-  PROJECT_NAME: $(echo $GITHUB_REPOSITORY | cut -d/ -f2)
-
 jobs:
   build:
     name: Build and push docker image
     runs-on: ubuntu-latest
     steps:
+      - name: project name
+        run: |
+          echo "PROJECT_NAME=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)" >> $GITHUB_ENV
+
       - name: Setup java
         uses: actions/setup-java@v1
         with:

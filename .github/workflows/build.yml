@@ -73,3 +73,4 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: nais.yaml
           VARS: nais/dev/dev-gcp.json
+          IMAGE: $IMAGE

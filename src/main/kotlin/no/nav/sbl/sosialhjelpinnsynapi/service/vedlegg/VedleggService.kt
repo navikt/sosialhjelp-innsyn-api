@@ -65,12 +65,12 @@ class VedleggService(
                                 filIndex += vedlegg.filer.size
                                 val filtrerteEttersendelsesVedlegg = ettersendelse.vedlegg
                                         .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
-                                if(filIndex >= filtrerteEttersendelsesVedlegg.size) {
-                                    log.debug(objectMapper.writeValueAsString(ettersendtInfoNAV)) //TODO ta bort denne igjen!!!
+                                if(filIndex > filtrerteEttersendelsesVedlegg.size) {
+                                    log.warn(objectMapper.writeValueAsString(ettersendtInfoNAV)) //TODO ta bort denne igjen!!!
                                     throw NedlastingFilnavnMismatchException(
                                             "Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId " +
                                                     "Det er flere filer enn vi har Metadata! " +
-                                                    "Filer: ${filIndex+1} Metadata: ${filtrerteEttersendelsesVedlegg.size}", null)
+                                                    "Filer: ${filIndex} Metadata: ${filtrerteEttersendelsesVedlegg.size}", null)
                                 }
                                 val dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)
 

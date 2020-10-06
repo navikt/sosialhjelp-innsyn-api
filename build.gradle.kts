@@ -81,6 +81,7 @@ dependencies {
 
 //    Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.coroutines}")
 
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")

@@ -11,10 +11,6 @@ jobs:
     name: Build and push docker image
     runs-on: ubuntu-latest
     steps:
-      - name: project name
-        run: |
-          echo "PROJECT_NAME=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)" >> $GITHUB_ENV
-
       - name: Setup java
         uses: actions/setup-java@v1
         with:
@@ -47,9 +43,8 @@ jobs:
         uses: navikt/sosialhjelp-ci/actions/create-artifact-version@master
       - name: Create docker image tags
         run: |
-          echo "docker.pkg.github.com/$GITHUB_REPOSITORY/$PROJECT_NAME:$VERSION" > DOCKER_TAG
-        env:
-          VERSION: ${{ steps.artifact-version.outputs.version }}
+          PROJECT_NAME=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)
+          echo "docker.pkg.github.com/$GITHUB_REPOSITORY/$PROJECT_NAME:${{ steps.artifact-version.outputs.version }}" > DOCKER_TAG
       - name: Build docker image
         run: docker build -t $(cat DOCKER_TAG) .
       - name: Create tag and release
@@ -69,6 +64,7 @@ jobs:
 # Kommenter inn for autodeploy til dev-gcp
       - name: Sett env variabler
         run: |
+          PROJECT_NAME=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)
           echo "IMAGE=docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME:${{ steps.artifact-version.outputs.version }}" >> $GITHUB_ENV
 
       - uses: nais/deploy/actions/deploy@v1

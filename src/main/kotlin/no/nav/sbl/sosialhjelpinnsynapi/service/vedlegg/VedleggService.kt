@@ -5,6 +5,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.NedlastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
@@ -62,9 +63,16 @@ class VedleggService(
                             .map { vedlegg ->
                                 val currentFilIndex = filIndex
                                 filIndex += vedlegg.filer.size
-                                val dokumentInfoList = ettersendelse.vedlegg
+                                val filtrerteEttersendelsesVedlegg = ettersendelse.vedlegg
                                         .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
-                                        .subList(currentFilIndex, filIndex)
+                                if(filIndex >= filtrerteEttersendelsesVedlegg.size) {
+                                    log.debug(objectMapper.writeValueAsString(ettersendtInfoNAV)) //TODO ta bort denne igjen!!!
+                                    throw NedlastingFilnavnMismatchException(
+                                            "Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId " +
+                                                    "Det er flere filer enn vi har Metadata! " +
+                                                    "Filer: ${filIndex+1} Metadata: ${filtrerteEttersendelsesVedlegg.size}", null)
+                                }
+                                val dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)
 
                                 if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
                                     throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)

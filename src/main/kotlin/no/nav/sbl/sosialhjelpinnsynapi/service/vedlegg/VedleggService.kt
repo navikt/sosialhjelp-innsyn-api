@@ -67,6 +67,7 @@ class VedleggService(
                                         .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
                                 if(filIndex > filtrerteEttersendelsesVedlegg.size) {
                                     log.warn(objectMapper.writeValueAsString(ettersendtInfoNAV)) //TODO ta bort denne igjen!!!
+                                    log.warn(objectMapper.writeValueAsString(ettersendelse)) //TODO ta bort denne igjen!!!
                                     throw NedlastingFilnavnMismatchException(
                                             "Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId " +
                                                     "Det er flere filer enn vi har Metadata! " +

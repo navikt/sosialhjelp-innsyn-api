@@ -6,6 +6,9 @@ on:
     tags-ignore:
       - '**' # Don't build any tags
 
+env:
+  PROJECT_NAME: $(echo $GITHUB_REPOSITORY | cut -d/ -f2)
+
 jobs:
   build:
     name: Build and push docker image
@@ -43,7 +46,6 @@ jobs:
         uses: navikt/sosialhjelp-ci/actions/create-artifact-version@master
       - name: Create docker image tags
         run: |
-          PROJECT_NAME=$(echo $GITHUB_REPOSITORY | cut -d/ -f2)
           echo "docker.pkg.github.com/$GITHUB_REPOSITORY/$PROJECT_NAME:$VERSION" > DOCKER_TAG
         env:
           VERSION: ${{ steps.artifact-version.outputs.version }}
@@ -66,7 +68,6 @@ jobs:
 # Kommenter inn for autodeploy til dev-gcp
       - name: Sett env variabler
         run: |
-          echo "PROJECT_NAME=$(echo ${{ github.repository }} | cut -d/ -f2)" >> $GITHUB_ENV
           echo "IMAGE=docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME:${{ steps.artifact-version.outputs.version }}" >> $GITHUB_ENV
 
       - uses: nais/deploy/actions/deploy@v1

@@ -3,5 +3,8 @@ query($ident: ID!){
         adressebeskyttelse(historikk: false) {
             gradering
         }
+        navn(historikk: false) {
+            fornavn
+        }
     }
 }

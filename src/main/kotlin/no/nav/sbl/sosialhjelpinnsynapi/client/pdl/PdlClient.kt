@@ -43,7 +43,10 @@ class PdlClientImpl(
         val query = getResourceAsString("/pdl/hentPerson.graphql").replace("[\n\r]", "")
         try {
             val requestEntity = createRequestEntity(PdlRequest(query, Variables(ident)))
+            log.info("DEBUG: Pdl-query: $query")
             val response = pdlRestTemplate.exchange(baseurl, HttpMethod.POST, requestEntity, PdlPersonResponse::class.java)
+            val response2 = pdlRestTemplate.exchange(baseurl, HttpMethod.POST, requestEntity, String::class.java)
+            log.info("DEBUG: Pdl-response: $response2")
 
             val pdlPersonResponse: PdlPersonResponse = response.body!!
             if (pdlPersonResponse.errors != null && pdlPersonResponse.errors.isNotEmpty()) {

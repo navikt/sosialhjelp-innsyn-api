@@ -27,7 +27,12 @@ data class PdlHentPerson(
 )
 
 data class PdlPerson(
-        val adressebeskyttelse: List<Adressebeskyttelse>
+        val adressebeskyttelse: List<Adressebeskyttelse>,
+        val navn: List<PdlNavn>
+)
+
+data class PdlNavn(
+        val fornavn: String?
 )
 
 data class Adressebeskyttelse(

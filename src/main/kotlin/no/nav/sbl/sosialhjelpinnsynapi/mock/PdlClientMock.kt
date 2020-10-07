@@ -1,8 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock
 
-import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
-import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlHentPerson
-import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlPerson
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.*
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
@@ -11,12 +9,17 @@ import org.springframework.stereotype.Component
 class PdlClientMock : PdlClient {
 
     private val pdlMap = mutableMapOf<String, PdlHentPerson>()
+    private val kode7 = listOf(Adressebeskyttelse(Gradering.FORTROLIG))
+    private val kode6 = listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
+    private val kode6_utland = listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG_UTLAND))
+    private val vanlig = emptyList<Adressebeskyttelse>()
 
     override fun hentPerson(ident: String): PdlHentPerson? {
         return pdlMap.getOrElse(ident, {
             val default = PdlHentPerson(
                     hentPerson = PdlPerson(
-                            adressebeskyttelse = emptyList()
+                            adressebeskyttelse = vanlig,
+                            navn = emptyList()
                     )
             )
             pdlMap[ident] = default

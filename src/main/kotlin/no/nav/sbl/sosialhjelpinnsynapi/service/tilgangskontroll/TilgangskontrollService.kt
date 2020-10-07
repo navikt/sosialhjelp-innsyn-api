@@ -20,9 +20,11 @@ class TilgangskontrollService(
         }
     }
 
-    fun harTilgang(ident: String): Boolean {
-        val hentPerson = hentPerson(ident)
-        return !(hentPerson != null && hentPerson.isKode6Or7())
+    fun hentTilgang(ident: String): Tilgang {
+        val pdlPerson = hentPerson(ident)
+        val harTilgang = !(pdlPerson != null && pdlPerson.isKode6Or7())
+        val fornavn = pdlPerson?.navn?.first()?.fornavn?.toLowerCase()?.capitalize() ?: ""
+        return Tilgang(harTilgang, fornavn)
     }
 
     private fun hentPerson(ident: String): PdlPerson? {
@@ -38,3 +40,8 @@ class TilgangskontrollService(
         private val log by logger()
     }
 }
+
+data class Tilgang(
+        val harTilgang: Boolean,
+        val fornavn: String
+)

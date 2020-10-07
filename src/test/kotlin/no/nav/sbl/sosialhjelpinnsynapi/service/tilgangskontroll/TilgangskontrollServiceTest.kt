@@ -2,14 +2,12 @@ package no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Adressebeskyttelse
-import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Gradering
-import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
-import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlHentPerson
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.*
 import no.nav.sbl.sosialhjelpinnsynapi.common.TilgangskontrollException
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -67,18 +65,38 @@ internal class TilgangskontrollServiceTest {
     }
 
     @Test
-    internal fun `harTilgang - skal gi true hvis ingen adressebeskyttelse`() {
+    internal fun `hentTilgang - skal gi harTilgang true hvis ingen adressebeskyttelse`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns emptyList()
+        every { clientResponse.hentPerson?.navn } returns null
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertTrue { service.harTilgang(ident) }
+        assertTrue { service.hentTilgang(ident).harTilgang }
     }
 
     @Test
-    internal fun `harTilgang - skal gi false hvis adressebeskyttelse`() {
+    internal fun `hentTilgang - skal gi harTilgang false hvis adressebeskyttelse`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
+        every { clientResponse.hentPerson?.navn } returns null
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertFalse { service.harTilgang(ident) }
+        assertFalse { service.hentTilgang(ident).harTilgang }
+    }
+
+    @Test
+    internal fun `harTilgang - skal gi første fornavn med stor forbokstav`() {
+        every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
+        every { clientResponse.hentPerson?.navn } returns listOf(PdlNavn("KREATIV"), PdlNavn("NATA"))
+        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+
+        assertEquals("Kreativ", service.hentTilgang(ident).fornavn)
+    }
+
+    @Test
+    internal fun `harTilgang - skal gi fornavn som tom string om det ikke finnes`() {
+        every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
+        every { clientResponse.hentPerson?.navn } returns null
+        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+
+        assertEquals("", service.hentTilgang(ident).fornavn)
     }
 }

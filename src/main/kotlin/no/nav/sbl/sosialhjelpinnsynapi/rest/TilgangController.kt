@@ -21,17 +21,18 @@ class TilgangController(
 
     @GetMapping("/tilgang")
     fun harTilgang(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<TilgangResponse> {
-        try {
-            val harTilgang = tilgangskontrollService.harTilgang(getUserIdFromToken())
-            return ResponseEntity.ok().body(TilgangResponse(harTilgang))
+        return try {
+            val tilgang = tilgangskontrollService.hentTilgang(getUserIdFromToken())
+            ResponseEntity.ok().body(TilgangResponse(tilgang.harTilgang, tilgang.fornavn))
         } catch (e: PdlException) {
             log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")
-            return ResponseEntity.ok().body(TilgangResponse(true))
+            ResponseEntity.ok().body(TilgangResponse(true, ""))
         }
     }
 
     data class TilgangResponse(
-            val harTilgang: Boolean
+            val harTilgang: Boolean,
+            val fornavn: String
     )
 
     companion object {

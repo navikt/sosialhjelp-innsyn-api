@@ -12,6 +12,7 @@ class PdlClientMock : PdlClient {
     private val kode7 = listOf(Adressebeskyttelse(Gradering.FORTROLIG))
     private val kode6 = listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
     private val kode6_utland = listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG_UTLAND))
+    private val navn = listOf(PdlNavn("NATALIE"))
     private val vanlig = emptyList<Adressebeskyttelse>()
 
     override fun hentPerson(ident: String): PdlHentPerson? {
@@ -19,7 +20,7 @@ class PdlClientMock : PdlClient {
             val default = PdlHentPerson(
                     hentPerson = PdlPerson(
                             adressebeskyttelse = vanlig,
-                            navn = emptyList()
+                            navn = navn
                     )
             )
             pdlMap[ident] = default

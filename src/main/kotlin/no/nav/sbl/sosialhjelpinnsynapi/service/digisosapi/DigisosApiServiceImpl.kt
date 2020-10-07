@@ -1,13 +1,12 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.digisosapi
 
-import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.client.digisosapi.DigisosApiClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosApiWrapper
+import no.nav.sbl.sosialhjelpinnsynapi.service.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.KrypteringService
 import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.VirusScanner
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.BEARER
-import no.nav.sosialhjelp.idporten.client.IdPortenClient
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
@@ -25,7 +24,7 @@ class DigisosApiServiceImpl(
         private val digisosApiClient: DigisosApiClient,
         private val krypteringService: KrypteringService,
         private val virusScanner: VirusScanner,
-        private val idPortenClient: IdPortenClient
+        private val idPortenService: IdPortenService
 ) : DigisosApiService {
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
@@ -34,7 +33,7 @@ class DigisosApiServiceImpl(
 
     override fun lastOppFil(fiksDigisosId: String, file: MultipartFile): String {
         virusScanner.scan(file.name, file.bytes, fiksDigisosId)
-        val accessToken = runBlocking { idPortenClient.requestToken() }
+        val accessToken = idPortenService.getToken()
 
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
         val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, BEARER + accessToken.token, fiksDigisosId)

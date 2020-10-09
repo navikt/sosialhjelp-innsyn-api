@@ -2,10 +2,16 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.sts
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.sts.STSToken.Companion.shouldRenewToken
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDateTime
@@ -25,8 +31,7 @@ class StsClient(
         if (shouldRenewToken(cachedToken)) {
             try {
                 log.info("Henter nytt token fra STS")
-                val requestUrl = "$baseUrl?grant_type=client_credentials&scope=openid"
-                val response = stsRestTemplate.exchange(requestUrl, HttpMethod.POST, null, STSToken::class.java)
+                val response = stsRestTemplate.exchange(baseUrl, HttpMethod.POST, requestEntity(), STSToken::class.java)
 
                 cachedToken = response.body
                 return response.body!!.access_token
@@ -48,8 +53,24 @@ class StsClient(
         }
     }
 
+    private fun requestEntity(): HttpEntity<MultiValueMap<String, String>> {
+        val headers = forwardHeaders()
+        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+
+        val map = LinkedMultiValueMap<String, String>()
+        map.add(GRANT_TYPE, CLIENT_CREDENTIALS)
+        map.add(SCOPE, OPENID)
+
+        return HttpEntity(map, headers)
+    }
+
     companion object {
         private val log by logger()
+
+        private const val GRANT_TYPE = "grant_type"
+        private const val CLIENT_CREDENTIALS = "client_credentials"
+        private const val SCOPE = "scope"
+        private const val OPENID = "openid"
     }
 }
 

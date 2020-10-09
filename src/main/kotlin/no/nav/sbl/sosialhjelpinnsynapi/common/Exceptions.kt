@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.common
 
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpStatusCodeException
 
 class InvalidInputException(
         message: String
@@ -28,5 +29,14 @@ class NedlastingFilnavnMismatchException(
 ) : RuntimeException(message, cause)
 
 class DigisosSakTilhorerAnnenBrukerException(
+        override val message: String?
+) : RuntimeException(message)
+
+class PdlException(
+        status: HttpStatus,
+        override val message: String
+) : HttpStatusCodeException(status, message)
+
+class TilgangskontrollException(
         override val message: String?
 ) : RuntimeException(message)

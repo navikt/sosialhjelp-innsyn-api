@@ -67,6 +67,13 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(PdlException::class)
+    fun handlePdlError(e: PdlException): ResponseEntity<FrontendErrorMessage> {
+        log.error("Noe feilet ved kall til Pdl", e)
+        val error = FrontendErrorMessage(PDL_ERROR, "Noe uventet feilet")
+        return ResponseEntity(error, e.statusCode)
+    }
+
     @ExceptionHandler(OpplastingException::class)
     fun handleOpplastingError(e: OpplastingException): ResponseEntity<FrontendErrorMessage> {
         log.error("Noe feilet ved opplasting av vedlegg", e)
@@ -92,6 +99,13 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(TilgangskontrollException::class)
+    fun handleTilgangskontrollException(e: TilgangskontrollException): ResponseEntity<FrontendErrorMessage> {
+        log.error("Bruker har ikke tilgang til ressurs", e)
+        val error = FrontendErrorMessage(TILGANG_ERROR, "Ingen tilgang")
+        return ResponseEntity(error, HttpStatus.FORBIDDEN)
+    }
+
     companion object {
         private val log by logger()
 
@@ -99,6 +113,8 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         private const val FIKS_ERROR = "fiks_error"
         private const val NORG_ERROR = "norg_error"
         private const val FILOPPLASTING_ERROR = "FILOPPLASTING_ERROR"
+        private const val PDL_ERROR = "pdl_error"
+        private const val TILGANG_ERROR = "tilgang_error"
     }
 
     data class FrontendErrorMessage(

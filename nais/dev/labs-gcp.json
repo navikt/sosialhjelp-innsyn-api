@@ -5,7 +5,7 @@
   ],
   "env": {
     "IS_REDIS_MOCKED": "true",
-    "SPRING_PROFILES_ACTIVE": "mock-alt,log-console",
+    "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,istio-tracing",
     "VILKAR_ENABLED": "true",
     "DOKUMENTASJONKRAV_ENABLED": "true",
     "METADATA_URL": "https://sosialhjelp-mock-alt-api.labs.nais.io/sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/.well-known/openid-configuration",
@@ -29,6 +29,6 @@
   "maxReplicas": "1",
   "prometheusEnabled": false,
   "webProxyEnabled": false,
-  "accessPoliciesForGcpEnabled": true,
+  "isGcp": true,
   "vaultEnabled": false
 }

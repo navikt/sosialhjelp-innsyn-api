@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.sts
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.sts.STSToken.Companion.shouldRenewToken
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
@@ -53,7 +54,7 @@ class StsClient(
     }
 
     private fun requestEntity(): HttpEntity<MultiValueMap<String, String>> {
-        val headers = HttpHeaders()
+        val headers = forwardHeaders()
         headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 
         val map = LinkedMultiValueMap<String, String>()

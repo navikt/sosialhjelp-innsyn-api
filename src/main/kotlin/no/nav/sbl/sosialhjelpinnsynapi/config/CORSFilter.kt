@@ -26,7 +26,12 @@ class CORSFilter : Filter {
         val httpResponse = servletResponse as HttpServletResponse
         val origin = if (servletRequest is HttpServletRequest) (servletRequest.getHeader("Origin")) else null
 
-        if (!isRunningInProd() || ALLOWED_ORIGINS.contains(origin)) {
+        if (ALLOWED_ORIGINS.contains(origin)) {
+            httpResponse.setHeader("Access-Control-Allow-Origin", origin)
+            httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-XSRF-TOKEN, Authorization, Nav-Call-Id")
+            httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+            httpResponse.setHeader("Access-Control-Allow-Credentials", "true")
+        } else if (!isRunningInProd()) {
             httpResponse.setHeader("Access-Control-Allow-Origin", origin)
             httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-XSRF-TOKEN, Authorization, Nav-Call-Id, x-request-id, x-client-trace-id, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags")
             httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")

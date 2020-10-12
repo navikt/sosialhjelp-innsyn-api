@@ -48,7 +48,7 @@ class NorgClientImpl(
 
     override fun ping() {
         try {
-            val headers = forwardHeaders()
+            val headers = headers()
             // samme kall som selftest i soknad-api
             restTemplate.exchange("$baseUrl/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
         } catch (e: HttpStatusCodeException) {

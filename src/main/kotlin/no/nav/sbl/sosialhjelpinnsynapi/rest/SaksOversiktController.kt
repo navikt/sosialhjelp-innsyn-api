@@ -9,6 +9,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.service.oppgave.OppgaveService
 import no.nav.sbl.sosialhjelpinnsynapi.service.saksstatus.DEFAULT_TITTEL
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixTimestampToDate
@@ -28,11 +29,14 @@ import org.springframework.web.bind.annotation.RestController
 class SaksOversiktController(
         private val fiksClient: FiksClient,
         private val eventService: EventService,
-        private val oppgaveService: OppgaveService
+        private val oppgaveService: OppgaveService,
+        private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
+        tilgangskontrollService.sjekkTilgang()
+
         val saker = try {
             fiksClient.hentAlleDigisosSaker(token)
         } catch (e: FiksException) {
@@ -55,6 +59,8 @@ class SaksOversiktController(
 
     @GetMapping("/saksDetaljer")
     fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
+        tilgangskontrollService.sjekkTilgang()
+
         if (id.isEmpty()) {
             return ResponseEntity.noContent().build()
         }

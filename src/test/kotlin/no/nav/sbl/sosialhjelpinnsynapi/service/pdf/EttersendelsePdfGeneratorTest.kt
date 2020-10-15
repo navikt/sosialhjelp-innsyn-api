@@ -20,8 +20,8 @@ class EttersendelsePdfGeneratorTest {
 
     private val ettersendelsePdfGenerator  = EttersendelsePdfGenerator()
 
-    // TODO: skrive bedre test for generering av pdf, foreløpig kun brukt for å sjekke at pdf ser riktig ut.
-    @Disabled
+    // TODO: skrive bedre test for generering av pdf
+    @Disabled("Kun lagd for å sjekke at pdf ser riktig ut.")
     @Test
     fun `skal generere pdf`() {
         val metadata = Collections.emptyList<OpplastetVedleggMetadata>()

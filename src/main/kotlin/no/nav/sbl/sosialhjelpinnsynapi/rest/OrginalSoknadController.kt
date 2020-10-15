@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.rest
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalJsonSoknadResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.originalsoknad.OrginalSoknadService
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
@@ -17,11 +18,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class OrginalSoknadController(
-        private val orginalSoknadService: OrginalSoknadService
+        private val orginalSoknadService: OrginalSoknadService,
+        private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/{fiksDigisosId}/orginalJsonSoknad")
     fun getOrginalJsonSoknad(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalJsonSoknadResponse> {
+        tilgangskontrollService.sjekkTilgang()
 
         val orginalSoknadResponse: OrginalJsonSoknadResponse = orginalSoknadService.hentOrginalJsonSoknad(fiksDigisosId, token)
                 ?: return ResponseEntity(HttpStatus.NO_CONTENT)
@@ -31,6 +34,7 @@ class OrginalSoknadController(
 
     @GetMapping("/{fiksDigisosId}/orginalSoknadPdfLink")
     fun getOrginalSoknadPdfLink(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalSoknadPdfLinkResponse> {
+        tilgangskontrollService.sjekkTilgang()
 
         val orginalSoknadPdfLink = (orginalSoknadService.hentOrginalSoknadPdfLink(fiksDigisosId, token)
                 ?: return ResponseEntity(HttpStatus.NO_CONTENT))

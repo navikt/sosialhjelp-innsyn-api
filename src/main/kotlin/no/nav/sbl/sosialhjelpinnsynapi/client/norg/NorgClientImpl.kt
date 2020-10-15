@@ -5,6 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_NAV_APIKEY
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
@@ -60,7 +61,7 @@ class NorgClientImpl(
     }
 
     private fun headers(): HttpHeaders {
-        val headers = HttpHeaders()
+        val headers = forwardHeaders()
         headers.set(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
         headers.set(HEADER_NAV_APIKEY, System.getenv(NORG2_APIKEY))
         return headers

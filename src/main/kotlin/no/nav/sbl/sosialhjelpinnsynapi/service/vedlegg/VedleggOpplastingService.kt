@@ -30,7 +30,6 @@ import kotlin.collections.ArrayList
 
 
 const val MESSAGE_COULD_NOT_LOAD_DOCUMENT = "COULD_NOT_LOAD_DOCUMENT"
-const val MESSAGE_PDF_IS_SIGNED = "PDF_IS_SIGNED"
 const val MESSAGE_PDF_IS_ENCRYPTED = "PDF_IS_ENCRYPTED"
 const val MESSAGE_ILLEGAL_FILE_TYPE = "ILLEGAL_FILE_TYPE"
 const val MESSAGE_ILLEGAL_FILENAME = "ILLEGAL_FILENAME"
@@ -235,9 +234,7 @@ class VedleggOpplastingService(
         try {
             PDDocument.load(data)
                     .use { document ->
-                        if (document.signatureDictionaries.isNotEmpty()) {
-                            return MESSAGE_PDF_IS_SIGNED
-                        } else if (document.isEncrypted) {
+                        if (document.isEncrypted) {
                             return MESSAGE_PDF_IS_ENCRYPTED
                         }
                         return "OK"

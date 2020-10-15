@@ -8,6 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CONSUMER_TOKEN
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.TEMA_KOM
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.CALL_ID
@@ -76,7 +77,7 @@ class PdlClientImpl(
     private fun createRequestEntity(request: PdlRequest): HttpEntity<PdlRequest> {
         val stsToken: String = stsClient.token()
 
-        val headers = HttpHeaders()
+        val headers = forwardHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.set(HEADER_CALL_ID, MDCUtils.get(CALL_ID))
         headers.set(HEADER_CONSUMER_TOKEN, BEARER + stsToken)

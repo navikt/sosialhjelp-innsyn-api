@@ -78,6 +78,7 @@ For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsv
 
 Propertyen `innsyn.cache.redisMocked` styrer hvorvidt en _in-memory_ Redis instans spinnes opp og tas i bruk. Denne er satt til `true` ved bruk av spring-profilene `mock`, `local` og `test`.
 
+
 ## Lokal kjøring
 #### *uten* integrasjon til Fiks og login-api
 TestApplication og profile=mock,log-console

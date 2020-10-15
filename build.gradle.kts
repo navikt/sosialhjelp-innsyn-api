@@ -8,8 +8,8 @@ group = "no.nav.sbl"
 object Versions {
     const val kotlin = "1.4.0"
     const val coroutines = "1.3.9"
-    const val springBoot = "2.3.3.RELEASE"
-    const val sosialhjelpCommon = "1.2d56711"
+    const val springBoot = "2.3.4.RELEASE"
+    const val sosialhjelpCommon = "1.b216764"
     const val logback = "1.2.3"
     const val logstash = "6.3"
     const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
@@ -29,6 +29,7 @@ object Versions {
     const val redisMock = "0.1.16"
     const val lettuce = "5.3.3.RELEASE"
     const val nettyCodec = "4.1.50.Final"
+    const val jempbox = "1.8.16"
     const val jerseyMediaJaxb = "2.31"
 
     //    Test only
@@ -132,6 +133,8 @@ dependencies {
     implementation("org.apache.tika:tika-core:${Versions.tika}")
     implementation("org.apache.pdfbox:preflight:${Versions.pdfBox}")
     implementation("com.natpryce:konfig:${Versions.konfig}")
+    implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
+
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     implementation("com.google.guava:guava:${Versions.guava}")

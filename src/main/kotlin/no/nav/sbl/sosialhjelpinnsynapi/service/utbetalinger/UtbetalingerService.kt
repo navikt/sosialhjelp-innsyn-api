@@ -1,14 +1,11 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
-import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallel
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.joda.time.DateTime
@@ -35,11 +32,10 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val alleUtbetalinger: List<ManedUtbetaling> = runBlocking(Dispatchers.IO) {
-            digisosSaker
-                    .filter { isDigisosSakNewerThanMonths(it, months) }
-                    .flatMapParallel { manedsutbetalinger(token, it) }
-        }
+        val alleUtbetalinger: List<ManedUtbetaling> =
+                    digisosSaker
+                            .filter { isDigisosSakNewerThanMonths(it, months) }
+                            .flatMap { manedsutbetalinger(token, it) }
 
         return alleUtbetalinger
                 .sortedByDescending { it.utbetalingsdato }

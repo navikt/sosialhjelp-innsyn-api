@@ -8,13 +8,12 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
-import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisStore
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.service.pdf.EttersendelsePdfGenerator
 import no.nav.sbl.sosialhjelpinnsynapi.service.virusscan.VirusScanner
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
-import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.springframework.stereotype.Component
@@ -41,7 +40,7 @@ class VedleggOpplastingService(
         private val fiksClient: FiksClient,
         private val krypteringService: KrypteringService,
         private val virusScanner: VirusScanner,
-        private val redisStore: RedisStore,
+        private val redisService: RedisService,
         private val cacheProperties: CacheProperties,
         private val ettersendelsePdfGenerator: EttersendelsePdfGenerator
 ) {
@@ -81,7 +80,7 @@ class VedleggOpplastingService(
 
             // opppdater cache med digisossak
             val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
-            cachePut(digisosId, digisosSak)
+            redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
 
             return valideringResultatResponseList
         } catch (e: Exception) {
@@ -263,16 +262,6 @@ class VedleggOpplastingService(
             throw IllegalStateException(e)
         }
 
-    }
-
-    private fun cachePut(key: String, value: DigisosSak) {
-        val stringValue = objectMapper.writeValueAsString(value)
-        val set = redisStore.set(key, stringValue, cacheProperties.timeToLiveSeconds)
-        if (set == null) {
-            log.warn("Cache put feilet eller fikk timeout")
-        } else if (set == "OK") {
-            log.debug("Cache put OK $key")
-        }
     }
 
     companion object {

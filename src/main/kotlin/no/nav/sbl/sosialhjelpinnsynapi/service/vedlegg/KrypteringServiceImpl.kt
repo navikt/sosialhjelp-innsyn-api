@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg
 import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.runAsyncWithMDC
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
@@ -76,7 +77,7 @@ class KrypteringServiceImpl(
     }
 
     private fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
-        val headers = HttpHeaders()
+        val headers = forwardHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         headers.set(HttpHeaders.AUTHORIZATION, token)
         headers.set(IntegrationUtils.HEADER_INTEGRASJON_ID, fiksIntegrasjonid)

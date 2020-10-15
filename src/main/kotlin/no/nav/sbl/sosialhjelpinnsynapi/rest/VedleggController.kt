@@ -92,7 +92,7 @@ class VedleggController(
     }
 }
 
-data class OpplastetVedleggMetadata (
+data class OpplastetVedleggMetadata(
         val type: String,
         val tilleggsinfo: String?,
         val filer: MutableList<OpplastetFil>,
@@ -100,6 +100,6 @@ data class OpplastetVedleggMetadata (
         val innsendelsesfrist: LocalDate?
 )
 
-data class OpplastetFil (
+data class OpplastetFil(
         var filnavn: String
 )

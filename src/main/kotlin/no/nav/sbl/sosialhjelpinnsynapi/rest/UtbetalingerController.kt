@@ -40,6 +40,8 @@ class UtbetalingerController(
 
     @GetMapping("/utbetalinger/exists")
     fun getUtbetalingExists(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "12") month: Int): ResponseEntity<Boolean> {
+        tilgangskontrollService.sjekkTilgang()
+
         try {
             return ResponseEntity.ok().body(utbetalingerService.utbetalingExists(token, month))
         } catch (e: FiksClientException) {

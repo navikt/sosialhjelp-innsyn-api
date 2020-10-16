@@ -25,15 +25,21 @@ spec:
     min: {{minReplicas}}
     max: {{maxReplicas}}
   webproxy: {{webProxyEnabled}}
-{{#if accessPoliciesForGcpEnabled}}
+{{#if isGcp}}
   accessPolicy:
     outbound:
       external:
         - host: "oidc-ver2.difi.no"
       rules:
         - application: sosialhjelp-mock-alt-api
+{{/if}}
+{{#if isGcp}}
   filesFrom:
     - secret: virksomhetssertifikat
+{{/if}}
+{{#if isGcp}}
+  tracing:
+    enabled: true
 {{/if}}
   vault:
     enabled: {{vaultEnabled}}

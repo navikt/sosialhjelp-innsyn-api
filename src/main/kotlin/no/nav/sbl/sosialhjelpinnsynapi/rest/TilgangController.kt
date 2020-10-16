@@ -27,6 +27,9 @@ class TilgangController(
         } catch (e: PdlException) {
             log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")
             ResponseEntity.ok().body(TilgangResponse(true, ""))
+        } catch (e: Exception) {
+            log.error("Tilgangssjekk feilet, returnerer 'harTilgang=true'")
+            ResponseEntity.ok().body(TilgangResponse(true, ""))
         }
     }
 

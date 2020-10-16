@@ -99,4 +99,13 @@ internal class TilgangskontrollServiceTest {
 
         assertEquals("", service.hentTilgang(ident).fornavn)
     }
+
+    @Test
+    internal fun `harTilgang - skal gi fornavn som tom string navneliste er tom`() {
+        every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
+        every { clientResponse.hentPerson?.navn } returns emptyList()
+        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+
+        assertEquals("", service.hentTilgang(ident).fornavn)
+    }
 }

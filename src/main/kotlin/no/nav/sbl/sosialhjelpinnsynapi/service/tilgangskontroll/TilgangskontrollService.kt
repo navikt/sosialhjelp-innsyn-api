@@ -23,7 +23,7 @@ class TilgangskontrollService(
     fun hentTilgang(ident: String): Tilgang {
         val pdlPerson = hentPerson(ident)
         val harTilgang = !(pdlPerson != null && pdlPerson.isKode6Or7())
-        val fornavn = pdlPerson?.navn?.first()?.fornavn?.toLowerCase()?.capitalize() ?: ""
+        val fornavn = pdlPerson?.navn?.firstOrNull()?.fornavn?.toLowerCase()?.capitalize() ?: ""
         return Tilgang(harTilgang, fornavn)
     }
 

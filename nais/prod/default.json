@@ -10,7 +10,8 @@
     "/var/run/secrets/nais.io/vault": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss",
     "/apigw/securitytokenservicetoken": "/apikey/apigw/prod/security-token-service-token/sosialhjelp-innsyn-api",
-    "/apigw/norg2": "/apikey/apigw/prod/norg2.api.v1/sosialhjelp-innsyn-api"
+    "/apigw/norg2": "/apikey/apigw/prod/norg2.api.v1/sosialhjelp-innsyn-api",
+    "/apigw/pdl-api": "/apikey/apigw/prod/pdl-api/sosialhjelp-innsyn-api"
   },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.ks.no",
@@ -35,6 +36,6 @@
   "maxReplicas": "4",
   "prometheusEnabled": true,
   "webProxyEnabled": true,
-  "accessPoliciesForGcpEnabled": false,
+  "isGcp": false,
   "vaultEnabled": true
 }

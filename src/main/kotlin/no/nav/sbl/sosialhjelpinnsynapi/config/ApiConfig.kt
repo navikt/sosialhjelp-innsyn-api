@@ -44,7 +44,9 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "https://digisos.labs.nais.io",
                 "https://www.digisos-test.com")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
-        configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "Authorization", "Nav-Call-Id")
+        configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "X-XSRF-TOKEN", "Authorization",
+                "Nav-Call-Id", "x-request-id", "x-client-trace-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid",
+                "x-b3-sampled", "x-b3-flags")
         configuration.allowCredentials = true
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)

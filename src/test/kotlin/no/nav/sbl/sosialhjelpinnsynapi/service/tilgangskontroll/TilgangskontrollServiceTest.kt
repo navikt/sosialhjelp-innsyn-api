@@ -113,7 +113,7 @@ internal class TilgangskontrollServiceTest {
     }
 
     @Test
-    internal fun `harTilgang - skal gi første fornavn med stor forbokstav`() {
+    internal fun `hentTilgang - skal gi første fornavn med stor forbokstav`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
         every { clientResponse.hentPerson?.navn } returns listOf(PdlNavn("KREATIV"), PdlNavn("NATA"))
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
@@ -123,7 +123,7 @@ internal class TilgangskontrollServiceTest {
     }
 
     @Test
-    internal fun `harTilgang - skal gi fornavn som tom string om det ikke finnes`() {
+    internal fun `hentTilgang - skal gi fornavn som tom string om det ikke finnes`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
         every { clientResponse.hentPerson?.navn } returns null
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
@@ -133,7 +133,7 @@ internal class TilgangskontrollServiceTest {
     }
 
     @Test
-    internal fun `harTilgang - skal gi fornavn som tom string om navneliste er tom`() {
+    internal fun `hentTilgang - skal gi fornavn som tom string om navneliste er tom`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.FORTROLIG))
         every { clientResponse.hentPerson?.navn } returns emptyList()
         every { pdlClientMock.hentPerson(any()) } returns clientResponse

@@ -48,6 +48,7 @@ no.nav.security.jwt:
     discoveryurl: ${AZUREAD_DISCOVERYURL}
     cookie_name: selvbetjening-idtoken
     accepted_audience: ${AZUREAD_CLIENTID}
+azuread.loginurl: ${AZUREAD_LOGINURL}
 
 innsyn:
   vedlegg:

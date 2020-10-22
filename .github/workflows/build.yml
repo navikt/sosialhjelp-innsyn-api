@@ -2,9 +2,10 @@ name: Build
 on:
   push:
     branches:
-      - '**' # Build all branches
+      - '**'      # Build all branches
+      - '!master' # Exclude master
     tags-ignore:
-      - '**' # Don't build any tags
+      - '**'      # Don't build any tags
 
 jobs:
   build:

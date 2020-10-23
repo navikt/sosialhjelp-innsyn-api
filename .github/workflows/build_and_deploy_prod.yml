@@ -6,6 +6,7 @@ on:
 
 env:
   CI: true
+  PROJECT_NAME: sosialhjelp-innsyn-api
   DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME:${{ github.sha }}
 
 # FIXME: Legg til docker layer caching, f.eks. https://github.com/marketplace/actions/build-docker-images-using-cache

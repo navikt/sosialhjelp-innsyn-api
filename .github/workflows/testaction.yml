@@ -1,0 +1,42 @@
+name: Build and deploy to prod
+on:
+  push:
+    branches:
+      - "feature/autodeploy-fixes"
+
+env:
+  CI: true
+  DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME:${{ github.sha }}
+
+# FIXME: Legg til docker layer caching, f.eks. https://github.com/marketplace/actions/build-docker-images-using-cache
+jobs:
+  build:
+    name: test env 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sett env variabel
+        run: |
+         echo "PROJECT_NAME=$(echo ${{ github.repository }} | cut -d/ -f2)"  >> $GITHUB_ENV
+      - name: echo docker image
+        run: |
+          echo ${{ env.DOCKER_IMAGE }}
+  deploy:
+    name: test env 2
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Sett env variabel
+        run: |
+          echo "PROJECT_NAME=$(echo ${{ github.repository }} | cut -d/ -f2)"  >> $GITHUB_ENV
+      - name: echo docker image
+        run: |
+          echo ${{ env.DOCKER_IMAGE }}
+  other:
+    name: test github.event.repository.name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: echo github.event.repository.name
+        run: |
+          echo ${{ github.event.repository.name }}

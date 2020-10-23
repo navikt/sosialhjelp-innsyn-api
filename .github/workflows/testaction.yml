@@ -1,4 +1,4 @@
-name: Build and deploy to prod
+name: testaction
 on:
   push:
     branches:
@@ -22,6 +22,8 @@ jobs:
           echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_REPOSITORY} --password-stdin docker.pkg.github.com
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v1
+      - uses: actions/cache@v2
       - name: Create artifact version
         id: artifact-version
         uses: navikt/sosialhjelp-ci/actions/create-artifact-version@master

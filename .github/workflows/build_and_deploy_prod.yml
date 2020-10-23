@@ -48,6 +48,7 @@ jobs:
           docker push ${{ env.DOCKER_IMAGE }}
   deploy:
     name: Deploy to prod-sbs
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

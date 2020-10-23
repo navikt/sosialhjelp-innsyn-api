@@ -1,4 +1,4 @@
-name: Build
+name: Build and deploy to prod
 on:
   push:
     branches:
@@ -6,7 +6,7 @@ on:
 
 env:
   CI: true
-  DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME:${{ github.sha }}
+  DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}:${{ github.sha }}
 
 # FIXME: Legg til docker layer caching, f.eks. https://github.com/marketplace/actions/build-docker-images-using-cache
 jobs:

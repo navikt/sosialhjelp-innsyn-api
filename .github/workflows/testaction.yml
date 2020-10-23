@@ -6,7 +6,7 @@ on:
 
 env:
   CI: true
-  DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME:${{ github.sha }}
+  DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}:${{ github.sha }}
 
 # FIXME: Legg til docker layer caching, f.eks. https://github.com/marketplace/actions/build-docker-images-using-cache
 jobs:

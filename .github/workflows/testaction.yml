@@ -6,7 +6,7 @@ on:
 
 env:
   CI: true
-  DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}:${{ github.sha }}
+  DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}
 
 # FIXME: Legg til docker layer caching, f.eks. https://github.com/marketplace/actions/build-docker-images-using-cache
 jobs:
@@ -17,6 +17,20 @@ jobs:
       - name: Sett env variabel
         run: |
          echo "PROJECT_NAME=$(echo ${{ github.repository }} | cut -d/ -f2)"  >> $GITHUB_ENV
+      - name: Create artifact version
+        id: artifact-version
+        uses: navikt/sosialhjelp-ci/actions/create-artifact-version@master
+      - name: Create docker image tags
+        run: |
+          echo ${{ env.DOCKER_IMAGE }}:"{{ steps.artifact-version.outputs.version }}" >> $DOCKER_TAG
+      - name: Create tag and release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.artifact-version.outputs.version }}
+          release_name: ${{ steps.artifact-version.outputs.version }}
+          commitish: ${{ github.sha }}
       - name: echo docker image
         run: |
           echo ${{ env.DOCKER_IMAGE }}
@@ -26,12 +40,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Sett env variabel
-        run: |
-          echo "PROJECT_NAME=$(echo ${{ github.repository }} | cut -d/ -f2)"  >> $GITHUB_ENV
       - name: echo docker image
         run: |
-          echo ${{ env.DOCKER_IMAGE }}
+          echo ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
   other:
     name: test github.event.repository.name
     runs-on: ubuntu-latest

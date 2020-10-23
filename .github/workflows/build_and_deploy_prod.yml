@@ -6,7 +6,6 @@ on:
 
 env:
   CI: true
-  PROJECT_NAME: sosialhjelp-innsyn-api
   DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME:${{ github.sha }}
 
 # FIXME: Legg til docker layer caching, f.eks. https://github.com/marketplace/actions/build-docker-images-using-cache
@@ -37,6 +36,9 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+     - name: Sett env variabel
+       run: |
+         echo "PROJECT_NAME=$(echo ${{ github.repository }} | cut -d/ -f2)"  >> $GITHUB_ENV
       - name: Login to GitHub package registry
         run: |
           echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_REPOSITORY} --password-stdin docker.pkg.github.com
@@ -53,6 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Sett env variabel
+        run: |
+          echo "PROJECT_NAME=$(echo ${{ github.repository }} | cut -d/ -f2)"  >> $GITHUB_ENV
       - name: deploy til prod-sbs
         uses: nais/deploy/actions/deploy@v1
         env:

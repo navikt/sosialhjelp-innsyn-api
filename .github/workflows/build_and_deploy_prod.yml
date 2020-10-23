@@ -13,6 +13,8 @@ jobs:
   build:
     name: Build and push docker image
     runs-on: ubuntu-latest
+    outputs:
+      IMAGE_TAG: ${{ steps.docker-tag.outputs.IMAGE_TAG }}
     steps:
       - name: Setup java
         uses: actions/setup-java@v1
@@ -41,18 +43,36 @@ jobs:
           echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_REPOSITORY} --password-stdin docker.pkg.github.com
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create artifact version
+        id: artifact-version
+        uses: navikt/sosialhjelp-ci/actions/create-artifact-version@master
+      - name: Create docker image tags
+        run: |
+          echo "DOCKER_TAG=${{ env.DOCKER_IMAGE }}:${{ steps.artifact-version.outputs.version }}" >> $GITHUB_ENV
+      - name: Create tag and release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.artifact-version.outputs.version }}
+          release_name: ${{ steps.artifact-version.outputs.version }}
+          commitish: ${{ github.sha }}
       - name: Build docker image
-        run: docker build -t ${{ env.DOCKER_IMAGE }} .
+        run: docker build -t ${{ env.DOCKER_TAG }} .
       - name: Push docker image
         run: |
-          docker push ${{ env.DOCKER_IMAGE }}
+          docker push ${{ env.DOCKER_TAG }}
+      - name: output docker image tag
+        id: docker-tag
+        run: |
+          echo "::set-output name=IMAGE_TAG::${{ env.DOCKER_TAG }}"
   deploy:
     name: Deploy to prod-sbs
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-        uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           RESOURCE: nais.yaml
@@ -60,4 +80,4 @@ jobs:
           VARS: nais/prod/default.json
           REF: ${{ github.sha }}
           PRINT_PAYLOAD: true
-          IMAGE: ${{ env.DOCKER_IMAGE }}
+          IMAGE: ${{ needs.build.outputs.IMAGE_TAG }}

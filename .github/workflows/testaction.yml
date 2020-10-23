@@ -23,6 +23,11 @@ jobs:
       - name: Create docker image tags
         run: |
           echo ${{ env.DOCKER_IMAGE }}:"{{ steps.artifact-version.outputs.version }}" >> $DOCKER_TAG
+      - name: Login to GitHub package registry
+        run: |
+          echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_REPOSITORY} --password-stdin docker.pkg.github.com
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create tag and release
         uses: actions/create-release@v1
         env:

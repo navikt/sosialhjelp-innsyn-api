@@ -36,7 +36,7 @@ jobs:
           commitish: ${{ github.sha }}
       - name: echo docker image
         run: |
-          echo ${{ env.DOCKER_IMAGE }}
+          echo ${{ env.DOCKER_TAG }}
   deploy:
     name: test env 2
     needs: build
@@ -47,10 +47,11 @@ jobs:
         run: |
           echo ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
   other:
-    name: test github.event.repository.name
+    name: test github.event.release.tag_name
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: echo github.event.repository.name
         run: |
-          echo ${{ github.event.repository.name }}
+          echo ${{ github.event.release.tag_name }}

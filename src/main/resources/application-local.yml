@@ -21,6 +21,7 @@ no.nav.security.jwt:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
+azuread.loginurl: ${AZUREAD_LOGINURL:http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}
 
 client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:https://api.fiks.test.ks.no}

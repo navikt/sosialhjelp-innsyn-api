@@ -5,7 +5,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.NedlastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
-import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV

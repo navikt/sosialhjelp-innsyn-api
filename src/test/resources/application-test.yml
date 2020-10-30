@@ -44,3 +44,4 @@ no.nav.security.jwt:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: localhost-idtoken
+azuread.loginurl: ${http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}

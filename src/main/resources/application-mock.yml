@@ -44,3 +44,12 @@ no.nav.sosialhjelp.idporten:
   config_url: configurl
   truststore_type: truststoretype
   truststore_filepath: filepath
+
+
+#Token-validering
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: http://metadata
+    accepted_audience: aud-localhost
+    cookie_name: localhost-idtoken
+azuread.loginurl: ${AZUREAD_LOGINURL:http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}

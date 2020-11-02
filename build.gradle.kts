@@ -38,7 +38,6 @@ object Versions {
     const val springmockk = "2.0.0"
 }
 
-val mainClass = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 val isRunningOnJenkins: String? by project
 
 plugins {
@@ -53,7 +52,7 @@ plugins {
 
 application {
     applicationName = "sosialhjelp-innsyn-api"
-    mainClassName = mainClass
+    mainClassName = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
 }
 
 java {

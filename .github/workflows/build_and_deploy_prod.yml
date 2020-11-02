@@ -80,8 +80,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.artifact-version.outputs.version }}
-          release_name: ${{ steps.artifact-version.outputs.version }}
+          tag_name: ${{ env.ARTIFACT_VERSION }}
+          release_name: ${{ env.ARTIFACT_VERSION }}
           commitish: ${{ github.sha }}
       - name: Build docker image
         if: env.IS_FIRST_RUN == 'true'

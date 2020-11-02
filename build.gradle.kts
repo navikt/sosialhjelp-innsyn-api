@@ -17,7 +17,7 @@ object Versions {
     const val prometheus = "0.8.1"
     const val tokenValidation = "1.3.0"
     const val jackson = "2.11.2"
-    const val guava = "28.2-jre"
+    const val guava = "30.0-jre"
     const val swagger = "2.9.2"
     const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"

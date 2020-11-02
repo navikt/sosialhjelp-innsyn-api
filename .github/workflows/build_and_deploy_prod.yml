@@ -2,7 +2,7 @@ name: Build and deploy to prod
 on:
   push:
     branches:
-      - "master"
+      - "fix/more-broken-workflow"
 
 # FIXME: Legg til docker layer caching, f.eks. https://github.com/marketplace/actions/build-docker-images-using-cache
 jobs:

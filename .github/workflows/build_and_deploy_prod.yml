@@ -73,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create docker image tags
         run: |
-          echo "DOCKER_TAG=${{ env.DOCKER_IMAGE }}:${{ steps.artifact-version.outputs.version }}" >> $GITHUB_ENV
+          echo "DOCKER_TAG=${{ env.DOCKER_IMAGE }}:${{ env.ARTIFACT_VERSION }}" >> $GITHUB_ENV
       - name: Create tag and release
         if: env.IS_FIRST_RUN == 'true'
         uses: actions/create-release@v1

@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sbl"
 
 object Versions {
-    const val kotlin = "1.4.0"
+    const val kotlin = "1.4.10"
     const val coroutines = "1.3.9"
     const val springBoot = "2.3.5.RELEASE"
     const val sosialhjelpCommon = "1.b216764"
@@ -42,9 +42,9 @@ val isRunningOnJenkins: String? by project
 
 plugins {
     application
-    kotlin("jvm") version "1.4.0"
+    kotlin("jvm") version "1.4.10"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.4.0"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.4.10"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
     id("com.github.ben-manes.versions") version "0.28.0"

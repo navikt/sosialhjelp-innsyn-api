@@ -28,8 +28,7 @@ class TilgangskontrollService(
     fun hentTilgang(ident: String): Tilgang {
         val pdlPerson = hentPerson(ident)
         val harTilgang = !(pdlPerson != null && pdlPerson.isKode6Or7())
-        val fornavn = pdlPerson?.navn?.first()?.fornavn?.toLowerCase()?.capitalize() ?: ""
-        return Tilgang(harTilgang, fornavn)
+        return Tilgang(harTilgang, fornavn(pdlPerson))
     }
 
     private fun hentPerson(ident: String): PdlPerson? {
@@ -39,6 +38,14 @@ class TilgangskontrollService(
             log.warn("PDL kaster feil -> gir midlertidig tilgang til ressurs")
             null
         }
+    }
+
+    private fun fornavn(pdlPerson: PdlPerson?) : String {
+        val fornavn = pdlPerson?.navn?.firstOrNull()?.fornavn?.toLowerCase()?.capitalize() ?: ""
+        if (fornavn.isEmpty()) {
+            log.warn("PDL har ingen fornavn på brukeren. Dette gir ingen feil hos oss. Kontakt gjerne PDL-teamet, siden datakvaliteten på denne brukeren er dårlig.")
+        }
+        return fornavn
     }
 
     companion object {

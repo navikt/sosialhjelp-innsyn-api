@@ -28,7 +28,6 @@ object Versions {
     const val fiksKryptering = "1.0.9"
     const val redisMock = "0.1.16"
     const val lettuce = "5.3.5.RELEASE"
-    const val nettyCodec = "4.1.50.Final"
     const val jempbox = "1.8.16"
     const val jerseyMediaJaxb = "2.31"
 
@@ -137,7 +136,6 @@ dependencies {
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     implementation("com.google.guava:guava:${Versions.guava}")
-    implementation("io.netty:netty-codec-http2:${Versions.nettyCodec}")
     implementation("org.glassfish.jersey.media:jersey-media-jaxb:${Versions.jerseyMediaJaxb}")
 
 //    Test

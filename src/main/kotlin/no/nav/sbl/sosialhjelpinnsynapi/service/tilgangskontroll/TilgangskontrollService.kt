@@ -5,6 +5,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlPerson
 import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.isKode6Or7
 import no.nav.sbl.sosialhjelpinnsynapi.common.PdlException
 import no.nav.sbl.sosialhjelpinnsynapi.common.TilgangskontrollException
+import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import org.springframework.stereotype.Component
 
@@ -12,6 +13,10 @@ import org.springframework.stereotype.Component
 class TilgangskontrollService(
         private val pdlClient: PdlClient
 ) {
+
+    fun sjekkTilgang() {
+        sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken())
+    }
 
     fun sjekkTilgang(ident: String) {
         val hentPerson = hentPerson(ident)

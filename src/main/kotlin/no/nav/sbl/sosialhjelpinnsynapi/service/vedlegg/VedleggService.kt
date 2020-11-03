@@ -62,12 +62,21 @@ class VedleggService(
                             .map { vedlegg ->
                                 val currentFilIndex = filIndex
                                 filIndex += vedlegg.filer.size
-                                val dokumentInfoList = ettersendelse.vedlegg
+                                val filtrerteEttersendelsesVedlegg = ettersendelse.vedlegg
                                         .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
-                                        .subList(currentFilIndex, filIndex)
+                                val dokumentInfoList:List<DokumentInfo>
+                                if(filIndex > filtrerteEttersendelsesVedlegg.size) {
+                                    log.error(
+                                            "Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId " +
+                                                    "Det er flere filer enn vi har Metadata! " +
+                                                    "Filer: ${filIndex} Metadata: ${filtrerteEttersendelsesVedlegg.size}")
+                                    dokumentInfoList = vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }
+                                } else {
+                                    dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)
 
-                                if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                    throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)
+                                    if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
+                                        throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)
+                                    }
                                 }
                                 InternalVedlegg(
                                         vedlegg.type,

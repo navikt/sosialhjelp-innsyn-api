@@ -188,9 +188,10 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
-    fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er signert`() {
+    fun `sendVedleggTilFiks skal ikke gi feilmelding hvis pdf-filen er signert`() {
         every { krypteringService.krypter(any(), any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+        every { ettersendelsePdfGenerator.generate(any(), any()) } returns ByteArray(1)
 
         val filnavn1 = "test1.pdf"
         val filnavn2 = "test2.pdf"
@@ -208,12 +209,12 @@ internal class VedleggOpplastingServiceTest {
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+        verify(exactly = 1) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
         assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
         assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo("OK")
         assertThat(vedleggOpplastingResponseList[0].filer[1].filnavn).isEqualTo(filnavn2)
-        assertThat(vedleggOpplastingResponseList[0].filer[1].status).isEqualTo(MESSAGE_PDF_IS_SIGNED)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].status).isEqualTo("OK")
     }
 
     @Test

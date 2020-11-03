@@ -11,7 +11,8 @@
     "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
     "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q0",
-    "/apigw/norg2": "/apikey/apigw/dev/norg2.api.v1/sosialhjelp-innsyn-api_q0"
+    "/apigw/norg2": "/apikey/apigw/dev/norg2.api.v1/sosialhjelp-innsyn-api_q0",
+    "/apigw/pdl-api": "/apikey/apigw/dev/pdl-api/sosialhjelp-innsyn-api_q1"
   },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
@@ -22,20 +23,19 @@
     "ID_PORTEN_CONFIG_URL": "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
     "ID_PORTEN_CLIENT_ID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
     "ID_PORTEN_SCOPE": "ks:fiks",
-    "AZUREAD_DISCOVERYURL": "https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1",
-    "AZUREAD_CLIENTID": "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5",
+    "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "300",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
     "VILKAR_ENABLED": "true",
     "DOKUMENTASJONKRAV_ENABLED": "true",
     "SPRING_PROFILES_ACTIVE": "dev-sbs,log-kibana",
-    "PDL_ENDPOINT_URL": "https://api-gw-q0.oera.no/pdl-api/graphql",
+    "PDL_ENDPOINT_URL": "https://api-gw-q1.oera.no/pdl-api/graphql",
     "STS_TOKEN_ENDPOINT_URL": "https://api-gw-q0.oera.no/security-token-service/rest/v1/sts/token"
   },
   "minReplicas": "2",
   "maxReplicas": "4",
   "prometheusEnabled": true,
   "webProxyEnabled": true,
-  "accessPoliciesForGcpEnabled": false,
+  "isGcp": false,
   "vaultEnabled": true
 }

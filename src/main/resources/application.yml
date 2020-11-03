@@ -45,9 +45,10 @@ no.nav.sosialhjelp.idporten:
 #Token-validering
 no.nav.security.jwt:
   issuer.selvbetjening:
-    discoveryurl: ${AZUREAD_DISCOVERYURL}
+    discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
     cookie_name: selvbetjening-idtoken
-    accepted_audience: ${AZUREAD_CLIENTID}
+    accepted_audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
+azuread.loginurl: ${AZUREAD_LOGINURL}
 
 innsyn:
   vedlegg:

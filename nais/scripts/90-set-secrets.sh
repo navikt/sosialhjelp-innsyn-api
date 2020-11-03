@@ -4,3 +4,4 @@ export SRVSOSIALHJELP_INNSYN_API_PASSWORD=$(cat /serviceuser/srvsosial-inn-fss/p
 
 export SOSIALHJELP_INNSYN_API_STSTOKEN_APIKEY_PASSWORD=$(cat /apigw/securitytokenservicetoken/x-nav-apiKey)
 export SOSIALHJELP_INNSYN_API_NORG2_APIKEY_PASSWORD=$(cat /apigw/norg2/x-nav-apiKey)
+export SOSIALHJELP_INNSYN_API_PDL_APIKEY_PASSWORD=$(cat /apigw/pdl-api/x-nav-apiKey)

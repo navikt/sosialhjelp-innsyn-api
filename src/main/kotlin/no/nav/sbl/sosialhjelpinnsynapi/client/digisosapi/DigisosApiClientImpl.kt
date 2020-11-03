@@ -10,6 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.BEARER
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
+import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
@@ -73,7 +74,7 @@ class DigisosApiClientImpl(
 
     // Brukes for å laste opp Pdf-er fra test-fagsystem i q-miljø
     override fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String> {
-        val headers = HttpHeaders()
+        val headers = forwardHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         headers.set(AUTHORIZATION, BEARER + idPortenService.getToken().token)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
@@ -131,7 +132,7 @@ class DigisosApiClientImpl(
     }
 
     private fun headers(): HttpHeaders {
-        val headers = HttpHeaders()
+        val headers = forwardHeaders()
         val accessToken = idPortenService.getToken()
         headers.accept = Collections.singletonList(MediaType.ALL)
         headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)

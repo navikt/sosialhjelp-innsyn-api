@@ -1,7 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.rest
 
-
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
+import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger.UtbetalingerService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,12 +19,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class UtbetalingerController(
-        private val utbetalingerService: UtbetalingerService
+        private val utbetalingerService: UtbetalingerService,
+        private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/utbetalinger")
     fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
-        // Gitt innlogget bruker
+        tilgangskontrollService.sjekkTilgang()
+
         try {
             return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(token, month))
         } catch (e: FiksClientException) {
@@ -38,6 +40,8 @@ class UtbetalingerController(
 
     @GetMapping("/utbetalinger/exists")
     fun getUtbetalingExists(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "12") month: Int): ResponseEntity<Boolean> {
+        tilgangskontrollService.sjekkTilgang()
+
         try {
             return ResponseEntity.ok().body(utbetalingerService.utbetalingExists(token, month))
         } catch (e: FiksClientException) {

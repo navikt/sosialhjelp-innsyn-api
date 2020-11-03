@@ -2,6 +2,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
@@ -39,7 +40,7 @@ class UtbetalingerService(
 
         val requestAttributes = RequestContextHolder.getRequestAttributes()
 
-        val alleUtbetalinger = runBlocking(Dispatchers.IO) {
+        val alleUtbetalinger = runBlocking(Dispatchers.IO + MDCContext()) {
             digisosSaker
                     .filter { isDigisosSakNewerThanMonths(it, months) }
                     .flatMapParallel {

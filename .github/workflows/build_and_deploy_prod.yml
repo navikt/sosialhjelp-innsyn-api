@@ -74,6 +74,13 @@ jobs:
       - name: Create docker image tags
         run: |
           echo "DOCKER_TAG=${{ env.DOCKER_IMAGE }}:${{ env.ARTIFACT_VERSION }}" >> $GITHUB_ENV
+<      - name: Build docker image
+        if: env.IS_FIRST_RUN == 'true'
+        run: docker build -t ${{ env.DOCKER_TAG }} .
+      - name: Push docker image
+        if: env.IS_FIRST_RUN == 'true'
+        run: |
+          docker push ${{ env.DOCKER_TAG }}
       - name: Create tag and release
         if: env.IS_FIRST_RUN == 'true'
         uses: actions/create-release@v1
@@ -83,13 +90,6 @@ jobs:
           tag_name: ${{ env.ARTIFACT_VERSION }}
           release_name: ${{ env.ARTIFACT_VERSION }}
           commitish: ${{ github.sha }}
-      - name: Build docker image
-        if: env.IS_FIRST_RUN == 'true'
-        run: docker build -t ${{ env.DOCKER_TAG }} .
-      - name: Push docker image
-        if: env.IS_FIRST_RUN == 'true'
-        run: |
-          docker push ${{ env.DOCKER_TAG }}
       - name: output docker image tag
         id: docker-tag
         run: |

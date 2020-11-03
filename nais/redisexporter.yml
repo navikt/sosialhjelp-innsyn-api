@@ -27,5 +27,5 @@ spec:
       value: sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local:6379
     - name: REDIS_EXPORTER_LOG_FORMAT
       value: json
-    envFrom:
-      - secret: redis-password-innsyn-api
+  envFrom:
+    - secret: redis-password-innsyn-api

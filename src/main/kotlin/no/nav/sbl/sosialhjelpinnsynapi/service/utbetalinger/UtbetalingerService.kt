@@ -11,11 +11,11 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallel
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
-import no.nav.sbl.sosialhjelpinnsynapi.utils.setRequestAttributes
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.YearMonth

@@ -16,7 +16,7 @@ class ClamAvVirusScanner(
     @Throws(OpplastingException::class)
     override fun scan(filnavn: String?, data: ByteArray, digisosId: String) {
         if (connection.isEnabled && connection.isInfected(filnavn, data, digisosId)) {
-            throw OpplastingException("Fant virus i fil forsøkt opplastet til digisosId=$digisosId", null)
+            throw OpplastingException("Fant virus i fil forsøkt opplastet", null)
         } else if (!connection.isEnabled) {
             log.warn("Virusscanning er ikke aktivert")
         }

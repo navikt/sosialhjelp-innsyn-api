@@ -38,7 +38,7 @@ class OppgaveService(
                     )
                 }
                 .sortedBy { it.innsendelsesfrist }
-        log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver for digisosId=$fiksDigisosId")
+        log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver")
         return oppgaveResponseList
     }
 

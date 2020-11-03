@@ -57,7 +57,7 @@ class KrypteringServiceImpl(
                     kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
                     log.debug("Ferdig med kryptering, digisosId=$digisosId")
                 } catch (e: Exception) {
-                    log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream, digisosId=$digisosId", e)
+                    log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 } finally {
                     try {
@@ -65,7 +65,7 @@ class KrypteringServiceImpl(
                         pipedOutputStream.close()
                         log.debug("OutputStream for kryptering er lukket, digisosId=$digisosId")
                     } catch (e: IOException) {
-                        log.error("Lukking av Outputstream for kryptering feilet, digisosId=$digisosId", e)
+                        log.error("Lukking av Outputstream for kryptering feilet", e)
                     }
                 }
             }, executor)

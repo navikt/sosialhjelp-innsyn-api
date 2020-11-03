@@ -40,7 +40,7 @@ class HendelseService(
         val responseList = model.historikk
                 .sortedBy { it.tidspunkt }
                 .map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
-        log.info("Hentet historikk med ${responseList.size} hendelser for digisosId=$fiksDigisosId")
+        log.info("Hentet historikk med ${responseList.size} hendelser")
         return responseList
     }
 

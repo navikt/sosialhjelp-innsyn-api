@@ -67,9 +67,9 @@ class VedleggService(
                                 val dokumentInfoList:List<DokumentInfo>
                                 if(filIndex > filtrerteEttersendelsesVedlegg.size) {
                                     log.error(
-                                            "Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId " +
+                                            "Det er mismatch mellom nedlastede filer og metadata. " +
                                                     "Det er flere filer enn vi har Metadata! " +
-                                                    "Filer: ${filIndex} Metadata: ${filtrerteEttersendelsesVedlegg.size}")
+                                                    "Filer: $filIndex Metadata: ${filtrerteEttersendelsesVedlegg.size}")
                                     dokumentInfoList = vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }
                                 } else {
                                     dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)

@@ -56,7 +56,7 @@ class VedleggController(
         files.removeIf { it.originalFilename == "metadata.json" }
 
         if (files.isEmpty()) {
-            throw IllegalStateException("Ingen filer i forsendelse på digisosId=$fiksDigisosId")
+            throw IllegalStateException("Ingen filer i forsendelse")
         }
         val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
         return ResponseEntity.ok(vedleggOpplastingResponseList)

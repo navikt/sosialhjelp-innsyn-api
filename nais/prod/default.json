@@ -1,4 +1,5 @@
 {
+  "applicationName": "sosialhjelp-innsyn-api",
   "namespace": "default",
   "ingress": [
     "https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",

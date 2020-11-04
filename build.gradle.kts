@@ -7,7 +7,7 @@ group = "no.nav.sbl"
 
 object Versions {
     const val kotlin = "1.4.10"
-    const val coroutines = "1.3.9"
+    const val coroutines = "1.4.0"
     const val springBoot = "2.3.5.RELEASE"
     const val sosialhjelpCommon = "1.b216764"
     const val logback = "1.2.3"
@@ -79,6 +79,7 @@ dependencies {
 
 //    Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.coroutines}")
 
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")

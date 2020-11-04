@@ -20,7 +20,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           RESOURCE: nais/nais.yaml
           CLUSTER: dev-sbs
-          VARS: nais/dev/dev-intern.json
+          VARS: nais/dev/intern.json
           REF: ${{ steps.get-latest-tag.outputs.tag }}
           PRINT_PAYLOAD: true
           IMAGE: ${{ env.IMAGE }}

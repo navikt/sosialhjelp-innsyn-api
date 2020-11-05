@@ -2,7 +2,9 @@
   "applicationName": "sosialhjelp-innsyn-api-intern",
   "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api-intern.dev.nav.no/sosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api-intern.dev.nav.no/sosialhjelp/innsyn-api",
+    "https://www-q1.dev.nav.no/sosialhjelp/innsyn-api",
+    "https://www-q1.nav.no/sosialhjelp/innsyn-api"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",

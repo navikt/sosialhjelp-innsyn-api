@@ -1,15 +1,15 @@
 {
-  "applicationName": "sosialhjelp-innsyn-api",
-  "namespace": "q1",
+  "applicationName": "sosialhjelp-innsyn-api-intern",
+  "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api-q1.dev-sbs.nais.io/sosialhjelp/innsyn-api",
+    "https://sosialhjelp-innsyn-api-intern.dev.nav.no/sosialhjelp/innsyn-api",
     "https://www-q1.dev.nav.no/sosialhjelp/innsyn-api",
     "https://www-q1.nav.no/sosialhjelp/innsyn-api"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
     "/var/run/secrets/nais.io/appdynamics": "/apikey/appdynamics/dev",
-    "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q1",
+    "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api-intern/teamdigisos",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
     "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q1",
     "/apigw/norg2": "/apikey/apigw/dev/norg2.api.v1/sosialhjelp-innsyn-api_q1",

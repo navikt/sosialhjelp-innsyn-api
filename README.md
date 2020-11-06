@@ -8,6 +8,14 @@ Backend-app som skal gi innsyn i egen sosialhjelp sak.
 Henvendelser kan sendes via Slack i kanalen #digisos.
 
 ## Hvordan komme i gang
+
+### Manuell deploy:
+Ved bruk av [cli](https://github.com/navikt/sosialhjelp-ci):
+- `deploy labs-gcp`
+- `deploy dev-gcp`
+- `deploy q0`
+- `deploy dev-sbs-intern`
+
 ### Hente github-package-registry pakker fra NAV-IT
 Enkelte pakker brukt i repoet er lastet opp til Github Package Registry, som krever autentisering for å kunne lastes ned.
 Ved bruk av f.eks Gradle, kan det løses slik:

@@ -43,7 +43,7 @@ client:
   fiks_integrasjonid_kommune: ${INTEGRASJONSID_FIKS_KOMMUNE:id2}
   fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS:pw1}
   fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE:pw2}
-  norg_endpoint_url: ${NORG_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/norg/norg2/api/v1}
+  norg_endpoint_url: ${NORG_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/norg_endpoint_url}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/pdl_endpoint_url}
   sts_token_endpoint_url: ${STS_TOKEN_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/sts_token_endpoint_url}
 

@@ -2,6 +2,7 @@
   "applicationName": "sosialhjelp-innsyn-api",
   "namespace": "q1",
   "ingress": [
+    "https://sosialhjelp-innsyn-api-q1.dev-sbs.nais.io/sosialhjelp/innsyn-api"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",

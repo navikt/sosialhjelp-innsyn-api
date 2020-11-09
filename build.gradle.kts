@@ -12,7 +12,7 @@ object Versions {
     const val sosialhjelpCommon = "1.b216764"
     const val logback = "1.2.3"
     const val logstash = "6.3"
-    const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
+    const val filformat = "1.2020.11.05-09.32-14af05dea965"
     const val micrometerRegistry = "1.5.6"
     const val prometheus = "0.9.0"
     const val tokenValidation = "1.3.1"

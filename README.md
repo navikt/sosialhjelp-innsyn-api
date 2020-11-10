@@ -13,7 +13,7 @@ Henvendelser kan sendes via Slack i kanalen #digisos.
 Ved bruk av [cli](https://github.com/navikt/sosialhjelp-ci):
 - `deploy labs-gcp`
 - `deploy dev-gcp`
-- `deploy q0`
+- `deploy dev-sbs`
 - `deploy dev-sbs-intern`
 
 ### Hente github-package-registry pakker fra NAV-IT

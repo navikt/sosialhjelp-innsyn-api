@@ -13,7 +13,9 @@ jobs:
       is_first_run: ${{ steps.check-tag.outputs.first_run }}
       artifact_version: ${{ steps.artifact-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Create artifact version
         id: artifact-version
         uses: navikt/sosialhjelp-ci/actions/create-artifact-version@master
@@ -45,7 +47,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11.x'
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
           path: |
@@ -100,7 +102,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}

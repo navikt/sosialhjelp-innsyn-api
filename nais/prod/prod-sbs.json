@@ -1,14 +1,12 @@
 {
   "applicationName": "sosialhjelp-innsyn-api",
-  "namespace": "default",
+  "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
-    "https://sosialhjelp-innsyn-api.prod-sbs.nais.io/sosialhjelp/innsyn-api",
-    "https://www.nav.no/sosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api-ny.nais.oera.no/sosialhjelp/innsyn-api"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",
-    "/var/run/secrets/nais.io/vault": "/kv/prod/sbs/sosialhjelp-innsyn-api/default",
+    "/var/run/secrets/nais.io/vault": "/kv/prod/sbs/sosialhjelp-innsyn-api/teamdigisos",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss",
     "/apigw/securitytokenservicetoken": "/apikey/apigw/prod/security-token-service-token/sosialhjelp-innsyn-api",
     "/apigw/norg2": "/apikey/apigw/prod/norg2.api.v1/sosialhjelp-innsyn-api",

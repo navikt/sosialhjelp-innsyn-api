@@ -68,3 +68,4 @@ spec:
 {{/each}}
   envFrom:
     - configmap: loginservice-idporten
+    - secret: redis-password-innsyn-api

@@ -2,8 +2,7 @@
   "applicationName": "sosialhjelp-innsyn-api",
   "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
-    "https://www.nav.no/sosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api-ny.nais.oera.no/sosialhjelp/innsyn-api"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",

@@ -124,6 +124,8 @@ internal class VilkarTest {
         val model = service.createModel(mockDigisosSak, "token")
 
         assertThat(model).isNotNull
+        assertThat(model.saker).hasSize(1)
+        assertThat(model.historikk).hasSize(5)
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
         assertThat(utbetaling.vilkar).hasSize(0)

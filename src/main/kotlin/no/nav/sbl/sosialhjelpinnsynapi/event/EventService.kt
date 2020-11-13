@@ -147,14 +147,10 @@ class EventService(
                 .thenComparator { a, b -> compareHendelseByType(a.type, b.type) }
 
         private fun compareHendelseByType(a: JsonHendelse.Type, b: JsonHendelse.Type): Int {
-            if (a == JsonHendelse.Type.UTBETALING) {
-                if (b == JsonHendelse.Type.VILKAR || b == JsonHendelse.Type.DOKUMENTASJONKRAV) {
-                    return -1
-                }
-            } else if (b == JsonHendelse.Type.UTBETALING) {
-                if (a == JsonHendelse.Type.VILKAR || a == JsonHendelse.Type.DOKUMENTASJONKRAV) {
-                    return 1
-                }
+            if (a == JsonHendelse.Type.UTBETALING && (b == JsonHendelse.Type.VILKAR || b == JsonHendelse.Type.DOKUMENTASJONKRAV)) {
+                return -1
+            } else if (b == JsonHendelse.Type.UTBETALING && (a == JsonHendelse.Type.VILKAR || a == JsonHendelse.Type.DOKUMENTASJONKRAV)) {
+                return 1
             }
             return 0
         }

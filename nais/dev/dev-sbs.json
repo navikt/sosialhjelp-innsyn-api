@@ -1,14 +1,15 @@
 {
-  "namespace": "q0",
+  "applicationName": "sosialhjelp-innsyn-api",
+  "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api-q0.dev-sbs.nais.io/sosialhjelp/innsyn-api",
+    "https://sosialhjelp-innsyn-api.dev.nav.no/sosialhjelp/innsyn-api",
     "https://www-q0.dev.nav.no/sosialhjelp/innsyn-api",
     "https://www-q0.nav.no/sosialhjelp/innsyn-api"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
     "/var/run/secrets/nais.io/appdynamics": "/apikey/appdynamics/dev",
-    "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api/q0",
+    "/var/run/secrets/nais.io/vault": "/kv/preprod/sbs/sosialhjelp-innsyn-api/teamdigisos",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
     "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q0",
     "/apigw/norg2": "/apikey/apigw/dev/norg2.api.v1/sosialhjelp-innsyn-api_q0",
@@ -25,7 +26,7 @@
     "ID_PORTEN_SCOPE": "ks:fiks",
     "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "300",
-    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.default.svc.nais.local",
+    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local",
     "VILKAR_ENABLED": "true",
     "DOKUMENTASJONKRAV_ENABLED": "true",
     "SPRING_PROFILES_ACTIVE": "dev-sbs,log-kibana",

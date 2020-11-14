@@ -168,7 +168,7 @@ class FiksClientImpl(
     }
 
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
-        log.info("Starter sending av ettersendelse med ${files.size} filer til digisosId=$digisosId")
+        log.info("Starter sending av ettersendelse med ${files.size} filer")
         val headers = fiksHeaders(clientProperties, token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 
@@ -195,7 +195,7 @@ class FiksClientImpl(
                     String::class.java,
                     mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
 
-            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue}) digisosId=$digisosId")
+            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue})")
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr

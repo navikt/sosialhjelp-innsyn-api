@@ -1,15 +1,21 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.utbetalinger
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.flatMapParallel
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.YearMonth
@@ -32,10 +38,16 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val alleUtbetalinger: List<ManedUtbetaling> =
-                    digisosSaker
-                            .filter { isDigisosSakNewerThanMonths(it, months) }
-                            .flatMap { manedsutbetalinger(token, it) }
+        val requestAttributes = RequestContextHolder.getRequestAttributes()
+
+        val alleUtbetalinger = runBlocking(Dispatchers.IO + MDCContext()) {
+            digisosSaker
+                    .filter { isDigisosSakNewerThanMonths(it, months) }
+                    .flatMapParallel {
+                        setRequestAttributes(requestAttributes)
+                        manedsutbetalinger(token, it)
+                    }
+        }
 
         return alleUtbetalinger
                 .sortedByDescending { it.utbetalingsdato }
@@ -50,7 +62,7 @@ class UtbetalingerService(
                 }
     }
 
-    private fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {
+    private suspend fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {
         val model = eventService.hentAlleUtbetalinger(token, digisosSak)
         return model.utbetalinger
                 .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
@@ -96,8 +108,8 @@ class UtbetalingerService(
             log.info("Fant ingen søknader for bruker")
             return false
         }
-
         return digisosSaker
+                .asSequence()
                 .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
                 .any { digisosSak ->
                     val model = eventService.hentAlleUtbetalinger(token, digisosSak)

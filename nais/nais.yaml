@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: sosialhjelp-innsyn-api
+  name: {{applicationName}}
   namespace: {{namespace}}
   labels:
     team: teamdigisos
@@ -68,3 +68,4 @@ spec:
 {{/each}}
   envFrom:
     - configmap: loginservice-idporten
+    - secret: redis-password-innsyn-api

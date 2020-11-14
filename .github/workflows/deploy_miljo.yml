@@ -22,7 +22,7 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          RESOURCE: nais.yaml
+          RESOURCE: nais/nais.yaml
           CLUSTER: dev-sbs
           VARS: nais/dev/${{ github.event.client_payload.MILJO }}.json
           REF: ${{ github.event.client_payload.TAG }}

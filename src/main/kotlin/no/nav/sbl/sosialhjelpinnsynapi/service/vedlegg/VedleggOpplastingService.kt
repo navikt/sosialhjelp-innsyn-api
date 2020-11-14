@@ -99,7 +99,7 @@ class VedleggOpplastingService(
 
     fun createEttersendelsePdf(metadata: MutableList<OpplastetVedleggMetadata>, digisosId: String, token: String): FilForOpplasting {
         try {
-            log.info("Starter generering av ettersendelse.pdf for digisosId=$digisosId")
+            log.info("Starter generering av ettersendelse.pdf")
             val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, token, true)
             val ettersendelsePdf = ettersendelsePdfGenerator.generate(metadata, currentDigisosSak.sokerFnr)
             return FilForOpplasting("ettersendelse.pdf", "application/pdf", ettersendelsePdf.size.toLong(), ettersendelsePdf.inputStream())
@@ -201,7 +201,7 @@ class VedleggOpplastingService(
             metadata.filer.forEach {
                 val file = files[filesIndex]
                 val valideringstatus = validateFil(file, fiksDigisosId)
-                if (valideringstatus != "OK") log.warn("Opplasting av fil $filesIndex av ${files.size} til ettersendelse feilet. Det var ${metadataListe.size} oppgaveElement. Status: $valideringstatus, digisosId=$fiksDigisosId")
+                if (valideringstatus != "OK") log.warn("Opplasting av fil $filesIndex av ${files.size} til ettersendelse feilet. Det var ${metadataListe.size} oppgaveElement. Status: $valideringstatus")
                 vedleggOpplastingResponse.add(VedleggOpplastingResponse(file.originalFilename, valideringstatus))
                 filesIndex++
             }

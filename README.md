@@ -8,6 +8,14 @@ Backend-app som skal gi innsyn i egen sosialhjelp sak.
 Henvendelser kan sendes via Slack i kanalen #digisos.
 
 ## Hvordan komme i gang
+
+### Manuell deploy:
+Ved bruk av [cli](https://github.com/navikt/sosialhjelp-ci):
+- `deploy labs-gcp`
+- `deploy dev-gcp`
+- `deploy dev-sbs`
+- `deploy dev-sbs-intern`
+
 ### Hente github-package-registry pakker fra NAV-IT
 Enkelte pakker brukt i repoet er lastet opp til Github Package Registry, som krever autentisering for å kunne lastes ned.
 Ved bruk av f.eks Gradle, kan det løses slik:
@@ -67,7 +75,8 @@ Dette prosjektet bygger og deployer vha Github Actions
 Vi bruker Redis som cache.
 Dette gjøres manuelt med kubectl både i preprod og prod. Se [nais/doc](https://github.com/nais/doc/blob/master/content/redis.md)
 1. `kubectl config use-context dev-sbs`
-2. `kubectl apply -f redis-config.yml`
+2. `kubectl apply -f nais/redis-config.yml`
+3. `kubectl apply -f nais/redisexporter.yml`
 
 For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsvare med portnummer i properties)
 1. `docker pull redis` (laster ned image fra docker hub)

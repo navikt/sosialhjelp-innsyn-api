@@ -23,7 +23,7 @@ internal class VirusScanConnection(
             log.info("Scanner ${data.size} bytes for virus")
             val scanResults = putForObject(config.getUri(), data)
             if (scanResults!!.size != 1) {
-                log.warn("Virusscan returnerte uventet respons med lengde ${scanResults.size}, forventet lengde er 1. digisosId=$digisosId")
+                log.warn("Virusscan returnerte uventet respons med lengde ${scanResults.size}, forventet lengde er 1.")
                 return false
             }
             val scanResult = scanResults[0]
@@ -32,10 +32,10 @@ internal class VirusScanConnection(
                 log.info("Ingen virus i fil (${data.size} bytes)")
                 return false
             }
-            log.warn("Fant virus med status ${scanResult.result} i fil forsøkt opplastet til digisosId=$digisosId")
+            log.warn("Fant virus med status ${scanResult.result} i fil forsøkt opplastet")
             return true
         } catch (e: Exception) {
-            log.warn("Kunne ikke scanne fil opplastet til digisosId=$digisosId", e)
+            log.warn("Kunne ikke scanne fil opplastet", e)
             return false
         }
 

@@ -6,6 +6,7 @@ import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.ManedUtbetaling
+import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingerResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtbetalingsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
@@ -67,6 +68,7 @@ class UtbetalingerService(
         return model.utbetalinger
                 .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
                 .map { utbetaling ->
+                    utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(digisosSak.kommunenummer)
                     ManedUtbetaling(
                             tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
                             belop = utbetaling.belop.toDouble(),
@@ -120,6 +122,20 @@ class UtbetalingerService(
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)
 
     private fun monthToString(month: Int) = DateFormatSymbols(Locale.forLanguageTag("no-NO")).months[month - 1]
+
+    private fun Utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(kommunenummer: String) {
+        when {
+            status == UtbetalingsStatus.UTBETALT && utbetalingsDato == null -> {
+                log.info("Utbetaling ($referanse) med status=${UtbetalingsStatus.UTBETALT} har ikke utbetalingsDato. Kommune=$kommunenummer")
+            }
+            status == UtbetalingsStatus.PLANLAGT_UTBETALING && forfallsDato == null -> {
+                log.info("Utbetaling ($referanse) med status=${UtbetalingsStatus.PLANLAGT_UTBETALING} har ikke forfallsDato. Kommune=$kommunenummer")
+            }
+            status == UtbetalingsStatus.STOPPET && (forfallsDato == null || utbetalingsDato == null) -> {
+                log.info("Utbetaling ($referanse) med status=${UtbetalingsStatus.STOPPET} mangler forfallsDato eller utbetalingsDato. Kommune=$kommunenummer")
+            }
+        }
+    }
 
     companion object {
         private val log by logger()

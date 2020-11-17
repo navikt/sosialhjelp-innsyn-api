@@ -21,10 +21,10 @@ fun isPdf(inputStream: InputStream): Boolean {
 }
 
 fun isImage(inputStream: InputStream): Boolean {
-    val type1 = Tika().detect(inputStream.readAllBytes())
-    log.info("VedleggUtils.isImage bytearray - mimetype={}", type1)
-    val type = Tika().detect(inputStream)
-    log.info("VedleggUtils.isImage inputstream - mimetype={}", type)
+    val type = Tika().detect(inputStream.readAllBytes())
+    log.info("VedleggUtils.isImage bytearray - mimetype={}", type)
+//    val type = Tika().detect(inputStream)
+//    log.info("VedleggUtils.isImage inputstream - mimetype={}", type)
     return type == "image/png" || type == "image/jpeg"
 }
 

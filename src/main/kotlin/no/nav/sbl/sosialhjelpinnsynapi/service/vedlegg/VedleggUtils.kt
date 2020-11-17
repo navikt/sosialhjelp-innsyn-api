@@ -1,6 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg
 
 import org.apache.tika.Tika
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.security.MessageDigest
 
@@ -20,5 +22,8 @@ fun isPdf(inputStream: InputStream): Boolean {
 
 fun isImage(inputStream: InputStream): Boolean {
     val type = Tika().detect(inputStream)
+    log.info("VedleggUtils.isImage - mimetype={}", type)
     return type == "image/png" || type == "image/jpeg"
 }
+
+private val log: Logger = LoggerFactory.getLogger(VedleggService::class.java)

@@ -23,7 +23,7 @@ object Versions {
     const val commonsCodec = "1.14"
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
-    const val tika = "1.23"
+    const val tika = "1.24.1"
     const val pdfBox = "2.0.19"
     const val fiksKryptering = "1.0.9"
     const val redisMock = "0.1.16"

@@ -25,7 +25,7 @@
     "ID_PORTEN_CLIENT_ID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
     "ID_PORTEN_SCOPE": "ks:fiks",
     "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
-    "CACHE_TIME_TO_LIVE_SECONDS": "300",
+    "CACHE_TIME_TO_LIVE_SECONDS": "10",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local",
     "VILKAR_ENABLED": "true",
     "DOKUMENTASJONKRAV_ENABLED": "true",

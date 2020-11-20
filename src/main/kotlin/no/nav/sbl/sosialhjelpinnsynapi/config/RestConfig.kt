@@ -12,6 +12,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 
 @Configuration
 class RestConfig {
@@ -33,6 +34,8 @@ class RestConfig {
     fun pdlRestTemplate(builder: RestTemplateBuilder): RestTemplate =
             builder
                     .basicAuthentication(System.getenv(SRVSOSIALHJELP_INNSYN_API_USERNAME), System.getenv(SRVSOSIALHJELP_INNSYN_API_PASSWORD), StandardCharsets.UTF_8)
+                    .setConnectTimeout(Duration.ofSeconds(15))
+                    .setReadTimeout(Duration.ofMinutes(1))
                     .defaultHeader(HEADER_NAV_APIKEY, System.getenv(PDL_APIKEY))
                     .build()
 

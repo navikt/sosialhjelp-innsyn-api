@@ -47,6 +47,7 @@ internal class UtbetalingerServiceTest {
         clearAllMocks()
 
         coEvery { mockDigisosSak.fiksDigisosId } returns digisosId
+        coEvery { mockDigisosSak.kommunenummer } returns "kommunenr"
         coEvery { mockDigisosSak.sistEndret } returns DateTime.now().millis
     }
 
@@ -332,8 +333,10 @@ internal class UtbetalingerServiceTest {
         val id1 = "some id"
         val id2 = "other id"
         coEvery { mockDigisosSak.fiksDigisosId } returns id1
+        coEvery { mockDigisosSak.kommunenummer } returns "kommune1"
         coEvery { mockDigisosSak.sistEndret } returns DateTime.now().millis
         coEvery { mockDigisosSak2.fiksDigisosId } returns id2
+        coEvery { mockDigisosSak2.kommunenummer } returns "kommune2"
         coEvery { mockDigisosSak2.sistEndret } returns DateTime.now().millis
         coEvery { eventService.hentAlleUtbetalinger(token, mockDigisosSak) } returns model
         coEvery { eventService.hentAlleUtbetalinger(token, mockDigisosSak2) } returns model2

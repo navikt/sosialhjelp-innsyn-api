@@ -94,4 +94,3 @@ TestApplication og profile=mock,log-console
 #### *med* integrasjon til Fiks og login-api
 TestApplication og profile=local,log-console. \
 Da må følgende env-variabler settes (hentes fra vault): FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI, TRUSTSTORE_TYPE, TRUSTSTORE_FILEPATH og TESTBRUKER_NATALIE.
-

@@ -12,13 +12,13 @@ object Versions {
     const val sosialhjelpCommon = "1.b216764"
     const val logback = "1.2.3"
     const val logstash = "6.3"
-    const val filformat = "1.2020.01.09-15.55-f18d10d7d76a"
+    const val filformat = "1.2020.11.05-09.32-14af05dea965"
     const val micrometerRegistry = "1.5.6"
     const val prometheus = "0.9.0"
     const val tokenValidation = "1.3.1"
     const val jackson = "2.11.3"
     const val guava = "30.0-jre"
-    const val swagger = "2.9.2"
+    const val springfox = "3.0.0"
     const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.6"
@@ -114,9 +114,8 @@ dependencies {
 //    Token-validering
     implementation("no.nav.security:token-validation-spring:${Versions.tokenValidation}")
 
-//    Swagger
-    implementation("io.springfox:springfox-swagger2:${Versions.swagger}")
-    implementation("io.springfox:springfox-swagger-ui:${Versions.swagger}")
+//    Springfox/swagger
+    implementation("io.springfox:springfox-boot-starter:${Versions.springfox}")
 
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")

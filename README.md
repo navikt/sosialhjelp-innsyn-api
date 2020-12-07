@@ -72,12 +72,23 @@ Dette prosjektet bygger og deployer vha Github Actions
 - Denne må godkjennes og merges før man kan opprette secrets i din apps katalog `.../app/namespace`.
 
 ### Redis
-Vi bruker Redis som cache.
-Dette gjøres manuelt med kubectl både i preprod og prod. Se [nais/doc](https://github.com/nais/doc/blob/master/content/redis.md)
-1. `kubectl config use-context dev-sbs`
-2. `kubectl apply -f nais/redis-config.yml`
-3. `kubectl apply -f nais/redisexporter.yml`
+Vi bruker Redis som cache. Se [https://doc.nais.io/persistence/redis/](https://doc.nais.io/persistence/redis/)
 
+#### Autodeploy
+Endringer i `redis-config.yml` eller `redisexporter.yml` trigger autodeploy til dev eller prod.
+
+#### Manuell deploy
+Dette kan gjøres manuelt med kubectl både i dev og prod ved bruk av `kubectl apply` i ønsket cluster
+1. `kubectl apply -f nais/redis-config.yml`
+2. `kubectl apply -f nais/redisexporter.yml`
+
+## Lokal kjøring
+#### *uten* integrasjon til Fiks og login-api
+TestApplication og profile=mock,log-console
+#### *med* integrasjon til Fiks og login-api
+TestApplication og profile=local,log-console. \
+Da må følgende env-variabler settes (hentes fra vault): FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI, TRUSTSTORE_TYPE, TRUSTSTORE_FILEPATH og TESTBRUKER_NATALIE.
+#### Med redis
 For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsvare med portnummer i properties)
 1. `docker pull redis` (laster ned image fra docker hub)
 2. `docker run --name <myredis> -d -p 6379:6379 redis` 
@@ -86,11 +97,3 @@ For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsv
 (kommandolinjeverktøy mot redis for å sjekke innholdet.)
 
 Propertyen `innsyn.cache.redisMocked` styrer hvorvidt en _in-memory_ Redis instans spinnes opp og tas i bruk. Denne er satt til `true` ved bruk av spring-profilene `mock`, `local` og `test`.
-
-
-## Lokal kjøring
-#### *uten* integrasjon til Fiks og login-api
-TestApplication og profile=mock,log-console
-#### *med* integrasjon til Fiks og login-api
-TestApplication og profile=local,log-console. \
-Da må følgende env-variabler settes (hentes fra vault): FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI, TRUSTSTORE_TYPE, TRUSTSTORE_FILEPATH og TESTBRUKER_NATALIE.

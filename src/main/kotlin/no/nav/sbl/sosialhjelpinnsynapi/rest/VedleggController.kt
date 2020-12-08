@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggOpplastingService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.hentDokumentlagerUrl
+import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders
@@ -39,6 +40,9 @@ class VedleggController(
         private val clientProperties: ClientProperties,
         private val tilgangskontrollService: TilgangskontrollService
 ) {
+    companion object {
+        private val log by logger()
+    }
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -47,6 +51,7 @@ class VedleggController(
                     @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
                     request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
+        log.warn("DEGBUG pcn: VedleggController.sendVedlegg() fiksDigisosId: $fiksDigisosId")
         tilgangskontrollService.sjekkTilgang()
 
         sjekkXsrfToken(fiksDigisosId, request)

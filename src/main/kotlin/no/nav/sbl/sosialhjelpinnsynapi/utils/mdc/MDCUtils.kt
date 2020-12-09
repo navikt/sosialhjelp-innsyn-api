@@ -10,6 +10,8 @@ object MDCUtils {
     const val PATH = "path"
     const val USER_AGENT = "userAgent"
     const val REFERER = "request_Referer"
+    const val FAGSYSTEM = "fagsystem"
+    const val KOMMUNE = "kommune"
 
     private val RANDOM = SecureRandom()
 
@@ -27,6 +29,8 @@ object MDCUtils {
         MDC.remove(PATH)
         MDC.remove(USER_AGENT)
         MDC.remove(REFERER)
+        MDC.remove(FAGSYSTEM)
+        MDC.remove(KOMMUNE)
     }
 
     fun generateCallId(): String {
@@ -34,6 +38,10 @@ object MDCUtils {
         val systemTime = System.currentTimeMillis()
 
         return "CallId_${systemTime}_${randomNr}"
+    }
+
+    fun generateSystem(fagsystem: String, fagsystemVersjon: String): String {
+        return "${fagsystem}_${fagsystemVersjon}"
     }
 
 }

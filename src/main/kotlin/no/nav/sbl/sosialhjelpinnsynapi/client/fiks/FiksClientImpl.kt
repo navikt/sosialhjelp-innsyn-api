@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.fiksHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.feilmeldingUtenFnr
 import no.nav.sbl.sosialhjelpinnsynapi.utils.lagNavEksternRefId
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
+import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sbl.sosialhjelpinnsynapi.utils.toFiksErrorMessage
 import no.nav.sbl.sosialhjelpinnsynapi.utils.typeRef
@@ -47,10 +48,12 @@ class FiksClientImpl(
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
-        return when {
+        val digisosSak = when {
             useCache -> hentDigisosSakFraCache(digisosId, token)
             else -> hentDigisosSakFraFiks(digisosId, token)
         }
+        MDCUtils.put(MDCUtils.KOMMUNE, digisosSak.kommunenummer)
+        return digisosSak
     }
 
     private fun hentDigisosSakFraCache(digisosId: String, token: String): DigisosSak {

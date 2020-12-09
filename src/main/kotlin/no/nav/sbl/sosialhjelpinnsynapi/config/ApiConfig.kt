@@ -14,6 +14,8 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 
+//Denne fører til 403 (HttpStatus.FORBIDDEN) uten logg og feilmelding når den feiler.
+
 @Configuration
 @EnableWebSecurity
 @EnableWebMvc

@@ -11,6 +11,7 @@ spring:
 server:
   servlet:
     context-path: '/sosialhjelp/innsyn-api'
+  max-http-header-size: 16KB
 
 # Prometheus
 management:

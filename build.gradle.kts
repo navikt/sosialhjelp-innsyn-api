@@ -30,6 +30,7 @@ object Versions {
     const val lettuce = "5.3.5.RELEASE"
     const val jempbox = "1.8.16"
     const val jerseyMediaJaxb = "2.31"
+    const val jetty= "9.4.35.v20201120"
 
     //    Test only
     const val junitJupiter = "5.6.3"
@@ -89,6 +90,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.springBoot}")
+
+//    Jetty (overskrive versjoner fra Spring Boot pga sårbarheter)
+    implementation("org.eclipse.jetty:jetty-security:$Versions.jetty")
 
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")

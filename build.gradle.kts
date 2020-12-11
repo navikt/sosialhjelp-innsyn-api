@@ -85,14 +85,16 @@ dependencies {
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-jetty:${Versions.springBoot}")
+    constraints {
+        implementation("org.eclipse.jetty:jetty-security:${Versions.jetty}") {
+            because("Pga. jetty-security dratt inn via springBoot:2.3.5.RELEASE har sårbarhet. Denne kan fjernees når springBoot bruker jetty-security: 9.4.35.v20201120 eller nyere")
+        }
+    }
     implementation("org.springframework.boot:spring-boot-starter-security:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.springBoot}")
-
-//    Jetty (overskrive versjoner fra Spring Boot pga sårbarheter)
-    implementation("org.eclipse.jetty:jetty-security:$Versions.jetty")
 
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")

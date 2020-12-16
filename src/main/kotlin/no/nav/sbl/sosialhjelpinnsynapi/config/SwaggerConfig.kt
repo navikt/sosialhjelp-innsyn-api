@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.config
 
+import no.nav.sbl.sosialhjelpinnsynapi.utils.isRunningInProd
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -16,6 +17,9 @@ class SwaggerConfig {
 
     @Bean
     fun api(): Docket {
+        if (isRunningInProd()) {
+            throw Error("Swagger-bean blir forsøkt generert i prod. Stopper applikasjonen da dette er en sikkerhetsrisiko.")
+        }
         return Docket(OAS_30)
                 .select()
                 .apis(RequestHandlerSelectors.any())

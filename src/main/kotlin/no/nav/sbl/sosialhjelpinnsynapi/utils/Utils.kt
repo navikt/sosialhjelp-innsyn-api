@@ -109,7 +109,7 @@ fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
 }
 
 fun isRunningInProd(): Boolean {
-    return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "default"
+    return System.getenv(NAIS_CLUSTER_NAME) == "prod-sbs" && System.getenv(NAIS_NAMESPACE) == "teamdigisos"
 }
 
 fun <T : HttpStatusCodeException> T.toFiksErrorMessage(): ErrorMessage? {

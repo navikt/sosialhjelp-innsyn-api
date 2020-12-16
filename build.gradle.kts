@@ -30,6 +30,7 @@ object Versions {
     const val lettuce = "5.3.5.RELEASE"
     const val jempbox = "1.8.16"
     const val jerseyMediaJaxb = "2.31"
+    const val jetty= "9.4.35.v20201120"
 
     //    Test only
     const val junitJupiter = "5.6.3"
@@ -84,6 +85,11 @@ dependencies {
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-jetty:${Versions.springBoot}")
+    constraints {
+        implementation("org.eclipse.jetty:jetty-security:${Versions.jetty}") {
+            because("Pga. jetty-security dratt inn via springBoot:2.3.5.RELEASE har sårbarhet. Denne kan fjernees når springBoot bruker jetty-security: 9.4.35.v20201120 eller nyere")
+        }
+    }
     implementation("org.springframework.boot:spring-boot-starter-security:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")

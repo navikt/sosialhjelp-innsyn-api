@@ -15,7 +15,7 @@ object Versions {
     const val filformat = "1.2020.11.05-09.32-14af05dea965"
     const val micrometerRegistry = "1.5.6"
     const val prometheus = "0.9.0"
-    const val tokenValidation = "1.3.1"
+    const val tokenValidation = "1.3.2"
     const val jackson = "2.11.3"
     const val guava = "30.0-jre"
     const val springfox = "3.0.0"
@@ -63,6 +63,9 @@ java {
 configurations {
     "implementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
+        exclude(group = "javax.activation", module = "activation")
+        exclude(group = "javax.mail", module = "mailapi")
+        exclude(group = "javax.validation", module = "validation-api")
     }
     "testImplementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")

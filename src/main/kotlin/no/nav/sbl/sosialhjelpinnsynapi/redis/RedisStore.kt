@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 
 @Component
-class RedisStore (
+class RedisStore(
         redisClient: RedisClient
 ) {
 

@@ -11,6 +11,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
+import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveElement
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
@@ -46,6 +47,8 @@ internal class SaksOversiktControllerTest {
 
     private val oppgaveResponseMock: OppgaveResponse = mockk()
 
+    private val oppgaveElement1: OppgaveElement = mockk()
+
     @BeforeEach
     internal fun setUp() {
         clearAllMocks()
@@ -62,7 +65,7 @@ internal class SaksOversiktControllerTest {
         every { digisosSak2.sistEndret } returns 1000L
         every { digisosSak2.digisosSoker } returns mockk()
 
-        every { oppgaveResponseMock.oppgaveElementer.size } returns 1
+        every { oppgaveResponseMock.oppgaveElementer } returns listOf(oppgaveElement1)
 
         every { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
         every { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
@@ -110,8 +113,8 @@ internal class SaksOversiktControllerTest {
         every { model1.status } returns MOTTATT
         every { model2.status } returns UNDER_BEHANDLING
 
-        every { model1.oppgaver.isEmpty() } returns false
-        every { model2.oppgaver.isEmpty() } returns false
+        every { model1.oppgaver } returns mutableListOf(mockk())
+        every { model2.oppgaver } returns mutableListOf(mockk())
 
         every { sak1.tittel } returns "Livsopphold"
         every { sak1.saksStatus } returns SaksStatus.UNDER_BEHANDLING
@@ -145,7 +148,7 @@ internal class SaksOversiktControllerTest {
         every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
 
         every { model1.status } returns MOTTATT
-        every { model1.oppgaver.isEmpty() } returns true
+        every { model1.oppgaver } returns mutableListOf()
         every { model1.saker } returns mutableListOf()
 
         val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId, "token")

@@ -8,7 +8,7 @@ group = "no.nav.sbl"
 object Versions {
     const val kotlin = "1.4.21"
     const val coroutines = "1.4.2"
-    const val springBoot = "2.3.5.RELEASE"
+    const val springBoot = "2.3.7.RELEASE"
     const val sosialhjelpCommon = "1.b216764"
     const val logback = "1.2.3"
     const val logstash = "6.5"
@@ -88,11 +88,6 @@ dependencies {
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-jetty:${Versions.springBoot}")
-    constraints {
-        implementation("org.eclipse.jetty:jetty-security:${Versions.jetty}") {
-            because("Pga. jetty-security dratt inn via springBoot:2.3.5.RELEASE har sårbarhet. Denne kan fjernees når springBoot bruker jetty-security: 9.4.35.v20201120 eller nyere")
-        }
-    }
     implementation("org.springframework.boot:spring-boot-starter-security:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")

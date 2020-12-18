@@ -137,11 +137,6 @@ dependencies {
     implementation("com.natpryce:konfig:${Versions.konfig}")
     implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
 
-
-//    spesifikke versjoner oppgradert etter ønske fra snyk
-    implementation("com.google.guava:guava:${Versions.guava}")
-    implementation("org.glassfish.jersey.media:jersey-media-jaxb:${Versions.jerseyMediaJaxb}")
-
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
@@ -149,6 +144,18 @@ dependencies {
     testImplementation("no.nav.security:token-validation-test-support:${Versions.tokenValidation}")
     testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
+
+//    spesifikke versjoner oppgradert etter ønske fra snyk
+    constraints {
+        implementation("com.google.guava:guava:${Versions.guava}") {
+            because("Transitiv avhengighet dratt inn av jedis-mock@0.1.16 har sårbarhet. Constraintsen kan fjernes når jedis-mock bruker guava@30.0-jre eller nyere")
+        }
+
+        //  Test
+        testImplementation("org.glassfish.jersey.media:jersey-media-jaxb:${Versions.jerseyMediaJaxb}") {
+            because("Transitiv avhengighet dratt inn av token-validation-test-support@1.3.1 har sårbarhet. Constraintsen kan fjernes når token-validation-test-support bruker jersey-media-jaxb@2.31 eller nyere")
+        }
+    }
 }
 
 val githubUser: String by project

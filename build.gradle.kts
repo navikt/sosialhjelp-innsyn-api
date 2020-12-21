@@ -24,13 +24,14 @@ object Versions {
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
     const val tika = "1.25"
-    const val pdfBox = "2.0.21"
+    const val pdfBox = "2.0.22"
     const val fiksKryptering = "1.0.10"
     const val redisMock = "0.1.16"
     const val lettuce = "5.3.5.RELEASE"
     const val jempbox = "1.8.16"
     const val jerseyMediaJaxb = "2.31"
     const val jetty = "9.4.35.v20201120"
+    const val bouncycastle = "1.67"
 
     //    Test only
     const val junitJupiter = "5.7.0"
@@ -47,7 +48,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.spring") version "1.4.21"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
-    id("com.github.ben-manes.versions") version "0.28.0"
+    id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 application {
@@ -149,6 +150,10 @@ dependencies {
     constraints {
         implementation("com.google.guava:guava:${Versions.guava}") {
             because("Transitiv avhengighet dratt inn av jedis-mock@0.1.16 har sårbarhet. Constraintsen kan fjernes når jedis-mock bruker guava@30.0-jre eller nyere")
+        }
+
+        implementation("org.bouncycastle:bcprov-jdk15on:${Versions.bouncycastle}") {
+            because("Transitiv avhengighet dratt inn av no.ks.fiks:kryptering@1.0.10 har sårbarhet. Constraintsen kan fjernes når no.ks.fiks:kryptering bruker org.bouncycastle:bcprov-jdk15on@1.67 eller nyere")
         }
 
         //  Test

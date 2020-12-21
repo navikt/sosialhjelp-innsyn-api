@@ -6,35 +6,35 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sbl"
 
 object Versions {
-    const val kotlin = "1.4.10"
-    const val coroutines = "1.4.0"
-    const val springBoot = "2.3.5.RELEASE"
-    const val sosialhjelpCommon = "1.b216764"
+    const val kotlin = "1.4.21"
+    const val coroutines = "1.4.2"
+    const val springBoot = "2.3.7.RELEASE"
+    const val sosialhjelpCommon = "1.4ef74b4"
     const val logback = "1.2.3"
-    const val logstash = "6.3"
+    const val logstash = "6.5"
     const val filformat = "1.2020.11.05-09.32-14af05dea965"
-    const val micrometerRegistry = "1.5.6"
+    const val micrometerRegistry = "1.6.2"
     const val prometheus = "0.9.0"
     const val tokenValidation = "1.3.2"
-    const val jackson = "2.11.3"
-    const val guava = "30.0-jre"
+    const val jackson = "2.12.0"
+    const val guava = "30.1-jre"
     const val springfox = "3.0.0"
     const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
-    const val tika = "1.23"
-    const val pdfBox = "2.0.19"
-    const val fiksKryptering = "1.0.9"
+    const val tika = "1.25"
+    const val pdfBox = "2.0.21"
+    const val fiksKryptering = "1.0.10"
     const val redisMock = "0.1.16"
     const val lettuce = "5.3.5.RELEASE"
     const val jempbox = "1.8.16"
     const val jerseyMediaJaxb = "2.31"
-    const val jetty= "9.4.35.v20201120"
+    const val jetty = "9.4.35.v20201120"
 
     //    Test only
-    const val junitJupiter = "5.6.3"
-    const val mockk = "1.9.3"
+    const val junitJupiter = "5.7.0"
+    const val mockk = "1.10.3"
     const val springmockk = "2.0.0"
 }
 
@@ -42,11 +42,11 @@ val isRunningOnJenkins: String? by project
 
 plugins {
     application
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.4.21"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.4.10"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.4.21"
     id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("io.spring.dependency-management") version "1.0.9.RELEASE"
+    id("io.spring.dependency-management") version "1.0.10.RELEASE"
     id("com.github.ben-manes.versions") version "0.28.0"
 }
 
@@ -88,11 +88,6 @@ dependencies {
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-jetty:${Versions.springBoot}")
-    constraints {
-        implementation("org.eclipse.jetty:jetty-security:${Versions.jetty}") {
-            because("Pga. jetty-security dratt inn via springBoot:2.3.5.RELEASE har sårbarhet. Denne kan fjernees når springBoot bruker jetty-security: 9.4.35.v20201120 eller nyere")
-        }
-    }
     implementation("org.springframework.boot:spring-boot-starter-security:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
@@ -142,11 +137,6 @@ dependencies {
     implementation("com.natpryce:konfig:${Versions.konfig}")
     implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
 
-
-//    spesifikke versjoner oppgradert etter ønske fra snyk
-    implementation("com.google.guava:guava:${Versions.guava}")
-    implementation("org.glassfish.jersey.media:jersey-media-jaxb:${Versions.jerseyMediaJaxb}")
-
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
@@ -154,6 +144,18 @@ dependencies {
     testImplementation("no.nav.security:token-validation-test-support:${Versions.tokenValidation}")
     testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
+
+//    spesifikke versjoner oppgradert etter ønske fra snyk
+    constraints {
+        implementation("com.google.guava:guava:${Versions.guava}") {
+            because("Transitiv avhengighet dratt inn av jedis-mock@0.1.16 har sårbarhet. Constraintsen kan fjernes når jedis-mock bruker guava@30.0-jre eller nyere")
+        }
+
+        //  Test
+        testImplementation("org.glassfish.jersey.media:jersey-media-jaxb:${Versions.jerseyMediaJaxb}") {
+            because("Transitiv avhengighet dratt inn av token-validation-test-support@1.3.1 har sårbarhet. Constraintsen kan fjernes når token-validation-test-support bruker jersey-media-jaxb@2.31 eller nyere")
+        }
+    }
 }
 
 val githubUser: String by project

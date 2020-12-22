@@ -18,7 +18,6 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
 
 internal class TildeltNavKontorTest {
 
@@ -85,7 +84,7 @@ internal class TildeltNavKontorTest {
 
     @Test
     fun `tildeltNavKontor skal gi generell melding hvis NorgClient kaster FiksException`() {
-        every { norgClient.hentNavEnhet(navKontor) } throws NorgException(HttpStatus.INTERNAL_SERVER_ERROR, "noe feilet", null)
+        every { norgClient.hentNavEnhet(navKontor) } throws NorgException("noe feilet", null)
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)

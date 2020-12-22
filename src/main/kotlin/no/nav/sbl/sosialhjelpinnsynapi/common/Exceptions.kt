@@ -8,7 +8,6 @@ class InvalidInputException(
 ) : Exception(message)
 
 class NorgException(
-        status: HttpStatus?,
         override val message: String?,
         override val cause: Throwable?
 ) : RuntimeException(message, cause)

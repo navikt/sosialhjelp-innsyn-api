@@ -14,8 +14,8 @@ class ClamAvVirusScanner(
     private val connection: VirusScanConnection = VirusScanConnection(config, restTemplate)
 
     @Throws(OpplastingException::class)
-    override fun scan(filnavn: String?, data: ByteArray, digisosId: String) {
-        if (connection.isEnabled && connection.isInfected(filnavn, data, digisosId)) {
+    override fun scan(filnavn: String?, data: ByteArray) {
+        if (connection.isEnabled && connection.isInfected(filnavn, data)) {
             throw OpplastingException("Fant virus i fil forsøkt opplastet", null)
         } else if (!connection.isEnabled) {
             log.warn("Virusscanning er ikke aktivert")

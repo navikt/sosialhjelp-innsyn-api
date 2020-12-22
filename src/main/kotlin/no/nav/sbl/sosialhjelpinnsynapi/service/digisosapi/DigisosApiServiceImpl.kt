@@ -32,7 +32,7 @@ class DigisosApiServiceImpl(
     }
 
     override fun lastOppFil(fiksDigisosId: String, file: MultipartFile): String {
-        virusScanner.scan(file.name, file.bytes, fiksDigisosId)
+        virusScanner.scan(file.name, file.bytes)
         val accessToken = idPortenService.getToken()
 
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))

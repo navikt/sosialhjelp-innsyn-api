@@ -3,7 +3,6 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.fiks
 import com.fasterxml.jackson.core.JsonProcessingException
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sbl.sosialhjelpinnsynapi.common.retry
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
@@ -19,6 +18,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
@@ -48,21 +48,13 @@ class FiksClientImpl(
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
         return when {
-            useCache -> hentDigisosSakFraCache(digisosId, token)
+            useCache -> hentDigisosSakFraCache(digisosId) ?: hentDigisosSakFraFiks(digisosId, token)
             else -> hentDigisosSakFraFiks(digisosId, token)
         }
     }
 
-    private fun hentDigisosSakFraCache(digisosId: String, token: String): DigisosSak {
-        val cachedDigisosSak: DigisosSak? = redisService.get(digisosId, DigisosSak::class.java) as DigisosSak?
-        if (cachedDigisosSak != null) {
-            return cachedDigisosSak
-        }
-
-        val digisosSak = hentDigisosSakFraFiks(digisosId, token)
-        redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
-        return digisosSak
-    }
+    private fun hentDigisosSakFraCache(digisosId: String): DigisosSak? =
+            redisService.get(digisosId, DigisosSak::class.java) as DigisosSak?
 
     private fun hentDigisosSakFraFiks(digisosId: String, token: String): DigisosSak {
         log.debug("Forsøker å hente digisosSak fra $baseUrl/digisos/api/v1/soknader/$digisosId")
@@ -75,6 +67,7 @@ class FiksClientImpl(
             log.debug("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
             val body = response.body!!
             return objectMapper.readValue(body, DigisosSak::class.java)
+                    .also { lagreTilCache(digisosId, it) }
         } catch (e: HttpClientErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
@@ -94,12 +87,18 @@ class FiksClientImpl(
         }
     }
 
-    override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
-        val cachedDokument: Any? = redisService.get(dokumentlagerId, requestedClass)
-        if (cachedDokument != null) {
-            return cachedDokument
-        }
+    private fun lagreTilCache(id: String, digisosSakEllerDokument: Any) =
+            redisService.put(id, objectMapper.writeValueAsBytes(digisosSakEllerDokument))
 
+    override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
+        return hentDokumentFraCache(dokumentlagerId, requestedClass)
+                ?: hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass, token)
+    }
+
+    private fun hentDokumentFraCache(dokumentlagerId: String, requestedClass: Class<out Any>): Any? =
+            redisService.get(dokumentlagerId, requestedClass)
+
+    private fun hentDokumentFraFiks(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
         log.debug("Forsøker å hente dokument fra $baseUrl/digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
 
         try {
@@ -114,10 +113,8 @@ class FiksClientImpl(
                     vars)
 
             log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
-            val dokument = objectMapper.readValue(response.body!!, requestedClass)
-            redisService.put(dokumentlagerId, objectMapper.writeValueAsBytes(dokument))
-            return dokument
-
+            return objectMapper.readValue(response.body!!, requestedClass)
+                    .also { lagreTilCache(dokumentlagerId, it) }
         } catch (e: HttpClientErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr

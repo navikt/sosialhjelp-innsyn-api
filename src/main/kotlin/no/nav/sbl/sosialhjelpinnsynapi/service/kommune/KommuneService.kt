@@ -29,9 +29,11 @@ class KommuneService(
             throw RuntimeException("KommuneStatus kan ikke hentes fordi kommunenummer mangler for digisosId=$fiksDigisosId")
         }
 
-        return redisService.get(kommunenummer, KommuneInfo::class.java) as KommuneInfo?
-                ?: hentKommuneInfoFraFiks(kommunenummer)
+        return hentFraCache(kommunenummer) ?: hentKommuneInfoFraFiks(kommunenummer)
     }
+
+    private fun hentFraCache(kommunenummer: String) =
+            redisService.get(kommunenummer, KommuneInfo::class.java) as KommuneInfo?
 
     private fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {

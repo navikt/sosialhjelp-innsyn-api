@@ -219,7 +219,7 @@ class VedleggOpplastingService(
             return MESSAGE_ILLEGAL_FILENAME
         }
 
-        virusScanner.scan(file.originalFilename, file.bytes, digisosId)
+        virusScanner.scan(file.originalFilename, file.bytes)
 
         if (!(isImage(file.inputStream) || isPdf(file.inputStream))) {
             return MESSAGE_ILLEGAL_FILE_TYPE

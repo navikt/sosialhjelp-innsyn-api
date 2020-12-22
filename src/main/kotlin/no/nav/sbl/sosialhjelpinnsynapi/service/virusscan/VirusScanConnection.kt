@@ -15,7 +15,7 @@ internal class VirusScanConnection(
     val isEnabled: Boolean
         get() = config.enabled
 
-    fun isInfected(filnavn: String?, data: ByteArray, digisosId: String): Boolean {
+    fun isInfected(filnavn: String?, data: ByteArray): Boolean {
         try {
             if (!isRunningInProd() && filnavn != null && filnavn.startsWith("virustest")) {
                 return true

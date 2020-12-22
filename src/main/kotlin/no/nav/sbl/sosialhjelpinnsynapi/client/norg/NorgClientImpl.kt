@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.client.norg
 import no.nav.sbl.sosialhjelpinnsynapi.common.NorgException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
+import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.HEADER_NAV_APIKEY
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
@@ -22,12 +23,17 @@ import org.springframework.web.client.RestTemplate
 @Component
 class NorgClientImpl(
         clientProperties: ClientProperties,
-        private val restTemplate: RestTemplate
+        private val restTemplate: RestTemplate,
+        private val redisService: RedisService,
 ) : NorgClient {
 
     private val baseUrl = clientProperties.norgEndpointUrl
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
+        return hentFraCache(enhetsnr) ?: hentFraNorg(enhetsnr)
+    }
+
+    private fun hentFraNorg(enhetsnr: String): NavEnhet {
         val headers = headers()
         try {
             log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
@@ -36,6 +42,7 @@ class NorgClientImpl(
 
             log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
             return objectMapper.readValue(response.body!!, NavEnhet::class.java)
+                    .also { lagreTilCache(enhetsnr, it) }
 
         } catch (e: HttpStatusCodeException) {
             log.warn("Noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
@@ -45,6 +52,9 @@ class NorgClientImpl(
             throw NorgException(null, e.message, e)
         }
     }
+
+    private fun hentFraCache(enhetsnr: String): NavEnhet? =
+            redisService.get(cacheKey(enhetsnr), NavEnhet::class.java) as NavEnhet?
 
     override fun ping() {
         try {
@@ -67,9 +77,16 @@ class NorgClientImpl(
         return headers
     }
 
+    private fun lagreTilCache(enhetsnr: String, navEnhet: NavEnhet) {
+        redisService.put(cacheKey(enhetsnr), objectMapper.writeValueAsBytes(navEnhet), NAVENHET_CACHE_TIMETOLIVE_SECONDS)
+    }
+
+    private fun cacheKey(enhetsnr: String): String = "NavEnhet_$enhetsnr"
+
     companion object {
         private val log by logger()
 
         private const val NORG2_APIKEY = "SOSIALHJELP_INNSYN_API_NORG2_APIKEY_PASSWORD"
+        private const val NAVENHET_CACHE_TIMETOLIVE_SECONDS: Long = 60 * 60 // 1 time
     }
 }

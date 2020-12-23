@@ -2,9 +2,11 @@ package no.nav.sbl.sosialhjelpinnsynapi.mock
 
 import io.mockk.every
 import io.mockk.mockk
+import no.finn.unleash.Unleash
 import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
+import no.nav.sbl.sosialhjelpinnsynapi.client.unleash.DOKUMENTASJONKRAV_ENABLED
+import no.nav.sbl.sosialhjelpinnsynapi.client.unleash.VILKAR_ENABLED
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.event.EventService
 import no.nav.sbl.sosialhjelpinnsynapi.mock.responses.digisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
@@ -19,9 +21,9 @@ internal class DefaultMockResponseTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val norgClient: NorgClient = mockk(relaxed = true)
     private val vedleggService: VedleggService = mockk()
-    private val featureToggles: FeatureToggles = mockk()
+    private val unleashClient: Unleash = mockk()
 
-    private val eventService = EventService(clientProperties, innsynService, vedleggService, norgClient, featureToggles)
+    private val eventService = EventService(clientProperties, innsynService, vedleggService, norgClient, unleashClient)
 
     @Test
     fun `validerer digisosSoker`() {
@@ -36,8 +38,8 @@ internal class DefaultMockResponseTest {
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
-        every { featureToggles.vilkarEnabled } returns true
-        every { featureToggles.dokumentasjonkravEnabled } returns true
+        every { unleashClient.isEnabled(VILKAR_ENABLED, false) } returns true
+        every { unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false) } returns true
 
         assertThatCode { eventService.createModel(mockDigisosSak, "token") }.doesNotThrowAnyException()
     }

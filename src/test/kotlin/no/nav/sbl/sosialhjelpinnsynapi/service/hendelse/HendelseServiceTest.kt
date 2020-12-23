@@ -3,9 +3,10 @@ package no.nav.sbl.sosialhjelpinnsynapi.service.hendelse
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.finn.unleash.Unleash
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
+import no.nav.sbl.sosialhjelpinnsynapi.client.unleash.VILKAR_ENABLED
 import no.nav.sbl.sosialhjelpinnsynapi.common.VIS_BREVET
-import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Sak
@@ -33,8 +34,8 @@ internal class HendelseServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
-    private val featureToggles: FeatureToggles = mockk()
-    private val service = HendelseService(eventService, vedleggService, fiksClient, featureToggles)
+    private val unleashClient: Unleash = mockk()
+    private val service = HendelseService(eventService, vedleggService, fiksClient, unleashClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
 
@@ -66,7 +67,7 @@ internal class HendelseServiceTest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
-        every { featureToggles.vilkarEnabled } returns true
+        every { unleashClient.isEnabled(VILKAR_ENABLED, false) } returns true
     }
 
     @Test

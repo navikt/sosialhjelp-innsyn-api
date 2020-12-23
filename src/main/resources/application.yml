@@ -33,6 +33,8 @@ client:
   norg_endpoint_url: ${NORG_ENDPOINT_URL}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL}
   sts_token_endpoint_url: ${STS_TOKEN_ENDPOINT_URL}
+  unleash_url: ${UNLEASH_API_URL}
+  unleash_instance_id: ${UNLEASH_INSTANCE_ID}
 
 no.nav.sosialhjelp.idporten:
   token_url: ${ID_PORTEN_TOKEN_URL}

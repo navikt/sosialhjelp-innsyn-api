@@ -32,6 +32,7 @@ object Versions {
     const val jerseyMediaJaxb = "2.31"
     const val jetty = "9.4.35.v20201120"
     const val bouncycastle = "1.67"
+    const val unleash = "3.3.4"
 
     //    Test only
     const val junitJupiter = "5.7.0"
@@ -125,6 +126,9 @@ dependencies {
 
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")
+
+//    Unleash
+    implementation("no.finn.unleash:unleash-client-java:${Versions.unleash}")
 
 //    Redis
     implementation("io.lettuce:lettuce-core:${Versions.lettuce}")

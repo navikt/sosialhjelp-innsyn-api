@@ -1,7 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.hendelse
 
+import no.finn.unleash.Unleash
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
-import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
+import no.nav.sbl.sosialhjelpinnsynapi.client.unleash.VILKAR_ENABLED
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.HendelseResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
@@ -21,7 +22,7 @@ class HendelseService(
         private val eventService: EventService,
         private val vedleggService: VedleggService,
         private val fiksClient: FiksClient,
-        private val featureToggles: FeatureToggles
+        private val unleashClient: Unleash
 ) {
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
@@ -33,7 +34,7 @@ class HendelseService(
 
         model.leggTilHendelserForUtbetalinger()
 
-        if (featureToggles.vilkarEnabled) {
+        if (unleashClient.isEnabled(VILKAR_ENABLED, false)) {
             model.leggTilHendelserForVilkar()
         }
 

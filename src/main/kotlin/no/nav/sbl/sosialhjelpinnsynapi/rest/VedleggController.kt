@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator.sjekkXsrfToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.OppgaveOpplastingResponse
+import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
@@ -59,7 +60,14 @@ class VedleggController(
             throw IllegalStateException("Ingen filer i forsendelse")
         }
         val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
-        return ResponseEntity.ok(vedleggOpplastingResponseList)
+        return ResponseEntity.ok(vedleggOpplastingResponseList.map {
+            OppgaveOpplastingResponse(
+                    it.type,
+                    it.tilleggsinfo,
+                    it.innsendelsesfrist,
+                    it.filer.map { VedleggOpplastingResponse(it.filename, it.status.result.name) }
+            )
+        })
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])

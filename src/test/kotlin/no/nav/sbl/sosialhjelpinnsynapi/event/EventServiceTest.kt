@@ -3,11 +3,11 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.sosialhjelpinnsynapi.client.norg.NorgClient
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
-import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.NavEnhet
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SaksStatus
@@ -31,9 +31,9 @@ internal class EventServiceTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
-    private val featureToggles: FeatureToggles = mockk()
+    private val unleashClient: Unleash = mockk()
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, featureToggles)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, unleashClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()

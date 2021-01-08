@@ -1,7 +1,8 @@
 package no.nav.sbl.sosialhjelpinnsynapi.event
 
+import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
-import no.nav.sbl.sosialhjelpinnsynapi.config.FeatureToggles
+import no.nav.sbl.sosialhjelpinnsynapi.client.unleash.DOKUMENTASJONKRAV_ENABLED
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Dokumentasjonkrav
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
@@ -9,7 +10,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.Utbetaling
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
 
-fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, featureToggles: FeatureToggles) {
+fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: Unleash) {
 
     val log by logger()
 
@@ -46,7 +47,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, featureToggles: 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
     union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav) }
 
-    if (featureToggles.dokumentasjonkravEnabled) {
+    if (unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false)) {
         val beskrivelse = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
     }

@@ -38,16 +38,16 @@ class VedleggOpplastingService(
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {
-        val valideringResultatResponseList = validateFiler(digisosId, files, metadata)
-        if (valideringResultatResponseList.any { oppgave -> oppgave.filer.any { it.status.result != ValidationValues.OK } }) {
-            return valideringResultatResponseList
+        val oppgaveValideringer = validateFiler(files, metadata)
+        if (harOppgaverMedValideringsfeil(oppgaveValideringer)) {
+            return oppgaveValideringer
         }
         metadata.removeIf { it.filer.isEmpty() }
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
 
         val valideringer = mutableListOf<FilValidering>()
-        valideringResultatResponseList.forEach({ valideringer.addAll(it.filer) })
+        oppgaveValideringer.forEach({ valideringer.addAll(it.filer) })
 
         files.forEach { file ->
             val filename = createFilename(file.originalFilename, valideringer)
@@ -77,7 +77,7 @@ class VedleggOpplastingService(
             val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
             redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
 
-            return valideringResultatResponseList
+            return oppgaveValideringer
         } catch (e: Exception) {
             log.error("Ettersendelse feilet ved generering av ettersendelsePdf, kryptering av filer eller sending til FIKS", e)
             throw e
@@ -91,6 +91,12 @@ class VedleggOpplastingService(
             }
         }
     }
+
+    private fun harOppgaverMedValideringsfeil(oppgaveValideringer: MutableList<OppgaveValidering>) =
+            oppgaveValideringer.any { oppgave -> harFilerMedValideringsfeil(oppgave) }
+
+    private fun harFilerMedValideringsfeil(oppgave: OppgaveValidering) =
+            oppgave.filer.any { it.status.result != ValidationValues.OK }
 
     fun createEttersendelsePdf(metadata: MutableList<OpplastetVedleggMetadata>, digisosId: String, token: String): FilForOpplasting {
         try {
@@ -188,8 +194,8 @@ class VedleggOpplastingService(
         throw OpplastingFilnavnMismatchException("Finner ikke filnavnet i valideringslisten! Dette skal da ikke kunne skje.", null)
     }
 
-    fun validateFiler(fiksDigisosId: String, files: List<MultipartFile>, metadataListe: MutableList<OpplastetVedleggMetadata>): MutableList<OppgaveValidering> {
-        val oppgaveVeligeringer = mutableListOf<OppgaveValidering>()
+    fun validateFiler(files: List<MultipartFile>, metadataListe: MutableList<OpplastetVedleggMetadata>): MutableList<OppgaveValidering> {
+        val oppgaveValideringer = mutableListOf<OppgaveValidering>()
         validateFilenameMatchInMetadataAndFiles(metadataListe, files)
 
         var filesIndex = 0
@@ -198,17 +204,17 @@ class VedleggOpplastingService(
 
             metadata.filer.forEach {
                 val file = files[filesIndex]
-                val valideringstatus = validateFil(file, fiksDigisosId)
+                val valideringstatus = validateFil(file)
                 if (valideringstatus.result != ValidationValues.OK) log.warn("Opplasting av fil $filesIndex av ${files.size} til ettersendelse feilet. Det var ${metadataListe.size} oppgaveElement. Status: $valideringstatus")
                 filValidering.add(FilValidering(file.originalFilename, valideringstatus))
                 filesIndex++
             }
-            oppgaveVeligeringer.add(OppgaveValidering(metadata.type, metadata.tilleggsinfo, metadata.innsendelsesfrist, filValidering))
+            oppgaveValideringer.add(OppgaveValidering(metadata.type, metadata.tilleggsinfo, metadata.innsendelsesfrist, filValidering))
         }
-        return oppgaveVeligeringer
+        return oppgaveValideringer
     }
 
-    fun validateFil(file: MultipartFile, digisosId: String): ValidationResult {
+    fun validateFil(file: MultipartFile): ValidationResult {
         if (file.size > MAKS_TOTAL_FILSTORRELSE) {
             return ValidationResult(ValidationValues.FILE_TOO_LARGE)
         }
@@ -222,32 +228,31 @@ class VedleggOpplastingService(
         val fileType = detectTikaType(file.inputStream)
         log.info("Validerer fil med extention: \"${splitFileName(file.originalFilename ?: "").extention}\" " +
                 "type: ${fileType.name} " +
-                "mime: ${file.contentType} " +
-                "digisosId: $digisosId")
+                "mime: ${file.contentType}")
         if (fileType == TikaFileType.UNKNOWN) {
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
         if (fileType == TikaFileType.PDF) {
-            return checkIfPdfIsValid(file.inputStream)
+            return ValidationResult(checkIfPdfIsValid(file.inputStream), TikaFileType.PDF)
         }
         return ValidationResult(ValidationValues.OK, fileType)
     }
 
-    private fun checkIfPdfIsValid(data: InputStream): ValidationResult {
+    private fun checkIfPdfIsValid(data: InputStream): ValidationValues {
         try {
             PDDocument.load(data)
                     .use { document ->
                         if (document.isEncrypted) {
-                            return ValidationResult(ValidationValues.PDF_IS_ENCRYPTED, TikaFileType.PDF)
+                            return ValidationValues.PDF_IS_ENCRYPTED
                         }
-                        return ValidationResult(ValidationValues.OK, TikaFileType.PDF)
+                        return ValidationValues.OK
                     }
         } catch (e: InvalidPasswordException) {
-            log.warn(ValidationValues.PDF_IS_ENCRYPTED.name, e)
-            return ValidationResult(ValidationValues.PDF_IS_ENCRYPTED, TikaFileType.PDF)
+            log.warn(ValidationValues.PDF_IS_ENCRYPTED.name + " " + e.message)
+            return ValidationValues.PDF_IS_ENCRYPTED
         } catch (e: IOException) {
             log.warn(ValidationValues.COULD_NOT_LOAD_DOCUMENT.name, e)
-            return ValidationResult(ValidationValues.COULD_NOT_LOAD_DOCUMENT, TikaFileType.PDF)
+            return ValidationValues.COULD_NOT_LOAD_DOCUMENT
         }
     }
 

@@ -57,5 +57,4 @@ jobs:
         run: docker build -t ${{ env.DOCKER_TAG }} .
       - name: Push docker image
         run: |
-          cat DOCKER_TAG
           docker push ${{ env.DOCKER_TAG }}

@@ -141,10 +141,12 @@ class VedleggOpplastingService(
 
         val uuid = UUID.randomUUID().toString()
 
+        val matchendeFiler = filValideringer.filter { it.filename == originalFilename }
+        if(filValideringer.size > 1) log.warn("Vi har funnet ${filValideringer.size} validerte filer med samme navn.")
 
         filename += "-" + uuid.split("-")[0]
         if (filenameSplit.extention.isEmpty()) {
-            filename += finnFilextentionBasedOnValidationResult(originalFilename, filValideringer)
+            filename += finnFilextentionBasedOnValidationResult(originalFilename, matchendeFiler.first())
         } else {
             filename += filenameSplit.extention
         }
@@ -184,9 +186,8 @@ class VedleggOpplastingService(
         return filstring
     }
 
-    private fun finnFilextentionBasedOnValidationResult(originalFilename: String?, filValideringer: List<FilValidering>): String {
+    private fun finnFilextentionBasedOnValidationResult(originalFilename: String?, filValidering: FilValidering): String {
         if (originalFilename != null) {
-            val filValidering = filValideringer.filter { it.filename == originalFilename }.first()
             if (filValidering.status.fileType == TikaFileType.PDF) return ".pdf"
             if (filValidering.status.fileType == TikaFileType.JPEG) return ".jpg"
             if (filValidering.status.fileType == TikaFileType.PNG) return ".png"

@@ -40,8 +40,6 @@ object Versions {
     const val springmockk = "2.0.0"
 }
 
-val isRunningOnJenkins: String? by project
-
 plugins {
     application
     kotlin("jvm") version "1.4.21"

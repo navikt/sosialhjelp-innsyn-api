@@ -12,6 +12,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
+import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
@@ -139,14 +140,14 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isNotEqualTo(vedleggSpesifikasjon.vedlegg[0].filer[2].sha512)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isEqualTo(vedleggSpesifikasjon.vedlegg[1].filer[0].sha512)
 
-        assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn == filnavn0)
-        assertThat(vedleggOpplastingResponseList[0].filer[0].status == "OK")
-        assertThat(vedleggOpplastingResponseList[0].filer[1].filnavn == filnavn1)
-        assertThat(vedleggOpplastingResponseList[0].filer[1].status == "OK")
-        assertThat(vedleggOpplastingResponseList[0].filer[2].filnavn == filnavn1)
-        assertThat(vedleggOpplastingResponseList[0].filer[2].status == "OK")
-        assertThat(vedleggOpplastingResponseList[1].filer[0].filnavn == filnavn3)
-        assertThat(vedleggOpplastingResponseList[1].filer[0].status == "OK")
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filename == filnavn0)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status.result == ValidationValues.OK)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].filename == filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].status.result == ValidationValues.OK)
+        assertThat(vedleggOpplastingResponseList[0].filer[2].filename == filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[2].status.result == ValidationValues.OK)
+        assertThat(vedleggOpplastingResponseList[1].filer[0].filename == filnavn3)
+        assertThat(vedleggOpplastingResponseList[1].filer[0].status.result == ValidationValues.OK)
     }
 
     @Test
@@ -166,12 +167,12 @@ internal class VedleggOpplastingServiceTest {
 
         verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
-        assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn == filnavn0)
-        assertThat(vedleggOpplastingResponseList[0].filer[0].status == "OK")
-        assertThat(vedleggOpplastingResponseList[0].filer[1].filnavn == filnavn1)
-        assertThat(vedleggOpplastingResponseList[0].filer[1].status == "OK")
-        assertThat(vedleggOpplastingResponseList[1].filer[0].filnavn == filnavn2)
-        assertThat(vedleggOpplastingResponseList[1].filer[0].status == MESSAGE_ILLEGAL_FILE_TYPE)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filename == filnavn0)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status.result == ValidationValues.OK)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].filename == filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].status.result == ValidationValues.OK)
+        assertThat(vedleggOpplastingResponseList[1].filer[0].filename == filnavn2)
+        assertThat(vedleggOpplastingResponseList[1].filer[0].status.result == ValidationValues.ILLEGAL_FILE_TYPE)
     }
 
     @Test
@@ -211,10 +212,10 @@ internal class VedleggOpplastingServiceTest {
 
         verify(exactly = 1) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
-        assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
-        assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo("OK")
-        assertThat(vedleggOpplastingResponseList[0].filer[1].filnavn).isEqualTo(filnavn2)
-        assertThat(vedleggOpplastingResponseList[0].filer[1].status).isEqualTo("OK")
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.OK)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].filename).isEqualTo(filnavn2)
+        assertThat(vedleggOpplastingResponseList[0].filer[1].status.result).isEqualTo(ValidationValues.OK)
     }
 
     @Test
@@ -236,8 +237,8 @@ internal class VedleggOpplastingServiceTest {
 
         verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
-        assertThat(vedleggOpplastingResponseList[0].filer[0].filnavn).isEqualTo(filnavn1)
-        assertThat(vedleggOpplastingResponseList[0].filer[0].status).isEqualTo(MESSAGE_PDF_IS_ENCRYPTED)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.PDF_IS_ENCRYPTED)
     }
 
     @Test
@@ -254,13 +255,36 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
-    fun `skal legge på UUID på filnavn`() {
+    fun `skal legge pa UUID pa filnavn`() {
         val uuid = "12345678"
         mockkStatic(UUID::class)
         every { UUID.randomUUID().toString() } returns uuid
 
         val filnavn = "fil.pdf"
-        assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("fil-$uuid.pdf")
+        val valideringer = listOf(FilValidering(filnavn, ValidationResult(ValidationValues.OK, TikaFileType.PDF)))
+        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal legge pa extention pa filnavn uten`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString() } returns uuid
+
+        val filnavn = "fil"
+        val valideringer = listOf(FilValidering(filnavn, ValidationResult(ValidationValues.OK, TikaFileType.PDF)))
+        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal legge pa extention pa filnavn bare dersom det mangler`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString() } returns uuid
+
+        val filnavn = "fil.jpg"
+        val valideringer = listOf(FilValidering(filnavn, ValidationResult(ValidationValues.OK, TikaFileType.PDF)))
+        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil-$uuid.jpg")
     }
 
     @Test
@@ -271,7 +295,8 @@ internal class VedleggOpplastingServiceTest {
 
         val filnavnUtenExtension50Tegn = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         val filnavn = "$filnavnUtenExtension50Tegn-dette-skal-kuttes-bort.pdf"
-        assertThat(service.createFilename(filnavn, "application/pdf")).isEqualTo("$filnavnUtenExtension50Tegn-$uuid.pdf")
+        val valideringer = listOf(FilValidering(filnavn, ValidationResult(ValidationValues.OK, TikaFileType.PDF)))
+        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("$filnavnUtenExtension50Tegn-$uuid.pdf")
     }
 
     @Test

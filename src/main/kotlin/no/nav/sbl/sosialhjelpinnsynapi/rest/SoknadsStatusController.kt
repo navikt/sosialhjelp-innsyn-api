@@ -4,6 +4,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.XsrfGenerator.generateXsrfToken
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatusResponse
 import no.nav.sbl.sosialhjelpinnsynapi.service.soknadsstatus.SoknadsStatusService
 import no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll.TilgangskontrollService
+import no.nav.sbl.sosialhjelpinnsynapi.utils.soknadsalderIMinutter
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
@@ -30,8 +31,16 @@ class SoknadsStatusController(
         tilgangskontrollService.sjekkTilgang()
 
         response.addCookie(xsrfCookie(fiksDigisosId, request))
-        val soknadsStatus: SoknadsStatusResponse = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)
-        return ResponseEntity.ok().body(soknadsStatus)
+        val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)
+        return ResponseEntity.ok().body(
+                SoknadsStatusResponse(
+                        status = utvidetSoknadsStatus.status,
+                        tidspunktSendt = utvidetSoknadsStatus.tidspunktSendt,
+                        soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
+                        navKontor = utvidetSoknadsStatus.navKontor,
+                        filUrl = utvidetSoknadsStatus.soknadUrl
+                )
+        )
     }
 
     private fun xsrfCookie(fiksDigisosId: String, request: HttpServletRequest): Cookie {

@@ -1,6 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.soknadsstatus
 
-import io.mockk.clearMocks
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
@@ -29,26 +29,50 @@ internal class SoknadsStatusServiceTest {
     private val mockInternalDigisosSoker: InternalDigisosSoker = mockk()
 
     private val token = "token"
+    private val dokumentlagerId = "dokumentlagerId"
+    private val navEnhet = "NAV Test"
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService, mockInternalDigisosSoker, fiksClient)
+        clearAllMocks()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
-        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
-        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns "dokumentlagerId"
+        every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns dokumentlagerId
     }
 
     @Test
-    fun `Skal returnere mest nylige SoknadsStatus`() {
+    fun `Skal returnere nyeste SoknadsStatus - innsyn aktivert`() {
+        val now = LocalDateTime.now()
         every { eventService.createModel(any(), any()) } returns mockInternalDigisosSoker
         every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
-        every { mockInternalDigisosSoker.tidspunktSendt } returns null
-        every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns "NAV Test"
+        every { mockInternalDigisosSoker.tidspunktSendt } returns now
+        every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns navEnhet
+        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
 
         val response = service.hentSoknadsStatus("123", token)
 
         assertThat(response).isNotNull
         assertThat(response.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+        assertThat(response.tidspunktSendt).isEqualTo(now)
+        assertThat(response.navKontor).isNull()
+        assertThat(response.soknadUrl).isNull()
+    }
+
+    @Test
+    fun `Skal returnere nyeste SoknadsStatus - innsyn deaktivert`() {
+        val now = LocalDateTime.now()
+        every { eventService.createModel(any(), any()) } returns mockInternalDigisosSoker
+        every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
+        every { mockInternalDigisosSoker.tidspunktSendt } returns now
+        every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns navEnhet
+        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns true
+
+        val response = service.hentSoknadsStatus("123", token)
+
+        assertThat(response).isNotNull
+        assertThat(response.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+        assertThat(response.tidspunktSendt).isEqualTo(now)
+        assertThat(response.navKontor).isEqualTo(navEnhet)
+        assertThat(response.soknadUrl?.link).contains(dokumentlagerId)
     }
 
     @Test

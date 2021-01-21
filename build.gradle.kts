@@ -64,7 +64,6 @@ configurations {
     "implementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
         exclude(group = "javax.activation", module = "activation")
-        exclude(group = "javax.mail", module = "mailapi")
         exclude(group = "javax.validation", module = "validation-api")
     }
     "testImplementation" {

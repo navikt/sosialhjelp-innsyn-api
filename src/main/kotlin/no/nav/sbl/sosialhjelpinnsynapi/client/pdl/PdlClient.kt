@@ -16,12 +16,13 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
+import java.util.*
+import java.util.stream.Collectors
 
 interface PdlClient {
 
@@ -47,19 +48,13 @@ class PdlClientImpl(
             val response = pdlRestTemplate.exchange(baseurl, HttpMethod.POST, requestEntity, PdlPersonResponse::class.java)
 
             val pdlPersonResponse: PdlPersonResponse = response.body!!
-            if (pdlPersonResponse.errors != null && pdlPersonResponse.errors.isNotEmpty()) {
-                pdlPersonResponse.errors
-                        .forEach { log.error("PDL - noe feilet. Message=${it.message}, path=${it.path}, code=${it.extensions.code}, classification=${it.extensions.classification}") }
-                val firstError = pdlPersonResponse.errors[0]
-                throw PdlException(
-                        firstError.extensions.code?.toUpperCase()?.let { HttpStatus.valueOf(it) } ?: HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Message: ${firstError.message}, Classification: ${firstError.extensions.classification}"
-                )
-            }
+
+            checkForPdlApiErrors(pdlPersonResponse)
+
             return pdlPersonResponse.data
         } catch (e: RestClientResponseException) {
             log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
-            throw PdlException(HttpStatus.valueOf(e.rawStatusCode), e.message!!)
+            throw PdlException(e.message!!)
         }
     }
 
@@ -85,6 +80,22 @@ class PdlClientImpl(
         headers.set(HEADER_TEMA, TEMA_KOM)
         return HttpEntity(request, headers)
     }
+
+    private fun checkForPdlApiErrors(response: PdlPersonResponse?) {
+        Optional.ofNullable(response)
+                .map(PdlPersonResponse::errors)
+                .ifPresent { handleErrors(it) }
+    }
+
+    private fun handleErrors(errors: List<PdlError>) {
+        val errorList = errors.stream()
+                .map { it.message + "(feilkode: " + it.extensions.code + ")" }
+                .collect(Collectors.toList())
+        throw PdlException(errorMessage(errorList))
+    }
+
+    private fun errorMessage(errors: List<String>): String =
+            "Error i respons fra pdl-api: ${errors.joinToString { it }}"
 
     companion object {
         private val log by logger()

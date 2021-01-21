@@ -1,5 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.client.pdl
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.sosialhjelpinnsynapi.client.sts.StsClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.PdlException
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
@@ -12,12 +13,14 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.CALL_ID
+import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
@@ -45,7 +48,17 @@ class PdlClientImpl(
         val query = getResourceAsString("/pdl/hentPerson.graphql").replace("[\n\r]", "")
         try {
             val requestEntity = createRequestEntity(PdlRequest(query, Variables(ident)))
-            val response = pdlRestTemplate.exchange(baseurl, HttpMethod.POST, requestEntity, PdlPersonResponse::class.java)
+
+            val response = runBlocking {
+                retry(
+                        attempts = RETRY_ATTEMPTS,
+                        initialDelay = INITIAL_DELAY,
+                        maxDelay = MAX_DELAY,
+                        retryableExceptions = arrayOf(HttpServerErrorException::class)
+                ) {
+                    pdlRestTemplate.exchange(baseurl, HttpMethod.POST, requestEntity, PdlPersonResponse::class.java)
+                }
+            }
 
             val pdlPersonResponse: PdlPersonResponse = response.body!!
 
@@ -99,5 +112,9 @@ class PdlClientImpl(
 
     companion object {
         private val log by logger()
+
+        private const val RETRY_ATTEMPTS = 5
+        private const val INITIAL_DELAY = 100L
+        private const val MAX_DELAY = 2000L
     }
 }

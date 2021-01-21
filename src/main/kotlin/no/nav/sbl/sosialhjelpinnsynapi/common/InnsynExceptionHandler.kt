@@ -80,7 +80,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     fun handlePdlError(e: PdlException): ResponseEntity<FrontendErrorMessage> {
         log.error("Noe feilet ved kall til Pdl", e)
         val error = FrontendErrorMessage(PDL_ERROR, "Noe uventet feilet")
-        return ResponseEntity(error, e.statusCode)
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(OpplastingException::class)

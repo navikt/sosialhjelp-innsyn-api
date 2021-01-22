@@ -30,6 +30,7 @@ spec:
     outbound:
       external:
         - host: "oidc-ver2.difi.no"
+        - host: "unleash.nais.io"
       rules:
         - application: sosialhjelp-mock-alt-api
 {{/if}}

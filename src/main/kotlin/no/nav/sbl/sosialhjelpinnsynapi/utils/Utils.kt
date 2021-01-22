@@ -25,6 +25,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
@@ -67,6 +68,10 @@ fun unixTimestampToDate(tidspunkt: Long): Date {
 fun formatLocalDateTime(dato: LocalDateTime): String {
     val datoFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy 'kl.' HH.mm", Locale.forLanguageTag("nb"))
     return dato.format(datoFormatter)
+}
+
+fun soknadsalderIMinutter(tidspunktSendt : LocalDateTime?) : Long {
+    return tidspunktSendt?.until(LocalDateTime.now(), ChronoUnit.MINUTES) ?: -1
 }
 
 fun enumNameToLowercase(string: String): String {

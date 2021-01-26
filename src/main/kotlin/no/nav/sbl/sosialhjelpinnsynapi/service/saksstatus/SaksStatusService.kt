@@ -37,6 +37,7 @@ class SaksStatusService(
         val vedtakfilUrlList = when {
             sak.vedtak.isEmpty() -> null
             else -> sak.vedtak.map {
+                log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
                 VedtaksfilUrl(it.dato, it.vedtaksFilUrl)
             }
         }

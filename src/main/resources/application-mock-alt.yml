@@ -1,14 +1,3 @@
-spring:
-  application:
-    name: "sosialhjelp-innsyn-api"
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: 1212
-
-server:
-  servlet:
-    context-path: '/sosialhjelp/innsyn-api'
-
 management:
   endpoints:
     web:
@@ -20,9 +9,6 @@ innsyn:
   vedlegg:
     virusscan:
       enabled: false
-  cache:
-    redis_mocked: true
-    time_to_live_seconds: 2
 
 #Token-validering
 no.nav.security.jwt:

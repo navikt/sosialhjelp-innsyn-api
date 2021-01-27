@@ -54,7 +54,8 @@ internal class FiksClientTest {
         clearAllMocks()
 
         every { redisService.get(any(), any()) } returns null
-        every { redisService.put(any(), any()) } just Runs
+        every { redisService.put(any(), any(), any()) } just Runs
+        every { redisService.defaultTimeToLiveSeconds } returns 1
 
         every { retryProperties.attempts } returns 2
         every { retryProperties.initialDelay } returns 5
@@ -88,7 +89,7 @@ internal class FiksClientTest {
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 0) { redisService.put(any(), any()) }
+        verify(exactly = 0) { redisService.put(any(), any(), any()) }
     }
 
     @Test
@@ -107,7 +108,7 @@ internal class FiksClientTest {
         val result1 = fiksClient.hentDigisosSak(id, "Token", true)
 
         assertThat(result1).isNotNull
-        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any(), any()) }
         verify(exactly = 1) { redisService.get(any(), DigisosSak::class.java) }
 
         val digisosSak: DigisosSak = objectMapper.readValue<DigisosSak>(ok_digisossak_response)
@@ -117,7 +118,7 @@ internal class FiksClientTest {
 
         assertThat(result).isNotNull
 
-        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any(), any()) }
         verify(exactly = 2) { redisService.get(any(), any()) }
     }
 
@@ -212,7 +213,7 @@ internal class FiksClientTest {
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 0) { redisService.put(any(), any()) }
+        verify(exactly = 0) { redisService.put(any(), any(), any()) }
     }
 
     @Test
@@ -231,7 +232,7 @@ internal class FiksClientTest {
         val result1 = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
 
         assertThat(result1).isNotNull
-        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any(), any()) }
         verify(exactly = 1) { redisService.get(any(), JsonDigisosSoker::class.java) }
 
         val jsonDigisosSoker = objectMapper.readValue<JsonDigisosSoker>(ok_minimal_jsondigisossoker_response)
@@ -241,7 +242,7 @@ internal class FiksClientTest {
 
         assertThat(result).isNotNull
 
-        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any(), any()) }
         verify(exactly = 2) { redisService.get(any(), JsonDigisosSoker::class.java) }
     }
 
@@ -265,7 +266,7 @@ internal class FiksClientTest {
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any(), any()) }
     }
 
     @Test

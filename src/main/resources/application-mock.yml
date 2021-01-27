@@ -1,13 +1,3 @@
-spring:
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: 1212
-    password: ${REDIS_PASSWORD:foobar}
-
-server:
-  servlet:
-    context-path: '/sosialhjelp/innsyn-api'
-
 management:
   endpoints:
     web:
@@ -18,9 +8,6 @@ innsyn:
   vedlegg:
     virusscan:
       enabled: true
-  cache:
-    redis_mocked: true
-    time_to_live_seconds: 2
 
 client:
   fiks_digisos_endpoint_url: digisosapiurl

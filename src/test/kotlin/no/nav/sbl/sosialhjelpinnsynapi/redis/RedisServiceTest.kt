@@ -16,7 +16,7 @@ internal class RedisServiceTest {
     private val redisStore: RedisStore = mockk()
     private val cacheProperties: CacheProperties = mockk(relaxed = true)
 
-    private val service = RedisService(redisStore, cacheProperties)
+    private val service = RedisServiceImpl(redisStore, cacheProperties)
 
     private val mockSubjectHandler: SubjectHandler = mockk()
 

@@ -148,10 +148,6 @@ dependencies {
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     constraints {
-        implementation("com.google.guava:guava:${Versions.guava}") {
-            because("Transitiv avhengighet dratt inn av jedis-mock@0.1.16 har sårbarhet. Constraintsen kan fjernes når jedis-mock bruker guava@30.0-jre eller nyere")
-        }
-
         implementation("org.bouncycastle:bcprov-jdk15on:${Versions.bouncycastle}") {
             because("Transitiv avhengighet dratt inn av no.ks.fiks:kryptering@1.0.10 har sårbarhet. Constraintsen kan fjernes når no.ks.fiks:kryptering bruker org.bouncycastle:bcprov-jdk15on@1.67 eller nyere")
         }

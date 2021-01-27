@@ -8,7 +8,7 @@ group = "no.nav.sbl"
 object Versions {
     const val kotlin = "1.4.21"
     const val coroutines = "1.4.2"
-    const val springBoot = "2.3.7.RELEASE"
+    const val springBoot = "2.4.2"
     const val sosialhjelpCommon = "1.4ef74b4"
     const val logback = "1.2.3"
     const val logstash = "6.5"
@@ -16,7 +16,7 @@ object Versions {
     const val micrometerRegistry = "1.6.2"
     const val prometheus = "0.9.0"
     const val tokenValidation = "1.3.2"
-    const val jackson = "2.12.0"
+    const val jackson = "2.12.1"
     const val guava = "30.1-jre"
     const val springfox = "3.0.0"
     const val konfig = "1.6.10.0"
@@ -26,8 +26,7 @@ object Versions {
     const val tika = "1.25"
     const val pdfBox = "2.0.22"
     const val fiksKryptering = "1.0.10"
-    const val redisMock = "0.1.16"
-    const val lettuce = "5.3.5.RELEASE"
+    const val lettuce = "6.0.2.RELEASE"
     const val jempbox = "1.8.16"
     const val jerseyMediaJaxb = "2.31"
     const val jetty = "9.4.35.v20201120"
@@ -45,8 +44,8 @@ plugins {
     kotlin("jvm") version "1.4.21"
 
     id("org.jetbrains.kotlin.plugin.spring") version "1.4.21"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("io.spring.dependency-management") version "1.0.10.RELEASE"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.github.ben-manes.versions") version "0.36.0"
 }
 
@@ -129,7 +128,6 @@ dependencies {
 
 //    Redis
     implementation("io.lettuce:lettuce-core:${Versions.lettuce}")
-    implementation("com.github.fppt:jedis-mock:${Versions.redisMock}")
 
 //    Div
     implementation("commons-codec:commons-codec:${Versions.commonsCodec}")

@@ -8,18 +8,26 @@ import no.nav.sbl.sosialhjelpinnsynapi.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.objectMapper
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.io.IOException
 
+interface RedisService {
+    val defaultTimeToLiveSeconds: Long
+    fun get(key: String, requestedClass: Class<out Any>): Any?
+    fun put(key: String, value: ByteArray, timeToLiveSeconds: Long = defaultTimeToLiveSeconds)
+}
+
+@Profile("!no-redis")
 @Component
-class RedisService(
+class RedisServiceImpl(
         private val redisStore: RedisStore,
         cacheProperties: CacheProperties
-) {
+) : RedisService {
 
-    private val defaultTimeToLiveSeconds = cacheProperties.timeToLiveSeconds
+    override val defaultTimeToLiveSeconds = cacheProperties.timeToLiveSeconds
 
-    fun get(key: String, requestedClass: Class<out Any>): Any? {
+    override fun get(key: String, requestedClass: Class<out Any>): Any? {
         val get: ByteArray? = redisStore.get(key) // Redis har konfigurert timout for disse.
         return if (get != null) {
             try {
@@ -39,7 +47,7 @@ class RedisService(
         }
     }
 
-    fun put(key: String, value: ByteArray, timeToLiveSeconds: Long = defaultTimeToLiveSeconds) {
+    override fun put(key: String, value: ByteArray, timeToLiveSeconds: Long) {
         val set = redisStore.set(key, value, timeToLiveSeconds)
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
@@ -63,5 +71,19 @@ class RedisService(
 
     companion object {
         private val log by logger()
+    }
+}
+
+@Profile("no-redis")
+@Component
+class RedisServiceMock : RedisService {
+    override val defaultTimeToLiveSeconds: Long = 1
+
+    override fun get(key: String, requestedClass: Class<out Any>): Any? {
+        return null
+    }
+
+    override fun put(key: String, value: ByteArray, timeToLiveSeconds: Long) {
+
     }
 }

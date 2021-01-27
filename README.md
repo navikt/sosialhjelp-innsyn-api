@@ -96,4 +96,4 @@ For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsv
 3. `docker run -it --link myredis:redis --rm redis redis-cli -h redis -p 6379` 
 (kommandolinjeverktøy mot redis for å sjekke innholdet.)
 
-Propertyen `innsyn.cache.redisMocked` styrer hvorvidt en _in-memory_ Redis instans spinnes opp og tas i bruk. Denne er satt til `true` ved bruk av spring-profilene `mock`, `local` og `test`.
+Bruk spring-profilen `no-redis` for å disable redis.

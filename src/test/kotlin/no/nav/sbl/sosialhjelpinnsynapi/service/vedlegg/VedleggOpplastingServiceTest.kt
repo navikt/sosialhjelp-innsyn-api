@@ -12,7 +12,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
-import no.nav.sbl.sosialhjelpinnsynapi.domain.VedleggOpplastingResponse
 import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
@@ -78,7 +77,8 @@ internal class VedleggOpplastingServiceTest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
         every { virusScanner.scan(any(), any()) } just runs
-        every { redisService.put(any(), any()) } just runs
+        every { redisService.put(any(), any(), any()) } just runs
+        every { redisService.defaultTimeToLiveSeconds } returns 1
     }
 
     @Test

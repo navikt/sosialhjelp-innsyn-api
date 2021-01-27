@@ -36,7 +36,8 @@ internal class KommuneServiceTest {
         every { mockDigisosSak.kommunenummer } returns kommuneNr
 
         every { redisService.get(any(), any())} returns null
-        every { redisService.put(any(), any()) } just Runs
+        every { redisService.put(any(), any(), any()) } just Runs
+        every { redisService.defaultTimeToLiveSeconds } returns 1
 
         every { idPortenService.getToken().token } returns "token"
     }
@@ -67,12 +68,12 @@ internal class KommuneServiceTest {
         val firstResult = service.hentKommuneInfo("123", "token")
         assertThat(firstResult).isEqualTo(kommuneInfo)
         verify(exactly = 1) { redisService.get(any(), any()) }
-        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any(), any()) }
 
         every { redisService.get(any(), any())} returns kommuneInfo
         val secondResult = service.hentKommuneInfo("123", "token")
         assertThat(secondResult).isEqualTo(kommuneInfo)
         verify(exactly = 2) { redisService.get(any(), any()) }
-        verify(exactly = 1) { redisService.put(any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any(), any()) }
     }
 }

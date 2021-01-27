@@ -1,16 +1,7 @@
-spring:
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: 1212
-    password: ${REDIS_PASSWORD:foobar}
-
 innsyn:
   vedlegg:
     virusscan:
       enabled: false
-  cache:
-    redis_mocked: true
-    time_to_live_seconds: 300
 
 #Token-validering
 no.nav.security.jwt:

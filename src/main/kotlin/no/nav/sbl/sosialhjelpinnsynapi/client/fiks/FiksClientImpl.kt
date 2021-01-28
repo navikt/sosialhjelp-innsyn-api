@@ -112,7 +112,7 @@ class FiksClientImpl(
                     String::class.java,
                     vars)
 
-            log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
+            log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
             return objectMapper.readValue(response.body!!, requestedClass)
                     .also { lagreTilCache(dokumentlagerId, it) }
         } catch (e: HttpClientErrorException) {

@@ -24,13 +24,13 @@
     "STS_TOKEN_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/sts_token_endpoint_url/token",
     "VIRKSERT_STI": "/var/run/secrets",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
-    "UNLEASH_INSTANCE_ID": "labs-gcp",
-    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local"
+    "UNLEASH_INSTANCE_ID": "labs-gcp"
   },
   "minReplicas": "1",
   "maxReplicas": "1",
   "prometheusEnabled": false,
   "webProxyEnabled": false,
   "isGcp": true,
+  "isLabsGcp": true,
   "vaultEnabled": false
 }

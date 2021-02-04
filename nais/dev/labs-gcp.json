@@ -31,5 +31,6 @@
   "prometheusEnabled": false,
   "webProxyEnabled": false,
   "isGcp": true,
+  "isLabsGcp": true,
   "vaultEnabled": false
 }

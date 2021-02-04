@@ -33,6 +33,7 @@ spec:
         - host: "unleash.nais.io"
       rules:
         - application: sosialhjelp-mock-alt-api
+        - application: sosialhjelp-innsyn-api-redis
 {{/if}}
 {{#if isGcp}}
   filesFrom:
@@ -69,6 +70,4 @@ spec:
 {{/each}}
   envFrom:
     - configmap: loginservice-idporten
-{{#unless isGcp}}
     - secret: redis-password-innsyn-api
-{{/unless}}

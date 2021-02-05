@@ -44,6 +44,7 @@ class EventService(
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak.fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
+        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
         val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
         val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 
@@ -75,7 +76,6 @@ class EventService(
 
             ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         }
-        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
         if (originalSoknadNAV != null && timestampSendt != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(timestampSendt)) {
             model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, timestampSendt, token)
         }
@@ -91,8 +91,9 @@ class EventService(
         }
     }
 
-    fun createSaksoversiktModel(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
+    fun createSaksoversiktModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
+        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
         val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
 
         val model = InternalDigisosSoker()
@@ -105,6 +106,12 @@ class EventService(
         jsonDigisosSoker.hendelser
                 .sortedWith(hendelseComparator)
                 .forEach { model.applyHendelse(it) }
+
+        val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
+
+        if (originalSoknadNAV != null && timestampSendt != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(timestampSendt)) {
+            model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, timestampSendt, token)
+        }
 
         return model
     }

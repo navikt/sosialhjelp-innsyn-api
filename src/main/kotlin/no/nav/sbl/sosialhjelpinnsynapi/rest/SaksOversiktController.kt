@@ -65,7 +65,7 @@ class SaksOversiktController(
             return ResponseEntity.noContent().build()
         }
         val sak = fiksClient.hentDigisosSak(id, token, true)
-        val model = eventService.createSaksoversiktModel(token, sak)
+        val model = eventService.createSaksoversiktModel(sak, token)
         val saksDetaljerResponse = SaksDetaljerResponse(
                 sak.fiksDigisosId,
                 hentNavn(model),

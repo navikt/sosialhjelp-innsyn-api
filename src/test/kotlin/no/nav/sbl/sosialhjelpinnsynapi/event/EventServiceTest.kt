@@ -512,9 +512,14 @@ internal class EventServiceTest {
         )
 
         val model = service.createModel(mockDigisosSak, "token")
-
         assertThat(model).isNotNull
         assertThat(model.oppgaver).hasSize(1)
+        verify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) }
+
+        val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak, "token")
+        assertThat(saksoversiktModel).isNotNull
+        assertThat(saksoversiktModel.oppgaver).hasSize(1)
+        verify(exactly = 2) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) }
     }
 
     @Test
@@ -538,10 +543,14 @@ internal class EventServiceTest {
         )
 
         val model = service.createModel(mockDigisosSak, "token")
-
         assertThat(model).isNotNull
         assertThat(model.oppgaver).hasSize(0)
+        verify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) }
 
+        val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak, "token")
+        assertThat(saksoversiktModel).isNotNull
+        assertThat(saksoversiktModel.oppgaver).hasSize(0)
         verify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) }
     }
+
 }

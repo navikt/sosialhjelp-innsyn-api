@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.event
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
@@ -15,6 +16,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.UtfallVedtak
 import no.nav.sbl.sosialhjelpinnsynapi.service.innsyn.InnsynService
 import no.nav.sbl.sosialhjelpinnsynapi.service.saksstatus.DEFAULT_TITTEL
+import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.InternalVedlegg
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.VedleggService
 import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
@@ -23,6 +25,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 
 internal class EventServiceTest {
@@ -474,7 +478,6 @@ internal class EventServiceTest {
 
     @Test
     fun `At soknad sendt hendelse blir lagt til selv om soknad pdf ikke eksisterer`() {
-
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
                         .withAvsender(avsender)
@@ -488,5 +491,57 @@ internal class EventServiceTest {
         assertThat(hendelse).isNotNull
         assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til The Office")
         assertThat(hendelse.url).isNull()
+    }
+
+    @Test
+    fun `skal legge til dokumentasjonkrav fra søknaden`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns listOf(
+                InternalVedlegg(
+                        type = "statsborgerskap",
+                        tilleggsinfo = "dokumentasjon",
+                        dokumentInfoList = emptyList(),
+                        tidspunktLastetOpp = LocalDateTime.now()
+                )
+        )
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.oppgaver).hasSize(1)
+    }
+
+    @Test
+    fun `skal ikke vise krav fra soknaden hvis soknaden ble sendt for mer enn 30 dager siden`() {
+        val tidspunktSendt31dagerSiden = ZonedDateTime.now().minusDays(31).toEpochSecond() * 1000L
+        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunktSendt31dagerSiden
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
+                        ))
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns listOf(
+                InternalVedlegg(
+                        type = "statsborgerskap",
+                        tilleggsinfo = "dokumentasjon",
+                        dokumentInfoList = emptyList(),
+                        tidspunktLastetOpp = LocalDateTime.now()
+                )
+        )
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.oppgaver).hasSize(0)
+
+        verify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) }
     }
 }

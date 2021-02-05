@@ -30,6 +30,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class EventService(
@@ -75,8 +76,8 @@ class EventService(
             ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
         }
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
-        if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
-            model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, timestampSendt!!, token)
+        if (originalSoknadNAV != null && timestampSendt != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(timestampSendt)) {
+            model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, timestampSendt, token)
         }
 
         return model
@@ -119,7 +120,7 @@ class EventService(
         return model
     }
 
-    fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {
+    private fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {
         when (hendelse) {
             is JsonSoknadsStatus -> apply(hendelse)
             is JsonTildeltNavKontor -> apply(hendelse, norgClient)
@@ -154,6 +155,9 @@ class EventService(
             }
             return 0
         }
+
+        private fun soknadSendtForMindreEnn30DagerSiden(timestampSendt: Long) =
+            unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
 
     }
 }

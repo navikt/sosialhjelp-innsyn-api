@@ -30,6 +30,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class EventService(
@@ -43,7 +44,7 @@ class EventService(
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak.fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
-        val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
+        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
         val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 
         val model = InternalDigisosSoker()
@@ -51,8 +52,8 @@ class EventService(
         // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
         model.status = SoknadsStatus.SENDT
 
-        if (timestampSendt != null) {
-            setTidspunktSendtIfNotZero(model, timestampSendt)
+        if (originalSoknadNAV?.timestampSendt != null) {
+            setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
 
             if (jsonSoknad != null && jsonSoknad.mottaker != null) {
@@ -60,24 +61,13 @@ class EventService(
                 model.historikk.add(
                         Hendelse(
                                 "Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}",
-                                unixToLocalDateTime(timestampSendt),
+                                unixToLocalDateTime(originalSoknadNAV.timestampSendt),
                                 dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
                         ))
             }
         }
 
-        var ingenDokumentasjonskravFraInnsyn = true
-        if (jsonDigisosSoker != null) {
-            jsonDigisosSoker.hendelser
-                    .sortedWith(hendelseComparator)
-                    .forEach { model.applyHendelse(it) }
-
-            ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker.hendelser.filterIsInstance<JsonDokumentasjonEtterspurt>().isEmpty()
-        }
-        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
-        if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn) {
-            model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, timestampSendt!!, token)
-        }
+        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, originalSoknadNAV, digisosSak, token)
 
         return model
     }
@@ -90,22 +80,33 @@ class EventService(
         }
     }
 
-    fun createSaksoversiktModel(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
+    fun createSaksoversiktModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
-        val timestampSendt = digisosSak.originalSoknadNAV?.timestampSendt
+        val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
 
         val model = InternalDigisosSoker()
-        if (timestampSendt != null) {
+
+        if (originalSoknadNAV?.timestampSendt != null) {
             model.status = SoknadsStatus.SENDT
         }
-        if (jsonDigisosSoker == null) {
-            return model
-        }
-        jsonDigisosSoker.hendelser
-                .sortedWith(hendelseComparator)
-                .forEach { model.applyHendelse(it) }
+
+        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, originalSoknadNAV, digisosSak, token)
 
         return model
+    }
+
+    private fun applyHendelserOgSoknadKrav(jsonDigisosSoker: JsonDigisosSoker?, model: InternalDigisosSoker, originalSoknadNAV: OriginalSoknadNAV?, digisosSak: DigisosSak, token: String) {
+        jsonDigisosSoker?.hendelser
+                ?.sortedWith(hendelseComparator)
+                ?.forEach { model.applyHendelse(it) }
+
+        val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker?.hendelser
+                ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
+                ?.isEmpty() ?: true
+
+        if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)) {
+            model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, originalSoknadNAV.timestampSendt, token)
+        }
     }
 
     fun hentAlleUtbetalinger(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
@@ -119,7 +120,7 @@ class EventService(
         return model
     }
 
-    fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {
+    private fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {
         when (hendelse) {
             is JsonSoknadsStatus -> apply(hendelse)
             is JsonTildeltNavKontor -> apply(hendelse, norgClient)
@@ -155,5 +156,7 @@ class EventService(
             return 0
         }
 
+        private fun soknadSendtForMindreEnn30DagerSiden(timestampSendt: Long) =
+                unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
     }
 }

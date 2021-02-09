@@ -20,6 +20,8 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 internal class DokumentasjonEtterspurtTest {
 
@@ -281,5 +283,36 @@ internal class DokumentasjonEtterspurtTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+    }
+
+    @Test
+    internal fun `skal vise oppgaver fra dokumentasjonEtterspurt selv om soknad er over 30 dager gammel`() {
+        val nowMinus31Days = ZonedDateTime.now().minusDays(31)
+        val tidspunktSendt31dagerSiden = nowMinus31Days.toEpochSecond() * 1000L
+        val tidspunktMottatt = nowMinus31Days.minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME)
+        val tidspunktUnderBehandling = nowMinus31Days.minusMinutes(4).format(DateTimeFormatter.ISO_DATE_TIME)
+        val tidspunktDokumentasjonEtterspurt = nowMinus31Days.minusMinutes(3).format(DateTimeFormatter.ISO_DATE_TIME)
+
+        every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunktSendt31dagerSiden
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+                JsonDigisosSoker()
+                        .withAvsender(avsender)
+                        .withVersion("123")
+                        .withHendelser(listOf(
+                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunktMottatt),
+                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunktUnderBehandling),
+                                DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunktDokumentasjonEtterspurt)
+                        ))
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.oppgaver).hasSize(1)
+
+        val oppgave = model.oppgaver.last()
+        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
+        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+        assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
+        assertThat(oppgave.erFraInnsyn).isEqualTo(true)
     }
 }

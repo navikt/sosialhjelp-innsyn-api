@@ -17,7 +17,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
             if (navEnhetsnavn == null) {
                 "Søknaden med vedlegg er mottatt."
             } else {
-                "Søknaden med vedlegg er mottatt hos $navEnhetsnavn."
+                "Søknaden med vedlegg er mottatt hos ${stripEnhetsnavnForKommune(navEnhetsnavn)} kommune."
             }
         }
         JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling."
@@ -27,4 +27,11 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
     }
 
     historikk.add(Hendelse(tittel, hendelse.hendelsestidspunkt.toLocalDateTime()))
+}
+
+fun stripEnhetsnavnForKommune(navEnhetsnavn: String): String {
+    if (navEnhetsnavn.endsWith(" kommune")) {
+        return navEnhetsnavn.replace(" kommune", "")
+    }
+    return navEnhetsnavn
 }

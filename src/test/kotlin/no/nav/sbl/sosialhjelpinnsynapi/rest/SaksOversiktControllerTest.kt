@@ -107,8 +107,8 @@ internal class SaksOversiktControllerTest {
     fun `skal mappe fra DigisosSak til SakResponse for detaljer`() {
         every { fiksClient.hentDigisosSak("123", "token", true) } returns digisosSak1
         every { fiksClient.hentDigisosSak("456", "token", true) } returns digisosSak2
-        every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
-        every { eventService.createSaksoversiktModel(any(), digisosSak2) } returns model2
+        every { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
+        every { eventService.createSaksoversiktModel(digisosSak2, any()) } returns model2
 
         every { model1.status } returns MOTTATT
         every { model2.status } returns UNDER_BEHANDLING
@@ -145,7 +145,7 @@ internal class SaksOversiktControllerTest {
     @Test
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() {
         every { fiksClient.hentDigisosSak("123", "token", true) } returns digisosSak1
-        every { eventService.createSaksoversiktModel(any(), digisosSak1) } returns model1
+        every { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
 
         every { model1.status } returns MOTTATT
         every { model1.oppgaver } returns mutableListOf()

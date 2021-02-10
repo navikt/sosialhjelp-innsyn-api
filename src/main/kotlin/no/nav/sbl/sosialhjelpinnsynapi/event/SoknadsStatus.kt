@@ -4,6 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
 import no.nav.sbl.sosialhjelpinnsynapi.domain.Hendelse
 import no.nav.sbl.sosialhjelpinnsynapi.domain.InternalDigisosSoker
 import no.nav.sbl.sosialhjelpinnsynapi.domain.SoknadsStatus
+import no.nav.sbl.sosialhjelpinnsynapi.event.EventService.Companion.stripEnhetsnavnForKommune
 import no.nav.sbl.sosialhjelpinnsynapi.utils.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
@@ -17,7 +18,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
             if (navEnhetsnavn == null) {
                 "Søknaden med vedlegg er mottatt."
             } else {
-                "Søknaden med vedlegg er mottatt hos $navEnhetsnavn."
+                "Søknaden med vedlegg er mottatt hos ${stripEnhetsnavnForKommune(navEnhetsnavn)} kommune."
             }
         }
         JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling."
@@ -28,3 +29,4 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
 
     historikk.add(Hendelse(tittel, hendelse.hendelsestidspunkt.toLocalDateTime()))
 }
+

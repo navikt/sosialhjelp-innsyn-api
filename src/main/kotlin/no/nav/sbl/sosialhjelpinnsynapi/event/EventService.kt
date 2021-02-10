@@ -60,7 +60,7 @@ class EventService(
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
                 model.historikk.add(
                         Hendelse(
-                                "Søknaden med vedlegg er sendt til ${jsonSoknad.mottaker.navEnhetsnavn}",
+                                "Søknaden med vedlegg er sendt til ${stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn)} kommune",
                                 unixToLocalDateTime(originalSoknadNAV.timestampSendt),
                                 dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
                         ))
@@ -158,5 +158,9 @@ class EventService(
 
         private fun soknadSendtForMindreEnn30DagerSiden(timestampSendt: Long) =
                 unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
+
+        fun stripEnhetsnavnForKommune(navEnhetsnavn: String): String {
+            return navEnhetsnavn.replace(" kommune", "")
+        }
     }
 }

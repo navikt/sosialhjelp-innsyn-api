@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
@@ -62,7 +63,10 @@ class FiksClientImpl(
         try {
             val headers = fiksHeaders(clientProperties, token)
             val urlTemplate = baseUrl + FiksPaths.PATH_DIGISOSSAK
-            val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, digisosId)
+
+            val response: ResponseEntity<String> = withRetry {
+                restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, digisosId)
+            }
 
             log.debug("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
             val body = response.body!!
@@ -105,12 +109,10 @@ class FiksClientImpl(
             val headers = fiksHeaders(clientProperties, token)
             val urlTemplate = baseUrl + FiksPaths.PATH_DOKUMENT
             val vars = mapOf("digisosId" to digisosId, "dokumentlagerId" to dokumentlagerId)
-            val response = restTemplate.exchange(
-                    urlTemplate,
-                    HttpMethod.GET,
-                    HttpEntity<Nothing>(headers),
-                    String::class.java,
-                    vars)
+
+            val response: ResponseEntity<String> = withRetry {
+                restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, vars)
+            }
 
             log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
             return objectMapper.readValue(response.body!!, requestedClass)
@@ -136,18 +138,10 @@ class FiksClientImpl(
             val headers = fiksHeaders(clientProperties, token)
             val url = baseUrl + FiksPaths.PATH_ALLE_DIGISOSSAKER
 
-            return runBlocking {
-                retry(
-                        attempts = retryProperties.attempts,
-                        initialDelay = retryProperties.initialDelay,
-                        maxDelay = retryProperties.maxDelay,
-                        retryableExceptions = arrayOf(HttpServerErrorException::class)
-                ) {
-                    val response = restTemplate.exchange(url, HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
-                    response.body.orEmpty()
-                }
+            val response: ResponseEntity<List<DigisosSak>> = withRetry {
+                restTemplate.exchange(url, HttpMethod.GET, HttpEntity<Nothing>(headers), typeRef<List<DigisosSak>>())
             }
-
+            return response.body.orEmpty()
         } catch (e: HttpClientErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
             val message = e.message?.feilmeldingUtenFnr
@@ -185,14 +179,12 @@ class FiksClientImpl(
         val requestEntity = HttpEntity(body, headers)
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
-            val responseEntity = restTemplate.exchange(
-                    urlTemplate,
-                    HttpMethod.POST,
-                    requestEntity,
-                    String::class.java,
-                    mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId))
+            val vars = mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId)
+            val response: ResponseEntity<String> = withRetry {
+                restTemplate.exchange(urlTemplate, HttpMethod.POST, requestEntity, String::class.java, vars)
+            }
 
-            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue})")
+            log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${response.statusCodeValue})")
 
         } catch (e: HttpClientErrorException) {
             val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
@@ -235,6 +227,19 @@ class FiksClientImpl(
             return objectMapper.writeValueAsString(metadata)
         } catch (e: JsonProcessingException) {
             throw RuntimeException("Feil under serialisering av metadata", e)
+        }
+    }
+
+    private fun <T> withRetry(block: () -> ResponseEntity<T>): ResponseEntity<T> {
+        return runBlocking {
+            retry(
+                    attempts = retryProperties.attempts,
+                    initialDelay = retryProperties.initialDelay,
+                    maxDelay = retryProperties.maxDelay,
+                    retryableExceptions = arrayOf(HttpServerErrorException::class)
+            ) {
+                block()
+            }
         }
     }
 

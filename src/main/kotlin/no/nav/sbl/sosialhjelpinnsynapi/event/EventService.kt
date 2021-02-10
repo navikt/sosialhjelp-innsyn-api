@@ -160,10 +160,7 @@ class EventService(
                 unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
 
         fun stripEnhetsnavnForKommune(navEnhetsnavn: String): String {
-            if (navEnhetsnavn.endsWith(" kommune")) {
-                return navEnhetsnavn.replace(" kommune", "")
-            }
-            return navEnhetsnavn
+            return navEnhetsnavn.replace(" kommune", "")
         }
     }
 }

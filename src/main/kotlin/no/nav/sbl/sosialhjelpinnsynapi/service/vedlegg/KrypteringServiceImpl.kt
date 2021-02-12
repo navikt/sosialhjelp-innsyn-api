@@ -4,11 +4,14 @@ import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
+import no.nav.sbl.sosialhjelpinnsynapi.utils.isRunningInProd
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.runAsyncWithMDC
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import org.apache.commons.io.IOUtils
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -38,6 +41,9 @@ class KrypteringServiceImpl(
         private val restTemplate: RestTemplate
 ) : KrypteringService {
 
+    @Value("\${spring.profiles.active}")
+    private val activeProfile: String? = null
+
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
@@ -54,7 +60,11 @@ class KrypteringServiceImpl(
             val krypteringFuture = runAsyncWithMDC(Runnable {
                 try {
                     log.debug("Starter kryptering, digisosId=$digisosId")
-                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
+                    if (!isRunningInProd() && activeProfile?.contains("mock-alt") == true) {
+                        IOUtils.copy(fileInputStream, pipedOutputStream)
+                    } else {
+                        kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
+                    }
                     log.debug("Ferdig med kryptering, digisosId=$digisosId")
                 } catch (e: Exception) {
                     log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)

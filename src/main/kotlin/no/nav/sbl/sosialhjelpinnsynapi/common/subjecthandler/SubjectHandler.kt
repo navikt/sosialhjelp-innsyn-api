@@ -13,7 +13,7 @@ interface SubjectHandler {
     fun getToken(): String
 }
 
-@Profile("!(mock | mock-alt)")
+@Profile("!mock")
 @Component
 class AzureAdSubjectHandlerImpl(
         private val tokenValidationContextHolder: TokenValidationContextHolder

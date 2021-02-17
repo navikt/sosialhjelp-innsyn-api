@@ -4,12 +4,15 @@ import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils
 import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.forwardHeaders
+import no.nav.sbl.sosialhjelpinnsynapi.utils.isRunningInProd
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.runAsyncWithMDC
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import org.apache.commons.io.IOUtils
 import org.springframework.context.annotation.Profile
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -26,7 +29,7 @@ import java.security.Security
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
-import java.util.*
+import java.util.Collections
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
@@ -35,6 +38,7 @@ import java.util.concurrent.Executors
 @Component
 class KrypteringServiceImpl(
         clientProperties: ClientProperties,
+        private val environment: Environment,
         private val restTemplate: RestTemplate
 ) : KrypteringService {
 
@@ -54,7 +58,11 @@ class KrypteringServiceImpl(
             val krypteringFuture = runAsyncWithMDC(Runnable {
                 try {
                     log.debug("Starter kryptering, digisosId=$digisosId")
-                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
+                    if (!isRunningInProd() && environment.activeProfiles.contains("mock-alt")) {
+                        IOUtils.copy(fileInputStream, pipedOutputStream)
+                    } else {
+                        kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
+                    }
                     log.debug("Ferdig med kryptering, digisosId=$digisosId")
                 } catch (e: Exception) {
                     log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)

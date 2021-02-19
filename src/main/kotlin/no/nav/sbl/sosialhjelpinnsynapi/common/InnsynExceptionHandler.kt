@@ -122,7 +122,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
             log.error(ex.message)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(FrontendErrorMessage("unexpected_error", NOE_UVENTET_FEILET))
+                    .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
         }
         log.info("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl. Feilmelding: ${ex.message}")
         return createUnauthorizedWithLoginUrlResponse(azureadLoginurl!!)
@@ -134,7 +134,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         log.error("Klarer ikke hente metadata fra discoveryurl eller problemer ved konfigurering av issuer. Feilmelding: ${ex.message}")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(FrontendErrorMessage("unexpected_error", NOE_UVENTET_FEILET))
+                .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
     }
 
     private fun createUnauthorizedWithLoginUrlResponse(loginUrl: String): ResponseEntity<FrontendErrorMessage> {

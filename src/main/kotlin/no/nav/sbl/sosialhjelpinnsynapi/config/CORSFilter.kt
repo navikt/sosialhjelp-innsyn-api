@@ -19,6 +19,7 @@ class CORSFilter : Filter {
 
     @Throws(ServletException::class)
     override fun init(filterConfig: FilterConfig?) {
+        // no-op
     }
 
     @Throws(IOException::class, ServletException::class)
@@ -40,7 +41,9 @@ class CORSFilter : Filter {
         filterChain.doFilter(servletRequest, httpResponse)
     }
 
-    override fun destroy() {}
+    override fun destroy() {
+        // no-op
+    }
 
     companion object {
         private val ALLOWED_ORIGINS = listOf(

@@ -34,6 +34,6 @@ class PdlClientMock : PdlClient {
     }
 
     override fun ping() {
-
+        // no-op
     }
 }

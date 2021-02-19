@@ -84,6 +84,6 @@ class RedisServiceMock : RedisService {
     }
 
     override fun put(key: String, value: ByteArray, timeToLiveSeconds: Long) {
-
+        // no-op
     }
 }

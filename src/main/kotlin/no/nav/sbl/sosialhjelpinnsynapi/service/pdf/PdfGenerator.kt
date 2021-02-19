@@ -35,7 +35,7 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
 
     private var fontStream1: InputStream? = ClassPathResource("SourceSansPro-Bold.ttf").inputStream
     val FONT_BOLD: PDFont = PDType0Font.load(document, fontStream1)
-    private val fontStream2: InputStream? = ClassPathResource("SourceSansPro-Regular.ttf").inputStream
+    private var fontStream2: InputStream? = ClassPathResource("SourceSansPro-Regular.ttf").inputStream
     val FONT_PLAIN: PDFont = PDType0Font.load(document, fontStream2)
 
     private fun calculateStartY(): Float {
@@ -43,18 +43,18 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     }
 
     fun finish(): ByteArray {
-        cat.setMetadata(metadata)
+        cat.metadata = metadata
 
         xmp.addSchema(pdfaid)
-        pdfaid.setConformance("B")
-        pdfaid.setPart(1)
-        pdfaid.setAbout("")
+        pdfaid.conformance = "B"
+        pdfaid.part = 1
+        pdfaid.about = ""
         metadata.importXMPMetadata(xmp.asByteArray())
 
-        oi.setInfo("sRGB IEC61966-2.1")
-        oi.setOutputCondition("sRGB IEC61966-2.1")
-        oi.setOutputConditionIdentifier("sRGB IEC61966-2.1")
-        oi.setRegistryName("http://www.color.org")
+        oi.info = sRGB_IEC61966_2_1
+        oi.outputCondition = sRGB_IEC61966_2_1
+        oi.outputConditionIdentifier = sRGB_IEC61966_2_1
+        oi.registryName = "http://www.color.org"
         cat.addOutputIntent(oi)
 
         document.addPage(currentPage)
@@ -152,11 +152,11 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         currentStream = PDPageContentStream(document, currentPage)
     }
 
-    private fun parseLines(text: String, font: PDFont, fontSize: Float): List<String> {
-        var text: String? = text
+    private fun parseLines(inputText: String, font: PDFont, fontSize: Float): List<String> {
+        var text: String? = inputText
         val lines: MutableList<String> = ArrayList()
         var lastSpace = -1
-        while (text != null && text.length > 0) {
+        while (text != null && text.isNotEmpty()) {
             var spaceIndex = text.indexOf(' ', lastSpace + 1)
             if (spaceIndex < 0) spaceIndex = text.length
             var subString = text.substring(0, spaceIndex)
@@ -179,12 +179,12 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         return lines
     }
 
-    fun addLogo() {
+    private fun addLogo() {
         val ximage = PDImageXObject.createFromByteArray(document, logo(), "logo")
         currentStream.drawImage(ximage, 27f, 765f, 99f, 62f)
     }
 
-    private fun logo(): ByteArray? {
+    private fun logo(): ByteArray {
         try {
             val classPathResource = ClassPathResource("/pdf/nav-logo_alphaless.jpg")
             val inputStream = classPathResource.inputStream
@@ -203,6 +203,8 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         private const val FONT_H4_SIZE = 14F
 
         private const val LEADING_PERCENTAGE = 1.5F
+
+        private const val sRGB_IEC61966_2_1 = "sRGB IEC61966-2.1"
 
         private val WIDTH_OF_CONTENT_COLUMN = PDPage(PDRectangle.A4).mediaBox.width - (MARGIN * 2)
         private val MEDIA_BOX = PDPage(PDRectangle.A4).mediaBox

@@ -1,9 +1,22 @@
 package no.nav.sbl.sosialhjelpinnsynapi.mock.responses
 
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.*
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonForvaltningsbrev
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.*
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumenter
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtaksfil
 import org.joda.time.DateTime
 import java.text.DateFormatSymbols
 import java.time.format.DateTimeFormatter
@@ -20,6 +33,12 @@ private fun toDateString(dateTime: DateTime): String? {
     return zoned.format(zonedDateTimeFormatter)
 }
 private fun monthToString(month: Int) = DateFormatSymbols(Locale.forLanguageTag("no-NO")).months[month - 1]
+
+private val sokerFnr = "søkers fnr"
+private val id0 = "12345678-9abc-def0-1234-56789abcdef0"
+private val id1 = "12345678-9abc-def0-1234-56789abcdeb1"
+private val id2 = "12345678-9abc-def0-1234-56789abcdea2"
+private val id3 = "12345678-9abc-def0-1234-56789abcdea3"
 
 val digisosSoker = JsonDigisosSoker()
         .withVersion("1.0.0")
@@ -47,7 +66,7 @@ val digisosSoker = JsonDigisosSoker()
                                                 .withReferanse(
                                                         JsonDokumentlagerFilreferanse()
                                                                 .withType(JsonFilreferanse.Type.DOKUMENTLAGER)
-                                                                .withId("12345678-9abc-def0-1234-56789abcdeb1")
+                                                                .withId(id1)
                                                 )
                                 )
                                 .withVedlegg(
@@ -57,14 +76,14 @@ val digisosSoker = JsonDigisosSoker()
                                                         .withReferanse(
                                                                 JsonDokumentlagerFilreferanse()
                                                                         .withType(JsonFilreferanse.Type.DOKUMENTLAGER)
-                                                                        .withId("12345678-9abc-def0-1234-56789abcdea2")
+                                                                        .withId(id2)
                                                         ),
                                                 JsonVedlegg()
                                                         .withTittel("dokumentasjon etterspurt svarut")
                                                         .withReferanse(
                                                                 JsonSvarUtFilreferanse()
                                                                         .withType(JsonFilreferanse.Type.SVARUT)
-                                                                        .withId("12345678-9abc-def0-1234-56789abcdea3")
+                                                                        .withId(id3)
                                                                         .withNr(1)
                                                         )
                                         )
@@ -96,7 +115,7 @@ val digisosSoker = JsonDigisosSoker()
                                                 .withReferanse(
                                                         JsonDokumentlagerFilreferanse()
                                                                 .withType(JsonFilreferanse.Type.DOKUMENTLAGER)
-                                                                .withId("12345678-9abc-def0-1234-56789abcdeb1")
+                                                                .withId(id1)
                                                 )
                                 )
                                 .withVedlegg(
@@ -127,7 +146,7 @@ val digisosSoker = JsonDigisosSoker()
                                                 .withReferanse(
                                                         JsonDokumentlagerFilreferanse()
                                                                 .withType(JsonFilreferanse.Type.DOKUMENTLAGER)
-                                                                .withId("12345678-9abc-def0-1234-56789abcdef0")
+                                                                .withId(id0)
                                                 )
                                 )
                                 .withSaksreferanse("SAK1")
@@ -139,14 +158,14 @@ val digisosSoker = JsonDigisosSoker()
                                                         .withReferanse(
                                                                 JsonDokumentlagerFilreferanse()
                                                                         .withType(JsonFilreferanse.Type.DOKUMENTLAGER)
-                                                                        .withId("12345678-9abc-def0-1234-56789abcdef0")
+                                                                        .withId(id0)
                                                         ),
                                                 JsonVedlegg()
                                                         .withTittel("Test")
                                                         .withReferanse(
                                                                 JsonSvarUtFilreferanse()
                                                                         .withType(JsonFilreferanse.Type.SVARUT)
-                                                                        .withId("12345678-9abc-def0-1234-56789abcdef0")
+                                                                        .withId(id0)
                                                                         .withNr(1)
                                                         )
                                         )
@@ -189,7 +208,7 @@ val digisosSoker = JsonDigisosSoker()
                                 .withFom(toDateString(DateTime.now().minusMonths(1).minusDays(5).withDayOfMonth(1)))
                                 .withTom(toDateString(DateTime.now().minusDays(5).withDayOfMonth(1).minusDays(1)))
                                 .withAnnenMottaker(false)
-                                .withMottaker("søkers fnr")
+                                .withMottaker(sokerFnr)
                                 .withKontonummer("11223344556")
                                 .withUtbetalingsmetode("bankoverføring"),
 
@@ -206,7 +225,7 @@ val digisosSoker = JsonDigisosSoker()
                                 .withFom(toDateString(DateTime.now().minusMonths(2).minusDays(5).withDayOfMonth(1)))
                                 .withTom(toDateString(DateTime.now().minusMonths(1).minusDays(5).withDayOfMonth(1).minusDays(1)))
                                 .withAnnenMottaker(false)
-                                .withMottaker("søkers fnr")
+                                .withMottaker(sokerFnr)
                                 .withKontonummer(null)
                                 .withUtbetalingsmetode("pengekort"),
 
@@ -223,7 +242,7 @@ val digisosSoker = JsonDigisosSoker()
                                 .withFom(toDateString(DateTime.now().minusMonths(3).minusDays(5).withDayOfMonth(1)))
                                 .withTom(toDateString(DateTime.now().minusMonths(2).minusDays(5).withDayOfMonth(1).minusDays(1)))
                                 .withAnnenMottaker(false)
-                                .withMottaker("søkers fnr")
+                                .withMottaker(sokerFnr)
                                 .withKontonummer(null)
                                 .withUtbetalingsmetode("pengekort")
                 )

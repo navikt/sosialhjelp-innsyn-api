@@ -51,35 +51,35 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(FiksException::class)
     fun handleFiksError(e: FiksException): ResponseEntity<FrontendErrorMessage> {
         log.error("Noe feilet ved kall til Fiks", e)
-        val error = FrontendErrorMessage(FIKS_ERROR, "Noe uventet feilet")
+        val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(FiksClientException::class)
     fun handleFiksClientError(e: FiksClientException): ResponseEntity<FrontendErrorMessage> {
         log.error("Client-feil ved kall til Fiks", e)
-        val error = FrontendErrorMessage(FIKS_ERROR, "Noe uventet feilet")
+        val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(FiksServerException::class)
     fun handleFiksServerError(e: FiksServerException): ResponseEntity<FrontendErrorMessage> {
         log.error("Server-feil ved kall til Fiks", e)
-        val error = FrontendErrorMessage(FIKS_ERROR, "Noe uventet feilet")
+        val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(NorgException::class)
     fun handleNorgError(e: NorgException): ResponseEntity<FrontendErrorMessage> {
         log.error("Noe feilet ved kall til Norg", e)
-        val error = FrontendErrorMessage(NORG_ERROR, "Noe uventet feilet")
+        val error = FrontendErrorMessage(NORG_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(PdlException::class)
     fun handlePdlError(e: PdlException): ResponseEntity<FrontendErrorMessage> {
         log.error("Noe feilet ved kall til Pdl", e)
-        val error = FrontendErrorMessage(PDL_ERROR, "Noe uventet feilet")
+        val error = FrontendErrorMessage(PDL_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
@@ -90,7 +90,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
             val error = FrontendErrorMessage(FILOPPLASTING_ERROR, "Mulig virus funnet")
             return ResponseEntity(error, HttpStatus.PAYLOAD_TOO_LARGE)
         }
-        val error = FrontendErrorMessage(FILOPPLASTING_ERROR, "Noe uventet feilet")
+        val error = FrontendErrorMessage(FILOPPLASTING_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
@@ -122,7 +122,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
             log.error(ex.message)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(FrontendErrorMessage("unexpected_error", "Noe uventet feilet"))
+                    .body(FrontendErrorMessage("unexpected_error", NOE_UVENTET_FEILET))
         }
         log.info("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl. Feilmelding: ${ex.message}")
         return createUnauthorizedWithLoginUrlResponse(azureadLoginurl!!)
@@ -134,7 +134,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         log.error("Klarer ikke hente metadata fra discoveryurl eller problemer ved konfigurering av issuer. Feilmelding: ${ex.message}")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(FrontendErrorMessage("unexpected_error", "Noe uventet feilet"))
+                .body(FrontendErrorMessage("unexpected_error", NOE_UVENTET_FEILET))
     }
 
     private fun createUnauthorizedWithLoginUrlResponse(loginUrl: String): ResponseEntity<FrontendErrorMessage> {
@@ -145,6 +145,8 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     companion object {
         private val log by logger()
+
+        private const val NOE_UVENTET_FEILET = "Noe uventet feilet"
 
         private const val UNEXPECTED_ERROR = "unexpected_error"
         private const val FIKS_ERROR = "fiks_error"

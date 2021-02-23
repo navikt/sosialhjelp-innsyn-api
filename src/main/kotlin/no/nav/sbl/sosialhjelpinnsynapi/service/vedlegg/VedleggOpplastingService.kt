@@ -5,7 +5,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
-import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
 import no.nav.sbl.sosialhjelpinnsynapi.service.pdf.EttersendelsePdfGenerator
@@ -33,7 +32,6 @@ class VedleggOpplastingService(
         private val krypteringService: KrypteringService,
         private val virusScanner: VirusScanner,
         private val redisService: RedisService,
-        private val cacheProperties: CacheProperties,
         private val ettersendelsePdfGenerator: EttersendelsePdfGenerator
 ) {
 

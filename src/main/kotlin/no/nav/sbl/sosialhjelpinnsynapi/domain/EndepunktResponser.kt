@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Date
 
 data class SoknadsStatusResponse(
         val status: SoknadsStatus,

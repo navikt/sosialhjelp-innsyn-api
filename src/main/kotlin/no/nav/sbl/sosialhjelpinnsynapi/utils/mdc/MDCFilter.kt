@@ -8,7 +8,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.generateCallId
 import no.nav.sbl.sosialhjelpinnsynapi.utils.mdc.MDCUtils.put
 import org.springframework.http.HttpHeaders
 import org.springframework.web.filter.OncePerRequestFilter
-import java.util.*
+import java.util.Optional
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

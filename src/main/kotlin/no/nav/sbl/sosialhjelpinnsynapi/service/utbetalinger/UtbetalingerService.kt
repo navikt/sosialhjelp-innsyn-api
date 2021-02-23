@@ -20,7 +20,7 @@ import org.springframework.web.context.request.RequestContextHolder.setRequestAt
 import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.Locale
 
 
 const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"

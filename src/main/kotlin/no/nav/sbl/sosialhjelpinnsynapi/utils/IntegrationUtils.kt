@@ -4,7 +4,7 @@ import no.nav.sbl.sosialhjelpinnsynapi.config.ClientProperties
 import org.slf4j.MDC
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import java.util.*
+import java.util.Collections
 
 object IntegrationUtils {
     const val HEADER_INTEGRASJON_ID = "IntegrasjonId"

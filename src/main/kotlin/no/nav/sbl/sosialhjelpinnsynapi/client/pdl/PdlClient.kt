@@ -24,7 +24,7 @@ import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Optional
 import java.util.stream.Collectors
 
 interface PdlClient {

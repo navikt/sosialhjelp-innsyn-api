@@ -3,6 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
@@ -32,7 +33,8 @@ class VedleggOpplastingService(
         private val krypteringService: KrypteringService,
         private val virusScanner: VirusScanner,
         private val redisService: RedisService,
-        private val ettersendelsePdfGenerator: EttersendelsePdfGenerator
+        private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
+        private val dokumentlagerClient: DokumentlagerClient,
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {
@@ -58,12 +60,12 @@ class VedleggOpplastingService(
         filerForOpplasting.add(ettersendelsePdf)
 
         val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(filerForOpplasting.size))
-
         try {
-            val filerForOpplastingEtterKryptering = mutableListOf<FilForOpplasting>()
-            filerForOpplasting.forEach { file ->
-                val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, token, digisosId)
-                filerForOpplastingEtterKryptering.add(FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream))
+            val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(token)
+            val filerForOpplastingEtterKryptering: List<FilForOpplasting> = filerForOpplasting
+                .map { file ->
+                    val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, certificate, digisosId)
+                    FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream)
             }
 
             val vedleggSpesifikasjon = createVedleggJson(files, metadata)

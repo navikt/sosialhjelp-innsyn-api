@@ -14,6 +14,7 @@ import java.io.InputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import java.security.Security
+import java.security.cert.X509Certificate
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
@@ -22,15 +23,11 @@ import java.util.concurrent.Executors
 @Component
 class KrypteringServiceImpl(
         private val environment: Environment,
-        private val dokumentlagerClient: DokumentlagerClient,
 ) : KrypteringService {
 
     private val executor = Executors.newFixedThreadPool(4)
 
-    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, token: String, digisosId: String): InputStream {
-        val kryptering = CMSKrypteringImpl()
-        val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(token)
-
+    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, certificate: X509Certificate, digisosId: String): InputStream {
         val pipedInputStream = PipedInputStream()
         try {
             val pipedOutputStream = PipedOutputStream(pipedInputStream)

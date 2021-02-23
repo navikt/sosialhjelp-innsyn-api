@@ -1,7 +1,6 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg
 
 import no.ks.kryptering.CMSKrypteringImpl
-import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.utils.isRunningInProd
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.runAsyncWithMDC
@@ -26,6 +25,7 @@ class KrypteringServiceImpl(
 ) : KrypteringService {
 
     private val executor = Executors.newFixedThreadPool(4)
+    private val kryptering = CMSKrypteringImpl()
 
     override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, certificate: X509Certificate, digisosId: String): InputStream {
         val pipedInputStream = PipedInputStream()

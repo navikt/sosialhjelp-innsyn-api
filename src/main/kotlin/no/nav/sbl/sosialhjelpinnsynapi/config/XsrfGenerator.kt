@@ -3,7 +3,7 @@ package no.nav.sbl.sosialhjelpinnsynapi.config
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.DateTime
 import java.security.NoSuchAlgorithmException
-import java.util.*
+import java.util.Arrays
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import javax.servlet.http.HttpServletRequest

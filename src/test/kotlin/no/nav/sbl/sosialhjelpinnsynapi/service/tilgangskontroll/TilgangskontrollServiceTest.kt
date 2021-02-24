@@ -2,7 +2,11 @@ package no.nav.sbl.sosialhjelpinnsynapi.service.tilgangskontroll
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.*
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Adressebeskyttelse
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.Gradering
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlClient
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlHentPerson
+import no.nav.sbl.sosialhjelpinnsynapi.client.pdl.PdlNavn
 import no.nav.sbl.sosialhjelpinnsynapi.common.TilgangskontrollException
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType

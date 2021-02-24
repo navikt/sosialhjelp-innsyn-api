@@ -17,7 +17,7 @@ import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.util.*
+import java.util.ArrayList
 
 class PdfGenerator internal constructor(private var document: PDDocument) {
     private var currentPage = PDPage(PDRectangle.A4)

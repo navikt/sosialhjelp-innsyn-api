@@ -27,7 +27,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Collections
 
 /**
  * Brukes kun i dev-sbs eller ved lokal testing mot fiks-test

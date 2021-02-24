@@ -35,7 +35,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import javax.imageio.ImageIO
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

@@ -10,13 +10,12 @@ import no.nav.sbl.sosialhjelpinnsynapi.utils.IntegrationUtils.BEARER
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
-import java.util.*
+import java.util.Collections
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import kotlin.collections.ArrayList
 
 @Profile("!(prod-sbs | mock)")
 @Component

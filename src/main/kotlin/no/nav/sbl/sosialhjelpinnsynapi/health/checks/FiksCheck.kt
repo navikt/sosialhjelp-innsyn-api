@@ -20,7 +20,7 @@ class FiksCheck(
     override val type = DependencyType.REST
     override val name = "Fiks Digisos API"
     override val address = clientProperties.fiksDigisosEndpointUrl
-    override val importance = Importance.WARNING
+    override val importance = Importance.CRITICAL
 
     override fun doCheck() {
         kommuneInfoClient.getAll(idPortenService.getToken().token)

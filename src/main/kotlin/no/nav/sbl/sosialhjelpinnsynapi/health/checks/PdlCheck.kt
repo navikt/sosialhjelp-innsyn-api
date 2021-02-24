@@ -19,7 +19,7 @@ class PdlCheck(
     override val type = DependencyType.REST
     override val name = "PDL"
     override val address = clientProperties.pdlEndpointUrl
-    override val importance = Importance.WARNING
+    override val importance = Importance.CRITICAL
 
     override fun doCheck() {
         pdlClient.ping()

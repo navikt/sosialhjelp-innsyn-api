@@ -1,12 +1,9 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg
 
 import no.ks.kryptering.CMSKrypteringImpl
-import no.nav.sbl.sosialhjelpinnsynapi.utils.isRunningInProd
 import no.nav.sbl.sosialhjelpinnsynapi.utils.logger
 import no.nav.sbl.sosialhjelpinnsynapi.utils.runAsyncWithMDC
-import org.apache.commons.io.IOUtils
 import org.springframework.context.annotation.Profile
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.InputStream
@@ -18,11 +15,9 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
 
-@Profile("!mock")
+@Profile("!(mock | mock-alt)")
 @Component
-class KrypteringServiceImpl(
-        private val environment: Environment,
-) : KrypteringService {
+class KrypteringServiceImpl : KrypteringService {
 
     private val executor = Executors.newFixedThreadPool(4)
     private val kryptering = CMSKrypteringImpl()
@@ -34,11 +29,7 @@ class KrypteringServiceImpl(
             val krypteringFuture = runAsyncWithMDC({
                 try {
                     log.debug("Starter kryptering")
-                    if (!isRunningInProd() && environment.activeProfiles.contains("mock-alt")) {
-                        IOUtils.copy(fileInputStream, pipedOutputStream)
-                    } else {
-                        kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
-                    }
+                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
                     log.debug("Ferdig med kryptering")
                 } catch (e: Exception) {
                     log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)

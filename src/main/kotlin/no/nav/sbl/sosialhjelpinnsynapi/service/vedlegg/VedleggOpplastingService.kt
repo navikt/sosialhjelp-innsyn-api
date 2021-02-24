@@ -64,7 +64,7 @@ class VedleggOpplastingService(
             val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(token)
             val filerForOpplastingEtterKryptering: List<FilForOpplasting> = filerForOpplasting
                 .map { file ->
-                    val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, certificate, digisosId)
+                    val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, certificate)
                     FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream)
             }
 

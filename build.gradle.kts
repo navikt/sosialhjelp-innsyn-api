@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTra
 import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "no.nav.sbl"
+group = "no.nav.sosialhjelp"
 
 object Versions {
     const val kotlin = "1.4.21"
@@ -51,7 +51,7 @@ plugins {
 
 application {
     applicationName = "sosialhjelp-innsyn-api"
-    mainClassName = "no.nav.sbl.sosialhjelpinnsynapi.ApplicationKt"
+    mainClassName = "no.nav.sosialhjelp.innsyn.ApplicationKt"
 }
 
 java {

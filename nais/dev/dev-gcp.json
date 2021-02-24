@@ -8,7 +8,7 @@
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,istio-tracing,no-redis",
     "METADATA_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/.well-known/openid-configuration",
     "FIKS_DIGISOS_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/fiks",
-    "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/fiks/dokumentlager",
+    "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://digisos-gcp.dev.nav.no/sosialhjelp/mock-alt-api/fiks/dokumentlager",
     "FIKS_SVAR_UT_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/fiks/svarut",
     "INTEGRASJONSID_FIKS" : "id1",
     "INTEGRASJONSID_FIKS_KOMMUNE" : "id2",

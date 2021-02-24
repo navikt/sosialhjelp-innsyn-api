@@ -1,0 +1,32 @@
+package no.nav.sosialhjelp.innsyn.event
+
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
+import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
+import no.nav.sosialhjelp.innsyn.event.EventService.Companion.stripEnhetsnavnForKommune
+import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
+
+fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
+
+    status = SoknadsStatus.valueOf(hendelse.status.name)
+
+    val tittel = when (hendelse.status) {
+        JsonSoknadsStatus.Status.MOTTATT -> {
+            val navEnhetsnavn = soknadsmottaker?.navEnhetsnavn
+
+            if (navEnhetsnavn == null) {
+                "Søknaden med vedlegg er mottatt."
+            } else {
+                "Søknaden med vedlegg er mottatt hos ${stripEnhetsnavnForKommune(navEnhetsnavn)} kommune."
+            }
+        }
+        JsonSoknadsStatus.Status.UNDER_BEHANDLING -> "Søknaden er under behandling."
+        JsonSoknadsStatus.Status.FERDIGBEHANDLET -> "Søknaden er ferdig behandlet."
+        JsonSoknadsStatus.Status.BEHANDLES_IKKE -> "Din søknad vil bli behandlet, men vi kan ikke vise behandlingsstatus digitalt."
+        else -> throw RuntimeException("Statustype ${hendelse.status.value()} mangler mapping")
+    }
+
+    historikk.add(Hendelse(tittel, hendelse.hendelsestidspunkt.toLocalDateTime()))
+}
+

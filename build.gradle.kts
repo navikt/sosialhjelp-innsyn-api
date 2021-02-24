@@ -141,7 +141,7 @@ dependencies {
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
-    testImplementation("io.mockk:mockk:${Versions.mockk}")
+    implementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("no.nav.security:token-validation-test-support:${Versions.tokenValidation}")
     testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")

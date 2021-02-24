@@ -27,27 +27,27 @@ class KrypteringServiceImpl(
     private val executor = Executors.newFixedThreadPool(4)
     private val kryptering = CMSKrypteringImpl()
 
-    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, certificate: X509Certificate, digisosId: String): InputStream {
+    override fun krypter(fileInputStream: InputStream, krypteringFutureList: MutableList<CompletableFuture<Void>>, certificate: X509Certificate): InputStream {
         val pipedInputStream = PipedInputStream()
         try {
             val pipedOutputStream = PipedOutputStream(pipedInputStream)
             val krypteringFuture = runAsyncWithMDC({
                 try {
-                    log.debug("Starter kryptering, digisosId=$digisosId")
+                    log.debug("Starter kryptering")
                     if (!isRunningInProd() && environment.activeProfiles.contains("mock-alt")) {
                         IOUtils.copy(fileInputStream, pipedOutputStream)
                     } else {
                         kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
                     }
-                    log.debug("Ferdig med kryptering, digisosId=$digisosId")
+                    log.debug("Ferdig med kryptering")
                 } catch (e: Exception) {
                     log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 } finally {
                     try {
-                        log.debug("Lukker kryptering OutputStream, digisosId=$digisosId")
+                        log.debug("Lukker kryptering OutputStream")
                         pipedOutputStream.close()
-                        log.debug("OutputStream for kryptering er lukket, digisosId=$digisosId")
+                        log.debug("OutputStream for kryptering er lukket")
                     } catch (e: IOException) {
                         log.error("Lukking av Outputstream for kryptering feilet", e)
                     }

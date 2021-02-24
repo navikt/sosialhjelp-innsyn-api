@@ -1,4 +1,4 @@
-![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Build/badge.svg?branch=master)
+![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Build%20image/badge.svg?branch=master)
 ![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Deploy%20Dev/badge.svg?)
 ![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Deploy%20Prod/badge.svg?)
 # sosialhjelp-innsyn-api

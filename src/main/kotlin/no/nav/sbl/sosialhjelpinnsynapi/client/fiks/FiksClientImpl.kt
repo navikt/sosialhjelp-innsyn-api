@@ -180,9 +180,7 @@ class FiksClientImpl(
         try {
             val urlTemplate = "$baseUrl/digisos/api/v1/soknader/{kommunenummer}/{digisosId}/{navEksternRefId}"
             val vars = mapOf("kommunenummer" to kommunenummer, "digisosId" to digisosId, "navEksternRefId" to navEksternRefId)
-            val response: ResponseEntity<String> = withRetry {
-                restTemplate.exchange(urlTemplate, HttpMethod.POST, requestEntity, String::class.java, vars)
-            }
+            val response: ResponseEntity<String> = restTemplate.exchange(urlTemplate, HttpMethod.POST, requestEntity, String::class.java, vars)
 
             log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${response.statusCodeValue})")
 

@@ -18,7 +18,7 @@ class NorgCheck(
     override val type = DependencyType.REST
     override val name = "NORG2"
     override val address = clientProperties.norgEndpointUrl
-    override val importance = Importance.WARNING
+    override val importance = Importance.CRITICAL
 
     override fun doCheck() {
         norgClient.ping()

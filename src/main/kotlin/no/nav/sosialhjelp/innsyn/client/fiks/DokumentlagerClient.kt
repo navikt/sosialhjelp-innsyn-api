@@ -6,6 +6,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -20,17 +21,22 @@ import java.security.cert.X509Certificate
 import java.util.Collections
 
 
+interface DokumentlagerClient {
+    fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate
+}
+
+@Profile("!mock")
 @Component
-class DokumentlagerClient(
+class DokumentlagerClientImpl(
     clientProperties: ClientProperties,
     private val restTemplate: RestTemplate
-) {
+) : DokumentlagerClient {
 
     private val baseUrl = clientProperties.fiksDigisosEndpointUrl
     private val fiksIntegrasjonid = clientProperties.fiksIntegrasjonId
     private val fiksIntegrasjonpassord = clientProperties.fiksIntegrasjonpassord
 
-    fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
+    override fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
         val headers = IntegrationUtils.forwardHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         headers.set(HttpHeaders.AUTHORIZATION, token)

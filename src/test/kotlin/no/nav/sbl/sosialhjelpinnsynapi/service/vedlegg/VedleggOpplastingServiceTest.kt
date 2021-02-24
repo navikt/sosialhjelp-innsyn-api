@@ -9,10 +9,10 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.FiksClient
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingException
 import no.nav.sbl.sosialhjelpinnsynapi.common.OpplastingFilnavnMismatchException
-import no.nav.sbl.sosialhjelpinnsynapi.redis.CacheProperties
 import no.nav.sbl.sosialhjelpinnsynapi.redis.RedisService
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetFil
 import no.nav.sbl.sosialhjelpinnsynapi.rest.OpplastetVedleggMetadata
@@ -34,6 +34,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.security.cert.X509Certificate
 import java.time.LocalDate
 import java.util.UUID
 import javax.imageio.ImageIO
@@ -49,9 +50,16 @@ internal class VedleggOpplastingServiceTest {
     private val krypteringService: KrypteringService = mockk()
     private val virusScanner: VirusScanner = mockk()
     private val redisService: RedisService = mockk()
-    private val cacheProperties: CacheProperties = mockk(relaxed = true)
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
-    private val service = VedleggOpplastingService(fiksClient, krypteringService, virusScanner, redisService, cacheProperties, ettersendelsePdfGenerator)
+    private val dokumentlagerClient: DokumentlagerClient = mockk()
+    private val service = VedleggOpplastingService(
+        fiksClient,
+        krypteringService,
+        virusScanner,
+        redisService,
+        ettersendelsePdfGenerator,
+        dokumentlagerClient,
+    )
 
     private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
 
@@ -70,6 +78,8 @@ internal class VedleggOpplastingServiceTest {
     private val pngFile = createImageByteArray("png")
     private val jpgFile = createImageByteArray("jpg")
 
+    private val mockCertificate: X509Certificate = mockk()
+
     @BeforeEach
     fun init() {
         clearAllMocks()
@@ -79,6 +89,7 @@ internal class VedleggOpplastingServiceTest {
         every { virusScanner.scan(any(), any()) } just runs
         every { redisService.put(any(), any(), any()) } just runs
         every { redisService.defaultTimeToLiveSeconds } returns 1
+        every { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(any()) } returns mockCertificate
     }
 
     @Test

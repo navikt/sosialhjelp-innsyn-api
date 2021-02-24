@@ -1,6 +1,7 @@
 package no.nav.sbl.sosialhjelpinnsynapi.service.digisosapi
 
 import no.nav.sbl.sosialhjelpinnsynapi.client.digisosapi.DigisosApiClient
+import no.nav.sbl.sosialhjelpinnsynapi.client.fiks.DokumentlagerClient
 import no.nav.sbl.sosialhjelpinnsynapi.domain.DigisosApiWrapper
 import no.nav.sbl.sosialhjelpinnsynapi.service.idporten.IdPortenService
 import no.nav.sbl.sosialhjelpinnsynapi.service.vedlegg.FilForOpplasting
@@ -23,7 +24,8 @@ class DigisosApiServiceImpl(
         private val digisosApiClient: DigisosApiClient,
         private val krypteringService: KrypteringService,
         private val virusScanner: VirusScanner,
-        private val idPortenService: IdPortenService
+        private val idPortenService: IdPortenService,
+        private val dokumentlagerClient: DokumentlagerClient
 ) : DigisosApiService {
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
@@ -35,7 +37,7 @@ class DigisosApiServiceImpl(
         val accessToken = idPortenService.getToken()
 
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
-        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, BEARER + accessToken.token, fiksDigisosId)
+        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(BEARER + accessToken.token), fiksDigisosId)
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         val fiksIder = digisosApiClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
         waitForFutures(krypteringFutureList)

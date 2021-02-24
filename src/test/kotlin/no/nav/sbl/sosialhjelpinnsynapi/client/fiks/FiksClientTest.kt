@@ -278,7 +278,7 @@ internal class FiksClientTest {
 
         val ettersendelsPdf = ByteArray(1)
         every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
-        every { krypteringService.krypter(any(), any(), any(), any()) } returns fil1
+        every { krypteringService.krypter(any(), any(), any()) } returns fil1
 
         val mockDigisosSakResponse: ResponseEntity<String> = mockk()
         every { mockDigisosSakResponse.body } returns ok_digisossak_response

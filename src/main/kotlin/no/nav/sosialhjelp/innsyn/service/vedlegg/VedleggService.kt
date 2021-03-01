@@ -75,7 +75,7 @@ class VedleggService(
                                     dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)
 
                                     if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                        throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)
+                                        throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
                                     }
                                 }
                                 InternalVedlegg(

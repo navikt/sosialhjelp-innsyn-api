@@ -68,7 +68,7 @@ class FiksClientImpl(
                 restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, digisosId)
             }
 
-            log.debug("Hentet DigisosSak fra Fiks, digisosId=$digisosId")
+            log.debug("Hentet DigisosSak fra Fiks")
             val body = response.body!!
             return objectMapper.readValue(body, DigisosSak::class.java)
                     .also { lagreTilCache(digisosId, it) }

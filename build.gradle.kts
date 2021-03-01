@@ -9,7 +9,7 @@ object Versions {
     const val kotlin = "1.4.21"
     const val coroutines = "1.4.2"
     const val springBoot = "2.4.3"
-    const val sosialhjelpCommon = "1.14b3a11"
+    const val sosialhjelpCommon = "1.1c8e196"
     const val logback = "1.2.3"
     const val logstash = "6.5"
     const val filformat = "1.2021.02.23-17.17-2b90547959dd"

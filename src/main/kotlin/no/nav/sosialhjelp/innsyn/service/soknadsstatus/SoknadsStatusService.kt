@@ -27,7 +27,7 @@ class SoknadsStatusService(
         val status = model.status
         if (status == null) {
             log.warn("SoknadsStatus er null")
-            throw RuntimeException("SoknadsStatus er null på digisosId=$fiksDigisosId")
+            throw RuntimeException("SoknadsStatus er null")
         }
         log.info("Hentet nåværende søknadsstatus=${status.name}")
         val erInnsynDeaktivertForKommune = kommuneService.erInnsynDeaktivertForKommune(fiksDigisosId, token)

@@ -75,7 +75,7 @@ class VedleggService(
                                     dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)
 
                                     if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                        throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata, for digisosId=$fiksDigisosId", null)
+                                        throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
                                     }
                                 }
                                 InternalVedlegg(
@@ -102,7 +102,7 @@ class VedleggService(
 
     private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {
         return dokumentInfoList.size == files.size &&
-                dokumentInfoList.filterIndexed { idx, it -> it.filnavn == files[idx].filnavn }.size == dokumentInfoList.size
+                dokumentInfoList.filterIndexed { idx, it -> it.filnavn == files[idx].sha512 }.size == dokumentInfoList.size
     }
 
 

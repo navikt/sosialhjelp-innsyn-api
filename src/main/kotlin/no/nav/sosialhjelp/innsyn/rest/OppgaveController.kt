@@ -22,7 +22,7 @@ class OppgaveController(
 ) {
 
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = ["application/json;charset=UTF-8"])
-    fun hentOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+    fun getOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
         tilgangskontrollService.sjekkTilgang()
 
         val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
@@ -33,10 +33,32 @@ class OppgaveController(
     }
 
     @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}", produces = ["application/json;charset=UTF-8"])
-    fun hentOppgaveMedId(@PathVariable fiksDigisosId: String, @PathVariable oppgaveId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+    fun getOppgaveMedId(@PathVariable fiksDigisosId: String, @PathVariable oppgaveId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
         tilgangskontrollService.sjekkTilgang()
 
         val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, token, oppgaveId)
+        if (oppgaver.isEmpty()) {
+            return ResponseEntity(HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.ok(oppgaver)
+    }
+
+    @GetMapping("/{fiksDigisosId}/vilkar", produces = ["application/json;charset=UTF-8"])
+    fun getVilkar(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+        tilgangskontrollService.sjekkTilgang()
+
+        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
+        if (oppgaver.isEmpty()) {
+            return ResponseEntity(HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.ok(oppgaver)
+    }
+
+    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
+    fun getDokumentasjonkrav(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+        tilgangskontrollService.sjekkTilgang()
+
+        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
         if (oppgaver.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }

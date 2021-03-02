@@ -116,6 +116,11 @@ data class UrlResponse(
         val link: String
 )
 
+data class ForelopigSvar(
+        val harMottattForelopigSvar: Boolean,
+        val link: String?
+)
+
 enum class SoknadsStatus {
     SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE
 }
@@ -132,7 +137,8 @@ enum class UtfallVedtak {
     INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST
 }
 
-data class ForelopigSvar(
-        val harMottattForelopigSvar: Boolean,
-        val link: String?
-)
+enum class HendelseType {
+    dokumentasjonEtterspurt, vilkar, dokumentasjonkrav
+}
+
+

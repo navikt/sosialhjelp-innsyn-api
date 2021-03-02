@@ -4,6 +4,7 @@ import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
+import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
@@ -52,6 +53,10 @@ class OppgaveService(
                 .filter { it.type == oppgave.tittel }
                 .filter { it.tilleggsinfo == oppgave.tilleggsinfo }
                 .any { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
+    }
+
+    fun getVilkar(fiksDigisosId: String, token: String): List<VilkarResponse> {
+        TODO("Not yet implemented")
     }
 
     companion object {

@@ -47,6 +47,19 @@ data class OppgaveElement(
         val erFraInnsyn: Boolean
 )
 
+data class VilkarResponse(
+        val vilkarElementer: List<VilkarElement>
+)
+
+data class VilkarElement(
+        val type: String,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val hendelsetidspunkt: LocalDate,
+        val vilkarReferanse: String,
+        val utbetalingsreferanse: String?,
+        val tittel: String?
+)
+
 data class UtbetalingerResponse(
         val ar: Int,
         val maned: String,

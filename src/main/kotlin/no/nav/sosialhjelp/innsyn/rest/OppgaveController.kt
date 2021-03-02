@@ -47,11 +47,11 @@ class OppgaveController(
     fun getVilkar(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
         tilgangskontrollService.sjekkTilgang()
 
-        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
-        if (oppgaver.isEmpty()) {
+        val vilkar = oppgaveService.getVilkar(fiksDigisosId, token)
+        if (vilkar.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
-        return ResponseEntity.ok(oppgaver)
+        return ResponseEntity.ok(vilkar)
     }
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])

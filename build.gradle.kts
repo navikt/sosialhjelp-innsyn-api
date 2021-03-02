@@ -104,7 +104,7 @@ dependencies {
     implementation("io.prometheus:simpleclient_common:${Versions.prometheus}")
     implementation("io.prometheus:simpleclient_hotspot:${Versions.prometheus}")
 
-//    Logging
+//    Loggingsfbgsrghsr
     implementation("ch.qos.logback:logback-classic:${Versions.logback}")
     implementation("net.logstash.logback:logstash-logback-encoder:${Versions.logstash}")
 

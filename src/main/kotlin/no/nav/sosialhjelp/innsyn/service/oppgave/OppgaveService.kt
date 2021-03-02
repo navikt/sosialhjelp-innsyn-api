@@ -59,14 +59,11 @@ class OppgaveService(
             return emptyList()
         }
 
-        val vilkarResponseList = model.oppgaver
-                .filter { !erAlleredeLastetOpp(it) }
-                .groupBy { if (it.innsendelsesfrist == null) null else it.innsendelsesfrist!!.toLocalDate() }
+        val vilkarResponseList = model.vilkar
+                .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
-                    OppgaveResponse(
-                            innsendelsesfrist = key,
-                            oppgaveId = value[0].oppgaveId,  // oppgaveId og innsendelsefrist er alltid 1-1
-                            oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.erFraInnsyn) }
+                    VilkarResponse(
+                            vilkarElementer = value.map { VilkarElement("VILKAR", it.referanse )}
                     )
                 }
                 .sortedBy { it.innsendelsesfrist }

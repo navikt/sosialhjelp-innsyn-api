@@ -1,10 +1,7 @@
 package no.nav.sosialhjelp.innsyn.service.oppgave
 
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.domain.Oppgave
-import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
-import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
-import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
+import no.nav.sosialhjelp.innsyn.domain.*
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
@@ -56,6 +53,29 @@ class OppgaveService(
     }
 
     fun getVilkar(fiksDigisosId: String, token: String): List<VilkarResponse> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
+        if (model.vilkar.isEmpty()) {
+            return emptyList()
+        }
+
+        val vilkarResponseList = model.oppgaver
+                .filter { !erAlleredeLastetOpp(it) }
+                .groupBy { if (it.innsendelsesfrist == null) null else it.innsendelsesfrist!!.toLocalDate() }
+                .map { (key, value) ->
+                    OppgaveResponse(
+                            innsendelsesfrist = key,
+                            oppgaveId = value[0].oppgaveId,  // oppgaveId og innsendelsefrist er alltid 1-1
+                            oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.erFraInnsyn) }
+                    )
+                }
+                .sortedBy { it.innsendelsesfrist }
+
+
+        return vilkarResponseList;
+    }
+
+    fun getDokumentasjonkrav(fiksDigisosId: String, token: String): List<DokumentasjonkravResponse> {
         TODO("Not yet implemented")
     }
 

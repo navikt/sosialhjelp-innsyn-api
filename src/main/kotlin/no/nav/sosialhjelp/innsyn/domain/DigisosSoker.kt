@@ -15,8 +15,12 @@ data class InternalDigisosSoker(
         var oppgaver: MutableList<Oppgave>,
         var historikk: MutableList<Hendelse>,
         var forelopigSvar: ForelopigSvar,
-        var tidspunktSendt: LocalDateTime?
+        var tidspunktSendt: LocalDateTime?,
+        var vilkar: MutableList<Vilkar>,
+        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
 ) {
+
+
     constructor() : this(
             referanse = null,
             status = null,
@@ -28,7 +32,9 @@ data class InternalDigisosSoker(
             oppgaver = mutableListOf(),
             historikk = mutableListOf(),
             forelopigSvar = ForelopigSvar(false, null),
-            tidspunktSendt = null
+            tidspunktSendt = null,
+            vilkar = mutableListOf(),
+            dokumentasjonkrav = mutableListOf()
     )
 }
 

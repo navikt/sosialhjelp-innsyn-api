@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.rest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
-import no.nav.sosialhjelp.innsyn.domain.VilkarElement
 import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService

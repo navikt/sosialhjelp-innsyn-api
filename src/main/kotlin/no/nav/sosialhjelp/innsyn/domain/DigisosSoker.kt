@@ -95,8 +95,7 @@ data class Vilkar(
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
         var datoSistEndret: LocalDateTime,
-        var tittel: String?,
-        var type: String
+        var tittel: String?
 )
 
 data class Dokumentasjonkrav(
@@ -104,8 +103,7 @@ data class Dokumentasjonkrav(
         var beskrivelse: String?,
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
-        var tittel: String?,
-        var type: String
+        var tittel: String?
 )
 
 data class Hendelse(

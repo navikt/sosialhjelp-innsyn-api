@@ -41,7 +41,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
             oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT,
             datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
             tittel = hendelse.tittel,
-            type = hendelse.type.value()
     )
 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)

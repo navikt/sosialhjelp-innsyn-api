@@ -27,7 +27,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
             datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
             datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime(),
             tittel = hendelse.tittel,
-            type = hendelse.type.value()
     )
 
     utbetalinger.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }

@@ -54,7 +54,6 @@ data class VilkarResponse(
 )
 
 data class VilkarElement(
-        val type: String,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val hendelsetidspunkt: LocalDate,
         val vilkarReferanse: String,
@@ -67,7 +66,6 @@ data class DokumentasjonkravResponse(
 )
 
 data class DokumentasjonkravElement(
-        val type: String,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val hendelsetidspunkt: LocalDate,
         val dokumentasjonkravReferanse : String,

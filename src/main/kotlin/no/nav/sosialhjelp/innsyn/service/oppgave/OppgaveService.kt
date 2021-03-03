@@ -63,7 +63,7 @@ class OppgaveService(
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
                     VilkarResponse(
-                            vilkarElementer = value.map { VilkarElement( it.type, it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse ) }
+                            vilkarElementer = value.map { VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse ) }
                     )
                 }
 
@@ -82,7 +82,7 @@ class OppgaveService(
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
                     DokumentasjonkravResponse(
-                            dokumentasjonkravElementer = value.map { DokumentasjonkravElement( it.type, it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
+                            dokumentasjonkravElementer = value.map { DokumentasjonkravElement( it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
                     )
                 }
 

@@ -96,4 +96,4 @@ For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsv
 3. `docker run -it --link myredis:redis --rm redis redis-cli -h redis -p 6379` 
 (kommandolinjeverktøy mot redis for å sjekke innholdet.)
 
-Bruk spring-profilen `no-redis` for å disable redis. 
+Bruk spring-profilen `no-redis` for å disable redis.

@@ -58,10 +58,8 @@ data class VilkarElement(
         @JsonFormat(pattern = "yyyy-MM-dd")
         val hendelsetidspunkt: LocalDate,
         val vilkarReferanse: String,
-        val utbetalingsreferanse: String?,
         val tittel: String?,
         val beskrivelse: String?,
-        val status: String,
 )
 
 data class DokumentasjonkravResponse(
@@ -72,11 +70,9 @@ data class DokumentasjonkravElement(
         val type: String,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val hendelsetidspunkt: LocalDate,
-        val vilkarReferanse: String,
-        val utbetalingsreferanse: String?,
+        val dokumentasjonkravReferanse : String,
         val tittel: String?,
         val beskrivelse: String?,
-        val status: String,
 )
 
 

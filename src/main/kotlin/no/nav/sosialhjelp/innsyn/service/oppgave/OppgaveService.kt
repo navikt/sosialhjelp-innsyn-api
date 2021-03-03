@@ -63,7 +63,7 @@ class OppgaveService(
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
                     VilkarResponse(
-                            vilkarElementer = value.map { VilkarElement("VILKAR", it.referanse )}
+                            vilkarElementer = value.map { VilkarElement( it.type,  ) }
                     )
                 }
                 .sortedBy { it.innsendelsesfrist }

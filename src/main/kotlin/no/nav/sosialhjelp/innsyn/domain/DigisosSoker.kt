@@ -95,13 +95,16 @@ data class Vilkar(
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
         var datoSistEndret: LocalDateTime,
-        var tittel: String?
+        var tittel: String?,
+        var type: String
 )
 
 data class Dokumentasjonkrav(
         var referanse: String,
         var beskrivelse: String?,
-        var oppfyllt: Boolean
+        var oppfyllt: Boolean,
+        var tittel: String?,
+        var type: String
 )
 
 data class Hendelse(
@@ -136,9 +139,3 @@ enum class UtbetalingsStatus {
 enum class UtfallVedtak {
     INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST
 }
-
-enum class HendelseType {
-    dokumentasjonEtterspurt, vilkar, dokumentasjonkrav
-}
-
-

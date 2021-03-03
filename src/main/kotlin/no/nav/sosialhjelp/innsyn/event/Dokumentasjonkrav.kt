@@ -3,10 +3,7 @@ package no.nav.sosialhjelp.innsyn.event
 import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV_ENABLED
-import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
-import no.nav.sosialhjelp.innsyn.domain.Hendelse
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.Utbetaling
+import no.nav.sosialhjelp.innsyn.domain.*
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 
@@ -41,7 +38,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
     val dokumentasjonkrav = Dokumentasjonkrav(
             referanse = hendelse.dokumentasjonkravreferanse,
             beskrivelse = hendelse.beskrivelse,
-            oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT
+            oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT,
+            tittel = hendelse.tittel,
+            type = hendelse.type.value()
     )
 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)

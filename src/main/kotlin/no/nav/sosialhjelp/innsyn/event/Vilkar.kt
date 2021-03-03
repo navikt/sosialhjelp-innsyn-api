@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
+import no.nav.sosialhjelp.innsyn.domain.HendelseType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
@@ -26,7 +27,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
             oppfyllt = hendelse.status == JsonVilkar.Status.OPPFYLT,
             datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
             datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime(),
-            tittel = hendelse.tittel
+            tittel = hendelse.tittel,
+            type = hendelse.type.value()
     )
 
     utbetalinger.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }

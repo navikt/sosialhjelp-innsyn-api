@@ -63,7 +63,7 @@ data class VilkarElement(
 )
 
 data class DokumentasjonkravResponse(
-        val vilkarElementer: List<DokumentasjonkravElement>
+        val dokumentasjonkravElementer: List<DokumentasjonkravElement>
 )
 
 data class DokumentasjonkravElement(

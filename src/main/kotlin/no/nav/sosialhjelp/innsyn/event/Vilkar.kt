@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
-import no.nav.sosialhjelp.innsyn.domain.HendelseType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.Vilkar

@@ -66,27 +66,28 @@ class OppgaveService(
                             vilkarElementer = value.map { VilkarElement( it.type, it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse ) }
                     )
                 }
+
         log.info("Hentet ${vilkarResponseList.sumBy { it.vilkarElementer.size }} vilkar")
         return vilkarResponseList
     }
 
     fun getDokumentasjonkrav(fiksDigisosId: String, token: String): List<DokumentasjonkravResponse> {
-
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
         if (model.dokumentasjonkrav.isEmpty()) {
             return emptyList()
         }
 
-        val vilkarResponseList = model.vilkar
+        val dokumentasjonkravResponseList = model.dokumentasjonkrav
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
-                    VilkarResponse(
-                            vilkarElementer = value.map { VilkarElement( it.type, it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse ) }
+                    DokumentasjonkravResponse(
+                            dokumentasjonkravElementer = value.map { DokumentasjonkravElement( it.type, it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
                     )
                 }
-        log.info("Hentet ${vilkarResponseList.sumBy { it.vilkarElementer.size }} vilkar")
-        return vilkarResponseList
+
+        log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
+        return dokumentasjonkravResponseList
     }
 
     companion object {

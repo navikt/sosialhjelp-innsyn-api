@@ -39,6 +39,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
             referanse = hendelse.dokumentasjonkravreferanse,
             beskrivelse = hendelse.beskrivelse,
             oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT,
+            datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
             tittel = hendelse.tittel,
             type = hendelse.type.value()
     )

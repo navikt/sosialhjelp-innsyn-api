@@ -103,6 +103,7 @@ data class Dokumentasjonkrav(
         var referanse: String,
         var beskrivelse: String?,
         var oppfyllt: Boolean,
+        var datoLagtTil: LocalDateTime,
         var tittel: String?,
         var type: String
 )

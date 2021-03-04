@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 
 @Component
@@ -26,7 +27,7 @@ class OppgaveService(
         val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
 
         val oppgaveResponseList = model.oppgaver
-                .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
+                .filter { !erAlleredeLastetOpp(it.tittel, it.tilleggsinfo, it.tidspunktForKrav, ettersendteVedlegg) }
                 .groupBy { if (it.innsendelsesfrist == null) null else it.innsendelsesfrist!!.toLocalDate() }
                 .map { (key, value) ->
                     OppgaveResponse(
@@ -44,12 +45,12 @@ class OppgaveService(
         return hentOppgaver(fiksDigisosId, token).filter { it.oppgaveId == oppgaveId }
     }
   
-    private fun erAlleredeLastetOpp(oppgave: Oppgave, vedleggListe: List<InternalVedlegg>): Boolean {
+    private fun erAlleredeLastetOpp(tittel: String, tilleggsinfo: String?, tidspunktForKrav: LocalDateTime, vedleggListe: List<InternalVedlegg>): Boolean {
 
         return vedleggListe
-                .filter { it.type == oppgave.tittel }
-                .filter { it.tilleggsinfo == oppgave.tilleggsinfo }
-                .any { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
+                .filter { it.type == tittel }
+                .filter { it.tilleggsinfo == tilleggsinfo }
+                .any { it.tidspunktLastetOpp.isAfter(tidspunktForKrav) }
     }
 
     fun getVilkar(fiksDigisosId: String, token: String): List<VilkarResponse> {
@@ -78,8 +79,11 @@ class OppgaveService(
             return emptyList()
         }
 
+        val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
                 .groupBy { it.datoLagtTil.toLocalDate() }
+                .filter { !erAlleredeLastetOpp(it.tittel, it.tilleggsinfo, it.tidspunktForKrav, ettersendteVedlegg) }
                 .map { (key, value) ->
                     DokumentasjonkravResponse(
                             dokumentasjonkravElementer = value.map { DokumentasjonkravElement( it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }

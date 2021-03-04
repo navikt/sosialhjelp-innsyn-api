@@ -90,11 +90,11 @@ data class Utbetaling(
 
 data class Vilkar(
         var referanse: String,
+        var tittel: String?,
         var beskrivelse: String?,
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
-        var datoSistEndret: LocalDateTime,
-        var tittel: String?
+        var datoSistEndret: LocalDateTime
 )
 
 data class Dokumentasjonkrav(

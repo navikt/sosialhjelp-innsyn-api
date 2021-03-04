@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
@@ -164,7 +165,7 @@ internal class OppgaveServiceTest {
     }
 
     /*
-    * Skal utvides med mer logikk i senere oppgaver (DIGISOS-2090)
+    * testene utvides med mer logikk i senere oppgaver (DIGISOS-2090)
     */
     @Test
     fun `Skal returnere vilkar`() {
@@ -180,6 +181,23 @@ internal class OppgaveServiceTest {
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
         assertThat(responseList[0].vilkarElementer).hasSize(2)
+
+    }
+
+    @Test
+    fun `Skal returnere dokumentasjonkrav`() {
+        val model = InternalDigisosSoker()
+        model.dokumentasjonkrav.addAll(listOf(
+                Dokumentasjonkrav("dokumentasjonkrav1", "DOKUMENTASJONKRAV1", "mer dokumentasjonkrav1", false, LocalDateTime.now()),
+                Dokumentasjonkrav("dokumentasjonkrav2", "DOKUMENTASJONKRAV2", "mer dokumentasjonkrav2", false, LocalDateTime.now())
+        ))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getDokumentasjonkrav("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
+        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(2)
 
     }
 }

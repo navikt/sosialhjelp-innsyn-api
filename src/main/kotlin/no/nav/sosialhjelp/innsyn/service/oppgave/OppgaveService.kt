@@ -78,7 +78,7 @@ class OppgaveService(
         if (model.dokumentasjonkrav.isEmpty()) {
             return emptyList()
         }
-        
+
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->

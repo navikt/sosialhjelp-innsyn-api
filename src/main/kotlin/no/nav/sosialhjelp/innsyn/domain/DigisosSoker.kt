@@ -99,10 +99,10 @@ data class Vilkar(
 
 data class Dokumentasjonkrav(
         var referanse: String,
+        var tittel: String?,
         var beskrivelse: String?,
         var oppfyllt: Boolean,
-        var datoLagtTil: LocalDateTime,
-        var tittel: String?
+        var datoLagtTil: LocalDateTime
 )
 
 data class Hendelse(

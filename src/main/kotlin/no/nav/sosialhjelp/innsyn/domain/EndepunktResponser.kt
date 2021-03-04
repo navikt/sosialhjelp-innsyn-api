@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -46,6 +48,31 @@ data class OppgaveElement(
         val tilleggsinformasjon: String?,
         val erFraInnsyn: Boolean
 )
+
+data class VilkarResponse(
+        val vilkarElementer: List<VilkarElement>
+)
+
+data class VilkarElement(
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val hendelsetidspunkt: LocalDate,
+        val vilkarReferanse: String,
+        val tittel: String?,
+        val beskrivelse: String?
+)
+
+data class DokumentasjonkravResponse(
+        val dokumentasjonkravElementer: List<DokumentasjonkravElement>
+)
+
+data class DokumentasjonkravElement(
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        val hendelsetidspunkt: LocalDate,
+        val dokumentasjonkravReferanse : String,
+        val tittel: String?,
+        val beskrivelse: String?
+)
+
 
 data class UtbetalingerResponse(
         val ar: Int,

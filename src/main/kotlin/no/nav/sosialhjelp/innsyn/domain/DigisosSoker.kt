@@ -15,8 +15,11 @@ data class InternalDigisosSoker(
         var oppgaver: MutableList<Oppgave>,
         var historikk: MutableList<Hendelse>,
         var forelopigSvar: ForelopigSvar,
-        var tidspunktSendt: LocalDateTime?
+        var tidspunktSendt: LocalDateTime?,
+        var vilkar: MutableList<Vilkar>,
+        var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
 ) {
+
     constructor() : this(
             referanse = null,
             status = null,
@@ -28,7 +31,9 @@ data class InternalDigisosSoker(
             oppgaver = mutableListOf(),
             historikk = mutableListOf(),
             forelopigSvar = ForelopigSvar(false, null),
-            tidspunktSendt = null
+            tidspunktSendt = null,
+            vilkar = mutableListOf(),
+            dokumentasjonkrav = mutableListOf()
     )
 }
 
@@ -85,6 +90,7 @@ data class Utbetaling(
 
 data class Vilkar(
         var referanse: String,
+        var tittel: String?,
         var beskrivelse: String?,
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
@@ -93,8 +99,10 @@ data class Vilkar(
 
 data class Dokumentasjonkrav(
         var referanse: String,
+        var tittel: String?,
         var beskrivelse: String?,
-        var oppfyllt: Boolean
+        var oppfyllt: Boolean,
+        var datoLagtTil: LocalDateTime
 )
 
 data class Hendelse(
@@ -107,6 +115,11 @@ data class Hendelse(
 data class UrlResponse(
         val linkTekst: String,
         val link: String
+)
+
+data class ForelopigSvar(
+        val harMottattForelopigSvar: Boolean,
+        val link: String?
 )
 
 enum class SoknadsStatus {
@@ -124,8 +137,3 @@ enum class UtbetalingsStatus {
 enum class UtfallVedtak {
     INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST
 }
-
-data class ForelopigSvar(
-        val harMottattForelopigSvar: Boolean,
-        val link: String?
-)

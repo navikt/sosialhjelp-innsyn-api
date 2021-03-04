@@ -170,8 +170,8 @@ internal class OppgaveServiceTest {
     fun `Skal returnere vilkar`() {
         val model = InternalDigisosSoker()
         model.vilkar.addAll(listOf(
-                Vilkar("vilkar1", "mer vilkarer1", false, LocalDateTime.now(), LocalDateTime.now(), "VILKAR1"),
-                Vilkar("vilkar2", "mer vilkarer2", false, LocalDateTime.now(), LocalDateTime.now(), "VILKAR2")
+                Vilkar("vilkar1", "VILKAR1", "mer vilkarer1", false, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", "VILKAR2", "mer vilkarer2", false, LocalDateTime.now(), LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 

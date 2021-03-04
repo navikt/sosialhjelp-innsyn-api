@@ -20,7 +20,6 @@ data class InternalDigisosSoker(
         var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
 ) {
 
-
     constructor() : this(
             referanse = null,
             status = null,

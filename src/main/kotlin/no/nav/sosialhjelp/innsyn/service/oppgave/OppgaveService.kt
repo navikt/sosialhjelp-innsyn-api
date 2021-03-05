@@ -7,7 +7,6 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 
 @Component
@@ -82,15 +81,21 @@ class OppgaveService(
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) -> {
-                     getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
                      DokumentasjonkravResponse(
-                             dokumentasjonkravElementer = value.map { DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
-                     )
-                    }
+                             dokumentasjonkravElementer = value.map {
+                                 val (tittel, beskrivelse) = getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse)
+                             }
+                     )}
                 }
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList
+    }
+
+    private fun getTittelOgBeskrivelse(tittel: String?, beskrivelse: String?): Pair<String, String?> {
+        if (tittel == null) return Pair(beskrivelse!!, null)
+        return Pair(tittel, beskrivelse)
     }
 
     companion object {

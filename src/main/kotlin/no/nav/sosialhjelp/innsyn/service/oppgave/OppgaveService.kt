@@ -81,10 +81,12 @@ class OppgaveService(
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
                 .groupBy { it.datoLagtTil.toLocalDate() }
-                .map { (key, value) ->
-                    DokumentasjonkravResponse(
-                            dokumentasjonkravElementer = value.map { DokumentasjonkravElement( it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
-                    )
+                .map { (key, value) -> {
+                     getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
+                     DokumentasjonkravResponse(
+                             dokumentasjonkravElementer = value.map { DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
+                     )
+                    }
                 }
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")

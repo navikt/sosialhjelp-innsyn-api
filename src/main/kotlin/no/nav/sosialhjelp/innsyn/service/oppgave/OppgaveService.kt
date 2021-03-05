@@ -82,10 +82,11 @@ class OppgaveService(
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) -> {
                      DokumentasjonkravResponse(
-                             dokumentasjonkravElementer = value.map {
+                             dokumentasjonkravElementer = value.map{
                                  val (tittel, beskrivelse) = getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
                                  DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse)
                              }
+                             
                      )}
                 }
 

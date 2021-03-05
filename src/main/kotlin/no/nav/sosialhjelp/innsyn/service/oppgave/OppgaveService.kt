@@ -83,8 +83,7 @@ class OppgaveService(
                 .map { (key, value) -> {
                      DokumentasjonkravResponse(
                              dokumentasjonkravElementer = value.map{
-                                 val (tittel, beskrivelse) = getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
-                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse)
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse)
                              }
                              
                      )}

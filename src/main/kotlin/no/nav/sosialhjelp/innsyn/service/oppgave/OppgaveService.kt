@@ -63,7 +63,9 @@ class OppgaveService(
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
                     VilkarResponse(
-                            vilkarElementer = value.map { VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
+                            vilkarElementer = value.map {
+                                val (tittel, beskrivelse) = getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
+                                VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
                     )
                 }
 
@@ -80,13 +82,12 @@ class OppgaveService(
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
                 .groupBy { it.datoLagtTil.toLocalDate() }
-                .map { (key, value) -> {
+                .map { (key, value) ->
                      DokumentasjonkravResponse(
-                             dokumentasjonkravElementer = value.map{
-                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse)
-                             }
-                             
-                     )}
+                             dokumentasjonkravElementer = value.map {
+                                 val (tittel, beskrivelse) = getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
+                     )
                 }
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")

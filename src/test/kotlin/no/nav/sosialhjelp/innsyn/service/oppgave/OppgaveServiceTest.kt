@@ -188,8 +188,8 @@ internal class OppgaveServiceTest {
     fun `Skal returnere dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
-                Dokumentasjonkrav("dokumentasjonkrav1", "DOKUMENTASJONKRAV1", "mer dokumentasjonkrav1", false, LocalDateTime.now()),
-                Dokumentasjonkrav("dokumentasjonkrav2", "DOKUMENTASJONKRAV2", "mer dokumentasjonkrav2", false, LocalDateTime.now())
+                Dokumentasjonkrav("dokumentasjonkrav1", "tittel", "beskrivelse", false, LocalDateTime.now()),
+                Dokumentasjonkrav("dokumentasjonkrav2", null, "beskrivelse1", false, LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 
@@ -198,6 +198,11 @@ internal class OppgaveServiceTest {
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
         assertThat(responseList[0].dokumentasjonkravElementer).hasSize(2)
+        /* sjekk om rekkefølgen på index list er garantert riktig*/
+        assertThat(responseList[0].dokumentasjonkravElementer.get(0).tittel).isNotNull()
+        assertThat(responseList[0].dokumentasjonkravElementer.get(1).beskrivelse).isNull()
+        assertThat(responseList[0].dokumentasjonkravElementer.get(1).tittel).isNotNull()
+
 
     }
 }

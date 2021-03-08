@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.rest
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.sjekkXsrfToken
@@ -43,10 +44,11 @@ class VedleggController(
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendVedlegg(@PathVariable fiksDigisosId: String,
-                    @RequestParam("files") files: MutableList<MultipartFile>,
-                    @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-                    request: HttpServletRequest
+    fun sendVedlegg(
+            @PathVariable fiksDigisosId: String,
+            @RequestParam("files") files: MutableList<MultipartFile>,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+            request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
         tilgangskontrollService.sjekkTilgang()
 
@@ -65,6 +67,8 @@ class VedleggController(
                     it.type,
                     it.tilleggsinfo,
                     it.innsendelsesfrist,
+                    it.hendelsetype,
+                    it.hendelsereferanse,
                     it.filer.map { VedleggOpplastingResponse(it.filename, it.status.result.name) }
             )
         })
@@ -109,6 +113,8 @@ class VedleggController(
 data class OpplastetVedleggMetadata(
         val type: String,
         val tilleggsinfo: String?,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val hendelsereferanse: String?,
         val filer: MutableList<OpplastetFil>,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val innsendelsesfrist: LocalDate?

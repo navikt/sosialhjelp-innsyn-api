@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.event
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
@@ -13,6 +14,6 @@ fun InternalDigisosSoker.applySoknadKrav(fiksDigisosId: String, originalSoknadNA
 
     oppgaver = vedleggKreves
             .filterNot { it.type == "annet" && it.tilleggsinfo == "annet" }
-            .map { Oppgave(sha256(timestampSendt.toString()), it.type, it.tilleggsinfo, null, unixToLocalDateTime(timestampSendt), false) }
+            .map { Oppgave(sha256(timestampSendt.toString()), it.type, it.tilleggsinfo, JsonVedlegg.HendelseType.SOKNAD, null, null, unixToLocalDateTime(timestampSendt), false) }
             .toMutableList()
 }

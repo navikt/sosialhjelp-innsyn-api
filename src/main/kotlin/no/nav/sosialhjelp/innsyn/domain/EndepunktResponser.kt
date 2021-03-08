@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Date
@@ -44,6 +45,8 @@ data class OppgaveResponse(
 data class OppgaveElement(
         val dokumenttype: String,
         val tilleggsinformasjon: String?,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val hendelsereferanse: String?,
         val erFraInnsyn: Boolean
 )
 
@@ -94,6 +97,8 @@ data class OppgaveOpplastingResponse(
         val tilleggsinfo: String?,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val innsendelsesfrist: LocalDate?,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val hendelsereferanse: String?,
         val filer: List<VedleggOpplastingResponse>
 )
 

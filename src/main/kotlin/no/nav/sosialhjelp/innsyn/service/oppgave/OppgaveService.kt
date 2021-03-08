@@ -34,7 +34,7 @@ class OppgaveService(
                     OppgaveResponse(
                             innsendelsesfrist = key,
                             oppgaveId = value[0].oppgaveId,  // oppgaveId og innsendelsefrist er alltid 1-1
-                            oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.erFraInnsyn) }
+                            oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.hendelsetype, it.hendelsereferanse, it.erFraInnsyn) }
                     )
                 }
                 .sortedBy { it.innsendelsesfrist }

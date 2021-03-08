@@ -1,10 +1,12 @@
 package no.nav.sosialhjelp.innsyn.service.vedlegg
 
+import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.unleash.UTVIDE_VEDLEGG_JSON
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.rest.OpplastetVedleggMetadata
@@ -35,6 +37,7 @@ class VedleggOpplastingService(
         private val redisService: RedisService,
         private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
         private val dokumentlagerClient: DokumentlagerClient,
+        private val unleashClient: Unleash
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {
@@ -68,7 +71,7 @@ class VedleggOpplastingService(
                     FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream)
             }
 
-            val vedleggSpesifikasjon = createVedleggJson(files, metadata)
+            val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadata)
             fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
 
             waitForFutures(krypteringFutureList)
@@ -111,20 +114,32 @@ class VedleggOpplastingService(
 
     }
 
-    fun createVedleggJson(files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon {
+    fun createJsonVedleggSpesifikasjon(files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon {
         var filIndex = 0
         return JsonVedleggSpesifikasjon()
                 .withVedlegg(metadata.map {
-                    JsonVedlegg()
-                            .withType(it.type)
-                            .withTilleggsinfo(it.tilleggsinfo)
-                            .withStatus(LASTET_OPP_STATUS)
-                            .withFiler(it.filer.map { fil ->
-                                JsonFiler()
-                                        .withFilnavn(fil.filnavn)
-                                        .withSha512(getSha512FromByteArray(files[filIndex++].bytes))
-                            })
+                    createJsonVedlegg(it, it.filer.map { fil ->
+                        JsonFiler()
+                                .withFilnavn(fil.filnavn)
+                                .withSha512(getSha512FromByteArray(files[filIndex++].bytes))
+                    })
                 })
+    }
+
+    fun createJsonVedlegg(metadata: OpplastetVedleggMetadata, filer: List<JsonFiler>): JsonVedlegg? {
+        val jsonVedlegg = JsonVedlegg()
+                .withType(metadata.type)
+                .withTilleggsinfo(metadata.tilleggsinfo)
+                .withStatus(LASTET_OPP_STATUS)
+                .withFiler(filer)
+
+        if (unleashClient.isEnabled(UTVIDE_VEDLEGG_JSON, false)) {
+            jsonVedlegg
+                    .withHendelseType(metadata.hendelsetype)
+                    .withHendelseReferanse(metadata.hendelsereferanse)
+        }
+
+        return jsonVedlegg
     }
 
     fun createFilename(originalFilename: String?, filValideringer: List<FilValidering>): String {
@@ -142,7 +157,7 @@ class VedleggOpplastingService(
         val uuid = UUID.randomUUID().toString()
 
         val matchendeFiler = filValideringer.filter { it.filename == originalFilename }
-        if(filValideringer.size > 1) log.warn("Vi har funnet ${filValideringer.size} validerte filer med samme navn. Det er flere enn 1.")
+        if (filValideringer.size > 1) log.warn("Vi har funnet ${filValideringer.size} validerte filer med samme navn. Det er flere enn 1.")
 
         filename += "-" + uuid.split("-")[0]
         if (filenameSplit.extention.isEmpty()) {
@@ -210,7 +225,7 @@ class VedleggOpplastingService(
                 filValidering.add(FilValidering(file.originalFilename, valideringstatus))
                 filesIndex++
             }
-            oppgaveValideringer.add(OppgaveValidering(metadata.type, metadata.tilleggsinfo, metadata.innsendelsesfrist, filValidering))
+            oppgaveValideringer.add(OppgaveValidering(metadata.type, metadata.tilleggsinfo, metadata.innsendelsesfrist, metadata.hendelsetype, metadata.hendelsereferanse, filValidering))
         }
         return oppgaveValideringer
     }
@@ -288,6 +303,8 @@ class OppgaveValidering(
         val type: String,
         val tilleggsinfo: String?,
         val innsendelsesfrist: LocalDate?,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val hendelsereferanse: String?,
         val filer: MutableList<FilValidering>
 )
 

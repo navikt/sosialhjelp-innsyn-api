@@ -71,7 +71,8 @@ data class DokumentasjonkravResponse(
 data class DokumentasjonkravElement(
         @JsonFormat(pattern = "yyyy-MM-dd")
         val hendelsetidspunkt: LocalDate,
-        val dokumentasjonkravReferanse : String,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val dokumentasjonkravReferanse : String, // hendelsereferanse
         val tittel: String?,
         val beskrivelse: String?
 )

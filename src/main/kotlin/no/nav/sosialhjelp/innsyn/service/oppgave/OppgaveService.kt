@@ -83,7 +83,7 @@ class OppgaveService(
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
                     DokumentasjonkravResponse(
-                            dokumentasjonkravElementer = value.map { DokumentasjonkravElement( it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
+                            dokumentasjonkravElementer = value.map { DokumentasjonkravElement( it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, it.tittel, it.beskrivelse) }
                     )
                 }
 

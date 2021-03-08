@@ -101,7 +101,8 @@ data class Vilkar(
 )
 
 data class Dokumentasjonkrav(
-        var referanse: String,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        var referanse: String, // hendelsereferanse
         var tittel: String?,
         var beskrivelse: String?,
         var oppfyllt: Boolean,

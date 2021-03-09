@@ -60,6 +60,7 @@ class OppgaveService(
         }
 
         val vilkarResponseList = model.vilkar
+                .filter { isTomtVedlegg(it.tittel, it.beskrivelse) }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
                     VilkarResponse(
@@ -81,6 +82,7 @@ class OppgaveService(
         }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
+                .filter { isTomtVedlegg(it.tittel, it.beskrivelse) }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (key, value) ->
                      DokumentasjonkravResponse(
@@ -94,12 +96,17 @@ class OppgaveService(
         return dokumentasjonkravResponseList
     }
 
-    private fun getTittelOgBeskrivelse(tittel: String?, beskrivelse: String?): Pair<String, String?> {
-        if (tittel == null) {
-            if (beskrivelse == null) {
-                log.error("Hendelsestypens tittel og beskrivelse er null")
-            }
-            return Pair(beskrivelse!!, null)
+    private fun isTomtVedlegg(tittel: String?, beskrivelse: String?): Boolean {
+        if ((tittel == null || tittel == "") && (beskrivelse == null || beskrivelse == "")) {
+            log.error("Hendelsestypens tittel og beskrivelse er tom")
+            return true
+        }
+        return false
+    }
+
+    private fun getTittelOgBeskrivelse(tittel: String?, beskrivelse: String?): Pair<String?, String?> {
+        if (tittel == null || tittel == "") {
+            return Pair(beskrivelse, null)
         }
         return Pair(tittel, beskrivelse)
     }

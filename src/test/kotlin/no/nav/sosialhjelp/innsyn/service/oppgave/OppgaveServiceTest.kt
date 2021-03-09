@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.service.oppgave
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
@@ -188,8 +189,8 @@ internal class OppgaveServiceTest {
     fun `Skal returnere dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
-                Dokumentasjonkrav("dokumentasjonkrav1", "DOKUMENTASJONKRAV1", "mer dokumentasjonkrav1", false, LocalDateTime.now()),
-                Dokumentasjonkrav("dokumentasjonkrav2", "DOKUMENTASJONKRAV2", "mer dokumentasjonkrav2", false, LocalDateTime.now())
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "DOKUMENTASJONKRAV1", "mer dokumentasjonkrav1", false, LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,"dokumentasjonkrav2", "DOKUMENTASJONKRAV2", "mer dokumentasjonkrav2", false, LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 

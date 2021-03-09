@@ -189,8 +189,6 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].vilkarElementer.get(1).tittel).isEqualTo(beskrivelse)
         assertThat(responseList[0].vilkarElementer.get(1).beskrivelse).isNull()
         assertThat(responseList[0].vilkarElementer.get(1).vilkarReferanse).isEqualTo("vilkar2")
-
-
     }
 
     @Test

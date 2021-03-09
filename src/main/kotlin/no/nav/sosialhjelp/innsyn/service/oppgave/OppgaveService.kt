@@ -95,7 +95,12 @@ class OppgaveService(
     }
 
     private fun getTittelOgBeskrivelse(tittel: String?, beskrivelse: String?): Pair<String, String?> {
-        if (tittel == null) return Pair(beskrivelse!!, null)
+        if (tittel == null) {
+            if (beskrivelse == null) {
+                log.error("Hendelsestypens tittel og beskrivelse er null")
+            }
+            return Pair(beskrivelse!!, null)
+        }
         return Pair(tittel, beskrivelse)
     }
 

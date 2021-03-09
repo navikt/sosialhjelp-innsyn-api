@@ -65,7 +65,7 @@ class OppgaveService(
                 .map { (_, value) ->
                     VilkarResponse(
                             vilkarElementer = value.map {
-                                val (tittel, beskrivelse) = getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
+                                val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
                                 VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
                     )
                 }
@@ -87,7 +87,7 @@ class OppgaveService(
                 .map { (_, value) ->
                      DokumentasjonkravResponse(
                              dokumentasjonkravElementer = value.map {
-                                 val (tittel, beskrivelse) = getTittelOgBeskrivelse(it.tittel, it.beskrivelse)
+                                 val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
                                  DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
                      )
                 }
@@ -102,13 +102,6 @@ class OppgaveService(
             return true
         }
         return false
-    }
-
-    private fun getTittelOgBeskrivelse(tittel: String?, beskrivelse: String?): Pair<String?, String?> {
-        if (tittel.isNullOrBlank()) {
-            return Pair(beskrivelse, null)
-        }
-        return Pair(tittel, beskrivelse)
     }
 
     companion object {

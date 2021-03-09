@@ -60,7 +60,7 @@ class OppgaveService(
         }
 
         val vilkarResponseList = model.vilkar
-                .filter { isTomtVedlegg(it.tittel, it.beskrivelse) }
+                .filter { !isTomHendelse(it.tittel, it.beskrivelse) }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                     VilkarResponse(
@@ -82,7 +82,7 @@ class OppgaveService(
         }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
-                .filter { isTomtVedlegg(it.tittel, it.beskrivelse) }
+                .filter { !isTomHendelse(it.tittel, it.beskrivelse) }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                      DokumentasjonkravResponse(
@@ -96,7 +96,7 @@ class OppgaveService(
         return dokumentasjonkravResponseList
     }
 
-    private fun isTomtVedlegg(tittel: String?, beskrivelse: String?): Boolean {
+    private fun isTomHendelse(tittel: String?, beskrivelse: String?): Boolean {
         if (tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()) {
             log.error("Hendelsestypens tittel og beskrivelse er tom")
             return true

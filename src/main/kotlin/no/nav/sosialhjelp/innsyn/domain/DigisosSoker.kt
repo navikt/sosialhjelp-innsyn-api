@@ -91,25 +91,41 @@ data class Utbetaling(
         var datoHendelse: LocalDateTime
 )
 
+// Skal renames til Hendelse eller lignende i senere refakturering
+sealed class Oppgavehendelse {
+        abstract var referanse: String
+        abstract var tittel: String?
+        abstract var beskrivelse: String?
+
+        fun getTittelOgBeskrivelse(): Pair<String?, String?> {
+                if (tittel.isNullOrBlank()) {
+                        return Pair(beskrivelse, null)
+                }
+                return Pair(tittel, beskrivelse)
+        }
+
+        fun isEmpty(): Boolean = tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()
+}
+
 data class Vilkar(
-        var referanse: String,
-        var tittel: String?,
-        var beskrivelse: String?,
+        override var referanse: String,
+        override var tittel: String?,
+        override var beskrivelse: String?,
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
         var datoSistEndret: LocalDateTime
-)
+) : Oppgavehendelse()
 
 data class Dokumentasjonkrav(
         val hendelsetype: JsonVedlegg.HendelseType?,
-        var referanse: String, // hendelsereferanse
-        var tittel: String?,
-        var beskrivelse: String?,
+        override var referanse: String, // hendelsereferanse
+        override var tittel: String?,
+        override var beskrivelse: String?,
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime
-)
+) : Oppgavehendelse()
 
-data class Hendelse(
+data class Hendelse( // egentlig historikk
         // type som felt?
         val tittel: String,
         val tidspunkt: LocalDateTime,

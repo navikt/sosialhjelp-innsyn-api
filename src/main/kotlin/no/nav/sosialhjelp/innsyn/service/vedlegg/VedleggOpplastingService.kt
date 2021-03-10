@@ -41,6 +41,8 @@ class VedleggOpplastingService(
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {
+        log.info("Starter ettersendelse med ${files.size} filer.")
+
         val oppgaveValideringer = validateFiler(files, metadata)
         if (harOppgaverMedValideringsfeil(oppgaveValideringer)) {
             return oppgaveValideringer
@@ -242,10 +244,14 @@ class VedleggOpplastingService(
 
         virusScanner.scan(file.originalFilename, file.bytes)
 
-        val fileType = detectTikaType(file.inputStream)
-        log.info("Validerer fil med extention: \"${splitFileName(file.originalFilename ?: "").extention}\" " +
-                "type: ${fileType.name} " +
+        val tikaMediaType = detectTikaType(file.inputStream)
+        val fileType = mapToTikaFileType(tikaMediaType)
+        log.info("Validerer fil med " +
+                "extention: \"${splitFileName(file.originalFilename ?: "").extention}\", " +
+                "validatedFileType: ${fileType.name}, " +
+                "tikaMediaType: ${tikaMediaType}, " +
                 "mime: ${file.contentType}")
+
         if (fileType == TikaFileType.UNKNOWN) {
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }

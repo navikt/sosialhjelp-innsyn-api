@@ -14,13 +14,17 @@ fun getSha512FromByteArray(bytes: ByteArray?): String {
     return digest.fold("", { str, it -> str + "%02x".format(it) })
 }
 
-fun detectTikaType(inputStream: InputStream): TikaFileType {
-    val type = Tika().detect(inputStream)
-    if(type.equals("application/pdf", ignoreCase = true) ) return TikaFileType.PDF
-    if(type.equals("image/png", ignoreCase = true) ) return TikaFileType.PNG
-    if(type.equals("image/jpeg", ignoreCase = true) ) return TikaFileType.JPEG
+fun detectTikaType(inputStream: InputStream): String {
+    return Tika().detect(inputStream)
+}
 
-    return TikaFileType.UNKNOWN
+fun mapToTikaFileType(tikaMediaType: String): TikaFileType {
+    return when {
+        tikaMediaType.equals("application/pdf", ignoreCase = true) -> TikaFileType.PDF
+        tikaMediaType.equals("image/png", ignoreCase = true) -> TikaFileType.PNG
+        tikaMediaType.equals("image/jpeg", ignoreCase = true) -> TikaFileType.JPEG
+        else -> TikaFileType.UNKNOWN
+    }
 }
 
 enum class TikaFileType {

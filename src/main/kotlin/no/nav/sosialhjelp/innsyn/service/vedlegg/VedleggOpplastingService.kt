@@ -134,6 +134,7 @@ class VedleggOpplastingService(
                 .withFiler(filer)
 
         if (unleashClient.isEnabled(UTVIDE_VEDLEGG_JSON, false)) {
+            log.info("hendelsetype og hendelsereferanse blir inkludert i vedlegg.json")
             jsonVedlegg
                     .withHendelseType(metadata.hendelsetype)
                     .withHendelseReferanse(metadata.hendelsereferanse)

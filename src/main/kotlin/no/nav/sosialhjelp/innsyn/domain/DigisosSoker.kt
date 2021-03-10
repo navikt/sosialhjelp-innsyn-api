@@ -90,6 +90,7 @@ data class Utbetaling(
 
 // Skal renames til Hendelse eller lignende i senere refakturering
 sealed class Oppgavehendelse {
+        abstract var referanse: String
         abstract var tittel: String?
         abstract var beskrivelse: String?
 
@@ -99,10 +100,17 @@ sealed class Oppgavehendelse {
                 }
                 return Pair(tittel, beskrivelse)
         }
+
+        fun isEmpty(): Boolean {
+            if (tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()) {
+                return true
+            }
+            return false
+        }
 }
 
 data class Vilkar(
-        var referanse: String,
+        override var referanse: String,
         override var tittel: String?,
         override var beskrivelse: String?,
         var oppfyllt: Boolean,
@@ -111,7 +119,7 @@ data class Vilkar(
 ) : Oppgavehendelse()
 
 data class Dokumentasjonkrav(
-        var referanse: String,
+        override var referanse: String,
         override var tittel: String?,
         override var beskrivelse: String?,
         var oppfyllt: Boolean,

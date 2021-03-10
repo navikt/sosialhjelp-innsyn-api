@@ -60,7 +60,13 @@ class OppgaveService(
         }
 
         val vilkarResponseList = model.vilkar
-                .filter { !isTomHendelse(it.tittel, it.beskrivelse) }
+                .filter {
+                    val isEmpty = it.isEmpty()
+                    if(isEmpty){
+                        log.error("Vilkår sin tittel og beskrivelse er tom")
+                    }
+                    !isEmpty
+                }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                     VilkarResponse(
@@ -82,7 +88,13 @@ class OppgaveService(
         }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
-                .filter { !isTomHendelse(it.tittel, it.beskrivelse) }
+                .filter {
+                    val isEmpty = it.isEmpty()
+                    if(isEmpty){
+                        log.error("Dokumentasjonkrav sin tittel og beskrivelse er tom")
+                    }
+                    !isEmpty
+                }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                      DokumentasjonkravResponse(
@@ -94,14 +106,6 @@ class OppgaveService(
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList
-    }
-
-    private fun isTomHendelse(tittel: String?, beskrivelse: String?): Boolean {
-        if (tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()) {
-            log.error("Hendelsestypens tittel og beskrivelse er tom")
-            return true
-        }
-        return false
     }
 
     companion object {

@@ -230,8 +230,8 @@ class VedleggOpplastingService(
         val fileType = mapToTikaFileType(tikaMediaType)
         log.info("Validerer fil med " +
                 "extention: \"${splitFileName(file.originalFilename ?: "").extention}\", " +
-                "tikaMediaType: ${tikaMediaType}, " +
                 "validatedFileType: ${fileType.name}, " +
+                "tikaMediaType: ${tikaMediaType}, " +
                 "mime: ${file.contentType}")
 
         if (fileType == TikaFileType.UNKNOWN) {

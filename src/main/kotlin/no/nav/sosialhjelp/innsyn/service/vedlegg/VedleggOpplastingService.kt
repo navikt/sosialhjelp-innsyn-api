@@ -38,6 +38,8 @@ class VedleggOpplastingService(
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {
+        log.info("Starter ettersendelse med ${files.size} filer.")
+
         val oppgaveValideringer = validateFiler(files, metadata)
         if (harOppgaverMedValideringsfeil(oppgaveValideringer)) {
             return oppgaveValideringer

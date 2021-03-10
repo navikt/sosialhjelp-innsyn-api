@@ -10,9 +10,11 @@ import no.nav.sosialhjelp.innsyn.domain.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
+import no.nav.sosialhjelp.innsyn.service.vedlegg.OppgaveValidering
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -48,26 +50,15 @@ class VedleggController(
                     @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
                     request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
+        log.info("Forsøker å starter ettersendelse")
         tilgangskontrollService.sjekkTilgang()
-
         sjekkXsrfToken(fiksDigisosId, request)
-        val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
-                ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.size}")
-        val metadata: MutableList<OpplastetVedleggMetadata> = objectMapper.readValue(metadataJson.bytes)
-        files.removeIf { it.originalFilename == "metadata.json" }
 
-        if (files.isEmpty()) {
-            throw IllegalStateException("Ingen filer i forsendelse")
-        }
-        val vedleggOpplastingResponseList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
-        return ResponseEntity.ok(vedleggOpplastingResponseList.map {
-            OppgaveOpplastingResponse(
-                    it.type,
-                    it.tilleggsinfo,
-                    it.innsendelsesfrist,
-                    it.filer.map { VedleggOpplastingResponse(it.filename, it.status.result.name) }
-            )
-        })
+        val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
+        validateFileListNotEmpty(files)
+
+        val oppgaveValideringList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+        return ResponseEntity.ok(mapToResponse(oppgaveValideringList))
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
@@ -94,6 +85,29 @@ class VedleggController(
         return ResponseEntity.ok(vedleggResponses.distinct())
     }
 
+    private fun mapToResponse(oppgaveValideringList: List<OppgaveValidering>) =
+            oppgaveValideringList.map {
+                OppgaveOpplastingResponse(
+                        it.type,
+                        it.tilleggsinfo,
+                        it.innsendelsesfrist,
+                        it.filer.map { VedleggOpplastingResponse(it.filename, it.status.result.name) }
+                )
+            }
+
+    private fun validateFileListNotEmpty(files: MutableList<MultipartFile>) {
+        if (files.isEmpty()) {
+            throw IllegalStateException("Ingen filer i forsendelse")
+        }
+    }
+
+    private fun getMetadataAndRemoveFromFileList(files: MutableList<MultipartFile>): MutableList<OpplastetVedleggMetadata> {
+        val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
+                ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.size}")
+        files.removeIf { it.originalFilename == "metadata.json" }
+        return objectMapper.readValue(metadataJson.bytes)
+    }
+
     fun removeUUIDFromFilename(filename: String): String {
         val indexOfFileExtention = filename.lastIndexOf(".")
         if (indexOfFileExtention != -1 && indexOfFileExtention > LENGTH_OF_UUID_PART &&
@@ -103,6 +117,10 @@ class VedleggController(
             return filename.substring(0, indexOfFileExtention - LENGTH_OF_UUID_PART) + extention
         }
         return filename
+    }
+
+    companion object {
+        private val log by logger()
     }
 }
 

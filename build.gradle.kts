@@ -92,6 +92,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.springBoot}")
 
+    implementation("org.springframework.boot:spring-boot-starter-webflux:${Versions.springBoot}")
+
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-api:${Versions.sosialhjelpCommon}")

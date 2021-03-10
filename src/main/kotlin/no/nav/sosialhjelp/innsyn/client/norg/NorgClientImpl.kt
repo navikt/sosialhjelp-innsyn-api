@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.client.norg
 
 import no.nav.sosialhjelp.innsyn.common.NorgException
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
@@ -11,40 +10,42 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpStatusCodeException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.reactive.function.client.bodyToMono
 
 
 @Profile("!(mock | local)")
 @Component
 class NorgClientImpl(
-        clientProperties: ClientProperties,
-        private val restTemplate: RestTemplate,
+        private val norgWebClient: WebClient,
         private val redisService: RedisService,
 ) : NorgClient {
-
-    private val baseUrl = clientProperties.norgEndpointUrl
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
         return hentFraCache(enhetsnr) ?: hentFraNorg(enhetsnr)
     }
 
     private fun hentFraNorg(enhetsnr: String): NavEnhet {
-        val headers = headers()
         try {
             log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
-            val urlTemplate = "$baseUrl/enhet/{enhetsnr}"
-            val response = restTemplate.exchange(urlTemplate, HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java, enhetsnr)
+
+            val navEnhet: NavEnhet? = norgWebClient
+                .get()
+                .uri("/enhet/{enhetsnr}", enhetsnr)
+                .headers { it.addAll(headers()) }
+                .retrieve()
+                .bodyToMono<NavEnhet>()
+                .block()
 
             log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
-            return objectMapper.readValue(response.body!!, NavEnhet::class.java)
+
+            return navEnhet!!
                     .also { lagreTilCache(enhetsnr, it) }
 
-        } catch (e: HttpStatusCodeException) {
+        } catch (e: WebClientResponseException) {
             log.warn("Noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
             throw NorgException(e.message, e)
         } catch (e: Exception) {
@@ -58,10 +59,16 @@ class NorgClientImpl(
 
     override fun ping() {
         try {
-            val headers = headers()
             // samme kall som selftest i soknad-api
-            restTemplate.exchange("$baseUrl/kodeverk/EnhetstyperNorg", HttpMethod.GET, HttpEntity<Nothing>(headers), String::class.java)
-        } catch (e: HttpStatusCodeException) {
+            norgWebClient
+                .get()
+                .uri("/kodeverk/EnhetstyperNorg")
+                .headers { headers() }
+                .retrieve()
+                .bodyToMono<String>()
+                .block()
+
+        } catch (e: WebClientResponseException) {
             log.warn("Selftest - noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
             throw NorgException(e.message, e)
         } catch (e: Exception) {

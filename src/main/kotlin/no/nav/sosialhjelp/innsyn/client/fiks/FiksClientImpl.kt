@@ -159,7 +159,7 @@ class FiksClientImpl(
     }
 
     override fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String) {
-        log.info("Starter sending av ettersendelse med ${files.size} filer. Validering, filnavn-endring, generering av ettersendelse.pdf og kryptering er OK.")
+        log.info("Starter sending til FIKS for ettersendelse med ${files.size} filer (inkludert ettersendelse.pdf). Validering, filnavn-endring, generering av ettersendelse.pdf og kryptering er OK.")
         val headers = fiksHeaders(clientProperties, token)
         headers.contentType = MediaType.MULTIPART_FORM_DATA
 

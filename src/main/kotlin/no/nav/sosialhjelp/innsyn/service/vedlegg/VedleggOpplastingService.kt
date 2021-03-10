@@ -226,10 +226,14 @@ class VedleggOpplastingService(
 
         virusScanner.scan(file.originalFilename, file.bytes)
 
-        val fileType = detectTikaType(file.inputStream)
-        log.info("Validerer fil med extention: \"${splitFileName(file.originalFilename ?: "").extention}\" " +
-                "type: ${fileType.name} " +
+        val tikaMediaType = detectTikaType(file.inputStream)
+        val fileType = mapToTikaFileType(tikaMediaType)
+        log.info("Validerer fil med " +
+                "extention: \"${splitFileName(file.originalFilename ?: "").extention}\", " +
+                "tikaMediaType: ${tikaMediaType}, " +
+                "validatedFileType: ${fileType.name}, " +
                 "mime: ${file.contentType}")
+
         if (fileType == TikaFileType.UNKNOWN) {
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }

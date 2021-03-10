@@ -101,12 +101,7 @@ sealed class Oppgavehendelse {
                 return Pair(tittel, beskrivelse)
         }
 
-        fun isEmpty(): Boolean {
-            if (tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()) {
-                return true
-            }
-            return false
-        }
+        fun isEmpty(): Boolean = tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()
 }
 
 data class Vilkar(

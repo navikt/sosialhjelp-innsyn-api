@@ -60,13 +60,8 @@ class OppgaveService(
         }
 
         val vilkarResponseList = model.vilkar
-                .filter {
-                    val isEmpty = it.isEmpty()
-                    if(isEmpty){
-                        log.error("Vilkår sin tittel og beskrivelse er tom")
-                    }
-                    !isEmpty
-                }
+            .filter { !it.isEmpty()
+                        .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på vilkår er tomt") }}
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                     VilkarResponse(
@@ -88,13 +83,8 @@ class OppgaveService(
         }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
-                .filter {
-                    val isEmpty = it.isEmpty()
-                    if(isEmpty){
-                        log.error("Dokumentasjonkrav sin tittel og beskrivelse er tom")
-                    }
-                    !isEmpty
-                }
+                .filter { !it.isEmpty()
+                            .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }}
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                      DokumentasjonkravResponse(

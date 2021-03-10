@@ -7,7 +7,6 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 
 @Component
@@ -61,10 +60,14 @@ class OppgaveService(
         }
 
         val vilkarResponseList = model.vilkar
+            .filter { !it.isEmpty()
+                        .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på vilkår er tomt") }}
                 .groupBy { it.datoLagtTil.toLocalDate() }
-                .map { (key, value) ->
+                .map { (_, value) ->
                     VilkarResponse(
-                            vilkarElementer = value.map { VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
+                            vilkarElementer = value.map {
+                                val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
+                                VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
                     )
                 }
 
@@ -80,11 +83,15 @@ class OppgaveService(
         }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
+                .filter { !it.isEmpty()
+                            .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }}
                 .groupBy { it.datoLagtTil.toLocalDate() }
-                .map { (key, value) ->
-                    DokumentasjonkravResponse(
-                            dokumentasjonkravElementer = value.map { DokumentasjonkravElement( it.datoLagtTil.toLocalDate(), it.referanse, it.tittel, it.beskrivelse) }
-                    )
+                .map { (_, value) ->
+                     DokumentasjonkravResponse(
+                             dokumentasjonkravElementer = value.map {
+                                 val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
+                     )
                 }
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")

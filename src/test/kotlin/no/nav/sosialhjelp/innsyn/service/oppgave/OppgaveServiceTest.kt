@@ -164,16 +164,16 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg3)
     }
 
-    /*
-    * testene utvides med mer logikk i senere oppgaver (DIGISOS-2090)
-    */
     @Test
-    fun `Skal returnere vilkar`() {
+    fun `Should return vilkar with tittel`() {
         val model = InternalDigisosSoker()
+        val tittel = "VILKAR1"
+        val beskrivelse = "mer vilkarer2"
         model.vilkar.addAll(listOf(
-                Vilkar("vilkar1", "VILKAR1", "mer vilkarer1", false, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar2", "VILKAR2", "mer vilkarer2", false, LocalDateTime.now(), LocalDateTime.now())
-        ))
+                Vilkar("vilkar1", tittel, "mer vilkarer1", false, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", null, beskrivelse, false, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar3", "", null, false, LocalDateTime.now(), LocalDateTime.now())
+                ))
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getVilkar("123", token)
@@ -181,15 +181,22 @@ internal class OppgaveServiceTest {
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
         assertThat(responseList[0].vilkarElementer).hasSize(2)
-
+        assertThat(responseList[0].vilkarElementer.get(0).tittel).isNotNull()
+        assertThat(responseList[0].vilkarElementer.get(0).tittel).isEqualTo(tittel)
+        assertThat(responseList[0].vilkarElementer.get(1).tittel).isNotNull()
+        assertThat(responseList[0].vilkarElementer.get(1).tittel).isEqualTo(beskrivelse)
+        assertThat(responseList[0].vilkarElementer.get(1).beskrivelse).isNull()
+        assertThat(responseList[0].vilkarElementer.get(1).vilkarReferanse).isEqualTo("vilkar2")
     }
 
     @Test
-    fun `Skal returnere dokumentasjonkrav`() {
+    fun `Should return dokumentasjonkrav with tittel and filter out empty dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
-                Dokumentasjonkrav("dokumentasjonkrav1", "DOKUMENTASJONKRAV1", "mer dokumentasjonkrav1", false, LocalDateTime.now()),
-                Dokumentasjonkrav("dokumentasjonkrav2", "DOKUMENTASJONKRAV2", "mer dokumentasjonkrav2", false, LocalDateTime.now())
+                Dokumentasjonkrav("dokumentasjonkrav1", "tittel", "beskrivelse1", false, LocalDateTime.now()),
+                Dokumentasjonkrav("dokumentasjonkrav2", null, "beskrivelse2", false, LocalDateTime.now()) ,
+                Dokumentasjonkrav("dokumentasjonkrav3", "", null, false, LocalDateTime.now()),
+                Dokumentasjonkrav("dokumentasjonkrav4", null, " ", false, LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 
@@ -198,6 +205,9 @@ internal class OppgaveServiceTest {
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
         assertThat(responseList[0].dokumentasjonkravElementer).hasSize(2)
-
+        assertThat(responseList[0].dokumentasjonkravElementer.get(0).tittel).isNotNull()
+        assertThat(responseList[0].dokumentasjonkravElementer.get(1).beskrivelse).isNull()
+        assertThat(responseList[0].dokumentasjonkravElementer.get(1).tittel).isNotNull()
+        assertThat(responseList[0].dokumentasjonkravElementer.get(1).dokumentasjonkravReferanse).isEqualTo("dokumentasjonkrav2")
     }
 }

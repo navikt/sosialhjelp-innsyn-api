@@ -1,71 +1,59 @@
 package no.nav.sosialhjelp.innsyn.client.sts
 
 import no.nav.sosialhjelp.innsyn.client.sts.STSToken.Companion.shouldRenewToken
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.forwardHeaders
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import java.time.LocalDateTime
 
 @Profile("!(mock | local)")
 @Component
 class StsClient(
-        private val stsRestTemplate: RestTemplate,
-        clientProperties: ClientProperties
+    private val stsWebClient: WebClient,
 ) {
-
-    private val baseUrl = clientProperties.stsTokenEndpointUrl
-
-    private var cachedToken: STSToken? = null
 
     fun token(): String {
         if (shouldRenewToken(cachedToken)) {
-            try {
-                log.info("Henter nytt token fra STS")
-                val response = stsRestTemplate.exchange(baseUrl, HttpMethod.POST, requestEntity(), STSToken::class.java)
+            log.info("Henter nytt token fra STS")
+            val stsToken = stsWebClient.post()
+                .uri {
+                    it
+                        .queryParam(GRANT_TYPE, CLIENT_CREDENTIALS)
+                        .queryParam(SCOPE, OPENID)
+                        .build()
+                }
+                .headers { it.addAll(forwardHeaders()) }
+                .retrieve()
+                .bodyToMono<STSToken>()
+                .doOnError {
+                    log.error("STS - Noe feilet, message: ${it.message}", it)
+                }
+                .block()
 
-                cachedToken = response.body
-                return response.body!!.access_token
-            } catch (e: RestClientException) {
-                log.error("STS - Noe feilet, message: ${e.message}", e)
-                throw e
-            }
+            cachedToken = stsToken
+            return stsToken!!.access_token
         }
         log.debug("Hentet token fra cache")
         return cachedToken!!.access_token
     }
 
     fun ping() {
-        try {
-            stsRestTemplate.exchange(baseUrl, HttpMethod.OPTIONS, null, String::class.java)
-        } catch (e: RestClientException) {
-            log.warn("STS - Ping feilet. message: ${e.message}", e)
-            throw e
-        }
-    }
-
-    private fun requestEntity(): HttpEntity<MultiValueMap<String, String>> {
-        val headers = forwardHeaders()
-        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-
-        val map = LinkedMultiValueMap<String, String>()
-        map.add(GRANT_TYPE, CLIENT_CREDENTIALS)
-        map.add(SCOPE, OPENID)
-
-        return HttpEntity(map, headers)
+        stsWebClient.options()
+            .retrieve()
+            .bodyToMono<String>()
+            .doOnError {
+                log.error("STS - Ping feilet, message: ${it.message}", it)
+            }
+            .block()
     }
 
     companion object {
         private val log by logger()
+
+        private var cachedToken: STSToken? = null
 
         private const val GRANT_TYPE = "grant_type"
         private const val CLIENT_CREDENTIALS = "client_credentials"
@@ -75,9 +63,9 @@ class StsClient(
 }
 
 data class STSToken(
-        val access_token: String,
-        val token_type: String,
-        val expires_in: Long
+    val access_token: String,
+    val token_type: String,
+    val expires_in: Long,
 ) {
 
     val expirationTime: LocalDateTime = LocalDateTime.now().plusSeconds(expires_in - 10L)

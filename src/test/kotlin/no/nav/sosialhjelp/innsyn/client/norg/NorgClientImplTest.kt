@@ -14,10 +14,8 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.util.function.Consumer
 
 internal class NorgClientImplTest {
 
@@ -56,9 +54,11 @@ internal class NorgClientImplTest {
             webClient
                 .get()
                 .uri("/enhet/{enhetsnr}", enhetsnr)
-                .headers(any<Consumer<HttpHeaders>>())
+                .headers(any())
                 .retrieve()
+                .onStatus(any(), any())
                 .bodyToMono<NavEnhet>()
+                .onErrorMap(any())
                 .block()
         } returns navEnhet
 

@@ -9,12 +9,13 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.forwardHeaders
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.withStatusCode
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 
 
@@ -30,52 +31,42 @@ class NorgClientImpl(
     }
 
     private fun hentFraNorg(enhetsnr: String): NavEnhet {
-        try {
-            log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
+        log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
 
-            val navEnhet: NavEnhet? = norgWebClient
-                .get()
-                .uri("/enhet/{enhetsnr}", enhetsnr)
-                .headers { it.addAll(headers()) }
-                .retrieve()
-                .bodyToMono<NavEnhet>()
-                .block()
+        val navEnhet: NavEnhet? = norgWebClient.get()
+            .uri("/enhet/{enhetsnr}", enhetsnr)
+            .headers { it.addAll(headers()) }
+            .retrieve()
+            .onStatus(HttpStatus::isError) { it.createException() }
+            .bodyToMono<NavEnhet>()
+            .onErrorMap {
+                log.warn("Noe feilet ved kall mot NORG2 ${withStatusCode(it)}", it)
+                NorgException(it.message, it)
+            }
+            .block()
 
-            log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
+        log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
 
-            return navEnhet!!
-                .also { lagreTilCache(enhetsnr, it) }
-
-        } catch (e: WebClientResponseException) {
-            log.warn("Noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
-            throw NorgException(e.message, e)
-        } catch (e: Exception) {
-            log.warn("Noe feilet ved kall mot NORG2", e)
-            throw NorgException(e.message, e)
-        }
+        return navEnhet!!
+            .also { lagreTilCache(enhetsnr, it) }
     }
 
     private fun hentFraCache(enhetsnr: String): NavEnhet? =
         redisService.get(cacheKey(enhetsnr), NavEnhet::class.java) as NavEnhet?
 
+    // samme kall som selftest i soknad-api
     override fun ping() {
-        try {
-            // samme kall som selftest i soknad-api
-            norgWebClient
-                .get()
-                .uri("/kodeverk/EnhetstyperNorg")
-                .headers { it.addAll(headers()) }
-                .retrieve()
-                .bodyToMono<String>()
-                .block()
-
-        } catch (e: WebClientResponseException) {
-            log.warn("Selftest - noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
-            throw NorgException(e.message, e)
-        } catch (e: Exception) {
-            log.warn("Selftest - noe feilet ved kall mot NORG2", e)
-            throw NorgException(e.message, e)
-        }
+        norgWebClient.get()
+            .uri("/kodeverk/EnhetstyperNorg")
+            .headers { it.addAll(headers()) }
+            .retrieve()
+            .onStatus(HttpStatus::isError) { it.createException() }
+            .bodyToMono<String>()
+            .onErrorMap {
+                log.warn("Ping - feilet mot NORG2 ${withStatusCode(it)}", it)
+                NorgException(it.message, it)
+            }
+            .block()
     }
 
     private fun headers(): HttpHeaders {

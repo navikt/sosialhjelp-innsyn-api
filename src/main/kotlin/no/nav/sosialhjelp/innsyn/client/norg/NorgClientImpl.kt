@@ -64,7 +64,7 @@ class NorgClientImpl(
             norgWebClient
                 .get()
                 .uri("/kodeverk/EnhetstyperNorg")
-                .headers { headers() }
+                .headers { it.addAll(headers()) }
                 .retrieve()
                 .bodyToMono<String>()
                 .block()

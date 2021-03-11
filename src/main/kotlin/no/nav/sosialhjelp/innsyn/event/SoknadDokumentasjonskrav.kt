@@ -14,6 +14,13 @@ fun InternalDigisosSoker.applySoknadKrav(fiksDigisosId: String, originalSoknadNA
 
     oppgaver = vedleggKreves
             .filterNot { it.type == "annet" && it.tilleggsinfo == "annet" }
-            .map { Oppgave(sha256(timestampSendt.toString()), it.type, it.tilleggsinfo, JsonVedlegg.HendelseType.SOKNAD, null, null, unixToLocalDateTime(timestampSendt), false) }
+            .map { Oppgave(sha256(timestampSendt.toString()),
+                    it.type,
+                    it.tilleggsinfo,
+                    JsonVedlegg.HendelseType.SOKNAD,
+                    null,
+                    null,
+                    unixToLocalDateTime(timestampSendt),
+                    false) }
             .toMutableList()
 }

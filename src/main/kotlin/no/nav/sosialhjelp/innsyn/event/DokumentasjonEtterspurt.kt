@@ -17,7 +17,14 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
     val prevSize = oppgaver.size
 
     oppgaver = hendelse.dokumenter
-            .map { Oppgave(sha256(it.innsendelsesfrist), it.dokumenttype, it.tilleggsinformasjon, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, it.dokumentreferanse, it.innsendelsesfrist.toLocalDateTime(), hendelse.hendelsestidspunkt.toLocalDateTime(), true) }
+            .map { Oppgave(sha256(it.innsendelsesfrist),
+                    it.dokumenttype,
+                    it.tilleggsinformasjon,
+                    JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
+                    it.dokumentreferanse,
+                    it.innsendelsesfrist.toLocalDateTime(),
+                    hendelse.hendelsestidspunkt.toLocalDateTime(),
+                    true) }
             .toMutableList()
 
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {

@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -79,6 +80,7 @@ class NorgClientImpl(
 
     private fun headers(): HttpHeaders {
         val headers = forwardHeaders()
+        headers.accept = listOf(APPLICATION_JSON)
         headers.set(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
         headers.set(HEADER_NAV_APIKEY, System.getenv(NORG2_APIKEY))
         return headers

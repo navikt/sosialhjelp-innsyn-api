@@ -21,8 +21,8 @@ import org.springframework.web.reactive.function.client.bodyToMono
 @Profile("!(mock | local)")
 @Component
 class NorgClientImpl(
-        private val norgWebClient: WebClient,
-        private val redisService: RedisService,
+    private val norgWebClient: WebClient,
+    private val redisService: RedisService,
 ) : NorgClient {
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
@@ -36,7 +36,7 @@ class NorgClientImpl(
             val navEnhet: NavEnhet? = norgWebClient
                 .get()
                 .uri("/enhet/{enhetsnr}", enhetsnr)
-                .headers { headers() }
+                .headers { it.addAll(headers()) }
                 .retrieve()
                 .bodyToMono<NavEnhet>()
                 .block()
@@ -44,7 +44,7 @@ class NorgClientImpl(
             log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
 
             return navEnhet!!
-                    .also { lagreTilCache(enhetsnr, it) }
+                .also { lagreTilCache(enhetsnr, it) }
 
         } catch (e: WebClientResponseException) {
             log.warn("Noe feilet ved kall mot NORG2 - ${e.statusCode} ${e.statusText}", e)
@@ -56,7 +56,7 @@ class NorgClientImpl(
     }
 
     private fun hentFraCache(enhetsnr: String): NavEnhet? =
-            redisService.get(cacheKey(enhetsnr), NavEnhet::class.java) as NavEnhet?
+        redisService.get(cacheKey(enhetsnr), NavEnhet::class.java) as NavEnhet?
 
     override fun ping() {
         try {
@@ -87,7 +87,9 @@ class NorgClientImpl(
     }
 
     private fun lagreTilCache(enhetsnr: String, navEnhet: NavEnhet) {
-        redisService.put(cacheKey(enhetsnr), objectMapper.writeValueAsBytes(navEnhet), NAVENHET_CACHE_TIMETOLIVE_SECONDS)
+        redisService.put(cacheKey(enhetsnr),
+            objectMapper.writeValueAsBytes(navEnhet),
+            NAVENHET_CACHE_TIMETOLIVE_SECONDS)
     }
 
     private fun cacheKey(enhetsnr: String): String = "NavEnhet_$enhetsnr"

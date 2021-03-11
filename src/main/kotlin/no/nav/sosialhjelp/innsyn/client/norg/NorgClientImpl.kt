@@ -35,7 +35,7 @@ class NorgClientImpl(
             val navEnhet: NavEnhet? = norgWebClient
                 .get()
                 .uri("/enhet/{enhetsnr}", enhetsnr)
-                .headers { it.addAll(headers()) }
+                .headers { headers() }
                 .retrieve()
                 .bodyToMono<NavEnhet>()
                 .block()

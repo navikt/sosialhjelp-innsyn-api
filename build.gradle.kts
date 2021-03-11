@@ -92,7 +92,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.springBoot}")
 
-    implementation("org.springframework.boot:spring-boot-starter-webflux:${Versions.springBoot}")
+    implementation("org.springframework.boot:spring-boot-starter-webflux:${Versions.springBoot}") {
+        exclude("org.springframework", "spring-boot-starter-reactor-netty")
+    }
 
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")

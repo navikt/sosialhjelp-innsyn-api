@@ -32,6 +32,7 @@ object Versions {
     const val jetty = "9.4.35.v20201120"
     const val bouncycastle = "1.67"
     const val unleash = "3.3.4"
+    const val servletApi = "3.1.0"
 
     //    Test only
     const val junitJupiter = "5.7.0"
@@ -92,9 +93,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.springBoot}")
 
-    implementation("org.springframework.boot:spring-boot-starter-webflux:${Versions.springBoot}") {
-        exclude("org.springframework", "spring-boot-starter-reactor-netty")
-    }
+    implementation("org.springframework.boot:spring-boot-starter-webflux:${Versions.springBoot}")
+
+    // servlet-api (override version
+    implementation("javax.servlet:javax.servlet-api:${Versions.servletApi}")
 
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")

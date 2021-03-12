@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn
 
 import com.ninjasquad.springmockk.MockkBean
 import no.nav.sosialhjelp.idporten.client.IdPortenClient
+import no.nav.sosialhjelp.innsyn.client.idporten.IdPortenClientConfig
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -13,6 +14,9 @@ class ApplicationContextTest {
 
     @MockkBean
     private lateinit var idPortenClient: IdPortenClient
+
+    @MockkBean
+    private lateinit var idPortenClientConfig: IdPortenClientConfig
 
     @MockkBean(name = "stsRestTemplate")
     private lateinit var stsRestTemplate: RestTemplate

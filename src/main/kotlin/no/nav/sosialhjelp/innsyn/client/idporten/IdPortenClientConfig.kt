@@ -12,31 +12,31 @@ import org.springframework.web.reactive.function.client.WebClient
 @Profile("!mock")
 @Configuration
 class IdPortenClientConfig(
-        @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String,
-        @Value("\${no.nav.sosialhjelp.idporten.client_id}") private val clientId: String,
-        @Value("\${no.nav.sosialhjelp.idporten.scope}") private val scope: String,
-        @Value("\${no.nav.sosialhjelp.idporten.config_url}") private val configUrl: String,
-        @Value("\${no.nav.sosialhjelp.idporten.truststore_type}") private val truststoreType: String,
-        @Value("\${no.nav.sosialhjelp.idporten.truststore_filepath}") private val truststoreFilepath: String
+    @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String,
+    @Value("\${no.nav.sosialhjelp.idporten.client_id}") private val clientId: String,
+    @Value("\${no.nav.sosialhjelp.idporten.scope}") private val scope: String,
+    @Value("\${no.nav.sosialhjelp.idporten.config_url}") private val configUrl: String,
+    @Value("\${no.nav.sosialhjelp.idporten.truststore_type}") private val truststoreType: String,
+    @Value("\${no.nav.sosialhjelp.idporten.truststore_filepath}") private val truststoreFilepath: String,
 ) {
 
     @Bean
     fun idPortenClient(): IdPortenClient {
         return IdPortenClient(
-                webClient = WebClient.create(),
-                idPortenProperties = idPortenProperties()
+            webClient = WebClient.create(),
+            idPortenProperties = idPortenProperties()
         )
     }
 
     fun idPortenProperties(): IdPortenProperties {
         return IdPortenProperties(
-                tokenUrl = tokenUrl,
-                clientId = clientId,
-                scope = scope,
-                configUrl = configUrl,
-                truststoreType = truststoreType,
-                truststoreFilepath = truststoreFilepath,
-                virksomhetSertifikatPath = getenv("VIRKSERT_STI", "/var/run/secrets/nais.io/virksomhetssertifikat")
+            tokenUrl = tokenUrl,
+            clientId = clientId,
+            scope = scope,
+            configUrl = configUrl,
+            truststoreType = truststoreType,
+            truststoreFilepath = truststoreFilepath,
+            virksomhetSertifikatPath = getenv("VIRKSERT_STI", "/var/run/secrets/nais.io/virksomhetssertifikat")
         )
     }
 }

@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.client.idporten
 
 import no.nav.sosialhjelp.idporten.client.IdPortenClient
 import no.nav.sosialhjelp.idporten.client.IdPortenProperties
+import no.nav.sosialhjelp.innsyn.utils.getReactorClientHttpConnector
 import no.nav.sosialhjelp.innsyn.utils.getenv
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -12,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Profile("!mock")
 @Configuration
 class IdPortenClientConfig(
-    private val webClient: WebClient,
+    private val webClientBuilder: WebClient.Builder,
     @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String,
     @Value("\${no.nav.sosialhjelp.idporten.client_id}") private val clientId: String,
     @Value("\${no.nav.sosialhjelp.idporten.scope}") private val scope: String,
@@ -21,10 +22,15 @@ class IdPortenClientConfig(
     @Value("\${no.nav.sosialhjelp.idporten.truststore_filepath}") private val truststoreFilepath: String,
 ) {
 
+    @Value("\${HTTPS_PROXY}")
+    private lateinit var proxyUrl: String
+
     @Bean
     fun idPortenClient(): IdPortenClient {
         return IdPortenClient(
-            webClient = webClient,
+            webClient = webClientBuilder
+                .clientConnector(getReactorClientHttpConnector(proxyUrl))
+                .build(),
             idPortenProperties = idPortenProperties()
         )
     }

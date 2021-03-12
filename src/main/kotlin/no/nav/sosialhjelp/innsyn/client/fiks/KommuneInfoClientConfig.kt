@@ -11,12 +11,14 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Profile("!mock")
 @Configuration
-class KommuneInfoClientConfig {
+class KommuneInfoClientConfig(
+    private val webClient: WebClient
+) {
 
     @Bean
     fun kommuneInfoClient(clientProperties: ClientProperties): KommuneInfoClient {
         return KommuneInfoClientImpl(
-            WebClient.create(),
+            webClient,
             toFiksProperties(clientProperties)
         )
     }

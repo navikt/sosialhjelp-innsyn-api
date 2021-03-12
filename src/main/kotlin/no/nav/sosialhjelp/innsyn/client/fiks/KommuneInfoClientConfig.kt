@@ -12,18 +12,19 @@ import org.springframework.web.reactive.function.client.WebClient
 @Profile("!mock")
 @Configuration
 class KommuneInfoClientConfig(
-    private val webClient: WebClient
+    private val proxiedWebClient: WebClient,
+    private val clientProperties: ClientProperties
 ) {
 
     @Bean
-    fun kommuneInfoClient(clientProperties: ClientProperties): KommuneInfoClient {
+    fun kommuneInfoClient(): KommuneInfoClient {
         return KommuneInfoClientImpl(
-            webClient,
-            toFiksProperties(clientProperties)
+            proxiedWebClient,
+            fiksProperties()
         )
     }
 
-    private fun toFiksProperties(clientProperties: ClientProperties): FiksProperties {
+    private fun fiksProperties(): FiksProperties {
         return FiksProperties(
             clientProperties.fiksDigisosEndpointUrl + FiksPaths.PATH_KOMMUNEINFO,
             clientProperties.fiksDigisosEndpointUrl + FiksPaths.PATH_ALLE_KOMMUNEINFO,

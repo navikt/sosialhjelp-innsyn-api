@@ -1,8 +1,9 @@
 package no.nav.sosialhjelp.innsyn.client.digisosapi
 
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
@@ -10,9 +11,9 @@ import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.domain.SakWrapper
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
+import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
-import org.springframework.http.ResponseEntity
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 
 
 internal class DigisosApiClientTest {
@@ -20,23 +21,24 @@ internal class DigisosApiClientTest {
 
     @Test
     fun `Post digisos sak til mock`() {
-        val restTemplate: RestTemplate = mockk()
+        val mockWebServer = MockWebServer()
+        val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
         val idPortenService: IdPortenService = mockk()
         val fiksClientImpl: FiksClientImpl = mockk()
 
-        val digisosApiClient = DigisosApiClientImpl(clientProperties, restTemplate, idPortenService, fiksClientImpl)
+        val digisosApiClient = DigisosApiClientImpl(clientProperties, fiksWebClient, idPortenService, fiksClientImpl)
 
-        val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.body } returns ok_komplett_jsondigisossoker_response
         coEvery { idPortenService.getToken().token } returns "Token"
-        every {
-            restTemplate.exchange(
-                    any<String>(),
-                    any(),
-                    any(),
-                    String::class.java)
-        } returns mockResponse
 
-        digisosApiClient.oppdaterDigisosSak("123123", DigisosApiWrapper(SakWrapper(JsonDigisosSoker()), ""))
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(202)
+                .setBody("ok")
+        )
+
+        val jsonDigisosSoker =
+            objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
+
+        digisosApiClient.oppdaterDigisosSak("123123", DigisosApiWrapper(SakWrapper(jsonDigisosSoker), ""))
     }
 }

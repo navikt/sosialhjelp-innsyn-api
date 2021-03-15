@@ -187,7 +187,7 @@ class VedleggOpplastingService(
 
     private fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>) {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> sanitizeFileName(opplastetFil.filnavn) } }
-        val filnavnMultipart: List<String> = files.map { sanitizeFileName(it.originalFilename ?: "") }.filterNotNull()
+        val filnavnMultipart: List<String> = files.map { sanitizeFileName(it.originalFilename ?: "") }
         if (filnavnMetadata.size != filnavnMultipart.size) {
             throw OpplastingFilnavnMismatchException("FilnavnMetadata (size ${filnavnMetadata.size}) og filnavnMultipart (size ${filnavnMultipart.size}) har forskjellig antall. " +
                     "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)

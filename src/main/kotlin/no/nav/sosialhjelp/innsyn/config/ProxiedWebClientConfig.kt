@@ -11,29 +11,25 @@ import reactor.netty.http.client.HttpClient
 
 @Profile("!(mock|mock-alt|local)")
 @Configuration
-class ProxiedWebClientConfig(
-    private val webClientBuilder: WebClient.Builder
-) {
+class ProxiedWebClientConfig {
 
     @Value("\${HTTPS_PROXY}")
     private lateinit var proxyUrl: String
 
     @Bean
     fun proxiedWebClientBuilder(): WebClient.Builder =
-        webClientBuilder
+        WebClient.builder()
             .clientConnector(getReactorClientHttpConnector(proxyUrl))
 
 }
 
 @Profile("mock|mock-alt|local")
 @Configuration
-class MockProxiedWebClientConfig(
-    private val webClientBuilder: WebClient.Builder
-) {
+class MockProxiedWebClientConfig {
 
     @Bean
     fun proxiedWebClientBuilder(): WebClient.Builder =
-        webClientBuilder
+        WebClient.builder()
             .clientConnector(ReactorClientHttpConnector(HttpClient.newConnection()))
 
 }

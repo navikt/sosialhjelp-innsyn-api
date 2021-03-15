@@ -303,8 +303,7 @@ class VedleggOpplastingService(
         const val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10 // 10 MB
 
         fun containsIllegalCharacters(filename: String): Boolean {
-            val testName = sanitizeFileName(filename)
-            return testName.contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
+            return sanitizeFileName(filename).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
         }
 
         private fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC)

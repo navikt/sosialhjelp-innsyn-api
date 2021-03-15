@@ -102,7 +102,7 @@ class VedleggService(
 
     private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {
         return dokumentInfoList.size == files.size &&
-                dokumentInfoList.filterIndexed { idx, it -> it.filnavn == files[idx].filnavn }.size == dokumentInfoList.size
+                dokumentInfoList.filterIndexed { idx, it -> sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn) }.size == dokumentInfoList.size
     }
 
 

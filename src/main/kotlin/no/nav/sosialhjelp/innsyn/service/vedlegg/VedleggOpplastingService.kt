@@ -305,8 +305,6 @@ class VedleggOpplastingService(
         fun containsIllegalCharacters(filename: String): Boolean {
             return sanitizeFileName(filename).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
         }
-
-        private fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC)
     }
 }
 

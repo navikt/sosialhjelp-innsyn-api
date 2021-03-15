@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.service.vedlegg
 import org.apache.tika.Tika
 import java.io.InputStream
 import java.security.MessageDigest
+import java.text.Normalizer
 
 fun getSha512FromByteArray(bytes: ByteArray?): String {
     if (bytes == null) {
@@ -13,6 +14,8 @@ fun getSha512FromByteArray(bytes: ByteArray?): String {
     val digest = md.digest(bytes)
     return digest.fold("", { str, it -> str + "%02x".format(it) })
 }
+
+fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC)
 
 fun detectTikaType(inputStream: InputStream): String {
     return Tika().detect(inputStream)

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 import java.io.InputStream
+import java.text.Normalizer
 import java.time.LocalDate
 import java.util.Collections
 import java.util.UUID
@@ -55,8 +56,9 @@ class VedleggOpplastingService(
         oppgaveValideringer.forEach({ valideringer.addAll(it.filer) })
 
         files.forEach { file ->
-            val filename = createFilename(file.originalFilename, valideringer)
-            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+            val originalFilename = sanitizeFileName(file.originalFilename ?: "")
+            val filename = createFilename(originalFilename, valideringer)
+            renameFilenameInMetadataJson(originalFilename, filename, metadata)
             filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, file.inputStream))
         }
 
@@ -184,8 +186,8 @@ class VedleggOpplastingService(
     }
 
     private fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>) {
-        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
-        val filnavnMultipart: List<String> = files.map { it.originalFilename }.filterNotNull()
+        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> sanitizeFileName(opplastetFil.filnavn) } }
+        val filnavnMultipart: List<String> = files.map { sanitizeFileName(it.originalFilename ?: "") }.filterNotNull()
         if (filnavnMetadata.size != filnavnMultipart.size) {
             throw OpplastingFilnavnMismatchException("FilnavnMetadata (size ${filnavnMetadata.size}) og filnavnMultipart (size ${filnavnMultipart.size}) har forskjellig antall. " +
                     "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
@@ -301,8 +303,11 @@ class VedleggOpplastingService(
         const val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10 // 10 MB
 
         fun containsIllegalCharacters(filename: String): Boolean {
-            return filename.contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
+            val testName = sanitizeFileName(filename)
+            return testName.contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
         }
+
+        private fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC)
     }
 }
 

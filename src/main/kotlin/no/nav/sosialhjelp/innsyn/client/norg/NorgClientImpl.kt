@@ -37,12 +37,14 @@ class NorgClientImpl(
             .uri("/enhet/{enhetsnr}", enhetsnr)
             .headers { it.addAll(headers()) }
             .retrieve()
-            .onStatus(HttpStatus::isError) { it.createException() }
-            .bodyToMono<NavEnhet>()
-            .onErrorMap {
-                log.warn("Noe feilet ved kall mot NORG2 ${withStatusCode(it)}", it)
-                NorgException(it.message, it)
+            .onStatus(HttpStatus::isError) {
+                it.createException()
+                    .map { e ->
+                        log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
+                        NorgException(e.message, e)
+                    }
             }
+            .bodyToMono<NavEnhet>()
             .block()
 
         log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
@@ -60,12 +62,14 @@ class NorgClientImpl(
             .uri("/kodeverk/EnhetstyperNorg")
             .headers { it.addAll(headers()) }
             .retrieve()
-            .onStatus(HttpStatus::isError) { it.createException() }
-            .bodyToMono<String>()
-            .onErrorMap {
-                log.warn("Ping - feilet mot NORG2 ${withStatusCode(it)}", it)
-                NorgException(it.message, it)
+            .onStatus(HttpStatus::isError) {
+                it.createException()
+                    .map { e ->
+                        log.warn("Ping - feilet mot NORG2 ${e.statusCode}", e)
+                        NorgException(e.message, e)
+                    }
             }
+            .bodyToMono<String>()
             .block()
     }
 

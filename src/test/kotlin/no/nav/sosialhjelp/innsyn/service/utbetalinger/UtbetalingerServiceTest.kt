@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
@@ -295,7 +296,7 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling med dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         val now = LocalDateTime.now()
-        val dokumentasjonkrav = Dokumentasjonkrav("dokumentasjonkrav", "tittel", "Skal hoppe", false, now)
+        val dokumentasjonkrav = Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,"dokumentasjonkrav", "tittel", "Skal hoppe", false, now)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now())
         model.saker.add(Sak(

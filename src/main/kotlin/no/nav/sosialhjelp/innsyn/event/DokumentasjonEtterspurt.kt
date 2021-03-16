@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.common.VIS_BREVET
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
@@ -16,7 +17,14 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
     val prevSize = oppgaver.size
 
     oppgaver = hendelse.dokumenter
-            .map { Oppgave(sha256(it.innsendelsesfrist), it.dokumenttype, it.tilleggsinformasjon, it.innsendelsesfrist.toLocalDateTime(), hendelse.hendelsestidspunkt.toLocalDateTime(), true) }
+            .map { Oppgave(sha256(it.innsendelsesfrist),
+                    it.dokumenttype,
+                    it.tilleggsinformasjon,
+                    JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
+                    it.dokumentreferanse,
+                    it.innsendelsesfrist.toLocalDateTime(),
+                    hendelse.hendelsestidspunkt.toLocalDateTime(),
+                    true) }
             .toMutableList()
 
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {

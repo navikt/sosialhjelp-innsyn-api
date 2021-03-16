@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.domain
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -51,6 +52,8 @@ data class Oppgave(
         var oppgaveId: String,
         var tittel: String,
         var tilleggsinfo: String?,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val hendelsereferanse: String?,
         var innsendelsesfrist: LocalDateTime?,
         var tidspunktForKrav: LocalDateTime,
         var erFraInnsyn: Boolean
@@ -114,7 +117,8 @@ data class Vilkar(
 ) : Oppgavehendelse()
 
 data class Dokumentasjonkrav(
-        override var referanse: String,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        override var referanse: String, // hendelsereferanse
         override var tittel: String?,
         override var beskrivelse: String?,
         var oppfyllt: Boolean,

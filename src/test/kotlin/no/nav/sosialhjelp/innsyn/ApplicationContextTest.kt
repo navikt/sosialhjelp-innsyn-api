@@ -22,9 +22,6 @@ class ApplicationContextTest {
     @MockkBean
     private lateinit var proxiedWebClientConfig: ProxiedWebClientConfig
 
-    @MockkBean(name = "stsRestTemplate")
-    private lateinit var stsRestTemplate: RestTemplate
-
     @MockkBean(name = "pdlRestTemplate")
     private lateinit var pdlRestTemplate: RestTemplate
 

@@ -7,13 +7,14 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class FiksConfig (
-    private val proxiedWebClientBuilder: WebClient.Builder,
+    private val proxiedWebClient: WebClient,
     private val clientProperties: ClientProperties
 ) {
 
     @Bean
     fun fiksWebClient(): WebClient =
-        proxiedWebClientBuilder
+        proxiedWebClient
+            .mutate()
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .build()
 }

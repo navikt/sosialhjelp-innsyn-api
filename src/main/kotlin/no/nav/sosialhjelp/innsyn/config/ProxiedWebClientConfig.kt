@@ -17,9 +17,10 @@ class ProxiedWebClientConfig {
     private lateinit var proxyUrl: String
 
     @Bean
-    fun proxiedWebClientBuilder(): WebClient.Builder =
+    fun proxiedWebClient(): WebClient =
         WebClient.builder()
             .clientConnector(getReactorClientHttpConnector(proxyUrl))
+            .build()
 
 }
 
@@ -28,8 +29,9 @@ class ProxiedWebClientConfig {
 class MockProxiedWebClientConfig {
 
     @Bean
-    fun proxiedWebClientBuilder(): WebClient.Builder =
+    fun proxiedWebClient(): WebClient =
         WebClient.builder()
             .clientConnector(ReactorClientHttpConnector(HttpClient.newConnection()))
+            .build()
 
 }

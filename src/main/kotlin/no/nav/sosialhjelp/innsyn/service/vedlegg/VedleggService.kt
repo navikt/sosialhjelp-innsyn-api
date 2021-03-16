@@ -102,9 +102,22 @@ class VedleggService(
 
     private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {
         return dokumentInfoList.size == files.size &&
-                dokumentInfoList.filterIndexed { idx, it -> sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn) }.size == dokumentInfoList.size
+                dokumentInfoList.filterIndexed { idx, it -> compareFilenames(it.filnavn, files[idx].filnavn) }.size == dokumentInfoList.size
     }
 
+    private fun compareFilenames(dokumentFilnavn : String, vedleggJsonFilnavn : String): Boolean {
+        val sanitizedDokumentFilnavn = sanitizeFileName(dokumentFilnavn)
+        val sanitizedVedleggJsonFilnavn = sanitizeFileName(vedleggJsonFilnavn)
+        val equals = sanitizedDokumentFilnavn == sanitizedVedleggJsonFilnavn
+        if (!equals) {
+            log.error("DEBUG: mismatch i filnavn fra KS: " +
+                    "Filnavn i dokumentlista ($dokumentFilnavn) " +
+                    "stemmer ikke med filnavn i vedlegg.json ($vedleggJsonFilnavn). " +
+                    "sanitizedDokumentFilnavn: $sanitizedDokumentFilnavn ." +
+                    "sanitizedVedleggJsonFilnavn: $sanitizedVedleggJsonFilnavn .")
+        }
+        return equals
+    }
 
     companion object {
         private val log by logger()

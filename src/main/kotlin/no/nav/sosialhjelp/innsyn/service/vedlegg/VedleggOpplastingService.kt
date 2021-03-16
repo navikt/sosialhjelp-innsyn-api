@@ -122,6 +122,7 @@ class VedleggOpplastingService(
         return JsonVedleggSpesifikasjon()
                 .withVedlegg(metadata.map {
                     createJsonVedlegg(it, it.filer.map { fil ->
+                        log.info("DEBUG: Lager vedlegg.json. Filnavn er: ${fil.filnavn}")
                         JsonFiler()
                                 .withFilnavn(fil.filnavn)
                                 .withSha512(getSha512FromByteArray(files[filIndex++].bytes))
@@ -178,6 +179,7 @@ class VedleggOpplastingService(
             data.filer.forEach { file ->
                 if (file.filnavn == originalFilename || file.filnavn == sanitizeFileName(originalFilename ?: "")) {
                     file.filnavn = newFilename
+                    log.info("DEBUG: filen fikk navnet ${file.filnavn} i metadata")
                     return
                 }
             }

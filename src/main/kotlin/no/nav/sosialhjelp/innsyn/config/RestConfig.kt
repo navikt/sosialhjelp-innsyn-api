@@ -23,14 +23,6 @@ class RestConfig {
 
     @Bean
     @Profile("!(mock | local)")
-    fun stsRestTemplate(builder: RestTemplateBuilder): RestTemplate =
-            builder
-                    .basicAuthentication(System.getenv(SRVSOSIALHJELP_INNSYN_API_USERNAME), System.getenv(SRVSOSIALHJELP_INNSYN_API_PASSWORD), StandardCharsets.UTF_8)
-                    .defaultHeader(HEADER_NAV_APIKEY, System.getenv(STSTOKEN_APIKEY))
-                    .build()
-
-    @Bean
-    @Profile("!(mock | local)")
     fun pdlRestTemplate(builder: RestTemplateBuilder): RestTemplate =
             builder
                     .basicAuthentication(System.getenv(SRVSOSIALHJELP_INNSYN_API_USERNAME), System.getenv(SRVSOSIALHJELP_INNSYN_API_PASSWORD), StandardCharsets.UTF_8)

@@ -9,7 +9,7 @@ object Versions {
     const val kotlin = "1.4.21"
     const val coroutines = "1.4.2"
     const val springBoot = "2.4.3"
-    const val sosialhjelpCommon = "1.1c8e196"
+    const val sosialhjelpCommon = "1.8f11108"
     const val logback = "1.2.3"
     const val logstash = "6.5"
     const val filformat = "1.2021.03.02-10.58-415c44e55124"
@@ -82,6 +82,7 @@ dependencies {
 //    Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.coroutines}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${Versions.coroutines}")
 
 //    Spring
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")

@@ -7,7 +7,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.responses.ok_navenhet
@@ -15,15 +14,14 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.http.ResponseEntity
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 
 internal class NorgClientImplTest {
 
-    private val clientProperties: ClientProperties = mockk(relaxed = true)
-    private val restTemplate: RestTemplate = mockk()
+    private val webClient: WebClient = mockk()
     private val redisService: RedisService = mockk()
-    private val norgClient = NorgClientImpl(clientProperties, restTemplate, redisService)
+    private val norgClient = NorgClientImpl(webClient, redisService)
 
     private val enhetsnr = "8888"
 
@@ -50,17 +48,18 @@ internal class NorgClientImplTest {
 
     @Test
     fun `skal hente fra Norg og lagre til cache hvis cache er tom`() {
-        val mockResponse: ResponseEntity<String> = mockk()
-        every { mockResponse.body } returns ok_navenhet
+        val navEnhet = objectMapper.readValue<NavEnhet>(ok_navenhet)
         every { redisService.get(any(), NavEnhet::class.java) } returns null
         every {
-            restTemplate.exchange(
-                    any(),
-                    any(),
-                    any(),
-                    String::class.java,
-                    enhetsnr)
-        } returns mockResponse
+            webClient
+                .get()
+                .uri("/enhet/{enhetsnr}", enhetsnr)
+                .headers(any())
+                .retrieve()
+                .onStatus(any(), any())
+                .bodyToMono<NavEnhet>()
+                .block()
+        } returns navEnhet
 
         val result2 = norgClient.hentNavEnhet(enhetsnr)
 

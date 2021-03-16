@@ -71,7 +71,6 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(NorgException::class)
     fun handleNorgError(e: NorgException): ResponseEntity<FrontendErrorMessage> {
-        log.error("Noe feilet ved kall til Norg", e)
         val error = FrontendErrorMessage(NORG_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }

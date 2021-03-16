@@ -54,4 +54,3 @@ val ok_digisossak_response = """
   }
 }
 """.trimIndent()
-

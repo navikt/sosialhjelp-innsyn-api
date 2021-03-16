@@ -84,16 +84,19 @@ Dette kan gjøres manuelt med kubectl både i dev og prod ved bruk av `kubectl a
 
 ## Lokal kjøring
 #### *uten* integrasjon til Fiks og login-api
-TestApplication og profile=mock,log-console
+`TestApplication` og profile=`mock,log-console`
 #### *med* integrasjon til Fiks og login-api
-TestApplication og profile=local,log-console. \
-Da må følgende env-variabler settes (hentes fra vault): FIKS_DIGISOS_ENDPOINT_URL, INTEGRASJONPASSORD_FIKS, INTEGRASJONSID_FIKS, VIRKSERT_STI, TRUSTSTORE_TYPE, TRUSTSTORE_FILEPATH og TESTBRUKER_NATALIE.
+`TestApplication` og profile=`local,log-console` (`,no-redis`)
+
+Da må følgende env-variabler settes (hentes fra vault): \
+`FIKS_DIGISOS_ENDPOINT_URL`, `INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS`, `VIRKSERT_STI`, `TRUSTSTORE_TYPE`, `TRUSTSTORE_FILEPATH` og `TESTBRUKER_NATALIE`.
+
 #### Med redis
+Bruk spring-profilen `no-redis` for å disable redis.
+
 For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsvare med portnummer i properties)
 1. `docker pull redis` (laster ned image fra docker hub)
 2. `docker run --name <myredis> -d -p 6379:6379 redis` 
 (kjører opp redis (`--name <myredis>` må samsvare med referansen i redis-config.yaml))
 3. `docker run -it --link myredis:redis --rm redis redis-cli -h redis -p 6379` 
 (kommandolinjeverktøy mot redis for å sjekke innholdet.)
-
-Bruk spring-profilen `no-redis` for å disable redis.

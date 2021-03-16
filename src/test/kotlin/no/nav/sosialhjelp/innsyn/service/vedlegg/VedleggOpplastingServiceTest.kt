@@ -383,6 +383,28 @@ internal class VedleggOpplastingServiceTest {
         assertEquals("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ", service.getMetadataAsString(metadataList))
     }
 
+    @Test
+    fun `renameFilenameInMetadataJson skal rename uavhengig av om filnavn er sanitized eller ikke`() {
+        val originalFilenameInNFDFormat ="a\u030AA\u030A.pdf" // å/Å på MAC blir lagret som to tegn.
+        val newName ="åÅ-1234.pdf"
+        val metadataListUtenSanitizedFilename = createSimpleMetadataListWithFilename(originalFilenameInNFDFormat)
+        val metadataListMedSanitizedFilename = createSimpleMetadataListWithFilename(sanitizeFileName(originalFilenameInNFDFormat))
+
+        service.renameFilenameInMetadataJson(originalFilenameInNFDFormat, newName, metadataListUtenSanitizedFilename)
+        service.renameFilenameInMetadataJson(originalFilenameInNFDFormat, newName, metadataListMedSanitizedFilename)
+
+        assertEquals(newName, metadataListUtenSanitizedFilename[0].filer[0].filnavn)
+        assertEquals(newName, metadataListMedSanitizedFilename[0].filer[0].filnavn)
+    }
+
+    private fun createSimpleMetadataListWithFilename(filename: String): MutableList<OpplastetVedleggMetadata> {
+        return mutableListOf(
+                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(
+                        OpplastetFil(sanitizeFileName(filename))), null
+                )
+        )
+    }
+
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {
         val outputStream = ByteArrayOutputStream()
         ImageIO.write(BufferedImage(size, size, BufferedImage.TYPE_INT_RGB), type, outputStream)

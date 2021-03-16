@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 import java.io.InputStream
-import java.text.Normalizer
 import java.time.LocalDate
 import java.util.Collections
 import java.util.UUID
@@ -50,11 +49,11 @@ class VedleggOpplastingService(
         }
         metadata.removeIf { it.filer.isEmpty() }
 
-        val filerForOpplasting = mutableListOf<FilForOpplasting>()
 
         val valideringer = mutableListOf<FilValidering>()
-        oppgaveValideringer.forEach({ valideringer.addAll(it.filer) })
+        oppgaveValideringer.forEach { valideringer.addAll(it.filer) }
 
+        val filerForOpplasting = mutableListOf<FilForOpplasting>()
         files.forEach { file ->
             val originalFilename = sanitizeFileName(file.originalFilename ?: "")
             val filename = createFilename(originalFilename, valideringer)
@@ -174,10 +173,10 @@ class VedleggOpplastingService(
         return filename
     }
 
-    private fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
+    fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
         metadata.forEach { data ->
             data.filer.forEach { file ->
-                if (file.filnavn == originalFilename) {
+                if (file.filnavn == originalFilename || file.filnavn == sanitizeFileName(originalFilename ?: "")) {
                     file.filnavn = newFilename
                     return
                 }

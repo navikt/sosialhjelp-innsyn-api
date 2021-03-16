@@ -24,10 +24,7 @@ interface DokumentlagerClient {
 @Component
 class DokumentlagerClientImpl(
     private val clientProperties: ClientProperties,
-    private val proxiedWebClientBuilder: WebClient.Builder,
-    private val fiksWebClient: WebClient = proxiedWebClientBuilder
-        .baseUrl(clientProperties.fiksDigisosEndpointUrl)
-        .build(),
+    private val fiksWebClient: WebClient,
 ) : DokumentlagerClient {
 
     override fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {

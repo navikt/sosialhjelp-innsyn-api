@@ -10,11 +10,10 @@ import reactor.netty.http.client.HttpClient
 @Configuration
 class NorgConfig(
     private val clientProperties: ClientProperties,
-    private val webClientBuilder: WebClient.Builder
 ) {
 
     @Bean
-    fun norgWebClient(): WebClient =
+    fun norgWebClient(webClientBuilder: WebClient.Builder): WebClient =
         webClientBuilder
             .baseUrl(clientProperties.norgEndpointUrl)
             .clientConnector(ReactorClientHttpConnector(HttpClient.newConnection()))

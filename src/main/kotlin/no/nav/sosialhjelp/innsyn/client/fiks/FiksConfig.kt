@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class FiksConfig (
+class FiksConfig(
     private val proxiedWebClient: WebClient,
-    private val clientProperties: ClientProperties
+    private val clientProperties: ClientProperties,
 ) {
 
     @Bean
@@ -16,5 +16,6 @@ class FiksConfig (
         proxiedWebClient
             .mutate()
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
+            .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
             .build()
 }

@@ -387,20 +387,27 @@ internal class VedleggOpplastingServiceTest {
     fun `renameFilenameInMetadataJson skal rename uavhengig av om filnavn er sanitized eller ikke`() {
         val originalFilenameInNFDFormat ="a\u030AA\u030A.pdf" // å/Å på MAC blir lagret som to tegn.
         val newName ="åÅ-1234.pdf"
+
         val metadataListUtenSanitizedFilename = createSimpleMetadataListWithFilename(originalFilenameInNFDFormat)
+        val metadataListUtenSanitizedFilename2 = createSimpleMetadataListWithFilename(originalFilenameInNFDFormat)
         val metadataListMedSanitizedFilename = createSimpleMetadataListWithFilename(sanitizeFileName(originalFilenameInNFDFormat))
+        val metadataListMedSanitizedFilename2 = createSimpleMetadataListWithFilename(sanitizeFileName(originalFilenameInNFDFormat))
 
         service.renameFilenameInMetadataJson(originalFilenameInNFDFormat, newName, metadataListUtenSanitizedFilename)
+        service.renameFilenameInMetadataJson(sanitizeFileName(originalFilenameInNFDFormat), newName, metadataListUtenSanitizedFilename2)
         service.renameFilenameInMetadataJson(originalFilenameInNFDFormat, newName, metadataListMedSanitizedFilename)
+        service.renameFilenameInMetadataJson(sanitizeFileName(originalFilenameInNFDFormat), newName, metadataListMedSanitizedFilename2)
 
         assertEquals(newName, metadataListUtenSanitizedFilename[0].filer[0].filnavn)
+        assertEquals(newName, metadataListUtenSanitizedFilename2[0].filer[0].filnavn)
         assertEquals(newName, metadataListMedSanitizedFilename[0].filer[0].filnavn)
+        assertEquals(newName, metadataListMedSanitizedFilename2[0].filer[0].filnavn)
     }
 
     private fun createSimpleMetadataListWithFilename(filename: String): MutableList<OpplastetVedleggMetadata> {
         return mutableListOf(
                 OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(
-                        OpplastetFil(sanitizeFileName(filename))), null
+                        OpplastetFil(filename)), null
                 )
         )
     }

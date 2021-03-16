@@ -176,7 +176,7 @@ class VedleggOpplastingService(
     fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
         metadata.forEach { data ->
             data.filer.forEach { file ->
-                if (file.filnavn == originalFilename || file.filnavn == sanitizeFileName(originalFilename ?: "")) {
+                if (file.filnavn == originalFilename || file.filnavn == sanitizeFileName(originalFilename ?: "") || sanitizeFileName(file.filnavn ?: "") == originalFilename) {
                     file.filnavn = newFilename
                     return
                 }

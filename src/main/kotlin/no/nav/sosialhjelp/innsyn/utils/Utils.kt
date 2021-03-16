@@ -126,15 +126,11 @@ fun messageUtenFnr(e: WebClientResponseException): String {
     return "$message - $fiksErrorMessage"
 }
 
-val String.feilmeldingUtenFnr: String?
-    get() {
-        return this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
-    }
+val String.feilmeldingUtenFnr: String
+    get() = this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
 
 val ErrorMessage.feilmeldingUtenFnr: String?
-    get() {
-        return this.message?.feilmeldingUtenFnr
-    }
+    get() = this.message?.feilmeldingUtenFnr
 
 fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()

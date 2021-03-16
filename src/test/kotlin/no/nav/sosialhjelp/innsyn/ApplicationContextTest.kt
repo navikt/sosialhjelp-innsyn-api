@@ -16,8 +16,8 @@ class ApplicationContextTest {
     @MockkBean
     private lateinit var idPortenClient: IdPortenClient
 
-    @MockkBean(name = "proxiedWebClient")
-    private lateinit var proxiedWebClient: WebClient
+    @MockkBean(name = "proxiedWebClientBuilder", relaxed = true)
+    private lateinit var proxiedWebClientBuilder: WebClient.Builder
 
     @MockkBean
     private lateinit var proxiedWebClientConfig: ProxiedWebClientConfig

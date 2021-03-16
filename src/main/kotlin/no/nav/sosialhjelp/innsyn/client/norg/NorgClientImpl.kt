@@ -69,6 +69,7 @@ class NorgClientImpl(
                     }
             }
             .bodyToMono<String>()
+
             .block()
     }
 

@@ -14,9 +14,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpStatusCodeException
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.io.IOException
 import java.sql.Timestamp
 import java.time.Instant
@@ -139,9 +137,6 @@ val ErrorMessage.feilmeldingUtenFnr: String?
     get() {
         return this.message?.feilmeldingUtenFnr
     }
-
-fun withStatusCode(t: Throwable): HttpStatus? =
-    (t as? WebClientResponseException)?.statusCode
 
 fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()

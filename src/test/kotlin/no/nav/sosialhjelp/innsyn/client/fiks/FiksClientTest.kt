@@ -47,7 +47,7 @@ internal class FiksClientTest {
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, fiksWebClient, retryProperties, redisService)
+    private val fiksClient = FiksClientImpl(clientProperties, WebClient.builder(), fiksWebClient, retryProperties, redisService)
 
     private val id = "123"
 
@@ -253,7 +253,7 @@ internal class FiksClientTest {
     @Test // fikk ikke mockWebServer til å funke her uten å skjønner hvorfor (InputStream-relatert), så gikk for "klassisk" mockk stil
     fun `POST ny ettersendelse`() {
         val webClient: WebClient = mockk()
-        val clientForPost = FiksClientImpl(clientProperties, webClient, retryProperties, redisService)
+        val clientForPost = FiksClientImpl(clientProperties, WebClient.builder(), webClient, retryProperties, redisService)
 
         val fil1: InputStream = mockk()
         val fil2: InputStream = mockk()

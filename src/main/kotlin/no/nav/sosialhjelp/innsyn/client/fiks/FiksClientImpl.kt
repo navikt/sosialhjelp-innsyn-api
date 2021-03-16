@@ -39,7 +39,10 @@ import java.util.function.Predicate
 @Component
 class FiksClientImpl(
     private val clientProperties: ClientProperties,
-    private val fiksWebClient: WebClient,
+    private val proxiedWebClientBuilder: WebClient.Builder,
+    private val fiksWebClient: WebClient = proxiedWebClientBuilder
+        .baseUrl(clientProperties.fiksDigisosEndpointUrl)
+        .build(),
     private val retryProperties: FiksRetryProperties,
     private val redisService: RedisService,
 ) : FiksClient {

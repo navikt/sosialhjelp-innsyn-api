@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = ["no-redis"])
+@ActiveProfiles(profiles = ["no-redis","test"])
 class ApplicationContextTest {
 
     @MockkBean

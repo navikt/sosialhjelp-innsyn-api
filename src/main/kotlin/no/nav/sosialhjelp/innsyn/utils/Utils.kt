@@ -16,10 +16,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import java.io.IOException
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
@@ -57,7 +54,7 @@ fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: St
 
 fun String.toLocalDateTime(): LocalDateTime {
     return ZonedDateTime.parse(this, ISO_DATE_TIME)
-            .withZoneSameInstant(ZoneId.of("Europe/Oslo")).toLocalDateTime()
+        .withZoneSameInstant(ZoneId.of("Europe/Oslo")).toLocalDateTime()
 }
 
 fun String.toLocalDate(): LocalDate = LocalDate.parse(this, ISO_LOCAL_DATE)
@@ -75,7 +72,7 @@ fun formatLocalDateTime(dato: LocalDateTime): String {
     return dato.format(datoFormatter)
 }
 
-fun soknadsalderIMinutter(tidspunktSendt : LocalDateTime?) : Long {
+fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long {
     return tidspunktSendt?.until(LocalDateTime.now(), ChronoUnit.MINUTES) ?: -1
 }
 
@@ -91,9 +88,9 @@ fun enumNameToLowercase(string: String): String {
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser
-            ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
-            ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
-            ?: digisosSak.fiksDigisosId.plus("0000")
+        ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
+        ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
+        ?: digisosSak.fiksDigisosId.plus("0000")
 
     val nesteSuffix = lagIdSuffix(previousId)
     return (previousId.dropLast(COUNTER_SUFFIX_LENGTH).plus(nesteSuffix))
@@ -123,14 +120,6 @@ fun isRunningInProd(): Boolean {
     return clusterName != null && clusterName.contains("prod")
 }
 
-fun <T : HttpStatusCodeException> T.toFiksErrorMessage(): ErrorMessage? {
-    return try {
-        objectMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
-    } catch (e: IOException) {
-        null
-    }
-}
-
 fun messageUtenFnr(e: WebClientResponseException): String {
     val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
     val message = e.message?.feilmeldingUtenFnr
@@ -146,9 +135,6 @@ val ErrorMessage.feilmeldingUtenFnr: String?
     get() {
         return this.message?.feilmeldingUtenFnr
     }
-
-fun withStatusCode(t: Throwable): HttpStatus? =
-    (t as? WebClientResponseException)?.statusCode
 
 fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()

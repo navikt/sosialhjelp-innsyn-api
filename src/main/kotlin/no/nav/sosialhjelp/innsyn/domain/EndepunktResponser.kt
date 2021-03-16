@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Date
@@ -46,6 +47,8 @@ data class OppgaveResponse(
 data class OppgaveElement(
         val dokumenttype: String,
         val tilleggsinformasjon: String?,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val hendelsereferanse: String?,
         val erFraInnsyn: Boolean
 )
 
@@ -68,7 +71,8 @@ data class DokumentasjonkravResponse(
 data class DokumentasjonkravElement(
         @JsonFormat(pattern = "yyyy-MM-dd")
         val hendelsetidspunkt: LocalDate,
-        val dokumentasjonkravReferanse : String,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val dokumentasjonkravReferanse : String, // hendelsereferanse
         val tittel: String?,
         val beskrivelse: String?
 )
@@ -121,6 +125,8 @@ data class OppgaveOpplastingResponse(
         val tilleggsinfo: String?,
         @JsonFormat(pattern = "yyyy-MM-dd")
         val innsendelsesfrist: LocalDate?,
+        val hendelsetype: JsonVedlegg.HendelseType?,
+        val hendelsereferanse: String?,
         val filer: List<VedleggOpplastingResponse>
 )
 

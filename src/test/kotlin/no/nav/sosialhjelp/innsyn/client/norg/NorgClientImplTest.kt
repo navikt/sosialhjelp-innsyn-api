@@ -58,7 +58,6 @@ internal class NorgClientImplTest {
                 .retrieve()
                 .onStatus(any(), any())
                 .bodyToMono<NavEnhet>()
-                .onErrorMap(any())
                 .block()
         } returns navEnhet
 

@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.service.oppgave
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
@@ -68,7 +69,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return oppgave`() {
         val model = InternalDigisosSoker()
-        model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, frist, tidspunktForKrav, true))
+        model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -86,7 +87,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return oppgave without tilleggsinformasjon`() {
         val model = InternalDigisosSoker()
-        model.oppgaver.add(Oppgave("oppgaveId1", type, null, frist, tidspunktForKrav, true))
+        model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -105,10 +106,10 @@ internal class OppgaveServiceTest {
     fun `Should return list of oppgaver sorted by frist`() {
         val model = InternalDigisosSoker()
         model.oppgaver.addAll(listOf(
-                Oppgave("oppgaveId1", type, tillegg, frist, tidspunktForKrav, true),
-                Oppgave("oppgaveId2", type3, tillegg3, frist3, tidspunktForKrav, true),
-                Oppgave("oppgaveId3", type4, tillegg4, frist4, tidspunktForKrav, true),
-                Oppgave("oppgaveId4", type2, tillegg2, frist2, tidspunktForKrav, true)))
+                Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
+                Oppgave("oppgaveId2", type3, tillegg3, null, null, frist3, tidspunktForKrav, true),
+                Oppgave("oppgaveId3", type4, tillegg4, null, null, frist4, tidspunktForKrav, true),
+                Oppgave("oppgaveId4", type2, tillegg2, null, null, frist2, tidspunktForKrav, true)))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -142,9 +143,9 @@ internal class OppgaveServiceTest {
     fun `Skal filtrere ut oppgaver der brukeren har lastet opp filer av samme type etter kravet ble gitt`() {
         val model = InternalDigisosSoker()
         model.oppgaver.addAll(listOf(
-                Oppgave("oppgaveId1", type, tillegg, frist, tidspunktForKrav, true),
-                Oppgave("oppgaveId2", type2, null, frist2, tidspunktForKrav, true),
-                Oppgave("oppgaveId3", type3, tillegg3, frist3, tidspunktForKrav, true)))
+                Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
+                Oppgave("oppgaveId2", type2, null, null, null, frist2, tidspunktForKrav, true),
+                Oppgave("oppgaveId3", type3, tillegg3, null, null, frist3, tidspunktForKrav, true)))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
@@ -193,10 +194,10 @@ internal class OppgaveServiceTest {
     fun `Should return dokumentasjonkrav with tittel and filter out empty dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
-                Dokumentasjonkrav("dokumentasjonkrav1", "tittel", "beskrivelse1", false, LocalDateTime.now()),
-                Dokumentasjonkrav("dokumentasjonkrav2", null, "beskrivelse2", false, LocalDateTime.now()) ,
-                Dokumentasjonkrav("dokumentasjonkrav3", "", null, false, LocalDateTime.now()),
-                Dokumentasjonkrav("dokumentasjonkrav4", null, " ", false, LocalDateTime.now())
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", false, LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", false, LocalDateTime.now()) ,
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, false, LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", false, LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 

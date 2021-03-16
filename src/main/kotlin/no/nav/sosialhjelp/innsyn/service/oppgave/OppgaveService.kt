@@ -32,7 +32,7 @@ class OppgaveService(
                     OppgaveResponse(
                             innsendelsesfrist = key,
                             oppgaveId = value[0].oppgaveId,  // oppgaveId og innsendelsefrist er alltid 1-1
-                            oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.erFraInnsyn) }
+                            oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.hendelsetype, it.hendelsereferanse, it.erFraInnsyn) }
                     )
                 }
                 .sortedBy { it.innsendelsesfrist }
@@ -90,7 +90,7 @@ class OppgaveService(
                      DokumentasjonkravResponse(
                              dokumentasjonkravElementer = value.map {
                                  val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse) }
                      )
                 }
 

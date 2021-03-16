@@ -8,6 +8,8 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.finn.unleash.Unleash
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
@@ -42,6 +44,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.assertNull
 
 
 internal class VedleggOpplastingServiceTest {
@@ -52,13 +55,15 @@ internal class VedleggOpplastingServiceTest {
     private val redisService: RedisService = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val dokumentlagerClient: DokumentlagerClient = mockk()
+    private val unleashClient: Unleash = mockk()
     private val service = VedleggOpplastingService(
-        fiksClient,
-        krypteringService,
-        virusScanner,
-        redisService,
-        ettersendelsePdfGenerator,
-        dokumentlagerClient,
+            fiksClient,
+            krypteringService,
+            virusScanner,
+            redisService,
+            ettersendelsePdfGenerator,
+            dokumentlagerClient,
+            unleashClient
     )
 
     private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
@@ -90,6 +95,7 @@ internal class VedleggOpplastingServiceTest {
         every { redisService.put(any(), any(), any()) } just runs
         every { redisService.defaultTimeToLiveSeconds } returns 1
         every { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(any()) } returns mockCertificate
+        every { unleashClient.isEnabled(any(), false) } returns true
     }
 
     @Test
@@ -107,8 +113,8 @@ internal class VedleggOpplastingServiceTest {
         val filnavn3 = "test3.png"
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1)), null),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn3)), null))
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1)), null),
+                OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn3)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile),
@@ -167,8 +173,8 @@ internal class VedleggOpplastingServiceTest {
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2)), null))
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null),
+                OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn2)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile),
@@ -189,8 +195,8 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis filnavn i metadata ikke matcher med filene som sendes`() {
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil("feilFilnavn.rar")), null),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, mutableListOf(OpplastetFil(filnavn2)), null))
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil("feilFilnavn.rar")), null),
+                OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn2)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile),
@@ -212,7 +218,7 @@ internal class VedleggOpplastingServiceTest {
         val signedPdfFile = createPdfByteArray(true)
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(
                         OpplastetFil(filnavn1),
                         OpplastetFil(filnavn2)), LocalDate.now()))
         val files = mutableListOf<MultipartFile>(
@@ -239,7 +245,7 @@ internal class VedleggOpplastingServiceTest {
         val pdfFile = createPasswordProtectedPdfByteArray()
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(
+                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(
                         OpplastetFil(filnavn1)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn1, filtype, pdfFile))
@@ -256,7 +262,7 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
         every { virusScanner.scan(any(), any()) } throws OpplastingException("mulig virus!", null)
 
-        val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null))
+        val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile))
@@ -322,15 +328,53 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
+    fun `vedleggJson skal ikke ha hendelsetype og hendelsereferanse om featureToggle er inaktiv`() {
+        every { unleashClient.isEnabled(any(), false) } returns false
+
+        val opplastetVedleggMetadata = OpplastetVedleggMetadata(
+                "type",
+                "tilleggsinfo",
+                JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
+                "hendelsereferanse",
+                mutableListOf(OpplastetFil("fil1")),
+                null
+        );
+
+        val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
+
+        assertNull(createJsonVedlegg.hendelseType)
+        assertNull(createJsonVedlegg.hendelseReferanse)
+    }
+
+    @Test
+    fun `vedleggJson skal ha hendelsetype og hendelsereferanse om featureToggle er aktiv`() {
+        every { unleashClient.isEnabled(any(), false) } returns true
+
+        val opplastetVedleggMetadata = OpplastetVedleggMetadata(
+                "type",
+                "tilleggsinfo",
+                JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
+                "hendelsereferanse",
+                mutableListOf(OpplastetFil("fil1")),
+                null
+        );
+
+        val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
+
+        assertEquals(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, createJsonVedlegg.hendelseType)
+        assertEquals("hendelsereferanse", createJsonVedlegg.hendelseReferanse)
+    }
+
+    @Test
     fun `getOpplastetVedleggMetadataAsString skal returnere antall filer per element i listen`() {
         val metadataList = mutableListOf(
-                OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
+                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(
                         OpplastetFil("fil1"),
                         OpplastetFil("fil2"),
                         OpplastetFil("fil3")
                 ), null),
-                OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(OpplastetFil("fil4")), null),
-                OpplastetVedleggMetadata("type", "tilleggsinfo", mutableListOf(
+                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("fil4")), null),
+                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(
                         OpplastetFil("fil5"),
                         OpplastetFil("fil6")
                 ), LocalDate.now())

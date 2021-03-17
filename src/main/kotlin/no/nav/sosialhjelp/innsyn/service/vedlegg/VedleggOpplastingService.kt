@@ -49,14 +49,15 @@ class VedleggOpplastingService(
         }
         metadata.removeIf { it.filer.isEmpty() }
 
-        val filerForOpplasting = mutableListOf<FilForOpplasting>()
 
         val valideringer = mutableListOf<FilValidering>()
-        oppgaveValideringer.forEach({ valideringer.addAll(it.filer) })
+        oppgaveValideringer.forEach { valideringer.addAll(it.filer) }
 
+        val filerForOpplasting = mutableListOf<FilForOpplasting>()
         files.forEach { file ->
-            val filename = createFilename(file.originalFilename, valideringer)
-            renameFilenameInMetadataJson(file.originalFilename, filename, metadata)
+            val originalFilename = sanitizeFileName(file.originalFilename!!)
+            val filename = createFilename(originalFilename, valideringer)
+            renameFilenameInMetadataJson(originalFilename, filename, metadata)
             filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, file.inputStream))
         }
 
@@ -172,10 +173,10 @@ class VedleggOpplastingService(
         return filename
     }
 
-    private fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
+    fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
         metadata.forEach { data ->
             data.filer.forEach { file ->
-                if (file.filnavn == originalFilename) {
+                if (sanitizeFileName(file.filnavn) == sanitizeFileName(originalFilename!!)) {
                     file.filnavn = newFilename
                     return
                 }
@@ -184,8 +185,8 @@ class VedleggOpplastingService(
     }
 
     private fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>) {
-        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> opplastetFil.filnavn } }
-        val filnavnMultipart: List<String> = files.map { it.originalFilename }.filterNotNull()
+        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> sanitizeFileName(opplastetFil.filnavn) } }
+        val filnavnMultipart: List<String> = files.map { sanitizeFileName(it.originalFilename ?: "") }
         if (filnavnMetadata.size != filnavnMultipart.size) {
             throw OpplastingFilnavnMismatchException("FilnavnMetadata (size ${filnavnMetadata.size}) og filnavnMultipart (size ${filnavnMultipart.size}) har forskjellig antall. " +
                     "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
@@ -301,7 +302,7 @@ class VedleggOpplastingService(
         const val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10 // 10 MB
 
         fun containsIllegalCharacters(filename: String): Boolean {
-            return filename.contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
+            return sanitizeFileName(filename).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
         }
     }
 }

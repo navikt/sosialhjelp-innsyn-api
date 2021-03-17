@@ -37,6 +37,7 @@ object Versions {
     const val junitJupiter = "5.7.0"
     const val mockk = "1.10.3"
     const val springmockk = "2.0.0"
+    const val mockwebserver = "5.0.0-alpha.2"
 }
 
 plugins {
@@ -147,6 +148,7 @@ dependencies {
     testImplementation("no.nav.security:token-validation-test-support:${Versions.tokenValidation}")
     testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
+    testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:${Versions.mockwebserver}")
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     constraints {

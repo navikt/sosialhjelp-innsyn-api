@@ -55,7 +55,7 @@ class VedleggOpplastingService(
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
         files.forEach { file ->
-            val originalFilename = sanitizeFileName(file.originalFilename ?: "")
+            val originalFilename = sanitizeFileName(file.originalFilename!!)
             val filename = createFilename(originalFilename, valideringer)
             renameFilenameInMetadataJson(originalFilename, filename, metadata)
             filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, file.inputStream))
@@ -176,7 +176,7 @@ class VedleggOpplastingService(
     fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
         metadata.forEach { data ->
             data.filer.forEach { file ->
-                if (sanitizeFileName(file.filnavn ?: "") == sanitizeFileName(originalFilename ?: "")) {
+                if (sanitizeFileName(file.filnavn) == sanitizeFileName(originalFilename!!)) {
                     file.filnavn = newFilename
                     return
                 }

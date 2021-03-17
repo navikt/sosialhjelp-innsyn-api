@@ -8,14 +8,15 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.ErrorMessage
+import no.nav.sosialhjelp.client.kommuneinfo.feilmeldingUtenFnr
+import no.nav.sosialhjelp.client.kommuneinfo.toFiksErrorMessage
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.web.client.HttpStatusCodeException
-import java.io.IOException
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
@@ -53,7 +54,7 @@ fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: St
 
 fun String.toLocalDateTime(): LocalDateTime {
     return ZonedDateTime.parse(this, ISO_DATE_TIME)
-            .withZoneSameInstant(ZoneId.of("Europe/Oslo")).toLocalDateTime()
+        .withZoneSameInstant(ZoneId.of("Europe/Oslo")).toLocalDateTime()
 }
 
 fun String.toLocalDate(): LocalDate = LocalDate.parse(this, ISO_LOCAL_DATE)
@@ -71,7 +72,7 @@ fun formatLocalDateTime(dato: LocalDateTime): String {
     return dato.format(datoFormatter)
 }
 
-fun soknadsalderIMinutter(tidspunktSendt : LocalDateTime?) : Long {
+fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long {
     return tidspunktSendt?.until(LocalDateTime.now(), ChronoUnit.MINUTES) ?: -1
 }
 
@@ -87,9 +88,9 @@ fun enumNameToLowercase(string: String): String {
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser
-            ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
-            ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
-            ?: digisosSak.fiksDigisosId.plus("0000")
+        ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
+        ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
+        ?: digisosSak.fiksDigisosId.plus("0000")
 
     val nesteSuffix = lagIdSuffix(previousId)
     return (previousId.dropLast(COUNTER_SUFFIX_LENGTH).plus(nesteSuffix))
@@ -119,24 +120,17 @@ fun isRunningInProd(): Boolean {
     return clusterName != null && clusterName.contains("prod")
 }
 
-fun <T : HttpStatusCodeException> T.toFiksErrorMessage(): ErrorMessage? {
-    return try {
-        objectMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
-    } catch (e: IOException) {
-        null
-    }
+fun messageUtenFnr(e: WebClientResponseException): String {
+    val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
+    val message = e.message?.feilmeldingUtenFnr
+    return "$message - $fiksErrorMessage"
 }
 
-
-val String.feilmeldingUtenFnr: String?
-    get() {
-        return this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
-    }
+val String.feilmeldingUtenFnr: String
+    get() = this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
 
 val ErrorMessage.feilmeldingUtenFnr: String?
-    get() {
-        return this.message?.feilmeldingUtenFnr
-    }
+    get() = this.message?.feilmeldingUtenFnr
 
 fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()

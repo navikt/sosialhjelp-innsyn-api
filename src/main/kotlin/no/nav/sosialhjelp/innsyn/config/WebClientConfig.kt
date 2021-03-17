@@ -7,11 +7,10 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 
 @Configuration
-class WebClientConfig(
-    private val webClientBuilder: WebClient.Builder,
-) {
+class WebClientConfig {
+
     @Bean
-    fun webClient(): WebClient =
+    fun webClient(webClientBuilder: WebClient.Builder): WebClient =
         webClientBuilder
             .clientConnector(ReactorClientHttpConnector(HttpClient.newConnection()))
             .build()

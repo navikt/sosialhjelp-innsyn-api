@@ -1,8 +1,6 @@
 package no.nav.sosialhjelp.innsyn.client.digisosapi
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
-import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.client.fiks.VedleggMetadata
@@ -16,17 +14,17 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSO
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.forwardHeaders
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.typeRef
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.Collections
 
 /**
@@ -35,17 +33,13 @@ import java.util.Collections
 @Profile("!(prod-sbs|mock)")
 @Component
 class DigisosApiClientImpl(
-        clientProperties: ClientProperties,
-        private val restTemplate: RestTemplate,
-        private val idPortenService: IdPortenService,
-        private val fiksClientImpl: FiksClientImpl
+    private val clientProperties: ClientProperties,
+    private val fiksWebClient: WebClient,
+    private val idPortenService: IdPortenService,
+    private val fiksClientImpl: FiksClientImpl,
 ) : DigisosApiClient {
 
     private val testbrukerNatalie = System.getenv("TESTBRUKER_NATALIE") ?: "11111111111"
-
-    private val baseUrl = clientProperties.fiksDigisosEndpointUrl
-    private val fiksIntegrasjonIdKommune = clientProperties.fiksIntegrasjonIdKommune
-    private val fiksIntegrasjonPassordKommune = clientProperties.fiksIntegrasjonPassordKommune
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
         var id = fiksDigisosId
@@ -53,91 +47,92 @@ class DigisosApiClientImpl(
             id = opprettDigisosSak()
             log.info("Laget ny digisossak: $id")
         }
-        val httpEntity = HttpEntity(objectMapper.writeValueAsString(digisosApiWrapper), headers())
-        try {
-            restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id", HttpMethod.POST, httpEntity, String::class.java)
-            log.info("Postet DigisosSak til Fiks")
-            return id
-        } catch (e: HttpClientErrorException) {
-            log.warn(e.responseBodyAsString)
-            log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksClientException(e.rawStatusCode, e.message, e)
-        } catch (e: HttpServerErrorException) {
-            log.warn(e.responseBodyAsString)
-            log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksServerException(e.rawStatusCode, e.message, e)
-        } catch (e: Exception) {
-            log.error(e.message, e)
-            throw FiksException(e.message, e)
-        }
+
+        return fiksWebClient.post()
+            .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
+            .headers { it.addAll(headers()) }
+            .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
+            .retrieve()
+            .onStatus(HttpStatus::is4xxClientError) {
+                it.createException().map { e ->
+                    log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+                    FiksClientException(e.rawStatusCode, e.message, e)
+                }
+            }
+            .onStatus(HttpStatus::is5xxServerError) {
+                it.createException().map { e ->
+                    log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+                    FiksServerException(e.rawStatusCode, e.message, e)
+                }
+            }
+            .bodyToMono<String>()
+            .block()
+            .also { log.info("Postet DigisosSak til Fiks") }
     }
 
     // Brukes for å laste opp Pdf-er fra test-fagsystem i q-miljø
     override fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String> {
-        val headers = forwardHeaders()
-        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-        headers.set(AUTHORIZATION, BEARER + idPortenService.getToken().token)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
-        headers.contentType = MediaType.MULTIPART_FORM_DATA
-
         val body = LinkedMultiValueMap<String, Any>()
-
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add("vedleggSpesifikasjon:$fileId", fiksClientImpl.createHttpEntityOfString(fiksClientImpl.serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
             body.add("dokument:$fileId", fiksClientImpl.createHttpEntityOfFile(file, "dokument:$fileId"))
         }
 
-        val requestEntity = HttpEntity(body, headers)
-        try {
-            val path = "$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer"
-            val response = restTemplate.exchange(path, HttpMethod.POST, requestEntity, String::class.java)
-
-            val opplastingResponse: List<FilOpplastingResponse> = objectMapper.readValue(response.body!!)
-            log.info("Filer sendt til Fiks")
-            return opplastingResponse.map { filOpplastingResponse -> filOpplastingResponse.dokumentlagerDokumentId }
-
-        } catch (e: HttpClientErrorException) {
-            log.warn(e.responseBodyAsString)
-            log.warn("Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksClientException(e.rawStatusCode, e.message, e)
-        } catch (e: HttpServerErrorException) {
-            log.warn(e.responseBodyAsString)
-            log.warn("Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksServerException(e.rawStatusCode, e.message, e)
-        } catch (e: Exception) {
-            log.warn("Opplasting av filer feilet", e)
-            throw FiksException(e.message, e)
-        }
-
+        val opplastingResponseList = fiksWebClient.post()
+            .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
+            .headers { it.addAll(headers()) }
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(body))
+            .retrieve()
+            .onStatus(HttpStatus::is4xxClientError) {
+                it.createException().map { e ->
+                    log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
+                    FiksClientException(e.rawStatusCode, e.message, e)
+                }
+            }
+            .onStatus(HttpStatus::is5xxServerError) {
+                it.createException().map { e ->
+                    log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
+                    FiksServerException(e.rawStatusCode, e.message, e)
+                }
+            }
+            .bodyToMono(typeRef<List<FilOpplastingResponse>>())
+            .block()
+        log.info("Filer sendt til Fiks")
+        return opplastingResponseList!!.map { it.dokumentlagerDokumentId }
     }
 
     fun opprettDigisosSak(): String? {
-        val httpEntity = HttpEntity("", headers())
-        try {
-            val response = restTemplate.exchange("$baseUrl/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie", HttpMethod.POST, httpEntity, String::class.java)
-            log.info("Opprettet sak hos Fiks. Digisosid: ${response.body}")
-            return response.body?.replace("\"", "")
-        } catch (e: HttpClientErrorException) {
-            log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksClientException(e.rawStatusCode, e.message, e)
-        } catch (e: HttpServerErrorException) {
-            log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-            throw FiksServerException(e.rawStatusCode, e.message, e)
-        } catch (e: Exception) {
-            log.error(e.message, e)
-            throw FiksException(e.message, e)
-        }
+        val response = fiksWebClient.post()
+            .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
+            .headers { it.addAll(headers()) }
+            .body(BodyInserters.fromValue(""))
+            .retrieve()
+            .onStatus(HttpStatus::is4xxClientError) {
+                it.createException().map { e ->
+                    log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+                    FiksClientException(e.rawStatusCode, e.message, e)
+                }
+            }
+            .onStatus(HttpStatus::is5xxServerError) {
+                it.createException().map { e ->
+                    log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+                    FiksServerException(e.rawStatusCode, e.message, e)
+                }
+            }
+            .bodyToMono<String>()
+            .block()
+        log.info("Opprettet sak hos Fiks. Digisosid: $response")
+        return response?.replace("\"", "")
     }
 
     private fun headers(): HttpHeaders {
         val headers = forwardHeaders()
-        val accessToken = idPortenService.getToken()
-        headers.accept = Collections.singletonList(MediaType.ALL)
-        headers.set(HEADER_INTEGRASJON_ID, fiksIntegrasjonIdKommune)
-        headers.set(HEADER_INTEGRASJON_PASSORD, fiksIntegrasjonPassordKommune)
-        headers.set(AUTHORIZATION, BEARER + accessToken.token)
+        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
+        headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
+        headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
+        headers.set(AUTHORIZATION, BEARER + idPortenService.getToken().token)
         headers.contentType = MediaType.APPLICATION_JSON
         return headers
     }
@@ -148,7 +143,7 @@ class DigisosApiClientImpl(
 }
 
 data class FilOpplastingResponse(
-        val filnavn: String,
-        val dokumentlagerDokumentId: String,
-        val storrelse: Long
+    val filnavn: String,
+    val dokumentlagerDokumentId: String,
+    val storrelse: Long,
 )

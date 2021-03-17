@@ -15,12 +15,11 @@ import java.util.Base64
 @Profile("!(mock | local)")
 @Configuration
 class StsConfig (
-    private val clientProperties: ClientProperties,
-    private val webClientBuilder: WebClient.Builder
+    private val clientProperties: ClientProperties
 ) {
 
     @Bean
-    fun stsWebClient(): WebClient =
+    fun stsWebClient(webClientBuilder: WebClient.Builder): WebClient =
         webClientBuilder
             .baseUrl(clientProperties.stsTokenEndpointUrl)
             .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic ${credentials()}")

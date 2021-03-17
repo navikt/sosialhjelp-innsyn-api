@@ -21,8 +21,8 @@ class FiksConfig(
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
-                it.customCodecs().register(Jackson2JsonDecoder(objectMapper))
-                it.customCodecs().register(Jackson2JsonEncoder(objectMapper))
+                it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
+                it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
             }
             .build()
 }

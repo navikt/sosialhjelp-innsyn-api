@@ -18,10 +18,6 @@ import java.time.Duration
 class RestConfig {
 
     @Bean
-    fun restTemplate(builder: RestTemplateBuilder): RestTemplate =
-            builder.build()
-
-    @Bean
     @Profile("!(mock | local)")
     fun pdlRestTemplate(builder: RestTemplateBuilder): RestTemplate =
             builder

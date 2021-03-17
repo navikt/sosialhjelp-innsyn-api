@@ -7,11 +7,11 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.client.unleash.UTVIDE_VEDLEGG_JSON
+import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.rest.OpplastetVedleggMetadata
 import no.nav.sosialhjelp.innsyn.service.pdf.EttersendelsePdfGenerator
-import no.nav.sosialhjelp.innsyn.service.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -31,13 +31,13 @@ import java.util.concurrent.TimeoutException
 
 @Component
 class VedleggOpplastingService(
-        private val fiksClient: FiksClient,
-        private val krypteringService: KrypteringService,
-        private val virusScanner: VirusScanner,
-        private val redisService: RedisService,
-        private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
-        private val dokumentlagerClient: DokumentlagerClient,
-        private val unleashClient: Unleash
+    private val fiksClient: FiksClient,
+    private val krypteringService: KrypteringService,
+    private val virusScanner: VirusScanner,
+    private val redisService: RedisService,
+    private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
+    private val dokumentlagerClient: DokumentlagerClient,
+    private val unleashClient: Unleash
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {

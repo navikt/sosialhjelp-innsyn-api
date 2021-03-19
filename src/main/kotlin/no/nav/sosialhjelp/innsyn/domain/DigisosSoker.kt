@@ -105,6 +105,13 @@ sealed class Oppgavehendelse {
                 return Pair(tittel, beskrivelse)
         }
 
+        fun getOppgaveStatus(): Oppgavestatus {
+            if (status != Oppgavestatus.OPPFYLT && status != Oppgavestatus.IKKE_OPPFYLT) {
+                return status
+            }
+            return Oppgavestatus.RELEVANT;
+        }
+
         fun isEmpty(): Boolean = tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()
 }
 
@@ -113,7 +120,7 @@ data class Vilkar(
         override var tittel: String?,
         override var beskrivelse: String?,
         override var status: Oppgavestatus,
-        var oppfyllt: Boolean,
+        var oppfyllt: Boolean, // todo remove
         var datoLagtTil: LocalDateTime,
         var datoSistEndret: LocalDateTime
 ) : Oppgavehendelse()
@@ -124,7 +131,7 @@ data class Dokumentasjonkrav(
         override var tittel: String?,
         override var beskrivelse: String?,
         override var status: Oppgavestatus,
-        var oppfyllt: Boolean,
+        var oppfyllt: Boolean, // todo remove
         var datoLagtTil: LocalDateTime
 ) : Oppgavehendelse()
 
@@ -162,5 +169,5 @@ enum class UtfallVedtak {
 }
 
 enum class Oppgavestatus {
-    RELEVANT, ANNULLERT, OPPFYLT, IKKE_OPPFYLT
+    RELEVANT, ANNULLERT, OPPFYLT, IKKE_OPPFYLT, LEVERT_TIDLIGERE
 }

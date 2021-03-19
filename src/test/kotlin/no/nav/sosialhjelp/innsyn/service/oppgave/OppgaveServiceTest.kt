@@ -205,10 +205,11 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun `Should not return dokumentasjonkrav with status annullert`() {
+    fun `Should not return Dokumentasjonkrav with status ANNULERT or LEVERT_TIDLIGERE`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT,false, LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE,false, LocalDateTime.now()),
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT,false, LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
@@ -244,7 +245,7 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for dokumentasjonkrav`() {
+    fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for Dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
             Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT,false, LocalDateTime.now()),

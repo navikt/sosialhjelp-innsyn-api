@@ -30,9 +30,9 @@ import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
-import java.util.function.Predicate
 
 
 @Profile("!mock")
@@ -62,25 +62,15 @@ class FiksClientImpl(
                 .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
                 .headers { it.addAll(fiksHeaders(clientProperties, token)) }
                 .retrieve()
-                .onStatus(Predicate.isEqual(HttpStatus.NOT_FOUND)) {
-                    it.createException().map { e ->
-                        log.warn("Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}", e)
-                        FiksNotFoundException(e.message?.feilmeldingUtenFnr, e)
-                    }
-                }
-                .onStatus(HttpStatus::is4xxClientError) {
-                    it.createException().map { e ->
-                        log.warn("Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}", e)
-                        FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                    }
-                }
-                .onStatus(HttpStatus::is5xxServerError) {
-                    it.createException().map { e ->
-                        log.warn("Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}", e)
-                        FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                    }
-                }
                 .bodyToMono<DigisosSak>()
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}", e)
+                    when {
+                        e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(e.message?.feilmeldingUtenFnr, e)
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                    }
+                }
                 .block()
         }
         log.debug("Hentet DigisosSak fra Fiks")
@@ -117,19 +107,14 @@ class FiksClientImpl(
                 .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
                 .headers { it.addAll(fiksHeaders(clientProperties, token)) }
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError) {
-                    it.createException().map { e ->
-                        log.warn("Fiks - hentDokument feilet - ${messageUtenFnr(e)}", e)
-                        FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                    }
-                }
-                .onStatus(HttpStatus::is5xxServerError) {
-                    it.createException().map { e ->
-                        log.warn("Fiks - hentDokument feilet - ${messageUtenFnr(e)}", e)
-                        FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                    }
-                }
                 .bodyToMono(requestedClass)
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - hentDokument feilet - ${messageUtenFnr(e)}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                    }
+                }
                 .block()
         }
         log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
@@ -143,19 +128,14 @@ class FiksClientImpl(
                 .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
                 .headers { it.addAll(fiksHeaders(clientProperties, token)) }
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError) {
-                    it.createException().map { e ->
-                        log.warn("Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}", e)
-                        FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                    }
-                }
-                .onStatus(HttpStatus::is5xxServerError) {
-                    it.createException().map { e ->
-                        log.warn("Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}", e)
-                        FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                    }
-                }
                 .bodyToMono(typeRef<List<DigisosSak>>())
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                    }
+                }
                 .block()
         }
         return digisosSaker!!
@@ -181,19 +161,14 @@ class FiksClientImpl(
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(body))
             .retrieve()
-            .onStatus(HttpStatus::is4xxClientError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
-                    FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                }
-            }
-            .onStatus(HttpStatus::is5xxServerError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
-                    FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                }
-            }
             .toEntity<String>()
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
+                when {
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                    else -> FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                }
+            }
             .block()
 
         log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity!!.statusCodeValue})")

@@ -33,6 +33,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
 import java.io.InputStream
@@ -272,10 +273,8 @@ internal class FiksClientTest {
                 .uri(any(), any<String>())
                 .headers(any())
                 .retrieve()
-                .onStatus(any(), any())
-                .onStatus(any(), any())
-                .onStatus(any(), any())
                 .bodyToMono<DigisosSak>()
+                .onErrorMap(WebClientResponseException::class.java, any())
                 .block()
         } returns objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
 
@@ -286,9 +285,8 @@ internal class FiksClientTest {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(any())
                 .retrieve()
-                .onStatus(any(), any())
-                .onStatus(any(), any())
                 .toEntity<String>()
+                .onErrorMap(WebClientResponseException::class.java, any())
                 .block()
         } returns ResponseEntity<String>(HttpStatus.ACCEPTED)
 

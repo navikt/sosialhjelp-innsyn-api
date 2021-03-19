@@ -205,6 +205,23 @@ internal class OppgaveServiceTest {
     }
 
     @Test
+    fun `Should not return dokumentasjonkrav with status annullert`() {
+        val model = InternalDigisosSoker()
+        model.dokumentasjonkrav.addAll(listOf(
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT,false, LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT,false, LocalDateTime.now())
+        ))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getDokumentasjonkrav("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
+        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(1)
+        assertThat(responseList[0].dokumentasjonkravElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
+    }
+
+    @Test
     fun `Should return dokumentasjonkrav with tittel and filter out empty dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(

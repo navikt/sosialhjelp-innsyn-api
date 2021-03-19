@@ -8,14 +8,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.Sak
-import no.nav.sosialhjelp.innsyn.domain.SaksStatus
-import no.nav.sosialhjelp.innsyn.domain.Utbetaling
-import no.nav.sosialhjelp.innsyn.domain.UtbetalingerResponse
-import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
-import no.nav.sosialhjelp.innsyn.domain.Vilkar
+import no.nav.sosialhjelp.innsyn.domain.*
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.event.apply
 import org.assertj.core.api.Assertions.assertThat
@@ -266,7 +259,7 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling med vilkar`() {
         val model = InternalDigisosSoker()
         val now = LocalDateTime.now()
-        val vilkar = Vilkar("vilkar1", "tittel", "Skal hoppe", false, now, now)
+        val vilkar = Vilkar("vilkar1", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, false, now, now)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now())
         model.saker.add(Sak(
@@ -296,7 +289,7 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling med dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         val now = LocalDateTime.now()
-        val dokumentasjonkrav = Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,"dokumentasjonkrav", "tittel", "Skal hoppe", false, now)
+        val dokumentasjonkrav = Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,"dokumentasjonkrav", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, false, now)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now())
         model.saker.add(Sak(

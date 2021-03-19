@@ -9,14 +9,7 @@ import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.common.VIS_BREVET
-import no.nav.sosialhjelp.innsyn.domain.Hendelse
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.Sak
-import no.nav.sosialhjelp.innsyn.domain.SaksStatus
-import no.nav.sosialhjelp.innsyn.domain.UrlResponse
-import no.nav.sosialhjelp.innsyn.domain.Utbetaling
-import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
-import no.nav.sosialhjelp.innsyn.domain.Vilkar
+import no.nav.sosialhjelp.innsyn.domain.*
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
@@ -206,9 +199,9 @@ internal class HendelseServiceTest {
                                         kontonummer = "kontonummer",
                                         utbetalingsmetode = "utbetalingsmetode",
                                         vilkar = mutableListOf(
-                                                Vilkar("ref1", "tittel", "beskrivelse", false, time, time),
-                                                Vilkar("ref2", "tittel", "beskrivelse2", false, time, time.plusSeconds(28)),
-                                                Vilkar("ref3", "tittel", "beskrivelse3", true, time, time.plusMinutes(5))),
+                                                Vilkar("ref1", "tittel", "beskrivelse", Oppgavestatus.RELEVANT, false, time, time),
+                                                Vilkar("ref2", "tittel", "beskrivelse2", Oppgavestatus.RELEVANT, false, time, time.plusSeconds(28)),
+                                                Vilkar("ref3", "tittel", "beskrivelse3", Oppgavestatus.RELEVANT, true, time, time.plusMinutes(5))),
                                         dokumentasjonkrav = mutableListOf(),
                                         datoHendelse = time
                                 )

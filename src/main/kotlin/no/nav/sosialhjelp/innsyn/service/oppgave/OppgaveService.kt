@@ -85,6 +85,7 @@ class OppgaveService(
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
                 .filter { !it.isEmpty()
                             .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }}
+                .filter { !it.status == Oppgavestatus.ANNULLERT }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                      DokumentasjonkravResponse(

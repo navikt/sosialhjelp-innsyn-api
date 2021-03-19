@@ -6,7 +6,6 @@ import no.nav.sosialhjelp.innsyn.config.ProxiedWebClientConfig
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -21,9 +20,6 @@ class ApplicationContextTest {
 
     @MockkBean
     private lateinit var proxiedWebClientConfig: ProxiedWebClientConfig
-
-    @MockkBean(name = "pdlRestTemplate")
-    private lateinit var pdlRestTemplate: RestTemplate
 
     @Test
     fun `app skal starte`() {

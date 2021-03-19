@@ -7,10 +7,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.Oppgave
-import no.nav.sosialhjelp.innsyn.domain.Vilkar
+import no.nav.sosialhjelp.innsyn.domain.*
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
@@ -188,6 +185,25 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].vilkarElementer.get(1).tittel).isEqualTo(beskrivelse)
         assertThat(responseList[0].vilkarElementer.get(1).beskrivelse).isNull()
         assertThat(responseList[0].vilkarElementer.get(1).vilkarReferanse).isEqualTo("vilkar2")
+    }
+
+    @Test
+    fun `Should not return vilkar with status annullert`() {
+        val model = InternalDigisosSoker()
+        val tittel = "VILKAR1"
+        val beskrivelse = "mer vilkarer2"
+        model.vilkar.addAll(listOf(
+                Vilkar("vilkar1", tittel, "mer vilkarer1", Oppgavestatus.ANNULLERT, false, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", null, beskrivelse, Oppgavestatus.RELEVANT,false, LocalDateTime.now(), LocalDateTime.now()),
+        ))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getVilkar("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
+        assertThat(responseList[0].vilkarElementer).hasSize(1)
+        assertThat(responseList[0].vilkarElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
     }
 
     @Test

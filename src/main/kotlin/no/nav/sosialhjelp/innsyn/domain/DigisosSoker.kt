@@ -96,6 +96,7 @@ sealed class Oppgavehendelse {
         abstract var referanse: String
         abstract var tittel: String?
         abstract var beskrivelse: String?
+        abstract var status: Oppgavestatus
 
         fun getTittelOgBeskrivelse(): Pair<String?, String?> {
                 if (tittel.isNullOrBlank()) {
@@ -111,6 +112,7 @@ data class Vilkar(
         override var referanse: String,
         override var tittel: String?,
         override var beskrivelse: String?,
+        override var status: Oppgavestatus,
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
         var datoSistEndret: LocalDateTime
@@ -121,6 +123,7 @@ data class Dokumentasjonkrav(
         override var referanse: String, // hendelsereferanse
         override var tittel: String?,
         override var beskrivelse: String?,
+        override var status: Oppgavestatus,
         var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime
 ) : Oppgavehendelse()
@@ -156,4 +159,8 @@ enum class UtbetalingsStatus {
 
 enum class UtfallVedtak {
     INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST
+}
+
+enum class Oppgavestatus {
+    RELEVANT, ANNULLERT
 }

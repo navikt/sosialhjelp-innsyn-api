@@ -61,7 +61,8 @@ data class VilkarElement(
         val hendelsetidspunkt: LocalDate,
         val vilkarReferanse: String,
         val tittel: String?,
-        val beskrivelse: String?
+        val beskrivelse: String?,
+        val status: Oppgavestatus
 )
 
 data class DokumentasjonkravResponse(

@@ -97,6 +97,7 @@ sealed class Oppgavehendelse {
         abstract var tittel: String?
         abstract var beskrivelse: String?
         abstract var status: Oppgavestatus
+        abstract var oppfyllt: Boolean
 
         fun getTittelOgBeskrivelse(): Pair<String?, String?> {
                 if (tittel.isNullOrBlank()) {
@@ -120,7 +121,7 @@ data class Vilkar(
         override var tittel: String?,
         override var beskrivelse: String?,
         override var status: Oppgavestatus,
-        var oppfyllt: Boolean, // todo remove
+        override var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime,
         var datoSistEndret: LocalDateTime
 ) : Oppgavehendelse()
@@ -131,7 +132,7 @@ data class Dokumentasjonkrav(
         override var tittel: String?,
         override var beskrivelse: String?,
         override var status: Oppgavestatus,
-        var oppfyllt: Boolean, // todo remove
+        override var oppfyllt: Boolean,
         var datoLagtTil: LocalDateTime
 ) : Oppgavehendelse()
 

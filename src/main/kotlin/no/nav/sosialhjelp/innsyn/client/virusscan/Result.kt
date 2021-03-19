@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.virusscan
+package no.nav.sosialhjelp.innsyn.client.virusscan
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty

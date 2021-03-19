@@ -14,6 +14,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.common.OpplastingException
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -21,7 +22,6 @@ import no.nav.sosialhjelp.innsyn.rest.OpplastetFil
 import no.nav.sosialhjelp.innsyn.rest.OpplastetVedleggMetadata
 import no.nav.sosialhjelp.innsyn.service.pdf.EttersendelsePdfGenerator
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService.Companion.containsIllegalCharacters
-import no.nav.sosialhjelp.innsyn.service.virusscan.VirusScanner
 import org.apache.commons.io.IOUtils
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -43,8 +43,8 @@ import javax.imageio.ImageIO
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 
 internal class VedleggOpplastingServiceTest {

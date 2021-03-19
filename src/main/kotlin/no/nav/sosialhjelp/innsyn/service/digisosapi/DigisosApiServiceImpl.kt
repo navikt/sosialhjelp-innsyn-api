@@ -2,11 +2,11 @@ package no.nav.sosialhjelp.innsyn.service.digisosapi
 
 import no.nav.sosialhjelp.innsyn.client.digisosapi.DigisosApiClient
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
+import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.service.vedlegg.KrypteringService
-import no.nav.sosialhjelp.innsyn.service.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -21,11 +21,11 @@ import java.util.concurrent.TimeoutException
 @Profile("!(prod-sbs | mock)")
 @Component
 class DigisosApiServiceImpl(
-        private val digisosApiClient: DigisosApiClient,
-        private val krypteringService: KrypteringService,
-        private val virusScanner: VirusScanner,
-        private val idPortenService: IdPortenService,
-        private val dokumentlagerClient: DokumentlagerClient
+    private val digisosApiClient: DigisosApiClient,
+    private val krypteringService: KrypteringService,
+    private val virusScanner: VirusScanner,
+    private val idPortenService: IdPortenService,
+    private val dokumentlagerClient: DokumentlagerClient
 ) : DigisosApiService {
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {

@@ -188,7 +188,7 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun `Should not return vilkar with status annullert`() {
+    fun `Should not return Vilkar with status ANNULLERT`() {
         val model = InternalDigisosSoker()
         model.vilkar.addAll(listOf(
                 Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, false, LocalDateTime.now(), LocalDateTime.now()),

@@ -162,5 +162,5 @@ enum class UtfallVedtak {
 }
 
 enum class Oppgavestatus {
-    RELEVANT, ANNULLERT
+    RELEVANT, ANNULLERT, OPPFYLT, IKKE_OPPFYLT
 }

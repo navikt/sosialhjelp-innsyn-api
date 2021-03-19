@@ -67,7 +67,7 @@ class OppgaveService(
                     VilkarResponse(
                             vilkarElementer = value.map {
                                 val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
+                                VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse, it.status) }
                     )
                 }
 
@@ -90,7 +90,7 @@ class OppgaveService(
                      DokumentasjonkravResponse(
                              dokumentasjonkravElementer = value.map {
                                  val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse) }
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.status) }
                      )
                 }
 

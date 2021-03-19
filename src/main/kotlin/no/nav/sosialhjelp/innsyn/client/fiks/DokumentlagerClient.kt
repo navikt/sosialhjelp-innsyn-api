@@ -6,9 +6,9 @@ import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.io.ByteArrayInputStream
 import java.security.cert.CertificateException
@@ -32,19 +32,14 @@ class DokumentlagerClientImpl(
             .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
             .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
             .retrieve()
-            .onStatus(HttpStatus::is4xxClientError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - getDokumentlagerPublicKey feilet - ${e.statusCode} ${e.statusText}", e)
-                    FiksClientException(e.rawStatusCode, e.message, e)
-                }
-            }
-            .onStatus(HttpStatus::is5xxServerError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - getDokumentlagerPublicKey feilet - ${e.statusCode} ${e.statusText}", e)
-                    FiksServerException(e.rawStatusCode, e.message, e)
-                }
-            }
             .bodyToMono<ByteArray>()
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Fiks - getDokumentlagerPublicKey feilet - ${e.statusCode} ${e.statusText}", e)
+                when {
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+                }
+            }
             .block()
 
         log.info("Hentet public key for dokumentlager")

@@ -8,7 +8,7 @@ group = "no.nav.sosialhjelp"
 object Versions {
     const val kotlin = "1.4.21"
     const val coroutines = "1.4.2"
-    const val springBoot = "2.4.3"
+    const val springBoot = "2.4.4"
     const val sosialhjelpCommon = "1.8f11108"
     const val logback = "1.2.3"
     const val logstash = "6.5"
@@ -29,7 +29,6 @@ object Versions {
     const val lettuce = "6.0.2.RELEASE"
     const val jempbox = "1.8.16"
     const val jerseyMediaJaxb = "2.31"
-    const val jetty = "9.4.35.v20201120"
     const val bouncycastle = "1.67"
     const val unleash = "3.3.4"
 

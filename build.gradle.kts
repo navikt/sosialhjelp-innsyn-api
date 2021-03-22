@@ -24,7 +24,7 @@ object Versions {
     const val commonsIo = "2.6"
     const val fileUpload = "1.4"
     const val tika = "1.25"
-    const val pdfBox = "2.0.22"
+    const val pdfBox = "2.0.23"
     const val fiksKryptering = "1.0.11"
     const val lettuce = "6.0.2.RELEASE"
     const val jempbox = "1.8.16"

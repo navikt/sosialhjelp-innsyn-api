@@ -42,7 +42,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
             tittel = hendelse.tittel,
             beskrivelse = hendelse.beskrivelse,
             status = Oppgavestatus.valueOf(hendelse.status.value()),
-            oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT,
             datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime()
     )
 
@@ -66,5 +65,4 @@ private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav
 
 private fun Dokumentasjonkrav.oppdaterFelter(hendelse: JsonDokumentasjonkrav) {
     beskrivelse = hendelse.beskrivelse
-    oppfyllt = hendelse.status == JsonDokumentasjonkrav.Status.OPPFYLT
 }

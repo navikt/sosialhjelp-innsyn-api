@@ -105,11 +105,9 @@ sealed class Oppgavehendelse {
                 return Pair(tittel, beskrivelse)
         }
 
-        fun getOppgaveStatus(): Oppgavestatus {
-            if (status != Oppgavestatus.OPPFYLT && status != Oppgavestatus.IKKE_OPPFYLT) {
-                return status
-            }
-            return Oppgavestatus.RELEVANT;
+        fun getOppgaveStatus(): Oppgavestatus = when (status) {
+                Oppgavestatus.OPPFYLT, Oppgavestatus.IKKE_OPPFYLT -> Oppgavestatus.RELEVANT
+                else -> status
         }
 
         fun isEmpty(): Boolean = tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()

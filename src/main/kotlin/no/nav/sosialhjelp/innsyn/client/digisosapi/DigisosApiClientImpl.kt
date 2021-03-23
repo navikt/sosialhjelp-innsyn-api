@@ -18,12 +18,12 @@ import no.nav.sosialhjelp.innsyn.utils.typeRef
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.Collections
 
@@ -53,19 +53,14 @@ class DigisosApiClientImpl(
             .headers { it.addAll(headers()) }
             .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
             .retrieve()
-            .onStatus(HttpStatus::is4xxClientError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-                    FiksClientException(e.rawStatusCode, e.message, e)
-                }
-            }
-            .onStatus(HttpStatus::is5xxServerError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-                    FiksServerException(e.rawStatusCode, e.message, e)
-                }
-            }
             .bodyToMono<String>()
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+                when {
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+                }
+            }
             .block()
             .also { log.info("Postet DigisosSak til Fiks") }
     }
@@ -85,19 +80,14 @@ class DigisosApiClientImpl(
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(body))
             .retrieve()
-            .onStatus(HttpStatus::is4xxClientError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
-                    FiksClientException(e.rawStatusCode, e.message, e)
-                }
-            }
-            .onStatus(HttpStatus::is5xxServerError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
-                    FiksServerException(e.rawStatusCode, e.message, e)
-                }
-            }
             .bodyToMono(typeRef<List<FilOpplastingResponse>>())
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
+                when {
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+                }
+            }
             .block()
         log.info("Filer sendt til Fiks")
         return opplastingResponseList!!.map { it.dokumentlagerDokumentId }
@@ -109,19 +99,14 @@ class DigisosApiClientImpl(
             .headers { it.addAll(headers()) }
             .body(BodyInserters.fromValue(""))
             .retrieve()
-            .onStatus(HttpStatus::is4xxClientError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-                    FiksClientException(e.rawStatusCode, e.message, e)
-                }
-            }
-            .onStatus(HttpStatus::is5xxServerError) {
-                it.createException().map { e ->
-                    log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-                    FiksServerException(e.rawStatusCode, e.message, e)
-                }
-            }
             .bodyToMono<String>()
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+                when {
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+                }
+            }
             .block()
         log.info("Opprettet sak hos Fiks. Digisosid: $response")
         return response?.replace("\"", "")

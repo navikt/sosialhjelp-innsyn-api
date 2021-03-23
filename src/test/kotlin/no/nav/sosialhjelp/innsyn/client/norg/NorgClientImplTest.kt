@@ -7,6 +7,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.responses.ok_navenhet
@@ -14,12 +16,14 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 
 internal class NorgClientImplTest {
 
-    private val webClient: WebClient = mockk()
+    private val mockWebServer = MockWebServer()
+    private val webClient: WebClient = WebClient.create(mockWebServer.url("/").toString())
     private val redisService: RedisService = mockk()
     private val norgClient = NorgClientImpl(webClient, redisService)
 
@@ -48,18 +52,14 @@ internal class NorgClientImplTest {
 
     @Test
     fun `skal hente fra Norg og lagre til cache hvis cache er tom`() {
-        val navEnhet = objectMapper.readValue<NavEnhet>(ok_navenhet)
         every { redisService.get(any(), NavEnhet::class.java) } returns null
-        every {
-            webClient
-                .get()
-                .uri("/enhet/{enhetsnr}", enhetsnr)
-                .headers(any())
-                .retrieve()
-                .onStatus(any(), any())
-                .bodyToMono<NavEnhet>()
-                .block()
-        } returns navEnhet
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(ok_navenhet)
+        )
 
         val result2 = norgClient.hentNavEnhet(enhetsnr)
 

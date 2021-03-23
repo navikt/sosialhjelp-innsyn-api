@@ -39,7 +39,7 @@ internal class VirusScanClientTest {
     @Test
     fun scanFile_filenameIsVirustest_isInfected() {
         assertThatExceptionOfType(OpplastingException::class.java)
-            .isThrownBy{ (virusScanClient.scan("virustest", data)) }
+            .isThrownBy{ virusScanClient.scan("virustest", data) }
     }
 
     @Test

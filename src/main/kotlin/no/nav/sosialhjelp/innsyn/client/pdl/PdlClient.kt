@@ -15,7 +15,6 @@ import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.CALL_ID
 import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -69,11 +68,10 @@ class PdlClientImpl(
     override fun ping() {
         pdlWebClient.options()
             .retrieve()
-            .onStatus(HttpStatus::isError) {
-                it.createException()
-                    .doOnError { e -> log.error("PDL - ping feilet", e) }
-            }
             .bodyToMono<String>()
+            .doOnError { e ->
+                log.error("PDL - ping feilet", e)
+            }
     }
 
     private fun getResourceAsString(path: String) = this::class.java.getResource(path).readText()

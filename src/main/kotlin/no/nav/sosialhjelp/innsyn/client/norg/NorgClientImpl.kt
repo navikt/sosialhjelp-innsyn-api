@@ -11,10 +11,10 @@ import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 
 
@@ -36,14 +36,11 @@ class NorgClientImpl(
             .uri("/enhet/{enhetsnr}", enhetsnr)
             .headers { it.addAll(headers()) }
             .retrieve()
-            .onStatus(HttpStatus::isError) {
-                it.createException()
-                    .map { e ->
-                        log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
-                        NorgException(e.message, e)
-                    }
-            }
             .bodyToMono<NavEnhet>()
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
+                NorgException(e.message, e)
+            }
             .block()
 
         log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
@@ -61,14 +58,11 @@ class NorgClientImpl(
             .uri("/kodeverk/EnhetstyperNorg")
             .headers { it.addAll(headers()) }
             .retrieve()
-            .onStatus(HttpStatus::isError) {
-                it.createException()
-                    .map { e ->
-                        log.warn("Ping - feilet mot NORG2 ${e.statusCode}", e)
-                        NorgException(e.message, e)
-                    }
-            }
             .bodyToMono<String>()
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Ping - feilet mot NORG2 ${e.statusCode}", e)
+                NorgException(e.message, e)
+            }
             .block()
     }
 

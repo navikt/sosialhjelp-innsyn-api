@@ -8,8 +8,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlager
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.ErrorMessage
-import no.nav.sosialhjelp.client.kommuneinfo.feilmeldingUtenFnr
-import no.nav.sosialhjelp.client.kommuneinfo.toFiksErrorMessage
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import org.slf4j.Logger
@@ -17,6 +15,7 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import java.io.IOException
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
@@ -124,6 +123,14 @@ fun messageUtenFnr(e: WebClientResponseException): String {
     val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
     val message = e.message?.feilmeldingUtenFnr
     return "$message - $fiksErrorMessage"
+}
+
+private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessage? {
+    return try {
+        objectMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
+    } catch (e: IOException) {
+        null
+    }
 }
 
 val String.feilmeldingUtenFnr: String

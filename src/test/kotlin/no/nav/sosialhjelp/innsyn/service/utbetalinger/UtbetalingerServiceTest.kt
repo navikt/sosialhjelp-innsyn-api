@@ -9,9 +9,12 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
+import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
+import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingerResponse
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
@@ -266,7 +269,7 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling med vilkar`() {
         val model = InternalDigisosSoker()
         val now = LocalDateTime.now()
-        val vilkar = Vilkar("vilkar1", "tittel", "Skal hoppe", false, now, now)
+        val vilkar = Vilkar("vilkar1", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, now, now)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now())
         model.saker.add(Sak(
@@ -296,7 +299,7 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling med dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         val now = LocalDateTime.now()
-        val dokumentasjonkrav = Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,"dokumentasjonkrav", "tittel", "Skal hoppe", false, now)
+        val dokumentasjonkrav = Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,"dokumentasjonkrav", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, now)
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now())
         model.saker.add(Sak(

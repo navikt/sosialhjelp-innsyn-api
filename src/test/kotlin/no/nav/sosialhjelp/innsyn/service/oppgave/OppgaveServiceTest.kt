@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
+import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
@@ -171,9 +172,9 @@ internal class OppgaveServiceTest {
         val tittel = "VILKAR1"
         val beskrivelse = "mer vilkarer2"
         model.vilkar.addAll(listOf(
-                Vilkar("vilkar1", tittel, "mer vilkarer1", false, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar2", null, beskrivelse, false, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar3", "", null, false, LocalDateTime.now(), LocalDateTime.now())
+                Vilkar("vilkar1", tittel, "mer vilkarer1", Oppgavestatus.RELEVANT,  LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", null, beskrivelse, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now())
                 ))
         every { eventService.createModel(any(), any()) } returns model
 
@@ -191,13 +192,48 @@ internal class OppgaveServiceTest {
     }
 
     @Test
+    fun `Should not return Vilkar with status ANNULLERT`() {
+        val model = InternalDigisosSoker()
+        model.vilkar.addAll(listOf(
+                Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", "tittel",null, Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now()),
+        ))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getVilkar("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
+        assertThat(responseList[0].vilkarElementer).hasSize(1)
+        assertThat(responseList[0].vilkarElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
+    }
+
+    @Test
+    fun `Should not return Dokumentasjonkrav with status ANNULERT or LEVERT_TIDLIGERE`() {
+        val model = InternalDigisosSoker()
+        model.dokumentasjonkrav.addAll(listOf(
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT,LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE,LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT,LocalDateTime.now())
+        ))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getDokumentasjonkrav("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
+        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(1)
+        assertThat(responseList[0].dokumentasjonkravElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
+    }
+
+    @Test
     fun `Should return dokumentasjonkrav with tittel and filter out empty dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", false, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", false, LocalDateTime.now()) ,
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, false, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", false, LocalDateTime.now())
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.RELEVANT,LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.RELEVANT,LocalDateTime.now()) ,
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, Oppgavestatus.RELEVANT,LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", Oppgavestatus.RELEVANT,LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 
@@ -211,4 +247,46 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].dokumentasjonkravElementer.get(1).tittel).isNotNull()
         assertThat(responseList[0].dokumentasjonkravElementer.get(1).dokumentasjonkravReferanse).isEqualTo("dokumentasjonkrav2")
     }
+
+    @Test
+    fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for Dokumentasjonkrav`() {
+        val model = InternalDigisosSoker()
+        model.dokumentasjonkrav.addAll(listOf(
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT,LocalDateTime.now()),
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.IKKE_OPPFYLT,LocalDateTime.now()) ,
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, "beskrivelse", Oppgavestatus.RELEVANT,LocalDateTime.now())
+        ))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getDokumentasjonkrav("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
+        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(3)
+        assertThat(responseList[0].dokumentasjonkravElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList[0].dokumentasjonkravElementer.get(1).status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList[0].dokumentasjonkravElementer.get(2).status).isEqualTo(Oppgavestatus.RELEVANT)
+    }
+
+    @Test
+    fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for Vilkar`() {
+        val model = InternalDigisosSoker()
+        model.vilkar.addAll(listOf(
+            Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, LocalDateTime.now(), LocalDateTime.now()),
+            Vilkar("vilkar2", "tittel",null, Oppgavestatus.IKKE_OPPFYLT,LocalDateTime.now(), LocalDateTime.now()),
+            Vilkar("vilkar3", "tittel",null, Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now()),
+
+            ))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getVilkar("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
+        assertThat(responseList[0].vilkarElementer).hasSize(3)
+        assertThat(responseList[0].vilkarElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList[0].vilkarElementer.get(1).status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList[0].vilkarElementer.get(2).status).isEqualTo(Oppgavestatus.RELEVANT)
+    }
+
 }

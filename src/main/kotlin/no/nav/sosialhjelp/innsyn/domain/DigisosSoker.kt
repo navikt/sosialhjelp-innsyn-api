@@ -96,12 +96,18 @@ sealed class Oppgavehendelse {
         abstract var referanse: String
         abstract var tittel: String?
         abstract var beskrivelse: String?
+        abstract var status: Oppgavestatus
 
         fun getTittelOgBeskrivelse(): Pair<String?, String?> {
                 if (tittel.isNullOrBlank()) {
                         return Pair(beskrivelse, null)
                 }
                 return Pair(tittel, beskrivelse)
+        }
+
+        fun getOppgaveStatus(): Oppgavestatus = when (status) {
+                Oppgavestatus.OPPFYLT, Oppgavestatus.IKKE_OPPFYLT -> Oppgavestatus.RELEVANT
+                else -> status
         }
 
         fun isEmpty(): Boolean = tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()
@@ -111,7 +117,7 @@ data class Vilkar(
         override var referanse: String,
         override var tittel: String?,
         override var beskrivelse: String?,
-        var oppfyllt: Boolean,
+        override var status: Oppgavestatus,
         var datoLagtTil: LocalDateTime,
         var datoSistEndret: LocalDateTime
 ) : Oppgavehendelse()
@@ -121,7 +127,7 @@ data class Dokumentasjonkrav(
         override var referanse: String, // hendelsereferanse
         override var tittel: String?,
         override var beskrivelse: String?,
-        var oppfyllt: Boolean,
+        override var status: Oppgavestatus,
         var datoLagtTil: LocalDateTime
 ) : Oppgavehendelse()
 
@@ -156,4 +162,8 @@ enum class UtbetalingsStatus {
 
 enum class UtfallVedtak {
     INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST
+}
+
+enum class Oppgavestatus {
+    RELEVANT, ANNULLERT, OPPFYLT, IKKE_OPPFYLT, LEVERT_TIDLIGERE
 }

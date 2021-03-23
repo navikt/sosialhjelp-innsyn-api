@@ -60,14 +60,15 @@ class OppgaveService(
         }
 
         val vilkarResponseList = model.vilkar
-            .filter { !it.isEmpty()
+                .filter { !it.isEmpty()
                         .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på vilkår er tomt") }}
+                .filter { it.status != Oppgavestatus.ANNULLERT }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                     VilkarResponse(
                             vilkarElementer = value.map {
                                 val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse) }
+                                VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse, it.getOppgaveStatus()) }
                     )
                 }
 
@@ -85,12 +86,14 @@ class OppgaveService(
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
                 .filter { !it.isEmpty()
                             .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }}
+                .filter { it.status != Oppgavestatus.ANNULLERT }
+                .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
                 .groupBy { it.datoLagtTil.toLocalDate() }
                 .map { (_, value) ->
                      DokumentasjonkravResponse(
                              dokumentasjonkravElementer = value.map {
                                  val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse) }
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.getOppgaveStatus()) }
                      )
                 }
 

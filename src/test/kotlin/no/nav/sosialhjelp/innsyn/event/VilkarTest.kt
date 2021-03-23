@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.norg.NorgClient
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
+import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.service.innsyn.InnsynService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VEDLEGG_KREVES_STATUS
@@ -81,7 +82,7 @@ internal class VilkarTest {
         assertThat(utbetaling.vilkar).hasSize(1)
         assertThat(utbetaling.vilkar[0].referanse).isEqualTo(vilkar_ref_1)
         assertThat(utbetaling.vilkar[0].beskrivelse).isEqualTo("beskrivelse")
-        assertThat(utbetaling.vilkar[0].oppfyllt).isEqualTo(true)
+        assertThat(utbetaling.vilkar[0].getOppgaveStatus()).isEqualTo(Oppgavestatus.RELEVANT)
     }
 
     @Test

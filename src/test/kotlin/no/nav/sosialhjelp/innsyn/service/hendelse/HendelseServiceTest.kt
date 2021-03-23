@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.common.VIS_BREVET
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
@@ -206,9 +207,9 @@ internal class HendelseServiceTest {
                                         kontonummer = "kontonummer",
                                         utbetalingsmetode = "utbetalingsmetode",
                                         vilkar = mutableListOf(
-                                                Vilkar("ref1", "tittel", "beskrivelse", false, time, time),
-                                                Vilkar("ref2", "tittel", "beskrivelse2", false, time, time.plusSeconds(28)),
-                                                Vilkar("ref3", "tittel", "beskrivelse3", true, time, time.plusMinutes(5))),
+                                                Vilkar("ref1", "tittel", "beskrivelse", Oppgavestatus.RELEVANT, time, time),
+                                                Vilkar("ref2", "tittel", "beskrivelse2", Oppgavestatus.RELEVANT, time, time.plusSeconds(28)),
+                                                Vilkar("ref3", "tittel", "beskrivelse3", Oppgavestatus.RELEVANT, time, time.plusMinutes(5))),
                                         dokumentasjonkrav = mutableListOf(),
                                         datoHendelse = time
                                 )

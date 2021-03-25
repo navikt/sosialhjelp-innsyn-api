@@ -506,6 +506,8 @@ internal class EventServiceTest {
                 InternalVedlegg(
                         type = "statsborgerskap",
                         tilleggsinfo = "dokumentasjon",
+                        null,
+                        null,
                         dokumentInfoList = emptyList(),
                         tidspunktLastetOpp = LocalDateTime.now()
                 )
@@ -537,6 +539,8 @@ internal class EventServiceTest {
                 InternalVedlegg(
                         type = "statsborgerskap",
                         tilleggsinfo = "dokumentasjon",
+                        null,
+                        null,
                         dokumentInfoList = emptyList(),
                         tidspunktLastetOpp = LocalDateTime.now()
                 )

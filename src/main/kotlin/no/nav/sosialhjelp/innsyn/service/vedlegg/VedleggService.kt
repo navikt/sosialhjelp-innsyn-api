@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.service.vedlegg
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
@@ -45,6 +46,8 @@ class VedleggService(
                     InternalVedlegg(
                             vedlegg.type,
                             vedlegg.tilleggsinfo,
+                            vedlegg.hendelseType,
+                            vedlegg.hendelseReferanse,
                             matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer),
                             unixToLocalDateTime(originalSoknadNAV.timestampSendt)
                     )
@@ -81,6 +84,8 @@ class VedleggService(
                                 InternalVedlegg(
                                         vedlegg.type,
                                         vedlegg.tilleggsinfo,
+                                        vedlegg.hendelseType,
+                                        vedlegg.hendelseReferanse,
                                         dokumentInfoList,
                                         unixToLocalDateTime(ettersendelse.timestampSendt)
                                 )
@@ -114,6 +119,8 @@ class VedleggService(
 data class InternalVedlegg(
         val type: String,
         val tilleggsinfo: String?,
+        val hendelseType: JsonVedlegg.HendelseType?,
+        val hendelseReferanse: String?,
         val dokumentInfoList: List<DokumentInfo>,
         val tidspunktLastetOpp: LocalDateTime
 )

@@ -18,7 +18,7 @@ fun InternalDigisosSoker.applySoknadKrav(fiksDigisosId: String, originalSoknadNA
                     it.type,
                     it.tilleggsinfo,
                     JsonVedlegg.HendelseType.SOKNAD,
-                    null,
+                    it.hendelseReferanse,
                     null,
                     unixToLocalDateTime(timestampSendt),
                     false) }

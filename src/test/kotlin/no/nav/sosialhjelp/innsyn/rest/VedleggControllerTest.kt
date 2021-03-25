@@ -68,6 +68,8 @@ internal class VedleggControllerTest {
                 InternalVedlegg(
                         dokumenttype,
                         tilleggsinfo,
+                        null,
+                        null,
                         listOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
                         LocalDateTime.now())
         )
@@ -96,10 +98,14 @@ internal class VedleggControllerTest {
                 InternalVedlegg(
                         dokumenttype,
                         null,
+                        null,
+                        null,
                         listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
                         now),
                 InternalVedlegg(
                         dokumenttype,
+                        null,
+                        null,
                         null,
                         listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
                         now)

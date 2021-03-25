@@ -417,21 +417,22 @@ internal class VedleggOpplastingServiceTest {
                 "1",
                 "22",
                 "333",
-                "fil4"
+                "fil4",
+                "a\u030AA\u030A.pdf",
+                "åÅ.pdf"
         )
         val filnavnMultipart = listOf(
-                "a\u030AA\u030A.pdf",
-                "åÅ.pdf",
+                "1",
+                "22",
+                "333",
+                "fil4",
                 "åÅ.pdf",
-                "fil4"
+                "åÅ.pdf"
         )
 
         assertEquals("" +
-                "\r\nFilnavnMetadata: \t\t FilnavnMultipart:" +
-                "\r\n1 \t\t a\u030AA\u030A.pdf," +
-                "\r\n22 \t\t åÅ.pdf," +
-                "\r\n333 \t\t åÅ.pdf," +
-                "\r\nfil4 \t\t fil4,",
+                "\r\nFilnavnMetadata : 1, 22, 333, fil4, a\u030AA\u030A.pdf, åÅ.pdf," +
+                "\r\nFilnavnMultipart: 1, 22, 333, fil4, åÅ.pdf, åÅ.pdf,",
                 service.getFilnavnListsAsString(filnavnMetadata, filnavnMultipart))
     }
 

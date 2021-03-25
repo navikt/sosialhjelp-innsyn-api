@@ -199,7 +199,24 @@ class VedleggOpplastingService(
         }
         if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
             if (true) {
+                val filnavnMetadata2 = listOf(
+                        "1",
+                        "22",
+                        "333",
+                        "fil4",
+                        "a\u030AA\u030A.pdf",
+                        "åÅ.pdf"
+                )
+                val filnavnMultipart2 = listOf(
+                        "1",
+                        "22",
+                        "333",
+                        "fil4",
+                        "åÅ.pdf",
+                        "åÅ.pdf"
+                )
                 log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
+                log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata2, filnavnMultipart2)}")
             }
 
             throw OpplastingFilnavnMismatchException("Antall filnavn som matcher i metadata og files (size ${nofFilenameMatchInMetadataAndFiles}) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
@@ -208,9 +225,13 @@ class VedleggOpplastingService(
     }
 
     fun getFilnavnListsAsString(filnavnMetadata: List<String>, filnavnMultipart: List<String>): String {
-        var filstring = "\r\nFilnavnMetadata: \t\t FilnavnMultipart:"
+        var filstring = "\r\nFilnavnMetadata :"
         filnavnMetadata.forEachIndexed { index, filnavn ->
-            filstring += "\r\n$filnavn \t\t ${filnavnMultipart[index]},"
+            filstring += " $filnavn,"
+        }
+        filstring += "\r\nFilnavnMultipart:"
+        filnavnMultipart.forEachIndexed { index, filnavn ->
+            filstring += " $filnavn,"
         }
         return filstring
     }

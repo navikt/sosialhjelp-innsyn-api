@@ -193,10 +193,26 @@ class VedleggOpplastingService(
         }
 
         val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
+        // DEBUG: Flytter denne hit for å se hvordan dette blir logget i kibana. NB: SKAL IKKE INN I PROD!
+        if (true) {
+            log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
+        }
         if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
+            if (true) {
+                log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
+            }
+
             throw OpplastingFilnavnMismatchException("Antall filnavn som matcher i metadata og files (size ${nofFilenameMatchInMetadataAndFiles}) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
                     "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
         }
+    }
+
+    fun getFilnavnListsAsString(filnavnMetadata: List<String>, filnavnMultipart: List<String>): String {
+        var filstring = "\r\nFilnavnMetadata: \t\t FilnavnMultipart:"
+        filnavnMetadata.forEachIndexed { index, filnavn ->
+            filstring += "\r\n$filnavn \t\t ${filnavnMultipart[index]},"
+        }
+        return filstring
     }
 
     fun getMetadataAsString(metadata: MutableList<OpplastetVedleggMetadata>): String {

@@ -411,6 +411,29 @@ internal class VedleggOpplastingServiceTest {
                 )
         )
     }
+    @Test
+    fun `getFilnavnListStructureAsString skal returnere antall filer per element i listen`() {
+        val filnavnMetadata = listOf(
+                "1",
+                "22",
+                "333",
+                "fil4"
+        )
+        val filnavnMultipart = listOf(
+                "a\u030AA\u030A.pdf",
+                "åÅ.pdf",
+                "åÅ.pdf",
+                "fil4 "
+        )
+
+        assertEquals("" +
+                "\r\nFilnavnMetadata: \t\t FilnavnMultipart:" +
+                "\r\n1 \t\t a\u030AA\u030A.pdf," +
+                "\r\n22 \t\t åÅ.pdf," +
+                "\r\n333 \t\t åÅ.pdf," +
+                "\r\nfil4 \t\t fil4,",
+                service.getFilnavnListsAsString(filnavnMetadata, filnavnMultipart))
+    }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {
         val outputStream = ByteArrayOutputStream()

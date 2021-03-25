@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.norg.NorgClient
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
@@ -152,7 +153,7 @@ internal class DokumentasjonEtterspurtTest {
                                 SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
-                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -175,6 +176,48 @@ internal class DokumentasjonEtterspurtTest {
     }
 
     @Test
+    fun `oppgaver som hentes fra soknad skal ha hendelseType og HendelseReferanse om de er satt i soknaden`() {
+        val hendelseReferanse = "1234"
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+                listOf(InternalVedlegg(
+                        vedleggKrevesDokumenttype,
+                        vedleggKrevesTilleggsinfo,
+                        JsonVedlegg.HendelseType.SOKNAD,
+                        hendelseReferanse,
+                        emptyList(),
+                        unixToLocalDateTime(tidspunkt_soknad)
+                ))
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        val oppgave = model.oppgaver.last()
+        assertThat(oppgave.tilleggsinfo).isEqualTo(vedleggKrevesTilleggsinfo)
+        assertThat(oppgave.hendelsetype).isEqualTo(JsonVedlegg.HendelseType.SOKNAD)
+        assertThat(oppgave.hendelsereferanse).isEqualTo(hendelseReferanse)
+    }
+
+    @Test
+    fun `oppgaver som hentes fra soknad skal ha hendelseType men ikke hendelsereferanse om det ikke er satt i soknaden`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+                listOf(InternalVedlegg(
+                        vedleggKrevesDokumenttype,
+                        vedleggKrevesTilleggsinfo,
+                        null,
+                        null,
+                        emptyList(),
+                        unixToLocalDateTime(tidspunkt_soknad)
+                ))
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        val oppgave = model.oppgaver.last()
+        assertThat(oppgave.hendelsetype).isEqualTo(JsonVedlegg.HendelseType.SOKNAD)
+        assertThat(oppgave.hendelsereferanse).isNull()
+    }
+
+    @Test
     internal fun `dokumentasjonEtterspurt overstyrer gjenstaende vedleggskrav fra soknad`() {
         every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
                 JsonDigisosSoker()
@@ -186,7 +229,7 @@ internal class DokumentasjonEtterspurtTest {
                                 DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
-                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -216,7 +259,7 @@ internal class DokumentasjonEtterspurtTest {
                                 DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
-                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -244,7 +287,7 @@ internal class DokumentasjonEtterspurtTest {
                                 DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
-                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -271,7 +314,7 @@ internal class DokumentasjonEtterspurtTest {
                                 DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
                         ))
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
-                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+                listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
 

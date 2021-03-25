@@ -150,10 +150,10 @@ internal class OppgaveServiceTest {
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
-                InternalVedlegg(type, tillegg, emptyList(), tidspunktEtterKrav),
-                InternalVedlegg(type2, null, emptyList(), tidspunktEtterKrav),
-                InternalVedlegg(type3, tillegg3, emptyList(), tidspunktFoerKrav),
-                InternalVedlegg(type3, null, emptyList(), tidspunktEtterKrav))
+                InternalVedlegg(type, tillegg, null, null, emptyList(), tidspunktEtterKrav),
+                InternalVedlegg(type2, null, null, null, emptyList(), tidspunktEtterKrav),
+                InternalVedlegg(type3, tillegg3, null, null, emptyList(), tidspunktFoerKrav),
+                InternalVedlegg(type3, null, null, null, emptyList(), tidspunktEtterKrav))
 
         val responseList = service.hentOppgaver("123", token)
 

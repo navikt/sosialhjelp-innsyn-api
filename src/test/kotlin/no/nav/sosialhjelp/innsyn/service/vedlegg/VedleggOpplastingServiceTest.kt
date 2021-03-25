@@ -412,7 +412,7 @@ internal class VedleggOpplastingServiceTest {
         )
     }
     @Test
-    fun `getFilnavnListStructureAsString skal returnere antall filer per element i listen`() {
+    fun `getFilnavnListsAsString skal returnere en string med finavn`() {
         val filnavnMetadata = listOf(
                 "1",
                 "22",
@@ -423,7 +423,7 @@ internal class VedleggOpplastingServiceTest {
                 "a\u030AA\u030A.pdf",
                 "åÅ.pdf",
                 "åÅ.pdf",
-                "fil4 "
+                "fil4"
         )
 
         assertEquals("" +

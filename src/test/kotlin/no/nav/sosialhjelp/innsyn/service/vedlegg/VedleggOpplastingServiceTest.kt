@@ -15,7 +15,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
-import no.nav.sosialhjelp.innsyn.common.OpplastingException
+import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.rest.OpplastetFil
@@ -260,14 +260,14 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
-        every { virusScanner.scan(any(), any()) } throws OpplastingException("mulig virus!", null)
+        every { virusScanner.scan(any(), any()) } throws VirusScanException("mulig virus!", null)
 
         val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null))
         val files = mutableListOf<MultipartFile>(
                 MockMultipartFile("files", filnavn0, filtype1, jpgFile),
                 MockMultipartFile("files", filnavn1, filtype0, pngFile))
 
-        assertThatExceptionOfType(OpplastingException::class.java)
+        assertThatExceptionOfType(VirusScanException::class.java)
                 .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
@@ -338,7 +338,7 @@ internal class VedleggOpplastingServiceTest {
                 "hendelsereferanse",
                 mutableListOf(OpplastetFil("fil1")),
                 null
-        );
+        )
 
         val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
 
@@ -357,7 +357,7 @@ internal class VedleggOpplastingServiceTest {
                 "hendelsereferanse",
                 mutableListOf(OpplastetFil("fil1")),
                 null
-        );
+        )
 
         val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
 

@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.client.virusscan
 
 import kotlinx.coroutines.runBlocking
-import no.nav.sosialhjelp.innsyn.common.OpplastingException
+import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.utils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.kotlin.utils.retry
@@ -30,7 +30,7 @@ class VirusScanClient(
 
     override fun scan(filnavn: String?, data: ByteArray) {
         if (enabled && isInfected(filnavn, data)) {
-            throw OpplastingException("Fant virus i fil forsøkt opplastet", null)
+            throw VirusScanException("Fant virus i fil forsøkt opplastet", null)
         } else {
             log.warn("Virusscanning er ikke aktivert")
         }

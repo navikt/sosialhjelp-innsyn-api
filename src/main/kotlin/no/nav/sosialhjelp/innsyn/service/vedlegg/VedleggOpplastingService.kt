@@ -37,7 +37,7 @@ class VedleggOpplastingService(
     private val redisService: RedisService,
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
     private val dokumentlagerClient: DokumentlagerClient,
-    private val unleashClient: Unleash
+    private val unleash: Unleash
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {
@@ -136,7 +136,7 @@ class VedleggOpplastingService(
                 .withStatus(LASTET_OPP_STATUS)
                 .withFiler(filer)
 
-        if (unleashClient.isEnabled(UTVIDE_VEDLEGG_JSON, false)) {
+        if (unleash.isEnabled(UTVIDE_VEDLEGG_JSON, false)) {
             log.info("hendelsetype og hendelsereferanse blir inkludert i vedlegg.json")
             jsonVedlegg
                     .withHendelseType(metadata.hendelsetype)
@@ -194,28 +194,11 @@ class VedleggOpplastingService(
 
         val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
         // DEBUG: Flytter denne hit for å se hvordan dette blir logget i kibana. NB: SKAL IKKE INN I PROD!
-        if (true) {
-            val filnavnMetadata2 = listOf(
-                    "1",
-                    "22",
-                    "333",
-                    "fil4",
-                    "a\u030AA\u030A.pdf",
-                    "åÅ.pdf"
-            )
-            val filnavnMultipart2 = listOf(
-                    "1",
-                    "22",
-                    "333",
-                    "fil4",
-                    "åÅ.pdf",
-                    "åÅ.pdf"
-            )
+        if (unleash.isEnabled("sosialhjelp.innsyn.logge-mismatch-filnavn", false)) {
             log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
-            log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata2, filnavnMultipart2)}")
         }
         if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
-            if (true) {
+            if (unleash.isEnabled("sosialhjelp.innsyn.logge-mismatch-filnavn", false)) {
                 log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
             }
 
@@ -232,7 +215,6 @@ class VedleggOpplastingService(
             if ( filnavn != filnavnMultipart[index]) {
                 filnavnMetadataString += " $filnavn,";
                 filnavnMultipartString += " ${filnavnMultipart[index]},";
-
             }
         }
         return filnavnMetadataString + filnavnMultipartString

@@ -6,6 +6,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.unleash.LOGGE_MISMATCH_FILNAVN
 import no.nav.sosialhjelp.innsyn.client.unleash.UTVIDE_VEDLEGG_JSON
 import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
@@ -193,12 +194,8 @@ class VedleggOpplastingService(
         }
 
         val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
-        // DEBUG: Flytter denne hit for å se hvordan dette blir logget i kibana. NB: SKAL IKKE INN I PROD!
-        if (unleash.isEnabled("sosialhjelp.innsyn.logge-mismatch-filnavn", false)) {
-            log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
-        }
         if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
-            if (unleash.isEnabled("sosialhjelp.innsyn.logge-mismatch-filnavn", false)) {
+            if (unleash.isEnabled(LOGGE_MISMATCH_FILNAVN, false)) {
                 log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
             }
 
@@ -213,8 +210,8 @@ class VedleggOpplastingService(
 
         filnavnMetadata.forEachIndexed { index, filnavn ->
             if ( filnavn != filnavnMultipart[index]) {
-                filnavnMetadataString += " $filnavn,";
-                filnavnMultipartString += " ${filnavnMultipart[index]},";
+                filnavnMetadataString += " $filnavn (${filnavn.length} tegn),";
+                filnavnMultipartString += " ${filnavnMultipart[index]} (${filnavnMultipart[index].length} tegn),";
             }
         }
         return filnavnMetadataString + filnavnMultipartString

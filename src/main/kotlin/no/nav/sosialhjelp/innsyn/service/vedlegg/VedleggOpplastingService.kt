@@ -267,12 +267,20 @@ class VedleggOpplastingService(
         val fileType = mapToTikaFileType(tikaMediaType)
 
         if (fileType == TikaFileType.UNKNOWN) {
+            val content = String(file.bytes)
+            val firstBytes = content.subSequence(0,
+                    when {
+                        content.length > 8 -> 8
+                        content.isNotEmpty() -> content.length
+                        else -> 0
+                    })
+
             log.warn("Fil validert som TikaFileType.UNKNOWN. Men har " +
                     "\r\nextention: \"${splitFileName(file.originalFilename ?: "").extention}\"," +
                     "\r\nvalidatedFileType: ${fileType.name}," +
                     "\r\ntikaMediaType: ${tikaMediaType}," +
                     "\r\nmime: ${file.contentType}" +
-                    ",\r\nførste bytes: " + String(file.bytes).subSequence(0,8)
+                    ",\r\nførste bytes: $firstBytes"
             )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }

@@ -211,12 +211,12 @@ class VedleggOpplastingService(
                     "åÅ.pdf",
                     "åÅ.pdf"
             )
-            log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
-            log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata2, filnavnMultipart2)}")
+            log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
+            log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata2, filnavnMultipart2)}")
         }
         if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
             if (true) {
-                log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
+                log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
             }
 
             throw OpplastingFilnavnMismatchException("Antall filnavn som matcher i metadata og files (size ${nofFilenameMatchInMetadataAndFiles}) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
@@ -224,16 +224,18 @@ class VedleggOpplastingService(
         }
     }
 
-    fun getFilnavnListsAsString(filnavnMetadata: List<String>, filnavnMultipart: List<String>): String {
-        var filstring = "\r\nFilnavnMetadata :"
+    fun getMismatchFilnavnListsAsString(filnavnMetadata: List<String>, filnavnMultipart: List<String>): String {
+        var filnavnMetadataString = "\r\nFilnavnMetadata :"
+        var filnavnMultipartString = "\r\nFilnavnMultipart:"
+
         filnavnMetadata.forEachIndexed { index, filnavn ->
-            filstring += " $filnavn,"
+            if ( filnavn != filnavnMultipart[index]) {
+                filnavnMetadataString += " $filnavn,";
+                filnavnMultipartString += " ${filnavnMultipart[index]},";
+
+            }
         }
-        filstring += "\r\nFilnavnMultipart:"
-        filnavnMultipart.forEachIndexed { index, filnavn ->
-            filstring += " $filnavn,"
-        }
-        return filstring
+        return filnavnMetadataString + filnavnMultipartString
     }
 
     fun getMetadataAsString(metadata: MutableList<OpplastetVedleggMetadata>): String {

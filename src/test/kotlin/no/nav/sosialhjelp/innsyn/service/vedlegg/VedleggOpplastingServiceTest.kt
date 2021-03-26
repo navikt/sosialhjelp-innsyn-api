@@ -431,9 +431,9 @@ internal class VedleggOpplastingServiceTest {
         )
 
         assertEquals("" +
-                "\r\nFilnavnMetadata : 1, 22, 333, fil4, a\u030AA\u030A.pdf, åÅ.pdf," +
-                "\r\nFilnavnMultipart: 1, 22, 333, fil4, åÅ.pdf, åÅ.pdf,",
-                service.getFilnavnListsAsString(filnavnMetadata, filnavnMultipart))
+                "\r\nFilnavnMetadata : a\u030AA\u030A.pdf, åÅ.pdf," +
+                "\r\nFilnavnMultipart: åÅ.pdf, åÅ.pdf,",
+                service.getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart))
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {

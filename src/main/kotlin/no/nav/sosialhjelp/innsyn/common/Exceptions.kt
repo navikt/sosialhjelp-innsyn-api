@@ -9,7 +9,7 @@ class NorgException(
         override val cause: Throwable?
 ) : RuntimeException(message, cause)
 
-class OpplastingException(
+class VirusScanException(
         override val message: String?,
         override val cause: Throwable?
 ) : RuntimeException(message, cause)

@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.spyk
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
-import no.nav.sosialhjelp.innsyn.common.OpplastingException
+import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -38,7 +38,7 @@ internal class VirusScanClientTest {
 
     @Test
     fun scanFile_filenameIsVirustest_isInfected() {
-        assertThatExceptionOfType(OpplastingException::class.java)
+        assertThatExceptionOfType(VirusScanException::class.java)
             .isThrownBy{ virusScanClient.scan("virustest", data) }
     }
 
@@ -81,7 +81,7 @@ internal class VirusScanClientTest {
                     listOf(ScanResult("test", Result.FOUND))
                 ))
         )
-        assertThatExceptionOfType(OpplastingException::class.java)
+        assertThatExceptionOfType(VirusScanException::class.java)
             .isThrownBy{ virusScanClient.scan(filnavn, data) }
     }
 }

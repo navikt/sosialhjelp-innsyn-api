@@ -84,11 +84,12 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(OpplastingException::class)
     fun handleOpplastingError(e: OpplastingException): ResponseEntity<FrontendErrorMessage> {
-        log.error("Noe feilet ved opplasting av vedlegg", e)
         if(e.message?.contains("Fant virus i fil") == true) {
+            log.warn("Mulig virus funnet i vedlegg", e)
             val error = FrontendErrorMessage(FILOPPLASTING_ERROR, "Mulig virus funnet")
             return ResponseEntity(error, HttpStatus.PAYLOAD_TOO_LARGE)
         }
+        log.error("Noe feilet ved opplasting av vedlegg", e)
         val error = FrontendErrorMessage(FILOPPLASTING_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }

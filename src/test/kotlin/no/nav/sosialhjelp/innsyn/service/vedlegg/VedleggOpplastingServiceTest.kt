@@ -411,6 +411,30 @@ internal class VedleggOpplastingServiceTest {
                 )
         )
     }
+    @Test
+    fun `getFilnavnListsAsString skal returnere en string med finavn`() {
+        val filnavnMetadata = listOf(
+                "1",
+                "22",
+                "333",
+                "filæøåÆØÅ",
+                "a\u030AA\u030A.pdf",
+                "åÅ.pdf"
+        )
+        val filnavnMultipart = listOf(
+                "1",
+                "22 ",
+                "333",
+                "filæøåÆØÅ",
+                "åÅ.pdf",
+                "åÅ.pdf"
+        )
+
+        assertEquals("" +
+                "\r\nFilnavnMetadata : 22 (2 tegn), a\u030AA\u030A.pdf (8 tegn), åÅ.pdf (8 tegn)," +
+                "\r\nFilnavnMultipart: 22  (3 tegn), åÅ.pdf (6 tegn), åÅ.pdf (6 tegn),",
+                service.getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart))
+    }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {
         val outputStream = ByteArrayOutputStream()

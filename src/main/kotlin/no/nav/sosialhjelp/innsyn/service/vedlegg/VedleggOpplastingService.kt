@@ -6,6 +6,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.unleash.LOGGE_MISMATCH_FILNAVN
 import no.nav.sosialhjelp.innsyn.client.unleash.UTVIDE_VEDLEGG_JSON
 import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
@@ -37,7 +38,7 @@ class VedleggOpplastingService(
     private val redisService: RedisService,
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
     private val dokumentlagerClient: DokumentlagerClient,
-    private val unleashClient: Unleash
+    private val unleash: Unleash
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {
@@ -136,7 +137,7 @@ class VedleggOpplastingService(
                 .withStatus(LASTET_OPP_STATUS)
                 .withFiler(filer)
 
-        if (unleashClient.isEnabled(UTVIDE_VEDLEGG_JSON, false)) {
+        if (unleash.isEnabled(UTVIDE_VEDLEGG_JSON, false)) {
             log.info("hendelsetype og hendelsereferanse blir inkludert i vedlegg.json")
             jsonVedlegg
                     .withHendelseType(metadata.hendelsetype)
@@ -194,9 +195,26 @@ class VedleggOpplastingService(
 
         val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
         if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
+            if (unleash.isEnabled(LOGGE_MISMATCH_FILNAVN, false)) {
+                log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
+            }
+
             throw OpplastingFilnavnMismatchException("Antall filnavn som matcher i metadata og files (size ${nofFilenameMatchInMetadataAndFiles}) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
                     "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
         }
+    }
+
+    fun getMismatchFilnavnListsAsString(filnavnMetadata: List<String>, filnavnMultipart: List<String>): String {
+        var filnavnMetadataString = "\r\nFilnavnMetadata :"
+        var filnavnMultipartString = "\r\nFilnavnMultipart:"
+
+        filnavnMetadata.forEachIndexed { index, filnavn ->
+            if ( filnavn != filnavnMultipart[index]) {
+                filnavnMetadataString += " $filnavn (${filnavn.length} tegn),";
+                filnavnMultipartString += " ${filnavnMultipart[index]} (${filnavnMultipart[index].length} tegn),";
+            }
+        }
+        return filnavnMetadataString + filnavnMultipartString
     }
 
     fun getMetadataAsString(metadata: MutableList<OpplastetVedleggMetadata>): String {

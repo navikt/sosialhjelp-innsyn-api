@@ -265,13 +265,15 @@ class VedleggOpplastingService(
 
         val tikaMediaType = detectTikaType(file.inputStream)
         val fileType = mapToTikaFileType(tikaMediaType)
-        log.info("Validerer fil med " +
-                "extention: \"${splitFileName(file.originalFilename ?: "").extention}\", " +
-                "validatedFileType: ${fileType.name}, " +
-                "tikaMediaType: ${tikaMediaType}, " +
-                "mime: ${file.contentType}")
 
         if (fileType == TikaFileType.UNKNOWN) {
+            log.warn("Fil validert som TikaFileType.UNKNOWN. Men har " +
+                    "\r\nextention: \"${splitFileName(file.originalFilename ?: "").extention}\"," +
+                    "\r\nvalidatedFileType: ${fileType.name}," +
+                    "\r\ntikaMediaType: ${tikaMediaType}," +
+                    "\r\nmime: ${file.contentType}" +
+                    ",\r\nførste bytes: " + String(file.bytes).subSequence(0,8)
+            )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
         if (fileType == TikaFileType.PDF) {

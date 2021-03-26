@@ -195,28 +195,28 @@ class VedleggOpplastingService(
         val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
         // DEBUG: Flytter denne hit for å se hvordan dette blir logget i kibana. NB: SKAL IKKE INN I PROD!
         if (true) {
+            val filnavnMetadata2 = listOf(
+                    "1",
+                    "22",
+                    "333",
+                    "fil4",
+                    "a\u030AA\u030A.pdf",
+                    "åÅ.pdf"
+            )
+            val filnavnMultipart2 = listOf(
+                    "1",
+                    "22",
+                    "333",
+                    "fil4",
+                    "åÅ.pdf",
+                    "åÅ.pdf"
+            )
             log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
+            log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata2, filnavnMultipart2)}")
         }
         if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
             if (true) {
-                val filnavnMetadata2 = listOf(
-                        "1",
-                        "22",
-                        "333",
-                        "fil4",
-                        "a\u030AA\u030A.pdf",
-                        "åÅ.pdf"
-                )
-                val filnavnMultipart2 = listOf(
-                        "1",
-                        "22",
-                        "333",
-                        "fil4",
-                        "åÅ.pdf",
-                        "åÅ.pdf"
-                )
                 log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
-                log.error("Filnavn som ga mismatch: ${getFilnavnListsAsString(filnavnMetadata2, filnavnMultipart2)}")
             }
 
             throw OpplastingFilnavnMismatchException("Antall filnavn som matcher i metadata og files (size ${nofFilenameMatchInMetadataAndFiles}) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +

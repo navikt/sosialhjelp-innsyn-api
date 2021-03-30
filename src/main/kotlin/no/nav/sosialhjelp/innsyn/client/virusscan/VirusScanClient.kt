@@ -31,7 +31,7 @@ class VirusScanClient(
     override fun scan(filnavn: String?, data: ByteArray) {
         if (enabled && isInfected(filnavn, data)) {
             throw VirusScanException("Fant virus i fil forsøkt opplastet", null)
-        } else {
+        } else if (!enabled) {
             log.warn("Virusscanning er ikke aktivert")
         }
     }

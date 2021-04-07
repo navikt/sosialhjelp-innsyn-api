@@ -44,6 +44,10 @@ class DigisosApiServiceImpl(
         return fiksIder[0]
     }
 
+    override fun hentInnsynsfil(fiksDigisosId: String): String? {
+        return digisosApiClient.hentInnsynsfil(fiksDigisosId)
+    }
+
     private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
         val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
         try {

@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.mock
 
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
@@ -8,6 +9,7 @@ import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.client.digisosapi.DigisosApiClient
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import org.springframework.context.annotation.Profile
@@ -61,6 +63,12 @@ class DigisosApiClientMock(
 
     override fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String> {
         return emptyList()
+    }
+
+    override fun hentInnsynsfil(fiksDigisosId: String): String? {
+        val digisosSak = fiksClientMock.hentDigisosSak(fiksDigisosId, "", true)
+        val innsynsfil = fiksClientMock.hentDokument(fiksDigisosId, digisosSak.digisosSoker!!.metadata, JsonDigisosSoker::class.java, "")
+        return objectMapper.writeValueAsString(innsynsfil)
     }
 
     private fun femMinutterForMottattSoknad(digisosApiWrapper: DigisosApiWrapper): Long {

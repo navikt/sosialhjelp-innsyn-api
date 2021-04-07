@@ -12,4 +12,6 @@ interface DigisosApiService {
     fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String?
 
     fun lastOppFil(fiksDigisosId: String, file: MultipartFile): String
+
+    fun hentInnsynsfil(fiksDigisosId: String): String?
 }

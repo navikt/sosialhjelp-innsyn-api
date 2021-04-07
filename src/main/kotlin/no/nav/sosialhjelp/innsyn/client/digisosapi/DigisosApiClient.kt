@@ -12,4 +12,6 @@ interface DigisosApiClient {
     fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String?
 
     fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String>
+
+    fun hentInnsynsfil(fiksDigisosId: String): String?
 }

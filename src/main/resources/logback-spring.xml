@@ -5,9 +5,7 @@
         <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                    <maxDepthPerThrowable>30</maxDepthPerThrowable>
-                    <exclude>org\.springframework\..*</exclude>
-                    <exclude>org\.eclipse\.jetty\..*</exclude>
+                    <maxDepthPerThrowable>8</maxDepthPerThrowable>
                     <rootCauseFirst>true</rootCauseFirst>
                 </throwableConverter>
             </encoder>

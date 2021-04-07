@@ -22,4 +22,7 @@ class DigisosApiServiceMock(
         return fiksIder[0]
     }
 
+    override fun hentInnsynsfil(fiksDigisosId: String): String? {
+        return digisosApiClient.hentInnsynsfil(fiksDigisosId)
+    }
 }

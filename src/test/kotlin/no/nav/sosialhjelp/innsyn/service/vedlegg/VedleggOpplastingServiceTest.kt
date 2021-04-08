@@ -384,6 +384,57 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
+    fun `validateFilenameMatchInMetadataAndFiles skal gi suksess om begge filnavn er like`() {
+        val metadataList = mutableListOf(
+                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("filnavnet")), null)
+        )
+
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", "filnavnet", filtype1, jpgFile)
+        )
+
+        service.validateFilenameMatchInMetadataAndFiles(metadataList, files)
+    }
+
+    @Test
+    fun `validateFilenameMatchInMetadataAndFiles skal gi suksess om begge filnavn er tomme`() {
+        val metadataList = mutableListOf(
+                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("")), null)
+        )
+
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", null, filtype1, jpgFile)
+        )
+
+        service.validateFilenameMatchInMetadataAndFiles(metadataList, files)
+    }
+
+    @Test
+    fun `validateFilenameMatchInMetadataAndFiles skal gi suksess selv ved leading and trailing whitespaces`() {
+        val metadataList = mutableListOf(
+                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null,
+                        mutableListOf(
+                                OpplastetFil(" nr 1.jpg"),
+                                OpplastetFil("nr 2.jpg "),
+                                OpplastetFil("nr 3.jpg"),
+                                OpplastetFil("nr 4.jpg"),
+                                OpplastetFil("\nnr 5.jpg\t\r"),
+
+                        ), null)
+        )
+
+        val files = mutableListOf<MultipartFile>(
+                MockMultipartFile("files", "nr 1.jpg", filtype1, jpgFile),
+                MockMultipartFile("files", "nr 2.jpg", filtype1, jpgFile),
+                MockMultipartFile("files", " nr 3.jpg", filtype1, jpgFile),
+                MockMultipartFile("files", "nr 4.jpg ", filtype1, jpgFile),
+                MockMultipartFile("files", "nr 5.jpg", filtype1, jpgFile),
+        )
+
+        service.validateFilenameMatchInMetadataAndFiles(metadataList, files)
+    }
+
+    @Test
     fun `renameFilenameInMetadataJson skal rename uavhengig av om filnavn er sanitized eller ikke`() {
         val originalFilenameInNFDFormat ="a\u030AA\u030A.pdf" // å/Å på MAC blir lagret som to tegn.
         val newName ="åÅ-1234.pdf"
@@ -402,6 +453,28 @@ internal class VedleggOpplastingServiceTest {
         assertEquals(newName, metadataListUtenSanitizedFilename2[0].filer[0].filnavn)
         assertEquals(newName, metadataListMedSanitizedFilename[0].filer[0].filnavn)
         assertEquals(newName, metadataListMedSanitizedFilename2[0].filer[0].filnavn)
+    }
+
+    @Test
+    fun `renameFilenameInMetadataJson skal rename selv om filnavn har leading eller ending whitespaces`() {
+        val originalFilenameWithWhitespaces =" \n\t a.pdf\t \r"
+        val originalFilenameWithoutWhitespaces ="a.pdf"
+        val newName ="a-1234.pdf"
+
+        val metadataListWithWhitespaces = createSimpleMetadataListWithFilename(originalFilenameWithWhitespaces)
+        val metadataListWithWhitespaces2 = createSimpleMetadataListWithFilename(originalFilenameWithWhitespaces)
+        val metadataListWithoutWhitespaces = createSimpleMetadataListWithFilename(originalFilenameWithoutWhitespaces)
+        val metadataListWithoutWhitespaces2 = createSimpleMetadataListWithFilename(originalFilenameWithoutWhitespaces)
+
+        service.renameFilenameInMetadataJson(originalFilenameWithWhitespaces, newName, metadataListWithWhitespaces)
+        service.renameFilenameInMetadataJson(originalFilenameWithoutWhitespaces, newName, metadataListWithWhitespaces2)
+        service.renameFilenameInMetadataJson(originalFilenameWithWhitespaces, newName, metadataListWithoutWhitespaces)
+        service.renameFilenameInMetadataJson(originalFilenameWithoutWhitespaces, newName, metadataListWithoutWhitespaces2)
+
+        assertEquals(newName, metadataListWithWhitespaces[0].filer[0].filnavn)
+        assertEquals(newName, metadataListWithWhitespaces2[0].filer[0].filnavn)
+        assertEquals(newName, metadataListWithoutWhitespaces[0].filer[0].filnavn)
+        assertEquals(newName, metadataListWithoutWhitespaces2[0].filer[0].filnavn)
     }
 
     private fun createSimpleMetadataListWithFilename(filename: String): MutableList<OpplastetVedleggMetadata> {

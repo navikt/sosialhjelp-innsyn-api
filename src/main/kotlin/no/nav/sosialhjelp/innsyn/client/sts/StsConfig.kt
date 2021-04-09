@@ -2,12 +2,12 @@ package no.nav.sosialhjelp.innsyn.client.sts
 
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
+import no.nav.sosialhjelp.innsyn.utils.getUnproxiedReactorClientHttpConnector
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 import java.util.Base64
@@ -25,7 +25,7 @@ class StsConfig (
             .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic ${credentials()}")
             .defaultHeader(IntegrationUtils.HEADER_NAV_APIKEY, System.getenv(STSTOKEN_APIKEY))
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .clientConnector(ReactorClientHttpConnector(HttpClient.newConnection()))
+            .clientConnector(getUnproxiedReactorClientHttpConnector())
             .build()
 
     companion object {

@@ -15,7 +15,7 @@ fun getSha512FromByteArray(bytes: ByteArray?): String {
     return digest.fold("", { str, it -> str + "%02x".format(it) })
 }
 
-fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC)
+fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC).trim()
 
 fun detectTikaType(inputStream: InputStream): String {
     return Tika().detect(inputStream)

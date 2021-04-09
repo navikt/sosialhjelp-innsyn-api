@@ -185,7 +185,7 @@ class VedleggOpplastingService(
         }
     }
 
-    private fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>) {
+    fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>) {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> sanitizeFileName(opplastetFil.filnavn) } }
         val filnavnMultipart: List<String> = files.map { sanitizeFileName(it.originalFilename ?: "") }
         if (filnavnMetadata.size != filnavnMultipart.size) {

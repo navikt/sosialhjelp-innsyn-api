@@ -261,6 +261,10 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
 
+        if (file.originalFilename == null || file.originalFilename.equals("korruptfil.pdf")) {
+            return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
+        }
+
         virusScanner.scan(file.originalFilename, file.bytes)
 
         val tikaMediaType = detectTikaType(file.inputStream)

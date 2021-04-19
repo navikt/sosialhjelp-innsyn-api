@@ -31,6 +31,7 @@ object Versions {
     const val jerseyMediaJaxb = "2.31"
     const val bouncycastle = "1.67"
     const val unleash = "3.3.4"
+    const val jsonSmart = "2.4.2"
 
     //    Test only
     const val junitJupiter = "5.7.0"
@@ -151,13 +152,8 @@ dependencies {
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     constraints {
-        implementation("org.bouncycastle:bcprov-jdk15on:${Versions.bouncycastle}") {
-            because("Transitiv avhengighet dratt inn av no.ks.fiks:kryptering@1.0.10 har sårbarhet. Constraintsen kan fjernes når no.ks.fiks:kryptering bruker org.bouncycastle:bcprov-jdk15on@1.67 eller nyere")
-        }
-
-        //  Test
-        testImplementation("org.glassfish.jersey.media:jersey-media-jaxb:${Versions.jerseyMediaJaxb}") {
-            because("Transitiv avhengighet dratt inn av token-validation-test-support@1.3.1 har sårbarhet. Constraintsen kan fjernes når token-validation-test-support bruker jersey-media-jaxb@2.31 eller nyere")
+        implementation("net.minidev:json-smart:${Versions.jsonSmart}") {
+            because("Setter transitiv avhengighet sin versjon eksplisitt til 2.4.2. Transitiv avhengighet dratt inn av com.nimbusds:oauth2-oidc-sdk@9.3.3 har sårbarhet. Constraintsen kan fjernes når token-support bruker en versjon av nimbusds som ikke har en range av versjoner for json-smart")
         }
     }
 }

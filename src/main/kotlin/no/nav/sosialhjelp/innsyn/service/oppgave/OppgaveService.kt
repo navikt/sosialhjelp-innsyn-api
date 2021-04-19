@@ -88,7 +88,7 @@ class OppgaveService(
                             .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }}
                 .filter { it.status != Oppgavestatus.ANNULLERT }
                 .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
-                .groupBy { it.datoLagtTil.toLocalDate() }
+                .groupBy { it.frist?.toLocalDate() }
                 .map { (_, value) ->
                      DokumentasjonkravResponse(
                              dokumentasjonkravElementer = value.map {

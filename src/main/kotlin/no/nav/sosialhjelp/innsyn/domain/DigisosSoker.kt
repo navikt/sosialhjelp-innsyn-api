@@ -129,7 +129,7 @@ data class Dokumentasjonkrav(
         override var beskrivelse: String?,
         override var status: Oppgavestatus,
         var datoLagtTil: LocalDateTime,
-        var frist: LocalDateTime
+        var frist: LocalDateTime?
 ) : Oppgavehendelse()
 
 data class Hendelse( // egentlig historikk

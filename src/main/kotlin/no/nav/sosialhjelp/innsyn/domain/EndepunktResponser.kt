@@ -75,7 +75,7 @@ data class DokumentasjonkravElement(
         val tittel: String?,
         val beskrivelse: String?,
         val status: Oppgavestatus,
-        val frist: LocalDateTime
+        val frist: LocalDateTime?
 )
 
 

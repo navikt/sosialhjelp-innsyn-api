@@ -28,8 +28,6 @@ object Versions {
     const val fiksKryptering = "1.0.11"
     const val lettuce = "6.0.2.RELEASE"
     const val jempbox = "1.8.16"
-    const val jerseyMediaJaxb = "2.31"
-    const val bouncycastle = "1.67"
     const val unleash = "3.3.4"
     const val jsonSmart = "2.4.2"
 

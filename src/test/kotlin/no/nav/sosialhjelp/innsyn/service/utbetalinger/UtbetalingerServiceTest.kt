@@ -299,7 +299,7 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling med dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         val now = LocalDateTime.now()
-        val dokumentasjonkrav = Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,"dokumentasjonkrav", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, now)
+        val dokumentasjonkrav = Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,"dokumentasjonkrav", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, now, LocalDateTime.now())
         val utbetaling1 = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
                 null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now())
         model.saker.add(Sak(

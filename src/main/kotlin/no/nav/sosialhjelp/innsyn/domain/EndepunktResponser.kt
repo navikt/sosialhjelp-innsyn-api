@@ -74,7 +74,8 @@ data class DokumentasjonkravElement(
         val dokumentasjonkravReferanse: String, // hendelsereferanse
         val tittel: String?,
         val beskrivelse: String?,
-        val status: Oppgavestatus
+        val status: Oppgavestatus,
+        val frist: LocalDateTime
 )
 
 

@@ -93,7 +93,7 @@ class OppgaveService(
                      DokumentasjonkravResponse(
                              dokumentasjonkravElementer = value.map {
                                  val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.getOppgaveStatus()) }
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.getOppgaveStatus(), it.frist) }
                      )
                 }
 

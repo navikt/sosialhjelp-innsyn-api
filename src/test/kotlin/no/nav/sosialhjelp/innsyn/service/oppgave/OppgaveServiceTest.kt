@@ -212,9 +212,9 @@ internal class OppgaveServiceTest {
     fun `Should not return Dokumentasjonkrav with status ANNULERT or LEVERT_TIDLIGERE`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT,LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE,LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT,LocalDateTime.now())
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT, LocalDateTime.now(), LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE,LocalDateTime.now(), LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 
@@ -230,10 +230,10 @@ internal class OppgaveServiceTest {
     fun `Should return dokumentasjonkrav with tittel and filter out empty dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.RELEVANT,LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.RELEVANT,LocalDateTime.now()) ,
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, Oppgavestatus.RELEVANT,LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", Oppgavestatus.RELEVANT,LocalDateTime.now())
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 
@@ -252,9 +252,9 @@ internal class OppgaveServiceTest {
     fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for Dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(listOf(
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT,LocalDateTime.now()),
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.IKKE_OPPFYLT,LocalDateTime.now()) ,
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, "beskrivelse", Oppgavestatus.RELEVANT,LocalDateTime.now())
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT,LocalDateTime.now(), LocalDateTime.now()),
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.IKKE_OPPFYLT,LocalDateTime.now(), LocalDateTime.now()),
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, "beskrivelse", Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now())
         ))
         every { eventService.createModel(any(), any()) } returns model
 
@@ -287,6 +287,39 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].vilkarElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
         assertThat(responseList[0].vilkarElementer.get(1).status).isEqualTo(Oppgavestatus.RELEVANT)
         assertThat(responseList[0].vilkarElementer.get(2).status).isEqualTo(Oppgavestatus.RELEVANT)
+    }
+
+    @Test
+    fun `Should sort Dokumentasjonkrav by date and group by date`() {
+        val model = InternalDigisosSoker()
+        val frist1 = LocalDateTime.of(2021, 4, 19, 23, 59)
+        val frist2 = LocalDateTime.of(2021, 4, 20, 13, 59)
+        val frist3 = LocalDateTime.of(2021, 4, 20, 23, 59)
+        val frist4 = LocalDateTime.of(2021, 4, 21, 23, 59)
+
+        model.dokumentasjonkrav.addAll(listOf(
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2),
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist4),
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist1),
+            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist3),
+        ))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getDokumentasjonkrav("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 3)
+
+        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(1)
+        assertThat(responseList[1].dokumentasjonkravElementer).hasSize(2)
+        assertThat(responseList[2].dokumentasjonkravElementer).hasSize(1)
+
+        assertThat(responseList[0].dokumentasjonkravElementer[0].frist).isEqualTo(frist1)
+        assertThat(responseList[1].dokumentasjonkravElementer[0].frist).isEqualTo(frist2)
+        assertThat(responseList[1].dokumentasjonkravElementer[1].frist).isEqualTo(frist3)
+        assertThat(responseList[2].dokumentasjonkravElementer[0].frist).isEqualTo(frist4)
+
+        assertThat(responseList[0].dokumentasjonkravElementer[0].frist).isBefore(responseList[1].dokumentasjonkravElementer[0].frist)
     }
 
 }

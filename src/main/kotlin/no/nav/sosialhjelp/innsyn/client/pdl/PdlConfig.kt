@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.client.pdl
 
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
+import io.netty.resolver.DefaultAddressResolverGroup
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import org.springframework.context.annotation.Bean
@@ -17,7 +18,7 @@ import reactor.netty.http.client.HttpClient
 @Configuration
 class PdlConfig(
     private val clientProperties: ClientProperties
-){
+) {
     @Bean
     fun pdlWebClient(webClientBuilder: WebClient.Builder): WebClient =
         webClientBuilder
@@ -27,6 +28,7 @@ class PdlConfig(
             .clientConnector(
                 ReactorClientHttpConnector(
                     HttpClient.newConnection()
+                        .resolver(DefaultAddressResolverGroup.INSTANCE)
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
                         .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(60)) }
                 )

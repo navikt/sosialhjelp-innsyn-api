@@ -162,7 +162,7 @@ class VedleggOpplastingService(
         val uuid = UUID.randomUUID().toString()
 
         val matchendeFiler = filValideringer.filter { it.filename == originalFilename }
-        if (filValideringer.size > 1) log.warn("Vi har funnet ${filValideringer.size} validerte filer med samme navn. Det er flere enn 1.")
+        if (matchendeFiler.size > 1) log.warn("Vi har funnet ${matchendeFiler.size} validerte filer med samme navn. Det er flere enn 1.")
 
         filename += "-" + uuid.split("-")[0]
         if (filenameSplit.extention.isEmpty()) {
@@ -185,7 +185,7 @@ class VedleggOpplastingService(
         }
     }
 
-    private fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>) {
+    fun validateFilenameMatchInMetadataAndFiles(metadata: MutableList<OpplastetVedleggMetadata>, files: List<MultipartFile>) {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> sanitizeFileName(opplastetFil.filnavn) } }
         val filnavnMultipart: List<String> = files.map { sanitizeFileName(it.originalFilename ?: "") }
         if (filnavnMetadata.size != filnavnMultipart.size) {

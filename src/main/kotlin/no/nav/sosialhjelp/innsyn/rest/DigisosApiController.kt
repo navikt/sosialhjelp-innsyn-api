@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -44,5 +45,11 @@ class DigisosApiController(
         val dokumentlagerId = digisosApiService.lastOppFil(fiksDigisosId, file)
 
         return ResponseEntity.ok(dokumentlagerId)
+    }
+
+    @GetMapping("/{digisosId}/innsynsfil")
+    fun hentInnsynsfilWoldena(@PathVariable digisosId: String): ResponseEntity<ByteArray> {
+        val innsynsfil =  digisosApiService.hentInnsynsfil(digisosId) ?: return ResponseEntity.noContent().build()
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
     }
 }

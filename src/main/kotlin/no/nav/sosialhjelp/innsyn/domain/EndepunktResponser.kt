@@ -64,7 +64,8 @@ data class VilkarElement(
 )
 
 data class DokumentasjonkravResponse(
-        val dokumentasjonkravElementer: List<DokumentasjonkravElement>
+        val dokumentasjonkravElementer: List<DokumentasjonkravElement>,
+        val frist: LocalDate?
 )
 
 data class DokumentasjonkravElement(
@@ -74,10 +75,8 @@ data class DokumentasjonkravElement(
         val dokumentasjonkravReferanse: String, // hendelsereferanse
         val tittel: String?,
         val beskrivelse: String?,
-        val status: Oppgavestatus,
-        val frist: LocalDateTime?
+        val status: Oppgavestatus
 )
-
 
 data class UtbetalingerResponse(
         val ar: Int,

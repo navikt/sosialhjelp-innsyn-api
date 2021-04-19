@@ -314,16 +314,15 @@ internal class OppgaveServiceTest {
         assertThat(responseList[1].dokumentasjonkravElementer).hasSize(2)
         assertThat(responseList[2].dokumentasjonkravElementer).hasSize(1)
 
-        assertThat(responseList[0].dokumentasjonkravElementer[0].frist).isEqualTo(frist1)
-        assertThat(responseList[1].dokumentasjonkravElementer[0].frist).isEqualTo(frist2)
-        assertThat(responseList[1].dokumentasjonkravElementer[1].frist).isEqualTo(frist3)
-        assertThat(responseList[2].dokumentasjonkravElementer[0].frist).isEqualTo(frist4)
+        assertThat(responseList[0].frist).isEqualTo(frist1.toLocalDate())
+        assertThat(responseList[1].frist).isEqualTo(frist2.toLocalDate())
+        assertThat(responseList[1].frist).isEqualTo(frist3.toLocalDate())
 
-        assertThat(responseList[0].dokumentasjonkravElementer[0].frist).isBefore(responseList[1].dokumentasjonkravElementer[0].frist)
+        assertThat(responseList[0].frist).isBefore(responseList[1].frist)
     }
 
     @Test
-    fun `Should add Dokumentasjonkrav without frist at end of list`() {
+    fun `Should group Dokumentasjonkrav without frist together`() {
         val model = InternalDigisosSoker()
         val frist1 = LocalDateTime.of(2021, 4, 19, 23, 59)
         val frist2 = LocalDateTime.of(2021, 4, 20, 13, 59)
@@ -331,8 +330,8 @@ internal class OppgaveServiceTest {
 
         model.dokumentasjonkrav.addAll(listOf(
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist1),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2),
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), null),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2),
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), null),
         ))
         every { eventService.createModel(any(), any()) } returns model
@@ -340,13 +339,10 @@ internal class OppgaveServiceTest {
         val responseList = service.getDokumentasjonkrav("123", token)
 
         assertThat(responseList).isNotNull
-        assertThat(responseList.size == 4)
+        assertThat(responseList.size == 3)
 
-        assertThat(responseList[2].dokumentasjonkravElementer).hasSize(1)
-        assertThat(responseList[3].dokumentasjonkravElementer).hasSize(1)
+        assertThat(responseList[2].dokumentasjonkravElementer).hasSize(2)
 
-        assertThat(responseList[2].dokumentasjonkravElementer[0].frist).isNull()
-        assertThat(responseList[3].dokumentasjonkravElementer[0].frist).isNull()
-
+        assertThat(responseList[2].frist).isNull()
     }
 }

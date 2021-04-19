@@ -7,6 +7,8 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 @Component
@@ -89,13 +91,16 @@ class OppgaveService(
                 .filter { it.status != Oppgavestatus.ANNULLERT }
                 .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
                 .groupBy { it.frist?.toLocalDate() }
-                .map { (_, value) ->
+                .map { (key, value) ->
                      DokumentasjonkravResponse(
+                             frist = key,
                              dokumentasjonkravElementer = value.map {
                                  val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.getOppgaveStatus(), it.frist) }
+                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.getOppgaveStatus())
+                             }
                      )
                 }
+                .sortedWith (compareBy(nullsLast<LocalDate>(), { it.frist }))
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList

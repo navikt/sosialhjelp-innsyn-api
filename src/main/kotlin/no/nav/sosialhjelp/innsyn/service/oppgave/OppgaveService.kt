@@ -100,7 +100,7 @@ class OppgaveService(
                              }
                      )
                 }
-                .sortedWith (compareBy(nullsLast<LocalDate>(), { it.frist }))
+                .sortedWith (compareBy(nullsLast(), { it.frist }))
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList

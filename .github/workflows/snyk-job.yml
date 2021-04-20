@@ -2,10 +2,10 @@ name: Daily snyk job
 
 on:
   push:
-    tags:
-      - snyk/*
-  schedule:
-    - cron: '30 5 * * *'
+    branches:
+      - '**'      # Build all branches
+    tags-ignore:
+      - '**'      # Don't build any tags
 
 jobs:
   snyk:

@@ -6,6 +6,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV_ENABLED
 import no.nav.sosialhjelp.innsyn.domain.*
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.toLocalDate
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: Unleash) {
@@ -43,7 +44,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
             beskrivelse = hendelse.beskrivelse,
             status = Oppgavestatus.valueOf(hendelse.status.value()),
             datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
-            frist = hendelse.frist.toLocalDateTime() // toLocalDate?
+            frist = hendelse.frist.toLocalDate()
     )
 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)

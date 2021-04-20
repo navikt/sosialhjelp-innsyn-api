@@ -314,6 +314,7 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].frist).isEqualTo(frist.toLocalDate())
         assertThat(responseList[1].frist).isEqualTo(frist2.toLocalDate())
         assertThat(responseList[1].frist).isEqualTo(frist2.toLocalDate())
+        assertThat(responseList[2].frist).isEqualTo(frist3.toLocalDate())
 
         assertThat(responseList[0].frist).isBefore(responseList[1].frist)
     }

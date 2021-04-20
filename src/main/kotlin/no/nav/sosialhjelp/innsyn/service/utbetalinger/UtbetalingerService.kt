@@ -22,13 +22,12 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Locale
 
-
 const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
 
 @Component
 class UtbetalingerService(
-        private val eventService: EventService,
-        private val fiksClient: FiksClient
+    private val eventService: EventService,
+    private val fiksClient: FiksClient
 ) {
 
     fun hentUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
@@ -43,47 +42,47 @@ class UtbetalingerService(
 
         val alleUtbetalinger = runBlocking(Dispatchers.IO + MDCContext()) {
             digisosSaker
-                    .filter { isDigisosSakNewerThanMonths(it, months) }
-                    .flatMapParallel {
-                        setRequestAttributes(requestAttributes)
-                        manedsutbetalinger(token, it)
-                    }
+                .filter { isDigisosSakNewerThanMonths(it, months) }
+                .flatMapParallel {
+                    setRequestAttributes(requestAttributes)
+                    manedsutbetalinger(token, it)
+                }
         }
 
         return alleUtbetalinger
-                .sortedByDescending { it.utbetalingsdato }
-                .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
-                .map { (key, value) ->
-                    UtbetalingerResponse(
-                            ar = key.year,
-                            maned = monthToString(key.monthValue),
-                            foersteIManeden = foersteIManeden(key),
-                            utbetalinger = value.sortedByDescending { it.utbetalingsdato }
-                    )
-                }
+            .sortedByDescending { it.utbetalingsdato }
+            .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+            .map { (key, value) ->
+                UtbetalingerResponse(
+                    ar = key.year,
+                    maned = monthToString(key.monthValue),
+                    foersteIManeden = foersteIManeden(key),
+                    utbetalinger = value.sortedByDescending { it.utbetalingsdato }
+                )
+            }
     }
 
     private suspend fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {
         val model = eventService.hentAlleUtbetalinger(token, digisosSak)
         return model.utbetalinger
-                .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
-                .map { utbetaling ->
-                    utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(digisosSak.kommunenummer)
-                    ManedUtbetaling(
-                            tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
-                            belop = utbetaling.belop.toDouble(),
-                            utbetalingsdato = utbetaling.utbetalingsDato,
-                            forfallsdato = utbetaling.forfallsDato,
-                            status = utbetaling.status.name,
-                            fiksDigisosId = digisosSak.fiksDigisosId,
-                            fom = utbetaling.fom,
-                            tom = utbetaling.tom,
-                            mottaker = utbetaling.mottaker,
-                            annenMottaker = utbetaling.annenMottaker,
-                            kontonummer = utbetaling.kontonummer,
-                            utbetalingsmetode = utbetaling.utbetalingsmetode
-                    )
-                }
+            .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
+            .map { utbetaling ->
+                utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(digisosSak.kommunenummer)
+                ManedUtbetaling(
+                    tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
+                    belop = utbetaling.belop.toDouble(),
+                    utbetalingsdato = utbetaling.utbetalingsDato,
+                    forfallsdato = utbetaling.forfallsDato,
+                    status = utbetaling.status.name,
+                    fiksDigisosId = digisosSak.fiksDigisosId,
+                    fom = utbetaling.fom,
+                    tom = utbetaling.tom,
+                    mottaker = utbetaling.mottaker,
+                    annenMottaker = utbetaling.annenMottaker,
+                    kontonummer = utbetaling.kontonummer,
+                    utbetalingsmetode = utbetaling.utbetalingsmetode
+                )
+            }
     }
 
     fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean {
@@ -96,11 +95,11 @@ class UtbetalingerService(
 
     fun containsUtbetalingNewerThanMonth(model: InternalDigisosSoker, months: Int): Boolean {
         return model.utbetalinger
-                .any {
-                    it.status == UtbetalingsStatus.UTBETALT
-                            && it.utbetalingsDato != null
-                            && isDateNewerThanMonths(it.utbetalingsDato!!, months)
-                }
+            .any {
+                it.status == UtbetalingsStatus.UTBETALT &&
+                    it.utbetalingsDato != null &&
+                    isDateNewerThanMonths(it.utbetalingsDato!!, months)
+            }
     }
 
     fun utbetalingExists(token: String, months: Int): Boolean {
@@ -111,12 +110,12 @@ class UtbetalingerService(
             return false
         }
         return digisosSaker
-                .asSequence()
-                .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
-                .any { digisosSak ->
-                    val model = eventService.hentAlleUtbetalinger(token, digisosSak)
-                    (containsUtbetalingNewerThanMonth(model, months))
-                }
+            .asSequence()
+            .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
+            .any { digisosSak ->
+                val model = eventService.hentAlleUtbetalinger(token, digisosSak)
+                (containsUtbetalingNewerThanMonth(model, months))
+            }
     }
 
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)

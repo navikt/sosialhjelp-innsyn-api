@@ -9,12 +9,11 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.netty.http.client.HttpClient
 import java.util.Base64
 
 @Profile("!(mock | local)")
 @Configuration
-class StsConfig (
+class StsConfig(
     private val clientProperties: ClientProperties
 ) {
 

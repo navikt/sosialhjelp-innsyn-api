@@ -16,7 +16,7 @@ class EttersendelsePdfGeneratorTest {
 
     private val ident = "11111111111"
 
-    private val ettersendelsePdfGenerator  = EttersendelsePdfGenerator()
+    private val ettersendelsePdfGenerator = EttersendelsePdfGenerator()
 
     // TODO: skrive bedre test for generering av pdf
     @Disabled("Kun lagd for å sjekke at pdf ser riktig ut.")
@@ -30,7 +30,7 @@ class EttersendelsePdfGeneratorTest {
             val out = FileOutputStream("./starcraft.pdf")
             out.write(bytes)
             out.close()
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
@@ -53,11 +53,9 @@ class EttersendelsePdfGeneratorTest {
             result = document.result
             Assertions.assertTrue(result.isValid)
             document.close()
-        }
-        catch(e: SyntaxValidationException){
+        } catch (e: SyntaxValidationException) {
             fail("Exception when checking validity of pdf/a. Exception message", e)
-        }
-        finally {
+        } finally {
             file.deleteOnExit()
         }
     }

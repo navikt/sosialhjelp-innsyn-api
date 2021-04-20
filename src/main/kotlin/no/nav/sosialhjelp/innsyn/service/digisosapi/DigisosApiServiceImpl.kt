@@ -61,6 +61,5 @@ class DigisosApiServiceImpl(
         } catch (e: InterruptedException) {
             throw IllegalStateException(e)
         }
-
     }
 }

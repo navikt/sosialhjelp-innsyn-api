@@ -21,16 +21,19 @@ class PdlClientMock : PdlClient {
     private val vanlig = emptyList<Adressebeskyttelse>()
 
     override fun hentPerson(ident: String): PdlHentPerson? {
-        return pdlMap.getOrElse(ident, {
-            val default = PdlHentPerson(
+        return pdlMap.getOrElse(
+            ident,
+            {
+                val default = PdlHentPerson(
                     hentPerson = PdlPerson(
-                            adressebeskyttelse = vanlig,
-                            navn = navn
+                        adressebeskyttelse = vanlig,
+                        navn = navn
                     )
-            )
-            pdlMap[ident] = default
-            default
-        })
+                )
+                pdlMap[ident] = default
+                default
+            }
+        )
     }
 
     override fun ping() {

@@ -15,7 +15,6 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.client.WebClient
 
-
 internal class DigisosApiClientTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
 

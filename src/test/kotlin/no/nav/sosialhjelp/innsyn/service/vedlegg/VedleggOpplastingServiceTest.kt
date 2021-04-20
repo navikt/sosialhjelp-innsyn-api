@@ -15,8 +15,8 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
-import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
+import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.rest.OpplastetFil
 import no.nav.sosialhjelp.innsyn.rest.OpplastetVedleggMetadata
@@ -46,7 +46,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-
 internal class VedleggOpplastingServiceTest {
 
     private val fiksClient: FiksClient = mockk()
@@ -57,13 +56,13 @@ internal class VedleggOpplastingServiceTest {
     private val dokumentlagerClient: DokumentlagerClient = mockk()
     private val unleashClient: Unleash = mockk()
     private val service = VedleggOpplastingService(
-            fiksClient,
-            krypteringService,
-            virusScanner,
-            redisService,
-            ettersendelsePdfGenerator,
-            dokumentlagerClient,
-            unleashClient
+        fiksClient,
+        krypteringService,
+        virusScanner,
+        redisService,
+        ettersendelsePdfGenerator,
+        dokumentlagerClient,
+        unleashClient
     )
 
     private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
@@ -113,13 +112,15 @@ internal class VedleggOpplastingServiceTest {
         val filnavn3 = "test3.png"
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1)), null),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn3)), null))
+            OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1)), null),
+            OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn3)), null)
+        )
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile),
-                MockMultipartFile("files", filnavn1, filtype0, largePngFile),
-                MockMultipartFile("files", filnavn3, filtype0, pngFile))
+            MockMultipartFile("files", filnavn0, filtype1, jpgFile),
+            MockMultipartFile("files", filnavn1, filtype0, pngFile),
+            MockMultipartFile("files", filnavn1, filtype0, largePngFile),
+            MockMultipartFile("files", filnavn3, filtype0, pngFile)
+        )
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
@@ -173,12 +174,14 @@ internal class VedleggOpplastingServiceTest {
         every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn2)), null))
+            OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null),
+            OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn2)), null)
+        )
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile),
-                MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
+            MockMultipartFile("files", filnavn0, filtype1, jpgFile),
+            MockMultipartFile("files", filnavn1, filtype0, pngFile),
+            MockMultipartFile("files", filnavn2, "unknown", ByteArray(0))
+        )
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
@@ -195,12 +198,14 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis filnavn i metadata ikke matcher med filene som sendes`() {
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil("feilFilnavn.rar")), null),
-                OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn2)), null))
+            OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil("feilFilnavn.rar")), null),
+            OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn2)), null)
+        )
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile),
-                MockMultipartFile("files", filnavn2, "unknown", ByteArray(0)))
+            MockMultipartFile("files", filnavn0, filtype1, jpgFile),
+            MockMultipartFile("files", filnavn1, filtype0, pngFile),
+            MockMultipartFile("files", filnavn2, "unknown", ByteArray(0))
+        )
 
         assertFailsWith<OpplastingFilnavnMismatchException> { service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
@@ -218,12 +223,19 @@ internal class VedleggOpplastingServiceTest {
         val signedPdfFile = createPdfByteArray(true)
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(
-                        OpplastetFil(filnavn1),
-                        OpplastetFil(filnavn2)), LocalDate.now()))
+            OpplastetVedleggMetadata(
+                type0, tilleggsinfo0, null, null,
+                mutableListOf(
+                    OpplastetFil(filnavn1),
+                    OpplastetFil(filnavn2)
+                ),
+                LocalDate.now()
+            )
+        )
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn1, filtype, pdfFile),
-                MockMultipartFile("files", filnavn2, filtype, signedPdfFile))
+            MockMultipartFile("files", filnavn1, filtype, pdfFile),
+            MockMultipartFile("files", filnavn2, filtype, signedPdfFile)
+        )
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
@@ -245,10 +257,17 @@ internal class VedleggOpplastingServiceTest {
         val pdfFile = createPasswordProtectedPdfByteArray()
 
         val metadata = mutableListOf(
-                OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(
-                        OpplastetFil(filnavn1)), null))
+            OpplastetVedleggMetadata(
+                type0, tilleggsinfo0, null, null,
+                mutableListOf(
+                    OpplastetFil(filnavn1)
+                ),
+                null
+            )
+        )
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn1, filtype, pdfFile))
+            MockMultipartFile("files", filnavn1, filtype, pdfFile)
+        )
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
@@ -264,11 +283,12 @@ internal class VedleggOpplastingServiceTest {
 
         val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null))
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", filnavn0, filtype1, jpgFile),
-                MockMultipartFile("files", filnavn1, filtype0, pngFile))
+            MockMultipartFile("files", filnavn0, filtype1, jpgFile),
+            MockMultipartFile("files", filnavn1, filtype0, pngFile)
+        )
 
         assertThatExceptionOfType(VirusScanException::class.java)
-                .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
+            .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
     @Test
@@ -332,12 +352,12 @@ internal class VedleggOpplastingServiceTest {
         every { unleashClient.isEnabled(any(), false) } returns false
 
         val opplastetVedleggMetadata = OpplastetVedleggMetadata(
-                "type",
-                "tilleggsinfo",
-                JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
-                "hendelsereferanse",
-                mutableListOf(OpplastetFil("fil1")),
-                null
+            "type",
+            "tilleggsinfo",
+            JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
+            "hendelsereferanse",
+            mutableListOf(OpplastetFil("fil1")),
+            null
         )
 
         val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
@@ -351,12 +371,12 @@ internal class VedleggOpplastingServiceTest {
         every { unleashClient.isEnabled(any(), false) } returns true
 
         val opplastetVedleggMetadata = OpplastetVedleggMetadata(
-                "type",
-                "tilleggsinfo",
-                JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
-                "hendelsereferanse",
-                mutableListOf(OpplastetFil("fil1")),
-                null
+            "type",
+            "tilleggsinfo",
+            JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
+            "hendelsereferanse",
+            mutableListOf(OpplastetFil("fil1")),
+            null
         )
 
         val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
@@ -368,16 +388,24 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `getOpplastetVedleggMetadataAsString skal returnere antall filer per element i listen`() {
         val metadataList = mutableListOf(
-                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(
-                        OpplastetFil("fil1"),
-                        OpplastetFil("fil2"),
-                        OpplastetFil("fil3")
-                ), null),
-                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("fil4")), null),
-                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(
-                        OpplastetFil("fil5"),
-                        OpplastetFil("fil6")
-                ), LocalDate.now())
+            OpplastetVedleggMetadata(
+                "type", "tilleggsinfo", null, null,
+                mutableListOf(
+                    OpplastetFil("fil1"),
+                    OpplastetFil("fil2"),
+                    OpplastetFil("fil3")
+                ),
+                null
+            ),
+            OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("fil4")), null),
+            OpplastetVedleggMetadata(
+                "type", "tilleggsinfo", null, null,
+                mutableListOf(
+                    OpplastetFil("fil5"),
+                    OpplastetFil("fil6")
+                ),
+                LocalDate.now()
+            )
         )
 
         assertEquals("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ", service.getMetadataAsString(metadataList))
@@ -386,11 +414,11 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `validateFilenameMatchInMetadataAndFiles skal gi suksess om begge filnavn er like`() {
         val metadataList = mutableListOf(
-                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("filnavnet")), null)
+            OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("filnavnet")), null)
         )
 
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", "filnavnet", filtype1, jpgFile)
+            MockMultipartFile("files", "filnavnet", filtype1, jpgFile)
         )
 
         service.validateFilenameMatchInMetadataAndFiles(metadataList, files)
@@ -399,11 +427,11 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `validateFilenameMatchInMetadataAndFiles skal gi suksess om begge filnavn er tomme`() {
         val metadataList = mutableListOf(
-                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("")), null)
+            OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(OpplastetFil("")), null)
         )
 
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", null, filtype1, jpgFile)
+            MockMultipartFile("files", null, filtype1, jpgFile)
         )
 
         service.validateFilenameMatchInMetadataAndFiles(metadataList, files)
@@ -412,23 +440,26 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `validateFilenameMatchInMetadataAndFiles skal gi suksess selv ved leading and trailing whitespaces`() {
         val metadataList = mutableListOf(
-                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null,
-                        mutableListOf(
-                                OpplastetFil(" nr 1.jpg"),
-                                OpplastetFil("nr 2.jpg "),
-                                OpplastetFil("nr 3.jpg"),
-                                OpplastetFil("nr 4.jpg"),
-                                OpplastetFil("\nnr 5.jpg\t\r"),
+            OpplastetVedleggMetadata(
+                "type", "tilleggsinfo", null, null,
+                mutableListOf(
+                    OpplastetFil(" nr 1.jpg"),
+                    OpplastetFil("nr 2.jpg "),
+                    OpplastetFil("nr 3.jpg"),
+                    OpplastetFil("nr 4.jpg"),
+                    OpplastetFil("\nnr 5.jpg\t\r"),
 
-                        ), null)
+                ),
+                null
+            )
         )
 
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", "nr 1.jpg", filtype1, jpgFile),
-                MockMultipartFile("files", "nr 2.jpg", filtype1, jpgFile),
-                MockMultipartFile("files", " nr 3.jpg", filtype1, jpgFile),
-                MockMultipartFile("files", "nr 4.jpg ", filtype1, jpgFile),
-                MockMultipartFile("files", "nr 5.jpg", filtype1, jpgFile),
+            MockMultipartFile("files", "nr 1.jpg", filtype1, jpgFile),
+            MockMultipartFile("files", "nr 2.jpg", filtype1, jpgFile),
+            MockMultipartFile("files", " nr 3.jpg", filtype1, jpgFile),
+            MockMultipartFile("files", "nr 4.jpg ", filtype1, jpgFile),
+            MockMultipartFile("files", "nr 5.jpg", filtype1, jpgFile),
         )
 
         service.validateFilenameMatchInMetadataAndFiles(metadataList, files)
@@ -436,8 +467,8 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `renameFilenameInMetadataJson skal rename uavhengig av om filnavn er sanitized eller ikke`() {
-        val originalFilenameInNFDFormat ="a\u030AA\u030A.pdf" // å/Å på MAC blir lagret som to tegn.
-        val newName ="åÅ-1234.pdf"
+        val originalFilenameInNFDFormat = "a\u030AA\u030A.pdf" // å/Å på MAC blir lagret som to tegn.
+        val newName = "åÅ-1234.pdf"
 
         val metadataListUtenSanitizedFilename = createSimpleMetadataListWithFilename(originalFilenameInNFDFormat)
         val metadataListUtenSanitizedFilename2 = createSimpleMetadataListWithFilename(originalFilenameInNFDFormat)
@@ -457,9 +488,9 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `renameFilenameInMetadataJson skal rename selv om filnavn har leading eller ending whitespaces`() {
-        val originalFilenameWithWhitespaces =" \n\t a.pdf\t \r"
-        val originalFilenameWithoutWhitespaces ="a.pdf"
-        val newName ="a-1234.pdf"
+        val originalFilenameWithWhitespaces = " \n\t a.pdf\t \r"
+        val originalFilenameWithoutWhitespaces = "a.pdf"
+        val newName = "a-1234.pdf"
 
         val metadataListWithWhitespaces = createSimpleMetadataListWithFilename(originalFilenameWithWhitespaces)
         val metadataListWithWhitespaces2 = createSimpleMetadataListWithFilename(originalFilenameWithWhitespaces)
@@ -479,34 +510,40 @@ internal class VedleggOpplastingServiceTest {
 
     private fun createSimpleMetadataListWithFilename(filename: String): MutableList<OpplastetVedleggMetadata> {
         return mutableListOf(
-                OpplastetVedleggMetadata("type", "tilleggsinfo", null, null, mutableListOf(
-                        OpplastetFil(filename)), null
-                )
+            OpplastetVedleggMetadata(
+                "type", "tilleggsinfo", null, null,
+                mutableListOf(
+                    OpplastetFil(filename)
+                ),
+                null
+            )
         )
     }
     @Test
     fun `getFilnavnListsAsString skal returnere en string med finavn`() {
         val filnavnMetadata = listOf(
-                "1",
-                "22",
-                "333",
-                "filæøåÆØÅ",
-                "a\u030AA\u030A.pdf",
-                "åÅ.pdf"
+            "1",
+            "22",
+            "333",
+            "filæøåÆØÅ",
+            "a\u030AA\u030A.pdf",
+            "åÅ.pdf"
         )
         val filnavnMultipart = listOf(
-                "1",
-                "22 ",
-                "333",
-                "filæøåÆØÅ",
-                "åÅ.pdf",
-                "åÅ.pdf"
+            "1",
+            "22 ",
+            "333",
+            "filæøåÆØÅ",
+            "åÅ.pdf",
+            "åÅ.pdf"
         )
 
-        assertEquals("" +
+        assertEquals(
+            "" +
                 "\r\nFilnavnMetadata : 22 (2 tegn), a\u030AA\u030A.pdf (8 tegn), åÅ.pdf (8 tegn)," +
                 "\r\nFilnavnMultipart: 22  (3 tegn), åÅ.pdf (6 tegn), åÅ.pdf (6 tegn),",
-                service.getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart))
+            service.getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)
+        )
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {

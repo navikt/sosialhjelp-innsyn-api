@@ -33,7 +33,6 @@ object MDCUtils {
         val randomNr = RANDOM.nextInt(Integer.MAX_VALUE)
         val systemTime = System.currentTimeMillis()
 
-        return "CallId_${systemTime}_${randomNr}"
+        return "CallId_${systemTime}_$randomNr"
     }
-
 }

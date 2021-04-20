@@ -21,10 +21,9 @@ class SwaggerConfig {
             throw Error("Swagger-bean blir forsøkt generert i prod. Stopper applikasjonen da dette er en sikkerhetsrisiko.")
         }
         return Docket(OAS_30)
-                .select()
-                .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.regex(".*/api/v1/.*"))
-                .build()
+            .select()
+            .apis(RequestHandlerSelectors.any())
+            .paths(PathSelectors.regex(".*/api/v1/.*"))
+            .build()
     }
-
 }

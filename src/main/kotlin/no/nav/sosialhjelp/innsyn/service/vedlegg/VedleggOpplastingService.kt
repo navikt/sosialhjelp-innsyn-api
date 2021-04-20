@@ -50,7 +50,6 @@ class VedleggOpplastingService(
         }
         metadata.removeIf { it.filer.isEmpty() }
 
-
         val valideringer = mutableListOf<FilValidering>()
         oppgaveValideringer.forEach { valideringer.addAll(it.filer) }
 
@@ -73,7 +72,7 @@ class VedleggOpplastingService(
                 .map { file ->
                     val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, certificate)
                     FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream)
-            }
+                }
 
             val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadata)
             fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
@@ -90,20 +89,20 @@ class VedleggOpplastingService(
             throw e
         } finally {
             val notCancelledFutureList = krypteringFutureList
-                    .filter { !it.isDone && !it.isCancelled }
+                .filter { !it.isDone && !it.isCancelled }
             if (notCancelledFutureList.isNotEmpty()) {
                 log.warn("Antall krypteringer som ikke er canceled var ${notCancelledFutureList.size}")
                 notCancelledFutureList
-                        .forEach { it.cancel(true) }
+                    .forEach { it.cancel(true) }
             }
         }
     }
 
     private fun harOppgaverMedValideringsfeil(oppgaveValideringer: MutableList<OppgaveValidering>) =
-            oppgaveValideringer.any { oppgave -> harFilerMedValideringsfeil(oppgave) }
+        oppgaveValideringer.any { oppgave -> harFilerMedValideringsfeil(oppgave) }
 
     private fun harFilerMedValideringsfeil(oppgave: OppgaveValidering) =
-            oppgave.filer.any { it.status.result != ValidationValues.OK }
+        oppgave.filer.any { it.status.result != ValidationValues.OK }
 
     fun createEttersendelsePdf(metadata: MutableList<OpplastetVedleggMetadata>, digisosId: String, token: String): FilForOpplasting {
         try {
@@ -115,33 +114,37 @@ class VedleggOpplastingService(
             log.error("Generering av ettersendelse.pdf feilet.", e)
             throw e
         }
-
     }
 
     fun createJsonVedleggSpesifikasjon(files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon {
         var filIndex = 0
         return JsonVedleggSpesifikasjon()
-                .withVedlegg(metadata.map {
-                    createJsonVedlegg(it, it.filer.map { fil ->
-                        JsonFiler()
+            .withVedlegg(
+                metadata.map {
+                    createJsonVedlegg(
+                        it,
+                        it.filer.map { fil ->
+                            JsonFiler()
                                 .withFilnavn(fil.filnavn)
                                 .withSha512(getSha512FromByteArray(files[filIndex++].bytes))
-                    })
-                })
+                        }
+                    )
+                }
+            )
     }
 
     fun createJsonVedlegg(metadata: OpplastetVedleggMetadata, filer: List<JsonFiler>): JsonVedlegg? {
         val jsonVedlegg = JsonVedlegg()
-                .withType(metadata.type)
-                .withTilleggsinfo(metadata.tilleggsinfo)
-                .withStatus(LASTET_OPP_STATUS)
-                .withFiler(filer)
+            .withType(metadata.type)
+            .withTilleggsinfo(metadata.tilleggsinfo)
+            .withStatus(LASTET_OPP_STATUS)
+            .withFiler(filer)
 
         if (unleash.isEnabled(UTVIDE_VEDLEGG_JSON, false)) {
             log.info("hendelsetype og hendelsereferanse blir inkludert i vedlegg.json")
             jsonVedlegg
-                    .withHendelseType(metadata.hendelsetype)
-                    .withHendelseReferanse(metadata.hendelsereferanse)
+                .withHendelseType(metadata.hendelsetype)
+                .withHendelseReferanse(metadata.hendelsereferanse)
         }
 
         return jsonVedlegg
@@ -189,8 +192,11 @@ class VedleggOpplastingService(
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> sanitizeFileName(opplastetFil.filnavn) } }
         val filnavnMultipart: List<String> = files.map { sanitizeFileName(it.originalFilename ?: "") }
         if (filnavnMetadata.size != filnavnMultipart.size) {
-            throw OpplastingFilnavnMismatchException("FilnavnMetadata (size ${filnavnMetadata.size}) og filnavnMultipart (size ${filnavnMultipart.size}) har forskjellig antall. " +
-                    "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
+            throw OpplastingFilnavnMismatchException(
+                "FilnavnMetadata (size ${filnavnMetadata.size}) og filnavnMultipart (size ${filnavnMultipart.size}) har forskjellig antall. " +
+                    "Strukturen til metadata: ${getMetadataAsString(metadata)}",
+                null
+            )
         }
 
         val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
@@ -199,8 +205,11 @@ class VedleggOpplastingService(
                 log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
             }
 
-            throw OpplastingFilnavnMismatchException("Antall filnavn som matcher i metadata og files (size ${nofFilenameMatchInMetadataAndFiles}) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
-                    "Strukturen til metadata: ${getMetadataAsString(metadata)}", null)
+            throw OpplastingFilnavnMismatchException(
+                "Antall filnavn som matcher i metadata og files (size $nofFilenameMatchInMetadataAndFiles) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
+                    "Strukturen til metadata: ${getMetadataAsString(metadata)}",
+                null
+            )
         }
     }
 
@@ -209,9 +218,9 @@ class VedleggOpplastingService(
         var filnavnMultipartString = "\r\nFilnavnMultipart:"
 
         filnavnMetadata.forEachIndexed { index, filnavn ->
-            if ( filnavn != filnavnMultipart[index]) {
-                filnavnMetadataString += " $filnavn (${filnavn.length} tegn),";
-                filnavnMultipartString += " ${filnavnMultipart[index]} (${filnavnMultipart[index].length} tegn),";
+            if (filnavn != filnavnMultipart[index]) {
+                filnavnMetadataString += " $filnavn (${filnavn.length} tegn),"
+                filnavnMultipartString += " ${filnavnMultipart[index]} (${filnavnMultipart[index].length} tegn),"
             }
         }
         return filnavnMetadataString + filnavnMultipartString
@@ -268,17 +277,20 @@ class VedleggOpplastingService(
 
         if (fileType == TikaFileType.UNKNOWN) {
             val content = String(file.bytes)
-            val firstBytes = content.subSequence(0,
-                    when {
-                        content.length > 8 -> 8
-                        content.isNotEmpty() -> content.length
-                        else -> 0
-                    })
+            val firstBytes = content.subSequence(
+                0,
+                when {
+                    content.length > 8 -> 8
+                    content.isNotEmpty() -> content.length
+                    else -> 0
+                }
+            )
 
-            log.warn("Fil validert som TikaFileType.UNKNOWN. Men har " +
+            log.warn(
+                "Fil validert som TikaFileType.UNKNOWN. Men har " +
                     "\r\nextention: \"${splitFileName(file.originalFilename ?: "").extention}\"," +
                     "\r\nvalidatedFileType: ${fileType.name}," +
-                    "\r\ntikaMediaType: ${tikaMediaType}," +
+                    "\r\ntikaMediaType: $tikaMediaType," +
                     "\r\nmime: ${file.contentType}" +
                     ",\r\nførste bytes: $firstBytes"
             )
@@ -293,12 +305,12 @@ class VedleggOpplastingService(
     private fun checkIfPdfIsValid(data: InputStream): ValidationValues {
         try {
             PDDocument.load(data)
-                    .use { document ->
-                        if (document.isEncrypted) {
-                            return ValidationValues.PDF_IS_ENCRYPTED
-                        }
-                        return ValidationValues.OK
+                .use { document ->
+                    if (document.isEncrypted) {
+                        return ValidationValues.PDF_IS_ENCRYPTED
                     }
+                    return ValidationValues.OK
+                }
         } catch (e: InvalidPasswordException) {
             log.warn(ValidationValues.PDF_IS_ENCRYPTED.name + " " + e.message)
             return ValidationValues.PDF_IS_ENCRYPTED
@@ -321,7 +333,6 @@ class VedleggOpplastingService(
         } catch (e: InterruptedException) {
             throw IllegalStateException(e)
         }
-
     }
 
     companion object {
@@ -336,12 +347,12 @@ class VedleggOpplastingService(
 }
 
 class OppgaveValidering(
-        val type: String,
-        val tilleggsinfo: String?,
-        val innsendelsesfrist: LocalDate?,
-        val hendelsetype: JsonVedlegg.HendelseType?,
-        val hendelsereferanse: String?,
-        val filer: MutableList<FilValidering>
+    val type: String,
+    val tilleggsinfo: String?,
+    val innsendelsesfrist: LocalDate?,
+    val hendelsetype: JsonVedlegg.HendelseType?,
+    val hendelsereferanse: String?,
+    val filer: MutableList<FilValidering>
 )
 
 class FilValidering(val filename: String?, val status: ValidationResult)
@@ -358,8 +369,8 @@ enum class ValidationValues {
 }
 
 data class FilForOpplasting(
-        val filnavn: String?,
-        val mimetype: String?,
-        val storrelse: Long,
-        val fil: InputStream
+    val filnavn: String?,
+    val mimetype: String?,
+    val storrelse: Long,
+    val fil: InputStream
 )

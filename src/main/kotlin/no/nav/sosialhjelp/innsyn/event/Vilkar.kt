@@ -22,12 +22,12 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
     }
 
     val vilkar = Vilkar(
-            referanse = hendelse.vilkarreferanse,
-            tittel = hendelse.tittel,
-            beskrivelse = hendelse.beskrivelse,
-            status = Oppgavestatus.valueOf(hendelse.status.value()),
-            datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
-            datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime()
+        referanse = hendelse.vilkarreferanse,
+        tittel = hendelse.tittel,
+        beskrivelse = hendelse.beskrivelse,
+        status = Oppgavestatus.valueOf(hendelse.status.value()),
+        datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
+        datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime()
     )
 
     utbetalinger.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }
@@ -51,8 +51,8 @@ private fun InternalDigisosSoker.fjernFraUtbetalingerSomIkkeLegereErReferertTilI
     for (sak in saker) {
         for (utbetaling in sak.utbetalinger) {
             utbetaling.vilkar.removeAll {
-                it.referanse == hendelse.vilkarreferanse
-                        && !hendelse.utbetalingsreferanse.contains(utbetaling.referanse)
+                it.referanse == hendelse.vilkarreferanse &&
+                    !hendelse.utbetalingsreferanse.contains(utbetaling.referanse)
             }
         }
     }
@@ -61,7 +61,7 @@ private fun InternalDigisosSoker.fjernFraUtbetalingerSomIkkeLegereErReferertTilI
 private fun MutableList<Vilkar>.oppdaterEllerLeggTilVilkar(hendelse: JsonVilkar, vilkar: Vilkar) {
     if (any { it.referanse == hendelse.vilkarreferanse }) {
         filter { it.referanse == hendelse.vilkarreferanse }
-                .forEach { it.oppdaterFelter(hendelse) }
+            .forEach { it.oppdaterFelter(hendelse) }
     } else {
         this.add(vilkar)
     }

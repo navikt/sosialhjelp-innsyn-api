@@ -35,7 +35,7 @@ internal class KommuneServiceTest {
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "some id"
         every { mockDigisosSak.kommunenummer } returns kommuneNr
 
-        every { redisService.get(any(), any())} returns null
+        every { redisService.get(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
         every { redisService.defaultTimeToLiveSeconds } returns 1
 
@@ -70,7 +70,7 @@ internal class KommuneServiceTest {
         verify(exactly = 1) { redisService.get(any(), any()) }
         verify(exactly = 1) { redisService.put(any(), any(), any()) }
 
-        every { redisService.get(any(), any())} returns kommuneInfo
+        every { redisService.get(any(), any()) } returns kommuneInfo
         val secondResult = service.hentKommuneInfo("123", "token")
         assertThat(secondResult).isEqualTo(kommuneInfo)
         verify(exactly = 2) { redisService.get(any(), any()) }

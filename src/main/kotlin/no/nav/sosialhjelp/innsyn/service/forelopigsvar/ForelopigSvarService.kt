@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class ForelopigSvarService(
-        private val fiksClient: FiksClient,
-        private val eventService: EventService
+    private val fiksClient: FiksClient,
+    private val eventService: EventService
 ) {
 
     fun hentForelopigSvar(fiksDigisosId: String, token: String): ForelopigSvarResponse {

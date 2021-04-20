@@ -48,7 +48,7 @@ fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: Jso
 }
 
 fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: String): String {
-    return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/${dokumentlagerId}?inline=true"
+    return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/$dokumentlagerId?inline=true"
 }
 
 fun String.toLocalDateTime(): LocalDateTime {
@@ -141,14 +141,17 @@ val ErrorMessage.feilmeldingUtenFnr: String?
 
 fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()
-    return CompletableFuture.runAsync(Runnable {
-        MDC.setContextMap(previous)
-        try {
-            runnable.run()
-        } finally {
-            MDCUtils.clearMDC()
-        }
-    }, executor)
+    return CompletableFuture.runAsync(
+        Runnable {
+            MDC.setContextMap(previous)
+            try {
+                runnable.run()
+            } finally {
+                MDCUtils.clearMDC()
+            }
+        },
+        executor
+    )
 }
 
 fun getenv(key: String, default: String): String {

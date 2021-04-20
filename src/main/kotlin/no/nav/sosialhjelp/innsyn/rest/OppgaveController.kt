@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class OppgaveController(
-        private val oppgaveService: OppgaveService,
-        private val tilgangskontrollService: TilgangskontrollService
+    private val oppgaveService: OppgaveService,
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = ["application/json;charset=UTF-8"])

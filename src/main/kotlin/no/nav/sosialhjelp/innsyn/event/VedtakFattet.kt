@@ -27,11 +27,11 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     if (sakForReferanse == null) {
         // Opprett ny Sak
         sakForReferanse = Sak(
-                referanse = hendelse.saksreferanse ?: "default",
-                saksStatus = SaksStatus.UNDER_BEHANDLING,
-                tittel = DEFAULT_TITTEL,
-                vedtak = mutableListOf(),
-                utbetalinger = mutableListOf()
+            referanse = hendelse.saksreferanse ?: "default",
+            saksStatus = SaksStatus.UNDER_BEHANDLING,
+            tittel = DEFAULT_TITTEL,
+            vedtak = mutableListOf(),
+            utbetalinger = mutableListOf()
         )
         saker.add(sakForReferanse)
     }

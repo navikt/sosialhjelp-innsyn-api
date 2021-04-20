@@ -14,7 +14,7 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 
-//Denne fører til 403 (HttpStatus.FORBIDDEN) uten logg og feilmelding når den feiler.
+// Denne fører til 403 (HttpStatus.FORBIDDEN) uten logg og feilmelding når den feiler.
 
 @Configuration
 @EnableWebSecurity
@@ -35,21 +35,24 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
         configuration.allowedOrigins = listOf(
-                "https://www.nav.no",
-                "https://www-q0.nav.no",
-                "https://www-q1.nav.no",
-                "https://sosialhjelp-innsyn-gcp.dev.nav.no",
-                "https://sosialhjelp-innsyn.labs.nais.io",
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://localhost:3002",
-                "https://digisos.labs.nais.io",
-                "https://digisos-gcp.dev.nav.no",
-                "https://www.digisos-test.com")
+            "https://www.nav.no",
+            "https://www-q0.nav.no",
+            "https://www-q1.nav.no",
+            "https://sosialhjelp-innsyn-gcp.dev.nav.no",
+            "https://sosialhjelp-innsyn.labs.nais.io",
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:3002",
+            "https://digisos.labs.nais.io",
+            "https://digisos-gcp.dev.nav.no",
+            "https://www.digisos-test.com"
+        )
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
-        configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "X-XSRF-TOKEN", "Authorization",
-                "Nav-Call-Id", "x-request-id", "x-client-trace-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid",
-                "x-b3-sampled", "x-b3-flags")
+        configuration.allowedHeaders = listOf(
+            "Origin", "Content-Type", "Accept", "X-XSRF-TOKEN", "Authorization",
+            "Nav-Call-Id", "x-request-id", "x-client-trace-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid",
+            "x-b3-sampled", "x-b3-flags"
+        )
         configuration.allowCredentials = true
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class TilgangskontrollService(
-        private val pdlClient: PdlClient
+    private val pdlClient: PdlClient
 ) {
 
     fun sjekkTilgang() {
@@ -40,7 +40,7 @@ class TilgangskontrollService(
         }
     }
 
-    private fun fornavn(pdlPerson: PdlPerson?) : String {
+    private fun fornavn(pdlPerson: PdlPerson?): String {
         val fornavn = pdlPerson?.navn?.firstOrNull()?.fornavn?.toLowerCase()?.capitalize() ?: ""
         if (fornavn.isEmpty()) {
             log.warn("PDL har ingen fornavn på brukeren. Dette gir ingen feil hos oss. Kontakt gjerne PDL-teamet, siden datakvaliteten på denne brukeren er dårlig.")
@@ -54,6 +54,6 @@ class TilgangskontrollService(
 }
 
 data class Tilgang(
-        val harTilgang: Boolean,
-        val fornavn: String
+    val harTilgang: Boolean,
+    val fornavn: String
 )

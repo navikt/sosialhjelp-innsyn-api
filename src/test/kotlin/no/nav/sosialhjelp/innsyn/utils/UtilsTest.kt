@@ -72,7 +72,7 @@ internal class UtilsTest {
         val ettersendelse2: Ettersendelse = mockk()
         val ettersendelse3: Ettersendelse = mockk()
 
-        every { ettersendelse.navEksternRefId } returns ettersendelseId1  // 0001
+        every { ettersendelse.navEksternRefId } returns ettersendelseId1 // 0001
         every { ettersendelse2.navEksternRefId } returns ettersendelseId2 // 0009
         every { ettersendelse3.navEksternRefId } returns ettersendelseId3 // 0004
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns listOf(ettersendelse, ettersendelse2, ettersendelse3)
@@ -91,12 +91,12 @@ internal class UtilsTest {
         val res = errorMessage.feilmeldingUtenFnr
 
         assertThat(res)
-                .doesNotContain(fnr)
-                .contains("feilmelding som har fnr [FNR]")
+            .doesNotContain(fnr)
+            .contains("feilmelding som har fnr [FNR]")
 
         assertThat(str.feilmeldingUtenFnr)
-                .doesNotContain(fnr)
-                .contains("feilmelding som har fnr [FNR]")
+            .doesNotContain(fnr)
+            .contains("feilmelding som har fnr [FNR]")
     }
 
     @Test
@@ -132,7 +132,7 @@ internal class UtilsTest {
         val res = errorMessage.feilmeldingUtenFnr
 
         assertThat(res)
-                .doesNotContain(fnr)
-                .contains("feilmelding som har fnr \"[FNR]\"")
+            .doesNotContain(fnr)
+            .contains("feilmelding som har fnr \"[FNR]\"")
     }
 }

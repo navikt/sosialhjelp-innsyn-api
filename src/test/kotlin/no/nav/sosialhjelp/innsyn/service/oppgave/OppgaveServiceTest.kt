@@ -107,11 +107,14 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return list of oppgaver sorted by frist`() {
         val model = InternalDigisosSoker()
-        model.oppgaver.addAll(listOf(
+        model.oppgaver.addAll(
+            listOf(
                 Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
                 Oppgave("oppgaveId2", type3, tillegg3, null, null, frist3, tidspunktForKrav, true),
                 Oppgave("oppgaveId3", type4, tillegg4, null, null, frist4, tidspunktForKrav, true),
-                Oppgave("oppgaveId4", type2, tillegg2, null, null, frist2, tidspunktForKrav, true)))
+                Oppgave("oppgaveId4", type2, tillegg2, null, null, frist2, tidspunktForKrav, true)
+            )
+        )
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -144,17 +147,21 @@ internal class OppgaveServiceTest {
     @Test
     fun `Skal filtrere ut oppgaver der brukeren har lastet opp filer av samme type etter kravet ble gitt`() {
         val model = InternalDigisosSoker()
-        model.oppgaver.addAll(listOf(
+        model.oppgaver.addAll(
+            listOf(
                 Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
                 Oppgave("oppgaveId2", type2, null, null, null, frist2, tidspunktForKrav, true),
-                Oppgave("oppgaveId3", type3, tillegg3, null, null, frist3, tidspunktForKrav, true)))
+                Oppgave("oppgaveId3", type3, tillegg3, null, null, frist3, tidspunktForKrav, true)
+            )
+        )
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
-                InternalVedlegg(type, tillegg, null, null, emptyList(), tidspunktEtterKrav),
-                InternalVedlegg(type2, null, null, null, emptyList(), tidspunktEtterKrav),
-                InternalVedlegg(type3, tillegg3, null, null, emptyList(), tidspunktFoerKrav),
-                InternalVedlegg(type3, null, null, null, emptyList(), tidspunktEtterKrav))
+            InternalVedlegg(type, tillegg, null, null, emptyList(), tidspunktEtterKrav),
+            InternalVedlegg(type2, null, null, null, emptyList(), tidspunktEtterKrav),
+            InternalVedlegg(type3, tillegg3, null, null, emptyList(), tidspunktFoerKrav),
+            InternalVedlegg(type3, null, null, null, emptyList(), tidspunktEtterKrav)
+        )
 
         val responseList = service.hentOppgaver("123", token)
 
@@ -172,11 +179,13 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         val tittel = "VILKAR1"
         val beskrivelse = "mer vilkarer2"
-        model.vilkar.addAll(listOf(
-                Vilkar("vilkar1", tittel, "mer vilkarer1", Oppgavestatus.RELEVANT,  LocalDateTime.now(), LocalDateTime.now()),
+        model.vilkar.addAll(
+            listOf(
+                Vilkar("vilkar1", tittel, "mer vilkarer1", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
                 Vilkar("vilkar2", null, beskrivelse, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
                 Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now())
-                ))
+            )
+        )
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getVilkar("123", token)
@@ -195,10 +204,12 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should not return Vilkar with status ANNULLERT`() {
         val model = InternalDigisosSoker()
-        model.vilkar.addAll(listOf(
+        model.vilkar.addAll(
+            listOf(
                 Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar2", "tittel",null, Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now()),
-        ))
+                Vilkar("vilkar2", "tittel", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
+            )
+        )
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getVilkar("123", token)
@@ -212,11 +223,13 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should not return Dokumentasjonkrav with status ANNULERT or LEVERT_TIDLIGERE`() {
         val model = InternalDigisosSoker()
-        model.dokumentasjonkrav.addAll(listOf(
+        model.dokumentasjonkrav.addAll(
+            listOf(
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT, LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE,LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDate.now())
-        ))
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
+            )
+        )
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getDokumentasjonkrav("123", token)
@@ -230,12 +243,14 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return dokumentasjonkrav with tittel and filter out empty dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
-        model.dokumentasjonkrav.addAll(listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDate.now())
-        ))
+        model.dokumentasjonkrav.addAll(
+            listOf(
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
+            )
+        )
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getDokumentasjonkrav("123", token)
@@ -252,11 +267,13 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for Dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
-        model.dokumentasjonkrav.addAll(listOf(
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT,LocalDateTime.now(), LocalDate.now()),
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.IKKE_OPPFYLT,LocalDateTime.now(), LocalDate.now()),
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, "beskrivelse", Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDate.now())
-        ))
+        model.dokumentasjonkrav.addAll(
+            listOf(
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.IKKE_OPPFYLT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, "beskrivelse", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
+            )
+        )
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getDokumentasjonkrav("123", token)
@@ -272,12 +289,14 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for Vilkar`() {
         val model = InternalDigisosSoker()
-        model.vilkar.addAll(listOf(
-            Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, LocalDateTime.now(), LocalDateTime.now()),
-            Vilkar("vilkar2", "tittel",null, Oppgavestatus.IKKE_OPPFYLT,LocalDateTime.now(), LocalDateTime.now()),
-            Vilkar("vilkar3", "tittel",null, Oppgavestatus.RELEVANT,LocalDateTime.now(), LocalDateTime.now()),
+        model.vilkar.addAll(
+            listOf(
+                Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", "tittel", null, Oppgavestatus.IKKE_OPPFYLT, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar3", "tittel", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
 
-            ))
+            )
+        )
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getVilkar("123", token)
@@ -294,12 +313,14 @@ internal class OppgaveServiceTest {
     fun `Should sort Dokumentasjonkrav by date and group by date`() {
         val model = InternalDigisosSoker()
 
-        model.dokumentasjonkrav.addAll(listOf(
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist.toLocalDate()),
-            Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist3.toLocalDate()),
-        ))
+        model.dokumentasjonkrav.addAll(
+            listOf(
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist.toLocalDate()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist3.toLocalDate()),
+            )
+        )
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getDokumentasjonkrav("123", token)
@@ -323,13 +344,14 @@ internal class OppgaveServiceTest {
     fun `Should group Dokumentasjonkrav without frist together`() {
         val model = InternalDigisosSoker()
 
-
-        model.dokumentasjonkrav.addAll(listOf(
+        model.dokumentasjonkrav.addAll(
+            listOf(
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist.toLocalDate()),
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), null),
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
                 Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), null),
-        ))
+            )
+        )
         every { eventService.createModel(any(), any()) } returns model
 
         val responseList = service.getDokumentasjonkrav("123", token)

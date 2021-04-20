@@ -19,24 +19,23 @@ class InfoController {
     @PostMapping("/logg")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun postKlientlogg(@RequestBody logg: Logg) {
-         when (logg.level) {
+        when (logg.level) {
             "INFO" -> klientlogger.info(logg.melding())
             "WARN" -> klientlogger.warn(logg.melding())
             "ERROR" -> klientlogger.error(logg.melding())
             else -> klientlogger.debug(logg.melding())
         }
     }
-
 }
 
 data class Logg(
-        val level: String,
-        val message: String,
-        val jsFileUrl: String,
-        val lineNumber: String,
-        val columnNumber: String,
-        val url: String,
-        val userAgent: String
+    val level: String,
+    val message: String,
+    val jsFileUrl: String,
+    val lineNumber: String,
+    val columnNumber: String,
+    val url: String,
+    val userAgent: String
 )
 
 fun Logg.melding(): String {

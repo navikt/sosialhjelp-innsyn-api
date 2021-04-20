@@ -12,8 +12,10 @@ class NorgClientMock : NorgClient {
     private val innsynMap = mutableMapOf<String, NavEnhet>()
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
-        return innsynMap.getOrElse(enhetsnr, {
-            val default = NavEnhet(
+        return innsynMap.getOrElse(
+            enhetsnr,
+            {
+                val default = NavEnhet(
                     enhetId = 100000367,
                     navn = "NAV Longyearbyen",
                     enhetNr = enhetsnr,
@@ -21,10 +23,11 @@ class NorgClientMock : NorgClient {
                     status = "AKTIV",
                     aktiveringsdato = "1982-04-21",
                     nedleggelsesdato = "null"
-            )
-            innsynMap[enhetsnr] = default
-            default
-        })
+                )
+                innsynMap[enhetsnr] = default
+                default
+            }
+        )
     }
 
     override fun ping() {

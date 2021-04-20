@@ -31,14 +31,14 @@ class MDCFilter : OncePerRequestFilter() {
 
     private fun addCallId(request: HttpServletRequest) {
         Optional.ofNullable(request.getHeader(HEADER_CALL_ID))
-                .ifPresentOrElse(
-                        { put(CALL_ID, it) },
-                        { put(CALL_ID, generateCallId()) }
-                )
+            .ifPresentOrElse(
+                { put(CALL_ID, it) },
+                { put(CALL_ID, generateCallId()) }
+            )
     }
 
     private fun addDigisosId(request: HttpServletRequest) {
-        if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)|orginalJsonSoknad|orginalSoknadPdlLink|saksStatus|soknadsStatus|vedlegg)"))) {
+        if (request.requestURI.matches(Regex("^$INNSYN_BASE_URL(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)|orginalJsonSoknad|orginalSoknadPdlLink|saksStatus|soknadsStatus|vedlegg)"))) {
             val digisosId = request.requestURI.substringAfter(INNSYN_BASE_URL).substringBefore("/")
             put(DIGISOS_ID, digisosId)
         } else if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}saksDetaljer")) && request.parameterMap.containsKey("id")) {

@@ -265,8 +265,10 @@ internal class FiksClientTest {
         every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
         every { krypteringService.krypter(any(), any(), any()) } returns fil1
 
-        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-            FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))
+        val files = listOf(
+            FilForOpplasting("filnavn0", "image/png", 1L, fil1),
+            FilForOpplasting("filnavn1", "image/jpg", 1L, fil2)
+        )
 
         every {
             webClient.get()
@@ -291,10 +293,12 @@ internal class FiksClientTest {
         } returns ResponseEntity<String>(HttpStatus.ACCEPTED)
 
         assertThatCode {
-            clientForPost.lastOppNyEttersendelse(files,
+            clientForPost.lastOppNyEttersendelse(
+                files,
                 JsonVedleggSpesifikasjon(),
                 id,
-                "token")
+                "token"
+            )
         }.doesNotThrowAnyException()
     }
 
@@ -305,8 +309,10 @@ internal class FiksClientTest {
         every { fil1.readAllBytes() } returns "test-fil".toByteArray()
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
-        val files = listOf(FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-            FilForOpplasting("filnavn1", "image/jpg", 1L, fil2))
+        val files = listOf(
+            FilForOpplasting("filnavn0", "image/png", 1L, fil1),
+            FilForOpplasting("filnavn1", "image/jpg", 1L, fil2)
+        )
         val body = fiksClient.createBodyForUpload(JsonVedleggSpesifikasjon(), files)
 
         assertThat(body.size == 5)

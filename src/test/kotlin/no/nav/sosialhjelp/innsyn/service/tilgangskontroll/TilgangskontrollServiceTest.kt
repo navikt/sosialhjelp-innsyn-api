@@ -31,7 +31,7 @@ internal class TilgangskontrollServiceTest {
         every { pdlClientMock.hentPerson(any()) } returns null
 
         assertThatCode { service.sjekkTilgang(ident) }
-                .doesNotThrowAnyException()
+            .doesNotThrowAnyException()
     }
 
     @Test
@@ -40,7 +40,7 @@ internal class TilgangskontrollServiceTest {
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
         assertThatCode { service.sjekkTilgang(ident) }
-                .doesNotThrowAnyException()
+            .doesNotThrowAnyException()
     }
 
     @Test
@@ -49,7 +49,7 @@ internal class TilgangskontrollServiceTest {
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
         assertThatCode { service.sjekkTilgang(ident) }
-                .doesNotThrowAnyException()
+            .doesNotThrowAnyException()
     }
 
     @Test
@@ -58,7 +58,7 @@ internal class TilgangskontrollServiceTest {
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
         assertThatExceptionOfType(TilgangskontrollException::class.java)
-                .isThrownBy { service.sjekkTilgang(ident) }
+            .isThrownBy { service.sjekkTilgang(ident) }
     }
 
     @Test
@@ -67,7 +67,7 @@ internal class TilgangskontrollServiceTest {
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
         assertThatExceptionOfType(TilgangskontrollException::class.java)
-                .isThrownBy { service.sjekkTilgang(ident) }
+            .isThrownBy { service.sjekkTilgang(ident) }
     }
 
     @Test
@@ -76,7 +76,7 @@ internal class TilgangskontrollServiceTest {
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
         assertThatExceptionOfType(TilgangskontrollException::class.java)
-                .isThrownBy { service.sjekkTilgang(ident) }
+            .isThrownBy { service.sjekkTilgang(ident) }
     }
 
     /** HentTilgang **/

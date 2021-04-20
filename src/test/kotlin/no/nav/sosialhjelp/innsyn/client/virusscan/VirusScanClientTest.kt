@@ -39,7 +39,7 @@ internal class VirusScanClientTest {
     @Test
     fun scanFile_filenameIsVirustest_isInfected() {
         assertThatExceptionOfType(VirusScanException::class.java)
-            .isThrownBy{ virusScanClient.scan("virustest", data) }
+            .isThrownBy { virusScanClient.scan("virustest", data) }
     }
 
     @Test
@@ -48,9 +48,11 @@ internal class VirusScanClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(
-                    listOf(ScanResult("test", Result.FOUND), ScanResult("test", Result.FOUND))
-                ))
+                .setBody(
+                    objectMapper.writeValueAsString(
+                        listOf(ScanResult("test", Result.FOUND), ScanResult("test", Result.FOUND))
+                    )
+                )
         )
 
         assertThatCode { virusScanClient.scan(filnavn, data) }
@@ -63,9 +65,11 @@ internal class VirusScanClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(
-                    listOf(ScanResult("test", Result.OK))
-                ))
+                .setBody(
+                    objectMapper.writeValueAsString(
+                        listOf(ScanResult("test", Result.OK))
+                    )
+                )
         )
         assertThatCode { virusScanClient.scan(filnavn, data) }
             .doesNotThrowAnyException()
@@ -77,11 +81,13 @@ internal class VirusScanClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(
-                    listOf(ScanResult("test", Result.FOUND))
-                ))
+                .setBody(
+                    objectMapper.writeValueAsString(
+                        listOf(ScanResult("test", Result.FOUND))
+                    )
+                )
         )
         assertThatExceptionOfType(VirusScanException::class.java)
-            .isThrownBy{ virusScanClient.scan(filnavn, data) }
+            .isThrownBy { virusScanClient.scan(filnavn, data) }
     }
 }

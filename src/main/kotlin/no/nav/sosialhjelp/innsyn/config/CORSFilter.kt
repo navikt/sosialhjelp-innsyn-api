@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.config
 
-
 import no.nav.sosialhjelp.innsyn.utils.isRunningInProd
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -47,7 +46,8 @@ class CORSFilter : Filter {
 
     companion object {
         private val ALLOWED_ORIGINS = listOf(
-                "https://tjenester.nav.no",
-                "https://www.nav.no")
+            "https://tjenester.nav.no",
+            "https://www.nav.no"
+        )
     }
 }

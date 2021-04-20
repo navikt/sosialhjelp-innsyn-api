@@ -4,7 +4,11 @@ import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV_ENABLED
-import no.nav.sosialhjelp.innsyn.domain.*
+import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
+import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
+import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.toLocalDate
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
@@ -38,13 +42,13 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
     }
 
     val dokumentasjonkrav = Dokumentasjonkrav(
-            hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-            referanse = hendelse.dokumentasjonkravreferanse,
-            tittel = hendelse.tittel,
-            beskrivelse = hendelse.beskrivelse,
-            status = Oppgavestatus.valueOf(hendelse.status.value()),
-            datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
-            frist = hendelse.frist?.toLocalDate()
+        hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+        referanse = hendelse.dokumentasjonkravreferanse,
+        tittel = hendelse.tittel,
+        beskrivelse = hendelse.beskrivelse,
+        status = Oppgavestatus.valueOf(hendelse.status.value()),
+        datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
+        frist = hendelse.frist?.toLocalDate()
     )
 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
@@ -59,7 +63,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
 private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(hendelse: JsonDokumentasjonkrav, dokumentasjonkrav: Dokumentasjonkrav) {
     if (any { it.referanse == hendelse.dokumentasjonkravreferanse }) {
         filter { it.referanse == hendelse.dokumentasjonkravreferanse }
-                .forEach { it.oppdaterFelter(hendelse) }
+            .forEach { it.oppdaterFelter(hendelse) }
     } else {
         this.add(dokumentasjonkrav)
     }

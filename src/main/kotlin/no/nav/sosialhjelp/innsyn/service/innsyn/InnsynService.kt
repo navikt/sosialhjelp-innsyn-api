@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class InnsynService(
-        private val fiksClient: FiksClient,
-        private val kommuneService: KommuneService
+    private val fiksClient: FiksClient,
+    private val kommuneService: KommuneService
 ) {
 
     fun hentJsonDigisosSoker(digisosId: String, digisosSokerMetadata: String?, token: String): JsonDigisosSoker? {

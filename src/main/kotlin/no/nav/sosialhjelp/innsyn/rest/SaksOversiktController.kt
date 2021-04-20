@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class SaksOversiktController(
-        private val fiksClient: FiksClient,
-        private val eventService: EventService,
-        private val oppgaveService: OppgaveService,
-        private val tilgangskontrollService: TilgangskontrollService
+    private val fiksClient: FiksClient,
+    private val eventService: EventService,
+    private val oppgaveService: OppgaveService,
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/saker")
@@ -44,14 +44,14 @@ class SaksOversiktController(
         }
 
         val responselist = saker
-                .map {
-                    SaksListeResponse(
-                            it.fiksDigisosId,
-                            "Søknad om økonomisk sosialhjelp",
-                            unixTimestampToDate(it.sistEndret),
-                            IntegrationUtils.KILDE_INNSYN_API
-                    )
-                }
+            .map {
+                SaksListeResponse(
+                    it.fiksDigisosId,
+                    "Søknad om økonomisk sosialhjelp",
+                    unixTimestampToDate(it.sistEndret),
+                    IntegrationUtils.KILDE_INNSYN_API
+                )
+            }
         log.info("Hentet alle (${responselist.size}) DigisosSaker for bruker.")
 
         return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
@@ -67,10 +67,10 @@ class SaksOversiktController(
         val sak = fiksClient.hentDigisosSak(id, token, true)
         val model = eventService.createSaksoversiktModel(sak, token)
         val saksDetaljerResponse = SaksDetaljerResponse(
-                sak.fiksDigisosId,
-                hentNavn(model),
-                model.status?.let { mapStatus(it) } ?: "",
-                hentAntallNyeOppgaver(model, sak.fiksDigisosId, token)
+            sak.fiksDigisosId,
+            hentNavn(model),
+            model.status?.let { mapStatus(it) } ?: "",
+            hentAntallNyeOppgaver(model, sak.fiksDigisosId, token)
         )
         return ResponseEntity.ok().body(saksDetaljerResponse)
     }

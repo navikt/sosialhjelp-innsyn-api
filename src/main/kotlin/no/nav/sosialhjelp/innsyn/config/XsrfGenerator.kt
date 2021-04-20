@@ -25,7 +25,6 @@ object XsrfGenerator {
         } catch (e: NoSuchAlgorithmException) {
             throw IllegalArgumentException("Kunne ikke generere token: ", e)
         }
-
     }
 
     fun sjekkXsrfToken(fiksDigisosId: String, request: HttpServletRequest) {
@@ -40,7 +39,6 @@ object XsrfGenerator {
         if (givenTokenOptional.isPresent) {
             givenToken = givenTokenOptional.get().value
         }
-
 
         val token = generateXsrfToken(fiksDigisosId, idportenIdtoken)
         val valid = token == givenToken || generateXsrfToken(fiksDigisosId, DateTime().minusDays(1).toString("yyyyMMdd")) == givenToken

@@ -23,7 +23,7 @@ import java.util.UUID
 @Profile("mock")
 @Component
 class DigisosApiClientMock(
-        private val fiksClientMock: FiksClientMock
+    private val fiksClientMock: FiksClientMock
 ) : DigisosApiClient {
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
@@ -35,22 +35,26 @@ class DigisosApiClientMock(
         }
 
         if (!fiksClientMock.digisosSakFinnes(id)) {
-            fiksClientMock.postDigisosSak(DigisosSak(
+            fiksClientMock.postDigisosSak(
+                DigisosSak(
                     fiksDigisosId = id,
                     sokerFnr = "01234567890",
                     fiksOrgId = "11415cd1-e26d-499a-8421-751457dfcbd5",
                     kommunenummer = "1",
                     sistEndret = System.currentTimeMillis(),
                     originalSoknadNAV = OriginalSoknadNAV(
-                            navEksternRefId = "110000000",
-                            metadata = "",
-                            vedleggMetadata = "mock-soknad-vedlegg-metadata",
-                            soknadDokument = DokumentInfo("", "", 0L),
-                            vedlegg = Collections.emptyList(),
-                            timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)),
+                        navEksternRefId = "110000000",
+                        metadata = "",
+                        vedleggMetadata = "mock-soknad-vedlegg-metadata",
+                        soknadDokument = DokumentInfo("", "", 0L),
+                        vedlegg = Collections.emptyList(),
+                        timestampSendt = femMinutterForMottattSoknad(digisosApiWrapper)
+                    ),
                     ettersendtInfoNAV = EttersendtInfoNAV(Collections.emptyList()),
                     digisosSoker = null,
-                    tilleggsinformasjon = null))
+                    tilleggsinformasjon = null
+                )
+            )
         } else {
             oppdaterOriginalSoknadNavHvisTimestampSendtIkkeErFoerTidligsteHendelse(id, digisosApiWrapper)
         }

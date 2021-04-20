@@ -96,31 +96,31 @@ class DigisosApiClientImpl(
 
     override fun hentInnsynsfil(fiksDigisosId: String): String? {
         val soknad = fiksWebClient.get()
-                .uri("/digisos/api/v1/soknader/$fiksDigisosId")
-                .retrieve()
-                .bodyToMono(DigisosSak::class.java)
-                .onErrorMap(WebClientResponseException::class.java) { e ->
-                    log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
-                    when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                        else -> FiksServerException(e.rawStatusCode, e.message, e)
-                    }
+            .uri("/digisos/api/v1/soknader/$fiksDigisosId")
+            .retrieve()
+            .bodyToMono(DigisosSak::class.java)
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
+                when {
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                    else -> FiksServerException(e.rawStatusCode, e.message, e)
                 }
-                .block()
-                ?: return null
+            }
+            .block()
+            ?: return null
         val innsynsfil = fiksWebClient.get()
-                .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
-                .retrieve()
-                .bodyToMono(String::class.java)
-                .onErrorMap(WebClientResponseException::class.java) { e ->
-                    log.warn("Fiks - Nedlasting av innsynsfil feilet - ${e.statusCode} ${e.statusText}", e)
-                    when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                        else -> FiksServerException(e.rawStatusCode, e.message, e)
-                    }
+            .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
+            .retrieve()
+            .bodyToMono(String::class.java)
+            .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.warn("Fiks - Nedlasting av innsynsfil feilet - ${e.statusCode} ${e.statusText}", e)
+                when {
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                    else -> FiksServerException(e.rawStatusCode, e.message, e)
                 }
-                .block()
-                ?: return null
+            }
+            .block()
+            ?: return null
         return innsynsfil
     }
 

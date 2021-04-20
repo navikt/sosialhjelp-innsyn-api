@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class OrginalSoknadController(
-        private val orginalSoknadService: OrginalSoknadService,
-        private val tilgangskontrollService: TilgangskontrollService
+    private val orginalSoknadService: OrginalSoknadService,
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/{fiksDigisosId}/orginalJsonSoknad")
@@ -27,7 +27,7 @@ class OrginalSoknadController(
         tilgangskontrollService.sjekkTilgang()
 
         val orginalSoknadResponse: OrginalJsonSoknadResponse = orginalSoknadService.hentOrginalJsonSoknad(fiksDigisosId, token)
-                ?: return ResponseEntity(HttpStatus.NO_CONTENT)
+            ?: return ResponseEntity(HttpStatus.NO_CONTENT)
 
         return ResponseEntity.ok().body(orginalSoknadResponse)
     }
@@ -36,8 +36,10 @@ class OrginalSoknadController(
     fun getOrginalSoknadPdfLink(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalSoknadPdfLinkResponse> {
         tilgangskontrollService.sjekkTilgang()
 
-        val orginalSoknadPdfLink = (orginalSoknadService.hentOrginalSoknadPdfLink(fiksDigisosId, token)
-                ?: return ResponseEntity(HttpStatus.NO_CONTENT))
+        val orginalSoknadPdfLink = (
+            orginalSoknadService.hentOrginalSoknadPdfLink(fiksDigisosId, token)
+                ?: return ResponseEntity(HttpStatus.NO_CONTENT)
+            )
 
         return ResponseEntity.ok().body(orginalSoknadPdfLink)
     }

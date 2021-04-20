@@ -18,8 +18,8 @@ import java.util.Date
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class KommuneController(
-        private val kommuneService: KommuneService,
-        private val tilgangskontrollService: TilgangskontrollService
+    private val kommuneService: KommuneService,
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/{fiksDigisosId}/kommune")
@@ -29,12 +29,14 @@ class KommuneController(
         val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
 
         return ResponseEntity.ok().body(
-                KommuneResponse(
-                        erInnsynDeaktivert = kommuneInfo == null || !kommuneInfo.kanOppdatereStatus,
-                        erInnsynMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertOppdateringer,
-                        erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
-                        erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak,
-                        tidspunkt = Date(),
-                        kommunenummer = kommuneInfo?.kommunenummer))
+            KommuneResponse(
+                erInnsynDeaktivert = kommuneInfo == null || !kommuneInfo.kanOppdatereStatus,
+                erInnsynMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertOppdateringer,
+                erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
+                erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak,
+                tidspunkt = Date(),
+                kommunenummer = kommuneInfo?.kommunenummer
+            )
+        )
     }
 }

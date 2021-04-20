@@ -12,13 +12,12 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
-
 @Component
 class SoknadsStatusService(
-        private val eventService: EventService,
-        private val fiksClient: FiksClient,
-        private val kommuneService: KommuneService,
-        private val clientProperties: ClientProperties,
+    private val eventService: EventService,
+    private val fiksClient: FiksClient,
+    private val kommuneService: KommuneService,
+    private val clientProperties: ClientProperties,
 ) {
 
     fun hentSoknadsStatus(fiksDigisosId: String, token: String): UtvidetSoknadsStatus {
@@ -33,18 +32,18 @@ class SoknadsStatusService(
         val erInnsynDeaktivertForKommune = kommuneService.erInnsynDeaktivertForKommune(fiksDigisosId, token)
         val dokumentlagerId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
         return UtvidetSoknadsStatus(
-                status = status,
-                tidspunktSendt = model.tidspunktSendt,
-                navKontor = if (erInnsynDeaktivertForKommune) model.soknadsmottaker?.navEnhetsnavn else null,
-                soknadUrl = if (erInnsynDeaktivertForKommune && dokumentlagerId != null) UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, dokumentlagerId)) else null
+            status = status,
+            tidspunktSendt = model.tidspunktSendt,
+            navKontor = if (erInnsynDeaktivertForKommune) model.soknadsmottaker?.navEnhetsnavn else null,
+            soknadUrl = if (erInnsynDeaktivertForKommune && dokumentlagerId != null) UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, dokumentlagerId)) else null
         )
     }
 
     data class UtvidetSoknadsStatus(
-            val status: SoknadsStatus,
-            val tidspunktSendt: LocalDateTime?,
-            val navKontor: String?,
-            val soknadUrl: UrlResponse?
+        val status: SoknadsStatus,
+        val tidspunktSendt: LocalDateTime?,
+        val navKontor: String?,
+        val soknadUrl: UrlResponse?
     )
 
     companion object {

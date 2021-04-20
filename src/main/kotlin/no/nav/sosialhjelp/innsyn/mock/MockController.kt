@@ -14,15 +14,14 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-
 @Profile("mock")
 @Unprotected
 @RestController
 @RequestMapping("/api/v1/mock")
 class MockController(
-        private val norgClient: NorgClientMock,
-        private val fiksClientMock: FiksClientMock,
-        private val innsynService: InnsynService
+    private val norgClient: NorgClientMock,
+    private val fiksClientMock: FiksClientMock,
+    private val innsynService: InnsynService
 ) {
 
     @PostMapping("/nyNavEnhet", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
@@ -51,7 +50,7 @@ class MockController(
     }
 }
 
-data class NyNavEnhet (
-        val id: Int,
-        val name: String
+data class NyNavEnhet(
+    val id: Int,
+    val name: String
 )

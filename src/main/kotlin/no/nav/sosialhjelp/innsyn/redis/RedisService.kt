@@ -21,8 +21,8 @@ interface RedisService {
 @Profile("!no-redis")
 @Component
 class RedisServiceImpl(
-        private val redisStore: RedisStore,
-        cacheProperties: CacheProperties
+    private val redisStore: RedisStore,
+    cacheProperties: CacheProperties
 ) : RedisService {
 
     override val defaultTimeToLiveSeconds = cacheProperties.timeToLiveSeconds

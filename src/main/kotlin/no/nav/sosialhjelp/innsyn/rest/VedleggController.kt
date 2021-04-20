@@ -38,19 +38,19 @@ const val LENGTH_OF_UUID_PART = 9
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class VedleggController(
-        private val vedleggOpplastingService: VedleggOpplastingService,
-        private val vedleggService: VedleggService,
-        private val clientProperties: ClientProperties,
-        private val tilgangskontrollService: TilgangskontrollService
+    private val vedleggOpplastingService: VedleggOpplastingService,
+    private val vedleggService: VedleggService,
+    private val clientProperties: ClientProperties,
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(
-            @PathVariable fiksDigisosId: String,
-            @RequestParam("files") files: MutableList<MultipartFile>,
-            @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-            request: HttpServletRequest
+        @PathVariable fiksDigisosId: String,
+        @RequestParam("files") files: MutableList<MultipartFile>,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+        request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
         log.info("Forsøker å starter ettersendelse")
         tilgangskontrollService.sjekkTilgang()
@@ -73,31 +73,32 @@ class VedleggController(
         }
         // mapper til en flat liste av VedleggResponse
         val vedleggResponses = internalVedleggList
-                .flatMap {
-                    it.dokumentInfoList.map { dokumentInfo ->
-                        VedleggResponse(
-                                removeUUIDFromFilename(dokumentInfo.filnavn),
-                                dokumentInfo.storrelse,
-                                hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
-                                it.type,
-                                it.tilleggsinfo,
-                                it.tidspunktLastetOpp)
-                    }
+            .flatMap {
+                it.dokumentInfoList.map { dokumentInfo ->
+                    VedleggResponse(
+                        removeUUIDFromFilename(dokumentInfo.filnavn),
+                        dokumentInfo.storrelse,
+                        hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
+                        it.type,
+                        it.tilleggsinfo,
+                        it.tidspunktLastetOpp
+                    )
                 }
+            }
         return ResponseEntity.ok(vedleggResponses.distinct())
     }
 
     private fun mapToResponse(oppgaveValideringList: List<OppgaveValidering>) =
-            oppgaveValideringList.map {
-                OppgaveOpplastingResponse(
-                        it.type,
-                        it.tilleggsinfo,
-                        it.innsendelsesfrist,
-                        it.hendelsetype,
-                        it.hendelsereferanse,
-                        it.filer.map { VedleggOpplastingResponse(it.filename, it.status.result.name) }
-                )
-            }
+        oppgaveValideringList.map {
+            OppgaveOpplastingResponse(
+                it.type,
+                it.tilleggsinfo,
+                it.innsendelsesfrist,
+                it.hendelsetype,
+                it.hendelsereferanse,
+                it.filer.map { VedleggOpplastingResponse(it.filename, it.status.result.name) }
+            )
+        }
 
     private fun validateFileListNotEmpty(files: MutableList<MultipartFile>) {
         if (files.isEmpty()) {
@@ -107,7 +108,7 @@ class VedleggController(
 
     private fun getMetadataAndRemoveFromFileList(files: MutableList<MultipartFile>): MutableList<OpplastetVedleggMetadata> {
         val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
-                ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.size}")
+            ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.size}")
         files.removeIf { it.originalFilename == "metadata.json" }
         return objectMapper.readValue(metadataJson.bytes)
     }
@@ -129,15 +130,15 @@ class VedleggController(
 }
 
 data class OpplastetVedleggMetadata(
-        val type: String,
-        val tilleggsinfo: String?,
-        val hendelsetype: JsonVedlegg.HendelseType?,
-        val hendelsereferanse: String?,
-        val filer: MutableList<OpplastetFil>,
-        @JsonFormat(pattern = "yyyy-MM-dd")
-        val innsendelsesfrist: LocalDate?
+    val type: String,
+    val tilleggsinfo: String?,
+    val hendelsetype: JsonVedlegg.HendelseType?,
+    val hendelsereferanse: String?,
+    val filer: MutableList<OpplastetFil>,
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    val innsendelsesfrist: LocalDate?
 )
 
 data class OpplastetFil(
-        var filnavn: String
+    var filnavn: String
 )

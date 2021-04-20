@@ -34,7 +34,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
 
-
 @Profile("!mock")
 @Component
 class FiksClientImpl(

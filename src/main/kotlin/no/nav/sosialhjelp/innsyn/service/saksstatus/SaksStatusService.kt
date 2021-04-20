@@ -14,8 +14,8 @@ const val DEFAULT_TITTEL: String = "Økonomisk sosialhjelp"
 
 @Component
 class SaksStatusService(
-        private val eventService: EventService,
-        private val fiksClient: FiksClient
+    private val eventService: EventService,
+    private val fiksClient: FiksClient
 ) {
 
     fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {

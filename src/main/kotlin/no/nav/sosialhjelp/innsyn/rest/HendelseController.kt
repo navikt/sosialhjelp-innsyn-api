@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class HendelseController(
-        private val hendelseService: HendelseService,
-        private val tilgangskontrollService: TilgangskontrollService
+    private val hendelseService: HendelseService,
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])

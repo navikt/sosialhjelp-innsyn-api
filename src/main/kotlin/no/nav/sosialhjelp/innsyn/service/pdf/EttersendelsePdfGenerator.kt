@@ -11,7 +11,7 @@ class EttersendelsePdfGenerator {
 
     fun generate(metadata: MutableList<OpplastetVedleggMetadata>, fodselsnummer: String): ByteArray {
         return try {
-             PDDocument().use { document ->
+            PDDocument().use { document ->
                 val pdf = PdfGenerator(document)
 
                 pdf.addCenteredH1Bold("Ettersendelse av vedlegg")
@@ -26,7 +26,7 @@ class EttersendelsePdfGenerator {
 
                 pdf.addText("Følgende vedlegg er sendt " + formatLocalDateTime(LocalDateTime.now()))
 
-                 metadata.forEach { vedlegg ->
+                metadata.forEach { vedlegg ->
                     pdf.addBlankLine()
                     pdf.addText("Type: " + vedlegg.type)
                     vedlegg.filer.forEach { fil ->

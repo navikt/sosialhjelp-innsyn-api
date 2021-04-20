@@ -15,7 +15,6 @@ import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
-
 interface DokumentlagerClient {
     fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate
 }

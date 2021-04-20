@@ -18,7 +18,7 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 
 @Component
 class VedleggService(
-        private val fiksClient: FiksClient
+    private val fiksClient: FiksClient
 ) {
 
     fun hentAlleOpplastedeVedlegg(fiksDigisosId: String, token: String): List<InternalVedlegg> {
@@ -41,56 +41,57 @@ class VedleggService(
         }
 
         return jsonVedleggSpesifikasjon.vedlegg
-                .filter { vedlegg -> vedlegg.status == status }
-                .map { vedlegg ->
-                    InternalVedlegg(
-                            vedlegg.type,
-                            vedlegg.tilleggsinfo,
-                            vedlegg.hendelseType,
-                            vedlegg.hendelseReferanse,
-                            matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer),
-                            unixToLocalDateTime(originalSoknadNAV.timestampSendt)
-                    )
-                }
+            .filter { vedlegg -> vedlegg.status == status }
+            .map { vedlegg ->
+                InternalVedlegg(
+                    vedlegg.type,
+                    vedlegg.tilleggsinfo,
+                    vedlegg.hendelseType,
+                    vedlegg.hendelseReferanse,
+                    matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer),
+                    unixToLocalDateTime(originalSoknadNAV.timestampSendt)
+                )
+            }
     }
 
     fun hentEttersendteVedlegg(fiksDigisosId: String, ettersendtInfoNAV: EttersendtInfoNAV?, token: String): List<InternalVedlegg> {
         return ettersendtInfoNAV
-                ?.ettersendelser
-                ?.flatMap { ettersendelse ->
-                    var filIndex = 0
-                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)
-                    jsonVedleggSpesifikasjon.vedlegg
-                            .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
-                            .map { vedlegg ->
-                                val currentFilIndex = filIndex
-                                filIndex += vedlegg.filer.size
-                                val filtrerteEttersendelsesVedlegg = ettersendelse.vedlegg
-                                        .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
-                                val dokumentInfoList:List<DokumentInfo>
-                                if(filIndex > filtrerteEttersendelsesVedlegg.size) {
-                                    log.error(
-                                            "Det er mismatch mellom nedlastede filer og metadata. " +
-                                                    "Det er flere filer enn vi har Metadata! " +
-                                                    "Filer: $filIndex Metadata: ${filtrerteEttersendelsesVedlegg.size}")
-                                    dokumentInfoList = vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }
-                                } else {
-                                    dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)
+            ?.ettersendelser
+            ?.flatMap { ettersendelse ->
+                var filIndex = 0
+                val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(fiksDigisosId, ettersendelse.vedleggMetadata, token)
+                jsonVedleggSpesifikasjon.vedlegg
+                    .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                    .map { vedlegg ->
+                        val currentFilIndex = filIndex
+                        filIndex += vedlegg.filer.size
+                        val filtrerteEttersendelsesVedlegg = ettersendelse.vedlegg
+                            .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
+                        val dokumentInfoList: List<DokumentInfo>
+                        if (filIndex > filtrerteEttersendelsesVedlegg.size) {
+                            log.error(
+                                "Det er mismatch mellom nedlastede filer og metadata. " +
+                                    "Det er flere filer enn vi har Metadata! " +
+                                    "Filer: $filIndex Metadata: ${filtrerteEttersendelsesVedlegg.size}"
+                            )
+                            dokumentInfoList = vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }
+                        } else {
+                            dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex)
 
-                                    if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                        throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
-                                    }
-                                }
-                                InternalVedlegg(
-                                        vedlegg.type,
-                                        vedlegg.tilleggsinfo,
-                                        vedlegg.hendelseType,
-                                        vedlegg.hendelseReferanse,
-                                        dokumentInfoList,
-                                        unixToLocalDateTime(ettersendelse.timestampSendt)
-                                )
+                            if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
+                                throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
                             }
-                } ?: emptyList()
+                        }
+                        InternalVedlegg(
+                            vedlegg.type,
+                            vedlegg.tilleggsinfo,
+                            vedlegg.hendelseType,
+                            vedlegg.hendelseReferanse,
+                            dokumentInfoList,
+                            unixToLocalDateTime(ettersendelse.timestampSendt)
+                        )
+                    }
+            } ?: emptyList()
     }
 
     private fun hentVedleggSpesifikasjon(fiksDigisosId: String, dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {
@@ -99,17 +100,16 @@ class VedleggService(
 
     private fun matchDokumentInfoAndJsonFiler(dokumentInfoList: List<DokumentInfo>, jsonFiler: List<JsonFiler>): List<DokumentInfo> {
         return jsonFiler
-                .flatMap { fil ->
-                    dokumentInfoList
-                            .filter { it.filnavn == fil.filnavn }
-                }
+            .flatMap { fil ->
+                dokumentInfoList
+                    .filter { it.filnavn == fil.filnavn }
+            }
     }
 
     private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {
         return dokumentInfoList.size == files.size &&
-                dokumentInfoList.filterIndexed { idx, it -> sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn) }.size == dokumentInfoList.size
+            dokumentInfoList.filterIndexed { idx, it -> sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn) }.size == dokumentInfoList.size
     }
-
 
     companion object {
         private val log by logger()
@@ -117,10 +117,10 @@ class VedleggService(
 }
 
 data class InternalVedlegg(
-        val type: String,
-        val tilleggsinfo: String?,
-        val hendelseType: JsonVedlegg.HendelseType?,
-        val hendelseReferanse: String?,
-        val dokumentInfoList: List<DokumentInfo>,
-        val tidspunktLastetOpp: LocalDateTime
+    val type: String,
+    val tilleggsinfo: String?,
+    val hendelseType: JsonVedlegg.HendelseType?,
+    val hendelseReferanse: String?,
+    val dokumentInfoList: List<DokumentInfo>,
+    val tidspunktLastetOpp: LocalDateTime
 )

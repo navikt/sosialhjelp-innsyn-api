@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.client.digisosapi
 
-
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile

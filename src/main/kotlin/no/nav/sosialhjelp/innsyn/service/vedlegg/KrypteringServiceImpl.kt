@@ -14,7 +14,6 @@ import java.security.cert.X509Certificate
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
-
 @Profile("!(mock | mock-alt)")
 @Component
 class KrypteringServiceImpl : KrypteringService {
@@ -26,24 +25,27 @@ class KrypteringServiceImpl : KrypteringService {
         val pipedInputStream = PipedInputStream()
         try {
             val pipedOutputStream = PipedOutputStream(pipedInputStream)
-            val krypteringFuture = runAsyncWithMDC({
-                try {
-                    log.debug("Starter kryptering")
-                    kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
-                    log.debug("Ferdig med kryptering")
-                } catch (e: Exception) {
-                    log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)
-                    throw IllegalStateException("An error occurred during encryption", e)
-                } finally {
+            val krypteringFuture = runAsyncWithMDC(
+                {
                     try {
-                        log.debug("Lukker kryptering OutputStream")
-                        pipedOutputStream.close()
-                        log.debug("OutputStream for kryptering er lukket")
-                    } catch (e: IOException) {
-                        log.error("Lukking av Outputstream for kryptering feilet", e)
+                        log.debug("Starter kryptering")
+                        kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
+                        log.debug("Ferdig med kryptering")
+                    } catch (e: Exception) {
+                        log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)
+                        throw IllegalStateException("An error occurred during encryption", e)
+                    } finally {
+                        try {
+                            log.debug("Lukker kryptering OutputStream")
+                            pipedOutputStream.close()
+                            log.debug("OutputStream for kryptering er lukket")
+                        } catch (e: IOException) {
+                            log.error("Lukking av Outputstream for kryptering feilet", e)
+                        }
                     }
-                }
-            }, executor)
+                },
+                executor
+            )
             krypteringFutureList.add(krypteringFuture)
         } catch (e: IOException) {
             throw RuntimeException(e)

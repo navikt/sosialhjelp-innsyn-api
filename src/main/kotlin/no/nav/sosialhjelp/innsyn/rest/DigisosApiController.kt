@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/api/v1/digisosapi")
 class DigisosApiController(
-        private val digisosApiService: DigisosApiService
+    private val digisosApiService: DigisosApiService
 ) {
 
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
@@ -49,7 +49,7 @@ class DigisosApiController(
 
     @GetMapping("/{digisosId}/innsynsfil")
     fun hentInnsynsfilWoldena(@PathVariable digisosId: String): ResponseEntity<ByteArray> {
-        val innsynsfil =  digisosApiService.hentInnsynsfil(digisosId) ?: return ResponseEntity.noContent().build()
+        val innsynsfil = digisosApiService.hentInnsynsfil(digisosId) ?: return ResponseEntity.noContent().build()
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
     }
 }

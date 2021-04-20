@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class KommuneService(
-        private val fiksClient: FiksClient,
-        private val kommuneInfoClient: KommuneInfoClient,
-        private val idPortenService: IdPortenService,
-        private val redisService: RedisService
+    private val fiksClient: FiksClient,
+    private val kommuneInfoClient: KommuneInfoClient,
+    private val idPortenService: IdPortenService,
+    private val redisService: RedisService
 ) {
 
     fun hentKommuneInfo(fiksDigisosId: String, token: String): KommuneInfo? {
@@ -33,12 +33,12 @@ class KommuneService(
     }
 
     private fun hentFraCache(kommunenummer: String) =
-            redisService.get(kommunenummer, KommuneInfo::class.java) as KommuneInfo?
+        redisService.get(kommunenummer, KommuneInfo::class.java) as KommuneInfo?
 
     private fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {
             kommuneInfoClient.get(kommunenummer, getToken())
-                    .also { redisService.put(kommunenummer, objectMapper.writeValueAsBytes(it)) }
+                .also { redisService.put(kommunenummer, objectMapper.writeValueAsBytes(it)) }
         } catch (e: FiksClientException) {
             null
         } catch (e: FiksServerException) {

@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.multipart.commons.CommonsMultipartResolver
 
-private const val MAX_UPLOAD_SIZE = 350 * 1024 * 1024L //350 MB. Summen av filer som kan sendes i et POST-kall
+private const val MAX_UPLOAD_SIZE = 350 * 1024 * 1024L // 350 MB. Summen av filer som kan sendes i et POST-kall
 
 @Configuration
 class MulitpartConfig {
@@ -15,5 +15,4 @@ class MulitpartConfig {
         multipartResolver.setMaxUploadSize(MAX_UPLOAD_SIZE)
         return multipartResolver
     }
-
 }

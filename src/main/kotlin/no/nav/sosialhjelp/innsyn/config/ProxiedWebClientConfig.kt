@@ -20,7 +20,6 @@ class ProxiedWebClientConfig {
         webClientBuilder
             .clientConnector(getProxiedReactorClientHttpConnector(proxyUrl))
             .build()
-
 }
 
 @Profile("mock|mock-alt|local")
@@ -32,5 +31,4 @@ class MockProxiedWebClientConfig {
         webClientBuilder
             .clientConnector(getUnproxiedReactorClientHttpConnector())
             .build()
-
 }

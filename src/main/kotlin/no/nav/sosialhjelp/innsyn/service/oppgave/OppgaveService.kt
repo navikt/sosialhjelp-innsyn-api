@@ -1,19 +1,25 @@
 package no.nav.sosialhjelp.innsyn.service.oppgave
 
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.domain.*
+import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
+import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
+import no.nav.sosialhjelp.innsyn.domain.Oppgave
+import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
+import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
+import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
+import no.nav.sosialhjelp.innsyn.domain.VilkarElement
+import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 
-
 @Component
 class OppgaveService(
-        private val eventService: EventService,
-        private val vedleggService: VedleggService,
-        private val fiksClient: FiksClient
+    private val eventService: EventService,
+    private val vedleggService: VedleggService,
+    private val fiksClient: FiksClient
 ) {
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
@@ -26,16 +32,16 @@ class OppgaveService(
         val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
 
         val oppgaveResponseList = model.oppgaver
-                .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
-                .groupBy { if (it.innsendelsesfrist == null) null else it.innsendelsesfrist!!.toLocalDate() }
-                .map { (key, value) ->
-                    OppgaveResponse(
-                            innsendelsesfrist = key,
-                            oppgaveId = value[0].oppgaveId,  // oppgaveId og innsendelsefrist er alltid 1-1
-                            oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.hendelsetype, it.hendelsereferanse, it.erFraInnsyn) }
-                    )
-                }
-                .sortedBy { it.innsendelsesfrist }
+            .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
+            .groupBy { if (it.innsendelsesfrist == null) null else it.innsendelsesfrist!!.toLocalDate() }
+            .map { (key, value) ->
+                OppgaveResponse(
+                    innsendelsesfrist = key,
+                    oppgaveId = value[0].oppgaveId, // oppgaveId og innsendelsefrist er alltid 1-1
+                    oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.hendelsetype, it.hendelsereferanse, it.erFraInnsyn) }
+                )
+            }
+            .sortedBy { it.innsendelsesfrist }
         log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver")
         return oppgaveResponseList
     }
@@ -47,9 +53,9 @@ class OppgaveService(
     private fun erAlleredeLastetOpp(oppgave: Oppgave, vedleggListe: List<InternalVedlegg>): Boolean {
 
         return vedleggListe
-                .filter { it.type == oppgave.tittel }
-                .filter { it.tilleggsinfo == oppgave.tilleggsinfo }
-                .any { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
+            .filter { it.type == oppgave.tittel }
+            .filter { it.tilleggsinfo == oppgave.tilleggsinfo }
+            .any { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
     }
 
     fun getVilkar(fiksDigisosId: String, token: String): List<VilkarResponse> {
@@ -60,17 +66,20 @@ class OppgaveService(
         }
 
         val vilkarResponseList = model.vilkar
-                .filter { !it.isEmpty()
-                        .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på vilkår er tomt") }}
-                .filter { it.status != Oppgavestatus.ANNULLERT }
-                .groupBy { it.datoLagtTil.toLocalDate() }
-                .map { (_, value) ->
-                    VilkarResponse(
-                            vilkarElementer = value.map {
-                                val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                VilkarElement( it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse, it.getOppgaveStatus()) }
-                    )
-                }
+            .filter {
+                !it.isEmpty()
+                    .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på vilkår er tomt") }
+            }
+            .filter { it.status != Oppgavestatus.ANNULLERT }
+            .groupBy { it.datoLagtTil.toLocalDate() }
+            .map { (_, value) ->
+                VilkarResponse(
+                    vilkarElementer = value.map {
+                        val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
+                        VilkarElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse, it.getOppgaveStatus())
+                    }
+                )
+            }
 
         log.info("Hentet ${vilkarResponseList.sumBy { it.vilkarElementer.size }} vilkar")
         return vilkarResponseList
@@ -84,18 +93,21 @@ class OppgaveService(
         }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
-                .filter { !it.isEmpty()
-                            .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }}
-                .filter { it.status != Oppgavestatus.ANNULLERT }
-                .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
-                .groupBy { it.datoLagtTil.toLocalDate() }
-                .map { (_, value) ->
-                     DokumentasjonkravResponse(
-                             dokumentasjonkravElementer = value.map {
-                                 val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                                 DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.getOppgaveStatus()) }
-                     )
-                }
+            .filter {
+                !it.isEmpty()
+                    .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
+            }
+            .filter { it.status != Oppgavestatus.ANNULLERT }
+            .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
+            .groupBy { it.datoLagtTil.toLocalDate() }
+            .map { (_, value) ->
+                DokumentasjonkravResponse(
+                    dokumentasjonkravElementer = value.map {
+                        val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
+                        DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.getOppgaveStatus())
+                    }
+                )
+            }
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList

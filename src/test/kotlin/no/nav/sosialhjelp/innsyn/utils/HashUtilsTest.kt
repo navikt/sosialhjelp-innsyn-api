@@ -11,7 +11,7 @@ internal class HashUtilsTest {
         val input1 = "123"
         val input2 = "124"
 
-        assertThat(sha256(input1)).isNotEqualTo(sha256(input2));
+        assertThat(sha256(input1)).isNotEqualTo(sha256(input2))
     }
 
     @Test
@@ -20,5 +20,4 @@ internal class HashUtilsTest {
 
         assertThat(sha256(input)).isEqualTo(sha256(input))
     }
-
 }

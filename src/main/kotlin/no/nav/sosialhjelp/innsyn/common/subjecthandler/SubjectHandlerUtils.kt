@@ -9,19 +9,19 @@ object SubjectHandlerUtils {
     private val log by logger()
     private var subjectHandlerService: SubjectHandler = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
 
-    fun getUserIdFromToken() : String {
+    fun getUserIdFromToken(): String {
         return subjectHandlerService.getUserIdFromToken()
     }
 
-    fun getConsumerId() : String {
+    fun getConsumerId(): String {
         return subjectHandlerService.getConsumerId()
     }
 
-    fun getToken() : String {
+    fun getToken(): String {
         return subjectHandlerService.getToken()
     }
 
-    fun setNewSubjectHandlerImpl(subjectHandlerImpl : SubjectHandler) {
+    fun setNewSubjectHandlerImpl(subjectHandlerImpl: SubjectHandler) {
         if (isRunningInProd()) {
             log.error("Forsøker å sette en annen SubjectHandlerImpl i prod!")
             throw RuntimeException("Forsøker å sette en annen SubjectHandlerImpl i prod!")

@@ -22,8 +22,8 @@ import javax.servlet.http.HttpServletResponse
 @RestController
 @RequestMapping("/api/v1/innsyn/")
 class SoknadsStatusController(
-        private val soknadsStatusService: SoknadsStatusService,
-        private val tilgangskontrollService: TilgangskontrollService
+    private val soknadsStatusService: SoknadsStatusService,
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("{fiksDigisosId}/soknadsStatus")
@@ -33,13 +33,13 @@ class SoknadsStatusController(
         response.addCookie(xsrfCookie(fiksDigisosId, request))
         val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)
         return ResponseEntity.ok().body(
-                SoknadsStatusResponse(
-                        status = utvidetSoknadsStatus.status,
-                        tidspunktSendt = utvidetSoknadsStatus.tidspunktSendt,
-                        soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
-                        navKontor = utvidetSoknadsStatus.navKontor,
-                        filUrl = utvidetSoknadsStatus.soknadUrl
-                )
+            SoknadsStatusResponse(
+                status = utvidetSoknadsStatus.status,
+                tidspunktSendt = utvidetSoknadsStatus.tidspunktSendt,
+                soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
+                navKontor = utvidetSoknadsStatus.navKontor,
+                filUrl = utvidetSoknadsStatus.soknadUrl
+            )
         )
     }
 

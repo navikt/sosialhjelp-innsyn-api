@@ -13,14 +13,18 @@ fun InternalDigisosSoker.applySoknadKrav(fiksDigisosId: String, originalSoknadNA
     val vedleggKreves = vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, fiksDigisosId, originalSoknadNAV, token)
 
     oppgaver = vedleggKreves
-            .filterNot { it.type == "annet" && it.tilleggsinfo == "annet" }
-            .map { Oppgave(sha256(timestampSendt.toString()),
-                    it.type,
-                    it.tilleggsinfo,
-                    JsonVedlegg.HendelseType.SOKNAD,
-                    it.hendelseReferanse,
-                    null,
-                    unixToLocalDateTime(timestampSendt),
-                    false) }
-            .toMutableList()
+        .filterNot { it.type == "annet" && it.tilleggsinfo == "annet" }
+        .map {
+            Oppgave(
+                sha256(timestampSendt.toString()),
+                it.type,
+                it.tilleggsinfo,
+                JsonVedlegg.HendelseType.SOKNAD,
+                it.hendelseReferanse,
+                null,
+                unixToLocalDateTime(timestampSendt),
+                false
+            )
+        }
+        .toMutableList()
 }

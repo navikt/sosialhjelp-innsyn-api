@@ -4,7 +4,6 @@ import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.client.kommuneinfo.KommuneInfoClient
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.util.ArrayList
 
 @Profile("mock")
 @Component

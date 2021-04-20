@@ -1,42 +1,42 @@
 package no.nav.sosialhjelp.innsyn.client.pdl
 
 data class PdlPersonResponse(
-        val errors: List<PdlError>?,
-        val data: PdlHentPerson?
+    val errors: List<PdlError>?,
+    val data: PdlHentPerson?
 )
 
 data class PdlError(
-        val message: String,
-        val locations: List<PdlErrorLocation>,
-        val path: List<String>?,
-        val extensions: PdlErrorExtension
+    val message: String,
+    val locations: List<PdlErrorLocation>,
+    val path: List<String>?,
+    val extensions: PdlErrorExtension
 )
 
 data class PdlErrorLocation(
-        val line: Int?,
-        val column: Int?
+    val line: Int?,
+    val column: Int?
 )
 
 data class PdlErrorExtension(
-        val code: String?,
-        val classification: String
+    val code: String?,
+    val classification: String
 )
 
 data class PdlHentPerson(
-        val hentPerson: PdlPerson?
+    val hentPerson: PdlPerson?
 )
 
 data class PdlPerson(
-        val adressebeskyttelse: List<Adressebeskyttelse>,
-        val navn: List<PdlNavn>
+    val adressebeskyttelse: List<Adressebeskyttelse>,
+    val navn: List<PdlNavn>
 )
 
 data class PdlNavn(
-        val fornavn: String?
+    val fornavn: String?
 )
 
 data class Adressebeskyttelse(
-        val gradering: Gradering
+    val gradering: Gradering
 )
 
 enum class Gradering {

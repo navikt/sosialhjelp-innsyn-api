@@ -17,7 +17,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 
-
 @Profile("!(mock | local)")
 @Component
 class NorgClientImpl(
@@ -75,9 +74,11 @@ class NorgClientImpl(
     }
 
     private fun lagreTilCache(enhetsnr: String, navEnhet: NavEnhet) {
-        redisService.put(cacheKey(enhetsnr),
+        redisService.put(
+            cacheKey(enhetsnr),
             objectMapper.writeValueAsBytes(navEnhet),
-            NAVENHET_CACHE_TIMETOLIVE_SECONDS)
+            NAVENHET_CACHE_TIMETOLIVE_SECONDS
+        )
     }
 
     private fun cacheKey(enhetsnr: String): String = "NavEnhet_$enhetsnr"

@@ -19,9 +19,9 @@ internal class OrginalSoknadServiceTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
 
     private val service = OrginalSoknadService(
-            fiksClient,
-            innsynService,
-            clientProperties
+        fiksClient,
+        innsynService,
+        clientProperties
     )
 
     private val mockDigisosSak: DigisosSak = mockk()

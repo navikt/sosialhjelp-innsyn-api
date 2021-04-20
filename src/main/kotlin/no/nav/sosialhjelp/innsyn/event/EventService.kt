@@ -34,11 +34,11 @@ import java.time.LocalDate
 
 @Component
 class EventService(
-        private val clientProperties: ClientProperties,
-        private val innsynService: InnsynService,
-        private val vedleggService: VedleggService,
-        private val norgClient: NorgClient,
-        private val unleashClient: Unleash,
+    private val clientProperties: ClientProperties,
+    private val innsynService: InnsynService,
+    private val vedleggService: VedleggService,
+    private val norgClient: NorgClient,
+    private val unleashClient: Unleash,
 ) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
@@ -59,11 +59,12 @@ class EventService(
             if (jsonSoknad != null && jsonSoknad.mottaker != null) {
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
                 model.historikk.add(
-                        Hendelse(
-                                "Søknaden med vedlegg er sendt til ${stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn)} kommune",
-                                unixToLocalDateTime(originalSoknadNAV.timestampSendt),
-                                dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
-                        ))
+                    Hendelse(
+                        "Søknaden med vedlegg er sendt til ${stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn)} kommune",
+                        unixToLocalDateTime(originalSoknadNAV.timestampSendt),
+                        dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
+                    )
+                )
             }
         }
 
@@ -97,12 +98,12 @@ class EventService(
 
     private fun applyHendelserOgSoknadKrav(jsonDigisosSoker: JsonDigisosSoker?, model: InternalDigisosSoker, originalSoknadNAV: OriginalSoknadNAV?, digisosSak: DigisosSak, token: String) {
         jsonDigisosSoker?.hendelser
-                ?.sortedWith(hendelseComparator)
-                ?.forEach { model.applyHendelse(it) }
+            ?.sortedWith(hendelseComparator)
+            ?.forEach { model.applyHendelse(it) }
 
         val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker?.hendelser
-                ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
-                ?.isEmpty() ?: true
+            ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
+            ?.isEmpty() ?: true
 
         if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)) {
             model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, originalSoknadNAV.timestampSendt, token)
@@ -112,11 +113,11 @@ class EventService(
     fun hentAlleUtbetalinger(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
         val model = InternalDigisosSoker()
         val jsonDigisosSoker: JsonDigisosSoker = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
-                ?: return model
+            ?: return model
         jsonDigisosSoker.hendelser
-                .filterIsInstance<JsonUtbetaling>()
-                .sortedBy { it.hendelsestidspunkt }
-                .map { model.applyHendelse(it) }
+            .filterIsInstance<JsonUtbetaling>()
+            .sortedBy { it.hendelsestidspunkt }
+            .map { model.applyHendelse(it) }
         return model
     }
 
@@ -145,7 +146,7 @@ class EventService(
          * Dette gjør at vi kan knytte Vilkår/Dokumentasjonkrav til Utbetalingen.
          */
         private val hendelseComparator = compareBy<JsonHendelse> { it.hendelsestidspunkt }
-                .thenComparator { a, b -> compareHendelseByType(a.type, b.type) }
+            .thenComparator { a, b -> compareHendelseByType(a.type, b.type) }
 
         private fun compareHendelseByType(a: JsonHendelse.Type, b: JsonHendelse.Type): Int {
             if (a == JsonHendelse.Type.UTBETALING && (b == JsonHendelse.Type.VILKAR || b == JsonHendelse.Type.DOKUMENTASJONKRAV)) {
@@ -157,7 +158,7 @@ class EventService(
         }
 
         private fun soknadSendtForMindreEnn30DagerSiden(timestampSendt: Long) =
-                unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
+            unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
 
         fun stripEnhetsnavnForKommune(navEnhetsnavn: String): String {
             return navEnhetsnavn.replace(" kommune", "")

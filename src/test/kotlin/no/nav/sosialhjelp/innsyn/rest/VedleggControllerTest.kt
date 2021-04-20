@@ -65,13 +65,14 @@ internal class VedleggControllerTest {
     @Test
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() {
         every { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns listOf(
-                InternalVedlegg(
-                        dokumenttype,
-                        tilleggsinfo,
-                        null,
-                        null,
-                        listOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
-                        LocalDateTime.now())
+            InternalVedlegg(
+                dokumenttype,
+                tilleggsinfo,
+                null,
+                null,
+                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
+                LocalDateTime.now()
+            )
         )
 
         val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
@@ -95,20 +96,22 @@ internal class VedleggControllerTest {
     fun `skal utelate duplikater i response`() {
         val now = LocalDateTime.now()
         every { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns listOf(
-                InternalVedlegg(
-                        dokumenttype,
-                        null,
-                        null,
-                        null,
-                        listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                        now),
-                InternalVedlegg(
-                        dokumenttype,
-                        null,
-                        null,
-                        null,
-                        listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                        now)
+            InternalVedlegg(
+                dokumenttype,
+                null,
+                null,
+                null,
+                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                now
+            ),
+            InternalVedlegg(
+                dokumenttype,
+                null,
+                null,
+                null,
+                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                now
+            )
         )
 
         val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
@@ -127,8 +130,9 @@ internal class VedleggControllerTest {
     @Test
     fun `kaster exception dersom input til sendVedlegg ikke inneholder metadata-json`() {
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-                MockMultipartFile("files", "test2.png", null, ByteArray(0)))
+            MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+            MockMultipartFile("files", "test2.png", null, ByteArray(0))
+        )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
         assertFailsWith<IllegalStateException> { controller.sendVedlegg(id, files, "token", request) }
@@ -138,8 +142,9 @@ internal class VedleggControllerTest {
     fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() {
         every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
-                MockMultipartFile("files", "test.jpg", null, ByteArray(0)))
+            MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+            MockMultipartFile("files", "test.jpg", null, ByteArray(0))
+        )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
         assertThatCode { controller.sendVedlegg(id, files, "token", request) }.doesNotThrowAnyException()
@@ -149,8 +154,9 @@ internal class VedleggControllerTest {
     fun `skal kaste exception dersom token mangler`() {
         every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
         val files = mutableListOf<MultipartFile>(
-                MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
-                MockMultipartFile("files", "test.jpg", null, ByteArray(0)))
+            MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+            MockMultipartFile("files", "test.jpg", null, ByteArray(0))
+        )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf()
         assertFailsWith<IllegalArgumentException> { controller.sendVedlegg(id, files, "token", request) }
@@ -189,5 +195,4 @@ internal class VedleggControllerTest {
         xsrfCookie.isHttpOnly = true
         return xsrfCookie
     }
-
 }

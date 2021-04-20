@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.mock
 
-
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import org.springframework.context.annotation.Configuration
@@ -13,5 +12,4 @@ class MockConfig {
     init {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
     }
-
 }

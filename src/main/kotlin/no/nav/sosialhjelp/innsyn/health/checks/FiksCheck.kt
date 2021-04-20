@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component
 @Profile("!mock")
 @Component
 class FiksCheck(
-        clientProperties: ClientProperties,
-        private val kommuneInfoClient: KommuneInfoClient,
-        private val idPortenService: IdPortenService
+    clientProperties: ClientProperties,
+    private val kommuneInfoClient: KommuneInfoClient,
+    private val idPortenService: IdPortenService
 ) : DependencyCheck {
 
     override val type = DependencyType.REST
@@ -25,5 +25,4 @@ class FiksCheck(
     override fun doCheck() {
         kommuneInfoClient.getAll(idPortenService.getToken().token)
     }
-
 }

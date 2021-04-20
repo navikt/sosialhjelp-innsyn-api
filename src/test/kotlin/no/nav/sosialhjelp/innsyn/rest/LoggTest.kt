@@ -18,5 +18,4 @@ internal class LoggTest {
 
         assertThat(logg.melding()).isEqualTo("jsmessagehash=" + feilmelding.hashCode() + ", fileUrl=minFil.js:100:99, url=http://nav.no/url, userAgent=IE_ROCKS_MSIE, melding: Cannot read blabla of undefined")
     }
-
 }

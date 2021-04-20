@@ -17,7 +17,6 @@ import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.util.ArrayList
 
 class PdfGenerator internal constructor(private var document: PDDocument) {
     private var currentPage = PDPage(PDRectangle.A4)
@@ -61,7 +60,7 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         val baos = ByteArrayOutputStream()
         currentStream.close()
         document.save(baos)
-            return baos.toByteArray()
+        return baos.toByteArray()
     }
 
     fun addBlankLine() {
@@ -118,10 +117,10 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     }
 
     fun addCenteredParagraph(
-            text: String,
-            font: PDFont,
-            fontSize: Float,
-            leadingPercentage: Float
+        text: String,
+        font: PDFont,
+        fontSize: Float,
+        leadingPercentage: Float
     ) {
         val lines: List<String> = parseLines(text, font, fontSize)
         currentStream.beginText()

@@ -51,13 +51,15 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere response med status = UNDER_BEHANDLING`() {
         val model = InternalDigisosSoker()
-        model.saker.add(Sak(
+        model.saker.add(
+            Sak(
                 referanse = referanse,
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
                 tittel = tittel,
                 vedtak = mutableListOf(),
                 utbetalinger = mutableListOf()
-        ))
+            )
+        )
 
         every { eventService.createModel(any(), any()) } returns model
 
@@ -73,17 +75,21 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere response med status = FERDIGBEHANDLET ved vedtakFattet uavhengig av utfallet til vedtakFattet`() {
         val model = InternalDigisosSoker()
-        model.saker.add(Sak(
+        model.saker.add(
+            Sak(
                 referanse = referanse,
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
                 tittel = tittel,
-                vedtak = mutableListOf(Vedtak(
+                vedtak = mutableListOf(
+                    Vedtak(
                         utfall = UtfallVedtak.INNVILGET,
                         vedtaksFilUrl = vedtaksfilUrl,
                         dato = LocalDate.now()
-                )),
+                    )
+                ),
                 utbetalinger = mutableListOf()
-        ))
+            )
+        )
 
         every { eventService.createModel(any(), any()) } returns model
 
@@ -100,17 +106,21 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere response med status = FERDIGBEHANDLET og vedtaksfilUrl og DEFAULT_TITTEL`() {
         val model = InternalDigisosSoker()
-        model.saker.add(Sak(
+        model.saker.add(
+            Sak(
                 referanse = referanse,
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
                 tittel = DEFAULT_TITTEL,
-                vedtak = mutableListOf(Vedtak(
+                vedtak = mutableListOf(
+                    Vedtak(
                         utfall = UtfallVedtak.INNVILGET,
                         vedtaksFilUrl = vedtaksfilUrl,
                         dato = LocalDate.now()
-                )),
+                    )
+                ),
                 utbetalinger = mutableListOf()
-        ))
+            )
+        )
 
         every { eventService.createModel(any(), any()) } returns model
 
@@ -127,29 +137,35 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere response med 2 elementer ved 2 Saker`() {
         val model = InternalDigisosSoker()
-        model.saker.addAll(listOf(
+        model.saker.addAll(
+            listOf(
                 Sak(
-                        referanse = referanse,
-                        saksStatus = SaksStatus.UNDER_BEHANDLING,
-                        tittel = tittel,
-                        vedtak = mutableListOf(
-                                Vedtak(
-                                        utfall = UtfallVedtak.INNVILGET,
-                                        vedtaksFilUrl = vedtaksfilUrl,
-                                        dato = LocalDate.now()),
-                                Vedtak(
-                                        utfall = UtfallVedtak.INNVILGET,
-                                        vedtaksFilUrl = vedtaksfilUrl,
-                                        dato = LocalDate.now())),
-                        utbetalinger = mutableListOf()),
+                    referanse = referanse,
+                    saksStatus = SaksStatus.UNDER_BEHANDLING,
+                    tittel = tittel,
+                    vedtak = mutableListOf(
+                        Vedtak(
+                            utfall = UtfallVedtak.INNVILGET,
+                            vedtaksFilUrl = vedtaksfilUrl,
+                            dato = LocalDate.now()
+                        ),
+                        Vedtak(
+                            utfall = UtfallVedtak.INNVILGET,
+                            vedtaksFilUrl = vedtaksfilUrl,
+                            dato = LocalDate.now()
+                        )
+                    ),
+                    utbetalinger = mutableListOf()
+                ),
                 Sak(
-                        referanse = referanse,
-                        saksStatus = SaksStatus.IKKE_INNSYN,
-                        tittel = DEFAULT_TITTEL,
-                        vedtak = mutableListOf(),
-                        utbetalinger = mutableListOf()
+                    referanse = referanse,
+                    saksStatus = SaksStatus.IKKE_INNSYN,
+                    tittel = DEFAULT_TITTEL,
+                    vedtak = mutableListOf(),
+                    utbetalinger = mutableListOf()
                 )
-        ))
+            )
+        )
 
         every { eventService.createModel(any(), any()) } returns model
 
@@ -168,43 +184,43 @@ internal class SaksStatusServiceTest {
     fun `teste at getSkalViseVedtakInfoPanel gir riktig svar`() {
 
         val vedtak1 = Vedtak(
-                utfall = UtfallVedtak.INNVILGET,
-                vedtaksFilUrl = "en link til noe",
-                dato = null
+            utfall = UtfallVedtak.INNVILGET,
+            vedtaksFilUrl = "en link til noe",
+            dato = null
         )
         val vedtak2 = Vedtak(
-                utfall = UtfallVedtak.DELVIS_INNVILGET,
-                vedtaksFilUrl = "en link til noe",
-                dato = null
+            utfall = UtfallVedtak.DELVIS_INNVILGET,
+            vedtaksFilUrl = "en link til noe",
+            dato = null
         )
         val vedtak3 = Vedtak(
-                utfall = UtfallVedtak.AVVIST,
-                vedtaksFilUrl = "en link til noe",
-                dato = null
+            utfall = UtfallVedtak.AVVIST,
+            vedtaksFilUrl = "en link til noe",
+            dato = null
         )
         val vedtak4 = Vedtak(
-                utfall = UtfallVedtak.AVSLATT,
-                vedtaksFilUrl = "en link til noe",
-                dato = null
+            utfall = UtfallVedtak.AVSLATT,
+            vedtaksFilUrl = "en link til noe",
+            dato = null
         )
         val vedtak5 = Vedtak(
-                utfall = null,
-                vedtaksFilUrl = "en link til noe",
-                dato = null
+            utfall = null,
+            vedtaksFilUrl = "en link til noe",
+            dato = null
         )
         val sakSomSkalGiTrue = Sak(
-                "ref1",
-                SaksStatus.FERDIGBEHANDLET,
-                "Tittel på sak",
-                vedtak = mutableListOf(vedtak1, vedtak2),
-                utbetalinger = mutableListOf()
+            "ref1",
+            SaksStatus.FERDIGBEHANDLET,
+            "Tittel på sak",
+            vedtak = mutableListOf(vedtak1, vedtak2),
+            utbetalinger = mutableListOf()
         )
         val sakSomSkalGiFalse = Sak(
-                "ref1",
-                SaksStatus.FERDIGBEHANDLET,
-                "Tittel på sak",
-                vedtak = mutableListOf(vedtak1, vedtak2, vedtak3, vedtak4, vedtak5),
-                utbetalinger = mutableListOf()
+            "ref1",
+            SaksStatus.FERDIGBEHANDLET,
+            "Tittel på sak",
+            vedtak = mutableListOf(vedtak1, vedtak2, vedtak3, vedtak4, vedtak5),
+            utbetalinger = mutableListOf()
         )
 
         assertThat(service.getSkalViseVedtakInfoPanel(sakSomSkalGiTrue)).isEqualTo(true)

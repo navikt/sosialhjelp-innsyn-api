@@ -30,42 +30,60 @@ class FiksClientMock : FiksClient {
     private val dokumentMap = mutableMapOf<String, Any>()
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
-        return innsynMap.getOrElse(digisosId, {
-            val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(digisosId, innsynMap.size.toLong())
-            innsynMap[digisosId] = default
-            default
-        })
+        return innsynMap.getOrElse(
+            digisosId,
+            {
+                val default = defaultDigisosSak.copyDigisosSokerWithNewMetadataId(digisosId, innsynMap.size.toLong())
+                innsynMap[digisosId] = default
+                default
+            }
+        )
     }
 
     override fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String): Any {
         return when (requestedClass) {
-            JsonDigisosSoker::class.java -> dokumentMap.getOrElse(dokumentlagerId, {
-                val default = digisosSoker
-                dokumentMap[dokumentlagerId] = default
-                default
-            })
-            JsonSoknad::class.java -> dokumentMap.getOrElse(dokumentlagerId, {
-                val default = defaultJsonSoknad
-                dokumentMap[dokumentlagerId] = default
-                default
-            })
+            JsonDigisosSoker::class.java -> dokumentMap.getOrElse(
+                dokumentlagerId,
+                {
+                    val default = digisosSoker
+                    dokumentMap[dokumentlagerId] = default
+                    default
+                }
+            )
+            JsonSoknad::class.java -> dokumentMap.getOrElse(
+                dokumentlagerId,
+                {
+                    val default = defaultJsonSoknad
+                    dokumentMap[dokumentlagerId] = default
+                    default
+                }
+            )
             JsonVedleggSpesifikasjon::class.java ->
                 when (dokumentlagerId) {
-                    "mock-soknad-vedlegg-metadata" -> dokumentMap.getOrElse(dokumentlagerId, {
-                        val default = jsonVedleggSpesifikasjonSoknad
-                        dokumentMap[dokumentlagerId] = default
-                        default
-                    })
-                    "mock-ettersendelse-vedlegg-metadata" -> dokumentMap.getOrElse(dokumentlagerId, {
-                        val default = jsonVedleggSpesifikasjonEttersendelse
-                        dokumentMap[dokumentlagerId] = default
-                        default
-                    })
-                    else -> dokumentMap.getOrElse(dokumentlagerId, {
-                        val default = jsonVedleggSpesifikasjonEttersendelse_2
-                        dokumentMap[dokumentlagerId] = default
-                        default
-                    })
+                    "mock-soknad-vedlegg-metadata" -> dokumentMap.getOrElse(
+                        dokumentlagerId,
+                        {
+                            val default = jsonVedleggSpesifikasjonSoknad
+                            dokumentMap[dokumentlagerId] = default
+                            default
+                        }
+                    )
+                    "mock-ettersendelse-vedlegg-metadata" -> dokumentMap.getOrElse(
+                        dokumentlagerId,
+                        {
+                            val default = jsonVedleggSpesifikasjonEttersendelse
+                            dokumentMap[dokumentlagerId] = default
+                            default
+                        }
+                    )
+                    else -> dokumentMap.getOrElse(
+                        dokumentlagerId,
+                        {
+                            val default = jsonVedleggSpesifikasjonEttersendelse_2
+                            dokumentMap[dokumentlagerId] = default
+                            default
+                        }
+                    )
                 }
             else -> requestedClass.getDeclaredConstructor(requestedClass).newInstance()
         }

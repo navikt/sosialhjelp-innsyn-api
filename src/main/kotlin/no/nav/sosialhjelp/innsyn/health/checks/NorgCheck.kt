@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component
 @Profile("!mock")
 @Component
 class NorgCheck(
-        private val norgClient: NorgClient,
-        clientProperties: ClientProperties
+    private val norgClient: NorgClient,
+    clientProperties: ClientProperties
 ) : DependencyCheck {
 
     override val type = DependencyType.REST
@@ -23,5 +23,4 @@ class NorgCheck(
     override fun doCheck() {
         norgClient.ping()
     }
-
 }

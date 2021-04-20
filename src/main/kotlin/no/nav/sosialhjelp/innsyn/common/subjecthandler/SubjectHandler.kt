@@ -16,7 +16,7 @@ interface SubjectHandler {
 @Profile("!mock")
 @Component
 class AzureAdSubjectHandlerImpl(
-        private val tokenValidationContextHolder: TokenValidationContextHolder
+    private val tokenValidationContextHolder: TokenValidationContextHolder
 ) : SubjectHandler {
 
     private val tokenValidationContext: TokenValidationContext

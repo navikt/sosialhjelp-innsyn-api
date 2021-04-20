@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class ForelopigSvarController(
-        private val forelopigSvarService: ForelopigSvarService,
-        private val tilgangskontrollService: TilgangskontrollService
+    private val forelopigSvarService: ForelopigSvarService,
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
     @GetMapping("/{fiksDigisosId}/forelopigSvar")
     fun hentForelopigSvarStatus(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<ForelopigSvarResponse> {

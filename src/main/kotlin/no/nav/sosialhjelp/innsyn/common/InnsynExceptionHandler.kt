@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
-
 @ControllerAdvice
 class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
@@ -35,7 +34,11 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     override fun handleHttpMessageNotReadable(
-            ex: HttpMessageNotReadableException, headers: HttpHeaders, status: HttpStatus, request: WebRequest): ResponseEntity<Any> {
+        ex: HttpMessageNotReadableException,
+        headers: HttpHeaders,
+        status: HttpStatus,
+        request: WebRequest
+    ): ResponseEntity<Any> {
         log.error(ex.message, ex)
         val error = FrontendErrorMessage(UNEXPECTED_ERROR, ex.message)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
@@ -112,12 +115,14 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [JwtTokenUnauthorizedException::class, JwtTokenMissingException::class])
     fun handleAzureAdValidationExceptions(
-            ex: RuntimeException, request: WebRequest): ResponseEntity<FrontendErrorMessage> {
+        ex: RuntimeException,
+        request: WebRequest
+    ): ResponseEntity<FrontendErrorMessage> {
         if (ex.message?.contains("Server misconfigured") == true) {
             log.error(ex.message)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
         }
         log.info("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl. Feilmelding: ${ex.message}")
         return createUnauthorizedWithLoginUrlResponse(azureadLoginurl!!)
@@ -125,17 +130,19 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [MetaDataNotAvailableException::class, IssuerConfigurationException::class])
     fun handleTokenValidationConfigurationExceptions(
-            ex: RuntimeException, request: WebRequest): ResponseEntity<FrontendErrorMessage> {
+        ex: RuntimeException,
+        request: WebRequest
+    ): ResponseEntity<FrontendErrorMessage> {
         log.error("Klarer ikke hente metadata fra discoveryurl eller problemer ved konfigurering av issuer. Feilmelding: ${ex.message}")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
     }
 
     private fun createUnauthorizedWithLoginUrlResponse(loginUrl: String): ResponseEntity<FrontendErrorMessage> {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(FrontendUnauthorizedMessage("azuread_authentication_error", "azuread_authentication_error", "Autentiseringsfeil", loginUrl))
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(FrontendUnauthorizedMessage("azuread_authentication_error", "azuread_authentication_error", "Autentiseringsfeil", loginUrl))
     }
 
     companion object {

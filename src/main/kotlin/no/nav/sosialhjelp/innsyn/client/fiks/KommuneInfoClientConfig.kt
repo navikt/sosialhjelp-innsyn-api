@@ -32,5 +32,4 @@ class KommuneInfoClientConfig(
             clientProperties.fiksIntegrasjonpassord
         )
     }
-
 }

@@ -12,13 +12,12 @@ import java.time.LocalDateTime
 interface IdPortenService {
 
     fun getToken(): AccessToken
-
 }
 
 @Component
 @Profile("!mock")
 class IdPortenServiceImpl(
-        private val idPortenClient: IdPortenClient
+    private val idPortenClient: IdPortenClient
 ) : IdPortenService {
 
     private var cachedToken: CachedToken? = null
@@ -27,15 +26,15 @@ class IdPortenServiceImpl(
         if (shouldRenewToken(cachedToken)) {
             val tidspunktForHenting: LocalDateTime = LocalDateTime.now()
             return runBlocking(Dispatchers.IO) { idPortenClient.requestToken() }
-                    .also { cachedToken = CachedToken(it, tidspunktForHenting) }
+                .also { cachedToken = CachedToken(it, tidspunktForHenting) }
         }
 
         return cachedToken!!.accessToken
     }
 
     private data class CachedToken(
-            val accessToken: AccessToken,
-            val created: LocalDateTime
+        val accessToken: AccessToken,
+        val created: LocalDateTime
     ) {
         // 10 sek buffer fra expiresIn
         val expirationTime: LocalDateTime = LocalDateTime.now().plusSeconds(accessToken.expiresIn - 10L)

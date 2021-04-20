@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class TilgangController(
-        private val tilgangskontrollService: TilgangskontrollService
+    private val tilgangskontrollService: TilgangskontrollService
 ) {
 
     @GetMapping("/tilgang")
@@ -31,12 +31,11 @@ class TilgangController(
     }
 
     data class TilgangResponse(
-            val harTilgang: Boolean,
-            val fornavn: String
+        val harTilgang: Boolean,
+        val fornavn: String
     )
 
     companion object {
         private val log by logger()
     }
 }
-

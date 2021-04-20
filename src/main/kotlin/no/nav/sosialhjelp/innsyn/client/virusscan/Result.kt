@@ -8,11 +8,11 @@ enum class Result {
 }
 
 data class ScanResult(
-        @JsonAlias("Filename")
-        @JsonProperty("filename")
-        val filename: String,
+    @JsonAlias("Filename")
+    @JsonProperty("filename")
+    val filename: String,
 
-        @JsonAlias("Result")
-        @JsonProperty("result")
-        val result: Result
+    @JsonAlias("Result")
+    @JsonProperty("result")
+    val result: Result
 )

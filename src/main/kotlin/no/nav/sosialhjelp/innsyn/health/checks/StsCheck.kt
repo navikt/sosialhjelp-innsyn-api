@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component
 @Profile("!(mock | local)")
 @Component
 class StsCheck(
-        clientProperties: ClientProperties,
-        private val stsClient: StsClient
+    clientProperties: ClientProperties,
+    private val stsClient: StsClient
 ) : DependencyCheck {
 
     override val type = DependencyType.REST

@@ -46,6 +46,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "6.1.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.github.ben-manes.versions") version "0.36.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
 }
 
 application {
@@ -56,6 +57,10 @@ application {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+ktlint {
+    this.version.set("0.41.0")
 }
 
 configurations {

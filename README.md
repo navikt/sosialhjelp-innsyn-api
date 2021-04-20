@@ -5,16 +5,12 @@
 Backend-app som skal gi innsyn i egen sosialhjelp sak.
 
 ## Henvendelser
-Henvendelser kan sendes via Slack i kanalen #digisos.
+Henvendelser kan sendes via Slack i kanalen #team-digisos.
 
 ## Hvordan komme i gang
 
-### Manuell deploy:
-Ved bruk av [cli](https://github.com/navikt/sosialhjelp-ci):
-- `deploy labs-gcp`
-- `deploy dev-gcp`
-- `deploy dev-sbs`
-- `deploy dev-sbs-intern`
+### Manuell deploy til dev
+Gjøres via Github Actions, se: https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_dev.yml
 
 ### Hente github-package-registry pakker fra NAV-IT
 Enkelte pakker brukt i repoet er lastet opp til Github Package Registry, som krever autentisering for å kunne lastes ned.
@@ -59,9 +55,8 @@ Dette prosjektet bygger og deployer vha Github Actions
 
 ### Github Actions
 - Docker image bygges ved push => `.github/workflows/build.yml`
-- Deploy til dev-sbs => `.github/workflows/deploy-miljo.yml`
-- Deploy til prod-sbs => `.github/workflows/deploy-prod.yml`
-- For å deploye til dev-sbs eller prod-sbs brukes av cli-verktøyet [sosialhjelp-ci](https://github.com/navikt/sosialhjelp-ci).
+- Deploy til dev => `.github/workflows/deploy_dev.yml`
+- Autodeploy til prod-sbs fra master => `.github/workflows/deploy_prod.yml`
 
 ### Github deployment
 - Github deployments - registrer ditt github-repo [her](https://deployment.prod-sbs.nais.io/auth/form)
@@ -74,11 +69,10 @@ Dette prosjektet bygger og deployer vha Github Actions
 ### Redis
 Vi bruker Redis som cache. Se [https://doc.nais.io/persistence/redis/](https://doc.nais.io/persistence/redis/)
 
-#### Autodeploy
+#### Deploy
 Endringer i `redis-config.yml` eller `redisexporter.yml` trigger autodeploy til dev eller prod.
 
-#### Manuell deploy
-Dette kan gjøres manuelt med kubectl både i dev og prod ved bruk av `kubectl apply` i ønsket cluster
+Manuell deploy kan også gjøres med kubectl ved bruk av `kubectl apply` i ønsket cluster
 1. `kubectl apply -f nais/redis-config.yml`
 2. `kubectl apply -f nais/redisexporter.yml`
 

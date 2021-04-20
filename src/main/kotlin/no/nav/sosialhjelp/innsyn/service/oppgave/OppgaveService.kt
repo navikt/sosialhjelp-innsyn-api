@@ -7,8 +7,6 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 
 @Component

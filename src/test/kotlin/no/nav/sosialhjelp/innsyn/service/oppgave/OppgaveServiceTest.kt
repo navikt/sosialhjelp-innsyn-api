@@ -18,6 +18,7 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class OppgaveServiceTest {
@@ -224,9 +225,9 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(
             listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT, LocalDateTime.now())
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
             )
         )
         every { eventService.createModel(any(), any()) } returns model
@@ -244,10 +245,10 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(
             listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.RELEVANT, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.RELEVANT, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, Oppgavestatus.RELEVANT, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", Oppgavestatus.RELEVANT, LocalDateTime.now())
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
             )
         )
         every { eventService.createModel(any(), any()) } returns model
@@ -268,9 +269,9 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(
             listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.IKKE_OPPFYLT, LocalDateTime.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, "beskrivelse", Oppgavestatus.RELEVANT, LocalDateTime.now())
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.IKKE_OPPFYLT, LocalDateTime.now(), LocalDate.now()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, "beskrivelse", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
             )
         )
         every { eventService.createModel(any(), any()) } returns model
@@ -306,5 +307,60 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].vilkarElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
         assertThat(responseList[0].vilkarElementer.get(1).status).isEqualTo(Oppgavestatus.RELEVANT)
         assertThat(responseList[0].vilkarElementer.get(2).status).isEqualTo(Oppgavestatus.RELEVANT)
+    }
+
+    @Test
+    fun `Should sort Dokumentasjonkrav by date and group by date`() {
+        val model = InternalDigisosSoker()
+
+        model.dokumentasjonkrav.addAll(
+            listOf(
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist.toLocalDate()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist3.toLocalDate()),
+            )
+        )
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getDokumentasjonkrav("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 3)
+
+        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(1)
+        assertThat(responseList[1].dokumentasjonkravElementer).hasSize(2)
+        assertThat(responseList[2].dokumentasjonkravElementer).hasSize(1)
+
+        assertThat(responseList[0].frist).isEqualTo(frist.toLocalDate())
+        assertThat(responseList[1].frist).isEqualTo(frist2.toLocalDate())
+        assertThat(responseList[1].frist).isEqualTo(frist2.toLocalDate())
+        assertThat(responseList[2].frist).isEqualTo(frist3.toLocalDate())
+
+        assertThat(responseList[0].frist).isBefore(responseList[1].frist)
+    }
+
+    @Test
+    fun `Should group Dokumentasjonkrav without frist together`() {
+        val model = InternalDigisosSoker()
+
+        model.dokumentasjonkrav.addAll(
+            listOf(
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist.toLocalDate()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), null),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
+                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), null),
+            )
+        )
+        every { eventService.createModel(any(), any()) } returns model
+
+        val responseList = service.getDokumentasjonkrav("123", token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 3)
+
+        assertThat(responseList[2].dokumentasjonkravElementer).hasSize(2)
+
+        assertThat(responseList[2].frist).isNull()
     }
 }

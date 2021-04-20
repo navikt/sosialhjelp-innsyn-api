@@ -18,7 +18,7 @@ data class InternalDigisosSoker(
     var forelopigSvar: ForelopigSvar,
     var tidspunktSendt: LocalDateTime?,
     var vilkar: MutableList<Vilkar>,
-    var dokumentasjonkrav: MutableList<Dokumentasjonkrav>
+    var dokumentasjonkrav: MutableList<Dokumentasjonkrav>,
 ) {
 
     constructor() : this(
@@ -40,12 +40,12 @@ data class InternalDigisosSoker(
 
 data class Forvaltningsbrev(
     var referanse: String,
-    var tittel: String
+    var tittel: String,
 )
 
 data class Soknadsmottaker(
     val navEnhetsnummer: String,
-    val navEnhetsnavn: String
+    val navEnhetsnavn: String,
 )
 
 data class Oppgave(
@@ -56,7 +56,7 @@ data class Oppgave(
     val hendelsereferanse: String?,
     var innsendelsesfrist: LocalDateTime?,
     var tidspunktForKrav: LocalDateTime,
-    var erFraInnsyn: Boolean
+    var erFraInnsyn: Boolean,
 )
 
 data class Sak(
@@ -64,13 +64,13 @@ data class Sak(
     var saksStatus: SaksStatus?,
     var tittel: String?,
     var vedtak: MutableList<Vedtak>,
-    var utbetalinger: MutableList<Utbetaling>
+    var utbetalinger: MutableList<Utbetaling>,
 )
 
 data class Vedtak(
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,
-    var dato: LocalDate?
+    var dato: LocalDate?,
 )
 
 data class Utbetaling(
@@ -88,7 +88,7 @@ data class Utbetaling(
     var utbetalingsmetode: String?,
     var vilkar: MutableList<Vilkar>,
     var dokumentasjonkrav: MutableList<Dokumentasjonkrav>,
-    var datoHendelse: LocalDateTime
+    var datoHendelse: LocalDateTime,
 )
 
 // Skal renames til Hendelse eller lignende i senere refakturering
@@ -119,7 +119,7 @@ data class Vilkar(
     override var beskrivelse: String?,
     override var status: Oppgavestatus,
     var datoLagtTil: LocalDateTime,
-    var datoSistEndret: LocalDateTime
+    var datoSistEndret: LocalDateTime,
 ) : Oppgavehendelse()
 
 data class Dokumentasjonkrav(
@@ -128,10 +128,12 @@ data class Dokumentasjonkrav(
     override var tittel: String?,
     override var beskrivelse: String?,
     override var status: Oppgavestatus,
-    var datoLagtTil: LocalDateTime
+    var datoLagtTil: LocalDateTime,
+    var frist: LocalDate?,
 ) : Oppgavehendelse()
 
-data class Hendelse( // egentlig historikk
+data class Hendelse(
+    // egentlig historikk
     // type som felt?
     val tittel: String,
     val tidspunkt: LocalDateTime,

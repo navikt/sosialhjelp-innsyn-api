@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
-    private val fiksClient: FiksClient
+    private val fiksClient: FiksClient,
 ) {
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
@@ -29,7 +29,8 @@ class OppgaveService(
             return emptyList()
         }
 
-        val ettersendteVedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+        val ettersendteVedlegg =
+            vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
 
         val oppgaveResponseList = model.oppgaver
             .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
@@ -38,7 +39,15 @@ class OppgaveService(
                 OppgaveResponse(
                     innsendelsesfrist = key,
                     oppgaveId = value[0].oppgaveId, // oppgaveId og innsendelsefrist er alltid 1-1
-                    oppgaveElementer = value.map { OppgaveElement(it.tittel, it.tilleggsinfo, it.hendelsetype, it.hendelsereferanse, it.erFraInnsyn) }
+                    oppgaveElementer = value.map {
+                        OppgaveElement(
+                            it.tittel,
+                            it.tilleggsinfo,
+                            it.hendelsetype,
+                            it.hendelsereferanse,
+                            it.erFraInnsyn
+                        )
+                    }
                 )
             }
             .sortedBy { it.innsendelsesfrist }
@@ -76,7 +85,13 @@ class OppgaveService(
                 VilkarResponse(
                     vilkarElementer = value.map {
                         val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                        VilkarElement(it.datoLagtTil.toLocalDate(), it.referanse, tittel, beskrivelse, it.getOppgaveStatus())
+                        VilkarElement(
+                            it.datoLagtTil.toLocalDate(),
+                            it.referanse,
+                            tittel,
+                            beskrivelse,
+                            it.getOppgaveStatus()
+                        )
                     }
                 )
             }
@@ -99,15 +114,24 @@ class OppgaveService(
             }
             .filter { it.status != Oppgavestatus.ANNULLERT }
             .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
-            .groupBy { it.datoLagtTil.toLocalDate() }
-            .map { (_, value) ->
+            .groupBy { it.frist }
+            .map { (key, value) ->
                 DokumentasjonkravResponse(
+                    frist = key,
                     dokumentasjonkravElementer = value.map {
                         val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                        DokumentasjonkravElement(it.datoLagtTil.toLocalDate(), it.hendelsetype, it.referanse, tittel, beskrivelse, it.getOppgaveStatus())
+                        DokumentasjonkravElement(
+                            it.datoLagtTil.toLocalDate(),
+                            it.hendelsetype,
+                            it.referanse,
+                            tittel,
+                            beskrivelse,
+                            it.getOppgaveStatus()
+                        )
                     }
                 )
             }
+            .sortedWith(compareBy(nullsLast(), { it.frist }))
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList

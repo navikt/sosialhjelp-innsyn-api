@@ -21,12 +21,12 @@ object Versions {
     const val springfox = "3.0.0"
     const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"
-    const val commonsIo = "2.6"
+    const val commonsIo = "2.8.0"
     const val fileUpload = "1.4"
     const val tika = "1.25"
     const val pdfBox = "2.0.23"
     const val fiksKryptering = "1.0.11"
-    const val lettuce = "6.0.2.RELEASE"
+    const val lettuce = "6.0.4.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
     const val jsonSmart = "2.4.2"
@@ -148,7 +148,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
     implementation("io.mockk:mockk:${Versions.mockk}")
-    testImplementation("no.nav.security:token-validation-test-support:${Versions.tokenValidation}")
+    testImplementation("no.nav.security:token-validation-test-support:${Versions.tokenValidation}") {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-jersey") // Excluder da vi kun bruker Spring. Ved å exclude slutter snyk å klage på sårbarheter i jersey
+    }
+
     testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:${Versions.mockwebserver}")
@@ -160,6 +163,9 @@ dependencies {
         }
     }
 }
+
+// override spring managed dependencies
+extra["json-smart.version"] = "2.4.2"
 
 val githubUser: String by project
 val githubPassword: String by project

@@ -111,15 +111,14 @@ val digisosSoker = JsonDigisosSoker()
 
             JsonDokumentasjonkrav()
                 .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
-                .withFrist(DateTime.now().toString())
+                .withFrist(toStringWithTimezone(DateTime.now().minusDays(10)))
                 .withTittel("Legeerklæring")
                 .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
-                .withUtbetalingsreferanse(listOf("Betaling 1"))
-                .withDokumentasjonkravreferanse("Dokkrav 1")
-                .withSaksreferanse("Sak 1")
+                .withUtbetalingsreferanse(listOf("Betaling 2"))
+                .withDokumentasjonkravreferanse("Dokkrav1")
+                .withSaksreferanse("SAK1")
                 .withBeskrivelse("Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.")
                 .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
-
             ,
 
 

@@ -36,10 +36,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
         }
     }
 
-    /*if (utbetalingerMedSakKnytning.isEmpty() && utbetalingerUtenSakKnytning.isEmpty()) {
+    if (utbetalingerMedSakKnytning.isEmpty() && utbetalingerUtenSakKnytning.isEmpty()) {
         log.warn("Fant ingen utbetalinger å knytte dokumentasjonkrav til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
         return
-    }*/
+    }
 
     val dokumentasjonkrav = Dokumentasjonkrav(
         hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,

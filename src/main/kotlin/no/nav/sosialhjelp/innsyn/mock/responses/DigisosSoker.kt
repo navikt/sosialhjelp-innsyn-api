@@ -9,6 +9,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumenter
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
@@ -107,6 +108,20 @@ val digisosSoker = JsonDigisosSoker()
                             .withInnsendelsesfrist(toStringWithTimezone(DateTime.now().plusMonths(1).plusDays(1)))
                     )
                 ),
+
+            JsonDokumentasjonkrav()
+                .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
+                .withFrist(DateTime.now().toString())
+                .withTittel("Legeerklæring")
+                .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
+                .withUtbetalingsreferanse(listOf("Betaling 1"))
+                .withDokumentasjonkravreferanse("Dokkrav 1")
+                .withSaksreferanse("Sak 1")
+                .withBeskrivelse("Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
+
+            ,
+
 
             JsonForelopigSvar()
                 .withType(JsonHendelse.Type.FORELOPIG_SVAR)

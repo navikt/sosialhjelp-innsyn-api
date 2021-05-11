@@ -1,8 +1,11 @@
 package no.nav.sosialhjelp.innsyn.rest
 
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
+import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
@@ -60,10 +64,24 @@ class OppgaveController(
     fun getDokumentasjonkrav(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
         tilgangskontrollService.sjekkTilgang()
 
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
+        val dokumentasjonkrav =  dokkravMock()//oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
         if (dokumentasjonkrav.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
         return ResponseEntity.ok(dokumentasjonkrav)
+    }
+
+    private fun dokkravMock(): List<DokumentasjonkravResponse> {
+        return listOf(DokumentasjonkravResponse(
+            listOf(DokumentasjonkravElement(
+                LocalDate.now(),
+                JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                "referanse 1",
+                "Legeerklæring",
+                "Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.",
+                Oppgavestatus.RELEVANT
+            )),
+            LocalDate.now()
+        ))
     }
 }

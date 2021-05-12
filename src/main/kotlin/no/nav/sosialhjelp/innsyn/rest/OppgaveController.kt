@@ -80,8 +80,35 @@ class OppgaveController(
                 "Legeerklæring",
                 "Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.",
                 Oppgavestatus.RELEVANT
+            ),
+            DokumentasjonkravElement(
+                    LocalDate.now(),
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "referanse 1",
+                    "husleie",
+                    "Du må levere husleie.",
+                    Oppgavestatus.RELEVANT
             )),
             LocalDate.now()
+        ),
+        DokumentasjonkravResponse(
+                listOf(DokumentasjonkravElement(
+                        LocalDate.now(),
+                        JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                        "referanse 1",
+                        "Legeerklæring",
+                        "Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.",
+                        Oppgavestatus.RELEVANT
+                ),
+                        DokumentasjonkravElement(
+                                LocalDate.now(),
+                                JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                                "referanse 1",
+                                "husleie",
+                                "Du må levere husleie.",
+                                Oppgavestatus.RELEVANT
+                        )),
+                LocalDate.now().plusMonths(1)
         ))
     }
 }

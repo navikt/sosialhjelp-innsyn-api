@@ -6,18 +6,18 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val kotlin = "1.4.32"
-    const val coroutines = "1.4.3"
+    const val kotlin = "1.5.0"
+    const val coroutines = "1.5.0"
     const val springBoot = "2.4.5"
     const val sosialhjelpCommon = "1.7cde724"
     const val logback = "1.2.3"
-    const val logstash = "6.5"
-    const val filformat = "1.2021.03.02-10.58-415c44e55124"
+    const val logstash = "6.6"
+    const val filformat = "1.2021.04.15-10.42-6eb47b47da27"
     const val micrometerRegistry = "1.6.2"
     const val prometheus = "0.9.0"
-    const val tokenValidation = "1.3.5"
-    const val jackson = "2.12.1"
-    const val guava = "30.1-jre"
+    const val tokenValidation = "1.3.7"
+    const val jackson = "2.12.3"
+    const val guava = "30.1.1-jre"
     const val springfox = "3.0.0"
     const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"
@@ -26,26 +26,26 @@ object Versions {
     const val tika = "1.25"
     const val pdfBox = "2.0.23"
     const val fiksKryptering = "1.0.11"
-    const val lettuce = "6.0.4.RELEASE"
+    const val lettuce = "6.1.2.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
     const val jsonSmart = "2.4.2"
 
     //    Test only
     const val junitJupiter = "5.7.0"
-    const val mockk = "1.10.3"
+    const val mockk = "1.11.0"
     const val springmockk = "2.0.0"
     const val mockwebserver = "5.0.0-alpha.2"
 }
 
 plugins {
     application
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.5.0"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.4.32"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.5.0"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("com.github.ben-manes.versions") version "0.36.0"
+    id("com.github.ben-manes.versions") version "0.38.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
 }
 

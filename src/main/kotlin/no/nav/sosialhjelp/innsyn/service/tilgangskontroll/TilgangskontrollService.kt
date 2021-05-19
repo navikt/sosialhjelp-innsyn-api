@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
+import java.util.Locale
 
 @Component
 class TilgangskontrollService(
@@ -41,7 +42,7 @@ class TilgangskontrollService(
     }
 
     private fun fornavn(pdlPerson: PdlPerson?): String {
-        val fornavn = pdlPerson?.navn?.firstOrNull()?.fornavn?.toLowerCase()?.capitalize() ?: ""
+        val fornavn = pdlPerson?.navn?.firstOrNull()?.fornavn?.lowercase()?.replaceFirstChar { it.titlecase(Locale.getDefault()) } ?: ""
         if (fornavn.isEmpty()) {
             log.warn("PDL har ingen fornavn på brukeren. Dette gir ingen feil hos oss. Kontakt gjerne PDL-teamet, siden datakvaliteten på denne brukeren er dårlig.")
         }

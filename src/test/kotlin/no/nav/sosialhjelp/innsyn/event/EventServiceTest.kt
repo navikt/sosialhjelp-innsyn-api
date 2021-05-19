@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
+import java.util.Locale
 
 internal class EventServiceTest {
 
@@ -149,7 +150,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("${tittel_1.capitalize()} er under behandling")
+            assertThat(hendelse.tittel).contains("${tittel_1.replaceFirstChar { it.titlecase(Locale.getDefault()) }} er under behandling")
         }
 
         @Test

@@ -51,7 +51,7 @@ class OppgaveService(
                 )
             }
             .sortedBy { it.innsendelsesfrist }
-        log.info("Hentet ${oppgaveResponseList.sumBy { it.oppgaveElementer.size }} oppgaver")
+        log.info("Hentet ${oppgaveResponseList.sumOf { it.oppgaveElementer.size }} oppgaver")
         return oppgaveResponseList
     }
 
@@ -96,7 +96,7 @@ class OppgaveService(
                 )
             }
 
-        log.info("Hentet ${vilkarResponseList.sumBy { it.vilkarElementer.size }} vilkar")
+        log.info("Hentet ${vilkarResponseList.sumOf { it.vilkarElementer.size }} vilkar")
         return vilkarResponseList
     }
 
@@ -133,7 +133,7 @@ class OppgaveService(
             }
             .sortedWith(compareBy(nullsLast(), { it.frist }))
 
-        log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
+        log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList
     }
 

@@ -26,7 +26,7 @@ object Versions {
     const val tika = "1.25"
     const val pdfBox = "2.0.23"
     const val fiksKryptering = "1.0.11"
-    const val lettuce = "6.0.4.RELEASE"
+    const val lettuce = "6.1.2.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
     const val jsonSmart = "2.4.2"

@@ -71,6 +71,18 @@ class OppgaveController(
         return ResponseEntity.ok(dokumentasjonkrav)
     }
 
+    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{dokkraReferanse}", produces = ["application/json;charset=UTF-8"])
+    fun getDokumentasjonkravMedId(@PathVariable fiksDigisosId: String, @PathVariable dokkraReferanse: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
+        tilgangskontrollService.sjekkTilgang()
+
+        val dokumentasjonkrav =  dokkravMock2()//oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
+        if (dokumentasjonkrav.isEmpty()) {
+            return ResponseEntity(HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.ok(dokumentasjonkrav)
+    }
+
+
     private fun dokkravMock(): List<DokumentasjonkravResponse> {
         return listOf(DokumentasjonkravResponse(
             listOf(DokumentasjonkravElement(
@@ -111,4 +123,39 @@ class OppgaveController(
                 LocalDate.now().plusMonths(1)
         ))
     }
+
+    private fun dokkravMock2(): List<DokumentasjonkravResponse> {
+        return listOf(DokumentasjonkravResponse(
+                listOf(
+                        DokumentasjonkravElement(
+                                LocalDate.now(),
+                                JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                                "referanse 1",
+                                "husleie",
+                                "Du må levere husleie.",
+                                Oppgavestatus.RELEVANT
+                        )),
+                LocalDate.now()
+        ),
+                DokumentasjonkravResponse(
+                        listOf(DokumentasjonkravElement(
+                                LocalDate.now(),
+                                JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                                "referanse 1",
+                                "Legeerklæring",
+                                "Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.",
+                                Oppgavestatus.RELEVANT
+                        ),
+                                DokumentasjonkravElement(
+                                        LocalDate.now(),
+                                        JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                                        "referanse 1",
+                                        "husleie",
+                                        "Du må levere husleie.",
+                                        Oppgavestatus.RELEVANT
+                                )),
+                        LocalDate.now().plusMonths(1)
+                ))
+    }
+
 }

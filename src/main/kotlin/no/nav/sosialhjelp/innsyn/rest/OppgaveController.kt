@@ -88,7 +88,7 @@ class OppgaveController(
             listOf(DokumentasjonkravElement(
                 LocalDate.now(),
                 JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                "referanse 1",
+                "referanse1",
                 "Legeerklæring",
                 "Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.",
                 Oppgavestatus.RELEVANT
@@ -96,7 +96,7 @@ class OppgaveController(
             DokumentasjonkravElement(
                     LocalDate.now(),
                     JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                    "referanse 1",
+                    "referanse2",
                     "husleie",
                     "Du må levere husleie.",
                     Oppgavestatus.RELEVANT
@@ -107,7 +107,7 @@ class OppgaveController(
                 listOf(DokumentasjonkravElement(
                         LocalDate.now(),
                         JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                        "referanse 1",
+                        "referanse3",
                         "Legeerklæring",
                         "Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.",
                         Oppgavestatus.RELEVANT
@@ -115,7 +115,7 @@ class OppgaveController(
                         DokumentasjonkravElement(
                                 LocalDate.now(),
                                 JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                                "referanse 1",
+                                "referanse4",
                                 "husleie",
                                 "Du må levere husleie.",
                                 Oppgavestatus.RELEVANT
@@ -130,7 +130,7 @@ class OppgaveController(
                         DokumentasjonkravElement(
                                 LocalDate.now(),
                                 JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                                "referanse 1",
+                                "referanse2",
                                 "husleie",
                                 "Du må levere husleie.",
                                 Oppgavestatus.RELEVANT
@@ -141,7 +141,7 @@ class OppgaveController(
                         listOf(DokumentasjonkravElement(
                                 LocalDate.now(),
                                 JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                                "referanse 1",
+                                "referanse3",
                                 "Legeerklæring",
                                 "Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.",
                                 Oppgavestatus.RELEVANT
@@ -149,7 +149,7 @@ class OppgaveController(
                                 DokumentasjonkravElement(
                                         LocalDate.now(),
                                         JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                                        "referanse 1",
+                                        "referanse4",
                                         "husleie",
                                         "Du må levere husleie.",
                                         Oppgavestatus.RELEVANT

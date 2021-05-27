@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val kotlin = "1.5.0"
+    const val kotlin = "1.5.10"
     const val coroutines = "1.5.0"
     const val springBoot = "2.5.0"
     const val sosialhjelpCommon = "1.05daec2"
@@ -40,9 +40,9 @@ object Versions {
 
 plugins {
     application
-    kotlin("jvm") version "1.5.0"
+    kotlin("jvm") version "1.5.10"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.5.0"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.5.10"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.github.ben-manes.versions") version "0.38.0"

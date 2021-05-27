@@ -12,7 +12,6 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.forwardHeaders
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.typeRef
@@ -144,7 +143,7 @@ class DigisosApiClientImpl(
     }
 
     private fun headers(): HttpHeaders {
-        val headers = forwardHeaders()
+        val headers = HttpHeaders()
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
         headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)

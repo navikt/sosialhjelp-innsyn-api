@@ -5,7 +5,6 @@ import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_NAV_APIKEY
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.forwardHeaders
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -66,7 +65,7 @@ class NorgClientImpl(
     }
 
     private fun headers(): HttpHeaders {
-        val headers = forwardHeaders()
+        val headers = HttpHeaders()
         headers.accept = listOf(APPLICATION_JSON)
         headers.set(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
         headers.set(HEADER_NAV_APIKEY, System.getenv(NORG2_APIKEY))

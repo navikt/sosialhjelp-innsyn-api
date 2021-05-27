@@ -8,7 +8,6 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CONSUMER_TOKEN
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.forwardHeaders
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.CALL_ID
@@ -79,7 +78,7 @@ class PdlClientImpl(
     private fun headers(): HttpHeaders {
         val stsToken: String = stsClient.token()
 
-        val headers = forwardHeaders()
+        val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.set(HEADER_CALL_ID, MDCUtils.get(CALL_ID))
         headers.set(HEADER_CONSUMER_TOKEN, BEARER + stsToken)

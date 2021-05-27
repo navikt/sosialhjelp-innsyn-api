@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.client.sts
 
 import no.nav.sosialhjelp.innsyn.client.sts.STSToken.Companion.shouldRenewToken
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.forwardHeaders
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -25,7 +24,6 @@ class StsClient(
                         .queryParam(SCOPE, OPENID)
                         .build()
                 }
-                .headers { it.addAll(forwardHeaders()) }
                 .retrieve()
                 .bodyToMono<STSToken>()
                 .doOnError {

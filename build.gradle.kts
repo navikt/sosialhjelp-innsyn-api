@@ -71,7 +71,6 @@ configurations {
     }
     "testImplementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
-        exclude(group = "junit", module = "junit")
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
@@ -148,10 +147,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
     implementation("io.mockk:mockk:${Versions.mockk}")
-    testImplementation("no.nav.security:token-validation-test-support:${Versions.tokenValidation}") {
-        exclude(group = "org.springframework.boot", module = "spring-boot-starter-jersey") // Excluder da vi kun bruker Spring. Ved å exclude slutter snyk å klage på sårbarheter i jersey
-    }
-
+    testImplementation("no.nav.security:token-validation-spring-test:${Versions.tokenValidation}")
     testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:${Versions.mockwebserver}")

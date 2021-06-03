@@ -6,7 +6,7 @@
   ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,no-redis",
-    "METADATA_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/.well-known/openid-configuration",
+    "METADATA_URL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt-api/login/metadata/selvbetjening",
     "FIKS_DIGISOS_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/fiks",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt-api/fiks/dokumentlager",
     "FIKS_SVAR_UT_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/fiks/svarut",

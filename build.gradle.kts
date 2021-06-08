@@ -43,7 +43,7 @@ plugins {
     kotlin("jvm") version "1.5.10"
 
     id("org.jetbrains.kotlin.plugin.spring") version "1.5.10"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.github.ben-manes.versions") version "0.38.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
@@ -51,7 +51,7 @@ plugins {
 
 application {
     applicationName = "sosialhjelp-innsyn-api"
-    mainClassName = "no.nav.sosialhjelp.innsyn.ApplicationKt"
+    mainClass.set("no.nav.sosialhjelp.innsyn.ApplicationKt")
 }
 
 java {
@@ -197,7 +197,7 @@ tasks {
     }
 
     withType<ShadowJar> {
-        classifier = ""
+        archiveClassifier.set("")
         transform(ServiceFileTransformer::class.java) {
             setPath("META-INF/cxf")
             include("bus-extensions.txt")

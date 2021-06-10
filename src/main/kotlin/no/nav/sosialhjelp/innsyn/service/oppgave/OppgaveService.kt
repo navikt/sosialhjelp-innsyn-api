@@ -137,6 +137,47 @@ class OppgaveService(
         return dokumentasjonkravResponseList
     }
 
+    fun getDokumentasjonkravMedId(
+        fiksDigisosId: String,
+        dokkraReferanse: String,
+        token: String
+    ): List<DokumentasjonkravResponse> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
+        if (model.dokumentasjonkrav.isEmpty()) {
+            return emptyList()
+        }
+
+        val dokumentasjonkravResponseList = model.dokumentasjonkrav
+            .filter {
+                !it.isEmpty()
+                    .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
+            }
+            .filter { it.status != Oppgavestatus.ANNULLERT }
+            .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
+            .filter { it.referanse == dokkraReferanse }
+            .groupBy { it.frist }
+            .map { (key, value) ->
+                DokumentasjonkravResponse(
+                    frist = key,
+                    dokumentasjonkravElementer = value.map {
+                        val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
+                        DokumentasjonkravElement(
+                            it.datoLagtTil.toLocalDate(),
+                            it.hendelsetype,
+                            it.referanse,
+                            tittel,
+                            beskrivelse,
+                            it.getOppgaveStatus()
+                        )
+                    }
+                )
+            }
+            .sortedWith(compareBy(nullsLast(), { it.frist }))
+
+        log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
+        return dokumentasjonkravResponseList    }
+
     companion object {
         private val log by logger()
     }

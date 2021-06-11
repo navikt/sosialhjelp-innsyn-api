@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
+import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
@@ -172,6 +173,20 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].oppgaveElementer).hasSize(1)
         assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type3)
         assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg3)
+    }
+
+    @Test
+    fun `Should not return oppgaver when soknad is ferdig behandla`() {
+        val model = InternalDigisosSoker()
+        model.status = SoknadsStatus.FERDIGBEHANDLET
+        model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
+
+        every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+
+        val responseList = service.hentOppgaver("123", token)
+
+        assertThat(responseList).isEmpty()
     }
 
     @Test

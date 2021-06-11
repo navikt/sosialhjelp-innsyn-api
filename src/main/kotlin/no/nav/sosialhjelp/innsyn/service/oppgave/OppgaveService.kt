@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
+import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.VilkarElement
 import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -25,7 +26,7 @@ class OppgaveService(
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
-        if (model.oppgaver.isEmpty()) {
+        if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
             return emptyList()
         }
 

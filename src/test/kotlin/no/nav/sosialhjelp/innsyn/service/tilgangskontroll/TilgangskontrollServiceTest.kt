@@ -8,12 +8,10 @@ import no.nav.sosialhjelp.innsyn.client.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlHentPerson
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlNavn
 import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class TilgangskontrollServiceTest {
 
@@ -85,8 +83,8 @@ internal class TilgangskontrollServiceTest {
     internal fun `hentTilgang - skal gi tilgang hvis client returnerer null`() {
         every { pdlClientMock.hentPerson(any()) } returns null
 
-        assertTrue { service.hentTilgang(ident).harTilgang }
-        assertEquals("", service.hentTilgang(ident).fornavn)
+        assertThat(service.hentTilgang(ident).harTilgang).isTrue
+        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("")
     }
 
     @Test
@@ -94,8 +92,8 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson } returns null
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertTrue { service.hentTilgang(ident).harTilgang }
-        assertEquals("", service.hentTilgang(ident).fornavn)
+        assertThat(service.hentTilgang(ident).harTilgang).isTrue
+        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("")
     }
 
     @Test
@@ -104,7 +102,7 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson?.navn } returns null
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertTrue { service.hentTilgang(ident).harTilgang }
+        assertThat(service.hentTilgang(ident).harTilgang).isTrue
     }
 
     @Test
@@ -113,7 +111,7 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson?.navn } returns null
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertFalse { service.hentTilgang(ident).harTilgang }
+        assertThat(service.hentTilgang(ident).harTilgang).isFalse
     }
 
     @Test
@@ -122,8 +120,8 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson?.navn } returns listOf(PdlNavn("KREATIV"), PdlNavn("NATA"))
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertEquals("Kreativ", service.hentTilgang(ident).fornavn)
-        assertFalse { service.hentTilgang(ident).harTilgang }
+        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("Kreativ")
+        assertThat(service.hentTilgang(ident).harTilgang).isFalse
     }
 
     @Test
@@ -132,8 +130,8 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson?.navn } returns null
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertEquals("", service.hentTilgang(ident).fornavn)
-        assertFalse { service.hentTilgang(ident).harTilgang }
+        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("")
+        assertThat(service.hentTilgang(ident).harTilgang).isFalse
     }
 
     @Test
@@ -142,7 +140,7 @@ internal class TilgangskontrollServiceTest {
         every { clientResponse.hentPerson?.navn } returns emptyList()
         every { pdlClientMock.hentPerson(any()) } returns clientResponse
 
-        assertEquals("", service.hentTilgang(ident).fornavn)
-        assertFalse { service.hentTilgang(ident).harTilgang }
+        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("")
+        assertThat(service.hentTilgang(ident).harTilgang).isFalse
     }
 }

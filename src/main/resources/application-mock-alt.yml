@@ -13,7 +13,7 @@ innsyn:
 #Token-validering
 no.nav.security.jwt:
   issuer.selvbetjening:
-    discoveryurl: ${METADATA_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/login/metadata/selvbetjening}
+    discoveryurl: ${METADATA_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/well-known/selvbetjening}
     accepted_audience: someaudience
     cookie_name: localhost-idtoken
 azuread.loginurl: ${AZUREAD_LOGINURL:http://127.0.0.1:3008/sosialhjelp/mock-alt/login}

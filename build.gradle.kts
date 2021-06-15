@@ -18,7 +18,6 @@ object Versions {
     const val tokenValidation = "1.3.7"
     const val jackson = "2.12.3"
     const val guava = "30.1.1-jre"
-    const val springfox = "3.0.0"
     const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.8.0"
@@ -30,6 +29,7 @@ object Versions {
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
     const val jsonSmart = "2.4.2"
+    const val springdoc = "1.5.9"
 
     //    Test only
     const val junitJupiter = "5.7.0"
@@ -122,8 +122,8 @@ dependencies {
 //    Token-validering
     implementation("no.nav.security:token-validation-spring:${Versions.tokenValidation}")
 
-//    Springfox/swagger
-    implementation("io.springfox:springfox-boot-starter:${Versions.springfox}")
+//    Springdoc
+    implementation("org.springdoc:springdoc-openapi-ui:${Versions.springdoc}")
 
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")

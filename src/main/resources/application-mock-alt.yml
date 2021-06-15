@@ -10,6 +10,10 @@ innsyn:
     virusscan:
       enabled: false
 
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
+
 #Token-validering
 no.nav.security.jwt:
   issuer.selvbetjening:

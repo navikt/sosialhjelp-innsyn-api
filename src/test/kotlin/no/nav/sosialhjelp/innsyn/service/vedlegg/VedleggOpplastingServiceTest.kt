@@ -40,11 +40,6 @@ import java.security.cert.X509Certificate
 import java.time.LocalDate
 import java.util.UUID
 import javax.imageio.ImageIO
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 internal class VedleggOpplastingServiceTest {
 
@@ -207,7 +202,8 @@ internal class VedleggOpplastingServiceTest {
             MockMultipartFile("files", filnavn2, "unknown", ByteArray(0))
         )
 
-        assertFailsWith<OpplastingFilnavnMismatchException> { service.sendVedleggTilFiks(id, files, metadata, "token") }
+        assertThatExceptionOfType(OpplastingFilnavnMismatchException::class.java)
+            .isThrownBy { service.sendVedleggTilFiks(id, files, metadata, "token") }
     }
 
     @Test
@@ -340,11 +336,11 @@ internal class VedleggOpplastingServiceTest {
     fun `skal validere ugyldige tegn i filnavn`() {
         val ugyldigTegn = arrayOf("*", ":", "<", ">", "|", "?", "\\", "/", "â", "اَلْعَرَبِيَّةُ", "blabla?njn")
         for (tegn in ugyldigTegn) {
-            assertTrue { containsIllegalCharacters(tegn) }
+            assertThat(containsIllegalCharacters(tegn)).isTrue
         }
 
         val utvalgAvGyldigeTegn = ".aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVw...WxXyYzZæÆøØåÅ-_ (),._–-"
-        assertFalse { containsIllegalCharacters(utvalgAvGyldigeTegn) }
+        assertThat(containsIllegalCharacters(utvalgAvGyldigeTegn)).isFalse
     }
 
     @Test
@@ -362,8 +358,8 @@ internal class VedleggOpplastingServiceTest {
 
         val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
 
-        assertNull(createJsonVedlegg.hendelseType)
-        assertNull(createJsonVedlegg.hendelseReferanse)
+        assertThat(createJsonVedlegg.hendelseType).isNull()
+        assertThat(createJsonVedlegg.hendelseReferanse).isNull()
     }
 
     @Test
@@ -381,8 +377,8 @@ internal class VedleggOpplastingServiceTest {
 
         val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
 
-        assertEquals(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, createJsonVedlegg.hendelseType)
-        assertEquals("hendelsereferanse", createJsonVedlegg.hendelseReferanse)
+        assertThat(createJsonVedlegg.hendelseType).isEqualTo(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT)
+        assertThat(createJsonVedlegg.hendelseReferanse).isEqualTo("hendelsereferanse")
     }
 
     @Test
@@ -408,7 +404,7 @@ internal class VedleggOpplastingServiceTest {
             )
         )
 
-        assertEquals("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ", service.getMetadataAsString(metadataList))
+        assertThat(service.getMetadataAsString(metadataList)).isEqualTo("metadata[0].filer.size: 3, metadata[1].filer.size: 1, metadata[2].filer.size: 2, ")
     }
 
     @Test
@@ -480,10 +476,10 @@ internal class VedleggOpplastingServiceTest {
         service.renameFilenameInMetadataJson(originalFilenameInNFDFormat, newName, metadataListMedSanitizedFilename)
         service.renameFilenameInMetadataJson(sanitizeFileName(originalFilenameInNFDFormat), newName, metadataListMedSanitizedFilename2)
 
-        assertEquals(newName, metadataListUtenSanitizedFilename[0].filer[0].filnavn)
-        assertEquals(newName, metadataListUtenSanitizedFilename2[0].filer[0].filnavn)
-        assertEquals(newName, metadataListMedSanitizedFilename[0].filer[0].filnavn)
-        assertEquals(newName, metadataListMedSanitizedFilename2[0].filer[0].filnavn)
+        assertThat(metadataListUtenSanitizedFilename[0].filer[0].filnavn).isEqualTo(newName)
+        assertThat(metadataListUtenSanitizedFilename2[0].filer[0].filnavn).isEqualTo(newName)
+        assertThat(metadataListMedSanitizedFilename[0].filer[0].filnavn).isEqualTo(newName)
+        assertThat(metadataListMedSanitizedFilename2[0].filer[0].filnavn).isEqualTo(newName)
     }
 
     @Test
@@ -502,10 +498,10 @@ internal class VedleggOpplastingServiceTest {
         service.renameFilenameInMetadataJson(originalFilenameWithWhitespaces, newName, metadataListWithoutWhitespaces)
         service.renameFilenameInMetadataJson(originalFilenameWithoutWhitespaces, newName, metadataListWithoutWhitespaces2)
 
-        assertEquals(newName, metadataListWithWhitespaces[0].filer[0].filnavn)
-        assertEquals(newName, metadataListWithWhitespaces2[0].filer[0].filnavn)
-        assertEquals(newName, metadataListWithoutWhitespaces[0].filer[0].filnavn)
-        assertEquals(newName, metadataListWithoutWhitespaces2[0].filer[0].filnavn)
+        assertThat(metadataListWithWhitespaces[0].filer[0].filnavn).isEqualTo(newName)
+        assertThat(metadataListWithWhitespaces2[0].filer[0].filnavn).isEqualTo(newName)
+        assertThat(metadataListWithoutWhitespaces[0].filer[0].filnavn).isEqualTo(newName)
+        assertThat(metadataListWithoutWhitespaces2[0].filer[0].filnavn).isEqualTo(newName)
     }
 
     private fun createSimpleMetadataListWithFilename(filename: String): MutableList<OpplastetVedleggMetadata> {
@@ -519,6 +515,7 @@ internal class VedleggOpplastingServiceTest {
             )
         )
     }
+
     @Test
     fun `getFilnavnListsAsString skal returnere en string med finavn`() {
         val filnavnMetadata = listOf(
@@ -538,12 +535,12 @@ internal class VedleggOpplastingServiceTest {
             "åÅ.pdf"
         )
 
-        assertEquals(
-            "" +
-                "\r\nFilnavnMetadata : 22 (2 tegn), a\u030AA\u030A.pdf (8 tegn), åÅ.pdf (8 tegn)," +
-                "\r\nFilnavnMultipart: 22  (3 tegn), åÅ.pdf (6 tegn), åÅ.pdf (6 tegn),",
-            service.getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)
-        )
+        assertThat(service.getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart))
+            .isEqualTo(
+                "" +
+                    "\r\nFilnavnMetadata : 22 (2 tegn), a\u030AA\u030A.pdf (8 tegn), åÅ.pdf (8 tegn)," +
+                    "\r\nFilnavnMultipart: 22  (3 tegn), åÅ.pdf (6 tegn), åÅ.pdf (6 tegn),"
+            )
     }
 
     private fun createImageByteArray(type: String, size: Int = 1): ByteArray {

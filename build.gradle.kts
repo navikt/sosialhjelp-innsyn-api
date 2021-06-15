@@ -23,13 +23,13 @@ object Versions {
     const val commonsIo = "2.8.0"
     const val fileUpload = "1.4"
     const val tika = "1.25"
-    const val pdfBox = "2.0.23"
+    const val pdfBox = "2.0.24"
     const val fiksKryptering = "1.0.11"
     const val lettuce = "6.0.5.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
-    const val jsonSmart = "2.4.2"
     const val springdoc = "1.5.9"
+    const val jsonSmart = "2.4.7"
 
     //    Test only
     const val junitJupiter = "5.7.0"
@@ -148,20 +148,19 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
     implementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("no.nav.security:token-validation-spring-test:${Versions.tokenValidation}")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:${Versions.mockwebserver}")
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     constraints {
         implementation("net.minidev:json-smart:${Versions.jsonSmart}") {
-            because("Setter transitiv avhengighet sin versjon eksplisitt til 2.4.2. Transitiv avhengighet dratt inn av com.nimbusds:oauth2-oidc-sdk@9.3.3 har sårbarhet. Constraintsen kan fjernes når token-support bruker en versjon av nimbusds som ikke har en range av versjoner for json-smart")
+            because("Snyk ønsker 2.4.5 eller høyere. Transitiv avhengighet dratt inn av com.nimbusds:oauth2-oidc-sdk@9.3.3 har sårbarhet.")
         }
     }
 }
 
 // override spring managed dependencies
-extra["json-smart.version"] = "2.4.2"
+extra["json-smart.version"] = Versions.jsonSmart
 
 val githubUser: String by project
 val githubPassword: String by project

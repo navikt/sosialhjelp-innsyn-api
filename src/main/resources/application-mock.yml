@@ -9,6 +9,10 @@ innsyn:
     virusscan:
       enabled: false
 
+springdoc:
+  api-docs:
+    enabled: true
+
 client:
   fiks_digisos_endpoint_url: digisosapiurl
   fiks_dokumentlager_endpoint_url: dokumentlagerurl

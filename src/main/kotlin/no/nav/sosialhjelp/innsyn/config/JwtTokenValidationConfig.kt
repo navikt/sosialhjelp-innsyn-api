@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile
 
 @Profile("!mock")
 @Configuration
-@EnableJwtTokenValidation(ignore = ["org.springframework", "springfox.documentation.swagger.web.ApiResourceController", "springfox.documentation.oas.web.OpenApiControllerWebMvc"])
+@EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc.webmvc.api.OpenApiWebMvcResource", "org.springdoc.webmvc.ui.SwaggerWelcomeWebMvc"])
 class JwtTokenValidationConfig
 
 // JwtTokenValidation er enabled så lenge appen kjører med profil != mock

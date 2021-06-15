@@ -26,6 +26,10 @@ innsyn:
     virusscan:
       enabled: false
 
+springdoc:
+  api-docs:
+    enabled: true
+
 #Token-valdering
 no.nav.security.jwt:
   issuer.selvbetjening:

@@ -153,6 +153,16 @@ val digisosSoker = JsonDigisosSoker()
                 .withBeskrivelse("Du må levere husleie")
                 .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
             ,
+            JsonDokumentasjonkrav()
+                .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
+                .withTittel("Strømregning")
+                .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
+                .withUtbetalingsreferanse(listOf("Betaling 1", "Betaling 2"))
+                .withDokumentasjonkravreferanse("Dokkrav5")
+                .withSaksreferanse("SAK1")
+                .withBeskrivelse("Du må levere strømregning")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
+            ,
 
 
             JsonForelopigSvar()

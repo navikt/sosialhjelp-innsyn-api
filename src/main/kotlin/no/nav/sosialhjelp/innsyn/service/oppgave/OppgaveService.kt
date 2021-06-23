@@ -13,6 +13,7 @@ import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.toLocalDate
 import org.springframework.stereotype.Component
 
 @Component
@@ -139,44 +140,17 @@ class OppgaveService(
 
     fun getDokumentasjonkravMedId(
         fiksDigisosId: String,
-        dokkraReferanse: String,
+        innsendelsesfrist: String,
         token: String
     ): List<DokumentasjonkravResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        val model = eventService.createModel(digisosSak, token)
-        if (model.dokumentasjonkrav.isEmpty()) {
-            return emptyList()
+        val dokumentasjonkrav = getDokumentasjonkrav(fiksDigisosId, token)
+
+        if (innsendelsesfrist == "null") {
+            return dokumentasjonkrav.filter { it.frist == null }
         }
 
-        val dokumentasjonkravResponseList = model.dokumentasjonkrav
-            .filter {
-                !it.isEmpty()
-                    .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-            }
-            .filter { it.status != Oppgavestatus.ANNULLERT }
-            .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
-            .filter { it.referanse == dokkraReferanse }
-            .groupBy { it.frist }
-            .map { (key, value) ->
-                DokumentasjonkravResponse(
-                    frist = key,
-                    dokumentasjonkravElementer = value.map {
-                        val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                        DokumentasjonkravElement(
-                            it.datoLagtTil.toLocalDate(),
-                            it.hendelsetype,
-                            it.referanse,
-                            tittel,
-                            beskrivelse,
-                            it.getOppgaveStatus()
-                        )
-                    }
-                )
-            }
-            .sortedWith(compareBy(nullsLast(), { it.frist }))
-
-        log.info("Hentet ${dokumentasjonkravResponseList.sumBy { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
-        return dokumentasjonkravResponseList    }
+        return dokumentasjonkrav.filter { it.frist == innsendelsesfrist.toLocalDate() }
+    }
 
     companion object {
         private val log by logger()

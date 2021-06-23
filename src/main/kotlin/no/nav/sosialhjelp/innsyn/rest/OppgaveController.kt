@@ -1,11 +1,8 @@
 package no.nav.sosialhjelp.innsyn.rest
 
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
-import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
 
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
@@ -71,11 +67,11 @@ class OppgaveController(
         return ResponseEntity.ok(dokumentasjonkrav)
     }
 
-    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{dokkraReferanse}", produces = ["application/json;charset=UTF-8"])
-    fun getDokumentasjonkravMedId(@PathVariable fiksDigisosId: String, @PathVariable dokkraReferanse: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
+    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{innsendelsesfrist}", produces = ["application/json;charset=UTF-8"])
+    fun getDokumentasjonkravMedId(@PathVariable fiksDigisosId: String, @PathVariable innsendelsesfrist: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
         tilgangskontrollService.sjekkTilgang()
-        // Fixme
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokkraReferanse, token)
+
+        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, innsendelsesfrist, token)
         if (dokumentasjonkrav.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }

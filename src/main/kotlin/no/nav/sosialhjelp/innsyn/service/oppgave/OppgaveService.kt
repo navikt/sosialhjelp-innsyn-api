@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.service.oppgave
 
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
@@ -108,11 +109,15 @@ class OppgaveService(
             return emptyList()
         }
 
+        val ettersendteVedlegg =
+            vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
             .filter {
                 !it.isEmpty()
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
             }
+            .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
             .filter { it.status != Oppgavestatus.ANNULLERT }
             .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
             .groupBy { it.frist }
@@ -150,6 +155,13 @@ class OppgaveService(
         }
 
         return dokumentasjonkrav.filter { it.frist == innsendelsesfrist.toLocalDate() }
+    }
+
+    private fun erAlleredeLastetOpp(dokumentasjonkrav: Dokumentasjonkrav, vedleggListe: List<InternalVedlegg>): Boolean {
+        return vedleggListe
+            .filter { it.type == dokumentasjonkrav.tittel }
+            .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
+            .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.toLocalDate().isAfter(dokumentasjonkrav.frist) }
     }
 
     companion object {

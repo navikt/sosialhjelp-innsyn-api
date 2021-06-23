@@ -65,6 +65,7 @@ data class VilkarElement(
 
 data class DokumentasjonkravResponse(
     val dokumentasjonkravElementer: List<DokumentasjonkravElement>,
+    @JsonFormat(pattern = "yyyy-MM-dd")
     val frist: LocalDate?
 )
 

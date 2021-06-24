@@ -161,7 +161,7 @@ class OppgaveService(
         return vedleggListe
             .filter { it.type == dokumentasjonkrav.tittel }
             .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
-            .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.toLocalDate().isAfter(dokumentasjonkrav.frist) }
+            .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) }
     }
 
     companion object {

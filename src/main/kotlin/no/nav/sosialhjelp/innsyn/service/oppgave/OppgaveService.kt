@@ -123,6 +123,7 @@ class OppgaveService(
             .groupBy { it.frist }
             .map { (key, value) ->
                 DokumentasjonkravResponse(
+                    dokumentasjonkravId = value[0].dokumentasjonkravId,
                     frist = key,
                     dokumentasjonkravElementer = value.map {
                         val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
@@ -145,16 +146,12 @@ class OppgaveService(
 
     fun getDokumentasjonkravMedId(
         fiksDigisosId: String,
-        innsendelsesfrist: String,
+        dokumentasjonkravId: String,
         token: String
     ): List<DokumentasjonkravResponse> {
         val dokumentasjonkrav = getDokumentasjonkrav(fiksDigisosId, token)
 
-        if (innsendelsesfrist == "null") {
-            return dokumentasjonkrav.filter { it.frist == null }
-        }
-
-        return dokumentasjonkrav.filter { it.frist == innsendelsesfrist.toLocalDate() }
+        return dokumentasjonkrav.filter { it.dokumentasjonkravId == dokumentasjonkravId }
     }
 
     private fun erAlleredeLastetOpp(dokumentasjonkrav: Dokumentasjonkrav, vedleggListe: List<InternalVedlegg>): Boolean {

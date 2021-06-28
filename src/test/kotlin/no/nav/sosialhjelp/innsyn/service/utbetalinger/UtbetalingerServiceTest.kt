@@ -44,6 +44,9 @@ internal class UtbetalingerServiceTest {
     private val tittel = "tittel"
     private val referanse = "referanse"
 
+    private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce";
+
+
     @BeforeEach
     fun init() {
         clearAllMocks()
@@ -306,7 +309,16 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling med dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         val now = LocalDateTime.now()
-        val dokumentasjonkrav = Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, now, LocalDate.now())
+        val dokumentasjonkrav = Dokumentasjonkrav(
+            dokumentasjonkravId,
+            JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+            "dokumentasjonkrav",
+            "tittel",
+            "Skal hoppe",
+            Oppgavestatus.RELEVANT,
+            now,
+            LocalDate.now()
+        )
         val utbetaling1 = Utbetaling(
             "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
             null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now()

@@ -47,6 +47,8 @@ internal class OppgaveServiceTest {
     private val frist3 = LocalDateTime.now().plusDays(2)
     private val frist4 = LocalDateTime.now().plusDays(3)
 
+    private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce";
+
     private val token = "token"
 
     @BeforeEach
@@ -225,12 +227,40 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(
             listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.ANNULLERT, LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", null, Oppgavestatus.LEVERT_TIDLIGERE, LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    "tittel",
+                    null,
+                    Oppgavestatus.ANNULLERT,
+                    LocalDateTime.now(),
+                    LocalDate.now()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    "tittel",
+                    null,
+                    Oppgavestatus.LEVERT_TIDLIGERE,
+                    LocalDateTime.now(),
+                    LocalDate.now()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav2",
+                    "tittel",
+                    null,
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    LocalDate.now()
+                )
             )
         )
         every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -245,13 +275,50 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(
             listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, " ", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    "tittel",
+                    "beskrivelse1",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    LocalDate.now()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav2",
+                    null,
+                    "beskrivelse2",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    LocalDate.now()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav3",
+                    "",
+                    null,
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    LocalDate.now()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav4",
+                    null,
+                    " ",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    LocalDate.now()
+                )
             )
         )
         every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -269,12 +336,40 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(
             listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "beskrivelse1", Oppgavestatus.OPPFYLT, LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", null, "beskrivelse2", Oppgavestatus.IKKE_OPPFYLT, LocalDateTime.now(), LocalDate.now()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", null, "beskrivelse", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDate.now())
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    "tittel",
+                    "beskrivelse1",
+                    Oppgavestatus.OPPFYLT,
+                    LocalDateTime.now(),
+                    LocalDate.now()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav2",
+                    null,
+                    "beskrivelse2",
+                    Oppgavestatus.IKKE_OPPFYLT,
+                    LocalDateTime.now(),
+                    LocalDate.now(),
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav4",
+                    null,
+                    "beskrivelse",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    LocalDate.now(),
+                )
             )
         )
         every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -298,6 +393,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getVilkar("123", token)
 
@@ -315,13 +411,50 @@ internal class OppgaveServiceTest {
 
         model.dokumentasjonkrav.addAll(
             listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist.toLocalDate()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist3.toLocalDate()),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    frist2.toLocalDate()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav2",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    frist2.toLocalDate()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav3",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    frist.toLocalDate()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav4",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    frist3.toLocalDate()
+                ),
             )
         )
         every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -346,13 +479,50 @@ internal class OppgaveServiceTest {
 
         model.dokumentasjonkrav.addAll(
             listOf(
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist.toLocalDate()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav3", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), null),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav2", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), frist2.toLocalDate()),
-                Dokumentasjonkrav(JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav4", "tittel", "", Oppgavestatus.RELEVANT, LocalDateTime.now(), null),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    frist.toLocalDate()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav3",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    null
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav2",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    frist2.toLocalDate()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav4",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    null
+                ),
             )
         )
         every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 

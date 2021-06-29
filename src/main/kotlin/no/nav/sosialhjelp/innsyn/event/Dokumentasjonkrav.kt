@@ -52,10 +52,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
         frist = hendelse.frist?.toLocalDateTime()?.toLocalDate()
     )
 
+    this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav)
 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
     union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav) }
-    this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav)
 
     if (unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false)) {
         val beskrivelse = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."

@@ -42,7 +42,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
     }
 
     val dokumentasjonkrav = Dokumentasjonkrav(
-        dokumentasjonkravId = sha256(hendelse.frist ?: "null"),
+        dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
         hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
         referanse = hendelse.dokumentasjonkravreferanse,
         tittel = hendelse.tittel,

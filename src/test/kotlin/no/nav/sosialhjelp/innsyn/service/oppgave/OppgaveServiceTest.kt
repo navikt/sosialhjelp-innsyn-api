@@ -48,6 +48,7 @@ internal class OppgaveServiceTest {
     private val frist4 = LocalDateTime.now().plusDays(3)
 
     private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce"
+    private val dokumentasjonkravId2 = "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
 
     private val token = "token"
 
@@ -532,5 +533,67 @@ internal class OppgaveServiceTest {
         assertThat(responseList[2].dokumentasjonkravElementer).hasSize(2)
 
         assertThat(responseList[2].frist).isNull()
+    }
+
+    @Test
+    fun `Should only return Dokumentasjonkrav with the same frist`() {
+        val model = InternalDigisosSoker()
+
+        model.dokumentasjonkrav.addAll(
+            listOf(
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    frist.toLocalDate()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId2,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav3",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    null
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav2",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    frist2.toLocalDate()
+                ),
+                Dokumentasjonkrav(
+                    dokumentasjonkravId2,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav4",
+                    "tittel",
+                    "",
+                    Oppgavestatus.RELEVANT,
+                    LocalDateTime.now(),
+                    null
+                ),
+            )
+        )
+        every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+
+        val responseList = service.getDokumentasjonkravMedId("123", dokumentasjonkravId2, token)
+
+        assertThat(responseList).isNotNull
+        assertThat(responseList.size == 1)
+
+        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(2)
+
+        assertThat(responseList[0].frist).isNull()
+        assertThat(responseList[0].dokumentasjonkravId).isEqualTo(dokumentasjonkravId2)
     }
 }

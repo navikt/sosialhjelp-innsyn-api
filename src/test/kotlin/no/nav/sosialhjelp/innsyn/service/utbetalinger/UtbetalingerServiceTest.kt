@@ -44,8 +44,7 @@ internal class UtbetalingerServiceTest {
     private val tittel = "tittel"
     private val referanse = "referanse"
 
-    private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce";
-
+    private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce"
 
     @BeforeEach
     fun init() {

@@ -47,7 +47,7 @@ internal class OppgaveServiceTest {
     private val frist3 = LocalDateTime.now().plusDays(2)
     private val frist4 = LocalDateTime.now().plusDays(3)
 
-    private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce";
+    private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce"
 
     private val token = "token"
 

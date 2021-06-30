@@ -60,7 +60,7 @@ class OppgaveController(
     fun getDokumentasjonkrav(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
         tilgangskontrollService.sjekkTilgang()
 
-        val dokumentasjonkrav =  oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
+        val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
         if (dokumentasjonkrav.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }

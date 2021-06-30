@@ -118,8 +118,7 @@ val digisosSoker = JsonDigisosSoker()
                 .withDokumentasjonkravreferanse("Dokkrav1")
                 .withSaksreferanse("SAK1")
                 .withBeskrivelse("Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.")
-                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
-            ,
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
             JsonDokumentasjonkrav()
                 .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
                 .withFrist(toStringWithTimezone(DateTime.now().minusDays(10)))
@@ -129,8 +128,7 @@ val digisosSoker = JsonDigisosSoker()
                 .withDokumentasjonkravreferanse("Dokkrav2")
                 .withSaksreferanse("SAK1")
                 .withBeskrivelse("Du må levere husleie.")
-                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
-            ,
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
             JsonDokumentasjonkrav()
                 .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
                 .withFrist(toStringWithTimezone(DateTime.now().plusDays(20)))
@@ -140,8 +138,7 @@ val digisosSoker = JsonDigisosSoker()
                 .withDokumentasjonkravreferanse("Dokkrav3")
                 .withSaksreferanse("SAK1")
                 .withBeskrivelse("Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.")
-                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
-            ,
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
             JsonDokumentasjonkrav()
                 .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
                 .withFrist(toStringWithTimezone(DateTime.now().plusDays(21)))
@@ -151,8 +148,7 @@ val digisosSoker = JsonDigisosSoker()
                 .withDokumentasjonkravreferanse("Dokkrav4")
                 .withSaksreferanse("SAK1")
                 .withBeskrivelse("Du må levere husleie")
-                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
-            ,
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
             JsonDokumentasjonkrav()
                 .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
                 .withTittel("Strømregning")
@@ -161,8 +157,7 @@ val digisosSoker = JsonDigisosSoker()
                 .withDokumentasjonkravreferanse("Dokkrav5")
                 .withSaksreferanse("SAK1")
                 .withBeskrivelse("Du må levere strømregning")
-                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
-            ,
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
             JsonDokumentasjonkrav()
                 .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
                 .withTittel("Mobilregning")
@@ -171,9 +166,7 @@ val digisosSoker = JsonDigisosSoker()
                 .withDokumentasjonkravreferanse("Dokkrav6")
                 .withSaksreferanse("SAK1")
                 .withBeskrivelse("Du må levere mobilregning")
-                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10)))
-            ,
-
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
 
             JsonForelopigSvar()
                 .withType(JsonHendelse.Type.FORELOPIG_SVAR)

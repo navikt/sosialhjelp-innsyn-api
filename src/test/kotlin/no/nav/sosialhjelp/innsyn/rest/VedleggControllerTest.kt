@@ -17,6 +17,7 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.ResponseEntity
@@ -25,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
-import kotlin.test.assertFailsWith
 
 internal class VedleggControllerTest {
 
@@ -135,7 +135,8 @@ internal class VedleggControllerTest {
         )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
-        assertFailsWith<IllegalStateException> { controller.sendVedlegg(id, files, "token", request) }
+        assertThatExceptionOfType(IllegalStateException::class.java)
+            .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
     }
 
     @Test
@@ -159,7 +160,8 @@ internal class VedleggControllerTest {
         )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf()
-        assertFailsWith<IllegalArgumentException> { controller.sendVedlegg(id, files, "token", request) }
+        assertThatExceptionOfType(IllegalArgumentException::class.java)
+            .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
     }
 
     @Test

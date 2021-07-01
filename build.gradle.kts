@@ -6,52 +6,52 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val kotlin = "1.4.32"
-    const val coroutines = "1.4.3"
-    const val springBoot = "2.4.5"
-    const val sosialhjelpCommon = "1.7cde724"
+    const val kotlin = "1.5.10"
+    const val coroutines = "1.5.0"
+    const val springBoot = "2.5.0"
+    const val sosialhjelpCommon = "1.05daec2"
     const val logback = "1.2.3"
-    const val logstash = "6.5"
-    const val filformat = "1.2021.03.02-10.58-415c44e55124"
+    const val logstash = "6.6"
+    const val filformat = "1.2021.04.15-10.42-6eb47b47da27"
     const val micrometerRegistry = "1.6.2"
     const val prometheus = "0.9.0"
-    const val tokenValidation = "1.3.5"
-    const val jackson = "2.12.1"
-    const val guava = "30.1-jre"
-    const val springfox = "3.0.0"
+    const val tokenValidation = "1.3.7"
+    const val jackson = "2.12.3"
+    const val guava = "30.1.1-jre"
     const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.8.0"
     const val fileUpload = "1.4"
     const val tika = "1.25"
-    const val pdfBox = "2.0.23"
+    const val pdfBox = "2.0.24"
     const val fiksKryptering = "1.0.11"
-    const val lettuce = "6.0.4.RELEASE"
+    const val lettuce = "6.0.5.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
-    const val jsonSmart = "2.4.2"
+    const val springdoc = "1.5.9"
+    const val jsonSmart = "2.4.7"
 
     //    Test only
     const val junitJupiter = "5.7.0"
-    const val mockk = "1.10.3"
+    const val mockk = "1.11.0"
     const val springmockk = "2.0.0"
     const val mockwebserver = "5.0.0-alpha.2"
 }
 
 plugins {
     application
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.5.10"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.4.32"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.5.10"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("com.github.ben-manes.versions") version "0.36.0"
+    id("com.github.ben-manes.versions") version "0.38.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
 }
 
 application {
     applicationName = "sosialhjelp-innsyn-api"
-    mainClassName = "no.nav.sosialhjelp.innsyn.ApplicationKt"
+    mainClass.set("no.nav.sosialhjelp.innsyn.ApplicationKt")
 }
 
 java {
@@ -71,7 +71,6 @@ configurations {
     }
     "testImplementation" {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
-        exclude(group = "junit", module = "junit")
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
@@ -123,8 +122,8 @@ dependencies {
 //    Token-validering
     implementation("no.nav.security:token-validation-spring:${Versions.tokenValidation}")
 
-//    Springfox/swagger
-    implementation("io.springfox:springfox-boot-starter:${Versions.springfox}")
+//    Springdoc
+    implementation("org.springdoc:springdoc-openapi-ui:${Versions.springdoc}")
 
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")
@@ -148,24 +147,20 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
     implementation("io.mockk:mockk:${Versions.mockk}")
-    testImplementation("no.nav.security:token-validation-test-support:${Versions.tokenValidation}") {
-        exclude(group = "org.springframework.boot", module = "spring-boot-starter-jersey") // Excluder da vi kun bruker Spring. Ved å exclude slutter snyk å klage på sårbarheter i jersey
-    }
-
-    testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}")
+    testImplementation("no.nav.security:token-validation-spring-test:${Versions.tokenValidation}")
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:${Versions.mockwebserver}")
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     constraints {
         implementation("net.minidev:json-smart:${Versions.jsonSmart}") {
-            because("Setter transitiv avhengighet sin versjon eksplisitt til 2.4.2. Transitiv avhengighet dratt inn av com.nimbusds:oauth2-oidc-sdk@9.3.3 har sårbarhet. Constraintsen kan fjernes når token-support bruker en versjon av nimbusds som ikke har en range av versjoner for json-smart")
+            because("Snyk ønsker 2.4.5 eller høyere. Transitiv avhengighet dratt inn av com.nimbusds:oauth2-oidc-sdk@9.3.3 har sårbarhet.")
         }
     }
 }
 
 // override spring managed dependencies
-extra["json-smart.version"] = "2.4.2"
+extra["json-smart.version"] = Versions.jsonSmart
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -201,7 +196,7 @@ tasks {
     }
 
     withType<ShadowJar> {
-        classifier = ""
+        archiveClassifier.set("")
         transform(ServiceFileTransformer::class.java) {
             setPath("META-INF/cxf")
             include("bus-extensions.txt")

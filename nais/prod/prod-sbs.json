@@ -29,7 +29,8 @@
     "PDL_ENDPOINT_URL": "https://api-gw.oera.no/pdl-api/graphql",
     "STS_TOKEN_ENDPOINT_URL": "https://api-gw.oera.no/security-token-service/rest/v1/sts/token",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
-    "UNLEASH_INSTANCE_ID": "prod-sbs"
+    "UNLEASH_INSTANCE_ID": "prod-sbs",
+    "SWAGGER_ENABLED": "false"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

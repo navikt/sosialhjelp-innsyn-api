@@ -75,10 +75,6 @@ fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long {
     return tidspunktSendt?.until(LocalDateTime.now(), ChronoUnit.MINUTES) ?: -1
 }
 
-fun enumNameToLowercase(string: String): String {
-    return string.toLowerCase().replace('_', ' ')
-}
-
 /**
  * Generer navEksternRefId for nytt opplastet vedlegg
  * HVIS digisosSak har ettersendelser, hent siste navEksternRefId og inkrementer

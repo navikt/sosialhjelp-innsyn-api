@@ -30,7 +30,7 @@ class PdlConfig(
                     HttpClient.newConnection()
                         .resolver(DefaultAddressResolverGroup.INSTANCE)
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
-                        .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(60)) }
+                        .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(30)) }
                 )
             )
             .build()

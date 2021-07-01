@@ -26,10 +26,14 @@ innsyn:
     virusscan:
       enabled: false
 
+springdoc:
+  api-docs:
+    enabled: true
+
 #Token-valdering
 no.nav.security.jwt:
   issuer.selvbetjening:
-    discoveryurl: http://metadata
-    accepted_audience: aud-localhost
+    discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
+    accepted_audience: someaudience
     cookie_name: localhost-idtoken
-azuread.loginurl: ${http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}
+azuread.loginurl: http://localhost:8080/sosialhjelp/innsyn-api/local/cookie

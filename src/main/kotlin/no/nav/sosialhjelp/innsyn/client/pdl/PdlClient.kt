@@ -3,15 +3,16 @@ package no.nav.sosialhjelp.innsyn.client.pdl
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.client.sts.StsClient
 import no.nav.sosialhjelp.innsyn.common.PdlException
+import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CONSUMER_TOKEN
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.forwardHeaders
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.CALL_ID
+import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
@@ -36,10 +37,18 @@ interface PdlClient {
 class PdlClientImpl(
     private val pdlWebClient: WebClient,
     private val stsClient: StsClient,
+    private val redisService: RedisService,
 ) : PdlClient {
 
     override fun hentPerson(ident: String): PdlHentPerson? {
-        val query = getResourceAsString("/pdl/hentPerson.graphql").replace("[\n\r]", "")
+        return hentFraCache(ident) ?: hentFraPdl(ident)
+    }
+
+    private fun hentFraCache(ident: String): PdlHentPerson? =
+        redisService.get(cacheKey(ident), PdlHentPerson::class.java) as? PdlHentPerson
+
+    private fun hentFraPdl(ident: String): PdlHentPerson? {
+        val query = getQuery()
         try {
             val pdlPersonResponse = runBlocking {
                 retry(
@@ -59,6 +68,7 @@ class PdlClientImpl(
             checkForPdlApiErrors(pdlPersonResponse)
 
             return pdlPersonResponse.data
+                .also { it?.let { lagreTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
             log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
             throw PdlException(e.message!!)
@@ -74,12 +84,14 @@ class PdlClientImpl(
             }
     }
 
-    private fun getResourceAsString(path: String) = this::class.java.getResource(path).readText()
+    private fun getQuery(): String =
+        this.javaClass.getResource("/pdl/hentPerson.graphql")?.readText()?.replace("[\n\r]", "")
+            ?: throw RuntimeException("Feil ved lesing av graphql-spørring fra fil")
 
     private fun headers(): HttpHeaders {
         val stsToken: String = stsClient.token()
 
-        val headers = forwardHeaders()
+        val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.set(HEADER_CALL_ID, MDCUtils.get(CALL_ID))
         headers.set(HEADER_CONSUMER_TOKEN, BEARER + stsToken)
@@ -103,6 +115,11 @@ class PdlClientImpl(
 
     private fun errorMessage(errors: List<String>): String =
         "Error i respons fra pdl-api: ${errors.joinToString { it }}"
+
+    private fun cacheKey(ident: String): String = "Adressebeskyttelse_$ident"
+
+    private fun lagreTilCache(ident: String, pdlHentPerson: PdlHentPerson) =
+        redisService.put(cacheKey(ident), objectMapper.writeValueAsBytes(pdlHentPerson))
 
     companion object {
         private val log by logger()

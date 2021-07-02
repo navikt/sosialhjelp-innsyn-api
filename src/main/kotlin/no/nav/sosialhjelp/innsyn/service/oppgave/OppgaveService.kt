@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.service.oppgave
 
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
@@ -14,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.toLocalDate
 import org.springframework.stereotype.Component
 
 @Component
@@ -108,16 +110,21 @@ class OppgaveService(
             return emptyList()
         }
 
+        val ettersendteVedlegg =
+            vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
             .filter {
                 !it.isEmpty()
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
             }
+            .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
             .filter { it.status != Oppgavestatus.ANNULLERT }
             .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
             .groupBy { it.frist }
             .map { (key, value) ->
                 DokumentasjonkravResponse(
+                    dokumentasjonkravId = value[0].dokumentasjonkravId,
                     frist = key,
                     dokumentasjonkravElementer = value.map {
                         val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
@@ -136,6 +143,23 @@ class OppgaveService(
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList
+    }
+
+    fun getDokumentasjonkravMedId(
+        fiksDigisosId: String,
+        dokumentasjonkravId: String,
+        token: String
+    ): List<DokumentasjonkravResponse> {
+        val dokumentasjonkrav = getDokumentasjonkrav(fiksDigisosId, token)
+
+        return dokumentasjonkrav.filter { it.dokumentasjonkravId == dokumentasjonkravId }
+    }
+
+    private fun erAlleredeLastetOpp(dokumentasjonkrav: Dokumentasjonkrav, vedleggListe: List<InternalVedlegg>): Boolean {
+        return vedleggListe
+            .filter { it.type == dokumentasjonkrav.tittel }
+            .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
+            .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) }
     }
 
     companion object {

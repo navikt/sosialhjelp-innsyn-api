@@ -10,7 +10,7 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.toLocalDate
+import no.nav.sosialhjelp.innsyn.utils.sha256
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: Unleash) {
@@ -42,14 +42,17 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
     }
 
     val dokumentasjonkrav = Dokumentasjonkrav(
+        dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
         hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
         referanse = hendelse.dokumentasjonkravreferanse,
         tittel = hendelse.tittel,
         beskrivelse = hendelse.beskrivelse,
         status = Oppgavestatus.valueOf(hendelse.status.value()),
         datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
-        frist = hendelse.frist?.toLocalDate()
+        frist = hendelse.frist?.toLocalDateTime()?.toLocalDate()
     )
+
+    this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav)
 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
     union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav) }

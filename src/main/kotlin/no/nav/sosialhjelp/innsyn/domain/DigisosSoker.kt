@@ -123,6 +123,7 @@ data class Vilkar(
 ) : Oppgavehendelse()
 
 data class Dokumentasjonkrav(
+    val dokumentasjonkravId: String,
     val hendelsetype: JsonVedlegg.HendelseType?,
     override var referanse: String, // hendelsereferanse
     override var tittel: String?,

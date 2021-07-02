@@ -9,6 +9,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumenter
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
@@ -107,6 +108,65 @@ val digisosSoker = JsonDigisosSoker()
                             .withInnsendelsesfrist(toStringWithTimezone(DateTime.now().plusMonths(1).plusDays(1)))
                     )
                 ),
+
+            JsonDokumentasjonkrav()
+                .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
+                .withFrist(toStringWithTimezone(DateTime.now().minusDays(10)))
+                .withTittel("Legeerklæring")
+                .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
+                .withUtbetalingsreferanse(listOf("Betaling 1", "Betaling 2"))
+                .withDokumentasjonkravreferanse("Dokkrav1")
+                .withSaksreferanse("SAK1")
+                .withBeskrivelse("Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
+            JsonDokumentasjonkrav()
+                .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
+                .withFrist(toStringWithTimezone(DateTime.now().minusDays(10)))
+                .withTittel("Husleie")
+                .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
+                .withUtbetalingsreferanse(listOf("Betaling 1", "Betaling 2"))
+                .withDokumentasjonkravreferanse("Dokkrav2")
+                .withSaksreferanse("SAK1")
+                .withBeskrivelse("Du må levere husleie.")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
+            JsonDokumentasjonkrav()
+                .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
+                .withFrist(toStringWithTimezone(DateTime.now().plusDays(20)))
+                .withTittel("Legeerklæring")
+                .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
+                .withUtbetalingsreferanse(listOf("Betaling 1", "Betaling 2"))
+                .withDokumentasjonkravreferanse("Dokkrav3")
+                .withSaksreferanse("SAK1")
+                .withBeskrivelse("Du må levere legeerklæring eller annen dokumentasjon fra lege som viser at du mottar oppføling for din helsesituasjon.")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
+            JsonDokumentasjonkrav()
+                .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
+                .withFrist(toStringWithTimezone(DateTime.now().plusDays(21)))
+                .withTittel("Husleie")
+                .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
+                .withUtbetalingsreferanse(listOf("Betaling 1", "Betaling 2"))
+                .withDokumentasjonkravreferanse("Dokkrav4")
+                .withSaksreferanse("SAK1")
+                .withBeskrivelse("Du må levere husleie")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
+            JsonDokumentasjonkrav()
+                .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
+                .withTittel("Strømregning")
+                .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
+                .withUtbetalingsreferanse(listOf("Betaling 1", "Betaling 2"))
+                .withDokumentasjonkravreferanse("Dokkrav5")
+                .withSaksreferanse("SAK1")
+                .withBeskrivelse("Du må levere strømregning")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
+            JsonDokumentasjonkrav()
+                .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)
+                .withTittel("Mobilregning")
+                .withStatus(JsonDokumentasjonkrav.Status.RELEVANT)
+                .withUtbetalingsreferanse(listOf("Betaling 1", "Betaling 2"))
+                .withDokumentasjonkravreferanse("Dokkrav6")
+                .withSaksreferanse("SAK1")
+                .withBeskrivelse("Du må levere mobilregning")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
 
             JsonForelopigSvar()
                 .withType(JsonHendelse.Type.FORELOPIG_SVAR)

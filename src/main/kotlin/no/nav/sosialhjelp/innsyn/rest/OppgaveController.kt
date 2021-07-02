@@ -66,4 +66,15 @@ class OppgaveController(
         }
         return ResponseEntity.ok(dokumentasjonkrav)
     }
+
+    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{dokumentasjonkravId}", produces = ["application/json;charset=UTF-8"])
+    fun getDokumentasjonkravMedId(@PathVariable fiksDigisosId: String, @PathVariable dokumentasjonkravId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
+        tilgangskontrollService.sjekkTilgang()
+
+        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId, token)
+        if (dokumentasjonkrav.isEmpty()) {
+            return ResponseEntity(HttpStatus.NO_CONTENT)
+        }
+        return ResponseEntity.ok(dokumentasjonkrav)
+    }
 }

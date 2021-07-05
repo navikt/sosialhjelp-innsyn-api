@@ -117,6 +117,27 @@ val digisosSoker = JsonDigisosSoker()
                 .withStatus(JsonVilkar.Status.RELEVANT)
                 .withVilkarreferanse("Vilkår1")
                 .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
+            JsonVilkar()
+                .withType(JsonHendelse.Type.VILKAR)
+                .withTittel("Betale husleie")
+                .withBeskrivelse("Du må betale din husleie hver måned.")
+                .withStatus(JsonVilkar.Status.RELEVANT)
+                .withVilkarreferanse("Vilkår2")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
+            JsonVilkar()
+                .withType(JsonHendelse.Type.VILKAR)
+                .withTittel("Møter med NAV")
+                .withBeskrivelse("Du må møte til avtaler på NAV. Din veileder vil kontakte deg dersom dette blir aktuelt.")
+                .withStatus(JsonVilkar.Status.RELEVANT)
+                .withVilkarreferanse("Vilkår3")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
+            JsonVilkar()
+                .withType(JsonHendelse.Type.VILKAR)
+                .withTittel("Søke bostøtte")
+                .withBeskrivelse(null)
+                .withStatus(JsonVilkar.Status.RELEVANT)
+                .withVilkarreferanse("Vilkår4")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
 
             JsonDokumentasjonkrav()
                 .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)

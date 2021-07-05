@@ -12,15 +12,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 
     val log by logger()
 
-    val utbetalinger = finnAlleUtbetalingerSomVilkarRefererTil(hendelse)
-
-    fjernFraUtbetalingerSomIkkeLegereErReferertTilIVilkaret(hendelse)
-
-    if (utbetalinger.isEmpty()) {
-        log.warn("Fant ingen utbetalinger å knytte vilkår til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
-        return
-    }
-
     val vilkar = Vilkar(
         referanse = hendelse.vilkarreferanse,
         tittel = hendelse.tittel,
@@ -30,6 +21,16 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
         datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime()
     )
 
+    this.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar)
+
+    val utbetalinger = finnAlleUtbetalingerSomVilkarRefererTil(hendelse)
+
+    fjernFraUtbetalingerSomIkkeLegereErReferertTilIVilkaret(hendelse)
+
+    if (utbetalinger.isEmpty()) {
+        log.warn("Fant ingen utbetalinger å knytte vilkår til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
+        return
+    }
     utbetalinger.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }
 }
 

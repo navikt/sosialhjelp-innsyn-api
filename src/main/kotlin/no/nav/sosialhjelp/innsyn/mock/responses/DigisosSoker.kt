@@ -18,6 +18,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtaksfil
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import org.joda.time.DateTime
 import java.text.DateFormatSymbols
 import java.time.format.DateTimeFormatter
@@ -108,6 +109,14 @@ val digisosSoker = JsonDigisosSoker()
                             .withInnsendelsesfrist(toStringWithTimezone(DateTime.now().plusMonths(1).plusDays(1)))
                     )
                 ),
+
+            JsonVilkar()
+                .withType(JsonHendelse.Type.VILKAR)
+                .withTittel("Oppsøk lege")
+                .withBeskrivelse("Du trenger å få avklart din helsesituasjon.")
+                .withStatus(JsonVilkar.Status.RELEVANT)
+                .withVilkarreferanse("Vilkår1")
+                .withHendelsestidspunkt(toStringWithTimezone(DateTime.now().minusDays(10))),
 
             JsonDokumentasjonkrav()
                 .withType(JsonHendelse.Type.DOKUMENTASJONKRAV)

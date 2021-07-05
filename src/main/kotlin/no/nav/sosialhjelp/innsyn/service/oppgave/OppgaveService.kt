@@ -9,13 +9,11 @@ import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
-import no.nav.sosialhjelp.innsyn.domain.VilkarElement
 import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.toLocalDate
 import org.springframework.stereotype.Component
 
 @Component
@@ -83,23 +81,19 @@ class OppgaveService(
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på vilkår er tomt") }
             }
             .filter { it.status != Oppgavestatus.ANNULLERT }
-            .groupBy { it.datoLagtTil.toLocalDate() }
-            .map { (_, value) ->
+            .map {
+                val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
                 VilkarResponse(
-                    vilkarElementer = value.map {
-                        val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
-                        VilkarElement(
-                            it.datoLagtTil.toLocalDate(),
-                            it.referanse,
-                            tittel,
-                            beskrivelse,
-                            it.getOppgaveStatus()
-                        )
-                    }
+                    it.datoLagtTil.toLocalDate(),
+                    it.referanse,
+                    tittel,
+                    beskrivelse,
+                    it.getOppgaveStatus()
                 )
             }
+            .sortedBy { it.hendelsetidspunkt }
 
-        log.info("Hentet ${vilkarResponseList.sumOf { it.vilkarElementer.size }} vilkar")
+        log.info("Hentet ${vilkarResponseList.size} vilkar")
         return vilkarResponseList
     }
 

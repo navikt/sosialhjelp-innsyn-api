@@ -51,10 +51,6 @@ data class OppgaveElement(
 )
 
 data class VilkarResponse(
-    val vilkarElementer: List<VilkarElement>
-)
-
-data class VilkarElement(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val hendelsetidspunkt: LocalDate,
     val vilkarReferanse: String,

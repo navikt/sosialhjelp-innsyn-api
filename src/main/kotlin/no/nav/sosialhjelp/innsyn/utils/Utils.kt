@@ -32,9 +32,6 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import kotlin.reflect.full.companionObject
 
-const val NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
-const val NAIS_NAMESPACE = "NAIS_NAMESPACE"
-
 const val COUNTER_SUFFIX_LENGTH = 4
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
@@ -108,11 +105,6 @@ fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
     return ofClass.enclosingClass?.takeIf {
         ofClass.enclosingClass.kotlin.companionObject?.java == ofClass
     } ?: ofClass
-}
-
-fun isRunningInProd(): Boolean {
-    val clusterName = System.getenv(NAIS_CLUSTER_NAME)
-    return clusterName != null && clusterName.contains("prod")
 }
 
 fun messageUtenFnr(e: WebClientResponseException): String {

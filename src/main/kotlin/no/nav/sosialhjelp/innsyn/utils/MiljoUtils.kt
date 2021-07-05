@@ -15,15 +15,18 @@ object MiljoUtils {
     }
 
     fun getDomain(): String {
-        return when (getenv(NAIS_CLUSTER_NAME, "nav.no")) {
-            "dev-sbs" -> "dev.nav.no"
+        return when (getenv(NAIS_CLUSTER_NAME, "prod-sbs")) {
+            "dev-sbs" -> {
+                val env = if (getAppName().contains("-intern")) "-q1" else "-q0"
+                "www$env.dev.nav.no"
+            }
             "dev-gcp" -> "digisos-gcp.dev.nav.no"
             "labs-gcp" -> "digisos.labs.nais.io"
             else -> "www.nav.no"
         }
     }
 
-    fun getAppName(): String {
+    private fun getAppName(): String {
         return getenv(NAIS_APP_NAME, "sosialhjelp-innsyn-api")
     }
 }

@@ -29,8 +29,8 @@ class DittNavOppgaverController(
         }
         // tilgangskontroll?
 
-        val oppgaverForDittNav = dittNavOppgaverService.hentAktiveOppgaverForDittNav(token)
-        return ResponseEntity.ok(oppgaverForDittNav)
+        val aktiveOppgaver = dittNavOppgaverService.hentAktiveOppgaver(token)
+        return ResponseEntity.ok(aktiveOppgaver)
     }
 
     @GetMapping("/oppgaver/inaktive", produces = ["application/json;charset=UTF-8"])
@@ -42,6 +42,7 @@ class DittNavOppgaverController(
         }
         // tilgangskontroll?
 
-        return ResponseEntity.ok(emptyList())
+        val inaktiveOppgaver = dittNavOppgaverService.hentInaktiveOppgaver(token)
+        return ResponseEntity.ok(inaktiveOppgaver)
     }
 }

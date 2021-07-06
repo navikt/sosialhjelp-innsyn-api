@@ -11,15 +11,12 @@ import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.getDomain
+import no.nav.sosialhjelp.innsyn.utils.TimeUtils.toUtc
 import no.nav.sosialhjelp.innsyn.utils.flatMapParallel
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 
 @Component
 class DittNavOppgaverService(
@@ -28,7 +25,15 @@ class DittNavOppgaverService(
     private val vedleggService: VedleggService,
 ) {
 
-    fun hentAktiveOppgaverForDittNav(token: String): List<DittNavOppgave> {
+    fun hentAktiveOppgaver(token: String): List<DittNavOppgave> {
+        return hentOppgaver(token, true)
+    }
+
+    fun hentInaktiveOppgaver(token: String): List<DittNavOppgave> {
+        return hentOppgaver(token, false)
+    }
+
+    private fun hentOppgaver(token: String, aktive: Boolean): List<DittNavOppgave> {
         val digisosSaker: List<DigisosSak> = fiksClient.hentAlleDigisosSaker(token)
         val requestAttributes = RequestContextHolder.getRequestAttributes()
 
@@ -37,14 +42,14 @@ class DittNavOppgaverService(
                 .filter { isDigisosSakNewerThanMonths(it, THREE_MONTHS) }
                 .flatMapParallel {
                     RequestContextHolder.setRequestAttributes(requestAttributes)
-                    getOppgaverForDigisosSak(it, token)
+                    getOppgaverForDigisosSak(it, token, aktive)
                 }
         }
     }
 
-    private fun getOppgaverForDigisosSak(digisosSak: DigisosSak, token: String): List<DittNavOppgave> {
+    private fun getOppgaverForDigisosSak(digisosSak: DigisosSak, token: String, aktiv: Boolean): List<DittNavOppgave> {
         val model = eventService.createModel(digisosSak, token)
-        if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
+        if (aktiv && (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty())) {
             return emptyList()
         }
 
@@ -52,17 +57,22 @@ class DittNavOppgaverService(
             vedleggService.hentEttersendteVedlegg(digisosSak.fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
 
         return model.oppgaver
-            .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
+            .filter {
+                when {
+                    aktiv -> !erAlleredeLastetOpp(it, ettersendteVedlegg)
+                    else -> erAlleredeLastetOpp(it, ettersendteVedlegg)
+                }
+            }
             .map {
                 DittNavOppgave(
                     eventId = it.oppgaveId, // unik id for hendelsen
-                    eventTidspunkt = toUtc(it.tidspunktForKrav, ZoneId.systemDefault()),
+                    eventTidspunkt = toUtc(it.tidspunktForKrav),
                     grupperingsId = digisosSak.originalSoknadNAV?.navEksternRefId
-                        ?: digisosSak.fiksDigisosId, // bruk navEksternRef/behandlingsId fra soknad som grupperingsId
+                        ?: digisosSak.fiksDigisosId, // bruk navEksternRefId fra soknad som grupperingsId
                     tekst = oppgavetekst(it.erFraInnsyn),
                     link = innsynlenke(digisosSak.fiksDigisosId),
                     sikkerhetsnivaa = SIKKERHETSNIVAA_3,
-                    aktiv = true
+                    aktiv = aktiv
                 )
             }
             .sortedBy { it.eventTidspunkt }
@@ -97,12 +107,6 @@ class DittNavOppgaverService(
         private fun innsynlenke(digisosId: String): String {
             val domain = getDomain()
             return "https://$domain/sosialhjelp/innsyn/$digisosId/status"
-        }
-
-        private fun toUtc(tidspunkt: LocalDateTime, zoneId: ZoneId): LocalDateTime {
-            return ZonedDateTime.of(tidspunkt, zoneId)
-                .withZoneSameInstant(ZoneOffset.UTC)
-                .toLocalDateTime()
         }
     }
 }

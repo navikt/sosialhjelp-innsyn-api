@@ -113,7 +113,7 @@ internal class DittNavOppgaverServiceTest {
         assertThat(aktiveOppgaver[0].eventId).isEqualTo("oppgaveId1")
         assertThat(aktiveOppgaver[0].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(aktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
-        assertThat(aktiveOppgaver[0].tekst).containsIgnoringCase("veileder")
+        assertThat(aktiveOppgaver[0].tekst).containsIgnoringCase("Vi mangler vedlegg")
         assertThat(aktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
         assertThat(aktiveOppgaver[0].aktiv).isTrue
 
@@ -148,7 +148,7 @@ internal class DittNavOppgaverServiceTest {
         assertThat(inaktiveOppgaver[0].eventId).isEqualTo("oppgaveId1")
         assertThat(inaktiveOppgaver[0].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(inaktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
-        assertThat(inaktiveOppgaver[0].tekst).containsIgnoringCase("veileder")
+        assertThat(inaktiveOppgaver[0].tekst).containsIgnoringCase("Vi mangler vedlegg")
         assertThat(inaktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
         assertThat(inaktiveOppgaver[0].aktiv).isFalse
     }
@@ -181,7 +181,6 @@ internal class DittNavOppgaverServiceTest {
         assertThat(aktiveOppgaver[0].eventId).isEqualTo("oppgaveId2")
         assertThat(aktiveOppgaver[0].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(aktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
-        assertThat(aktiveOppgaver[0].tekst).containsIgnoringCase("veileder")
         assertThat(aktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
         assertThat(aktiveOppgaver[0].aktiv).isTrue
 
@@ -189,7 +188,6 @@ internal class DittNavOppgaverServiceTest {
         assertThat(inaktiveOppgaver[0].eventId).isEqualTo("oppgaveId1")
         assertThat(inaktiveOppgaver[0].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(inaktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
-        assertThat(inaktiveOppgaver[0].tekst).containsIgnoringCase("veileder")
         assertThat(inaktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
         assertThat(inaktiveOppgaver[0].aktiv).isFalse
     }

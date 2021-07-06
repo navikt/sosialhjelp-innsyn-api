@@ -82,8 +82,8 @@ class DittNavOppgaverService(
     }
 
     companion object {
-        private const val DEFAULT_OPPGAVETEKST_VEILEDER = "Veileder ber om mer dokumentasjon"
-        private const val DEFAULT_OPPGAVETEKST_SOKNAD = "Gjenstående oppgave fra søknad"
+        private const val DEFAULT_OPPGAVETEKST_VEILEDER = "Vi mangler vedlegg for å kunne behandle søknaden din om økonomisk sosialhjelp"
+        private const val DEFAULT_OPPGAVETEKST_SOKNAD = "Vi mangler vedlegg for å kunne behandle søknaden din om økonomisk sosialhjelp"
         private const val THREE_MONTHS = 3
         private const val SIKKERHETSNIVAA_3 = 3
 

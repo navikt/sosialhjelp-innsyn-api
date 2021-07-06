@@ -209,14 +209,13 @@ internal class OppgaveServiceTest {
         val responseList = service.getVilkar("123", token)
 
         assertThat(responseList).isNotNull
-        assertThat(responseList.size == 1)
-        assertThat(responseList[0].vilkarElementer).hasSize(2)
-        assertThat(responseList[0].vilkarElementer.get(0).tittel).isNotNull()
-        assertThat(responseList[0].vilkarElementer.get(0).tittel).isEqualTo(tittel)
-        assertThat(responseList[0].vilkarElementer.get(1).tittel).isNotNull()
-        assertThat(responseList[0].vilkarElementer.get(1).tittel).isEqualTo(beskrivelse)
-        assertThat(responseList[0].vilkarElementer.get(1).beskrivelse).isNull()
-        assertThat(responseList[0].vilkarElementer.get(1).vilkarReferanse).isEqualTo("vilkar2")
+        assertThat(responseList).hasSize(2)
+        assertThat(responseList[0].tittel).isNotNull()
+        assertThat(responseList[0].tittel).isEqualTo(tittel)
+        assertThat(responseList[1].tittel).isNotNull()
+        assertThat(responseList[1].tittel).isEqualTo(beskrivelse)
+        assertThat(responseList[1].beskrivelse).isNull()
+        assertThat(responseList[1].vilkarReferanse).isEqualTo("vilkar2")
     }
 
     @Test
@@ -234,8 +233,8 @@ internal class OppgaveServiceTest {
 
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
-        assertThat(responseList[0].vilkarElementer).hasSize(1)
-        assertThat(responseList[0].vilkarElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList).hasSize(1)
+        assertThat(responseList[0].status).isEqualTo(Oppgavestatus.RELEVANT)
     }
 
     @Test
@@ -415,10 +414,10 @@ internal class OppgaveServiceTest {
 
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
-        assertThat(responseList[0].vilkarElementer).hasSize(3)
-        assertThat(responseList[0].vilkarElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
-        assertThat(responseList[0].vilkarElementer.get(1).status).isEqualTo(Oppgavestatus.RELEVANT)
-        assertThat(responseList[0].vilkarElementer.get(2).status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList).hasSize(3)
+        assertThat(responseList[0].status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList[1].status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList[2].status).isEqualTo(Oppgavestatus.RELEVANT)
     }
 
     @Test

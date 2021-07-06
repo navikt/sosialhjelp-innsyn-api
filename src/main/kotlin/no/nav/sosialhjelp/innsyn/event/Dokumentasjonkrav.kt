@@ -17,6 +17,19 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
 
     val log by logger()
 
+    val dokumentasjonkrav = Dokumentasjonkrav(
+        dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
+        hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+        referanse = hendelse.dokumentasjonkravreferanse,
+        tittel = hendelse.tittel,
+        beskrivelse = hendelse.beskrivelse,
+        status = Oppgavestatus.valueOf(hendelse.status.value()),
+        datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
+        frist = hendelse.frist?.toLocalDateTime()?.toLocalDate()
+    )
+
+    this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav)
+
     val utbetalingerMedSakKnytning = mutableListOf<Utbetaling>()
     val utbetalingerUtenSakKnytning = mutableListOf<Utbetaling>()
     for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
@@ -40,19 +53,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
         log.warn("Fant ingen utbetalinger å knytte dokumentasjonkrav til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
         return
     }
-
-    val dokumentasjonkrav = Dokumentasjonkrav(
-        dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
-        hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-        referanse = hendelse.dokumentasjonkravreferanse,
-        tittel = hendelse.tittel,
-        beskrivelse = hendelse.beskrivelse,
-        status = Oppgavestatus.valueOf(hendelse.status.value()),
-        datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
-        frist = hendelse.frist?.toLocalDateTime()?.toLocalDate()
-    )
-
-    this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav)
 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
     union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav) }

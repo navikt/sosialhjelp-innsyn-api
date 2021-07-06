@@ -25,7 +25,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 
     val utbetalinger = finnAlleUtbetalingerSomVilkarRefererTil(hendelse)
 
-    fjernFraUtbetalingerSomIkkeLegereErReferertTilIVilkaret(hendelse)
+    fjernFraUtbetalingerSomIkkeLengreErReferertTilIVilkaret(hendelse)
 
     if (utbetalinger.isEmpty()) {
         log.warn("Fant ingen utbetalinger å knytte vilkår til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
@@ -48,7 +48,7 @@ private fun InternalDigisosSoker.finnAlleUtbetalingerSomVilkarRefererTil(hendels
     return utbetalinger
 }
 
-private fun InternalDigisosSoker.fjernFraUtbetalingerSomIkkeLegereErReferertTilIVilkaret(hendelse: JsonVilkar) {
+private fun InternalDigisosSoker.fjernFraUtbetalingerSomIkkeLengreErReferertTilIVilkaret(hendelse: JsonVilkar) {
     for (sak in saker) {
         for (utbetaling in sak.utbetalinger) {
             utbetaling.vilkar.removeAll {

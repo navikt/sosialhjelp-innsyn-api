@@ -47,6 +47,7 @@ class DittNavOppgaverService(
         }
     }
 
+    // todo - skal vi vise gjenstående oppgaver fra søknad som aktive oppgaver?
     private fun getOppgaverForDigisosSak(digisosSak: DigisosSak, token: String, aktiv: Boolean): List<DittNavOppgave> {
         val model = eventService.createModel(digisosSak, token)
         if (aktiv && (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty())) {
@@ -67,8 +68,7 @@ class DittNavOppgaverService(
                 DittNavOppgave(
                     eventId = it.oppgaveId, // unik id for hendelsen
                     eventTidspunkt = toUtc(it.tidspunktForKrav),
-                    grupperingsId = digisosSak.originalSoknadNAV?.navEksternRefId
-                        ?: digisosSak.fiksDigisosId, // bruk navEksternRefId fra soknad som grupperingsId
+                    grupperingsId = digisosSak.originalSoknadNAV?.navEksternRefId ?: digisosSak.fiksDigisosId,
                     tekst = oppgavetekst(it.erFraInnsyn),
                     link = innsynlenke(digisosSak.fiksDigisosId),
                     sikkerhetsnivaa = SIKKERHETSNIVAA_3,
@@ -82,6 +82,7 @@ class DittNavOppgaverService(
     }
 
     companion object {
+        // todo - skal vi vise samme oppgavetekst for dokumentasjonEtterspurt og gjenstående oppgaver fra søknad?
         private const val DEFAULT_OPPGAVETEKST_VEILEDER = "Vi mangler vedlegg for å kunne behandle søknaden din om økonomisk sosialhjelp"
         private const val DEFAULT_OPPGAVETEKST_SOKNAD = "Vi mangler vedlegg for å kunne behandle søknaden din om økonomisk sosialhjelp"
         private const val THREE_MONTHS = 3

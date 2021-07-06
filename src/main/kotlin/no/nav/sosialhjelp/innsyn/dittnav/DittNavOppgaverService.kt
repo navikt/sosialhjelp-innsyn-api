@@ -77,7 +77,7 @@ class DittNavOppgaverService(
             }
             .sortedBy { it.eventTidspunkt }
             .also {
-                log.info("Hentet ${it.size} oppgaver")
+                log.info("DittNav - hentet ${it.size} ${aktiv.toAktivString} oppgaver")
             }
     }
 
@@ -108,5 +108,7 @@ class DittNavOppgaverService(
             val domain = getDomain()
             return "https://$domain/sosialhjelp/innsyn/$digisosId/status"
         }
+
+        private val Boolean.toAktivString get() = if (this) "aktive" else "inaktive"
     }
 }

@@ -30,6 +30,7 @@ object Versions {
     const val unleash = "3.3.4"
     const val springdoc = "1.5.9"
     const val jsonSmart = "2.4.7"
+    const val rhino = "1.7.13"
 
     //    Test only
     const val junitJupiter = "5.7.0"
@@ -155,6 +156,9 @@ dependencies {
     constraints {
         implementation("net.minidev:json-smart:${Versions.jsonSmart}") {
             because("Snyk ønsker 2.4.5 eller høyere. Transitiv avhengighet dratt inn av com.nimbusds:oauth2-oidc-sdk@9.3.3 har sårbarhet.")
+        }
+        implementation("org.mozilla:rhino:${Versions.rhino}") {
+            because("Snyk ønsker 1.7.12 eller høyere. Transitiv avhengighet dratt inn av com.github.java-json-tools:json-schema-core@1.2.14 har sårbarhet.")
         }
     }
 }

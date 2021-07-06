@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @ProtectedWithClaims(issuer = "selvbetjening", combineWithOr = true, claimMap = ["acr=Level3", "acr=Level4"])
 @RestController
-@RequestMapping("/api/dittnav")
+@RequestMapping("/dittnav")
 class DittNavOppgaverController(
     private val dittNavOppgaverService: DittNavOppgaverService,
     private val unleash: Unleash,

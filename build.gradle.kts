@@ -6,16 +6,16 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val kotlin = "1.5.10"
+    const val kotlin = "1.5.20"
     const val coroutines = "1.5.0"
-    const val springBoot = "2.5.0"
+    const val springBoot = "2.5.1"
     const val sosialhjelpCommon = "1.05daec2"
     const val logback = "1.2.3"
     const val logstash = "6.6"
     const val filformat = "1.2021.04.15-10.42-6eb47b47da27"
     const val micrometerRegistry = "1.6.2"
     const val prometheus = "0.9.0"
-    const val tokenValidation = "1.3.7"
+    const val tokenValidation = "1.3.8"
     const val jackson = "2.12.3"
     const val guava = "30.1.1-jre"
     const val konfig = "1.6.10.0"
@@ -25,7 +25,7 @@ object Versions {
     const val tika = "1.25"
     const val pdfBox = "2.0.24"
     const val fiksKryptering = "1.0.11"
-    const val lettuce = "6.0.5.RELEASE"
+    const val lettuce = "6.0.6.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
     const val springdoc = "1.5.9"
@@ -41,9 +41,9 @@ object Versions {
 
 plugins {
     application
-    kotlin("jvm") version "1.5.10"
+    kotlin("jvm") version "1.5.20"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.5.10"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.5.20"
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.github.ben-manes.versions") version "0.38.0"

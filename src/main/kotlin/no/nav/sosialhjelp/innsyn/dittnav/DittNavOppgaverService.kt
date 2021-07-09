@@ -47,9 +47,9 @@ class DittNavOppgaverService(
         }
     }
 
-    // todo - skal vi vise gjenstående oppgaver fra søknad som aktive oppgaver?
+    // todo - skal vi vise gjenstående oppgaver fra søknad som aktive oppgaver på dittNav (i tillegg til i innsyn)?
     private fun getOppgaverForDigisosSak(digisosSak: DigisosSak, token: String, aktiv: Boolean): List<DittNavOppgave> {
-        val model = eventService.createModel(digisosSak, token)
+        val model = eventService.createSaksoversiktModel(digisosSak, token)
         if (aktiv && (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty())) {
             return emptyList()
         }

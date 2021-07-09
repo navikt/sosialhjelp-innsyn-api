@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.common.subjecthandler
 
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
-import no.nav.sosialhjelp.innsyn.utils.isRunningInProd
+import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.utils.logger
 
 object SubjectHandlerUtils {

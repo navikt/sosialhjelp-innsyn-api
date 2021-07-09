@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.config
 
-import no.nav.sosialhjelp.innsyn.utils.isRunningInProd
+import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException

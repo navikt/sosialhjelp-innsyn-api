@@ -66,12 +66,12 @@ class SaksOversiktController(
         }
         val sak = fiksClient.hentDigisosSak(id, token, true)
         val model = eventService.createSaksoversiktModel(sak, token)
-        val antallOppgaver = hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) + hentAntallNyeVilkar(model, sak.fiksDigisosId, token)+ hentAntallNyeDokumentasjonkrav(model, sak.fiksDigisosId, token)
+        val antallOppgaver = hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) + hentAntallNyeVilkar(model, sak.fiksDigisosId, token) + hentAntallNyeDokumentasjonkrav(model, sak.fiksDigisosId, token)
         val saksDetaljerResponse = SaksDetaljerResponse(
             sak.fiksDigisosId,
             hentNavn(model),
             model.status?.let { mapStatus(it) } ?: "",
-                antallOppgaver
+            antallOppgaver
         )
         return ResponseEntity.ok().body(saksDetaljerResponse)
     }

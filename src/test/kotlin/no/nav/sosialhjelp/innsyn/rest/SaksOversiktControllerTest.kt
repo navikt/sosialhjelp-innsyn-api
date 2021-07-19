@@ -11,6 +11,8 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
+import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
@@ -18,6 +20,7 @@ import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.MOTTATT
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.UNDER_BEHANDLING
+import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
@@ -46,8 +49,11 @@ internal class SaksOversiktControllerTest {
     private val sak2: Sak = mockk()
 
     private val oppgaveResponseMock: OppgaveResponse = mockk()
+    private val vilkarResponseMock: VilkarResponse = mockk()
+    private val dokumentasjonkravResponseMock: DokumentasjonkravResponse = mockk()
 
     private val oppgaveElement1: OppgaveElement = mockk()
+    private val dokumentasjonkravElement1: DokumentasjonkravElement = mockk()
 
     @BeforeEach
     internal fun setUp() {
@@ -66,9 +72,14 @@ internal class SaksOversiktControllerTest {
         every { digisosSak2.digisosSoker } returns mockk()
 
         every { oppgaveResponseMock.oppgaveElementer } returns listOf(oppgaveElement1)
+        every { dokumentasjonkravResponseMock.dokumentasjonkravElementer } returns listOf(dokumentasjonkravElement1)
 
         every { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
         every { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
+        every { oppgaveService.getVilkar("123", any()) } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
+        every { oppgaveService.getVilkar("456", any()) } returns listOf(vilkarResponseMock) // 1 oppgave
+        every { oppgaveService.getDokumentasjonkrav("123", any()) } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
+        every { oppgaveService.getDokumentasjonkrav("456", any()) } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
     }
 
     @Test
@@ -116,6 +127,12 @@ internal class SaksOversiktControllerTest {
         every { model1.oppgaver } returns mutableListOf(mockk())
         every { model2.oppgaver } returns mutableListOf(mockk())
 
+        every { model1.vilkar } returns mutableListOf(mockk())
+        every { model2.vilkar } returns mutableListOf(mockk())
+
+        every { model1.dokumentasjonkrav } returns mutableListOf(mockk())
+        every { model2.dokumentasjonkrav } returns mutableListOf(mockk())
+
         every { sak1.tittel } returns "Livsopphold"
         every { sak1.saksStatus } returns SaksStatus.UNDER_BEHANDLING
         every { sak2.tittel } returns "Strøm"
@@ -130,7 +147,7 @@ internal class SaksOversiktControllerTest {
         assertThat(response1.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(sak1).isNotNull
         assertThat(sak1?.soknadTittel).isEqualTo("")
-        assertThat(sak1?.antallNyeOppgaver).isEqualTo(2)
+        assertThat(sak1?.antallNyeOppgaver).isEqualTo(6)
 
         val response2 = controller.hentSaksDetaljer("456", "token")
         val sak2 = response2.body
@@ -139,7 +156,7 @@ internal class SaksOversiktControllerTest {
         assertThat(sak2).isNotNull
         assertThat(sak2?.soknadTittel).contains("Livsopphold", "Strøm")
         assertThat(sak2?.status).isEqualTo("UNDER BEHANDLING")
-        assertThat(sak2?.antallNyeOppgaver).isEqualTo(1)
+        assertThat(sak2?.antallNyeOppgaver).isEqualTo(3)
     }
 
     @Test
@@ -149,6 +166,8 @@ internal class SaksOversiktControllerTest {
 
         every { model1.status } returns MOTTATT
         every { model1.oppgaver } returns mutableListOf()
+        every { model1.vilkar } returns mutableListOf()
+        every { model1.dokumentasjonkrav } returns mutableListOf()
         every { model1.saker } returns mutableListOf()
 
         val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId, "token")
@@ -159,6 +178,6 @@ internal class SaksOversiktControllerTest {
 
         verify { oppgaveService wasNot Called }
 
-        assertThat(sak?.antallNyeOppgaver).isEqualTo(null)
+        assertThat(sak?.antallNyeOppgaver).isEqualTo(0)
     }
 }

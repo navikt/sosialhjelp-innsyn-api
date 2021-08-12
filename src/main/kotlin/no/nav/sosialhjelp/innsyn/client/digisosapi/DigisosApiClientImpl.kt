@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sha256
 import no.nav.sosialhjelp.innsyn.utils.typeRef
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
@@ -95,6 +96,7 @@ class DigisosApiClientImpl(
     }
 
     override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
+        log.debug("DEBUG pcn: hentInnsynfil: token lengde: ${token.length} ${sha256(token)}")
         val soknad = fiksWebClient.get()
             .uri("/digisos/api/v1/soknader/$fiksDigisosId")
             .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }

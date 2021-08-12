@@ -9,6 +9,7 @@ import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -93,9 +94,10 @@ class DigisosApiClientImpl(
         return opplastingResponseList!!.map { it.dokumentlagerDokumentId }
     }
 
-    override fun hentInnsynsfil(fiksDigisosId: String): String? {
+    override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
         val soknad = fiksWebClient.get()
             .uri("/digisos/api/v1/soknader/$fiksDigisosId")
+            .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
             .retrieve()
             .bodyToMono(DigisosSak::class.java)
             .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -109,6 +111,7 @@ class DigisosApiClientImpl(
             ?: return null
         val innsynsfil = fiksWebClient.get()
             .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
+            .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
             .retrieve()
             .bodyToMono(String::class.java)
             .onErrorMap(WebClientResponseException::class.java) { e ->

@@ -13,5 +13,5 @@ interface DigisosApiService {
 
     fun lastOppFil(fiksDigisosId: String, file: MultipartFile): String
 
-    fun hentInnsynsfil(fiksDigisosId: String): String?
+    fun hentInnsynsfil(fiksDigisosId: String, token: String): String?
 }

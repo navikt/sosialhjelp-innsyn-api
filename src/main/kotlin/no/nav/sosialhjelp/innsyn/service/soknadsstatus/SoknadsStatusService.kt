@@ -9,7 +9,6 @@ import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.kommune.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -22,7 +21,6 @@ class SoknadsStatusService(
 ) {
 
     fun hentSoknadsStatus(fiksDigisosId: String, token: String): UtvidetSoknadsStatus {
-        log.warn("DEBUG pcn: hentSoknadsStatus: token lengde: ${token.length} ${sha256(token)}")
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
         val status = model.status

@@ -96,7 +96,7 @@ class DigisosApiClientImpl(
     }
 
     override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
-        log.debug("DEBUG pcn: hentInnsynfil: token lengde: ${token.length} ${sha256(token)}")
+        log.warn("DEBUG pcn: hentInnsynfil: token lengde: ${token.length} ${sha256(token)}")
         val soknad = fiksWebClient.get()
             .uri("/digisos/api/v1/soknader/$fiksDigisosId")
             .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }

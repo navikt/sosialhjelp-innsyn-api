@@ -22,7 +22,7 @@ class SoknadsStatusService(
 ) {
 
     fun hentSoknadsStatus(fiksDigisosId: String, token: String): UtvidetSoknadsStatus {
-        log.debug("DEBUG pcn: hentSoknadsStatus: token lengde: ${token.length} ${sha256(token)}")
+        log.warn("DEBUG pcn: hentSoknadsStatus: token lengde: ${token.length} ${sha256(token)}")
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
         val status = model.status

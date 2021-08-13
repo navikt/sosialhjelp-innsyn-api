@@ -95,21 +95,21 @@ class DigisosApiClientImpl(
     }
 
     override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
-        val soknad = fiksWebClient.get()
-            .uri("/digisos/api/v1/soknader/$fiksDigisosId")
-            .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
-            .retrieve()
-            .bodyToMono(DigisosSak::class.java)
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message, e)
-                }
-            }
-            .block()
-            ?: return null
         try {
+            val soknad = fiksWebClient.get()
+                .uri("/digisos/api/v1/soknader/$fiksDigisosId")
+                .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
+                .retrieve()
+                .bodyToMono(DigisosSak::class.java)
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message, e)
+                    }
+                }
+                .block()
+                ?: return null
             return fiksWebClient.get()
                 .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
                 .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }

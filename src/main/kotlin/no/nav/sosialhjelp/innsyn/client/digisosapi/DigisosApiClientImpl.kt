@@ -63,7 +63,7 @@ class DigisosApiClientImpl(
                 }
             }
             .block()
-            .also { log.info("Postet DigisosSak til Fiks") }
+            .also { log.info("Postet DigisosSak til Fiks og fikk response: $it") }
     }
 
     // Brukes for å laste opp Pdf-er fra test-fagsystem i q-miljø

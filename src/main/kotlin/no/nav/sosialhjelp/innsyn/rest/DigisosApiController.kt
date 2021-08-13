@@ -37,9 +37,11 @@ class DigisosApiController(
         JsonSosialhjelpValidator.ensureValidInnsyn(json)
 
         val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
-        val id = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
-
-        return ResponseEntity.ok("{\"fiksDigisosId\":\"$id\"}")
+        val returnValue = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
+        if(returnValue?.contains("fiksDigisosId") == true) {
+            return ResponseEntity.ok(returnValue)
+        }
+        return ResponseEntity.ok("{\"fiksDigisosId\":\"$returnValue\"}")
     }
 
     @PostMapping("/{fiksDigisosId}/filOpplasting", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

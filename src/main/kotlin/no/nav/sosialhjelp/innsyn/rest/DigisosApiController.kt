@@ -38,7 +38,7 @@ class DigisosApiController(
 
         val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
         val returnValue = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
-        if(returnValue?.contains("fiksDigisosId") == true) {
+        if (returnValue?.contains("fiksDigisosId") == true) {
             return ResponseEntity.ok(returnValue)
         }
         return ResponseEntity.ok("{\"fiksDigisosId\":\"$returnValue\"}")

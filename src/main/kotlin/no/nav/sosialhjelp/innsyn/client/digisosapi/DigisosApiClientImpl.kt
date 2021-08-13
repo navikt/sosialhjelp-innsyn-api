@@ -109,21 +109,23 @@ class DigisosApiClientImpl(
             }
             .block()
             ?: return null
-        val innsynsfil = fiksWebClient.get()
-            .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
-            .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
-            .retrieve()
-            .bodyToMono(String::class.java)
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - Nedlasting av innsynsfil feilet - ${e.statusCode} ${e.statusText}", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+        try {
+            return fiksWebClient.get()
+                .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
+                .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
+                .retrieve()
+                .bodyToMono(String::class.java)
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - Nedlasting av innsynsfil feilet - ${e.statusCode} ${e.statusText}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message, e)
+                    }
                 }
-            }
-            .block()
-            ?: return null
-        return innsynsfil
+                .block()
+        } catch (e: RuntimeException) {
+            return null
+        }
     }
 
     fun opprettDigisosSak(): String? {

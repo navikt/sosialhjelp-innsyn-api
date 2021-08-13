@@ -50,8 +50,8 @@ class DigisosApiController(
     }
 
     @GetMapping("/{digisosId}/innsynsfil")
-    fun hentInnsynsfilWoldena(@PathVariable digisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<ByteArray> {
-        val innsynsfil = digisosApiService.hentInnsynsfil(digisosId, token) ?: return ResponseEntity.noContent().build()
+    fun hentInnsynsfilWoldena(@PathVariable digisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?): ResponseEntity<ByteArray> {
+        val innsynsfil = digisosApiService.hentInnsynsfil(digisosId, token ?: "") ?: return ResponseEntity.noContent().build()
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
     }
 }

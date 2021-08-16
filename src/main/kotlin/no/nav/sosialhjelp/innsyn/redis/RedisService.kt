@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.common.DigisosSakTilhorerAnnenBrukerException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.maskerFnr
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -33,10 +34,10 @@ class RedisServiceImpl(
             try {
                 val obj = objectMapper.readValue(get, requestedClass)
                 valider(obj)
-                log.debug("Hentet ${requestedClass.simpleName} fra cache, key=$key")
+                log.debug("Hentet ${requestedClass.simpleName} fra cache, key=${key.maskerFnr}")
                 obj
             } catch (e: IOException) {
-                log.warn("Fant key=$key i cache, men value var ikke ${requestedClass.simpleName}")
+                log.warn("Fant key=${key.maskerFnr} i cache, men value var ikke ${requestedClass.simpleName}")
                 null
             } catch (e: DigisosSakTilhorerAnnenBrukerException) {
                 log.warn("DigisosSak i cache tilhører en annen bruker enn brukeren fra token.")
@@ -52,7 +53,7 @@ class RedisServiceImpl(
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
         } else if (set == "OK") {
-            log.debug("Cache put OK $key")
+            log.debug("Cache put OK ${key.maskerFnr}")
         }
     }
 

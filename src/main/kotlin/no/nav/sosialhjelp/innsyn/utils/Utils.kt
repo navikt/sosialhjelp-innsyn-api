@@ -109,7 +109,7 @@ fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
 
 fun messageUtenFnr(e: WebClientResponseException): String {
     val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
-    val message = e.message?.feilmeldingUtenFnr
+    val message = e.message?.maskerFnr
     return "$message - $fiksErrorMessage"
 }
 
@@ -121,11 +121,11 @@ private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessag
     }
 }
 
-val String.feilmeldingUtenFnr: String
+val String.maskerFnr: String
     get() = this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
 
 val ErrorMessage.feilmeldingUtenFnr: String?
-    get() = this.message?.feilmeldingUtenFnr
+    get() = this.message?.maskerFnr
 
 fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()

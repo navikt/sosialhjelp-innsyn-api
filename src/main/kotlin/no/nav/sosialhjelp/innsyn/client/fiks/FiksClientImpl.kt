@@ -11,9 +11,9 @@ import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.fiksHeaders
-import no.nav.sosialhjelp.innsyn.utils.feilmeldingUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.maskerFnr
 import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.typeRef
@@ -65,9 +65,9 @@ class FiksClientImpl(
                 .onErrorMap(WebClientResponseException::class.java) { e ->
                     log.warn("Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}", e)
                     when {
-                        e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(e.message?.feilmeldingUtenFnr, e)
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                        else -> FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                        e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(e.message?.maskerFnr, e)
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
                     }
                 }
                 .block()
@@ -110,8 +110,8 @@ class FiksClientImpl(
                 .onErrorMap(WebClientResponseException::class.java) { e ->
                     log.warn("Fiks - hentDokument feilet - ${messageUtenFnr(e)}", e)
                     when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                        else -> FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
                     }
                 }
                 .block()
@@ -131,8 +131,8 @@ class FiksClientImpl(
                 .onErrorMap(WebClientResponseException::class.java) { e ->
                     log.warn("Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}", e)
                     when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                        else -> FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
                     }
                 }
                 .block()
@@ -164,8 +164,8 @@ class FiksClientImpl(
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
                 when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message?.feilmeldingUtenFnr, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
+                    else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
                 }
             }
             .block()

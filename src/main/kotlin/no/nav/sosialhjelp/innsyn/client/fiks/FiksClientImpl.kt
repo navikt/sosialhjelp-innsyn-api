@@ -99,7 +99,7 @@ class FiksClientImpl(
         requestedClass: Class<out Any>,
         token: String,
     ): Any {
-        log.debug("Forsøker å hente dokument fra /digisos/api/v1/soknader/nav/$digisosId/dokumenter/$dokumentlagerId")
+        log.debug("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
 
         val dokument: Any? = withRetry {
             fiksWebClient.get()

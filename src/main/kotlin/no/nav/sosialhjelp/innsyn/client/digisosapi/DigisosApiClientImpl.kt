@@ -9,6 +9,7 @@ import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -62,7 +63,8 @@ class DigisosApiClientImpl(
                 }
             }
             .block()
-            .also { log.info("Postet DigisosSak til Fiks") }
+            .also { log.info("Postet DigisosSak til Fiks og fikk response: $it") }
+            ?: id
     }
 
     // Brukes for å laste opp Pdf-er fra test-fagsystem i q-miljø
@@ -93,34 +95,38 @@ class DigisosApiClientImpl(
         return opplastingResponseList!!.map { it.dokumentlagerDokumentId }
     }
 
-    override fun hentInnsynsfil(fiksDigisosId: String): String? {
-        val soknad = fiksWebClient.get()
-            .uri("/digisos/api/v1/soknader/$fiksDigisosId")
-            .retrieve()
-            .bodyToMono(DigisosSak::class.java)
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+    override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
+        try {
+            val soknad = fiksWebClient.get()
+                .uri("/digisos/api/v1/soknader/$fiksDigisosId")
+                .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
+                .retrieve()
+                .bodyToMono(DigisosSak::class.java)
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message, e)
+                    }
                 }
-            }
-            .block()
-            ?: return null
-        val innsynsfil = fiksWebClient.get()
-            .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
-            .retrieve()
-            .bodyToMono(String::class.java)
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - Nedlasting av innsynsfil feilet - ${e.statusCode} ${e.statusText}", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+                .block()
+                ?: return null
+            return fiksWebClient.get()
+                .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
+                .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
+                .retrieve()
+                .bodyToMono(String::class.java)
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - Nedlasting av innsynsfil feilet - ${e.statusCode} ${e.statusText}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message, e)
+                    }
                 }
-            }
-            .block()
-            ?: return null
-        return innsynsfil
+                .block()
+        } catch (e: RuntimeException) {
+            return null
+        }
     }
 
     fun opprettDigisosSak(): String? {

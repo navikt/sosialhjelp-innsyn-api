@@ -69,9 +69,9 @@ class DigisosApiClientMock(
         return emptyList()
     }
 
-    override fun hentInnsynsfil(fiksDigisosId: String): String? {
-        val digisosSak = fiksClientMock.hentDigisosSak(fiksDigisosId, "", true)
-        val innsynsfil = fiksClientMock.hentDokument(fiksDigisosId, digisosSak.digisosSoker!!.metadata, JsonDigisosSoker::class.java, "")
+    override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
+        val digisosSak = fiksClientMock.hentDigisosSak(fiksDigisosId, token, true)
+        val innsynsfil = fiksClientMock.hentDokument(fiksDigisosId, digisosSak.digisosSoker!!.metadata, JsonDigisosSoker::class.java, token)
         return objectMapper.writeValueAsString(innsynsfil)
     }
 

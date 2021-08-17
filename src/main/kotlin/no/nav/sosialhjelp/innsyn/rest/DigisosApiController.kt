@@ -6,6 +6,7 @@ import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.digisosapi.DigisosApiService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -35,9 +37,11 @@ class DigisosApiController(
         JsonSosialhjelpValidator.ensureValidInnsyn(json)
 
         val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
-        val id = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
-
-        return ResponseEntity.ok("{\"fiksDigisosId\":\"$id\"}")
+        val digisosId = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
+        if (digisosId?.contains("fiksDigisosId") == true) {
+            return ResponseEntity.ok(digisosId) // Allerede wrappet i json.
+        }
+        return ResponseEntity.ok("{\"fiksDigisosId\":\"$digisosId\"}")
     }
 
     @PostMapping("/{fiksDigisosId}/filOpplasting", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -48,8 +52,8 @@ class DigisosApiController(
     }
 
     @GetMapping("/{digisosId}/innsynsfil")
-    fun hentInnsynsfilWoldena(@PathVariable digisosId: String): ResponseEntity<ByteArray> {
-        val innsynsfil = digisosApiService.hentInnsynsfil(digisosId) ?: return ResponseEntity.noContent().build()
+    fun hentInnsynsfilWoldena(@PathVariable digisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?): ResponseEntity<ByteArray> {
+        val innsynsfil = digisosApiService.hentInnsynsfil(digisosId, token ?: "") ?: return ResponseEntity.noContent().build()
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
     }
 }

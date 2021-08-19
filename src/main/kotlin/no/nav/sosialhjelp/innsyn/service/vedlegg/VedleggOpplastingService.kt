@@ -168,13 +168,27 @@ class VedleggOpplastingService(
         if (matchendeFiler.size > 1) log.warn("Vi har funnet ${matchendeFiler.size} validerte filer med samme navn. Det er flere enn 1.")
 
         filename += "-" + uuid.split("-")[0]
-        if (filenameSplit.extention.isEmpty()) {
-            filename += finnFilextentionBasedOnValidationResult(originalFilename, matchendeFiler.first())
+
+        if (filenameSplit.extension.isNotEmpty() && isExtensionAndValidationResultInAgreement(filenameSplit.extension, matchendeFiler.first())) {
+            filename += filenameSplit.extension
         } else {
-            filename += filenameSplit.extention
+            filename += finnFilextensionBasedOnValidationResult(originalFilename, matchendeFiler.first())
         }
 
         return filename
+    }
+
+    private fun isExtensionAndValidationResultInAgreement(extension: String, validering: FilValidering): Boolean {
+        if (TikaFileType.JPEG == validering.status.fileType) {
+            return ".jpeg" == extension.lowercase() || ".jpg" == extension.lowercase()
+        }
+        if (TikaFileType.PNG == validering.status.fileType) {
+            return ".png" == extension.lowercase()
+        }
+        if (TikaFileType.PDF == validering.status.fileType) {
+            return ".pdf" == extension.lowercase()
+        }
+        return false
     }
 
     fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
@@ -232,7 +246,7 @@ class VedleggOpplastingService(
         return filstring
     }
 
-    private fun finnFilextentionBasedOnValidationResult(originalFilename: String?, filValidering: FilValidering): String {
+    private fun finnFilextensionBasedOnValidationResult(originalFilename: String?, filValidering: FilValidering): String {
         if (originalFilename != null) {
             if (filValidering.status.fileType == TikaFileType.PDF) return ".pdf"
             if (filValidering.status.fileType == TikaFileType.JPEG) return ".jpg"
@@ -288,7 +302,7 @@ class VedleggOpplastingService(
 
             log.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +
-                    "\r\nextention: \"${splitFileName(file.originalFilename ?: "").extention}\"," +
+                    "\r\nextension: \"${splitFileName(file.originalFilename ?: "").extension}\"," +
                     "\r\nvalidatedFileType: ${fileType.name}," +
                     "\r\ntikaMediaType: $tikaMediaType," +
                     "\r\nmime: ${file.contentType}" +
@@ -298,6 +312,13 @@ class VedleggOpplastingService(
         }
         if (fileType == TikaFileType.PDF) {
             return ValidationResult(checkIfPdfIsValid(file.inputStream), TikaFileType.PDF)
+        }
+        if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
+            val ext: String = file.originalFilename!!.substringAfterLast(".")
+            if (ext.lowercase() in listOf("jfif", "pjpeg", "pjp")) {
+                log.warn("Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.")
+                return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
+            }
         }
         return ValidationResult(ValidationValues.OK, fileType)
     }

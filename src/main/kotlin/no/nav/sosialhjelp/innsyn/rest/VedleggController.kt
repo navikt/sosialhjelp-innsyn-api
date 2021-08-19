@@ -114,12 +114,12 @@ class VedleggController(
     }
 
     fun removeUUIDFromFilename(filename: String): String {
-        val indexOfFileExtention = filename.lastIndexOf(".")
-        if (indexOfFileExtention != -1 && indexOfFileExtention > LENGTH_OF_UUID_PART &&
-            filename.substring(indexOfFileExtention - LENGTH_OF_UUID_PART).startsWith("-")
+        val indexOfFileExtension = filename.lastIndexOf(".")
+        if (indexOfFileExtension != -1 && indexOfFileExtension > LENGTH_OF_UUID_PART &&
+            filename.substring(indexOfFileExtension - LENGTH_OF_UUID_PART).startsWith("-")
         ) {
-            val extention = filename.substring(indexOfFileExtention, filename.length)
-            return filename.substring(0, indexOfFileExtention - LENGTH_OF_UUID_PART) + extention
+            val extension = filename.substring(indexOfFileExtension, filename.length)
+            return filename.substring(0, indexOfFileExtension - LENGTH_OF_UUID_PART) + extension
         }
         return filename
     }

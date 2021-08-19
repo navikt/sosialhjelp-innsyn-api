@@ -37,14 +37,17 @@ enum class TikaFileType {
     UNKNOWN
 }
 
-fun splitFileName(fineName: String): FileNameSplit {
-    val returnValue = FileNameSplit(fineName, "")
-    val indexOfFileExtention = fineName.lastIndexOf(".")
-    if (indexOfFileExtention != -1) {
-        returnValue.name = fineName.substring(0, indexOfFileExtention)
-        returnValue.extention = fineName.substring(indexOfFileExtention, fineName.length)
+fun splitFileName(fileName: String): FileNameSplit {
+    val returnValue = FileNameSplit(fileName, "")
+    val indexOfFileExtension = fileName.lastIndexOf(".")
+    if (indexOfFileExtension != -1) {
+        val ext = fileName.substring(indexOfFileExtension, fileName.length)
+        if (ext in listOf(".jpg", ".jpeg", ".png", ".pdf")) {
+            returnValue.name = fileName.substring(0, indexOfFileExtension)
+            returnValue.extension = ext
+        }
     }
     return returnValue
 }
 
-class FileNameSplit(var name: String, var extention: String)
+class FileNameSplit(var name: String, var extension: String)

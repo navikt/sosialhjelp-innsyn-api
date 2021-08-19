@@ -274,6 +274,34 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
+    fun `sendVedleggTilFiks skal gi feilmelding hvis bilde er jfif`() {
+        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+
+        val filnavn1 = "test1.jfif"
+
+        val metadata = mutableListOf(
+            OpplastetVedleggMetadata(
+                type0, tilleggsinfo0, null, null,
+                mutableListOf(
+                    OpplastetFil(filnavn1)
+                ),
+                null
+            )
+        )
+        val files = mutableListOf<MultipartFile>(
+            MockMultipartFile("files", filnavn1, filtype1, jpgFile)
+        )
+
+        val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
+
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.ILLEGAL_FILE_TYPE)
+    }
+
+    @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
         every { virusScanner.scan(any(), any()) } throws VirusScanException("mulig virus!", null)
 
@@ -299,7 +327,7 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
-    fun `skal legge pa extention pa filnavn uten`() {
+    fun `skal legge pa extension pa filnavn uten`() {
         val uuid = "12345678"
         mockkStatic(UUID::class)
         every { UUID.randomUUID().toString() } returns uuid
@@ -310,14 +338,25 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
-    fun `skal legge pa extention pa filnavn bare dersom det mangler`() {
+    fun `skal endre extension pa filnavn hvis Tika validerer filen er noe annet enn hva filnavnet tilsier`() {
         val uuid = "12345678"
         mockkStatic(UUID::class)
         every { UUID.randomUUID().toString() } returns uuid
 
         val filnavn = "fil.jpg"
         val valideringer = listOf(FilValidering(filnavn, ValidationResult(ValidationValues.OK, TikaFileType.PDF)))
-        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil-$uuid.jpg")
+        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal legge pa extension pa filnavn hvis filnavnets extension er ukjent eller ugyldig`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString() } returns uuid
+
+        val filnavn = "fil.punktum"
+        val valideringer = listOf(FilValidering(filnavn, ValidationResult(ValidationValues.OK, TikaFileType.PDF)))
+        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil.punktum-$uuid.pdf")
     }
 
     @Test

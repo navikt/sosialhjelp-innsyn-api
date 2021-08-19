@@ -179,7 +179,7 @@ internal class VedleggControllerTest {
     }
 
     @Test
-    fun `skal håndtere filnavn uten extention`() {
+    fun `skal håndtere filnavn uten extension`() {
         val filnavn = "123"
         assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
     }

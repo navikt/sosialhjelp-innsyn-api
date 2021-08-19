@@ -299,7 +299,7 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
-    fun `skal legge pa extention pa filnavn uten`() {
+    fun `skal legge pa extension pa filnavn uten`() {
         val uuid = "12345678"
         mockkStatic(UUID::class)
         every { UUID.randomUUID().toString() } returns uuid
@@ -310,14 +310,25 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
-    fun `skal legge pa extention pa filnavn bare dersom det mangler`() {
+    fun `skal endre extension pa filnavn hvis Tika validerer filen er noe annet enn hva filnavnet tilsier`() {
         val uuid = "12345678"
         mockkStatic(UUID::class)
         every { UUID.randomUUID().toString() } returns uuid
 
         val filnavn = "fil.jpg"
         val valideringer = listOf(FilValidering(filnavn, ValidationResult(ValidationValues.OK, TikaFileType.PDF)))
-        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil-$uuid.jpg")
+        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil-$uuid.pdf")
+    }
+
+    @Test
+    fun `skal legge pa extension pa filnavn hvis filnavnets extension er ukjent eller ugyldig`() {
+        val uuid = "12345678"
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID().toString() } returns uuid
+
+        val filnavn = "fil.punktum"
+        val valideringer = listOf(FilValidering(filnavn, ValidationResult(ValidationValues.OK, TikaFileType.PDF)))
+        assertThat(service.createFilename(filnavn, valideringer)).isEqualTo("fil.punktum-$uuid.pdf")
     }
 
     @Test

@@ -274,6 +274,34 @@ internal class VedleggOpplastingServiceTest {
     }
 
     @Test
+    fun `sendVedleggTilFiks skal gi feilmelding hvis bilde er jfif`() {
+        every { krypteringService.krypter(any(), any(), any()) } returns IOUtils.toInputStream("some test data for my input stream", "UTF-8")
+        every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+
+        val filnavn1 = "test1.jfif"
+
+        val metadata = mutableListOf(
+            OpplastetVedleggMetadata(
+                type0, tilleggsinfo0, null, null,
+                mutableListOf(
+                    OpplastetFil(filnavn1)
+                ),
+                null
+            )
+        )
+        val files = mutableListOf<MultipartFile>(
+            MockMultipartFile("files", filnavn1, filtype1, jpgFile)
+        )
+
+        val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
+
+        verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+
+        assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1)
+        assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.ILLEGAL_FILE_TYPE)
+    }
+
+    @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
         every { virusScanner.scan(any(), any()) } throws VirusScanException("mulig virus!", null)
 

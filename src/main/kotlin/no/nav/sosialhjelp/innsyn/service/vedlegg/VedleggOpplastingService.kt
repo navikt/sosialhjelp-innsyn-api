@@ -180,13 +180,13 @@ class VedleggOpplastingService(
 
     private fun isExtensionAndValidationResultInAgreement(extension: String, validering: FilValidering): Boolean {
         if (TikaFileType.JPEG == validering.status.fileType) {
-            return ".jpeg" == extension || ".jpg" == extension
+            return ".jpeg" == extension.lowercase() || ".jpg" == extension.lowercase()
         }
         if (TikaFileType.PNG == validering.status.fileType) {
-            return ".png" == extension
+            return ".png" == extension.lowercase()
         }
         if (TikaFileType.PDF == validering.status.fileType) {
-            return ".pdf" == extension
+            return ".pdf" == extension.lowercase()
         }
         return false
     }
@@ -312,6 +312,13 @@ class VedleggOpplastingService(
         }
         if (fileType == TikaFileType.PDF) {
             return ValidationResult(checkIfPdfIsValid(file.inputStream), TikaFileType.PDF)
+        }
+        if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
+            val ext: String = file.originalFilename!!.substringAfterLast(".")
+            if (ext.lowercase() in listOf("jfif", "pjpeg", "pjp")) {
+                log.warn("Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.")
+                return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
+            }
         }
         return ValidationResult(ValidationValues.OK, fileType)
     }

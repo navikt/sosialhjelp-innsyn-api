@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.client.norg
 
 import no.nav.sosialhjelp.innsyn.common.NorgException
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
+import no.nav.sosialhjelp.innsyn.redis.NAVENHET_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_NAV_APIKEY
@@ -80,7 +81,7 @@ class NorgClientImpl(
         )
     }
 
-    private fun cacheKey(enhetsnr: String): String = "NavEnhet_$enhetsnr"
+    private fun cacheKey(enhetsnr: String): String = NAVENHET_CACHE_KEY_PREFIX + enhetsnr
 
     companion object {
         private val log by logger()

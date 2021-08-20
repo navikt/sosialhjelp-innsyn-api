@@ -135,4 +135,17 @@ internal class UtilsTest {
             .doesNotContain(fnr)
             .contains("feilmelding som har fnr \"[FNR]\"")
     }
+
+    @Test
+    fun `11-sifret tall skal fjernes fra redis cachekey logging`() {
+        val fnr = "12345612345"
+        val str = "cache key=adressebeskyttelse-$fnr"
+        val errorMessage = ErrorMessage(null, null, null, null, str, null, null, 500, null)
+
+        val res = errorMessage.feilmeldingUtenFnr
+
+        assertThat(res)
+            .doesNotContain(fnr)
+            .contains("cache key=adressebeskyttelse-[FNR]")
+    }
 }

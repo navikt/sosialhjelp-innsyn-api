@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.client.pdl
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.client.sts.StsClient
 import no.nav.sosialhjelp.innsyn.common.PdlException
+import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
@@ -116,7 +117,7 @@ class PdlClientImpl(
     private fun errorMessage(errors: List<String>): String =
         "Error i respons fra pdl-api: ${errors.joinToString { it }}"
 
-    private fun cacheKey(ident: String): String = "Adressebeskyttelse_$ident"
+    private fun cacheKey(ident: String): String = ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX + ident
 
     private fun lagreTilCache(ident: String, pdlHentPerson: PdlHentPerson) =
         redisService.put(cacheKey(ident), objectMapper.writeValueAsBytes(pdlHentPerson))

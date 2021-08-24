@@ -14,13 +14,13 @@ jobs:
     env:
       DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}
     steps:
+      - uses: actions/checkout@v2
       - name: Setup java
         uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: '11'
           cache: 'gradle'
-      - uses: actions/checkout@v2
       - name: Run lint
         run: ./gradlew ktlintCheck
         env:

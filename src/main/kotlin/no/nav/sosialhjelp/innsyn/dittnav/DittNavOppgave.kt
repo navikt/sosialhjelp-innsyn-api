@@ -11,5 +11,7 @@ data class DittNavOppgave(
     val tekst: String,
     val link: String,
     val sikkerhetsnivaa: Int,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    val sistOppdatert: LocalDateTime,
     val aktiv: Boolean
 )

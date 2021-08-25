@@ -26,11 +26,11 @@ class DittNavOppgaverService(
 ) {
 
     fun hentAktiveOppgaver(token: String): List<DittNavOppgave> {
-        return hentOppgaver(token, true)
+        return hentOppgaver(token, aktive = true)
     }
 
     fun hentInaktiveOppgaver(token: String): List<DittNavOppgave> {
-        return hentOppgaver(token, false)
+        return hentOppgaver(token, aktive = false)
     }
 
     private fun hentOppgaver(token: String, aktive: Boolean): List<DittNavOppgave> {
@@ -72,6 +72,7 @@ class DittNavOppgaverService(
                     tekst = oppgavetekst(it.erFraInnsyn),
                     link = innsynlenke(digisosSak.fiksDigisosId),
                     sikkerhetsnivaa = SIKKERHETSNIVAA_3,
+                    sistOppdatert = toUtc(it.tidspunktForKrav),
                     aktiv = aktiv
                 )
             }

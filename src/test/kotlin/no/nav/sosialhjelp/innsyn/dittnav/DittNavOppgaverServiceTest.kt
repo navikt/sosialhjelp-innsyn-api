@@ -110,6 +110,8 @@ internal class DittNavOppgaverServiceTest {
         assertThat(aktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
         assertThat(aktiveOppgaver[0].tekst).containsIgnoringCase("Vi mangler vedlegg")
         assertThat(aktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
+        assertThat(aktiveOppgaver[0].sikkerhetsnivaa).isEqualTo(3)
+        assertThat(aktiveOppgaver[0].sistOppdatert).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(aktiveOppgaver[0].aktiv).isTrue
 
         assertThat(inaktiveOppgaver).isEmpty()
@@ -145,6 +147,7 @@ internal class DittNavOppgaverServiceTest {
         assertThat(inaktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
         assertThat(inaktiveOppgaver[0].tekst).containsIgnoringCase("Vi mangler vedlegg")
         assertThat(inaktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
+        assertThat(inaktiveOppgaver[0].sistOppdatert).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(inaktiveOppgaver[0].aktiv).isFalse
     }
 
@@ -177,6 +180,7 @@ internal class DittNavOppgaverServiceTest {
         assertThat(aktiveOppgaver[0].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(aktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
         assertThat(aktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
+        assertThat(aktiveOppgaver[0].sistOppdatert).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(aktiveOppgaver[0].aktiv).isTrue
 
         assertThat(inaktiveOppgaver).hasSize(1)
@@ -184,6 +188,7 @@ internal class DittNavOppgaverServiceTest {
         assertThat(inaktiveOppgaver[0].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(inaktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
         assertThat(inaktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
+        assertThat(inaktiveOppgaver[0].sistOppdatert).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(inaktiveOppgaver[0].aktiv).isFalse
     }
 
@@ -223,11 +228,13 @@ internal class DittNavOppgaverServiceTest {
         assertThat(aktiveOppgaver[0].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(aktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
         assertThat(aktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
+        assertThat(aktiveOppgaver[0].sistOppdatert).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(aktiveOppgaver[0].aktiv).isTrue
         assertThat(aktiveOppgaver[1].eventId).isEqualTo("oppgaveId2")
         assertThat(aktiveOppgaver[1].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav2))
         assertThat(aktiveOppgaver[1].grupperingsId).isEqualTo("behandlingsId2")
         assertThat(aktiveOppgaver[1].link).contains("sosialhjelp/innsyn/$digisosId2/status")
+        assertThat(aktiveOppgaver[1].sistOppdatert).isEqualTo(toUtc(tidspunktForKrav2))
         assertThat(aktiveOppgaver[1].aktiv).isTrue
 
         assertThat(inaktiveOppgaver).isEmpty()
@@ -275,11 +282,13 @@ internal class DittNavOppgaverServiceTest {
         assertThat(inaktiveOppgaver[0].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(inaktiveOppgaver[0].grupperingsId).isEqualTo("behandlingsId")
         assertThat(inaktiveOppgaver[0].link).contains("sosialhjelp/innsyn/$digisosId/status")
+        assertThat(inaktiveOppgaver[0].sistOppdatert).isEqualTo(toUtc(tidspunktForKrav))
         assertThat(inaktiveOppgaver[0].aktiv).isFalse
         assertThat(inaktiveOppgaver[1].eventId).isEqualTo("oppgaveId2")
         assertThat(inaktiveOppgaver[1].eventTidspunkt).isEqualTo(toUtc(tidspunktForKrav2))
         assertThat(inaktiveOppgaver[1].grupperingsId).isEqualTo("behandlingsId2")
         assertThat(inaktiveOppgaver[1].link).contains("sosialhjelp/innsyn/$digisosId2/status")
+        assertThat(inaktiveOppgaver[1].sistOppdatert).isEqualTo(toUtc(tidspunktForKrav2))
         assertThat(inaktiveOppgaver[1].aktiv).isFalse
     }
 }

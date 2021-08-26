@@ -5,7 +5,9 @@ import io.mockk.mockk
 import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.norg.NorgClient
+import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV
 import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV_ENABLED
+import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR
 import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -40,6 +42,9 @@ internal class DefaultMockResponseTest {
 
         every { unleashClient.isEnabled(VILKAR_ENABLED, false) } returns true
         every { unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false) } returns true
+
+        every { unleashClient.isEnabled(VILKAR, false) } returns true
+        every { unleashClient.isEnabled(DOKUMENTASJONKRAV, false) } returns true
 
         assertThatCode { eventService.createModel(mockDigisosSak, "token") }.doesNotThrowAnyException()
     }

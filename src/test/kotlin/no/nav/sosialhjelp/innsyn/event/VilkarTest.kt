@@ -8,6 +8,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.norg.NorgClient
+import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
@@ -51,6 +52,7 @@ internal class VilkarTest {
         every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
+        every { unleashClient.isEnabled(VILKAR, false) } returns true
         resetHendelser()
     }
 

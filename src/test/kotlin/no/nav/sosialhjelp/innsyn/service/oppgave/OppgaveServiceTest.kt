@@ -3,10 +3,13 @@ package no.nav.sosialhjelp.innsyn.service.oppgave
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV
+import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
@@ -27,7 +30,8 @@ internal class OppgaveServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
-    private val service = OppgaveService(eventService, vedleggService, fiksClient)
+    private val unleashClient: Unleash = mockk()
+    private val service = OppgaveService(eventService, vedleggService, fiksClient, unleashClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockEttersendtInfoNAV: EttersendtInfoNAV = mockk()
@@ -58,6 +62,9 @@ internal class OppgaveServiceTest {
         clearAllMocks()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
+
+        every { unleashClient.isEnabled(VILKAR, false) } returns true
+        every { unleashClient.isEnabled(DOKUMENTASJONKRAV, false) } returns true
     }
 
     @Test

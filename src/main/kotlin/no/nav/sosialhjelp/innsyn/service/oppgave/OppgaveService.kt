@@ -1,6 +1,9 @@
 package no.nav.sosialhjelp.innsyn.service.oppgave
 
+import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV
+import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
@@ -21,6 +24,7 @@ class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksClient: FiksClient,
+    private val unleashClient: Unleash,
 ) {
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
@@ -94,7 +98,11 @@ class OppgaveService(
             .sortedBy { it.hendelsetidspunkt }
 
         log.info("Hentet ${vilkarResponseList.size} vilkar")
-        return vilkarResponseList
+        if (unleashClient.isEnabled(VILKAR, false)) {
+            return vilkarResponseList
+        }
+
+        return emptyList()
     }
 
     fun getDokumentasjonkrav(fiksDigisosId: String, token: String): List<DokumentasjonkravResponse> {
@@ -133,10 +141,14 @@ class OppgaveService(
                     }
                 )
             }
-            .sortedWith(compareBy(nullsLast(), { it.frist }))
+            .sortedWith(compareBy(nullsLast()) { it.frist })
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
-        return dokumentasjonkravResponseList
+        if (unleashClient.isEnabled(DOKUMENTASJONKRAV, false)) {
+            return dokumentasjonkravResponseList
+        }
+
+        return emptyList()
     }
 
     fun getDokumentasjonkravMedId(

@@ -170,7 +170,7 @@ class VedleggOpplastingService(
 
         filename += "-" + uuid.split("-")[0]
 
-        filename += if (filenameSplit.extension.isNotEmpty() && (matchendeFiler.isEmpty() || isExtensionAndValidationResultInAgreement(filenameSplit.extension, matchendeFiler.first()))) {
+        filename += if (filenameSplit.extension.isNotEmpty() && isExtensionAndValidationResultInAgreement(filenameSplit.extension, matchendeFiler.first())) {
             filenameSplit.extension
         } else {
             finnFilextensionBasedOnValidationResult(originalFilename, matchendeFiler.first())

@@ -99,7 +99,7 @@ class OppgaveService(
 
         log.info("Hentet ${vilkarResponseList.size} vilkar")
         if (unleashClient.isEnabled(VILKAR, false)) {
-           return vilkarResponseList
+            return vilkarResponseList
         }
 
         return emptyList()

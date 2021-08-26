@@ -166,13 +166,14 @@ class VedleggOpplastingService(
 
         val matchendeFiler = filValideringer.filter { it.filename == originalFilename }
         if (matchendeFiler.size > 1) log.warn("Vi har funnet ${matchendeFiler.size} validerte filer med samme navn. Det er flere enn 1.")
+        if (matchendeFiler.isEmpty()) log.warn("0 validerte filer med samme navn. Antall filvalideringer totalt: {} Dette burde undersøkes nærmere.", filValideringer.size)
 
         filename += "-" + uuid.split("-")[0]
 
-        if (filenameSplit.extension.isNotEmpty() && isExtensionAndValidationResultInAgreement(filenameSplit.extension, matchendeFiler.first())) {
-            filename += filenameSplit.extension
+        filename += if (filenameSplit.extension.isNotEmpty() && (matchendeFiler.isEmpty() || isExtensionAndValidationResultInAgreement(filenameSplit.extension, matchendeFiler.first()))) {
+            filenameSplit.extension
         } else {
-            filename += finnFilextensionBasedOnValidationResult(originalFilename, matchendeFiler.first())
+            finnFilextensionBasedOnValidationResult(originalFilename, matchendeFiler.first())
         }
 
         return filename

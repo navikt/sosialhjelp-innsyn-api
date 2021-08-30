@@ -97,8 +97,8 @@ class OppgaveService(
             }
             .sortedBy { it.hendelsetidspunkt }
 
-        log.info("Hentet ${vilkarResponseList.size} vilkar")
         if (unleashClient.isEnabled(VILKAR, false)) {
+            log.info("Hentet ${vilkarResponseList.size} vilkar")
             return vilkarResponseList
         }
 
@@ -143,8 +143,8 @@ class OppgaveService(
             }
             .sortedWith(compareBy(nullsLast()) { it.frist })
 
-        log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         if (unleashClient.isEnabled(DOKUMENTASJONKRAV, false)) {
+            log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
             return dokumentasjonkravResponseList
         }
 

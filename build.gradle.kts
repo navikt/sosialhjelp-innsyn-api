@@ -28,7 +28,7 @@ object Versions {
     const val lettuce = "6.0.6.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
-    const val springdoc = "1.5.9"
+    const val springdoc = "1.5.10"
     const val jsonSmart = "2.4.7"
 
     //    Test only

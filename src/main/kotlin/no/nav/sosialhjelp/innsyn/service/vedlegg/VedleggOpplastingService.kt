@@ -50,8 +50,7 @@ class VedleggOpplastingService(
         }
         metadata.removeIf { it.filer.isEmpty() }
 
-        val valideringer = mutableListOf<FilValidering>()
-        oppgaveValideringer.forEach { valideringer.addAll(it.filer) }
+        val valideringer = oppgaveValideringer.flatMap { it.filer }
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
         files.forEach { file ->
@@ -268,7 +267,7 @@ class VedleggOpplastingService(
                 val file = files[filesIndex]
                 val valideringstatus = validateFil(file)
                 if (valideringstatus.result != ValidationValues.OK) log.warn("Opplasting av fil $filesIndex av ${files.size} til ettersendelse feilet. Det var ${metadataListe.size} oppgaveElement. Status: $valideringstatus")
-                filValidering.add(FilValidering(file.originalFilename, valideringstatus))
+                filValidering.add(FilValidering(file.originalFilename?.let { fileName -> sanitizeFileName(fileName) }, valideringstatus))
                 filesIndex++
             }
             oppgaveValideringer.add(OppgaveValidering(metadata.type, metadata.tilleggsinfo, metadata.innsendelsesfrist, metadata.hendelsetype, metadata.hendelsereferanse, filValidering))

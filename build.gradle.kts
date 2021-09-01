@@ -6,47 +6,45 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val kotlin = "1.5.20"
-    const val coroutines = "1.5.0"
-    const val springBoot = "2.5.3"
-    const val sosialhjelpCommon = "1.05daec2"
+    const val coroutines = "1.5.1"
+    const val springBoot = "2.5.4"
+    const val sosialhjelpCommon = "1.6341b6b"
     const val logback = "1.2.3"
     const val logstash = "6.6"
-    const val filformat = "1.2021.07.07-09.02-3adcd1adc14b"
+    const val filformat = "1.2021.08.27-10.29-41cf5ce1230a"
     const val micrometerRegistry = "1.6.2"
     const val prometheus = "0.9.0"
     const val tokenValidation = "1.3.8"
     const val jackson = "2.12.3"
     const val guava = "30.1.1-jre"
-    const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.8.0"
     const val fileUpload = "1.4"
     const val tika = "1.25"
     const val pdfBox = "2.0.24"
-    const val fiksKryptering = "1.0.11"
+    const val fiksKryptering = "1.1.1"
     const val lettuce = "6.0.6.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
-    const val springdoc = "1.5.9"
+    const val springdoc = "1.5.10"
     const val jsonSmart = "2.4.7"
 
     //    Test only
     const val junitJupiter = "5.7.0"
-    const val mockk = "1.11.0"
-    const val springmockk = "2.0.0"
+    const val mockk = "1.12.0"
+    const val springmockk = "3.0.1"
     const val mockwebserver = "5.0.0-alpha.2"
 }
 
 plugins {
     application
-    kotlin("jvm") version "1.5.20"
+    kotlin("jvm") version "1.5.30"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.5.20"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.5.30"
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("com.github.ben-manes.versions") version "0.38.0"
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    id("com.github.ben-manes.versions") version "0.39.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
 }
 
 application {
@@ -60,7 +58,7 @@ java {
 }
 
 ktlint {
-    this.version.set("0.41.0")
+    this.version.set("0.42.1")
 }
 
 configurations {
@@ -140,7 +138,6 @@ dependencies {
     implementation("commons-fileupload:commons-fileupload:${Versions.fileUpload}")
     implementation("org.apache.tika:tika-core:${Versions.tika}")
     implementation("org.apache.pdfbox:preflight:${Versions.pdfBox}")
-    implementation("com.natpryce:konfig:${Versions.konfig}")
     implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
 
 //    Test

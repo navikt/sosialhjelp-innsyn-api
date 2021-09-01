@@ -23,7 +23,7 @@ object Versions {
     const val fileUpload = "1.4"
     const val tika = "1.25"
     const val pdfBox = "2.0.24"
-    const val fiksKryptering = "1.0.11"
+    const val fiksKryptering = "1.1.1"
     const val lettuce = "6.0.6.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
@@ -33,7 +33,7 @@ object Versions {
     //    Test only
     const val junitJupiter = "5.7.0"
     const val mockk = "1.12.0"
-    const val springmockk = "2.0.0"
+    const val springmockk = "3.0.1"
     const val mockwebserver = "5.0.0-alpha.2"
 }
 

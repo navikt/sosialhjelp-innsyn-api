@@ -106,15 +106,20 @@ internal class VedleggOpplastingServiceTest {
         val largePngFile = createImageByteArray("png", 2)
         val filnavn3 = "test3.png"
 
+        val filnavn4 = " jadda.png"
+        val filnavn5 = " uten "
+
         val metadata = mutableListOf(
             OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1), OpplastetFil(filnavn1)), null),
-            OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn3)), null)
+            OpplastetVedleggMetadata(type1, tilleggsinfo1, null, null, mutableListOf(OpplastetFil(filnavn3), OpplastetFil(filnavn4), OpplastetFil(filnavn5)), null)
         )
         val files = mutableListOf<MultipartFile>(
             MockMultipartFile("files", filnavn0, filtype1, jpgFile),
             MockMultipartFile("files", filnavn1, filtype0, pngFile),
             MockMultipartFile("files", filnavn1, filtype0, largePngFile),
-            MockMultipartFile("files", filnavn3, filtype0, pngFile)
+            MockMultipartFile("files", filnavn3, filtype0, pngFile),
+            MockMultipartFile("files", filnavn4, filtype0, pngFile),
+            MockMultipartFile("files", filnavn5, filtype0, pngFile)
         )
 
         val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
@@ -125,7 +130,7 @@ internal class VedleggOpplastingServiceTest {
         val filerForOpplasting = filerForOpplastingSlot.captured
         val vedleggSpesifikasjon = vedleggSpesifikasjonSlot.captured
 
-        assertThat(filerForOpplasting).hasSize(5) // Inkluderer ettersendelse.pdf
+        assertThat(filerForOpplasting).hasSize(7) // Inkluderer ettersendelse.pdf
         assertThat(filerForOpplasting[0].filnavn == filnavn0)
         assertThat(filerForOpplasting[0].mimetype == filtype0)
         assertThat(filerForOpplasting[1].filnavn == filnavn1)
@@ -135,11 +140,11 @@ internal class VedleggOpplastingServiceTest {
         assertThat(filerForOpplasting[3].filnavn == filnavn1)
         assertThat(filerForOpplasting[3].mimetype == filtype1)
 
-        assertThat(vedleggSpesifikasjon.vedlegg.size).isEqualTo(2)
+        assertThat(vedleggSpesifikasjon.vedlegg).hasSize(2)
         assertThat(vedleggSpesifikasjon.vedlegg[0].type == type0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].tilleggsinfo == tilleggsinfo0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].status == "LastetOpp")
-        assertThat(vedleggSpesifikasjon.vedlegg[0].filer.size == 3)
+        assertThat(vedleggSpesifikasjon.vedlegg[0].filer).hasSize(3)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[0].filnavn == filnavn0)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].filnavn == filnavn1)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[2].filnavn == filnavn1)
@@ -147,8 +152,10 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggSpesifikasjon.vedlegg[1].type).isEqualTo(type1)
         assertThat(vedleggSpesifikasjon.vedlegg[1].tilleggsinfo).isEqualTo(tilleggsinfo1)
         assertThat(vedleggSpesifikasjon.vedlegg[1].status).isEqualTo("LastetOpp")
-        assertThat(vedleggSpesifikasjon.vedlegg[1].filer.size).isEqualTo(1)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer).hasSize(3)
         assertThat(vedleggSpesifikasjon.vedlegg[1].filer[0].filnavn.replace("-uuid", "")).isEqualTo(filnavn3)
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[1].filnavn.replace("-uuid", "")).isEqualTo(filnavn4.trim())
+        assertThat(vedleggSpesifikasjon.vedlegg[1].filer[2].filnavn.replace("-uuid", "")).startsWith(filnavn5.trim()).endsWith(".png")
 
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isNotEqualTo(vedleggSpesifikasjon.vedlegg[0].filer[2].sha512)
         assertThat(vedleggSpesifikasjon.vedlegg[0].filer[1].sha512).isEqualTo(vedleggSpesifikasjon.vedlegg[1].filer[0].sha512)
@@ -161,6 +168,10 @@ internal class VedleggOpplastingServiceTest {
         assertThat(vedleggOpplastingResponseList[0].filer[2].status.result == ValidationValues.OK)
         assertThat(vedleggOpplastingResponseList[1].filer[0].filename == filnavn3)
         assertThat(vedleggOpplastingResponseList[1].filer[0].status.result == ValidationValues.OK)
+        assertThat(vedleggOpplastingResponseList[1].filer[1].filename == filnavn4.trim())
+        assertThat(vedleggOpplastingResponseList[1].filer[1].status.result == ValidationValues.OK)
+        assertThat(vedleggOpplastingResponseList[1].filer[2].filename).startsWith(filnavn5.trim())
+        assertThat(vedleggOpplastingResponseList[1].filer[2].status.result == ValidationValues.OK)
     }
 
     @Test

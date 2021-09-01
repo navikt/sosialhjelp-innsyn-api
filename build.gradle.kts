@@ -7,7 +7,7 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.5.1"
-    const val springBoot = "2.5.3"
+    const val springBoot = "2.5.4"
     const val sosialhjelpCommon = "1.6341b6b"
     const val logback = "1.2.3"
     const val logstash = "6.6"
@@ -17,7 +17,6 @@ object Versions {
     const val tokenValidation = "1.3.8"
     const val jackson = "2.12.3"
     const val guava = "30.1.1-jre"
-    const val konfig = "1.6.10.0"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.8.0"
     const val fileUpload = "1.4"
@@ -139,7 +138,6 @@ dependencies {
     implementation("commons-fileupload:commons-fileupload:${Versions.fileUpload}")
     implementation("org.apache.tika:tika-core:${Versions.tika}")
     implementation("org.apache.pdfbox:preflight:${Versions.pdfBox}")
-    implementation("com.natpryce:konfig:${Versions.konfig}")
     implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
 
 //    Test

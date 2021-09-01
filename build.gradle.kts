@@ -44,8 +44,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.spring") version "1.5.30"
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("com.github.ben-manes.versions") version "0.38.0"
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    id("com.github.ben-manes.versions") version "0.39.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
 }
 
 application {
@@ -59,7 +59,7 @@ java {
 }
 
 ktlint {
-    this.version.set("0.41.0")
+    this.version.set("0.42.1")
 }
 
 configurations {

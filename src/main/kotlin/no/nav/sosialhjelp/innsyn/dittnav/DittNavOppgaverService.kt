@@ -44,6 +44,9 @@ class DittNavOppgaverService(
                     RequestContextHolder.setRequestAttributes(requestAttributes)
                     getOppgaverForDigisosSak(it, token, aktive)
                 }
+                .also {
+                    log.info("DittNav - hentet ${it.size} ${aktive.toAktivString} oppgaver")
+                }
         }
     }
 
@@ -77,9 +80,6 @@ class DittNavOppgaverService(
                 )
             }
             .sortedBy { it.eventTidspunkt }
-            .also {
-                log.info("DittNav - hentet ${it.size} ${aktiv.toAktivString} oppgaver")
-            }
     }
 
     companion object {

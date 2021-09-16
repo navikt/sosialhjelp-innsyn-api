@@ -57,7 +57,7 @@ class VedleggOpplastingService(
             val originalFilename = sanitizeFileName(file.originalFilename!!)
             val filename = createFilename(originalFilename, valideringer)
             renameFilenameInMetadataJson(originalFilename, filename, metadata)
-            filerForOpplasting.add(FilForOpplasting(filename, file.contentType, file.size, file.inputStream))
+            filerForOpplasting.add(FilForOpplasting(filename, detectTikaType(file.inputStream), file.size, file.inputStream))
         }
 
         // Generere pdf og legge til i listen over filer som skal krypteres og lastes opp

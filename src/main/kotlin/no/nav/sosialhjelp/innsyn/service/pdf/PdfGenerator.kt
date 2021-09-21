@@ -108,6 +108,7 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
             if (y < 100) {
                 currentStream.endText()
                 continueOnNewPage()
+                y = calculateStartY()
                 currentStream.beginText()
                 currentStream.setFont(font, fontSize)
                 currentStream.newLineAtOffset(margin, y)

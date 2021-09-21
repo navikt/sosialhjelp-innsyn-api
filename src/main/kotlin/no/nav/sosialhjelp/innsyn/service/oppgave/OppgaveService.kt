@@ -83,8 +83,8 @@ class OppgaveService(
         val newStatus = model.vilkar
             .filter { it.status == Oppgavestatus.RELEVANT || it.status == Oppgavestatus.ANNULLERT }
             .size
-        if (newStatus > 0 ) {
-            log.info("Hentet ${newStatus} vilkar med nye statuser (RELEVANT / ANNULERT).")
+        if (newStatus > 0) {
+            log.info("Hentet $newStatus vilkar med nye statuser (RELEVANT / ANNULERT).")
         }
 
         val vilkarResponseList = model.vilkar
@@ -127,8 +127,8 @@ class OppgaveService(
         val newStatus = model.dokumentasjonkrav
             .filter { it.status == Oppgavestatus.RELEVANT || it.status == Oppgavestatus.ANNULLERT || it.status == Oppgavestatus.LEVERT_TIDLIGERE }
             .size
-        if (newStatus > 0 ) {
-            log.info("Hentet ${newStatus} dokumentasjonkrav med nye statuser (RELEVANT / ANNULERT / LEVERT_TIDLIGERE).")
+        if (newStatus > 0) {
+            log.info("Hentet $newStatus dokumentasjonkrav med nye statuser (RELEVANT / ANNULERT / LEVERT_TIDLIGERE).")
         }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav

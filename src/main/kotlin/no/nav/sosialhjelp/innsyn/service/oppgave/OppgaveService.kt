@@ -79,6 +79,14 @@ class OppgaveService(
             return emptyList()
         }
 
+        // Logger om fagsystemene har tatt i bruk nye statuser
+        val antallWithNewStatus = model.vilkar
+            .filter { it.status == Oppgavestatus.RELEVANT || it.status == Oppgavestatus.ANNULLERT }
+            .size
+        if (antallWithNewStatus > 0) {
+            log.info("Hentet $antallWithNewStatus vilkar med nye statuser (RELEVANT / ANNULERT).")
+        }
+
         val vilkarResponseList = model.vilkar
             .filter {
                 !it.isEmpty()
@@ -114,6 +122,14 @@ class OppgaveService(
 
         val ettersendteVedlegg =
             vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+
+        // Logger om fagsystemene har tatt i bruk nye statuser
+        val antallWithNewStatus = model.dokumentasjonkrav
+            .filter { it.status == Oppgavestatus.RELEVANT || it.status == Oppgavestatus.ANNULLERT || it.status == Oppgavestatus.LEVERT_TIDLIGERE }
+            .size
+        if (antallWithNewStatus > 0) {
+            log.info("Hentet $antallWithNewStatus dokumentasjonkrav med nye statuser (RELEVANT / ANNULERT / LEVERT_TIDLIGERE).")
+        }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
             .filter {

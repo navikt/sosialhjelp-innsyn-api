@@ -18,7 +18,7 @@ class StsCheck(
     override val type = DependencyType.REST
     override val name = "STS"
     override val address = clientProperties.stsTokenEndpointUrl
-    override val importance = Importance.WARNING
+    override val importance = Importance.CRITICAL
 
     override fun doCheck() {
         stsClient.ping()

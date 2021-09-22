@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration debug="true">
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%green(%d{HH:mm:ss}) %cyan([%-5.5t]) %boldCyan(%0.-5p) %yellow(%-25.25logger{19}) %cyan(:) %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="no.nav.sosialhjelp.innsyn" level="DEBUG" />
+    <logger name="no.nav.security.token" level="DEBUG" />
+    <logger name="org.springframework.web" level="INFO" />
+    <logger name="org.pac4j.springframework" level="INFO" />
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

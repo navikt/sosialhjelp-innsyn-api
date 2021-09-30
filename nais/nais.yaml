@@ -68,4 +68,5 @@ spec:
     - configmap: loginservice-idporten
 {{#unless isLabsGcp}}
     - secret: redis-password-innsyn-api
+    - secret: digisos-truststore-env
 {{/unless}}

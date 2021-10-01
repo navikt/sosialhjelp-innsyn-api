@@ -98,7 +98,7 @@ Manuell deploy kan også gjøres med kubectl ved bruk av `kubectl apply` i ønsk
 `TestApplication` og profile=`local,log-console` (`,no-redis`)
 
 Da må følgende env-variabler settes (hentes fra vault): \
-`FIKS_DIGISOS_ENDPOINT_URL`, `INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS`, `VIRKSERT_STI`, `TRUSTSTORE_TYPE`, `TRUSTSTORE_FILEPATH` og `TESTBRUKER_NATALIE`.
+`FIKS_DIGISOS_ENDPOINT_URL`, `INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS`, `VIRKSERT_STI` og `TESTBRUKER_NATALIE`.
 
 #### Med redis
 Bruk spring-profilen `no-redis` for å disable redis.

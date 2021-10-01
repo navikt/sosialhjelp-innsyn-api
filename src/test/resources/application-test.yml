@@ -18,8 +18,6 @@ no.nav.sosialhjelp.idporten:
   client_id: clientid
   scope: scope
   config_url: configurl
-  truststore_type: truststoretype
-  truststore_filepath: filepath
 
 innsyn:
   vedlegg:

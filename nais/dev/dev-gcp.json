@@ -4,6 +4,10 @@
   "ingress": [
     "https://sosialhjelp-innsyn-api-gcp.dev.nav.no/sosialhjelp/innsyn-api"
   ],
+  "envsecret": [
+    "redis-password-innsyn-api",
+    "testbruker-natalie"
+  ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,no-redis",
     "METADATA_URL": "https://digisos-gcp.dev.nav.no/sosialhjelp/mock-alt-api/well-known/selvbetjening",

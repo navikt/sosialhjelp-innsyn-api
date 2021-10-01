@@ -5,6 +5,9 @@
     "https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
     "https://www.nav.no/sosialhjelp/innsyn-api"
   ],
+  "envsecret": [
+    "redis-password-innsyn-api"
+  ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",
     "/var/run/secrets/nais.io/vault": "/kv/prod/sbs/sosialhjelp-innsyn-api/teamdigisos",

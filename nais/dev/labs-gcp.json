@@ -4,6 +4,9 @@
   "ingress": [
     "https://sosialhjelp-innsyn-api.labs.nais.io/sosialhjelp/innsyn-api"
   ],
+  "envsecret": [
+    "testbruker-natalie"
+  ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,no-redis",
     "METADATA_URL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt-api/well-known/selvbetjening",

@@ -5,8 +5,7 @@
     "https://sosialhjelp-innsyn-api-gcp.dev.nav.no/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
-    "redis-password-innsyn-api",
-    "testbruker-natalie"
+    "redis-password-innsyn-api"
   ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,no-redis",

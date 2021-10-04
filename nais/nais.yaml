@@ -66,6 +66,6 @@ spec:
 {{/each}}
   envFrom:
     - configmap: loginservice-idporten
-{{#unless isLabsGcp}}
-    - secret: redis-password-innsyn-api
-{{/unless}}
+{{#each envsecret}}
+    - secret: "{{this}}"
+{{/each}}

@@ -6,6 +6,10 @@
     "https://www-q1.dev.nav.no/sosialhjelp/innsyn-api",
     "https://www-q1.nav.no/sosialhjelp/innsyn-api"
   ],
+  "envsecret": [
+    "redis-password-innsyn-api",
+    "testbruker-natalie"
+  ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
     "/var/run/secrets/nais.io/appdynamics": "/apikey/appdynamics/dev",

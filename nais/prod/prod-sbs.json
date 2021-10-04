@@ -6,7 +6,8 @@
     "https://www.nav.no/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
-    "redis-password-innsyn-api"
+    "redis-password-innsyn-api",
+    "xsrf-secret"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",

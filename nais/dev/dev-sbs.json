@@ -9,7 +9,9 @@
   "envsecret": [
     "redis-password-innsyn-api",
     "testbruker-natalie",
-    "xsrf-secret"
+    "xsrf-secret",
+    "fiks-integrasjon-secret",
+    "fiks-kommune-integrasjon-secret"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",

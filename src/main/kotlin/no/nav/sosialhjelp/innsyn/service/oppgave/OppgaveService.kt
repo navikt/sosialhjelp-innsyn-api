@@ -1,9 +1,6 @@
 package no.nav.sosialhjelp.innsyn.service.oppgave
 
-import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV
-import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
@@ -24,7 +21,6 @@ class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksClient: FiksClient,
-    private val unleashClient: Unleash,
 ) {
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
@@ -92,7 +88,7 @@ class OppgaveService(
                 !it.isEmpty()
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på vilkår er tomt") }
             }
-            .filter { it.status != Oppgavestatus.ANNULLERT }
+            .filter { it.status == Oppgavestatus.RELEVANT }
             .map {
                 val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
                 VilkarResponse(
@@ -105,12 +101,8 @@ class OppgaveService(
             }
             .sortedBy { it.hendelsetidspunkt }
 
-        if (unleashClient.isEnabled(VILKAR, false)) {
-            log.info("Hentet ${vilkarResponseList.size} vilkar")
-            return vilkarResponseList
-        }
-
-        return emptyList()
+        log.info("Hentet ${vilkarResponseList.size} vilkar")
+        return vilkarResponseList
     }
 
     fun getDokumentasjonkrav(fiksDigisosId: String, token: String): List<DokumentasjonkravResponse> {
@@ -137,8 +129,7 @@ class OppgaveService(
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
             }
             .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
-            .filter { it.status != Oppgavestatus.ANNULLERT }
-            .filter { it.status != Oppgavestatus.LEVERT_TIDLIGERE }
+            .filter { it.status == Oppgavestatus.RELEVANT }
             .groupBy { it.frist }
             .map { (key, value) ->
                 DokumentasjonkravResponse(
@@ -159,12 +150,8 @@ class OppgaveService(
             }
             .sortedWith(compareBy(nullsLast()) { it.frist })
 
-        if (unleashClient.isEnabled(DOKUMENTASJONKRAV, false)) {
-            log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
-            return dokumentasjonkravResponseList
-        }
-
-        return emptyList()
+        log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
+        return dokumentasjonkravResponseList
     }
 
     fun getDokumentasjonkravMedId(

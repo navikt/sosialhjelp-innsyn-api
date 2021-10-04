@@ -3,13 +3,10 @@ package no.nav.sosialhjelp.innsyn.service.oppgave
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV
-import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
@@ -30,8 +27,7 @@ internal class OppgaveServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
-    private val unleashClient: Unleash = mockk()
-    private val service = OppgaveService(eventService, vedleggService, fiksClient, unleashClient)
+    private val service = OppgaveService(eventService, vedleggService, fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockEttersendtInfoNAV: EttersendtInfoNAV = mockk()
@@ -62,9 +58,6 @@ internal class OppgaveServiceTest {
         clearAllMocks()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
-
-        every { unleashClient.isEnabled(VILKAR, false) } returns true
-        every { unleashClient.isEnabled(DOKUMENTASJONKRAV, false) } returns true
     }
 
     @Test
@@ -354,7 +347,7 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for Dokumentasjonkrav`() {
+    fun `Should not include statuses OPPFYLT or IKKE_OPPFYLT for Dokumentasjonkrav`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav.addAll(
             listOf(
@@ -397,14 +390,12 @@ internal class OppgaveServiceTest {
 
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
-        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(3)
+        assertThat(responseList[0].dokumentasjonkravElementer).hasSize(1)
         assertThat(responseList[0].dokumentasjonkravElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
-        assertThat(responseList[0].dokumentasjonkravElementer.get(1).status).isEqualTo(Oppgavestatus.RELEVANT)
-        assertThat(responseList[0].dokumentasjonkravElementer.get(2).status).isEqualTo(Oppgavestatus.RELEVANT)
     }
 
     @Test
-    fun `Should change status OPPFYLT and IKKE_OPPFYLT to RELEVANT for Vilkar`() {
+    fun `Should not include statuses OPPFYLT or IKKE_OPPFYLT for Vilkar`() {
         val model = InternalDigisosSoker()
         model.vilkar.addAll(
             listOf(
@@ -421,10 +412,8 @@ internal class OppgaveServiceTest {
 
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
-        assertThat(responseList).hasSize(3)
+        assertThat(responseList).hasSize(1)
         assertThat(responseList[0].status).isEqualTo(Oppgavestatus.RELEVANT)
-        assertThat(responseList[1].status).isEqualTo(Oppgavestatus.RELEVANT)
-        assertThat(responseList[2].status).isEqualTo(Oppgavestatus.RELEVANT)
     }
 
     @Test

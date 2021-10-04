@@ -7,7 +7,8 @@
   ],
   "envsecret": [
     "redis-password-innsyn-api",
-    "xsrf-secret"
+    "xsrf-secret",
+    "fiks-integrasjon-secret"
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",

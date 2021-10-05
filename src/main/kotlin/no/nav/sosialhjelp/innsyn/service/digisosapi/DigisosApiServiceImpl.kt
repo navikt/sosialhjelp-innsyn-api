@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-@Profile("!(prod-sbs | mock)")
+@Profile("!prod-sbs")
 @Component
 class DigisosApiServiceImpl(
     private val digisosApiClient: DigisosApiClient,

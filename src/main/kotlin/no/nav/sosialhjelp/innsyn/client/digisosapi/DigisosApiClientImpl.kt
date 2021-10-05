@@ -31,7 +31,7 @@ import java.util.Collections
 /**
  * Brukes kun i dev-sbs eller ved lokal testing mot fiks-test
  */
-@Profile("!(prod-sbs|mock)")
+@Profile("!prod-sbs")
 @Component
 class DigisosApiClientImpl(
     private val clientProperties: ClientProperties,

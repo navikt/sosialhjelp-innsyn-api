@@ -17,7 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 
-@Profile("!(mock | local)")
+@Profile("!local")
 @Component
 class NorgClientImpl(
     private val norgWebClient: WebClient,

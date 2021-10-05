@@ -5,7 +5,7 @@ import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
-@Profile("mock | local")
+@Profile("local")
 @Component
 class NorgClientMock : NorgClient {
 
@@ -13,21 +13,20 @@ class NorgClientMock : NorgClient {
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
         return innsynMap.getOrElse(
-            enhetsnr,
-            {
-                val default = NavEnhet(
-                    enhetId = 100000367,
-                    navn = "NAV Longyearbyen",
-                    enhetNr = enhetsnr,
-                    antallRessurser = 20,
-                    status = "AKTIV",
-                    aktiveringsdato = "1982-04-21",
-                    nedleggelsesdato = "null"
-                )
-                innsynMap[enhetsnr] = default
-                default
-            }
-        )
+            enhetsnr
+        ) {
+            val default = NavEnhet(
+                enhetId = 100000367,
+                navn = "NAV Longyearbyen",
+                enhetNr = enhetsnr,
+                antallRessurser = 20,
+                status = "AKTIV",
+                aktiveringsdato = "1982-04-21",
+                nedleggelsesdato = "null"
+            )
+            innsynMap[enhetsnr] = default
+            default
+        }
     }
 
     override fun ping() {

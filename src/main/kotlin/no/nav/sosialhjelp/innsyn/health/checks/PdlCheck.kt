@@ -5,8 +5,10 @@ import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.selftest.DependencyCheck
 import no.nav.sosialhjelp.selftest.DependencyType
 import no.nav.sosialhjelp.selftest.Importance
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
+@Profile("!local")
 @Component
 class PdlCheck(
     clientProperties: ClientProperties,

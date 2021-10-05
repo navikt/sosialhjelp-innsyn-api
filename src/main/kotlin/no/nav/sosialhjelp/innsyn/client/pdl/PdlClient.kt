@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.retry
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -26,12 +27,11 @@ import java.util.Optional
 import java.util.stream.Collectors
 
 interface PdlClient {
-
     fun hentPerson(ident: String): PdlHentPerson?
-
     fun ping()
 }
 
+@Profile("!local")
 @Component
 class PdlClientImpl(
     private val pdlWebClient: WebClient,

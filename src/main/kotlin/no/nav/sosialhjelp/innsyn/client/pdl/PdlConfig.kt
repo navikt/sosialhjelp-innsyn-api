@@ -14,7 +14,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 
-@Profile("!(mock | local)")
+@Profile("!local")
 @Configuration
 class PdlConfig(
     private val clientProperties: ClientProperties

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.mock
+package no.nav.sosialhjelp.innsyn.config
 
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils

@@ -18,7 +18,6 @@ import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.typeRef
 import no.nav.sosialhjelp.kotlin.utils.retry
-import org.springframework.context.annotation.Profile
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
@@ -34,7 +33,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
 
-@Profile("!mock")
 @Component
 class FiksClientImpl(
     private val clientProperties: ClientProperties,

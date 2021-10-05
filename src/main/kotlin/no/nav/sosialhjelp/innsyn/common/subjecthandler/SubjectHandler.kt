@@ -4,7 +4,6 @@ import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import no.nav.sosialhjelp.innsyn.utils.logger
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 interface SubjectHandler {
@@ -13,7 +12,6 @@ interface SubjectHandler {
     fun getToken(): String
 }
 
-@Profile("!mock")
 @Component
 class AzureAdSubjectHandlerImpl(
     private val tokenValidationContextHolder: TokenValidationContextHolder

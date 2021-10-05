@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.rest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingerResponse
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.utbetalinger.UtbetalingerService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/innsyn")
 class UtbetalingerController(
     private val utbetalingerService: UtbetalingerService,
-    private val tilgangskontrollService: TilgangskontrollService
+    private val tilgangskontroll: Tilgangskontroll
 ) {
 
     @GetMapping("/utbetalinger")
     fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
-        tilgangskontrollService.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang()
 
         try {
             return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(token, month))
@@ -40,7 +40,7 @@ class UtbetalingerController(
 
     @GetMapping("/utbetalinger/exists")
     fun getUtbetalingExists(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "12") month: Int): ResponseEntity<Boolean> {
-        tilgangskontrollService.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang()
 
         try {
             return ResponseEntity.ok().body(utbetalingerService.utbetalingExists(token, month))

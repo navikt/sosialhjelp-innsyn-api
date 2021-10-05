@@ -7,15 +7,22 @@ import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.util.Locale
 
+interface Tilgangskontroll {
+    fun sjekkTilgang()
+    fun hentTilgang(ident: String): Tilgang
+}
+
+@Profile("!local")
 @Component
 class TilgangskontrollService(
     private val pdlClient: PdlClient
-) {
+) : Tilgangskontroll {
 
-    fun sjekkTilgang() {
+    override fun sjekkTilgang() {
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken())
     }
 
@@ -26,7 +33,7 @@ class TilgangskontrollService(
         }
     }
 
-    fun hentTilgang(ident: String): Tilgang {
+    override fun hentTilgang(ident: String): Tilgang {
         val pdlPerson = hentPerson(ident)
         val harTilgang = !(pdlPerson != null && pdlPerson.isKode6Or7())
         return Tilgang(harTilgang, fornavn(pdlPerson))
@@ -51,6 +58,22 @@ class TilgangskontrollService(
 
     companion object {
         private val log by logger()
+    }
+}
+
+@Profile("local")
+@Component
+class TilgangskontrollLocal : Tilgangskontroll {
+
+    override fun sjekkTilgang() {
+        // no-op
+    }
+
+    override fun hentTilgang(ident: String): Tilgang {
+        return Tilgang(
+            harTilgang = true,
+            fornavn = "mockperson"
+        )
     }
 }
 

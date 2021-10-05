@@ -9,7 +9,7 @@ import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.sjekkXsrfToken
 import no.nav.sosialhjelp.innsyn.domain.OppgaveOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.OppgaveValidering
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
@@ -41,7 +41,7 @@ class VedleggController(
     private val vedleggOpplastingService: VedleggOpplastingService,
     private val vedleggService: VedleggService,
     private val clientProperties: ClientProperties,
-    private val tilgangskontrollService: TilgangskontrollService
+    private val tilgangskontroll: Tilgangskontroll
 ) {
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
@@ -53,7 +53,7 @@ class VedleggController(
         request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
         log.info("Forsøker å starter ettersendelse")
-        tilgangskontrollService.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang()
         sjekkXsrfToken(fiksDigisosId, request)
 
         val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
@@ -65,7 +65,7 @@ class VedleggController(
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
     fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
-        tilgangskontrollService.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang()
 
         val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(fiksDigisosId, token)
         if (internalVedleggList.isEmpty()) {

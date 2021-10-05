@@ -92,8 +92,8 @@ Manuell deploy kan også gjøres med kubectl ved bruk av `kubectl apply` i ønsk
 2. `kubectl apply -f nais/redisexporter.yml`
 
 ## Lokal kjøring
-#### *uten* integrasjon til Fiks og login-api
-`TestApplication` og profile=`mock,log-console`
+#### *uten* integrasjon til Fiks og login-api, dvs mot mock-alt
+`Application` og profile=`mock-alt,log-console`
 #### *med* integrasjon til Fiks og login-api
 `TestApplication` og profile=`local,log-console` (`,no-redis`)
 

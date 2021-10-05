@@ -15,7 +15,6 @@ import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.retry
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -33,7 +32,6 @@ interface PdlClient {
     fun ping()
 }
 
-@Profile("!(mock | local)")
 @Component
 class PdlClientImpl(
     private val pdlWebClient: WebClient,

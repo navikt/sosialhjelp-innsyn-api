@@ -32,8 +32,4 @@ class NorgClientMock : NorgClient {
     override fun ping() {
         // no-op
     }
-
-    fun postNavEnhet(enhetsnr: String, navenhet: NavEnhet) {
-        innsynMap[enhetsnr] = navenhet
-    }
 }

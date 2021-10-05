@@ -5,9 +5,9 @@ import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 
-@Profile("mock | mock-alt")
+@Profile("mock-alt")
 @Configuration
-class MockConfig {
+class MockAltConfig {
 
     init {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())

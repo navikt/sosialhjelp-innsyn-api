@@ -11,7 +11,7 @@ import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
@@ -32,9 +32,9 @@ internal class VedleggControllerTest {
     private val vedleggOpplastingService: VedleggOpplastingService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
-    private val tilgangskontrollService: TilgangskontrollService = mockk()
+    private val tilgangskontroll: Tilgangskontroll = mockk()
 
-    private val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontrollService)
+    private val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontroll)
 
     private val id = "123"
 
@@ -59,7 +59,7 @@ internal class VedleggControllerTest {
         clearMocks(vedleggOpplastingService, vedleggService)
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { tilgangskontrollService.sjekkTilgang() } just Runs
+        every { tilgangskontroll.sjekkTilgang() } just Runs
     }
 
     @Test

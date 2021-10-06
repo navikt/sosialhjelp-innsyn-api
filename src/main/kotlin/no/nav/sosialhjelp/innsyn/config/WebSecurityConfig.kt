@@ -3,8 +3,6 @@ package no.nav.sosialhjelp.innsyn.config
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
-import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
@@ -66,17 +64,5 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
     private fun addFilters(http: HttpSecurity) {
         http.addFilterBefore(mdcFilter, SecurityContextPersistenceFilter::class.java)
-    }
-}
-
-@Profile("mock")
-@Order(-1)
-@Configuration
-class WebSecurityMockConfig : WebSecurityConfigurerAdapter() {
-
-    @Throws(Exception::class)
-    override fun configure(http: HttpSecurity) {
-        http.csrf().disable()
-        http.cors()
     }
 }

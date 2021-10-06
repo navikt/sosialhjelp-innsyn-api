@@ -6,10 +6,8 @@ import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
 import no.nav.sosialhjelp.selftest.DependencyCheck
 import no.nav.sosialhjelp.selftest.DependencyType
 import no.nav.sosialhjelp.selftest.Importance
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
-@Profile("!mock")
 @Component
 class FiksCheck(
     clientProperties: ClientProperties,

@@ -4,7 +4,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.domain.KommuneResponse
 import no.nav.sosialhjelp.innsyn.service.kommune.KommuneService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,12 +19,12 @@ import java.util.Date
 @RequestMapping("/api/v1/innsyn")
 class KommuneController(
     private val kommuneService: KommuneService,
-    private val tilgangskontrollService: TilgangskontrollService
+    private val tilgangskontroll: Tilgangskontroll
 ) {
 
     @GetMapping("/{fiksDigisosId}/kommune")
     fun hentKommuneInfo(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<KommuneResponse> {
-        tilgangskontrollService.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang()
 
         val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
 

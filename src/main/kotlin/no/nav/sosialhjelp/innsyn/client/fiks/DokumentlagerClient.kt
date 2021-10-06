@@ -5,7 +5,6 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.logger
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -19,7 +18,6 @@ interface DokumentlagerClient {
     fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate
 }
 
-@Profile("!mock")
 @Component
 class DokumentlagerClientImpl(
     private val clientProperties: ClientProperties,

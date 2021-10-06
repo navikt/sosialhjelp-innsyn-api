@@ -6,10 +6,8 @@ import no.nav.sosialhjelp.innsyn.utils.getenv
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.web.reactive.function.client.WebClient
 
-@Profile("!mock")
 @Configuration
 class IdPortenClientConfig(
     private val proxiedWebClient: WebClient,

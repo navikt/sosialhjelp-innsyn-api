@@ -4,7 +4,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.generateXsrfToken
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatusResponse
 import no.nav.sosialhjelp.innsyn.service.soknadsstatus.SoknadsStatusService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
@@ -23,12 +23,12 @@ import javax.servlet.http.HttpServletResponse
 @RequestMapping("/api/v1/innsyn/")
 class SoknadsStatusController(
     private val soknadsStatusService: SoknadsStatusService,
-    private val tilgangskontrollService: TilgangskontrollService
+    private val tilgangskontroll: Tilgangskontroll
 ) {
 
     @GetMapping("{fiksDigisosId}/soknadsStatus")
     fun hentSoknadsStatus(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String, response: HttpServletResponse, request: HttpServletRequest): ResponseEntity<SoknadsStatusResponse> {
-        tilgangskontrollService.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang()
 
         response.addCookie(xsrfCookie(fiksDigisosId, request))
         val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)

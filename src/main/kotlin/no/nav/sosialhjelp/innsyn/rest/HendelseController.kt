@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.rest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.domain.HendelseResponse
 import no.nav.sosialhjelp.innsyn.service.hendelse.HendelseService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/innsyn")
 class HendelseController(
     private val hendelseService: HendelseService,
-    private val tilgangskontrollService: TilgangskontrollService
+    private val tilgangskontroll: Tilgangskontroll
 ) {
 
     @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
     fun hentHendelser(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<HendelseResponse>> {
-        tilgangskontrollService.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang()
 
         val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
         return ResponseEntity.ok(hendelser)

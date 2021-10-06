@@ -27,13 +27,11 @@ import java.util.Optional
 import java.util.stream.Collectors
 
 interface PdlClient {
-
     fun hentPerson(ident: String): PdlHentPerson?
-
     fun ping()
 }
 
-@Profile("!(mock | local)")
+@Profile("!local")
 @Component
 class PdlClientImpl(
     private val pdlWebClient: WebClient,

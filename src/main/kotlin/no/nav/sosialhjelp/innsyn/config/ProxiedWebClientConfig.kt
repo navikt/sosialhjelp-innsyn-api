@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.web.reactive.function.client.WebClient
 
-@Profile("!(mock|mock-alt|local)")
+@Profile("!(mock-alt|local)")
 @Configuration
 class ProxiedWebClientConfig {
 
@@ -22,7 +22,7 @@ class ProxiedWebClientConfig {
             .build()
 }
 
-@Profile("mock|mock-alt|local")
+@Profile("(mock-alt|local)")
 @Configuration
 class MockProxiedWebClientConfig {
 

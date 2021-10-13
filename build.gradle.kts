@@ -8,7 +8,7 @@ group = "no.nav.sosialhjelp"
 object Versions {
     const val coroutines = "1.5.2"
     const val springBoot = "2.5.4"
-    const val sosialhjelpCommon = "1.f76ffa9"
+    const val sosialhjelpCommon = "1.00018ba"
     const val logback = "1.2.3"
     const val logstash = "6.6"
     const val filformat = "1.2021.08.27-10.29-41cf5ce1230a"

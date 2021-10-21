@@ -8,9 +8,11 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -36,8 +38,9 @@ internal class SaksOversiktControllerTest {
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val tilgangskontroll: Tilgangskontroll = mockk()
+    private val clientProperties: ClientProperties = mockk()
 
-    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll)
+    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, clientProperties)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -112,6 +115,56 @@ internal class SaksOversiktControllerTest {
             assertThat(second.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
             assertThat(second.kilde).isEqualTo(KILDE_INNSYN_API)
         }
+    }
+
+    @Test
+    fun skalSjekkeOmSisteSoknadErSendtTilRettKommune_riktigKommune() {
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1)
+        every { digisosSak1.kommunenummer } returns "0301"
+        every { clientProperties.meldingerKommunenummer } returns "0301"
+
+        val response = controller.skalViseMeldingerLenke("token")
+        val resultat = response.body
+        assertThat(resultat).isEqualTo(true)
+    }
+
+    @Test
+    fun skalSjekkeOmSisteSoknadErSendtTilRettKommune_feilKommune() {
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1)
+        every { digisosSak1.kommunenummer } returns "1234"
+        every { clientProperties.meldingerKommunenummer } returns "0301"
+
+        val response = controller.skalViseMeldingerLenke("token")
+        val resultat = response.body
+        assertThat(resultat).isEqualTo(false)
+    }
+
+    @Test
+    fun skalSjekkeOmSisteSoknadErSendtTilRettKommune_riktigSortert() {
+        val digisosSakEldst: DigisosSak = mockk()
+        val orgSoknadNavEldst: OriginalSoknadNAV = mockk()
+        every { digisosSakEldst.originalSoknadNAV } returns orgSoknadNavEldst
+        every { orgSoknadNavEldst.timestampSendt } returns 1L
+        every { digisosSakEldst.kommunenummer } returns "1234"
+
+        val digisosSakNyeste: DigisosSak = mockk()
+        val orgSoknadNavNyeste: OriginalSoknadNAV = mockk()
+        every { digisosSakNyeste.originalSoknadNAV } returns orgSoknadNavNyeste
+        every { orgSoknadNavNyeste.timestampSendt } returns 3L
+        every { digisosSakNyeste.kommunenummer } returns "0301"
+
+        val digisosSakIMidten: DigisosSak = mockk()
+        val orgSoknadNavC: OriginalSoknadNAV = mockk()
+        every { digisosSakIMidten.originalSoknadNAV } returns orgSoknadNavC
+        every { orgSoknadNavC.timestampSendt } returns 2L
+        every { digisosSakIMidten.kommunenummer } returns "1234"
+
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakEldst, digisosSakNyeste, digisosSakIMidten)
+        every { clientProperties.meldingerKommunenummer } returns "0301"
+
+        val response = controller.skalViseMeldingerLenke("token")
+        val resultat = response.body
+        assertThat(resultat).isEqualTo(true)
     }
 
     @Test

@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.rest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksDetaljerResponse
 import no.nav.sosialhjelp.innsyn.domain.SaksListeResponse
@@ -30,7 +31,8 @@ class SaksOversiktController(
     private val fiksClient: FiksClient,
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: Tilgangskontroll,
+    private val clientProperties: ClientProperties,
 ) {
 
     @GetMapping("/saker")
@@ -55,6 +57,21 @@ class SaksOversiktController(
         log.info("Hentet alle (${responselist.size}) DigisosSaker for bruker.")
 
         return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
+    }
+
+    @GetMapping("/skalViseMeldingerLenke")
+    fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+        tilgangskontroll.sjekkTilgang()
+
+        val saker = try {
+            fiksClient.hentAlleDigisosSaker(token)
+        } catch (e: FiksException) {
+            return ResponseEntity.status(503).build()
+        }
+
+        val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.first()
+
+        return ResponseEntity.ok().body(sisteSoknad.kommunenummer == clientProperties.meldingerKommunenummer)
     }
 
     @GetMapping("/saksDetaljer")

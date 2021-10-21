@@ -26,6 +26,7 @@
     "VIRKSERT_STI": "/var/run/secrets",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
     "UNLEASH_INSTANCE_ID": "labs-gcp",
+    "MELDINGER_KOMMUNENUMMER": "0301",
     "SWAGGER_ENABLED": "true"
   },
   "minReplicas": "1",

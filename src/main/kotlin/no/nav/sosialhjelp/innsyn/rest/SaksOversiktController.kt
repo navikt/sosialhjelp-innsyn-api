@@ -71,7 +71,7 @@ class SaksOversiktController(
 
         val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.first()
 
-        return ResponseEntity.ok().body( sisteSoknad.kommunenummer == clientProperties.meldingerKommunenummer )
+        return ResponseEntity.ok().body(sisteSoknad.kommunenummer == clientProperties.meldingerKommunenummer)
     }
 
     @GetMapping("/saksDetaljer")

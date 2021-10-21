@@ -42,6 +42,7 @@ client:
   sts_token_endpoint_url: ${STS_TOKEN_ENDPOINT_URL}
   unleash_url: ${UNLEASH_API_URL}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID}
+  meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER}
 
 no.nav.sosialhjelp.idporten:
   token_url: ${ID_PORTEN_TOKEN_URL}

@@ -12,6 +12,7 @@ client:
   sts_token_endpoint_url: 'http://localhost:57777'
   unleash_url: "http://localhost:58888"
   unleash_instance_id: "local"
+  meldinger_kommunenummer: "0301"
 
 no.nav.sosialhjelp.idporten:
   token_url: tokenurl

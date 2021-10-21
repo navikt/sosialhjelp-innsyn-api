@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -36,8 +37,9 @@ internal class SaksOversiktControllerTest {
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val tilgangskontroll: Tilgangskontroll = mockk()
+    private val clientProperties: ClientProperties = mockk()
 
-    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll)
+    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, clientProperties)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()

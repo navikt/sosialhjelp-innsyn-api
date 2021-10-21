@@ -24,4 +24,6 @@ class ClientProperties {
 
     lateinit var unleashUrl: String
     lateinit var unleashInstanceId: String
+
+    lateinit var meldingerKommunenummer: String
 }

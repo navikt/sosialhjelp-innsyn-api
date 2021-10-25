@@ -75,8 +75,8 @@ class SaksOversiktController(
         return ResponseEntity.ok().body(sisteSoknad?.kommunenummer == clientProperties.meldingerKommunenummer)
     }
 
-    @GetMapping("/sisteKommune")
-    fun hentSisteKommune(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DigisosSak> {
+    @GetMapping("/sisteSak")
+    fun hentSisteSak(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DigisosSak> {
         tilgangskontroll.sjekkTilgang()
 
         val saker = try {

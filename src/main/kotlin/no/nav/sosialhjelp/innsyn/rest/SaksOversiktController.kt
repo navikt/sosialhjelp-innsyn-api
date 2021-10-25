@@ -69,9 +69,9 @@ class SaksOversiktController(
             return ResponseEntity.status(503).build()
         }
 
-        val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.first()
+        val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.firstOrNull()
 
-        return ResponseEntity.ok().body(sisteSoknad.kommunenummer == clientProperties.meldingerKommunenummer)
+        return ResponseEntity.ok().body(sisteSoknad?.kommunenummer == clientProperties.meldingerKommunenummer)
     }
 
     @GetMapping("/saksDetaljer")

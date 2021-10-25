@@ -287,6 +287,7 @@ class VedleggOpplastingService(
         virusScanner.scan(file.originalFilename, file.bytes)
 
         val tikaMediaType = detectTikaType(file.inputStream)
+        if (tikaMediaType == "text/x-matlab") log.info("Tika detekterte mimeType text/x-matlab. Vi antar at dette egentlig er en PDF, men som ikke har korrekte magic bytes (%PDF).")
         val fileType = mapToTikaFileType(tikaMediaType)
 
         if (fileType == TikaFileType.UNKNOWN) {

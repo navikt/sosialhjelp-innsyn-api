@@ -24,6 +24,7 @@ fun detectTikaType(inputStream: InputStream): String {
 fun mapToTikaFileType(tikaMediaType: String): TikaFileType {
     return when {
         tikaMediaType.equals("application/pdf", ignoreCase = true) -> TikaFileType.PDF
+        tikaMediaType.equals("text/x-matlab", ignoreCase = true) -> TikaFileType.PDF
         tikaMediaType.equals("image/png", ignoreCase = true) -> TikaFileType.PNG
         tikaMediaType.equals("image/jpeg", ignoreCase = true) -> TikaFileType.JPEG
         else -> TikaFileType.UNKNOWN

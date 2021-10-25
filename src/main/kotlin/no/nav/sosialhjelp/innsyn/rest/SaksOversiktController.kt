@@ -86,7 +86,7 @@ class SaksOversiktController(
         }
 
         val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.firstOrNull()
-                ?: return ResponseEntity.noContent().build()
+            ?: return ResponseEntity.noContent().build()
 
         return ResponseEntity.ok().body(sisteSoknad)
     }

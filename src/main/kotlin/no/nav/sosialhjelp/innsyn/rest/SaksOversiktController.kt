@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.rest
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
@@ -72,6 +73,21 @@ class SaksOversiktController(
         val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.first()
 
         return ResponseEntity.ok().body(sisteSoknad.kommunenummer == clientProperties.meldingerKommunenummer)
+    }
+
+    @GetMapping("/sisteKommune")
+    fun hentSisteKommune(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DigisosSak> {
+        tilgangskontroll.sjekkTilgang()
+
+        val saker = try {
+            fiksClient.hentAlleDigisosSaker(token)
+        } catch (e: FiksException) {
+            return ResponseEntity.status(503).build()
+        }
+
+        val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.first()
+
+        return ResponseEntity.ok().body(sisteSoknad)
     }
 
     @GetMapping("/saksDetaljer")

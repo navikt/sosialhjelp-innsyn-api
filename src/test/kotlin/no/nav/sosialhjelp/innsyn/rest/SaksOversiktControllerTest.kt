@@ -129,6 +129,16 @@ internal class SaksOversiktControllerTest {
     }
 
     @Test
+    fun skalSjekkeOmSisteSoknadErSendtTilRettKommune_ingenSoknader() {
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
+        every { clientProperties.meldingerKommunenummer } returns "0301"
+
+        val response = controller.skalViseMeldingerLenke("token")
+        val resultat = response.body
+        assertThat(resultat).isEqualTo(false)
+    }
+
+    @Test
     fun skalSjekkeOmSisteSoknadErSendtTilRettKommune_feilKommune() {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1)
         every { digisosSak1.kommunenummer } returns "1234"

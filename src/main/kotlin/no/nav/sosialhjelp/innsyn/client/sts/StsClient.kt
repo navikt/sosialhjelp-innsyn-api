@@ -17,25 +17,25 @@ interface StsClient {
 @Profile("!(mock-alt|local)")
 @Component
 class StsClientImpl(
-        private val stsWebClient: WebClient,
+    private val stsWebClient: WebClient,
 ) : StsClient {
 
     override fun token(): String {
         if (shouldRenewToken(cachedToken)) {
             log.info("Henter nytt token fra STS")
             val stsToken = stsWebClient.post()
-                    .uri {
-                        it
-                                .queryParam(GRANT_TYPE, CLIENT_CREDENTIALS)
-                                .queryParam(SCOPE, OPENID)
-                                .build()
-                    }
-                    .retrieve()
-                    .bodyToMono<STSToken>()
-                    .doOnError {
-                        log.error("STS - Noe feilet, message: ${it.message}", it)
-                    }
-                    .block()
+                .uri {
+                    it
+                        .queryParam(GRANT_TYPE, CLIENT_CREDENTIALS)
+                        .queryParam(SCOPE, OPENID)
+                        .build()
+                }
+                .retrieve()
+                .bodyToMono<STSToken>()
+                .doOnError {
+                    log.error("STS - Noe feilet, message: ${it.message}", it)
+                }
+                .block()
 
             cachedToken = stsToken
             return stsToken!!.access_token
@@ -46,12 +46,12 @@ class StsClientImpl(
 
     override fun ping() {
         stsWebClient.options()
-                .retrieve()
-                .bodyToMono<String>()
-                .doOnError {
-                    log.error("STS - Ping feilet, message: ${it.message}", it)
-                }
-                .block()
+            .retrieve()
+            .bodyToMono<String>()
+            .doOnError {
+                log.error("STS - Ping feilet, message: ${it.message}", it)
+            }
+            .block()
     }
 
     companion object {
@@ -69,7 +69,7 @@ class StsClientImpl(
 @Profile("mock-alt|local")
 @Component
 class StsClientMock(
-        private val tokenValidationContextHolder: TokenValidationContextHolder
+    private val tokenValidationContextHolder: TokenValidationContextHolder
 ) : StsClient {
 
     override fun token(): String {
@@ -81,9 +81,9 @@ class StsClientMock(
 }
 
 data class STSToken(
-        val access_token: String,
-        val token_type: String,
-        val expires_in: Long,
+    val access_token: String,
+    val token_type: String,
+    val expires_in: Long,
 ) {
 
     val expirationTime: LocalDateTime = LocalDateTime.now().plusSeconds(expires_in - 10L)

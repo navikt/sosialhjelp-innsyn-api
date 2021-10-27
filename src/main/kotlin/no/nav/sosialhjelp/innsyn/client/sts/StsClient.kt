@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.client.sts
 
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.sosialhjelp.innsyn.client.sts.STSToken.Companion.shouldRenewToken
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.context.annotation.Profile
@@ -8,13 +9,18 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.time.LocalDateTime
 
-@Profile("!local")
-@Component
-class StsClient(
-    private val stsWebClient: WebClient,
-) {
+interface StsClient {
+    fun token(): String
+    fun ping()
+}
 
-    fun token(): String {
+@Profile("!(mock-alt|local)")
+@Component
+class StsClientImpl(
+    private val stsWebClient: WebClient,
+) : StsClient {
+
+    override fun token(): String {
         if (shouldRenewToken(cachedToken)) {
             log.info("Henter nytt token fra STS")
             val stsToken = stsWebClient.post()
@@ -38,7 +44,7 @@ class StsClient(
         return cachedToken!!.access_token
     }
 
-    fun ping() {
+    override fun ping() {
         stsWebClient.options()
             .retrieve()
             .bodyToMono<String>()
@@ -57,6 +63,20 @@ class StsClient(
         private const val CLIENT_CREDENTIALS = "client_credentials"
         private const val SCOPE = "scope"
         private const val OPENID = "openid"
+    }
+}
+
+@Profile("mock-alt|local")
+@Component
+class StsClientMock(
+    private val tokenValidationContextHolder: TokenValidationContextHolder
+) : StsClient {
+
+    override fun token(): String {
+        return tokenValidationContextHolder.tokenValidationContext.firstValidToken.get().tokenAsString
+    }
+
+    override fun ping() {
     }
 }
 

@@ -57,7 +57,8 @@ class VedleggOpplastingService(
             val originalFilename = sanitizeFileName(file.originalFilename!!)
             val filename = createFilename(originalFilename, valideringer)
             renameFilenameInMetadataJson(originalFilename, filename, metadata)
-            filerForOpplasting.add(FilForOpplasting(filename, detectTikaType(file.inputStream), file.size, file.inputStream))
+            val detectedMimetype = detectTikaType(file.inputStream)
+            filerForOpplasting.add(FilForOpplasting(filename, getMimetype(detectedMimetype), file.size, file.inputStream))
         }
 
         // Generere pdf og legge til i listen over filer som skal krypteres og lastes opp
@@ -96,6 +97,12 @@ class VedleggOpplastingService(
             }
         }
     }
+
+    private fun getMimetype(detectedMimetype: String) =
+        when (detectedMimetype) {
+            "text/x-matlab" -> "application/pdf"
+            else -> detectedMimetype
+        }
 
     private fun harOppgaverMedValideringsfeil(oppgaveValideringer: MutableList<OppgaveValidering>) =
         oppgaveValideringer.any { oppgave -> harFilerMedValideringsfeil(oppgave) }

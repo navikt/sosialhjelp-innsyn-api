@@ -64,12 +64,11 @@ class SaksOversiktController(
     }
 
     @GetMapping("/skalViseMeldingerLenke")
-    suspend fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) bearerToken: String): ResponseEntity<Boolean> {
+    suspend fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang()
-        val token = bearerToken.replace("Bearer ", "")
 
         try {
-            val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token)
+            val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.replace("Bearer ", ""))
             return ResponseEntity.ok().body(status.tilgangTilDialog)
         } catch (e: Exception) { // DialogException
             log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)

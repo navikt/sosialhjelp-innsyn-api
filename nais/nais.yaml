@@ -25,6 +25,8 @@ spec:
     min: {{minReplicas}}
     max: {{maxReplicas}}
   webproxy: {{webProxyEnabled}}
+  tokenx:
+    enabled: {{tokenXEnabled}}
 {{#if isGcp}}
   accessPolicy:
     outbound:
@@ -34,6 +36,9 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api
         - application: sosialhjelp-innsyn-api-redis
+    inbound:
+      rules:
+        - application: sosialhjelp-dialog-api
 {{/if}}
 {{#if isGcp}}
   filesFrom:

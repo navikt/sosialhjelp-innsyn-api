@@ -3,7 +3,9 @@ package no.nav.sosialhjelp.innsyn.rest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksDetaljerResponse
@@ -33,6 +35,7 @@ class SaksOversiktController(
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: Tilgangskontroll,
+    private val dialogClient: DialogClient,
     private val clientProperties: ClientProperties,
 ) {
 
@@ -61,8 +64,15 @@ class SaksOversiktController(
     }
 
     @GetMapping("/skalViseMeldingerLenke")
-    fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+    suspend fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang()
+
+        try {
+            val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token)
+            return ResponseEntity.ok().body(status.tilgangTilDialog)
+        } catch (e: Exception) { // DialogException
+            log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)
+        }
 
         val saker = try {
             fiksClient.hentAlleDigisosSaker(token)

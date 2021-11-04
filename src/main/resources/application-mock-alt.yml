@@ -36,6 +36,11 @@ client:
   unleash_url: ${UNLEASH_API_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/internal/unleash}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID:local}
   meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER:0301}
+  tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/well-known/selvbetjening}
+  tokendings_client_id: ${TOKEN_X_CLIENT_ID:localhost:teamdigisos:sosialhjelp-dialog-api}
+  tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK:generateRSA}
+  dialog_endpoint_url: ${DIALOG_ENDPOINT_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/dialog-api/status}
+  dialog_audience: ${DIALOG_AUDIENCE:dialog_audience}
 
 no.nav.sosialhjelp.idporten:
   token_url: ${ID_PORTEN_TOKEN_URL:http://127.0.0.1:8989/sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/token}

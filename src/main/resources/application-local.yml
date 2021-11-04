@@ -29,6 +29,11 @@ client:
   unleash_url: ${UNLEASH_API_URL:https://unleash.nais.io/api}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID:local}
   meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER:0301}
+  tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:tokendings_endpoint_url}
+  tokendings_client_id: ${TOKEN_X_CLIENT_ID:localhost:teamdigisos:sosialhjelp-dialog-api}
+  tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK:generateRSA}
+  dialog_endpoint_url: ${DIALOG_ENDPOINT_URL:dialog_endpoint_url}
+  dialog_audience: ${DIALOG_AUDIENCE:dialog_audience}
 
 no.nav.sosialhjelp.idporten:
   token_url: ${ID_PORTEN_TOKEN_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/token}

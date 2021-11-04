@@ -39,7 +39,9 @@
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
     "UNLEASH_INSTANCE_ID": "dev-sbs-intern",
     "MELDINGER_KOMMUNENUMMER": "0301",
-    "SWAGGER_ENABLED": "true"
+    "SWAGGER_ENABLED": "true",
+    "DIALOG_ENDPOINT_URL": "https://sosialhjelp.intern.nav.no/sosialhjelp/meldinger-api/app/api/status",
+    "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api"
   },
   "minReplicas": "2",
   "maxReplicas": "4",
@@ -51,5 +53,6 @@
   "webProxyEnabled": true,
   "isGcp": false,
   "isLabsGcp": false,
-  "vaultEnabled": true
+  "vaultEnabled": true,
+  "tokenXEnabled": true
 }

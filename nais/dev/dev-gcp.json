@@ -30,7 +30,10 @@
     "UNLEASH_INSTANCE_ID": "dev-gcp",
     "MELDINGER_KOMMUNENUMMER": "0301",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
-    "SWAGGER_ENABLED": "true"
+    "SWAGGER_ENABLED": "true",
+    "TOKEN_X_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/well-known/selvbetjening",
+    "TOKEN_X_CLIENT_ID": "dev-gcp:teamdigisos:sosialhjelp-innsyn-api",
+    "TOKEN_X_PRIVATE_JWK": "generateRSA"
   },
   "minReplicas": "1",
   "maxReplicas": "1",
@@ -42,5 +45,6 @@
   "webProxyEnabled": false,
   "isGcp": true,
   "isLabsGcp": false,
-  "vaultEnabled": false
+  "vaultEnabled": false,
+  "tokenXEnabled": false
 }

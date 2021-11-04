@@ -4,6 +4,9 @@ import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.DIALOG_API_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.logger
 import no.nav.sosialhjelp.kotlin.utils.retry
@@ -13,10 +16,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.bodyToMono
-
-const val BEARER = "Bearer "
-const val HEADER_TEMA = "Tema"
-const val TEMA_KOM = "KOM"
 
 interface DialogClient {
     suspend fun hentDialogStatus(ident: String, token: String): DialogStatus

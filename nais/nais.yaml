@@ -36,9 +36,6 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api
         - application: sosialhjelp-innsyn-api-redis
-    inbound:
-      rules:
-        - application: sosialhjelp-dialog-api
 {{/if}}
 {{#if isGcp}}
   filesFrom:

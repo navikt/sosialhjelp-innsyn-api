@@ -20,11 +20,9 @@ class DialogConfig(
 ) {
     @Bean
     fun dialogWebClient(webClientBuilder: WebClient.Builder): DialogWebClient {
-        val headers = HttpHeaders()
-        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         val builder = webClientBuilder
             .baseUrl(clientProperties.dialogEndpointUrl)
-            .defaultHeaders { headers.map { it.key to it.value } }
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .clientConnector(
                 ReactorClientHttpConnector(
                     HttpClient.newConnection()

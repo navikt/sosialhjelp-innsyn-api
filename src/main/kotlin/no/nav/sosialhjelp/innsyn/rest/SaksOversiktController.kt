@@ -1,9 +1,12 @@
 package no.nav.sosialhjelp.innsyn.rest
 
+import kotlinx.coroutines.runBlocking
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
+import no.nav.sosialhjelp.innsyn.client.dialog.DialogException
+import no.nav.sosialhjelp.innsyn.client.dialog.DialogStatus
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
@@ -64,11 +67,13 @@ class SaksOversiktController(
     }
 
     @GetMapping("/skalViseMeldingerLenke")
-    suspend fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+    fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang()
 
         try {
-            val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.replace("Bearer ", ""))
+            val status = runBlocking {
+                dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.replace("Bearer ", ""))
+            }
             return ResponseEntity.ok().body(status.tilgangTilDialog)
         } catch (e: Exception) { // DialogException
             log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)
@@ -83,6 +88,19 @@ class SaksOversiktController(
         val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.firstOrNull()
 
         return ResponseEntity.ok().body(sisteSoknad?.kommunenummer == clientProperties.meldingerKommunenummer)
+    }
+
+    @GetMapping("/dialog-status")
+    suspend fun hentDialogStatus(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DialogStatus> {
+        tilgangskontroll.sjekkTilgang()
+
+        try {
+            val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.replace("Bearer ", ""))
+            return ResponseEntity.ok().body(status)
+        } catch (e: DialogException) {
+            log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)
+            return ResponseEntity.status(503).build()
+        }
     }
 
     @GetMapping("/sisteSak")

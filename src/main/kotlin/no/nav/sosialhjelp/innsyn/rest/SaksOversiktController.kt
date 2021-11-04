@@ -64,8 +64,9 @@ class SaksOversiktController(
     }
 
     @GetMapping("/skalViseMeldingerLenke")
-    suspend fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+    suspend fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) bearerToken: String): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang()
+        val token = bearerToken.replace("Bearer ", "")
 
         try {
             val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token)

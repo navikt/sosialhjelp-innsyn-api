@@ -34,7 +34,7 @@
     "TOKEN_X_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/well-known/selvbetjening",
     "TOKEN_X_CLIENT_ID": "dev-gcp:teamdigisos:sosialhjelp-innsyn-api",
     "TOKEN_X_PRIVATE_JWK": "generateRSA",
-    "DIALOG_ENDPOINT_URL": "https://sosialhjelp-dialog-api-gcp/sosialhjelp/meldinger-api/app/api/status"
+    "DIALOG_ENDPOINT_URL": "https://sosialhjelp-dialog-api-gcp/sosialhjelp/meldinger-api/system/brukerstatus"
   },
   "minReplicas": "1",
   "maxReplicas": "1",

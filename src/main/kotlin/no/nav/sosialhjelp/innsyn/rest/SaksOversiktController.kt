@@ -91,7 +91,7 @@ class SaksOversiktController(
         return ResponseEntity.ok().body(sisteSoknad?.kommunenummer == clientProperties.meldingerKommunenummer)
     }
 
-    @GetMapping("/dialog-status")
+    @GetMapping("/dialogstatus")
     suspend fun hentDialogStatus(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DialogStatus> {
         tilgangskontroll.sjekkTilgang()
 

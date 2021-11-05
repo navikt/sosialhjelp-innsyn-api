@@ -60,7 +60,7 @@ class DialogClientImpl(
             if (dialogStatus.ident != ident) throw DialogException("Dialog returnerte status for feil ident.")
             return dialogStatus
         } catch (e: WebClientResponseException) {
-            log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
+            log.error("DialogClient - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
             throw DialogException(e.message!!)
         }
     }
@@ -70,7 +70,7 @@ class DialogClientImpl(
             .retrieve()
             .bodyToMono<String>()
             .doOnError { e ->
-                throw DialogException("PDL - ping feilet med melding: ${e.message}")
+                throw DialogException("DialogClient - ping feilet med melding: ${e.message}")
             }
             .subscribe()
     }

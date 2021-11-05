@@ -1,9 +1,14 @@
 package no.nav.sosialhjelp.innsyn.rest
 
+import kotlinx.coroutines.runBlocking
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
+import no.nav.sosialhjelp.innsyn.client.dialog.DialogException
+import no.nav.sosialhjelp.innsyn.client.dialog.DialogStatus
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksDetaljerResponse
@@ -15,6 +20,7 @@ import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.service.saksstatus.DEFAULT_TITTEL
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixTimestampToDate
 import org.springframework.http.HttpHeaders
@@ -33,6 +39,7 @@ class SaksOversiktController(
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: Tilgangskontroll,
+    private val dialogClient: DialogClient,
     private val clientProperties: ClientProperties,
 ) {
 
@@ -64,6 +71,15 @@ class SaksOversiktController(
     fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang()
 
+        try {
+            val status = runBlocking {
+                dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.removePrefix(BEARER))
+            }
+            return ResponseEntity.ok().body(status.tilgangTilDialog)
+        } catch (e: Exception) { // DialogException
+            log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)
+        }
+
         val saker = try {
             fiksClient.hentAlleDigisosSaker(token)
         } catch (e: FiksException) {
@@ -73,6 +89,19 @@ class SaksOversiktController(
         val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.firstOrNull()
 
         return ResponseEntity.ok().body(sisteSoknad?.kommunenummer == clientProperties.meldingerKommunenummer)
+    }
+
+    @GetMapping("/dialog-status")
+    suspend fun hentDialogStatus(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DialogStatus> {
+        tilgangskontroll.sjekkTilgang()
+
+        return try {
+            val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.removePrefix(BEARER))
+            ResponseEntity.ok().body(status)
+        } catch (e: DialogException) {
+            log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)
+            ResponseEntity.status(503).build()
+        }
     }
 
     @GetMapping("/sisteSak")

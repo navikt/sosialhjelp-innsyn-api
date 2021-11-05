@@ -7,8 +7,10 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
+import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
@@ -38,9 +40,10 @@ internal class SaksOversiktControllerTest {
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val tilgangskontroll: Tilgangskontroll = mockk()
+    private val dialogClient: DialogClient = mockk()
     private val clientProperties: ClientProperties = mockk()
 
-    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, clientProperties)
+    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, dialogClient, clientProperties)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -123,9 +126,11 @@ internal class SaksOversiktControllerTest {
         every { digisosSak1.kommunenummer } returns "0301"
         every { clientProperties.meldingerKommunenummer } returns "0301"
 
-        val response = controller.skalViseMeldingerLenke("token")
-        val resultat = response.body
-        assertThat(resultat).isEqualTo(true)
+        runBlocking {
+            val response = controller.skalViseMeldingerLenke("token")
+            val resultat = response.body
+            assertThat(resultat).isEqualTo(true)
+        }
     }
 
     @Test
@@ -133,9 +138,11 @@ internal class SaksOversiktControllerTest {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
         every { clientProperties.meldingerKommunenummer } returns "0301"
 
-        val response = controller.skalViseMeldingerLenke("token")
-        val resultat = response.body
-        assertThat(resultat).isEqualTo(false)
+        runBlocking {
+            val response = controller.skalViseMeldingerLenke("token")
+            val resultat = response.body
+            assertThat(resultat).isEqualTo(false)
+        }
     }
 
     @Test
@@ -144,9 +151,11 @@ internal class SaksOversiktControllerTest {
         every { digisosSak1.kommunenummer } returns "1234"
         every { clientProperties.meldingerKommunenummer } returns "0301"
 
-        val response = controller.skalViseMeldingerLenke("token")
-        val resultat = response.body
-        assertThat(resultat).isEqualTo(false)
+        runBlocking {
+            val response = controller.skalViseMeldingerLenke("token")
+            val resultat = response.body
+            assertThat(resultat).isEqualTo(false)
+        }
     }
 
     @Test
@@ -172,9 +181,11 @@ internal class SaksOversiktControllerTest {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakEldst, digisosSakNyeste, digisosSakIMidten)
         every { clientProperties.meldingerKommunenummer } returns "0301"
 
-        val response = controller.skalViseMeldingerLenke("token")
-        val resultat = response.body
-        assertThat(resultat).isEqualTo(true)
+        runBlocking {
+            val response = controller.skalViseMeldingerLenke("token")
+            val resultat = response.body
+            assertThat(resultat).isEqualTo(true)
+        }
     }
 
     @Test

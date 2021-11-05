@@ -29,6 +29,10 @@ object Versions {
     const val springdoc = "1.5.10"
     const val jsonSmart = "2.4.7"
 
+    const val javaJwt = "3.18.2"
+    const val jwksRsa = "0.17.0"
+    const val nimbus = "9.15.1"
+
     //    Test only
     const val junitJupiter = "5.7.0"
     const val mockk = "1.12.0"
@@ -101,6 +105,11 @@ dependencies {
     implementation("no.nav.sosialhjelp:sosialhjelp-common-kommuneinfo-client:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-idporten-client:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-kotlin-utils:${Versions.sosialhjelpCommon}")
+
+//    tokendings mot dialog-api
+    implementation("com.auth0:java-jwt:${Versions.javaJwt}")
+    implementation("com.auth0:jwks-rsa:${Versions.jwksRsa}")
+    implementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbus}")
 
 //    Micrometer/Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")

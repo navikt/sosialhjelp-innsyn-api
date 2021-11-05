@@ -25,6 +25,8 @@ spec:
     min: {{minReplicas}}
     max: {{maxReplicas}}
   webproxy: {{webProxyEnabled}}
+  tokenx:
+    enabled: {{tokenXEnabled}}
 {{#if isGcp}}
   accessPolicy:
     outbound:

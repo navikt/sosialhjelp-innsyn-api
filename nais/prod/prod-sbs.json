@@ -36,7 +36,7 @@
     "UNLEASH_INSTANCE_ID": "prod-sbs",
     "MELDINGER_KOMMUNENUMMER": "3403",
     "SWAGGER_ENABLED": "false",
-    "DIALOG_ENDPOINT_URL": "https://sosialhjelp.intern.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",
+    "DIALOG_ENDPOINT_URL": "https://www.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",
     "DIALOG_AUDIENCE": "prod-gcp:teamdigisos:sosialhjelp-dialog-api"
   },
   "minReplicas": "2",

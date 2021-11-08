@@ -135,6 +135,7 @@ internal class VedleggControllerTest {
         )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
+        every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns "null"
         assertThatExceptionOfType(IllegalStateException::class.java)
             .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
     }
@@ -148,6 +149,7 @@ internal class VedleggControllerTest {
         )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
+        every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns "null"
         assertThatCode { controller.sendVedlegg(id, files, "token", request) }.doesNotThrowAnyException()
     }
 
@@ -160,6 +162,7 @@ internal class VedleggControllerTest {
         )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf()
+        every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns "null"
         assertThatExceptionOfType(IllegalArgumentException::class.java)
             .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
     }

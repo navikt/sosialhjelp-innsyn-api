@@ -160,15 +160,29 @@ class FiksClientImpl(
             .retrieve()
             .toEntity<String>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
+                if (e.rawStatusCode == 400 && filErAlleredeLastetOpp(e, digisosId)) {
+                    log.warn("Fiks - Opplasting av ettersendelse er allerede på plass hos Fiks - ${messageUtenFnr(e)}", e)
+                    FiksClientFileExistsException(e.message?.maskerFnr, e)
+                } else {
+                    log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
+                        else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
+                    }
                 }
             }
             .block()
 
         log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity!!.statusCodeValue})")
+    }
+
+    private fun filErAlleredeLastetOpp(exception: WebClientResponseException?, digisosId: String): Boolean {
+        if(exception?.message?.startsWith("Ettersendelse med tilhørende navEksternRefId ") == true) {
+            if(exception?.message?.endsWith(" finnes allerde for oppgitt DigisosId $digisosId") == true) {
+                return true
+            }
+        }
+        return false
     }
 
     fun createBodyForUpload(
@@ -231,6 +245,8 @@ class FiksClientImpl(
         private val log by logger()
     }
 }
+
+class FiksClientFileExistsException(message: String?, e: WebClientResponseException?) : RuntimeException(message, e)
 
 data class VedleggMetadata(
     val filnavn: String?,

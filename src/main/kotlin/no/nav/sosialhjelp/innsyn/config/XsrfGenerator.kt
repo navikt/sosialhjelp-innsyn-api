@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.config
 
-import no.nav.sosialhjelp.innsyn.utils.logger
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.DateTime
 import java.security.NoSuchAlgorithmException
@@ -14,7 +13,6 @@ import javax.servlet.http.HttpServletRequest
  */
 object XsrfGenerator {
     private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
-    private val log by logger()
 
     @JvmOverloads
     fun generateXsrfToken(fiksDigisosId: String, token: String, date: String = DateTime().toString("yyyyMMdd")): String {
@@ -42,9 +40,6 @@ object XsrfGenerator {
         if (givenTokenOptional.isPresent) {
             givenToken = givenTokenOptional.get().value
         }
-
-        val header = request.getHeader("XSRF-TOKEN-INNSYN-API")
-        log.info("xsrftoken header? $header")
 
         val token = generateXsrfToken(fiksDigisosId, idportenIdtoken)
         val valid = token == givenToken || generateXsrfToken(fiksDigisosId, DateTime().minusDays(1).toString("yyyyMMdd")) == givenToken

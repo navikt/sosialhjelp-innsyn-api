@@ -40,13 +40,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class SaksOversiktController(
-        private val fiksClient: FiksClient,
-        private val eventService: EventService,
-        private val oppgaveService: OppgaveService,
-        private val tilgangskontroll: Tilgangskontroll,
-        private val dialogClient: DialogClient,
-        private val clientProperties: ClientProperties,
-        private val unleashClient: Unleash,
+    private val fiksClient: FiksClient,
+    private val eventService: EventService,
+    private val oppgaveService: OppgaveService,
+    private val tilgangskontroll: Tilgangskontroll,
+    private val dialogClient: DialogClient,
+    private val clientProperties: ClientProperties,
+    private val unleashClient: Unleash,
 ) {
 
     @GetMapping("/saker")

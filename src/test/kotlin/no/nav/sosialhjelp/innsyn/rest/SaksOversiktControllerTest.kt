@@ -8,6 +8,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
@@ -42,8 +43,9 @@ internal class SaksOversiktControllerTest {
     private val tilgangskontroll: Tilgangskontroll = mockk()
     private val dialogClient: DialogClient = mockk()
     private val clientProperties: ClientProperties = mockk()
+    private val unleashClient: Unleash = mockk()
 
-    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, dialogClient, clientProperties)
+    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, dialogClient, clientProperties, unleashClient)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()

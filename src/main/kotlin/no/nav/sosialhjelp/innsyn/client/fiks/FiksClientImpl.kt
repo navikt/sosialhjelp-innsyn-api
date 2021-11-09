@@ -176,9 +176,9 @@ class FiksClientImpl(
         log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity!!.statusCodeValue})")
     }
 
-    private fun filErAlleredeLastetOpp(exception: WebClientResponseException?, digisosId: String): Boolean =
-        (exception?.message?.startsWith("Ettersendelse med tilhørende navEksternRefId ") ?: false) &&
-            (exception?.message?.endsWith(" finnes allerde for oppgitt DigisosId $digisosId") ?: false)
+    private fun filErAlleredeLastetOpp(exception: WebClientResponseException, digisosId: String): Boolean =
+        (exception.message?.startsWith("Ettersendelse med tilhørende navEksternRefId ") ?: false) &&
+            (exception.message?.endsWith(" finnes allerde for oppgitt DigisosId $digisosId") ?: false)
 
     fun createBodyForUpload(
         vedleggJson: JsonVedleggSpesifikasjon,

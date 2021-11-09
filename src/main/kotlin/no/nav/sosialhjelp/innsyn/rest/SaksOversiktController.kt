@@ -99,7 +99,7 @@ class SaksOversiktController(
             val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.removePrefix(BEARER))
             ResponseEntity.ok().body(status)
         } catch (e: DialogException) {
-            log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)
+            log.warn("Status kall mot dialog-api har feilet.", e)
             ResponseEntity.status(503).build()
         }
     }

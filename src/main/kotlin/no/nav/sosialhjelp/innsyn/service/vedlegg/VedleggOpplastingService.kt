@@ -6,6 +6,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientFileExistsException
 import no.nav.sosialhjelp.innsyn.client.unleash.LOGGE_MISMATCH_FILNAVN
 import no.nav.sosialhjelp.innsyn.client.unleash.UTVIDE_VEDLEGG_JSON
 import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
@@ -75,7 +76,11 @@ class VedleggOpplastingService(
                 }
 
             val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadata)
-            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
+            try {
+                fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
+            } catch (e: FiksClientFileExistsException) {
+                // ignorerer når filen allerede er lastet opp
+            }
 
             waitForFutures(krypteringFutureList)
 

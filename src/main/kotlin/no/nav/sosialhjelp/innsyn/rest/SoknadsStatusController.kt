@@ -30,7 +30,7 @@ class SoknadsStatusController(
     fun hentSoknadsStatus(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String, response: HttpServletResponse, request: HttpServletRequest): ResponseEntity<SoknadsStatusResponse> {
         tilgangskontroll.sjekkTilgang()
 
-        response.addCookie(xsrfCookie(fiksDigisosId, request))
+        response.addCookie(xsrfCookie(request))
         val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)
         return ResponseEntity.ok().body(
             SoknadsStatusResponse(
@@ -43,7 +43,7 @@ class SoknadsStatusController(
         )
     }
 
-    private fun xsrfCookie(fiksDigisosId: String, request: HttpServletRequest): Cookie {
+    private fun xsrfCookie(request: HttpServletRequest): Cookie {
         var idportenIdtoken = "default"
         if (request.cookies != null) {
             val idportenTokenOptional = Arrays.stream(request.cookies).filter { c -> c.name == "idporten-idtoken" }.findFirst()
@@ -52,7 +52,7 @@ class SoknadsStatusController(
             }
         }
 
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", generateXsrfToken(fiksDigisosId, idportenIdtoken))
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", generateXsrfToken(idportenIdtoken))
         xsrfCookie.path = "/"
         xsrfCookie.isHttpOnly = true
         return xsrfCookie

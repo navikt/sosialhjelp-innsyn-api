@@ -22,6 +22,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.ResponseEntity
 import org.springframework.mock.web.MockMultipartFile
+import org.springframework.web.context.request.RequestAttributes
+import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import javax.servlet.http.Cookie
@@ -58,6 +60,10 @@ internal class VedleggControllerTest {
     internal fun setUp() {
         clearMocks(vedleggOpplastingService, vedleggService)
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
+
+        val requestAttributes: RequestAttributes = mockk()
+        every { requestAttributes.sessionId } returns "sessionId"
+        RequestContextHolder.setRequestAttributes(requestAttributes)
 
         every { tilgangskontroll.sjekkTilgang() } just Runs
     }
@@ -134,7 +140,7 @@ internal class VedleggControllerTest {
             MockMultipartFile("files", "test2.png", null, ByteArray(0))
         )
         val request: HttpServletRequest = mockk()
-        every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
+        every { request.cookies } returns arrayOf(xsrfCookie("default"))
         assertThatExceptionOfType(IllegalStateException::class.java)
             .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
     }
@@ -147,7 +153,7 @@ internal class VedleggControllerTest {
             MockMultipartFile("files", "test.jpg", null, ByteArray(0))
         )
         val request: HttpServletRequest = mockk()
-        every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
+        every { request.cookies } returns arrayOf(xsrfCookie("default"))
         assertThatCode { controller.sendVedlegg(id, files, "token", request) }.doesNotThrowAnyException()
     }
 
@@ -190,9 +196,9 @@ internal class VedleggControllerTest {
         assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
     }
 
-    private fun xsrfCookie(fiksDigisosId: String, token: String): Cookie {
+    private fun xsrfCookie(token: String): Cookie {
 
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", XsrfGenerator.generateXsrfToken(fiksDigisosId, token))
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", XsrfGenerator.generateXsrfToken(token))
         xsrfCookie.path = "/"
         xsrfCookie.isHttpOnly = true
         return xsrfCookie

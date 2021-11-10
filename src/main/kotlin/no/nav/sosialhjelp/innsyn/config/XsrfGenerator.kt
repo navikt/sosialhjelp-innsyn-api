@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.config
 
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.DateTime
+import org.springframework.web.context.request.RequestContextHolder
 import java.security.NoSuchAlgorithmException
 import java.util.Arrays
 import javax.crypto.Mac
@@ -15,9 +16,10 @@ object XsrfGenerator {
     private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
 
     @JvmOverloads
-    fun generateXsrfToken(fiksDigisosId: String, token: String, date: String = DateTime().toString("yyyyMMdd")): String {
+    fun generateXsrfToken(token: String, date: String = DateTime().toString("yyyyMMdd")): String {
         try {
-            val signKey = token + fiksDigisosId + date
+            val sessionId = RequestContextHolder.currentRequestAttributes().sessionId
+            val signKey = token + sessionId + date
             val hmac = Mac.getInstance("HmacSHA256")
             val secretKey = SecretKeySpec(SECRET.toByteArray(), "HmacSHA256")
             hmac.init(secretKey)
@@ -27,7 +29,7 @@ object XsrfGenerator {
         }
     }
 
-    fun sjekkXsrfToken(fiksDigisosId: String, request: HttpServletRequest) {
+    fun sjekkXsrfToken(request: HttpServletRequest) {
         val idportenTokenOptional = Arrays.stream(request.cookies).filter { c -> c.name == "idporten-idtoken" }.findFirst()
         var idportenIdtoken = "default"
         if (idportenTokenOptional.isPresent) {
@@ -40,8 +42,8 @@ object XsrfGenerator {
             givenToken = givenTokenOptional.get().value
         }
 
-        val token = generateXsrfToken(fiksDigisosId, idportenIdtoken)
-        val valid = token == givenToken || generateXsrfToken(fiksDigisosId, DateTime().minusDays(1).toString("yyyyMMdd")) == givenToken
+        val token = generateXsrfToken(idportenIdtoken)
+        val valid = token == givenToken || generateXsrfToken(DateTime().minusDays(1).toString("yyyyMMdd")) == givenToken
         require(valid) { "Feil token" }
     }
 }

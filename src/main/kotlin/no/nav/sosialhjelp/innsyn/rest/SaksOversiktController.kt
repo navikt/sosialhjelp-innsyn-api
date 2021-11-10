@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.rest
 
 import kotlinx.coroutines.runBlocking
+import no.finn.unleash.Unleash
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
@@ -8,6 +9,10 @@ import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogException
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogStatus
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.unleash.DIALOG_UNDERSOKELSE_GRUPPE_1
+import no.nav.sosialhjelp.innsyn.client.unleash.DIALOG_UNDERSOKELSE_GRUPPE_2
+import no.nav.sosialhjelp.innsyn.client.unleash.DIALOG_UNDERSOKELSE_GRUPPE_3
+import no.nav.sosialhjelp.innsyn.client.unleash.DIALOG_UNDERSOKELSE_GRUPPE_4
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -41,6 +46,7 @@ class SaksOversiktController(
     private val tilgangskontroll: Tilgangskontroll,
     private val dialogClient: DialogClient,
     private val clientProperties: ClientProperties,
+    private val unleashClient: Unleash,
 ) {
 
     @GetMapping("/saker")
@@ -99,7 +105,7 @@ class SaksOversiktController(
             val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.removePrefix(BEARER))
             ResponseEntity.ok().body(status)
         } catch (e: DialogException) {
-            log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)
+            log.warn("Status kall mot dialog-api har feilet.", e)
             ResponseEntity.status(503).build()
         }
     }
@@ -117,7 +123,22 @@ class SaksOversiktController(
         val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.firstOrNull()
             ?: return ResponseEntity.noContent().build()
 
-        return ResponseEntity.ok().body(sisteSoknad)
+        val lastDigit: Char = SubjectHandlerUtils.getUserIdFromToken()[10]
+
+        if (unleashClient.isEnabled(DIALOG_UNDERSOKELSE_GRUPPE_1) && listOf('0', '1', '2').contains(lastDigit)) {
+            return ResponseEntity.ok().body(sisteSoknad)
+        }
+        if (unleashClient.isEnabled(DIALOG_UNDERSOKELSE_GRUPPE_2) && listOf('3', '4').contains(lastDigit)) {
+            return ResponseEntity.ok().body(sisteSoknad)
+        }
+        if (unleashClient.isEnabled(DIALOG_UNDERSOKELSE_GRUPPE_3) && listOf('5', '6', '7').contains(lastDigit)) {
+            return ResponseEntity.ok().body(sisteSoknad)
+        }
+        if (unleashClient.isEnabled(DIALOG_UNDERSOKELSE_GRUPPE_4) && listOf('8', '9').contains(lastDigit)) {
+            return ResponseEntity.ok().body(sisteSoknad)
+        }
+
+        return ResponseEntity.noContent().build()
     }
 
     @GetMapping("/saksDetaljer")

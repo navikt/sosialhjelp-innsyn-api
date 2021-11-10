@@ -30,13 +30,14 @@ object XsrfGenerator {
     }
 
     fun sjekkXsrfToken(request: HttpServletRequest) {
-        val idportenTokenOptional = Arrays.stream(request.cookies).filter { c -> c.name == "idporten-idtoken" }.findFirst()
+        val cookies = request.cookies ?: emptyArray()
+        val idportenTokenOptional = Arrays.stream(cookies).filter { c -> c.name == "idporten-idtoken" }.findFirst()
         var idportenIdtoken = "default"
         if (idportenTokenOptional.isPresent) {
             idportenIdtoken = idportenTokenOptional.get().value
         }
 
-        val givenTokenOptional = Arrays.stream(request.cookies).filter { c -> c.name == "XSRF-TOKEN-INNSYN-API" }.findFirst()
+        val givenTokenOptional = Arrays.stream(cookies).filter { c -> c.name == "XSRF-TOKEN-INNSYN-API" }.findFirst()
         var givenToken = "default"
         if (givenTokenOptional.isPresent) {
             givenToken = givenTokenOptional.get().value

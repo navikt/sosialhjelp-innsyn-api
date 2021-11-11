@@ -198,7 +198,7 @@ internal class VedleggControllerTest {
 
     private fun xsrfCookie(token: String): Cookie {
 
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", XsrfGenerator.generateXsrfToken(token))
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", XsrfGenerator.generateXsrfToken(token, "sessionId"))
         xsrfCookie.path = "/"
         xsrfCookie.isHttpOnly = true
         return xsrfCookie

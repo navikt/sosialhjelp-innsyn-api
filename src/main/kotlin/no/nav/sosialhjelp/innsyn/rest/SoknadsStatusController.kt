@@ -31,6 +31,8 @@ class SoknadsStatusController(
         tilgangskontroll.sjekkTilgang()
 
         response.addCookie(xsrfCookie(request))
+        if(request.cookies.none { it.name == "sosialhjelp-innsyn-id" })
+            response.addCookie(sessionCookie(request))
         val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)
         return ResponseEntity.ok().body(
             SoknadsStatusResponse(
@@ -43,6 +45,13 @@ class SoknadsStatusController(
         )
     }
 
+    private fun sessionCookie(request: HttpServletRequest): Cookie {
+        val sessionCookie = Cookie("sosialhjelp-innsyn-id", request.session.id)
+        sessionCookie.path = "/"
+        sessionCookie.isHttpOnly = true
+        return sessionCookie
+    }
+
     private fun xsrfCookie(request: HttpServletRequest): Cookie {
         var idportenIdtoken = "default"
         if (request.cookies != null) {
@@ -52,7 +61,7 @@ class SoknadsStatusController(
             }
         }
 
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", generateXsrfToken(idportenIdtoken))
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", generateXsrfToken(idportenIdtoken, request.session.id))
         xsrfCookie.path = "/"
         xsrfCookie.isHttpOnly = true
         return xsrfCookie

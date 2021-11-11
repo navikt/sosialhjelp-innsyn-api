@@ -19,6 +19,7 @@ server:
         path: /sosialhjelp
         secure: true
         max-age: 30M
+        http-only: true
   max-http-header-size: 16KB
 
 

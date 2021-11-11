@@ -161,10 +161,7 @@ class FiksClientImpl(
             .retrieve()
             .toEntity<String>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.info("e.rawStatusCode = ${e.rawStatusCode}")
-                log.info("400 == ${e.rawStatusCode} -> ${e.rawStatusCode == 400}")
-                log.info("toFiksErrorMessageUtenFnr(e) = ${toFiksErrorMessageUtenFnr(e)}")
-                if (e.rawStatusCode == 400 && filErAlleredeLastetOpp(e, digisosId)) {
+                if (files.size == 2 && e.rawStatusCode == 400 && filErAlleredeLastetOpp(e)) {
                     log.warn("Fiks - Opplasting av ettersendelse er allerede på plass hos Fiks - ${messageUtenFnr(e)}", e)
                     FiksClientFileExistsException(e.message?.maskerFnr, e)
                 } else {
@@ -180,9 +177,9 @@ class FiksClientImpl(
         log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity!!.statusCodeValue})")
     }
 
-    private fun filErAlleredeLastetOpp(exception: WebClientResponseException, digisosId: String): Boolean =
+    private fun filErAlleredeLastetOpp(exception: WebClientResponseException): Boolean =
         toFiksErrorMessageUtenFnr(exception).startsWith("Ettersendelse med tilhørende navEksternRefId ") &&
-            toFiksErrorMessageUtenFnr(exception).endsWith(" finnes allerde for oppgitt DigisosId $digisosId")
+            toFiksErrorMessageUtenFnr(exception).contains(" finnes allerde for oppgitt DigisosId ")
 
     fun createBodyForUpload(
         vedleggJson: JsonVedleggSpesifikasjon,

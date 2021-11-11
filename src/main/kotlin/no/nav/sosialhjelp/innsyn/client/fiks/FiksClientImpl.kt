@@ -16,6 +16,7 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.maskerFnr
 import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.typeRef
 import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.core.io.InputStreamResource
@@ -177,8 +178,8 @@ class FiksClientImpl(
     }
 
     private fun filErAlleredeLastetOpp(exception: WebClientResponseException, digisosId: String): Boolean =
-        (exception.message?.startsWith("Ettersendelse med tilhørende navEksternRefId ") ?: false) &&
-            (exception.message?.endsWith(" finnes allerde for oppgitt DigisosId $digisosId") ?: false)
+        toFiksErrorMessageUtenFnr(exception).startsWith("Ettersendelse med tilhørende navEksternRefId ") &&
+            toFiksErrorMessageUtenFnr(exception).endsWith(" finnes allerde for oppgitt DigisosId $digisosId")
 
     fun createBodyForUpload(
         vedleggJson: JsonVedleggSpesifikasjon,

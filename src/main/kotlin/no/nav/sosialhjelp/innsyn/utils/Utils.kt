@@ -108,10 +108,13 @@ fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
 }
 
 fun messageUtenFnr(e: WebClientResponseException): String {
-    val fiksErrorMessage = e.toFiksErrorMessage()?.feilmeldingUtenFnr
+    val fiksErrorMessage = toFiksErrorMessageUtenFnr(e)
     val message = e.message?.maskerFnr
     return "$message - $fiksErrorMessage"
 }
+
+fun toFiksErrorMessageUtenFnr(e: WebClientResponseException) =
+    e.toFiksErrorMessage()?.feilmeldingUtenFnr ?: ""
 
 private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessage? {
     return try {

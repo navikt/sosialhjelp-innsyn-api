@@ -161,6 +161,9 @@ class FiksClientImpl(
             .retrieve()
             .toEntity<String>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
+                log.info("e.rawStatusCode = ${e.rawStatusCode}")
+                log.info("400 == ${e.rawStatusCode} -> ${e.rawStatusCode == 400}")
+                log.info("toFiksErrorMessageUtenFnr(e) = ${toFiksErrorMessageUtenFnr(e)}")
                 if (e.rawStatusCode == 400 && filErAlleredeLastetOpp(e, digisosId)) {
                     log.warn("Fiks - Opplasting av ettersendelse er allerede på plass hos Fiks - ${messageUtenFnr(e)}", e)
                     FiksClientFileExistsException(e.message?.maskerFnr, e)

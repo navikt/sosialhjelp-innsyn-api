@@ -37,9 +37,7 @@ class XsrfGenerator (
         }
     }
 
-    private fun redisKey(token: String, date: LocalDateTime) = sha256(token + date.toString("yyyyMMdd"))
-
-    fun hentXsrfToken(token: String, date: LocalDateTime = LocalDateTime.now()): String? {
+    private fun hentXsrfToken(token: String, date: LocalDateTime = LocalDateTime.now()): String? {
         return hentFraRedis(redisKey(token, date))
     }
 
@@ -52,7 +50,7 @@ class XsrfGenerator (
         return xsrf?.string
     }
 
-    private class XsrfDto(val string: String)
+    class XsrfDto(val string: String)
 
     fun sjekkXsrfToken(request: HttpServletRequest) {
         val idportenIdtoken = SubjectHandlerUtils.getToken()
@@ -64,5 +62,9 @@ class XsrfGenerator (
         val yesterdaysXsrfToken = hentXsrfToken(idportenIdtoken, yesterday)
         val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
         require(valid) { "Feil xsrf token" }
+    }
+
+    companion object {
+        fun redisKey(token: String, date: LocalDateTime) = sha256(token + date.toString("yyyyMMdd"))
     }
 }

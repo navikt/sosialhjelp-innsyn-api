@@ -55,7 +55,7 @@ interface RedisService {
     }
 }
 
-@Profile("!no-redis")
+@Profile("!mock-redis")
 @Component
 class RedisServiceImpl(
     private val redisStore: RedisStore,
@@ -84,7 +84,7 @@ class RedisServiceImpl(
     }
 }
 
-@Profile("no-redis")
+@Profile("mock-redis")
 @Component
 class RedisServiceMock : RedisService {
     override val defaultTimeToLiveSeconds: Long = 1

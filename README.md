@@ -95,13 +95,13 @@ Manuell deploy kan også gjøres med kubectl ved bruk av `kubectl apply` i ønsk
 #### *uten* integrasjon til Fiks og login-api, dvs mot mock-alt
 `Application` og profile=`mock-alt,log-console`
 #### *med* integrasjon til Fiks og login-api
-`TestApplication` og profile=`local,log-console` (`,no-redis`)
+`TestApplication` og profile=`local,log-console` (`,mock-redis`)
 
 Da må følgende env-variabler settes (hentes fra vault): \
 `FIKS_DIGISOS_ENDPOINT_URL`, `INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS`, `VIRKSERT_STI` og `TESTBRUKER_NATALIE`.
 
 #### Med redis
-Bruk spring-profilen `no-redis` for å disable redis.
+Bruk spring-profilen `mock-redis` for å disable redis.
 
 For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsvare med portnummer i properties)
 1. `docker pull redis` (laster ned image fra docker hub)

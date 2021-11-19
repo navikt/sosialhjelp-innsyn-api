@@ -18,9 +18,9 @@ import javax.servlet.http.HttpServletRequest
  * Klasse som genererer og sjekker xsrf token som sendes inn
  */
 @Component
-class XsrfGenerator (
+class XsrfGenerator(
     private val redisService: RedisService,
-){
+) {
     private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
 
     fun generateXsrfToken(token: String, date: LocalDateTime = LocalDateTime.now()): String {
@@ -31,7 +31,7 @@ class XsrfGenerator (
             val secretKey = SecretKeySpec(SECRET.toByteArray(), "HmacSHA256")
             hmac.init(secretKey)
             return Base64.encodeBase64URLSafeString(hmac.doFinal(xsrf.toByteArray()))
-                    .also { lagreTilRedis(redisKey(token, date), it) }
+                .also { lagreTilRedis(redisKey(token, date), it) }
         } catch (e: NoSuchAlgorithmException) {
             throw IllegalArgumentException("Kunne ikke generere token: ", e)
         }
@@ -42,7 +42,7 @@ class XsrfGenerator (
     }
 
     private fun lagreTilRedis(redisKey: String, xsrfString: String) {
-        redisService.put(XSRF_KEY_PREFIX + redisKey, objectMapper.writeValueAsBytes(XsrfDto(xsrfString)), 60L*60L)
+        redisService.put(XSRF_KEY_PREFIX + redisKey, objectMapper.writeValueAsBytes(XsrfDto(xsrfString)), 60L * 60L)
     }
 
     private fun hentFraRedis(redisKey: String): String? {

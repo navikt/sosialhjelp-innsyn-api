@@ -10,11 +10,11 @@ import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.Companion.redisKey
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.joda.time.LocalDateTime
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import javax.servlet.http.HttpServletRequest
 
 internal class XsrfGeneratorTest {
@@ -90,8 +90,8 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessage("Feil xsrf token")
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("Feil xsrf token")
     }
 
     @Test
@@ -104,7 +104,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessage("Feil xsrf token")
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("Feil xsrf token")
     }
 }

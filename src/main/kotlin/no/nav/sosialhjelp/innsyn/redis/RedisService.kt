@@ -23,22 +23,22 @@ interface RedisService {
 
     companion object {
         fun pakkUtRedisData(get: ByteArray?, requestedClass: Class<out Any>, key: String, log: Logger) =
-                if (get != null) {
-                    try {
-                        val obj = objectMapper.readValue(get, requestedClass)
-                        valider(obj)
-                        log.debug("Hentet ${requestedClass.simpleName} fra cache, key=${key.maskerFnr}")
-                        obj
-                    } catch (e: IOException) {
-                        log.warn("Fant key=${key.maskerFnr} i cache, men value var ikke ${requestedClass.simpleName}")
-                        null
-                    } catch (e: DigisosSakTilhorerAnnenBrukerException) {
-                        log.warn("DigisosSak i cache tilhører en annen bruker enn brukeren fra token.")
-                        null
-                    }
-                } else {
+            if (get != null) {
+                try {
+                    val obj = objectMapper.readValue(get, requestedClass)
+                    valider(obj)
+                    log.debug("Hentet ${requestedClass.simpleName} fra cache, key=${key.maskerFnr}")
+                    obj
+                } catch (e: IOException) {
+                    log.warn("Fant key=${key.maskerFnr} i cache, men value var ikke ${requestedClass.simpleName}")
+                    null
+                } catch (e: DigisosSakTilhorerAnnenBrukerException) {
+                    log.warn("DigisosSak i cache tilhører en annen bruker enn brukeren fra token.")
                     null
                 }
+            } else {
+                null
+            }
 
         /**
          * Kaster feil hvis det finnes additionalProperties på mappet objekt.
@@ -52,7 +52,6 @@ interface RedisService {
                 obj is JsonVedleggSpesifikasjon && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonVedleggSpesifikasjon har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
             }
         }
-
     }
 }
 
@@ -79,7 +78,6 @@ class RedisServiceImpl(
         }
     }
 
-
     companion object {
         private val log by logger()
     }
@@ -94,9 +92,9 @@ class RedisServiceMock : RedisService {
 
     override fun get(key: String, requestedClass: Class<out Any>): Any? {
         val get: ByteArray? = mockMap[key]
-        if(get != null) {
+        if (get != null) {
             val expiryTime = expiryMap[key]
-            if (expiryTime == null ||expiryTime.isBefore(LocalDateTime.now())) {
+            if (expiryTime == null || expiryTime.isBefore(LocalDateTime.now())) {
                 return null
             }
         }

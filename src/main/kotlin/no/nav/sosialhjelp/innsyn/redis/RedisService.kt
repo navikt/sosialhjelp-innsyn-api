@@ -25,10 +25,14 @@ interface RedisService {
         fun pakkUtRedisData(get: ByteArray?, requestedClass: Class<out Any>, key: String, log: Logger) =
             if (get != null) {
                 try {
-                    val obj = objectMapper.readValue(get, requestedClass)
-                    valider(obj)
-                    log.debug("Hentet ${requestedClass.simpleName} fra cache, key=${key.maskerFnr}")
-                    obj
+                    if (requestedClass == String::class.java) {
+                        get.toString()
+                    } else {
+                        val obj = objectMapper.readValue(get, requestedClass)
+                        valider(obj)
+                        log.debug("Hentet ${requestedClass.simpleName} fra cache, key=${key.maskerFnr}")
+                        obj
+                    }
                 } catch (e: IOException) {
                     log.warn("Fant key=${key.maskerFnr} i cache, men value var ikke ${requestedClass.simpleName}")
                     null

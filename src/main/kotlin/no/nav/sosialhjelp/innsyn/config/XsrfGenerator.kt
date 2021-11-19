@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.config
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.LocalDateTime
@@ -42,15 +41,12 @@ class XsrfGenerator(
     }
 
     private fun lagreTilRedis(redisKey: String, xsrfString: String) {
-        redisService.put(XSRF_KEY_PREFIX + redisKey, objectMapper.writeValueAsBytes(XsrfDto(xsrfString)), 60L * 60L)
+        redisService.put(XSRF_KEY_PREFIX + redisKey, xsrfString.toByteArray(), 60L * 60L)
     }
 
     private fun hentFraRedis(redisKey: String): String? {
-        val xsrf = redisService.get(XSRF_KEY_PREFIX + redisKey, XsrfDto::class.java) as XsrfDto?
-        return xsrf?.string
+        return redisService.get(XSRF_KEY_PREFIX + redisKey, String::class.java) as String?
     }
-
-    class XsrfDto(val string: String)
 
     fun sjekkXsrfToken(request: HttpServletRequest) {
         val idportenIdtoken = SubjectHandlerUtils.getToken()

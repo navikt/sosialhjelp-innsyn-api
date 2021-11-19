@@ -14,6 +14,7 @@ import org.slf4j.Logger
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.io.IOException
+import java.time.LocalDateTime
 
 interface RedisService {
     val defaultTimeToLiveSeconds: Long
@@ -89,14 +90,22 @@ class RedisServiceImpl(
 class RedisServiceMock : RedisService {
     override val defaultTimeToLiveSeconds: Long = 1
     val mockMap = HashMap<String, ByteArray>()
+    val expiryMap = HashMap<String, LocalDateTime>()
 
     override fun get(key: String, requestedClass: Class<out Any>): Any? {
         val get: ByteArray? = mockMap[key]
+        if(get != null) {
+            val expiryTime = expiryMap[key]
+            if (expiryTime == null ||expiryTime.isBefore(LocalDateTime.now())) {
+                return null
+            }
+        }
         return pakkUtRedisData(get, requestedClass, key, log)
     }
 
     override fun put(key: String, value: ByteArray, timeToLiveSeconds: Long) {
-        mockMap.put(key, value)
+        mockMap[key] = value
+        expiryMap[key] = LocalDateTime.now().plusSeconds(timeToLiveSeconds)
     }
 
     companion object {

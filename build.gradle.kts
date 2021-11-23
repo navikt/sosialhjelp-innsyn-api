@@ -23,7 +23,7 @@ object Versions {
     const val tika = "1.25"
     const val pdfBox = "2.0.24"
     const val fiksKryptering = "1.1.1"
-    const val lettuce = "6.0.8.RELEASE"
+    const val lettuce = "6.1.5.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
     const val springdoc = "1.5.10"

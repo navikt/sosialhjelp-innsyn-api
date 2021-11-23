@@ -10,14 +10,13 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class FiksConfig(
-    private val proxiedWebClient: WebClient,
+    private val proxiedWebClientBuilder: WebClient.Builder,
     private val clientProperties: ClientProperties,
 ) {
 
     @Bean
     fun fiksWebClient(): WebClient =
-        proxiedWebClient
-            .mutate()
+        proxiedWebClientBuilder
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)

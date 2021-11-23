@@ -16,10 +16,9 @@ class ProxiedWebClientConfig {
     private lateinit var proxyUrl: String
 
     @Bean
-    fun proxiedWebClient(webClientBuilder: WebClient.Builder): WebClient =
-        webClientBuilder
+    fun proxiedWebClientBuilder(): WebClient.Builder =
+        WebClient.builder()
             .clientConnector(getProxiedReactorClientHttpConnector(proxyUrl))
-            .build()
 }
 
 @Profile("(mock-alt|local)")
@@ -27,8 +26,7 @@ class ProxiedWebClientConfig {
 class MockProxiedWebClientConfig {
 
     @Bean
-    fun proxiedWebClient(webClientBuilder: WebClient.Builder): WebClient =
-        webClientBuilder
+    fun proxiedWebClientBuilder(): WebClient.Builder =
+        WebClient.builder()
             .clientConnector(getUnproxiedReactorClientHttpConnector())
-            .build()
 }

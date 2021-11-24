@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 class NonProxiedWebClientConfig {
 
-    @Bean
+    @Bean("nonProxiedWebClientBuilder")
     fun nonProxiedWebClientBuilder(webClientBuilder: WebClient.Builder): WebClient.Builder =
         webClientBuilder
             .clientConnector(getUnproxiedReactorClientHttpConnector())
@@ -24,7 +24,7 @@ class ProxiedWebClientConfig {
     @Value("\${HTTPS_PROXY}")
     private lateinit var proxyUrl: String
 
-    @Bean
+    @Bean("proxiedWebClientBuilder")
     fun proxiedWebClientBuilder(webClientBuilder: WebClient.Builder): WebClient.Builder =
         webClientBuilder
             .clientConnector(getProxiedReactorClientHttpConnector(proxyUrl))
@@ -34,7 +34,7 @@ class ProxiedWebClientConfig {
 @Configuration
 class MockProxiedWebClientConfig {
 
-    @Bean
+    @Bean("proxiedWebClientBuilder")
     fun proxiedWebClientBuilder(webClientBuilder: WebClient.Builder): WebClient.Builder =
         webClientBuilder
             .clientConnector(getUnproxiedReactorClientHttpConnector())

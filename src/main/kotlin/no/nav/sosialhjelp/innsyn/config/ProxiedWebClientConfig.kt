@@ -9,33 +9,39 @@ import org.springframework.context.annotation.Profile
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class NonProxiedWebClientConfig {
+class NonProxiedWebClientConfig(
+    private val webClientBuilder: WebClient.Builder
+) {
 
     @Bean("nonProxiedWebClientBuilder")
-    fun nonProxiedWebClientBuilder(webClientBuilder: WebClient.Builder): WebClient.Builder =
+    fun nonProxiedWebClientBuilder(): WebClient.Builder =
         webClientBuilder
             .clientConnector(getUnproxiedReactorClientHttpConnector())
 }
 
 @Profile("!(mock-alt|local|test)")
 @Configuration
-class ProxiedWebClientConfig {
+class ProxiedWebClientConfig(
+    private val webClientBuilder: WebClient.Builder
+) {
 
     @Value("\${HTTPS_PROXY}")
     private lateinit var proxyUrl: String
 
-    @Bean("proxiedWebClientBuilder")
-    fun proxiedWebClientBuilder(webClientBuilder: WebClient.Builder): WebClient.Builder =
+    @Bean
+    fun proxiedWebClientBuilder(): WebClient.Builder =
         webClientBuilder
             .clientConnector(getProxiedReactorClientHttpConnector(proxyUrl))
 }
 
 @Profile("(mock-alt|local|test)")
 @Configuration
-class MockProxiedWebClientConfig {
+class MockProxiedWebClientConfig(
+    private val webClientBuilder: WebClient.Builder
+) {
 
-    @Bean("proxiedWebClientBuilder")
-    fun proxiedWebClientBuilder(webClientBuilder: WebClient.Builder): WebClient.Builder =
+    @Bean
+    fun proxiedWebClientBuilder(): WebClient.Builder =
         webClientBuilder
             .clientConnector(getUnproxiedReactorClientHttpConnector())
 }

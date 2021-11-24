@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.config
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.LocalDateTime
@@ -56,11 +57,15 @@ class XsrfGenerator(
         val xsrfToken = hentXsrfToken(idportenIdtoken)
         val yesterday = LocalDateTime.now().minusDays(1)
         val yesterdaysXsrfToken = hentXsrfToken(idportenIdtoken, yesterday)
+
+        log.warn("xsrfRequestString=$xsrfRequestString, xsrfToken=$xsrfToken, yesterdaysXsrfToken=$yesterdaysXsrfToken")
+
         val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
         require(valid) { "Feil xsrf token" }
     }
 
     companion object {
         fun redisKey(token: String, date: LocalDateTime) = sha256(token + date.toString("yyyyMMdd"))
+        private val log by logger()
     }
 }

@@ -19,8 +19,8 @@ class DialogConfig(
     private val clientProperties: ClientProperties,
 ) {
     @Bean
-    fun dialogWebClient(nonProxiedWebClientBuilder: WebClient.Builder): DialogWebClient {
-        val builder = nonProxiedWebClientBuilder
+    fun dialogWebClient(webClientBuilder: WebClient.Builder): DialogWebClient {
+        val builder = webClientBuilder
             .baseUrl(clientProperties.dialogEndpointUrl)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .clientConnector(

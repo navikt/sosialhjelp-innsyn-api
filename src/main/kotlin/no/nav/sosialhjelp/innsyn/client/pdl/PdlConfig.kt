@@ -18,8 +18,8 @@ class PdlConfig(
     private val clientProperties: ClientProperties
 ) {
     @Bean
-    fun pdlWebClient(nonProxiedWebClientBuilder: WebClient.Builder): WebClient =
-        nonProxiedWebClientBuilder
+    fun pdlWebClient(webClientBuilder: WebClient.Builder): WebClient =
+        webClientBuilder
             .baseUrl(clientProperties.pdlEndpointUrl)
             .defaultHeader(IntegrationUtils.HEADER_NAV_APIKEY, System.getenv(PDL_APIKEY))
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

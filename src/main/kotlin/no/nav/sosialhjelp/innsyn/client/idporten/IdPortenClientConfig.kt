@@ -17,7 +17,7 @@ import org.springframework.web.reactive.function.client.awaitBody
 @Profile("!mock-alt")
 @Configuration
 class IdPortenClientConfig(
-    private val proxiedWebClientBuilder: WebClient.Builder,
+    private val proxiedWebClient: WebClient,
     @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String,
     @Value("\${no.nav.sosialhjelp.idporten.client_id}") private val clientId: String,
     @Value("\${no.nav.sosialhjelp.idporten.scope}") private val scope: String,
@@ -27,7 +27,7 @@ class IdPortenClientConfig(
     @Bean
     fun idPortenClient(): IdPortenClient {
         return IdPortenClientImpl(
-            webClient = proxiedWebClientBuilder.build(),
+            webClient = proxiedWebClient,
             idPortenProperties = idPortenProperties()
         )
     }
@@ -46,13 +46,13 @@ class IdPortenClientConfig(
 @Profile("mock-alt")
 @Configuration
 class IdPortenClientConfigMockAlt(
-    private val proxiedWebClientBuilder: WebClient.Builder,
+    private val proxiedWebClient: WebClient,
     @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String
 ) {
 
     @Bean
     fun idPortenClient(): IdPortenClient {
-        return IdPortenClientMockAlt(proxiedWebClientBuilder.build(), tokenUrl)
+        return IdPortenClientMockAlt(proxiedWebClient, tokenUrl)
     }
 
     private class IdPortenClientMockAlt(

@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.client.norg
 
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
+import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.getUnproxiedReactorClientHttpConnector
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
@@ -11,8 +12,9 @@ class NorgConfig(
 ) {
 
     @Bean
-    fun norgWebClient(nonProxiedWebClientBuilder: WebClient.Builder): WebClient =
-        nonProxiedWebClientBuilder
+    fun norgWebClient(webClientBuilder: WebClient.Builder): WebClient =
+        webClientBuilder
             .baseUrl(clientProperties.norgEndpointUrl)
+            .clientConnector(getUnproxiedReactorClientHttpConnector())
             .build()
 }

@@ -10,14 +10,14 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class KommuneInfoClientConfig(
-    private val proxiedWebClient: WebClient,
+    private val proxiedWebClientBuilder: WebClient.Builder,
     private val clientProperties: ClientProperties
 ) {
 
     @Bean
     fun kommuneInfoClient(): KommuneInfoClient {
         return KommuneInfoClientImpl(
-            proxiedWebClient,
+            proxiedWebClientBuilder.build(),
             fiksProperties()
         )
     }

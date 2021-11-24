@@ -18,8 +18,8 @@ class StsConfig(
 ) {
 
     @Bean
-    fun stsWebClient(nonProxiedWebClient: WebClient): WebClient =
-        nonProxiedWebClient.mutate()
+    fun stsWebClient(nonProxiedWebClientBuilder: WebClient.Builder): WebClient =
+        nonProxiedWebClientBuilder
             .baseUrl(clientProperties.stsTokenEndpointUrl)
             .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic ${credentials()}")
             .defaultHeader(IntegrationUtils.HEADER_NAV_APIKEY, System.getenv(STSTOKEN_APIKEY))

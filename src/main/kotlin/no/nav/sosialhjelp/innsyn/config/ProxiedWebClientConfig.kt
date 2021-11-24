@@ -11,10 +11,9 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 class NonProxiedWebClientConfig {
     @Bean
-    fun nonProxiedWebClient(): WebClient =
+    fun nonProxiedWebClientBuilder(): WebClient.Builder =
         WebClient.builder()
             .clientConnector(getUnproxiedReactorClientHttpConnector())
-            .build()
 }
 
 @Profile("!(mock-alt|local|test)")
@@ -25,10 +24,9 @@ class ProxiedWebClientConfig {
     private lateinit var proxyUrl: String
 
     @Bean
-    fun proxiedWebClient(): WebClient =
+    fun proxiedWebClientBuilder(): WebClient.Builder =
         WebClient.builder()
             .clientConnector(getProxiedReactorClientHttpConnector(proxyUrl))
-            .build()
 }
 
 @Profile("(mock-alt|local|test)")
@@ -36,8 +34,7 @@ class ProxiedWebClientConfig {
 class MockProxiedWebClientConfig {
 
     @Bean
-    fun proxiedWebClient(): WebClient =
+    fun proxiedWebClientBuilder(): WebClient.Builder =
         WebClient.builder()
             .clientConnector(getUnproxiedReactorClientHttpConnector())
-            .build()
 }

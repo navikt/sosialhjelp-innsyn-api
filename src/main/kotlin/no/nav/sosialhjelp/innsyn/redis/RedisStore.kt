@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-@Profile("!no-redis")
+@Profile("!mock-redis")
 @Component
 class RedisStore(
     redisClient: RedisClient

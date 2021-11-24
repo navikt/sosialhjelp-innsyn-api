@@ -6,7 +6,7 @@
   ],
   "envsecret": [],
   "env": {
-    "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,no-redis",
+    "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,mock-redis",
     "METADATA_URL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt-api/well-known/selvbetjening",
     "FIKS_DIGISOS_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/fiks",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt-api/fiks/dokumentlager",

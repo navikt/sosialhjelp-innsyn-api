@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
-import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.sjekkXsrfToken
+import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.OppgaveOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
@@ -41,7 +41,8 @@ class VedleggController(
     private val vedleggOpplastingService: VedleggOpplastingService,
     private val vedleggService: VedleggService,
     private val clientProperties: ClientProperties,
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: Tilgangskontroll,
+    private val xsrfGenerator: XsrfGenerator,
 ) {
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
@@ -54,7 +55,7 @@ class VedleggController(
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
         log.info("Forsøker å starter ettersendelse")
         tilgangskontroll.sjekkTilgang()
-        sjekkXsrfToken(fiksDigisosId, request)
+        xsrfGenerator.sjekkXsrfToken(request)
 
         val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
         validateFileListNotEmpty(files)
@@ -96,7 +97,7 @@ class VedleggController(
                 it.innsendelsesfrist,
                 it.hendelsetype,
                 it.hendelsereferanse,
-                it.filer.map { VedleggOpplastingResponse(it.filename, it.status.result.name) }
+                it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result.name) }
             )
         }
 

@@ -7,11 +7,21 @@ spring:
     host: ${REDIS_HOST}
     port: 6379
     password: ${REDIS_PASSWORD}
+  session:
+    store-type: redis
 
 server:
   servlet:
     context-path: '/sosialhjelp/innsyn-api'
+    session:
+      cookie:
+        name: sosialhjelp-innsyn-id
+        path: /sosialhjelp
+        secure: true
+        max-age: 30M
+        http-only: true
   max-http-header-size: 16KB
+
 
 # Prometheus
 management:

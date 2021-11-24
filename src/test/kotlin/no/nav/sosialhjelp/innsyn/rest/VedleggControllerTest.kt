@@ -33,8 +33,9 @@ internal class VedleggControllerTest {
     private val vedleggService: VedleggService = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val tilgangskontroll: Tilgangskontroll = mockk()
+    private val xsrfGenerator: XsrfGenerator = mockk()
 
-    private val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontroll)
+    private val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontroll, xsrfGenerator)
 
     private val id = "123"
 
@@ -134,7 +135,9 @@ internal class VedleggControllerTest {
             MockMultipartFile("files", "test2.png", null, ByteArray(0))
         )
         val request: HttpServletRequest = mockk()
-        every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
+        every { request.cookies } returns arrayOf(xsrfCookie())
+        every { xsrfGenerator.generateXsrfToken(any(), any()) } returns "someRandomChars"
+        every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
         assertThatExceptionOfType(IllegalStateException::class.java)
             .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
     }
@@ -147,7 +150,9 @@ internal class VedleggControllerTest {
             MockMultipartFile("files", "test.jpg", null, ByteArray(0))
         )
         val request: HttpServletRequest = mockk()
-        every { request.cookies } returns arrayOf(xsrfCookie(id, "default"))
+        every { request.cookies } returns arrayOf(xsrfCookie())
+        every { xsrfGenerator.generateXsrfToken(any(), any()) } returns "someRandomChars"
+        every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
         assertThatCode { controller.sendVedlegg(id, files, "token", request) }.doesNotThrowAnyException()
     }
 
@@ -160,6 +165,7 @@ internal class VedleggControllerTest {
         )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf()
+        every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
         assertThatExceptionOfType(IllegalArgumentException::class.java)
             .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
     }
@@ -179,20 +185,19 @@ internal class VedleggControllerTest {
     }
 
     @Test
-    fun `skal håndtere filnavn uten extension`() {
+    fun `skal handtere filnavn uten extension`() {
         val filnavn = "123"
         assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
     }
 
     @Test
-    fun `skal håndtere passe langt filnavn med strek og seks tegn`() {
+    fun `skal handtere passe langt filnavn med strek og seks tegn`() {
         val filnavn = "filnavn_som_er_passe_langt-123456.pdf"
         assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
     }
 
-    private fun xsrfCookie(fiksDigisosId: String, token: String): Cookie {
-
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", XsrfGenerator.generateXsrfToken(fiksDigisosId, token))
+    private fun xsrfCookie(): Cookie {
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", "someRandomChars")
         xsrfCookie.path = "/"
         xsrfCookie.isHttpOnly = true
         return xsrfCookie

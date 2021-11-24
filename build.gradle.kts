@@ -7,15 +7,15 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.5.2"
-    const val springBoot = "2.5.4"
-    const val sosialhjelpCommon = "1.00018ba"
-    const val logback = "1.2.3"
+    const val springBoot = "2.5.7"
+    const val sosialhjelpCommon = "1.da234e2"
+    const val logback = "1.2.7"
     const val logstash = "6.6"
     const val filformat = "1.2021.08.27-10.29-41cf5ce1230a"
-    const val micrometerRegistry = "1.6.2"
-    const val prometheus = "0.9.0"
-    const val tokenValidation = "1.3.8"
-    const val jackson = "2.12.3"
+    const val micrometerRegistry = "1.8.0"
+    const val prometheus = "0.12.0"
+    const val tokenValidation = "1.3.9"
+    const val jackson = "2.13.0"
     const val guava = "30.1.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.8.0"
@@ -23,7 +23,7 @@ object Versions {
     const val tika = "1.25"
     const val pdfBox = "2.0.24"
     const val fiksKryptering = "1.1.1"
-    const val lettuce = "6.0.8.RELEASE"
+    const val lettuce = "6.1.5.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
     const val springdoc = "1.5.10"
@@ -35,17 +35,17 @@ object Versions {
     const val nimbus = "9.15.1"
 
     //    Test only
-    const val junitJupiter = "5.7.0"
-    const val mockk = "1.12.0"
+    const val junitJupiter = "5.8.1"
+    const val mockk = "1.12.1"
     const val springmockk = "3.0.1"
     const val mockwebserver = "5.0.0-alpha.2"
 }
 
 plugins {
     application
-    kotlin("jvm") version "1.5.30"
+    kotlin("jvm") version "1.6.0"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.5.30"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.6.0"
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("com.github.ben-manes.versions") version "0.39.0"

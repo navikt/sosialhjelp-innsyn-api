@@ -1,14 +1,14 @@
 package no.nav.sosialhjelp.innsyn.config
 
-import no.nav.sosialhjelp.innsyn.utils.getProxiedReactorClientHttpConnector
-import no.nav.sosialhjelp.innsyn.utils.getUnproxiedReactorClientHttpConnector
+import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.getProxiedReactorClientHttpConnector
+import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.getUnproxiedReactorClientHttpConnector
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.web.reactive.function.client.WebClient
 
-@Profile("!(mock-alt|local)")
+@Profile("!(mock-alt|local|test)")
 @Configuration
 class ProxiedWebClientConfig {
 
@@ -22,7 +22,7 @@ class ProxiedWebClientConfig {
             .build()
 }
 
-@Profile("(mock-alt|local)")
+@Profile("(mock-alt|local|test)")
 @Configuration
 class MockProxiedWebClientConfig {
 

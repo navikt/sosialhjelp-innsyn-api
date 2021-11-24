@@ -15,7 +15,6 @@
   ],
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
-    "/var/run/secrets/nais.io/appdynamics": "/apikey/appdynamics/dev",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
     "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q1",
     "/apigw/norg2": "/apikey/apigw/dev/norg2.api.v1/sosialhjelp-innsyn-api_q1",

@@ -14,7 +14,7 @@ class TokendingsWebClient(
 
 @Configuration
 class TokendingsClientConfig(
-    private val clientProperties: ClientProperties,
+    private val clientProperties: ClientProperties
 ) {
     @Bean
     @Profile("!test")

@@ -6,21 +6,24 @@ import reactor.netty.http.client.HttpClient
 import reactor.netty.transport.ProxyProvider
 import java.net.URL
 
-fun getProxiedReactorClientHttpConnector(proxyUrl: String): ReactorClientHttpConnector {
-    val uri = URL(proxyUrl)
+object HttpClientUtil {
 
-    val httpClient: HttpClient = HttpClient.create()
-        .resolver(DefaultAddressResolverGroup.INSTANCE)
-        .proxy { proxy ->
-            proxy.type(ProxyProvider.Proxy.HTTP).host(uri.host).port(uri.port)
-        }
+    fun getProxiedReactorClientHttpConnector(proxyUrl: String): ReactorClientHttpConnector {
+        val uri = URL(proxyUrl)
 
-    return ReactorClientHttpConnector(httpClient)
-}
+        val httpClient: HttpClient = HttpClient.create()
+            .resolver(DefaultAddressResolverGroup.INSTANCE)
+            .proxy { proxy ->
+                proxy.type(ProxyProvider.Proxy.HTTP).host(uri.host).port(uri.port)
+            }
 
-fun getUnproxiedReactorClientHttpConnector(): ReactorClientHttpConnector {
-    val httpClient: HttpClient = HttpClient
-        .newConnection()
-        .resolver(DefaultAddressResolverGroup.INSTANCE)
-    return ReactorClientHttpConnector(httpClient)
+        return ReactorClientHttpConnector(httpClient)
+    }
+
+    fun getUnproxiedReactorClientHttpConnector(): ReactorClientHttpConnector {
+        val httpClient: HttpClient = HttpClient
+            .newConnection()
+            .resolver(DefaultAddressResolverGroup.INSTANCE)
+        return ReactorClientHttpConnector(httpClient)
+    }
 }

@@ -16,8 +16,7 @@ class FiksConfig(
 
     @Bean
     fun fiksWebClient(): WebClient =
-        proxiedWebClient
-            .mutate()
+        proxiedWebClient.mutate()
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)

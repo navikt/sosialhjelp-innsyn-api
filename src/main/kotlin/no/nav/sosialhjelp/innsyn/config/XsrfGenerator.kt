@@ -53,9 +53,9 @@ class XsrfGenerator(
 
         val xsrfRequestString = request.getHeader("XSRF-TOKEN-INNSYN-API")
 
-        val xsrfToken = hentXsrfToken(idportenIdtoken)
+        val xsrfToken = hentXsrfToken(idportenIdtoken) ?: UUID.randomUUID().toString()
         val yesterday = LocalDateTime.now().minusDays(1)
-        val yesterdaysXsrfToken = hentXsrfToken(idportenIdtoken, yesterday)
+        val yesterdaysXsrfToken = hentXsrfToken(idportenIdtoken, yesterday) ?: UUID.randomUUID().toString()
         val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
         require(valid) { "Feil xsrf token" }
     }

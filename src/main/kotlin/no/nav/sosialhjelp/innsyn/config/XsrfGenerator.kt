@@ -41,7 +41,7 @@ class XsrfGenerator(
     }
 
     private fun lagreTilRedis(redisKey: String, xsrfString: String) {
-        redisService.put(XSRF_KEY_PREFIX + redisKey, xsrfString.toByteArray(), 60L * 60L)
+        redisService.put(XSRF_KEY_PREFIX + redisKey, xsrfString.toByteArray(), 8 * 60L * 60L)
     }
 
     private fun hentFraRedis(redisKey: String): String? {

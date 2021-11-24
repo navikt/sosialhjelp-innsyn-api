@@ -14,6 +14,7 @@ import org.slf4j.Logger
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.io.IOException
+import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 
 interface RedisService {
@@ -22,13 +23,13 @@ interface RedisService {
     fun put(key: String, value: ByteArray, timeToLiveSeconds: Long = defaultTimeToLiveSeconds)
 
     companion object {
-        fun pakkUtRedisData(get: ByteArray?, requestedClass: Class<out Any>, key: String, log: Logger) =
-            if (get != null) {
+        fun pakkUtRedisData(bytes: ByteArray?, requestedClass: Class<out Any>, key: String, log: Logger) =
+            if (bytes != null) {
                 try {
                     if (requestedClass == String::class.java) {
-                        get.toString()
+                        String(bytes, StandardCharsets.UTF_8)
                     } else {
-                        val obj = objectMapper.readValue(get, requestedClass)
+                        val obj = objectMapper.readValue(bytes, requestedClass)
                         valider(obj)
                         log.debug("Hentet ${requestedClass.simpleName} fra cache, key=${key.maskerFnr}")
                         obj

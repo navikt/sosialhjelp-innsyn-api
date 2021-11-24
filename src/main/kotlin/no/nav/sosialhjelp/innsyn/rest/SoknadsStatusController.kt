@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.rest
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
+import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.generateXsrfToken
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatusResponse
 import no.nav.sosialhjelp.innsyn.service.soknadsstatus.SoknadsStatusService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
@@ -24,14 +24,13 @@ import javax.servlet.http.HttpServletResponse
 class SoknadsStatusController(
     private val soknadsStatusService: SoknadsStatusService,
     private val tilgangskontroll: Tilgangskontroll,
-    private val xsrfGenerator: XsrfGenerator,
 ) {
 
     @GetMapping("{fiksDigisosId}/soknadsStatus")
     fun hentSoknadsStatus(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String, response: HttpServletResponse, request: HttpServletRequest): ResponseEntity<SoknadsStatusResponse> {
         tilgangskontroll.sjekkTilgang()
 
-        response.addCookie(xsrfCookie())
+        response.addCookie(xsrfCookie(fiksDigisosId))
         val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)
         return ResponseEntity.ok().body(
             SoknadsStatusResponse(
@@ -44,10 +43,10 @@ class SoknadsStatusController(
         )
     }
 
-    private fun xsrfCookie(): Cookie {
+    private fun xsrfCookie(fiksDigisosId: String): Cookie {
         val idportenIdtoken = SubjectHandlerUtils.getToken()
 
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken(idportenIdtoken))
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", generateXsrfToken(fiksDigisosId, idportenIdtoken))
         xsrfCookie.path = "/sosialhjelp/innsyn"
         xsrfCookie.isHttpOnly = false
         return xsrfCookie

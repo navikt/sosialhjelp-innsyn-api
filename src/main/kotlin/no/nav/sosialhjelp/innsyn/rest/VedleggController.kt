@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
-import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
+import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.sjekkXsrfToken
 import no.nav.sosialhjelp.innsyn.domain.OppgaveOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
@@ -42,7 +42,6 @@ class VedleggController(
     private val vedleggService: VedleggService,
     private val clientProperties: ClientProperties,
     private val tilgangskontroll: Tilgangskontroll,
-    private val xsrfGenerator: XsrfGenerator,
 ) {
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
@@ -55,7 +54,7 @@ class VedleggController(
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
         log.info("Forsøker å starter ettersendelse")
         tilgangskontroll.sjekkTilgang()
-        xsrfGenerator.sjekkXsrfToken(request)
+        sjekkXsrfToken(fiksDigisosId, request)
 
         val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
         validateFileListNotEmpty(files)

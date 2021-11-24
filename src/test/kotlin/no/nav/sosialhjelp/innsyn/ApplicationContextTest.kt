@@ -18,6 +18,9 @@ class ApplicationContextTest {
     @MockkBean(name = "proxiedWebClient", relaxed = true)
     private lateinit var proxiedWebClient: WebClient
 
+    @MockkBean(name = "nonProxiedWebClient", relaxed = true)
+    private lateinit var nonProxiedWebClient: WebClient
+
     @MockkBean
     private lateinit var proxiedWebClientConfig: ProxiedWebClientConfig
 

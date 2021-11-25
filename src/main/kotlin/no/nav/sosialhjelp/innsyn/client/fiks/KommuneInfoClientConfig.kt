@@ -6,18 +6,19 @@ import no.nav.sosialhjelp.client.kommuneinfo.KommuneInfoClientImpl
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
 
 @Configuration
 class KommuneInfoClientConfig(
-    private val proxiedWebClientBuilder: WebClient.Builder,
     private val clientProperties: ClientProperties
 ) {
 
     @Bean
-    fun kommuneInfoClient(): KommuneInfoClient {
+    fun kommuneInfoClient(webClientBuilder: WebClient.Builder, proxiedHttpClient: HttpClient): KommuneInfoClient {
         return KommuneInfoClientImpl(
-            proxiedWebClientBuilder.build(),
+            webClientBuilder.clientConnector(ReactorClientHttpConnector(proxiedHttpClient)).build(),
             fiksProperties()
         )
     }

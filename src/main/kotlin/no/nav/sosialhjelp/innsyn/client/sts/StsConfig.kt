@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.client.sts
 
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
-import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil
+import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.getUnproxiedReactorClientHttpConnector
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -18,13 +18,13 @@ class StsConfig(
 ) {
 
     @Bean
-    fun stsWebClient(nonProxiedWebClientBuilder: WebClient.Builder): WebClient =
-        nonProxiedWebClientBuilder
+    fun stsWebClient(webClientBuilder: WebClient.Builder): WebClient =
+        webClientBuilder
             .baseUrl(clientProperties.stsTokenEndpointUrl)
             .defaultHeader(HttpHeaders.AUTHORIZATION, "Basic ${credentials()}")
             .defaultHeader(IntegrationUtils.HEADER_NAV_APIKEY, System.getenv(STSTOKEN_APIKEY))
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .clientConnector(HttpClientUtil.getUnproxiedReactorClientHttpConnector())
+            .clientConnector(getUnproxiedReactorClientHttpConnector())
             .build()
 
     companion object {

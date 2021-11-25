@@ -18,21 +18,21 @@ class TokendingsClientConfig(
 ) {
     @Bean
     @Profile("!test")
-    fun tokendingsWebClient(nonProxiedWebClientBuilder: WebClient.Builder): TokendingsWebClient {
+    fun tokendingsWebClient(webClientBuilder: WebClient.Builder): TokendingsWebClient {
         val wellKnown = downloadWellKnown(clientProperties.tokendingsUrl)
         log.info("TokendingsClient: Lastet ned well known fra: ${clientProperties.tokendingsUrl} bruker token endpoint: ${wellKnown.tokenEndpoint}")
         return TokendingsWebClient(
-            buildWebClient(nonProxiedWebClientBuilder, wellKnown.tokenEndpoint, applicationFormUrlencodedHeaders()),
+            buildWebClient(webClientBuilder, wellKnown.tokenEndpoint, applicationFormUrlencodedHeaders()),
             wellKnown
         )
     }
 
     @Bean
     @Profile("test")
-    fun tokendingsWebClientTest(nonProxiedWebClientBuilder: WebClient.Builder): TokendingsWebClient {
+    fun tokendingsWebClientTest(webClientBuilder: WebClient.Builder): TokendingsWebClient {
         log.info("TokendingsClient: Setter opp test client som bruker token endpoint: ${clientProperties.tokendingsUrl}")
         return TokendingsWebClient(
-            buildWebClient(nonProxiedWebClientBuilder, clientProperties.tokendingsUrl),
+            buildWebClient(webClientBuilder, clientProperties.tokendingsUrl),
             WellKnown("iss-localhost", "authorizationEndpoint", "tokenEndpoint", clientProperties.tokendingsUrl)
         )
     }

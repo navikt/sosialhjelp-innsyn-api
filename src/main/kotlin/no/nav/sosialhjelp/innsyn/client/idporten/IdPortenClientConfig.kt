@@ -11,13 +11,14 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
+import reactor.netty.http.client.HttpClient
 
 @Profile("!mock-alt")
 @Configuration
 class IdPortenClientConfig(
-    private val proxiedWebClientBuilder: WebClient.Builder,
     @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String,
     @Value("\${no.nav.sosialhjelp.idporten.client_id}") private val clientId: String,
     @Value("\${no.nav.sosialhjelp.idporten.scope}") private val scope: String,
@@ -25,9 +26,9 @@ class IdPortenClientConfig(
 ) {
 
     @Bean
-    fun idPortenClient(): IdPortenClient {
+    fun idPortenClient(webClientBuilder: WebClient.Builder, proxiedHttpClient: HttpClient): IdPortenClient {
         return IdPortenClientImpl(
-            webClient = proxiedWebClientBuilder.build(),
+            webClient = webClientBuilder.clientConnector(ReactorClientHttpConnector(proxiedHttpClient)).build(),
             idPortenProperties = idPortenProperties()
         )
     }
@@ -46,13 +47,15 @@ class IdPortenClientConfig(
 @Profile("mock-alt")
 @Configuration
 class IdPortenClientConfigMockAlt(
-    private val proxiedWebClientBuilder: WebClient.Builder,
     @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String
 ) {
 
     @Bean
-    fun idPortenClient(): IdPortenClient {
-        return IdPortenClientMockAlt(proxiedWebClientBuilder.build(), tokenUrl)
+    fun idPortenClient(webClientBuilder: WebClient.Builder, proxiedHttpClient: HttpClient): IdPortenClient {
+        return IdPortenClientMockAlt(
+            webClientBuilder.clientConnector(ReactorClientHttpConnector(proxiedHttpClient)).build(),
+            tokenUrl
+        )
     }
 
     private class IdPortenClientMockAlt(

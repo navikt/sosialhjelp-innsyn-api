@@ -9,6 +9,12 @@ import java.net.URL
 object HttpClientUtil {
 
     fun getProxiedReactorClientHttpConnector(proxyUrl: String): ReactorClientHttpConnector {
+        val httpClient: HttpClient = proxiedHttpClient(proxyUrl)
+
+        return ReactorClientHttpConnector(httpClient)
+    }
+
+    fun proxiedHttpClient(proxyUrl: String): HttpClient {
         val uri = URL(proxyUrl)
 
         val httpClient: HttpClient = HttpClient.create()
@@ -16,14 +22,15 @@ object HttpClientUtil {
             .proxy { proxy ->
                 proxy.type(ProxyProvider.Proxy.HTTP).host(uri.host).port(uri.port)
             }
-
-        return ReactorClientHttpConnector(httpClient)
+        return httpClient
     }
 
     fun getUnproxiedReactorClientHttpConnector(): ReactorClientHttpConnector {
-        val httpClient: HttpClient = HttpClient
-            .newConnection()
-            .resolver(DefaultAddressResolverGroup.INSTANCE)
+        val httpClient: HttpClient = unproxiedHttpClient()
         return ReactorClientHttpConnector(httpClient)
     }
+
+    fun unproxiedHttpClient() = HttpClient
+        .newConnection()
+        .resolver(DefaultAddressResolverGroup.INSTANCE)
 }

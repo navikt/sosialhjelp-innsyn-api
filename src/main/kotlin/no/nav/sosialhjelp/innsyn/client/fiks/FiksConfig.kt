@@ -4,19 +4,21 @@ import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
 
 @Configuration
 class FiksConfig(
-    private val proxiedWebClientBuilder: WebClient.Builder,
-    private val clientProperties: ClientProperties,
+    private val clientProperties: ClientProperties
 ) {
 
     @Bean
-    fun fiksWebClient(): WebClient =
-        proxiedWebClientBuilder
+    fun fiksWebClient(webClientBuilder: WebClient.Builder, proxiedHttpClient: HttpClient): WebClient =
+        webClientBuilder
+            .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)

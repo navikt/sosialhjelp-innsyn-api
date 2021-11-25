@@ -9,8 +9,8 @@ import org.springframework.web.reactive.function.client.WebClient
 class VirusScanConfig {
 
     @Bean
-    fun virusScanWebClient(nonProxiedWebClientBuilder: WebClient.Builder) =
-        nonProxiedWebClientBuilder
+    fun virusScanWebClient(webClientBuilder: WebClient.Builder) =
+        webClientBuilder
             .baseUrl(DEFAULT_CLAM_URI)
             .clientConnector(getUnproxiedReactorClientHttpConnector())
             .build()

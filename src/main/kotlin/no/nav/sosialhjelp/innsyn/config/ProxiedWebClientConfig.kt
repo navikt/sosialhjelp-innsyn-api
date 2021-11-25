@@ -8,6 +8,14 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.web.reactive.function.client.WebClient
 
+@Configuration
+class NonProxiedWebClientConfig {
+    @Bean
+    fun nonProxiedWebClientBuilder(): WebClient.Builder =
+        WebClient.builder()
+            .clientConnector(getUnproxiedReactorClientHttpConnector())
+}
+
 @Profile("!(mock-alt|local|test)")
 @Configuration
 class ProxiedWebClientConfig {
@@ -16,10 +24,9 @@ class ProxiedWebClientConfig {
     private lateinit var proxyUrl: String
 
     @Bean
-    fun proxiedWebClient(webClientBuilder: WebClient.Builder): WebClient =
-        webClientBuilder
+    fun proxiedWebClientBuilder(): WebClient.Builder =
+        WebClient.builder()
             .clientConnector(getProxiedReactorClientHttpConnector(proxyUrl))
-            .build()
 }
 
 @Profile("(mock-alt|local|test)")
@@ -27,8 +34,7 @@ class ProxiedWebClientConfig {
 class MockProxiedWebClientConfig {
 
     @Bean
-    fun proxiedWebClient(webClientBuilder: WebClient.Builder): WebClient =
-        webClientBuilder
+    fun proxiedWebClientBuilder(): WebClient.Builder =
+        WebClient.builder()
             .clientConnector(getUnproxiedReactorClientHttpConnector())
-            .build()
 }

@@ -12,8 +12,8 @@ class NorgConfig(
 ) {
 
     @Bean
-    fun norgWebClient(webClientBuilder: WebClient.Builder): WebClient =
-        webClientBuilder
+    fun norgWebClient(nonProxiedWebClientBuilder: WebClient.Builder): WebClient =
+        nonProxiedWebClientBuilder
             .baseUrl(clientProperties.norgEndpointUrl)
             .clientConnector(getUnproxiedReactorClientHttpConnector())
             .build()

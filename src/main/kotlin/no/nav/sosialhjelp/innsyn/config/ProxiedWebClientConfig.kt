@@ -8,12 +8,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import reactor.netty.http.client.HttpClient
 
-// @Configuration
-// class WebClientBuilderClientConfig {
-//
-//
-// }
-
 @Profile("!(mock-alt|local|test)")
 @Configuration
 class ProxiedHttpClientConfig {

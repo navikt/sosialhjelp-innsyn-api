@@ -12,7 +12,7 @@ import java.math.BigDecimal
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     val log by logger()
 
-    if (hendelse.utbetalingsdato == null) log.warn("utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.")
+    if (hendelse.utbetalingsdato == null) log.debug("utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.")
     if (hendelse.fom == null) log.info("utbetalingens start-periode (fom) er null")
     if (hendelse.tom == null) log.info("utbetalingens slutt-periode (tom) er null")
 

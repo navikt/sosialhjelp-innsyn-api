@@ -15,6 +15,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     if (hendelse.utbetalingsdato == null) log.debug("utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.")
     if (hendelse.fom == null) log.info("utbetalingens start-periode (fom) er null")
     if (hendelse.tom == null) log.info("utbetalingens slutt-periode (tom) er null")
+    if (hendelse.status == null) log.info("utbetalingsstatus er null")
+    if (hendelse.status == JsonUtbetaling.Status.PLANLAGT_UTBETALING) log.info("utbetalingsstatus er PLANLAGT_UTBETALING")
+
 
     val utbetaling = Utbetaling(
         referanse = hendelse.utbetalingsreferanse,

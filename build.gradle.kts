@@ -29,6 +29,7 @@ object Versions {
     const val springdoc = "1.5.10"
     const val jsonSmart = "2.4.7"
     const val gson = "2.8.9"
+    const val log4j = "2.15.0"
 
     const val javaJwt = "3.18.2"
     const val jwksRsa = "0.17.0"
@@ -166,6 +167,13 @@ dependencies {
 
         implementation("com.google.code.gson:gson:${Versions.gson}") {
             because("Snyk ønsker 2.8.9 eller høyere. Transitiv avhengighet dratt inn av unleash-client-java.")
+        }
+
+        implementation("org.apache.logging.log4j:log4j-api:${Versions.log4j}") {
+            because("0-day exploit i version 2.0.0-2.14.1")
+        }
+        implementation("org.apache.logging.log4j:log4j-to-slf4j:${Versions.log4j}") {
+            because("0-day exploit i version 2.0.0-2.14.1")
         }
     }
 }

@@ -4,13 +4,12 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
-import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.toLocalDate
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
+import org.slf4j.Logger
 import java.math.BigDecimal
 
-fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
-    val log by logger()
+fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling, log: Logger) {
 
     if (hendelse.utbetalingsdato == null) log.debug("utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.")
     if (hendelse.fom == null) log.info("utbetalingens start-periode (fom) er null")
@@ -18,6 +17,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     if (hendelse.status == null) log.info("utbetalingsstatus er null")
     if (hendelse.status == JsonUtbetaling.Status.PLANLAGT_UTBETALING) log.info("utbetalingsstatus er PLANLAGT_UTBETALING")
 
+    log.info("Hendelse: Utbetaling. Status: ${hendelse.status?.name ?: "null"}")
 
     val utbetaling = Utbetaling(
         referanse = hendelse.utbetalingsreferanse,

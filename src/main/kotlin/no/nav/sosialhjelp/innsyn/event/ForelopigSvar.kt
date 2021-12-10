@@ -9,12 +9,14 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
+import org.slf4j.Logger
 
-fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: ClientProperties) {
+fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: ClientProperties, log: Logger) {
 
     forelopigSvar = ForelopigSvar(true, hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse))
 
     val beskrivelse = "Du har fått et brev om saksbehandlingstiden for søknaden din"
+    log.info("Hendelse: Forelopig svar. $beskrivelse")
     historikk.add(
         Hendelse(
             beskrivelse,

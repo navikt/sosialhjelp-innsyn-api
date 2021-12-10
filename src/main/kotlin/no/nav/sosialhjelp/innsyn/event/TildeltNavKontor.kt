@@ -6,8 +6,9 @@ import no.nav.sosialhjelp.innsyn.common.NorgException
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
+import org.slf4j.Logger
 
-fun InternalDigisosSoker.apply(hendelse: JsonTildeltNavKontor, norgClient: NorgClient) {
+fun InternalDigisosSoker.apply(hendelse: JsonTildeltNavKontor, norgClient: NorgClient, log: Logger) {
 
     if (hendelse.navKontor == tildeltNavKontor) {
         return
@@ -26,5 +27,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonTildeltNavKontor, norgClient: NorgC
         "et annet NAV-kontor"
     }
     val beskrivelse = "Søknaden med vedlegg er videresendt og mottatt ved $destinasjon. Videresendingen vil ikke påvirke saksbehandlingstiden."
+    log.info("Hendelse: Tildelt Navkontor. Beskrivelse: $beskrivelse")
     historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
 }

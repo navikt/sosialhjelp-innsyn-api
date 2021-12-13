@@ -6,10 +6,12 @@ import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDate
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
-fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonUtbetaling::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
 
     if (hendelse.utbetalingsdato == null) log.debug("utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.")
     if (hendelse.fom == null) log.info("utbetalingens start-periode (fom) er null")

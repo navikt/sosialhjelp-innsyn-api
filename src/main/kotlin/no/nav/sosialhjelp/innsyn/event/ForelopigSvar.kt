@@ -9,9 +9,11 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: ClientProperties, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonForelopigSvar::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: ClientProperties) {
 
     forelopigSvar = ForelopigSvar(true, hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse))
 

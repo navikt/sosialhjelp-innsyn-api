@@ -6,9 +6,11 @@ import no.nav.sosialhjelp.innsyn.common.NorgException
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-fun InternalDigisosSoker.apply(hendelse: JsonTildeltNavKontor, norgClient: NorgClient, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonTildeltNavKontor::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonTildeltNavKontor, norgClient: NorgClient) {
 
     if (hendelse.navKontor == tildeltNavKontor) {
         return

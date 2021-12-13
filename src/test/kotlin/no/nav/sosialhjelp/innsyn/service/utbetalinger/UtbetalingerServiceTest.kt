@@ -24,7 +24,6 @@ import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.slf4j.Logger
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -37,8 +36,6 @@ internal class UtbetalingerServiceTest {
     private val service = UtbetalingerService(eventService, fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
-
-    private val log: Logger = mockk(relaxed = true)
 
     private val token = "token"
 
@@ -431,7 +428,7 @@ internal class UtbetalingerServiceTest {
             .withUtbetalingsreferanse(utbetalingsreferanse)
             .withAnnenMottaker(false)
             .withHendelsestidspunkt(ZonedDateTime.now().toString())
-        model.apply(utbetaling, log)
+        model.apply(utbetaling)
         assertThat(model.utbetalinger).isNotEmpty
         assertThat(model.utbetalinger).hasSize(1)
         assertThat(model.utbetalinger[0].kontonummer).isEqualTo(kontonummer)
@@ -447,7 +444,7 @@ internal class UtbetalingerServiceTest {
             .withUtbetalingsreferanse(utbetalingsreferanse)
             .withAnnenMottaker(true)
             .withHendelsestidspunkt(ZonedDateTime.now().toString())
-        model.apply(utbetaling, log)
+        model.apply(utbetaling)
         assertThat(model.utbetalinger).isNotEmpty
         assertThat(model.utbetalinger).hasSize(1)
         assertThat(model.utbetalinger[0].kontonummer).isNull()
@@ -463,7 +460,7 @@ internal class UtbetalingerServiceTest {
             .withUtbetalingsreferanse(utbetalingsreferanse)
             .withAnnenMottaker(null)
             .withHendelsestidspunkt(ZonedDateTime.now().toString())
-        model.apply(utbetaling, log)
+        model.apply(utbetaling)
         assertThat(model.utbetalinger).isNotEmpty
         assertThat(model.utbetalinger).hasSize(1)
         assertThat(model.utbetalinger[0].kontonummer).isNull()

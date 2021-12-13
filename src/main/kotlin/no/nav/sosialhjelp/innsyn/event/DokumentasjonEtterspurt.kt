@@ -12,9 +12,11 @@ import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProperties: ClientProperties, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonDokumentasjonEtterspurt::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProperties: ClientProperties) {
     val prevSize = oppgaver.size
 
     oppgaver = hendelse.dokumenter

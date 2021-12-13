@@ -6,9 +6,11 @@ import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-fun InternalDigisosSoker.apply(hendelse: JsonVilkar, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonVilkar::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 
     log.info("Hendelse: Vilkar. Status: ${hendelse.status?.name ?: "null"}")
 

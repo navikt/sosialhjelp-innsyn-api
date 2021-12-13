@@ -6,9 +6,11 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService.Companion.stripEnhetsnavnForKommune
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonSoknadsStatus::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
 
     status = SoknadsStatus.valueOf(hendelse.status.name)
 

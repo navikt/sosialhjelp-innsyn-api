@@ -11,9 +11,11 @@ import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: Unleash, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonDokumentasjonkrav::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: Unleash) {
     val dokumentasjonkrav = Dokumentasjonkrav(
         dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
         hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,

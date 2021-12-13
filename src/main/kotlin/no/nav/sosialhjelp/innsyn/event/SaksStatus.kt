@@ -6,10 +6,12 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.Locale
 
-fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonSaksStatus::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
 
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.referanse }
 

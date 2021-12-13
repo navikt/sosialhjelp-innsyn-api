@@ -13,9 +13,11 @@ import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.service.saksstatus.DEFAULT_TITTEL
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties, log: Logger) {
+private val log = LoggerFactory.getLogger(JsonVedtakFattet::class.java.name)
+
+fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
 
     val utfallString = hendelse.utfall?.name
     val utfall = if (utfallString == null) null else UtfallVedtak.valueOf(utfallString)

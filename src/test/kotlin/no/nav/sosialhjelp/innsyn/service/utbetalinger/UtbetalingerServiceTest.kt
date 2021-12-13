@@ -24,6 +24,7 @@ import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.slf4j.Logger
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -36,6 +37,8 @@ internal class UtbetalingerServiceTest {
     private val service = UtbetalingerService(eventService, fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
+
+    private val log: Logger = mockk(relaxed = true)
 
     private val token = "token"
 
@@ -61,18 +64,18 @@ internal class UtbetalingerServiceTest {
 
         val response = service.utbetalingExists(token, 6)
 
-        assertThat(response).isFalse()
+        assertThat(response).isFalse
     }
 
     @Test
-    fun `Skal returnere at utbetalinger ikke eksisterer om soker ikke har utbetalinger på noen digisosSaker`() {
+    fun `Skal returnere at utbetalinger ikke eksisterer om soker ikke har utbetalinger pa noen digisosSaker`() {
         val model = InternalDigisosSoker()
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
         val response = service.utbetalingExists(token, 6)
 
-        assertThat(response).isFalse()
+        assertThat(response).isFalse
     }
 
     @Test
@@ -85,7 +88,7 @@ internal class UtbetalingerServiceTest {
 
         val response = service.utbetalingExists(token, 6)
 
-        assertThat(response).isFalse()
+        assertThat(response).isFalse
     }
 
     @Test
@@ -116,7 +119,7 @@ internal class UtbetalingerServiceTest {
 
         val response = service.utbetalingExists(token, 12)
 
-        assertThat(response).isFalse()
+        assertThat(response).isFalse
     }
 
     @Test
@@ -147,7 +150,7 @@ internal class UtbetalingerServiceTest {
 
         val response = service.utbetalingExists(token, 12)
 
-        assertThat(response).isTrue()
+        assertThat(response).isTrue
     }
 
     @Test
@@ -428,7 +431,7 @@ internal class UtbetalingerServiceTest {
             .withUtbetalingsreferanse(utbetalingsreferanse)
             .withAnnenMottaker(false)
             .withHendelsestidspunkt(ZonedDateTime.now().toString())
-        model.apply(utbetaling)
+        model.apply(utbetaling, log)
         assertThat(model.utbetalinger).isNotEmpty
         assertThat(model.utbetalinger).hasSize(1)
         assertThat(model.utbetalinger[0].kontonummer).isEqualTo(kontonummer)
@@ -444,7 +447,7 @@ internal class UtbetalingerServiceTest {
             .withUtbetalingsreferanse(utbetalingsreferanse)
             .withAnnenMottaker(true)
             .withHendelsestidspunkt(ZonedDateTime.now().toString())
-        model.apply(utbetaling)
+        model.apply(utbetaling, log)
         assertThat(model.utbetalinger).isNotEmpty
         assertThat(model.utbetalinger).hasSize(1)
         assertThat(model.utbetalinger[0].kontonummer).isNull()
@@ -460,7 +463,7 @@ internal class UtbetalingerServiceTest {
             .withUtbetalingsreferanse(utbetalingsreferanse)
             .withAnnenMottaker(null)
             .withHendelsestidspunkt(ZonedDateTime.now().toString())
-        model.apply(utbetaling)
+        model.apply(utbetaling, log)
         assertThat(model.utbetalinger).isNotEmpty
         assertThat(model.utbetalinger).hasSize(1)
         assertThat(model.utbetalinger[0].kontonummer).isNull()

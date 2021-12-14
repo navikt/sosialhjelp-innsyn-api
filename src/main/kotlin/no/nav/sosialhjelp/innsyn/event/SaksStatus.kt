@@ -6,7 +6,10 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
+import org.slf4j.LoggerFactory
 import java.util.Locale
+
+private val log = LoggerFactory.getLogger(JsonSaksStatus::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
 
@@ -54,4 +57,5 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
         }
     }
+    log.info("Hendelse: Sakstatus: ${hendelse.status?.name ?: "null"}")
 }

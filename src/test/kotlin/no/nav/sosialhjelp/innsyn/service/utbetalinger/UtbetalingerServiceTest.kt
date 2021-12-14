@@ -61,18 +61,18 @@ internal class UtbetalingerServiceTest {
 
         val response = service.utbetalingExists(token, 6)
 
-        assertThat(response).isFalse()
+        assertThat(response).isFalse
     }
 
     @Test
-    fun `Skal returnere at utbetalinger ikke eksisterer om soker ikke har utbetalinger på noen digisosSaker`() {
+    fun `Skal returnere at utbetalinger ikke eksisterer om soker ikke har utbetalinger pa noen digisosSaker`() {
         val model = InternalDigisosSoker()
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
         val response = service.utbetalingExists(token, 6)
 
-        assertThat(response).isFalse()
+        assertThat(response).isFalse
     }
 
     @Test
@@ -85,7 +85,7 @@ internal class UtbetalingerServiceTest {
 
         val response = service.utbetalingExists(token, 6)
 
-        assertThat(response).isFalse()
+        assertThat(response).isFalse
     }
 
     @Test
@@ -116,7 +116,7 @@ internal class UtbetalingerServiceTest {
 
         val response = service.utbetalingExists(token, 12)
 
-        assertThat(response).isFalse()
+        assertThat(response).isFalse
     }
 
     @Test
@@ -147,7 +147,7 @@ internal class UtbetalingerServiceTest {
 
         val response = service.utbetalingExists(token, 12)
 
-        assertThat(response).isTrue()
+        assertThat(response).isTrue
     }
 
     @Test

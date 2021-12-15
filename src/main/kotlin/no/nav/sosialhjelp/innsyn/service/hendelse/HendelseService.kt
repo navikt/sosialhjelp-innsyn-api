@@ -6,6 +6,7 @@ import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseResponse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
@@ -71,7 +72,7 @@ class HendelseService(
 
     private fun InternalDigisosSoker.leggTilHendelserForUtbetalinger() {
         utbetalinger
-//                .filterNot { it.status == UtbetalingsStatus.ANNULLERT } // TODO - Finn ut om annullert skal gi melding i historikk
+            .filter { it.status == UtbetalingsStatus.UTBETALT }
             .groupBy { it.datoHendelse.rundNedTilNaermeste5Minutt() }
             .forEach { (_, grupperteVilkar) ->
                 historikk.add(

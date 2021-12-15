@@ -310,4 +310,89 @@ internal class HendelseServiceTest {
         val second = hendelser[1]
         assertThat(second.tidspunkt).isEqualTo(time.plusMinutes(5).toString())
     }
+
+    @Test
+    internal fun `hendelser for utbetalinger - utbetalinger med annen status enn UTBETALT blir filtrert bort`() {
+        val model = InternalDigisosSoker()
+
+        val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
+        model.utbetalinger = mutableListOf(
+            Utbetaling(
+                referanse = "utbetalref",
+                status = UtbetalingsStatus.PLANLAGT_UTBETALING,
+                belop = BigDecimal.valueOf(1337.0),
+                beskrivelse = "beskrivelse",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.now(),
+                fom = null,
+                tom = null,
+                mottaker = "mottaker",
+                annenMottaker = false,
+                kontonummer = "kontonummer",
+                utbetalingsmetode = "utbetalingsmetode",
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = time
+            ),
+            Utbetaling(
+                referanse = "utbetalref",
+                status = UtbetalingsStatus.ANNULLERT,
+                belop = BigDecimal.valueOf(1337.0),
+                beskrivelse = "beskrivelse",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.now(),
+                fom = null,
+                tom = null,
+                mottaker = "mottaker",
+                annenMottaker = false,
+                kontonummer = "kontonummer",
+                utbetalingsmetode = "utbetalingsmetode",
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = time
+            ),
+            Utbetaling(
+                referanse = "utbetalref",
+                status = UtbetalingsStatus.STOPPET,
+                belop = BigDecimal.valueOf(1337.0),
+                beskrivelse = "beskrivelse",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.now(),
+                fom = null,
+                tom = null,
+                mottaker = "mottaker",
+                annenMottaker = false,
+                kontonummer = "kontonummer",
+                utbetalingsmetode = "utbetalingsmetode",
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = time
+            ),
+            Utbetaling(
+                referanse = "utbetalref",
+                status = UtbetalingsStatus.UTBETALT,
+                belop = BigDecimal.valueOf(1337.0),
+                beskrivelse = "utbetalt utbetaling",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.now(),
+                fom = null,
+                tom = null,
+                mottaker = "mottaker",
+                annenMottaker = false,
+                kontonummer = "kontonummer",
+                utbetalingsmetode = "utbetalingsmetode",
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = time.plusMinutes(10)
+            )
+        )
+
+        every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+
+        val hendelser = service.hentHendelser("123", "Token")
+
+        assertThat(hendelser).hasSize(1)
+        assertThat(hendelser[0].tidspunkt).isEqualTo(time.plusMinutes(10).toString())
+    }
 }

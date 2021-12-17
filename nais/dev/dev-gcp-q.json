@@ -5,11 +5,7 @@
     "https://sosialhjelp-innsyn-api.dev.nav.no/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
-    "redis-password-innsyn-api",
-    "testbruker-natalie",
-    "xsrf-secret",
-    "fiks-integrasjon-secret",
-    "fiks-kommune-integrasjon-secret"
+    "redis-password-innsyn-api"
   ],
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",

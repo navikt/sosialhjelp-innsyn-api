@@ -1,5 +1,5 @@
 {
-  "applicationName": "sosialhjelp-innsyn-api-intern",
+  "applicationName": "sosialhjelp-innsyn-api",
   "namespace": "teamdigisos",
   "ingress": [
     "https://sosialhjelp-innsyn-api.dev.nav.no/sosialhjelp/innsyn-api"
@@ -11,13 +11,6 @@
     "fiks-integrasjon-secret",
     "fiks-kommune-integrasjon-secret"
   ],
-  "kvPaths": {
-    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
-    "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
-    "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q1",
-    "/apigw/norg2": "/apikey/apigw/dev/norg2.api.v1/sosialhjelp-innsyn-api_q1",
-    "/apigw/pdl-api": "/apikey/apigw/dev/pdl-api/sosialhjelp-innsyn-api_q1"
-  },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",
@@ -47,7 +40,7 @@
   "cpuRequest": "200m",
   "memoryRequest": "1Gi",
   "prometheusEnabled": true,
-  "webProxyEnabled": true,
+  "webProxyEnabled": false,
   "isGcp": true,
   "isLabsGcp": false,
   "vaultEnabled": false,

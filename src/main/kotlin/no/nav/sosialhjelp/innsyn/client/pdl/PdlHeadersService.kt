@@ -21,8 +21,8 @@ interface PdlHeadersService {
 @Service
 @Profile("!(dev-gcp-q)")
 class PdlStsHeadersService(
-        private val stsClient: StsClient,
-): PdlHeadersService {
+    private val stsClient: StsClient,
+) : PdlHeadersService {
     override fun getHeaders(ident: String, token: String): HttpHeaders {
         val stsToken = stsClient.token()
         val headers = HttpHeaders()
@@ -38,9 +38,9 @@ class PdlStsHeadersService(
 @Service
 @Profile("(dev-gcp-q)")
 class PdlTokendingsHeadersService(
-        private val tokendingsService: TokendingsService,
-        @Value("\${pdl_audience}") private val pdlAudience: String
-): PdlHeadersService {
+    private val tokendingsService: TokendingsService,
+    @Value("\${pdl_audience}") private val pdlAudience: String
+) : PdlHeadersService {
     override fun getHeaders(ident: String, token: String): HttpHeaders {
         val headers = HttpHeaders()
         runBlocking {

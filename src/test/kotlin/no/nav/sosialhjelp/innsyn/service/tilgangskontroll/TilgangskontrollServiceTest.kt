@@ -8,9 +8,13 @@ import no.nav.sosialhjelp.innsyn.client.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlHentPerson
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlNavn
 import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandler
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class TilgangskontrollServiceTest {
@@ -22,7 +26,14 @@ internal class TilgangskontrollServiceTest {
 
     private val clientResponse: PdlHentPerson = mockk()
 
-    /** SjekkTilgang **/
+    private val mockSubjectHandler: SubjectHandler = mockk()
+
+    @BeforeEach
+    fun init() {
+        SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
+
+        every { mockSubjectHandler.getUserIdFromToken() } returns ident
+    }
 
     @Test
     internal fun `sjekkTilgang - skal ikke kaste feil hvis client returnerer null`() {

@@ -19,7 +19,7 @@
     "ID_PORTEN_SCOPE": "ks:fiks",
     "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
-    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local",
+    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
     "PDL_ENDPOINT_URL": "https://api-gw-q1.oera.no/pdl-api/graphql",
     "STS_TOKEN_ENDPOINT_URL": "https://api-gw-q1.oera.no/security-token-service/rest/v1/sts/token",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",

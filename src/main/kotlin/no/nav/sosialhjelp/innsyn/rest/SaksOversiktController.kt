@@ -51,7 +51,7 @@ class SaksOversiktController(
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val saker = try {
             fiksClient.hentAlleDigisosSaker(token)
@@ -75,7 +75,7 @@ class SaksOversiktController(
 
     @GetMapping("/skalViseMeldingerLenke")
     fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         try {
             val status = runBlocking {
@@ -99,7 +99,7 @@ class SaksOversiktController(
 
     @GetMapping("/dialogstatus")
     suspend fun hentDialogStatus(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DialogStatus> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         return try {
             val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.removePrefix(BEARER))
@@ -112,7 +112,7 @@ class SaksOversiktController(
 
     @GetMapping("/sisteSak")
     fun hentSisteSak(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DigisosSak> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val saker = try {
             fiksClient.hentAlleDigisosSaker(token)
@@ -143,7 +143,7 @@ class SaksOversiktController(
 
     @GetMapping("/saksDetaljer")
     fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         if (id.isEmpty()) {
             return ResponseEntity.noContent().build()

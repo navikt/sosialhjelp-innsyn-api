@@ -25,7 +25,7 @@ class OppgaveController(
 
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = ["application/json;charset=UTF-8"])
     fun getOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
         if (oppgaver.isEmpty()) {
@@ -36,7 +36,7 @@ class OppgaveController(
 
     @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}", produces = ["application/json;charset=UTF-8"])
     fun getOppgaveMedId(@PathVariable fiksDigisosId: String, @PathVariable oppgaveId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, token, oppgaveId)
         if (oppgaver.isEmpty()) {
@@ -47,7 +47,7 @@ class OppgaveController(
 
     @GetMapping("/{fiksDigisosId}/vilkar", produces = ["application/json;charset=UTF-8"])
     fun getVilkar(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<VilkarResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val vilkar = oppgaveService.getVilkar(fiksDigisosId, token)
         if (vilkar.isEmpty()) {
@@ -58,7 +58,7 @@ class OppgaveController(
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
     fun getDokumentasjonkrav(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
         if (dokumentasjonkrav.isEmpty()) {
@@ -69,7 +69,7 @@ class OppgaveController(
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{dokumentasjonkravId}", produces = ["application/json;charset=UTF-8"])
     fun getDokumentasjonkravMedId(@PathVariable fiksDigisosId: String, @PathVariable dokumentasjonkravId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId, token)
         if (dokumentasjonkrav.isEmpty()) {

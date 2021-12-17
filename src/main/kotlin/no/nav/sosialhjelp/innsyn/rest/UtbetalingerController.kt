@@ -25,7 +25,7 @@ class UtbetalingerController(
 
     @GetMapping("/utbetalinger")
     fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         try {
             return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(token, month))
@@ -40,7 +40,7 @@ class UtbetalingerController(
 
     @GetMapping("/utbetalinger/exists")
     fun getUtbetalingExists(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "12") month: Int): ResponseEntity<Boolean> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         try {
             return ResponseEntity.ok().body(utbetalingerService.utbetalingExists(token, month))

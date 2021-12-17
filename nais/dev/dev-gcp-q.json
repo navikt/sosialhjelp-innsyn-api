@@ -23,7 +23,7 @@
     "PDL_ENDPOINT_URL": "https://api-gw-q1.oera.no/pdl-api/graphql",
     "STS_TOKEN_ENDPOINT_URL": "https://api-gw-q1.oera.no/security-token-service/rest/v1/sts/token",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
-    "UNLEASH_INSTANCE_ID": "dev-sbs-intern",
+    "UNLEASH_INSTANCE_ID": "dev-gcp",
     "MELDINGER_KOMMUNENUMMER": "0301",
     "SWAGGER_ENABLED": "true",
     "DIALOG_ENDPOINT_URL": "https://sosialhjelp.dev.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",

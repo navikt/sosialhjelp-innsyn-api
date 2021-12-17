@@ -60,7 +60,7 @@ internal class VedleggControllerTest {
         clearMocks(vedleggOpplastingService, vedleggService)
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { tilgangskontroll.sjekkTilgang() } just Runs
+        every { tilgangskontroll.sjekkTilgang("token") } just Runs
     }
 
     @Test

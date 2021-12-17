@@ -29,7 +29,7 @@ class SoknadsStatusController(
 
     @GetMapping("{fiksDigisosId}/soknadsStatus")
     fun hentSoknadsStatus(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String, response: HttpServletResponse, request: HttpServletRequest): ResponseEntity<SoknadsStatusResponse> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         response.addCookie(xsrfCookie())
         val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)

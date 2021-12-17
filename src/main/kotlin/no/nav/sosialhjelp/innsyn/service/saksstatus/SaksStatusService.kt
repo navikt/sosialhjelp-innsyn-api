@@ -28,7 +28,7 @@ class SaksStatusService(
         }
 
         val responseList = model.saker.filter { it.saksStatus != SaksStatus.FEILREGISTRERT }.map { mapToResponse(it) }
-        log.info("Hentet ${responseList.size} sak(er)")
+        log.info("Hentet ${responseList.size} sak(er) ${responseList.map { it.status?.name ?: "UKJENT_STATUS" }}")
         return responseList
     }
 
@@ -45,7 +45,7 @@ class SaksStatusService(
         return SaksStatusResponse(sak.tittel ?: DEFAULT_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList)
     }
 
-    private fun hentStatusNavn(sak: Sak): SaksStatus? {
+    private fun hentStatusNavn(sak: Sak): SaksStatus {
         return when {
             sak.vedtak.isEmpty() -> sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
             else -> SaksStatus.FERDIGBEHANDLET

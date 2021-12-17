@@ -9,14 +9,13 @@ import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
-import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger(JsonDokumentasjonkrav::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: Unleash) {
-
-    val log by logger()
-
     val dokumentasjonkrav = Dokumentasjonkrav(
         dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
         hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
@@ -59,6 +58,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
 
     if (unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false)) {
         val beskrivelse = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."
+        log.info("Hendelse: Dokumentasjonskrav. Beskrivelse: $beskrivelse")
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
     }
 }

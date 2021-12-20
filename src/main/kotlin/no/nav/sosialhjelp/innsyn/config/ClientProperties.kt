@@ -20,6 +20,7 @@ class ClientProperties {
     lateinit var norgEndpointUrl: String
 
     lateinit var pdlEndpointUrl: String
+    lateinit var pdlAudience: String
     lateinit var stsTokenEndpointUrl: String
 
     lateinit var unleashUrl: String

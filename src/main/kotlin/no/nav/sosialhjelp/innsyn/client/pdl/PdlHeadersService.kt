@@ -3,12 +3,12 @@ package no.nav.sosialhjelp.innsyn.client.pdl
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.client.sts.StsClient
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
+import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -36,15 +36,15 @@ class PdlStsHeadersService(
 }
 
 @Service
-@Profile("(dev-gcp-q)")
+@Profile("dev-gcp-q")
 class PdlTokendingsHeadersService(
     private val tokendingsService: TokendingsService,
-    @Value("\${pdl_audience}") private val pdlAudience: String
+    private val clientProperties: ClientProperties,
 ) : PdlHeadersService {
     override fun getHeaders(ident: String, token: String): HttpHeaders {
         val headers = HttpHeaders()
         runBlocking {
-            val tokenXToken = tokendingsService.exchangeToken(ident, token, pdlAudience)
+            val tokenXToken = tokendingsService.exchangeToken(ident, token, clientProperties.pdlAudience)
 
             headers.contentType = MediaType.APPLICATION_JSON
             headers.set(HttpHeaders.AUTHORIZATION, BEARER + tokenXToken)

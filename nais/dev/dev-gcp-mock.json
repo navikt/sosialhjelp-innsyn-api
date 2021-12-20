@@ -7,6 +7,14 @@
   "envsecret": [
     "redis-password-innsyn-api"
   ],
+  "outboundExternalHosts": [
+    "oidc-ver2.difi.no",
+    "unleash.nais.io"
+  ],
+  "outboundRulesApplications": [
+    "sosialhjelp-mock-alt-api",
+    "sosialhjelp-innsyn-api-redis"
+  ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,mock-redis",
     "METADATA_URL": "https://digisos-gcp.dev.nav.no/sosialhjelp/mock-alt-api/well-known/selvbetjening",

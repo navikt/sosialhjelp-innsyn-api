@@ -29,7 +29,7 @@ object Versions {
     const val springdoc = "1.5.10"
     const val jsonSmart = "2.4.7"
     const val gson = "2.8.9"
-    const val log4j = "2.16.0"
+    const val log4j = "2.17.0"
 
     const val javaJwt = "3.18.2"
     const val jwksRsa = "0.17.0"

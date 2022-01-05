@@ -414,7 +414,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("Vi kan ikke vise behandlingsstatus for $tittel_1 digitalt.")
+            assertThat(hendelse.tittel).contains("Vi kan ikke vise status på søknaden din om $tittel_1 på nav.no.")
         }
 
         @Test
@@ -447,7 +447,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("Vi kan ikke vise behandlingsstatus for $tittel_1 digitalt.")
+            assertThat(hendelse.tittel).contains("Vi kan ikke vise status på søknaden din om $tittel_1 på nav.no.")
         }
     }
 
@@ -475,7 +475,7 @@ internal class EventServiceTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
+        assertThat(hendelse.tittel).contains("Du har fått ett brev om saksbehandlingstiden for søknaden din")
         assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
     }
 

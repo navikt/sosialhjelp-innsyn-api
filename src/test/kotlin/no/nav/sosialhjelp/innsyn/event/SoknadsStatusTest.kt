@@ -199,7 +199,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittel).isEqualTo("Søknaden er ferdig behandlet.")
+        assertThat(hendelse.tittel).isEqualTo("Søknaden er ferdigbehandlet.")
     }
 
     @Test

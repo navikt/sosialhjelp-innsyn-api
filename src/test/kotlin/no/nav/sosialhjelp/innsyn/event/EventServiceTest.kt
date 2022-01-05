@@ -69,7 +69,7 @@ internal class EventServiceTest {
  [x] ingen innsyn, sendt soknad -> status SENDT
  [x] status mottatt
  [x] status under behandling
- [x] status ferdig behandlet
+ [x] status ferdigbehandlet
  [x] saksStatus uten vedtakFattet
  [x] saksStatus før vedtakFattet
  [x] vedtakFattet uten saksStatus
@@ -223,7 +223,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$tittel_1 er ferdig behandlet")
+            assertThat(hendelse.tittel).contains("$tittel_1 er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -262,7 +262,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
+            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -303,7 +303,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
+            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -381,7 +381,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdig behandlet")
+            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -414,7 +414,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("Vi kan ikke vise behandlingsstatus for $tittel_1 digitalt.")
+            assertThat(hendelse.tittel).contains("Vi kan ikke vise status på søknaden din om $tittel_1 på nav.no.")
         }
 
         @Test
@@ -447,7 +447,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("Vi kan ikke vise behandlingsstatus for $tittel_1 digitalt.")
+            assertThat(hendelse.tittel).contains("Vi kan ikke vise status på søknaden din om $tittel_1 på nav.no.")
         }
     }
 
@@ -475,7 +475,7 @@ internal class EventServiceTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din")
+        assertThat(hendelse.tittel).contains("Du har fått ett brev om saksbehandlingstiden for søknaden din")
         assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
     }
 

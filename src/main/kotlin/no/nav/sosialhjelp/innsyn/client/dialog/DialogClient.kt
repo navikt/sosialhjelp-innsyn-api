@@ -76,8 +76,9 @@ class DialogClientImpl(
     }
 
     private suspend fun tokendingsHeaders(ident: String, token: String): HttpHeaders {
+        log.debug("DEBUG pcn: Input token: $token")
         val tokenXToken = tokendingsService.exchangeToken(ident, token, clientProperties.dialogAudience)
-        log.debug("DEBUG pcn: Token: $tokenXToken")
+        log.debug("DEBUG pcn: Return token: $tokenXToken")
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON

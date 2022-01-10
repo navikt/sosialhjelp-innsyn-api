@@ -52,7 +52,7 @@ class TokendingsServiceImpl internal constructor(
     }
 
     private fun lagreTilCache(key: String, onBehalfToken: String) {
-        redisService.put(TOKENDINGS_CACHE_KEY_PREFIX + key, objectMapper.writeValueAsBytes(onBehalfToken), 30)
+        redisService.put(TOKENDINGS_CACHE_KEY_PREFIX + key, onBehalfToken.toByteArray(), 30)
     }
 
     companion object {

@@ -9,7 +9,6 @@ import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.TOKENDINGS_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException

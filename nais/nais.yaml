@@ -37,6 +37,8 @@ spec:
         - host: "unleash.nais.io"
       rules:
         - application: sosialhjelp-mock-alt-api
+        - application: sosialhjelp-dialog-api
+        - application: sosialhjelp-dialog-api-gcp
         - application: sosialhjelp-innsyn-api-redis
 {{/if}}
 {{#if isGcp}}

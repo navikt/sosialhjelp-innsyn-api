@@ -27,6 +27,7 @@ interface RedisService {
             if (bytes != null) {
                 try {
                     if (requestedClass == String::class.java) {
+                        log.debug("Hentet ${requestedClass.simpleName} fra cache, key=${key.maskerFnr}")
                         String(bytes, StandardCharsets.UTF_8)
                     } else {
                         val obj = objectMapper.readValue(bytes, requestedClass)

@@ -69,7 +69,7 @@ internal class SaksOversiktControllerTest {
 
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { tilgangskontroll.sjekkTilgang() } just Runs
+        every { tilgangskontroll.sjekkTilgang("token") } just Runs
 
         every { digisosSak1.fiksDigisosId } returns "123"
         every { digisosSak1.sistEndret } returns 0L

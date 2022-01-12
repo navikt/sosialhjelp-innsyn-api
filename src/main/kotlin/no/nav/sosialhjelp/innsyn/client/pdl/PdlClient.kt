@@ -1,23 +1,14 @@
 package no.nav.sosialhjelp.innsyn.client.pdl
 
 import kotlinx.coroutines.runBlocking
-import no.nav.sosialhjelp.innsyn.client.sts.StsClient
 import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CONSUMER_TOKEN
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
-import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -27,7 +18,7 @@ import java.util.Optional
 import java.util.stream.Collectors
 
 interface PdlClient {
-    fun hentPerson(ident: String): PdlHentPerson?
+    fun hentPerson(ident: String, token: String): PdlHentPerson?
     fun ping()
 }
 
@@ -35,18 +26,18 @@ interface PdlClient {
 @Component
 class PdlClientImpl(
     private val pdlWebClient: WebClient,
-    private val stsClient: StsClient,
+    private val pdlHeadersService: PdlHeadersService,
     private val redisService: RedisService,
 ) : PdlClient {
 
-    override fun hentPerson(ident: String): PdlHentPerson? {
-        return hentFraCache(ident) ?: hentFraPdl(ident)
+    override fun hentPerson(ident: String, token: String): PdlHentPerson? {
+        return hentFraCache(ident) ?: hentFraPdl(ident, token)
     }
 
     private fun hentFraCache(ident: String): PdlHentPerson? =
         redisService.get(cacheKey(ident), PdlHentPerson::class.java) as? PdlHentPerson
 
-    private fun hentFraPdl(ident: String): PdlHentPerson? {
+    private fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
         val query = getQuery()
         try {
             val pdlPersonResponse = runBlocking {
@@ -57,7 +48,7 @@ class PdlClientImpl(
                     retryableExceptions = arrayOf(WebClientResponseException::class)
                 ) {
                     pdlWebClient.post()
-                        .headers { it.addAll(headers()) }
+                        .headers { it.addAll(headers(ident, token)) }
                         .bodyValue(PdlRequest(query, Variables(ident)))
                         .retrieve()
                         .awaitBody<PdlPersonResponse>()
@@ -87,16 +78,8 @@ class PdlClientImpl(
         this.javaClass.getResource("/pdl/hentPerson.graphql")?.readText()?.replace("[\n\r]", "")
             ?: throw RuntimeException("Feil ved lesing av graphql-spørring fra fil")
 
-    private fun headers(): HttpHeaders {
-        val stsToken: String = stsClient.token()
-
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        headers.set(HEADER_CALL_ID, MDCUtils.get(CALL_ID))
-        headers.set(HEADER_CONSUMER_TOKEN, BEARER + stsToken)
-        headers.set(HttpHeaders.AUTHORIZATION, BEARER + stsToken)
-        headers.set(HEADER_TEMA, TEMA_KOM)
-        return headers
+    private fun headers(ident: String, token: String): HttpHeaders {
+        return pdlHeadersService.getHeaders(ident, token)
     }
 
     private fun checkForPdlApiErrors(response: PdlPersonResponse?) {

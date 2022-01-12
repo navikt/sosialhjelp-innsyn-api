@@ -33,13 +33,17 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: "oidc-ver2.difi.no"
-        - host: "unleash.nais.io"
+      {{#each outboundExternalHosts}}
+        - host: "{{this}}"
+      {{else}}
+        []
+      {{/each}}
       rules:
-        - application: sosialhjelp-mock-alt-api
-        - application: sosialhjelp-dialog-api
-        - application: sosialhjelp-dialog-api-gcp
-        - application: sosialhjelp-innsyn-api-redis
+      {{#each outboundRulesApplications}}
+        - application: "{{this}}"
+      {{else}}
+        []
+      {{/each}}
 {{/if}}
 {{#if isGcp}}
   filesFrom:

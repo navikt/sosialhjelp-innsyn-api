@@ -22,7 +22,7 @@ class TilgangController(
     @GetMapping("/tilgang")
     fun harTilgang(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<TilgangResponse> {
         return try {
-            val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken())
+            val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
             ResponseEntity.ok().body(TilgangResponse(tilgang.harTilgang, tilgang.fornavn))
         } catch (e: PdlException) {
             log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")

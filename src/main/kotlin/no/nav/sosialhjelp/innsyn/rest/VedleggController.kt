@@ -54,7 +54,7 @@ class VedleggController(
         request: HttpServletRequest
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
         log.info("Forsøker å starter ettersendelse")
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
         xsrfGenerator.sjekkXsrfToken(request)
 
         val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
@@ -66,7 +66,7 @@ class VedleggController(
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
     fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(fiksDigisosId, token)
         if (internalVedleggList.isEmpty()) {

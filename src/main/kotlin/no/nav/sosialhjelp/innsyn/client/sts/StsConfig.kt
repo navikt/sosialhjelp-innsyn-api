@@ -11,7 +11,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.Base64
 
-@Profile("!local")
+@Profile("!(dev-gcp-q|local)")
 @Configuration
 class StsConfig(
     private val clientProperties: ClientProperties

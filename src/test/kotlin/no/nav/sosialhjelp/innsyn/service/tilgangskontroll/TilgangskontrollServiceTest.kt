@@ -8,9 +8,12 @@ import no.nav.sosialhjelp.innsyn.client.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlHentPerson
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlNavn
 import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandler
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class TilgangskontrollServiceTest {
@@ -22,11 +25,18 @@ internal class TilgangskontrollServiceTest {
 
     private val clientResponse: PdlHentPerson = mockk()
 
-    /** SjekkTilgang **/
+    private val mockSubjectHandler: SubjectHandler = mockk()
+
+    @BeforeEach
+    fun init() {
+        SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
+
+        every { mockSubjectHandler.getUserIdFromToken() } returns ident
+    }
 
     @Test
     internal fun `sjekkTilgang - skal ikke kaste feil hvis client returnerer null`() {
-        every { pdlClientMock.hentPerson(any()) } returns null
+        every { pdlClientMock.hentPerson(any(), any()) } returns null
 
         assertThatCode { service.sjekkTilgang(ident) }
             .doesNotThrowAnyException()
@@ -35,7 +45,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `sjekkTilgang - skal kaste feil hvis client returnerer PdlHentPerson_pdlPerson = null`() {
         every { clientResponse.hentPerson } returns null
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
         assertThatCode { service.sjekkTilgang(ident) }
             .doesNotThrowAnyException()
@@ -44,7 +54,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `sjekkTilgang - skal ikke kaste feil hvis adressebeskyttelse-liste er tom`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns emptyList()
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
         assertThatCode { service.sjekkTilgang(ident) }
             .doesNotThrowAnyException()
@@ -53,7 +63,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `sjekkTilgang - skal kaste feil hvis bruker er kode6`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
         assertThatExceptionOfType(TilgangskontrollException::class.java)
             .isThrownBy { service.sjekkTilgang(ident) }
@@ -62,7 +72,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `sjekkTilgang - skal kaste feil hvis bruker er kode7`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.FORTROLIG))
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
         assertThatExceptionOfType(TilgangskontrollException::class.java)
             .isThrownBy { service.sjekkTilgang(ident) }
@@ -71,7 +81,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `sjekkTilgang - skal kaste feil hvis bruker er kode6 utland`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG_UTLAND))
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
         assertThatExceptionOfType(TilgangskontrollException::class.java)
             .isThrownBy { service.sjekkTilgang(ident) }
@@ -81,66 +91,66 @@ internal class TilgangskontrollServiceTest {
 
     @Test
     internal fun `hentTilgang - skal gi tilgang hvis client returnerer null`() {
-        every { pdlClientMock.hentPerson(any()) } returns null
+        every { pdlClientMock.hentPerson(any(), any()) } returns null
 
-        assertThat(service.hentTilgang(ident).harTilgang).isTrue
-        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("")
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isTrue
+        assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
     }
 
     @Test
     internal fun `hentTilgang - skal gi tilgang hvis client returnerer PdlHentPerson_pdlPerson = null`() {
         every { clientResponse.hentPerson } returns null
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-        assertThat(service.hentTilgang(ident).harTilgang).isTrue
-        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("")
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isTrue
+        assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
     }
 
     @Test
     internal fun `hentTilgang - skal gi harTilgang true hvis ingen adressebeskyttelse`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns emptyList()
         every { clientResponse.hentPerson?.navn } returns null
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-        assertThat(service.hentTilgang(ident).harTilgang).isTrue
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isTrue
     }
 
     @Test
     internal fun `hentTilgang - skal gi harTilgang false hvis adressebeskyttelse`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
         every { clientResponse.hentPerson?.navn } returns null
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-        assertThat(service.hentTilgang(ident).harTilgang).isFalse
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
     }
 
     @Test
-    internal fun `hentTilgang - skal gi første fornavn med stor forbokstav`() {
+    internal fun `hentTilgang - skal gi forste fornavn med stor forbokstav`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
         every { clientResponse.hentPerson?.navn } returns listOf(PdlNavn("KREATIV"), PdlNavn("NATA"))
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("Kreativ")
-        assertThat(service.hentTilgang(ident).harTilgang).isFalse
+        assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("Kreativ")
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
     }
 
     @Test
     internal fun `hentTilgang - skal gi fornavn som tom string om det ikke finnes`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
         every { clientResponse.hentPerson?.navn } returns null
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("")
-        assertThat(service.hentTilgang(ident).harTilgang).isFalse
+        assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
     }
 
     @Test
     internal fun `hentTilgang - skal gi fornavn som tom string om navneliste er tom`() {
         every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.FORTROLIG))
         every { clientResponse.hentPerson?.navn } returns emptyList()
-        every { pdlClientMock.hentPerson(any()) } returns clientResponse
+        every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-        assertThat(service.hentTilgang(ident).fornavn).isEqualTo("")
-        assertThat(service.hentTilgang(ident).harTilgang).isFalse
+        assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
     }
 }

@@ -1,0 +1,56 @@
+{
+  "applicationName": "sosialhjelp-innsyn-api",
+  "namespace": "teamdigisos",
+  "ingress": [
+    "https://sosialhjelp-innsyn-api.dev.nav.no/sosialhjelp/innsyn-api"
+  ],
+  "envsecret": [
+    "redis-password-innsyn-api"
+  ],
+  "outboundExternalHosts": [
+    "api.fiks.test.ks.no",
+    "test.svarut.ks.no",
+    "minside.fiks.test.ks.no",
+    "pdl-api.prod-fss-pub.nais.io",
+    "norg2.dev.intern.nav.no",
+    "oidc-ver2.difi.no",
+    "unleash.nais.io"
+  ],
+  "outboundRulesApplications": [
+    "sosialhjelp-innsyn-api-redis",
+    "sosialhjelp-dialog-api-gcp"
+  ],
+  "env": {
+    "SPRING_PROFILES_ACTIVE": "dev-gcp-q,log-kibana",
+    "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
+    "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",
+    "FIKS_SVAR_UT_ENDPOINT_URL": "https://test.svarut.ks.no",
+    "NORG_ENDPOINT_URL": "https://norg2.dev.intern.nav.no/norg2/api/v1",
+    "ID_PORTEN_TOKEN_URL": "https://oidc-ver2.difi.no/idporten-oidc-provider/token",
+    "ID_PORTEN_CONFIG_URL": "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
+    "ID_PORTEN_CLIENT_ID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
+    "ID_PORTEN_SCOPE": "ks:fiks",
+    "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
+    "CACHE_TIME_TO_LIVE_SECONDS": "10",
+    "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
+    "PDL_ENDPOINT_URL": "https://api-gw-q1.oera.no/pdl-api/graphql",
+    "UNLEASH_API_URL": "https://unleash.nais.io/api",
+    "UNLEASH_INSTANCE_ID": "dev-gcp",
+    "MELDINGER_KOMMUNENUMMER": "0301",
+    "SWAGGER_ENABLED": "true",
+    "DIALOG_ENDPOINT_URL": "https://sosialhjelp.dev.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",
+    "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api"
+  },
+  "minReplicas": "2",
+  "maxReplicas": "4",
+  "cpuLimit": "500m",
+  "memoryLimit": "2Gi",
+  "cpuRequest": "200m",
+  "memoryRequest": "1Gi",
+  "prometheusEnabled": true,
+  "webProxyEnabled": false,
+  "isGcp": true,
+  "isLabsGcp": false,
+  "vaultEnabled": false,
+  "tokenXEnabled": true
+}

@@ -22,7 +22,7 @@ class HendelseController(
 
     @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
     fun hentHendelser(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<HendelseResponse>> {
-        tilgangskontroll.sjekkTilgang()
+        tilgangskontroll.sjekkTilgang(token)
 
         val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
         return ResponseEntity.ok(hendelser)

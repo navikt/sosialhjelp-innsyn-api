@@ -14,7 +14,7 @@ interface StsClient {
     fun ping()
 }
 
-@Profile("!(mock-alt|local)")
+@Profile("!(dev-gcp-q|mock-alt|local)")
 @Component
 class StsClientImpl(
     private val stsWebClient: WebClient,

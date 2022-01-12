@@ -13,7 +13,8 @@
   ],
   "outboundRulesApplications": [
     "sosialhjelp-mock-alt-api",
-    "sosialhjelp-innsyn-api-redis"
+    "sosialhjelp-innsyn-api-redis",
+    "sosialhjelp-dialog-api-gcp"
   ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,mock-redis",

@@ -17,7 +17,8 @@
     "unleash.nais.io"
   ],
   "outboundRulesApplications": [
-    "sosialhjelp-innsyn-api-redis"
+    "sosialhjelp-innsyn-api-redis",
+    "sosialhjelp-dialog-api-gcp"
   ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "dev-gcp-q,log-kibana",

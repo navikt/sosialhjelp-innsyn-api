@@ -1,5 +1,5 @@
 {
-  "applicationName": "sosialhjelp-innsyn-api",
+  "applicationName": "sosialhjelp-innsyn-api-q",
   "namespace": "teamdigisos",
   "ingress": [
     "https://sosialhjelp-innsyn-api.dev.nav.no/sosialhjelp/innsyn-api"

@@ -98,9 +98,9 @@ class FiksClientImpl(
         requestedClass: Class<out Any>,
         token: String,
     ): Any {
-        log.debug("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
-
         val dokument: Any? = withRetry {
+            log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
+
             fiksWebClient.get()
                 .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
                 .headers { it.addAll(fiksHeaders(clientProperties, token)) }
@@ -111,11 +111,12 @@ class FiksClientImpl(
                     when {
                         e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
                         else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
+                            .also { log.warn("responsebody (uten fnr): ${e.responseBodyAsString.maskerFnr}") }
                     }
                 }
                 .block()
         }
-        log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
+        log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
         return dokument!!
             .also { lagreTilCache(dokumentlagerId, it) }
     }
@@ -165,7 +166,10 @@ class FiksClientImpl(
                 log.info("400 == ${e.rawStatusCode} -> ${e.rawStatusCode == 400}")
                 log.info("toFiksErrorMessageUtenFnr(e) = ${toFiksErrorMessageUtenFnr(e)}")
                 if (e.rawStatusCode == 400 && filErAlleredeLastetOpp(e, digisosId)) {
-                    log.warn("Fiks - Opplasting av ettersendelse er allerede på plass hos Fiks - ${messageUtenFnr(e)}", e)
+                    log.warn(
+                        "Fiks - Opplasting av ettersendelse er allerede på plass hos Fiks - ${messageUtenFnr(e)}",
+                        e
+                    )
                     FiksClientFileExistsException(e.message?.maskerFnr, e)
                 } else {
                     log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
@@ -193,7 +197,10 @@ class FiksClientImpl(
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
-            body.add("vedleggSpesifikasjon:$fileId", createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
+            body.add(
+                "vedleggSpesifikasjon:$fileId",
+                createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId")
+            )
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
         }
         return body
@@ -212,7 +219,8 @@ class FiksClientImpl(
         val builder: ContentDisposition.Builder = ContentDisposition
             .builder("form-data")
             .name(name)
-        val contentDisposition: ContentDisposition = if (filename == null) builder.build() else builder.filename(filename).build()
+        val contentDisposition: ContentDisposition =
+            if (filename == null) builder.build() else builder.filename(filename).build()
 
         headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
         headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)

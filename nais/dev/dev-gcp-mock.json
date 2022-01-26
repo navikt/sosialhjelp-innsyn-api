@@ -15,6 +15,7 @@
     "sosialhjelp-innsyn-api-redis",
     "sosialhjelp-dialog-api-gcp"
   ],
+  "fssProxyClusterName": "dev-fss",
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,mock-redis",
     "METADATA_URL": "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/well-known/selvbetjening",

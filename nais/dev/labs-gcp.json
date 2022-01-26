@@ -13,6 +13,7 @@
     "sosialhjelp-mock-alt-api",
     "sosialhjelp-innsyn-api-redis"
   ],
+  "fssProxyClusterName": "dev-fss",
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,mock-redis",
     "METADATA_URL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt-api/well-known/selvbetjening",

@@ -44,6 +44,8 @@ spec:
       {{else}}
         []
       {{/each}}
+        - application: "sosialhjelp-fss-proxy"
+          cluster: {{fssProxyClusterName}}
 {{/if}}
 {{#if isGcp}}
   filesFrom:

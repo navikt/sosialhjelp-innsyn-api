@@ -42,7 +42,8 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
             "http://localhost:3001",
             "http://localhost:3002",
             "https://digisos.labs.nais.io",
-            "https://digisos-gcp.dev.nav.no"
+            "https://digisos-gcp.dev.nav.no",
+            "https://sosialhjelp-innsyn-q.dev.nav.no"
         )
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE")
         configuration.allowedHeaders = listOf("Origin", "Content-Type", "Accept", "X-XSRF-TOKEN", "Authorization", "Nav-Call-Id")

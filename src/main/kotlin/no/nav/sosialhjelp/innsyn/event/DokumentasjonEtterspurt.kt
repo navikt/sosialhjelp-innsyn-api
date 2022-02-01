@@ -35,7 +35,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
         .toMutableList()
 
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {
-        val beskrivelse = "Vi trenger flere opplysninger"
+        val beskrivelse = "Vi trenger flere opplysninger til søknaden din."
         val url = hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
         log.info("Hendelse: Dokumentasjon etterspurt. $beskrivelse")
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, url)))

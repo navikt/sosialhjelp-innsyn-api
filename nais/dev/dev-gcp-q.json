@@ -7,6 +7,9 @@
   "envsecret": [
     "redis-password-innsyn-api"
   ],
+  "inboundRulesApplications": [
+    "sosialhjelp-login-api-q"
+  ],
   "outboundExternalHosts": [
     "api.fiks.test.ks.no",
     "test.svarut.ks.no",

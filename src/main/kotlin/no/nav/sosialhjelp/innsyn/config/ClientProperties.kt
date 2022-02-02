@@ -17,7 +17,9 @@ class ClientProperties {
     lateinit var fiksIntegrasjonpassord: String
     lateinit var fiksIntegrasjonPassordKommune: String
 
+    lateinit var norgBaseUrl: String
     lateinit var norgEndpointUrl: String
+    lateinit var norgPingUrl: String
 
     lateinit var pdlEndpointUrl: String
     lateinit var pdlAudience: String

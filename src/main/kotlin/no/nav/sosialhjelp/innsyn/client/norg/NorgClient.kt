@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.client.norg
 
 import no.nav.sosialhjelp.innsyn.common.NorgException
+import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.NAVENHET_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -26,6 +27,7 @@ interface NorgClient {
 class NorgClientImpl(
     private val norgWebClient: WebClient,
     private val redisService: RedisService,
+    private val clientProperties: ClientProperties,
 ) : NorgClient {
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
@@ -36,7 +38,7 @@ class NorgClientImpl(
         log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
 
         val navEnhet: NavEnhet? = norgWebClient.get()
-            .uri("/enhet/{enhetsnr}", enhetsnr)
+            .uri("${clientProperties.norgEndpointUrl}/{enhetsnr}", enhetsnr)
             .headers { it.addAll(headers()) }
             .retrieve()
             .bodyToMono<NavEnhet>()
@@ -58,7 +60,7 @@ class NorgClientImpl(
     // samme kall som selftest i soknad-api
     override fun ping() {
         norgWebClient.options()
-            .uri("/ping")
+            .uri(clientProperties.norgPingUrl)
             .headers { it.addAll(headers()) }
             .retrieve()
             .bodyToMono<String>()
@@ -67,17 +69,6 @@ class NorgClientImpl(
                 NorgException(e.message, e)
             }
             .block()
-
-//        norgWebClient.get()
-//            .uri("/kodeverk/EnhetstyperNorg")
-//            .headers { it.addAll(headers()) }
-//            .retrieve()
-//            .bodyToMono<String>()
-//            .onErrorMap(WebClientResponseException::class.java) { e ->
-//                log.warn("Ping - feilet mot NORG2 ${e.statusCode}", e)
-//                NorgException(e.message, e)
-//            }
-//            .block()
     }
 
     private fun headers(): HttpHeaders {

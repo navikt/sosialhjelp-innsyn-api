@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
+import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.responses.ok_navenhet
@@ -25,7 +26,8 @@ internal class NorgClientImplTest {
     private val mockWebServer = MockWebServer()
     private val webClient: WebClient = WebClient.create(mockWebServer.url("/").toString())
     private val redisService: RedisService = mockk()
-    private val norgClient = NorgClientImpl(webClient, redisService)
+    private val clientProperties: ClientProperties = mockk()
+    private val norgClient = NorgClientImpl(webClient, redisService, clientProperties)
 
     private val enhetsnr = "8888"
 
@@ -53,6 +55,7 @@ internal class NorgClientImplTest {
     @Test
     fun `skal hente fra Norg og lagre til cache hvis cache er tom`() {
         every { redisService.get(any(), NavEnhet::class.java) } returns null
+        every { clientProperties.norgEndpointUrl } returns "/enhet"
 
         mockWebServer.enqueue(
             MockResponse()

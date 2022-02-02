@@ -55,7 +55,7 @@ internal class NorgClientImplTest {
     @Test
     fun `skal hente fra Norg og lagre til cache hvis cache er tom`() {
         every { redisService.get(any(), NavEnhet::class.java) } returns null
-        every { clientProperties.norgEndpointUrl } returns "/enhet"
+        every { clientProperties.norgEndpointPath } returns "/enhet"
 
         mockWebServer.enqueue(
             MockResponse()

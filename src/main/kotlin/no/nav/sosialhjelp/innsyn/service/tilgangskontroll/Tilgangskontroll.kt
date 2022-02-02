@@ -34,16 +34,15 @@ class TilgangskontrollService(
     }
 
     override fun hentTilgang(ident: String, token: String): Tilgang {
-        val pdlPerson = hentPerson(ident, token)
-        val harTilgang = !(pdlPerson != null && pdlPerson.isKode6Or7())
-        return Tilgang(harTilgang, fornavn(pdlPerson))
+        val pdlPerson = hentPerson(ident, token) ?: return Tilgang(false, "")
+        return Tilgang(!pdlPerson.isKode6Or7(), fornavn(pdlPerson))
     }
 
     private fun hentPerson(ident: String, token: String): PdlPerson? {
         return try {
             pdlClient.hentPerson(ident, token)?.hentPerson
         } catch (e: PdlException) {
-            log.warn("PDL kaster feil -> gir midlertidig tilgang til ressurs")
+            log.warn("PDL kaster feil -> midlertidig ikke tilgang", e)
             null
         }
     }

@@ -90,19 +90,19 @@ internal class TilgangskontrollServiceTest {
     /** HentTilgang **/
 
     @Test
-    internal fun `hentTilgang - skal gi tilgang hvis client returnerer null`() {
+    internal fun `hentTilgang - skal ikke gi tilgang hvis client returnerer null`() {
         every { pdlClientMock.hentPerson(any(), any()) } returns null
 
-        assertThat(service.hentTilgang(ident, "token").harTilgang).isTrue
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
         assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
     }
 
     @Test
-    internal fun `hentTilgang - skal gi tilgang hvis client returnerer PdlHentPerson_pdlPerson = null`() {
+    internal fun `hentTilgang - skal ikke gi tilgang hvis client returnerer PdlHentPerson_pdlPerson = null`() {
         every { clientResponse.hentPerson } returns null
         every { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-        assertThat(service.hentTilgang(ident, "token").harTilgang).isTrue
+        assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
         assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
     }
 

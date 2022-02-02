@@ -14,7 +14,7 @@
     "api.fiks.test.ks.no",
     "test.svarut.ks.no",
     "minside.fiks.test.ks.no",
-    "pdl-api.prod-fss-pub.nais.io",
+    "pdl-api.dev-fss-pub.nais.io",
     "norg2.dev.intern.nav.no",
     "oidc-ver2.difi.no",
     "unleash.nais.io"
@@ -37,7 +37,8 @@
     "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
-    "PDL_ENDPOINT_URL": "https://api-gw-q1.oera.no/pdl-api/graphql",
+    "PDL_ENDPOINT_URL": "https://pdl-api.dev-fss-pub.nais.io/graphql",
+    "PDL_AUDIENCE": "dev-fss:pdl:pdl-api",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
     "UNLEASH_INSTANCE_ID": "dev-gcp",
     "MELDINGER_KOMMUNENUMMER": "0301",

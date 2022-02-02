@@ -57,7 +57,7 @@ class NorgClientImpl(
 
     // samme kall som selftest i soknad-api
     override fun ping() {
-        norgWebClient.get()
+        norgWebClient.options()
             .uri("/kodeverk/EnhetstyperNorg")
             .headers { it.addAll(headers()) }
             .retrieve()
@@ -67,6 +67,17 @@ class NorgClientImpl(
                 NorgException(e.message, e)
             }
             .block()
+
+//        norgWebClient.get()
+//            .uri("/kodeverk/EnhetstyperNorg")
+//            .headers { it.addAll(headers()) }
+//            .retrieve()
+//            .bodyToMono<String>()
+//            .onErrorMap(WebClientResponseException::class.java) { e ->
+//                log.warn("Ping - feilet mot NORG2 ${e.statusCode}", e)
+//                NorgException(e.message, e)
+//            }
+//            .block()
     }
 
     private fun headers(): HttpHeaders {

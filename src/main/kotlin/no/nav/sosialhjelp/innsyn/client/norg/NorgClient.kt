@@ -36,7 +36,7 @@ class NorgClientImpl(
         log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
 
         val navEnhet: NavEnhet? = norgWebClient.get()
-            .uri("/enhet/{enhetsnr}", enhetsnr)
+            .uri("/proxy/norg/enhet/{enhetsnr}", enhetsnr)
             .headers { it.addAll(headers()) }
             .retrieve()
             .bodyToMono<NavEnhet>()
@@ -58,7 +58,7 @@ class NorgClientImpl(
     // samme kall som selftest i soknad-api
     override fun ping() {
         norgWebClient.options()
-            .uri("/kodeverk/EnhetstyperNorg")
+            .uri("/norg/ping")
             .headers { it.addAll(headers()) }
             .retrieve()
             .bodyToMono<String>()

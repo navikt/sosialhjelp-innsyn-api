@@ -5,7 +5,9 @@
     "https://sosialhjelp-innsyn-api-q.dev.nav.no/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
-    "redis-password-innsyn-api"
+    "redis-password-innsyn-api",
+    "fiks-integrasjon-secret",
+    "fiks-kommune-integrasjon-secret"
   ],
   "inboundRulesApplications": [
     "sosialhjelp-login-api-q"

@@ -13,6 +13,7 @@
     "fiks-integrasjon-secret",
     "fiks-kommune-integrasjon-secret"
   ],
+  "virksomhetssertifikat": "virksomhetssertifikat",
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",

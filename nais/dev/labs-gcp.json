@@ -5,6 +5,7 @@
     "https://sosialhjelp-innsyn-api.labs.nais.io/sosialhjelp/innsyn-api"
   ],
   "envsecret": [],
+  "virksomhetssertifikat": "virksomhetssertifikat",
   "outboundExternalHosts": [
     "oidc-ver2.difi.no",
     "unleash.nais.io"

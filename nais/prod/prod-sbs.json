@@ -10,6 +10,7 @@
     "xsrf-secret",
     "fiks-integrasjon-secret"
   ],
+  "virksomhetssertifikat": "virksomhetssertifikat",
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss",

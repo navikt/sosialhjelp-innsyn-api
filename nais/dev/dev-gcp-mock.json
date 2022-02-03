@@ -7,6 +7,7 @@
   "envsecret": [
     "redis-password-innsyn-api"
   ],
+  "virksomhetssertifikat": "virksomhetssertifikat",
   "outboundExternalHosts": [
     "unleash.nais.io"
   ],

@@ -9,6 +9,7 @@
     "fiks-integrasjon-secret",
     "fiks-kommune-integrasjon-secret"
   ],
+  "virksomhetssertifikat": "virksomhetssertifikat-dev",
   "inboundRulesApplications": [
     "sosialhjelp-login-api-q"
   ],

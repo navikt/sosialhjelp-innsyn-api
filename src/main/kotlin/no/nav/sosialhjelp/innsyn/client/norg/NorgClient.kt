@@ -1,16 +1,21 @@
 package no.nav.sosialhjelp.innsyn.client.norg
 
+import kotlinx.coroutines.runBlocking
+import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.common.NorgException
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getToken
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.NAVENHET_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -19,7 +24,6 @@ import org.springframework.web.reactive.function.client.bodyToMono
 
 interface NorgClient {
     fun hentNavEnhet(enhetsnr: String): NavEnhet
-    fun ping()
 }
 
 @Profile("!local")
@@ -28,6 +32,7 @@ class NorgClientImpl(
     private val norgWebClient: WebClient,
     private val redisService: RedisService,
     private val clientProperties: ClientProperties,
+    private val tokendingsService: TokendingsService
 ) : NorgClient {
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
@@ -35,20 +40,24 @@ class NorgClientImpl(
     }
 
     private fun hentFraNorg(enhetsnr: String): NavEnhet {
-        log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
-
+        log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2 (via fss-proxy)")
+        val tokenXtoken = runBlocking {
+            tokendingsService.exchangeToken(getUserIdFromToken(), getToken(), clientProperties.fssProxyAudience)
+        }
         val navEnhet: NavEnhet? = norgWebClient.get()
-            .uri("${clientProperties.norgEndpointPath}/{enhetsnr}", enhetsnr)
-            .headers { it.addAll(headers()) }
+            .uri("/enhet/{enhetsnr}", enhetsnr)
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+            .header(AUTHORIZATION, BEARER + tokenXtoken)
             .retrieve()
             .bodyToMono<NavEnhet>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
+                log.warn("Noe feilet ved kall mot NORG2 (via fss-proxy) ${e.statusCode}", e)
                 NorgException(e.message, e)
             }
             .block()
 
-        log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
+        log.info("Hentet NAV-enhet $enhetsnr fra NORG2 (via fss-proxy)")
 
         return navEnhet!!
             .also { lagreTilCache(enhetsnr, it) }
@@ -56,28 +65,6 @@ class NorgClientImpl(
 
     private fun hentFraCache(enhetsnr: String): NavEnhet? =
         redisService.get(cacheKey(enhetsnr), NavEnhet::class.java) as NavEnhet?
-
-    // samme kall som selftest i soknad-api
-    override fun ping() {
-        norgWebClient.options()
-            .uri(clientProperties.norgPingPath)
-            .headers { it.addAll(headers()) }
-            .retrieve()
-            .bodyToMono<String>()
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Ping - feilet mot NORG2 ${e.statusCode}", e)
-                NorgException(e.message, e)
-            }
-            .block()
-    }
-
-    private fun headers(): HttpHeaders {
-        val headers = HttpHeaders()
-        headers.accept = listOf(MediaType.APPLICATION_JSON)
-        headers.set(IntegrationUtils.HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-        headers.set(IntegrationUtils.HEADER_NAV_APIKEY, System.getenv(NORG2_APIKEY))
-        return headers
-    }
 
     private fun lagreTilCache(enhetsnr: String, navEnhet: NavEnhet) {
         redisService.put(
@@ -92,7 +79,6 @@ class NorgClientImpl(
     companion object {
         private val log by logger()
 
-        private const val NORG2_APIKEY = "SOSIALHJELP_INNSYN_API_NORG2_APIKEY_PASSWORD"
         private const val NAVENHET_CACHE_TIMETOLIVE_SECONDS: Long = 60 * 60 // 1 time
     }
 }
@@ -119,9 +105,5 @@ class NorgClientLocal : NorgClient {
             innsynMap[enhetsnr] = default
             default
         }
-    }
-
-    override fun ping() {
-        // no-op
     }
 }

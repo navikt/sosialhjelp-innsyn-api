@@ -3,7 +3,9 @@ client:
   fiks_digisos_endpoint_url: 'http://localhost:51111'
   fiks_svar_ut_endpoint_url: 'http://localhost:52222'
   fiks_dokumentlager_endpoint_url: 'http://localhost:53333'
-  norg_endpoint_url: 'http://localhost:54444'
+  norg_proxy_url: 'http://localhost:54444'
+  fss_proxy_audience: "fss-proxy-audience"
+  fss_proxy_ping_url: 'http://localhost:54555'
   fiks_integrasjonid: "id"
   fiks_integrasjonid_kommune: "idkom"
   fiks_integrasjonpassord: "pwd"

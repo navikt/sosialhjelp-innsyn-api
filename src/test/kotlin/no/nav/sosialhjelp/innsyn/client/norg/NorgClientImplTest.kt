@@ -3,12 +3,16 @@ package no.nav.sosialhjelp.innsyn.client.norg
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
+import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -27,7 +31,8 @@ internal class NorgClientImplTest {
     private val webClient: WebClient = WebClient.create(mockWebServer.url("/").toString())
     private val redisService: RedisService = mockk()
     private val clientProperties: ClientProperties = mockk()
-    private val norgClient = NorgClientImpl(webClient, redisService, clientProperties)
+    private val tokendingsService: TokendingsService = mockk()
+    private val norgClient = NorgClientImpl(webClient, redisService, clientProperties, tokendingsService)
 
     private val enhetsnr = "8888"
 
@@ -35,8 +40,13 @@ internal class NorgClientImplTest {
     fun init() {
         clearAllMocks()
 
+        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
+
+        every { clientProperties.fssProxyAudience } returns "fssProxyAudience"
+
         every { redisService.get(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
+        coEvery { tokendingsService.exchangeToken(any(), any(), any()) } returns "tokenXtoken"
     }
 
     @Test
@@ -55,7 +65,6 @@ internal class NorgClientImplTest {
     @Test
     fun `skal hente fra Norg og lagre til cache hvis cache er tom`() {
         every { redisService.get(any(), NavEnhet::class.java) } returns null
-        every { clientProperties.norgEndpointPath } returns "/enhet"
 
         mockWebServer.enqueue(
             MockResponse()

@@ -15,6 +15,6 @@ class NorgConfig(
     fun norgWebClient(webClientBuilder: WebClient.Builder): WebClient =
         webClientBuilder
             .clientConnector(getUnproxiedReactorClientHttpConnector())
-            .baseUrl(clientProperties.norgBaseUrl)
+            .baseUrl(clientProperties.norgProxyUrl)
             .build()
 }

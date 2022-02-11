@@ -31,6 +31,13 @@ spec:
     enabled: {{tokenXEnabled}}
 {{#if isGcp}}
   accessPolicy:
+    inbound:
+      rules:
+      {{#each inboundRulesApplications}}
+        - application: "{{this}}"
+      {{else}}
+        []
+      {{/each}}
     outbound:
       external:
       {{#each outboundExternalHosts}}
@@ -44,10 +51,12 @@ spec:
       {{else}}
         []
       {{/each}}
+        - application: "sosialhjelp-fss-proxy"
+          cluster: {{fssProxyClusterName}}
 {{/if}}
 {{#if isGcp}}
   filesFrom:
-    - secret: virksomhetssertifikat
+    - secret: {{virksomhetssertifikat}}
 {{/if}}
   vault:
     enabled: {{vaultEnabled}}

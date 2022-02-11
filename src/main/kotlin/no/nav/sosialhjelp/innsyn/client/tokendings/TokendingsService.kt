@@ -17,7 +17,7 @@ import java.util.Date
 import java.util.UUID
 
 interface TokendingsService {
-    suspend fun exchangeToken(subject: String, token: String, audience: String): String
+    suspend fun exchangeToken(subject: String, rawToken: String, audience: String): String
 }
 
 @Service
@@ -35,17 +35,18 @@ class TokendingsServiceImpl internal constructor(
         RSAKey.parse(clientConfig.tokendingsPrivateJwk)
     }
 
-    override suspend fun exchangeToken(subject: String, token: String, audience: String): String {
+    override suspend fun exchangeToken(subject: String, rawToken: String, audience: String): String {
         redisService.get(TOKENDINGS_CACHE_KEY_PREFIX + "$audience$subject", (String::class.java))
             ?.let { return (it as String) }
 
+        val token = rawToken.replace("Bearer ", "")
         val jwt = createSignedAssertion(clientConfig.tokendingsClientId, tokendingsWebClient.wellKnown.tokenEndpoint, privateRsaKey)
 
         return try {
             tokendingsClient.exchangeToken(token, jwt, audience).accessToken
                 .also { lagreTilCache("$audience$subject", it) }
         } catch (e: WebClientResponseException) {
-            log.warn("Error message from server: ${e.responseBodyAsString}")
+            log.warn("Tokendings: Error message from server: ${e.responseBodyAsString}")
             throw e
         }
     }

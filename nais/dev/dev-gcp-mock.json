@@ -7,6 +7,7 @@
   "envsecret": [
     "redis-password-innsyn-api"
   ],
+  "virksomhetssertifikat": "virksomhetssertifikat",
   "outboundExternalHosts": [
     "unleash.nais.io"
   ],
@@ -15,6 +16,7 @@
     "sosialhjelp-innsyn-api-redis",
     "sosialhjelp-dialog-api-gcp"
   ],
+  "fssProxyClusterName": "dev-fss",
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,mock-redis",
     "METADATA_URL": "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/well-known/selvbetjening",
@@ -30,7 +32,8 @@
     "ID_PORTEN_SCOPE" : "ks:fiks",
     "ID_PORTEN_CONFIG_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/idporten",
     "AZUREAD_LOGINURL": "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt/login",
-    "NORG_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/norg_endpoint_url",
+    "NORG_PROXY_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/norg_endpoint_url",
+    "FSS_PROXY_PING_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fss-proxy/ping",
     "PDL_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/pdl_endpoint_url",
     "PDL_AUDIENCE": "dev-fss:pdl:pdl-api",
     "STS_TOKEN_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/sts_token_endpoint_url/token",

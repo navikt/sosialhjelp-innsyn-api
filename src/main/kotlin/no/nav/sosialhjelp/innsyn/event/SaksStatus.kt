@@ -34,6 +34,11 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                 val tittel = sakForReferanse.tittel ?: "saken din"
                 historikk.add(Hendelse("Vi kan ikke vise status på søknaden din om $tittel på nav.no.", hendelse.hendelsestidspunkt.toLocalDateTime()))
             }
+            if (sakForReferanse.saksStatus == SaksStatus.UNDER_BEHANDLING &&
+                (prevStatus == SaksStatus.IKKE_INNSYN || prevStatus == SaksStatus.BEHANDLES_IKKE)
+            ) {
+                log.info("Sak har gått fra status ${prevStatus.name} til status ${SaksStatus.UNDER_BEHANDLING.name}.")
+            }
         }
     } else {
         // Opprett ny Sak

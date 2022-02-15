@@ -225,7 +225,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.tittel).isEqualTo("Vi kan ikke vise behandlingsstatus for din søknad på nett.")
+        assertThat(hendelse.tittel).isEqualTo("Vi kan ikke vise status for søknaden din på nav.no.")
     }
 
     @Test

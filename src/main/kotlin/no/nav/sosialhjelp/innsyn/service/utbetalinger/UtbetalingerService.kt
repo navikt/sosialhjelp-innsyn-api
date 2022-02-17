@@ -29,8 +29,15 @@ class UtbetalingerService(
     private val eventService: EventService,
     private val fiksClient: FiksClient
 ) {
+    fun hentAlleUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
+        return hentUtbetalingerMedFilter(token, months) { true }
+    }
 
-    fun hentUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
+    fun hentUtbetalteUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
+        return hentUtbetalingerMedFilter(token, months) { status -> status == UtbetalingsStatus.UTBETALT }
+    }
+
+    private fun hentUtbetalingerMedFilter(token: String, months: Int, statusFilter: (status: UtbetalingsStatus) -> Boolean): List<UtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
         if (digisosSaker.isEmpty()) {
@@ -45,7 +52,7 @@ class UtbetalingerService(
                 .filter { isDigisosSakNewerThanMonths(it, months) }
                 .flatMapParallel {
                     setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it)
+                    manedsutbetalinger(token, it, statusFilter)
                 }
         }
 
@@ -62,10 +69,10 @@ class UtbetalingerService(
             }
     }
 
-    private suspend fun manedsutbetalinger(token: String, digisosSak: DigisosSak): List<ManedUtbetaling> {
+    private suspend fun manedsutbetalinger(token: String, digisosSak: DigisosSak, statusFilter: (status: UtbetalingsStatus) -> Boolean): List<ManedUtbetaling> {
         val model = eventService.hentAlleUtbetalinger(token, digisosSak)
         return model.utbetalinger
-            .filter { it.utbetalingsDato != null && it.status == UtbetalingsStatus.UTBETALT }
+            .filter { it.utbetalingsDato != null && statusFilter(it.status) }
             .map { utbetaling ->
                 utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(digisosSak.kommunenummer)
                 ManedUtbetaling(

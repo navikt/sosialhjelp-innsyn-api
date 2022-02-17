@@ -28,7 +28,22 @@ class UtbetalingerController(
         tilgangskontroll.sjekkTilgang(token)
 
         try {
-            return ResponseEntity.ok().body(utbetalingerService.hentUtbetalinger(token, month))
+            return ResponseEntity.ok().body(utbetalingerService.hentUtbetalteUtbetalinger(token, month))
+        } catch (e: FiksClientException) {
+            if (e.status == HttpStatus.FORBIDDEN.value()) {
+                log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            }
+            throw e
+        }
+    }
+
+    @GetMapping("/alle-utbetalinger")
+    fun hentAlleUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
+        tilgangskontroll.sjekkTilgang(token)
+
+        try {
+            return ResponseEntity.ok().body(utbetalingerService.hentAlleUtbetalinger(token, month))
         } catch (e: FiksClientException) {
             if (e.status == HttpStatus.FORBIDDEN.value()) {
                 log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)

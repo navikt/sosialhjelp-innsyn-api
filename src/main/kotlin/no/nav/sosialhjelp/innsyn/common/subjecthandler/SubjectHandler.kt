@@ -28,7 +28,9 @@ class AzureAdSubjectHandlerImpl(
         }
 
     override fun getUserIdFromToken(): String {
-        return tokenValidationContext.getClaims(ISSUER).subject
+        val pid: String? = tokenValidationContext.getClaims(ISSUER).getStringClaim(PID)
+        val sub: String? = tokenValidationContext.getClaims(ISSUER).subject
+        return pid ?: sub ?: throw RuntimeException("Could not find any userId for token in pid or sub claim")
     }
 
     override fun getToken(): String {
@@ -41,6 +43,7 @@ class AzureAdSubjectHandlerImpl(
 
     companion object {
         private const val ISSUER = "selvbetjening"
+        private const val PID = "pid"
         private val log by logger()
     }
 }

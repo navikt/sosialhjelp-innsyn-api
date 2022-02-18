@@ -154,7 +154,7 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere emptyList hvis soker ikke har noen digisosSaker`() {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
 
-        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
         assertThat(response).isEmpty()
     }
@@ -185,7 +185,7 @@ internal class UtbetalingerServiceTest {
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
-        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
         assertThat(response).isNotEmpty
         assertThat(response).hasSize(1)
@@ -215,7 +215,7 @@ internal class UtbetalingerServiceTest {
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
-        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
@@ -244,7 +244,7 @@ internal class UtbetalingerServiceTest {
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
-        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(2)
@@ -296,7 +296,7 @@ internal class UtbetalingerServiceTest {
         every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
-        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
@@ -335,7 +335,7 @@ internal class UtbetalingerServiceTest {
         every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
-        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
@@ -373,7 +373,7 @@ internal class UtbetalingerServiceTest {
         coEvery { eventService.hentAlleUtbetalinger(token, mockDigisosSak2) } returns model2
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak, mockDigisosSak2)
 
-        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
         assertThat(response).isNotEmpty
         assertThat(response).hasSize(2)
@@ -410,7 +410,7 @@ internal class UtbetalingerServiceTest {
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
-        val response: List<UtbetalingerResponse> = service.hentUtbetalinger(token, 6)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
         assertThat(response).isNotEmpty
         assertThat(response).hasSize(1)
@@ -464,5 +464,108 @@ internal class UtbetalingerServiceTest {
         assertThat(model.utbetalinger).isNotEmpty
         assertThat(model.utbetalinger).hasSize(1)
         assertThat(model.utbetalinger[0].kontonummer).isNull()
+    }
+
+    @Test
+    fun `Hent utbetalinger skal kun returnere status UTBETALT`() {
+        val model = InternalDigisosSoker()
+        model.utbetalinger = mutableListOf(
+            Utbetaling(
+                referanse = "Sak1",
+                status = UtbetalingsStatus.UTBETALT,
+                belop = BigDecimal.TEN,
+                beskrivelse = "Nødhjelp",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.of(2019, 8, 10),
+                fom = LocalDate.of(2019, 8, 1),
+                tom = LocalDate.of(2019, 8, 31),
+                mottaker = "utleier",
+                kontonummer = "kontonr",
+                utbetalingsmetode = "utbetalingsmetode",
+                annenMottaker = false,
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = LocalDateTime.now()
+            ),
+            Utbetaling(
+                referanse = "Sak1",
+                status = UtbetalingsStatus.PLANLAGT_UTBETALING,
+                belop = BigDecimal.TEN,
+                beskrivelse = "Nødhjelp",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.of(2019, 9, 10),
+                fom = LocalDate.of(2019, 8, 1),
+                tom = LocalDate.of(2019, 8, 31),
+                mottaker = "utleier",
+                kontonummer = "kontonr",
+                utbetalingsmetode = "utbetalingsmetode",
+                annenMottaker = false,
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = LocalDateTime.now()
+            )
+        )
+
+        coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 12)
+
+        assertThat(response).isNotEmpty
+        assertThat(response).hasSize(1)
+        assertThat(response[0].utbetalinger).hasSize(1)
+        assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT.name)
+    }
+
+    @Test
+    fun `Hent utbetalinger for sak skal returnere utbetalinger med alle statuser`() {
+        val model = InternalDigisosSoker()
+        model.utbetalinger = mutableListOf(
+            Utbetaling(
+                referanse = "Sak1",
+                status = UtbetalingsStatus.UTBETALT,
+                belop = BigDecimal.TEN,
+                beskrivelse = "Nødhjelp",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.of(2019, 8, 10),
+                fom = LocalDate.of(2019, 8, 1),
+                tom = LocalDate.of(2019, 8, 31),
+                mottaker = "utleier",
+                kontonummer = "kontonr",
+                utbetalingsmetode = "utbetalingsmetode",
+                annenMottaker = false,
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = LocalDateTime.now()
+            ),
+            Utbetaling(
+                referanse = "Sak1",
+                status = UtbetalingsStatus.PLANLAGT_UTBETALING,
+                belop = BigDecimal.TEN,
+                beskrivelse = "Nødhjelp",
+                forfallsDato = null,
+                utbetalingsDato = LocalDate.of(2019, 9, 10),
+                fom = LocalDate.of(2019, 8, 1),
+                tom = LocalDate.of(2019, 8, 31),
+                mottaker = "utleier",
+                kontonummer = "kontonr",
+                utbetalingsmetode = "utbetalingsmetode",
+                annenMottaker = false,
+                vilkar = mutableListOf(),
+                dokumentasjonkrav = mutableListOf(),
+                datoHendelse = LocalDateTime.now()
+            )
+        )
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
+        coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+
+        val response: List<UtbetalingerResponse> = service.hentUtbetalingerForSak("fiksdigisosId", token)
+
+        assertThat(response).isNotEmpty
+        assertThat(response).hasSize(2)
+        assertThat(response[0].utbetalinger).hasSize(1)
+        assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.PLANLAGT_UTBETALING.name)
+        assertThat(response[1].utbetalinger).hasSize(1)
+        assertThat(response[1].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT.name)
     }
 }

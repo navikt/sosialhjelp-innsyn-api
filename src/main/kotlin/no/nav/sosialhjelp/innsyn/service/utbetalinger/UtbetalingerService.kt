@@ -29,15 +29,13 @@ class UtbetalingerService(
     private val eventService: EventService,
     private val fiksClient: FiksClient
 ) {
-    fun hentAlleUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
-        return hentUtbetalingerMedFilter(token, months) { true }
+
+    fun hentUtbetalingerForSak(fiksDigisosId: String, token: String): List<UtbetalingerResponse> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        return toUtbetalingerResponse(manedsutbetalinger(token, digisosSak) { true })
     }
 
     fun hentUtbetalteUtbetalinger(token: String, months: Int): List<UtbetalingerResponse> {
-        return hentUtbetalingerMedFilter(token, months) { status -> status == UtbetalingsStatus.UTBETALT }
-    }
-
-    private fun hentUtbetalingerMedFilter(token: String, months: Int, statusFilter: (status: UtbetalingsStatus) -> Boolean): List<UtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
         if (digisosSaker.isEmpty()) {
@@ -52,24 +50,25 @@ class UtbetalingerService(
                 .filter { isDigisosSakNewerThanMonths(it, months) }
                 .flatMapParallel {
                     setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it, statusFilter)
+                    manedsutbetalinger(token, it) { status -> status == UtbetalingsStatus.UTBETALT }
                 }
         }
-
-        return alleUtbetalinger
-            .sortedByDescending { it.utbetalingsdato }
-            .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
-            .map { (key, value) ->
-                UtbetalingerResponse(
-                    ar = key.year,
-                    maned = monthToString(key.monthValue),
-                    foersteIManeden = foersteIManeden(key),
-                    utbetalinger = value.sortedByDescending { it.utbetalingsdato }
-                )
-            }
+        return toUtbetalingerResponse(alleUtbetalinger)
     }
 
-    private suspend fun manedsutbetalinger(token: String, digisosSak: DigisosSak, statusFilter: (status: UtbetalingsStatus) -> Boolean): List<ManedUtbetaling> {
+    private fun toUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) = manedUtbetalinger
+        .sortedByDescending { it.utbetalingsdato }
+        .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+        .map { (key, value) ->
+            UtbetalingerResponse(
+                ar = key.year,
+                maned = monthToString(key.monthValue),
+                foersteIManeden = foersteIManeden(key),
+                utbetalinger = value.sortedByDescending { it.utbetalingsdato }
+            )
+        }
+
+    private fun manedsutbetalinger(token: String, digisosSak: DigisosSak, statusFilter: (status: UtbetalingsStatus) -> Boolean): List<ManedUtbetaling> {
         val model = eventService.hentAlleUtbetalinger(token, digisosSak)
         return model.utbetalinger
             .filter { it.utbetalingsDato != null && statusFilter(it.status) }

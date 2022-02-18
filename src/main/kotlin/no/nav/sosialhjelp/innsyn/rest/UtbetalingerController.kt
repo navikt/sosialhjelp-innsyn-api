@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -38,12 +39,12 @@ class UtbetalingerController(
         }
     }
 
-    @GetMapping("/alle-utbetalinger")
-    fun hentAlleUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
+    @GetMapping("/{fiksDigisosId}/utbetalinger")
+    fun hentUtbetalingerForSak(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<UtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {
-            return ResponseEntity.ok().body(utbetalingerService.hentAlleUtbetalinger(token, month))
+            return ResponseEntity.ok().body(utbetalingerService.hentUtbetalingerForSak(fiksDigisosId, token))
         } catch (e: FiksClientException) {
             if (e.status == HttpStatus.FORBIDDEN.value()) {
                 log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)

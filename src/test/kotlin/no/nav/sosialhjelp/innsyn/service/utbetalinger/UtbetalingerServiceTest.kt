@@ -518,7 +518,7 @@ internal class UtbetalingerServiceTest {
     }
 
     @Test
-    fun `Hent alle utbetalinger skal returnere utbetalinger med alle statuser`() {
+    fun `Hent utbetalinger for sak skal returnere utbetalinger med alle statuser`() {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(
             Utbetaling(
@@ -556,11 +556,10 @@ internal class UtbetalingerServiceTest {
                 datoHendelse = LocalDateTime.now()
             )
         )
-
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
 
-        val response: List<UtbetalingerResponse> = service.hentAlleUtbetalinger(token, 12)
+        val response: List<UtbetalingerResponse> = service.hentUtbetalingerForSak("fiksdigisosId", token)
 
         assertThat(response).isNotEmpty
         assertThat(response).hasSize(2)

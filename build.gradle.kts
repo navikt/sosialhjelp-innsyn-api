@@ -78,6 +78,7 @@ configurations {
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+        exclude(group = "junit", module = "junit")
         exclude(group = "org.mockito", module = "mockito-core")
     }
 }

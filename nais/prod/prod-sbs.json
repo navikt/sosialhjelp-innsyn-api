@@ -12,8 +12,7 @@
   ],
   "virksomhetssertifikat": "virksomhetssertifikat",
   "kvPaths": {
-    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",
-    "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss",
+    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten"
   },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.ks.no",

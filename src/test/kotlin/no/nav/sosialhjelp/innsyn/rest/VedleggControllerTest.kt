@@ -35,7 +35,8 @@ internal class VedleggControllerTest {
     private val tilgangskontroll: Tilgangskontroll = mockk()
     private val xsrfGenerator: XsrfGenerator = mockk()
 
-    private val controller = VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontroll, xsrfGenerator)
+    private val controller =
+        VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontroll, xsrfGenerator)
 
     private val id = "123"
 
@@ -47,13 +48,15 @@ internal class VedleggControllerTest {
     private val dokumentlagerId = "id1"
     private val dokumentlagerId2 = "id2"
 
-    private val metadataJson = """[{
-  "type": "brukskonto",
-  "tilleggsinfo": "kontoutskrift",
-  "filer": [{
-    "filnavn": "test.jpg"
+    private val metadataJson = """
+[{
+    "type": "brukskonto",
+    "tilleggsinfo": "kontoutskrift",
+    "filer": [{
+        "filnavn": "test.jpg"
     }]
-  }]"""
+}]
+    """
 
     @BeforeEach
     internal fun setUp() {

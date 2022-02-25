@@ -14,8 +14,6 @@
   "kvPaths": {
     "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/prod/maskinporten",
     "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/prod/srvsosial-inn-fss",
-    "/apigw/securitytokenservicetoken": "/apikey/apigw/prod/security-token-service-token/sosialhjelp-innsyn-api",
-    "/apigw/pdl-api": "/apikey/apigw/prod/pdl-api/sosialhjelp-innsyn-api"
   },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.ks.no",
@@ -32,8 +30,8 @@
     "CACHE_TIME_TO_LIVE_SECONDS": "180",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local",
     "SPRING_PROFILES_ACTIVE": "prod-sbs,log-kibana",
-    "PDL_ENDPOINT_URL": "https://api-gw.oera.no/pdl-api/graphql",
-    "STS_TOKEN_ENDPOINT_URL": "https://api-gw.oera.no/security-token-service/rest/v1/sts/token",
+    "PDL_ENDPOINT_URL": "https://pdl-api.prod-fss-pub.nais.io/graphql",
+    "PDL_AUDIENCE": "prod-fss:pdl:pdl-api",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
     "UNLEASH_INSTANCE_ID": "prod-sbs",
     "MELDINGER_KOMMUNENUMMER": "3403",

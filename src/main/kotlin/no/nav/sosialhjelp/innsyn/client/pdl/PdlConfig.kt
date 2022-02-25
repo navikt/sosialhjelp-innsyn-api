@@ -4,11 +4,8 @@ import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.unproxiedHttpClient
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -20,8 +17,6 @@ class PdlConfig(
     fun pdlWebClient(webClientBuilder: WebClient.Builder): WebClient =
         webClientBuilder
             .baseUrl(clientProperties.pdlEndpointUrl)
-            .defaultHeader(IntegrationUtils.HEADER_NAV_APIKEY, System.getenv(PDL_APIKEY))
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .clientConnector(
                 ReactorClientHttpConnector(
                     unproxiedHttpClient()
@@ -30,8 +25,4 @@ class PdlConfig(
                 )
             )
             .build()
-
-    companion object {
-        private const val PDL_APIKEY: String = "SOSIALHJELP_INNSYN_API_PDL_APIKEY_PASSWORD"
-    }
 }

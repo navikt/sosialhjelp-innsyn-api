@@ -39,6 +39,7 @@ object Versions {
 
     //    Test only
     const val junitJupiter = "5.8.2"
+    const val junit = "4.13.2"
     const val mockk = "1.12.2"
     const val mockwebserver = "5.0.0-alpha.2"
 }
@@ -78,7 +79,6 @@ configurations {
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-        exclude(group = "junit", module = "junit")
         exclude(group = "org.mockito", module = "mockito-core")
     }
 }
@@ -174,6 +174,10 @@ dependencies {
         }
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${Versions.log4j}") {
             because("0-day exploit i version 2.0.0-2.14.1")
+        }
+
+        testImplementation("junit:junit:${Versions.junit}") {
+            because("Snyk ønsker 4.13.1 eller høyere")
         }
     }
 }

@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.netty.http.client.HttpClient
 
-@Profile("!mock-alt")
+@Profile("!(mock-alt|test)")
 @Configuration
 class IdPortenClientConfig(
     @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String,
@@ -44,7 +44,7 @@ class IdPortenClientConfig(
     }
 }
 
-@Profile("mock-alt")
+@Profile("(mock-alt|test)")
 @Configuration
 class IdPortenClientConfigMockAlt(
     @Value("\${no.nav.sosialhjelp.idporten.token_url}") private val tokenUrl: String

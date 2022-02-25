@@ -6,51 +6,51 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val coroutines = "1.5.2"
-    const val springBoot = "2.6.2"
-    const val sosialhjelpCommon = "1.a98af5f"
-    const val logback = "1.2.7"
-    const val logstash = "6.6"
-    const val filformat = "1.2021.08.27-10.29-41cf5ce1230a"
-    const val micrometerRegistry = "1.8.0"
-    const val prometheus = "0.12.0"
-    const val tokenValidation = "1.3.9"
+    const val coroutines = "1.6.0"
+    const val springBoot = "2.6.3"
+    const val sosialhjelpCommon = "1.4204e7e"
+    const val logback = "1.2.10"
+    const val logstash = "7.0.1"
+    const val filformat = "1.2022.01.30-13.18-01cd95216e0b"
+    const val micrometerRegistry = "1.8.3"
+    const val prometheus = "0.15.0"
+    const val tokenValidation = "1.3.19"
     const val jackson = "2.13.1"
-    const val guava = "30.1.1-jre"
+    const val guava = "31.0.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.8.0"
     const val fileUpload = "1.4"
-    const val tika = "1.25"
+    const val tika = "2.3.0"
     const val pdfBox = "2.0.24"
-    const val fiksKryptering = "1.1.1"
-    const val lettuce = "6.1.5.RELEASE"
+    const val fiksKryptering = "1.1.2"
+    const val lettuce = "6.1.6.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
-    const val springdoc = "1.6.0"
+    const val springdoc = "1.6.6"
     const val jsonSmart = "2.4.7"
-    const val gson = "2.8.9"
+    const val gson = "2.9.0"
     const val log4j = "2.17.1"
 
-    const val javaJwt = "3.18.2"
-    const val jwksRsa = "0.17.0"
-    const val nimbus = "9.15.1"
+    const val javaJwt = "3.18.3"
+    const val jwksRsa = "0.20.2"
+    const val nimbus = "9.20"
+
+    const val ktlint = "0.44.0"
 
     //    Test only
-    const val junitJupiter = "5.8.1"
-    const val mockk = "1.12.1"
-    const val springmockk = "3.0.1"
+    const val junitJupiter = "5.8.2"
+    const val mockk = "1.12.2"
     const val mockwebserver = "5.0.0-alpha.2"
 }
 
 plugins {
     application
-    kotlin("jvm") version "1.6.0"
+    kotlin("jvm") version "1.6.10"
 
-    id("org.jetbrains.kotlin.plugin.spring") version "1.6.0"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("com.github.ben-manes.versions") version "0.39.0"
-    id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
+    id("org.jetbrains.kotlin.plugin.spring") version "1.6.10"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.ben-manes.versions") version "0.42.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
 }
 
 application {
@@ -64,7 +64,7 @@ java {
 }
 
 ktlint {
-    this.version.set("0.42.1")
+    this.version.set(Versions.ktlint)
 }
 
 configurations {
@@ -156,7 +156,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
     implementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("no.nav.security:token-validation-spring-test:${Versions.tokenValidation}")
-    testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:${Versions.mockwebserver}")
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk

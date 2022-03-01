@@ -6,6 +6,7 @@ import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
@@ -59,7 +60,7 @@ class PdlClientImpl(
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
                         .header(HEADER_TEMA, TEMA_KOM)
-                        .header(AUTHORIZATION, tokenXtoken(ident, token))
+                        .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
                         .bodyValue(PdlRequest(query, Variables(ident)))
                         .retrieve()
                         .awaitBody<PdlPersonResponse>()

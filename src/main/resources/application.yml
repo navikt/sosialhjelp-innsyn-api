@@ -52,8 +52,7 @@ client:
   fss_proxy_audience: ${FSS_PROXY_AUDIENCE}
   fss_proxy_ping_url: ${FSS_PROXY_PING_URL}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL}
-  pdl_audience: ${PDL_AUDIENCE:dev-fss:pdl:pdl-api}
-  sts_token_endpoint_url: ${STS_TOKEN_ENDPOINT_URL}
+  pdl_audience: ${PDL_AUDIENCE}
   unleash_url: ${UNLEASH_API_URL}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID}
   meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER}

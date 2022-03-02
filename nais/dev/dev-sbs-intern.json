@@ -15,10 +15,7 @@
   ],
   "virksomhetssertifikat": "virksomhetssertifikat",
   "kvPaths": {
-    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared",
-    "/serviceuser/srvsosial-inn-fss": "/serviceuser/data/dev/srvsosial-inn-fss",
-    "/apigw/securitytokenservicetoken": "/apikey/apigw/dev/security-token-service-token/sosialhjelp-innsyn-api_q1",
-    "/apigw/pdl-api": "/apikey/apigw/dev/pdl-api/sosialhjelp-innsyn-api_q1"
+    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared"
   },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
@@ -35,8 +32,8 @@
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local",
     "SPRING_PROFILES_ACTIVE": "dev-sbs,log-kibana",
-    "PDL_ENDPOINT_URL": "https://api-gw-q1.oera.no/pdl-api/graphql",
-    "STS_TOKEN_ENDPOINT_URL": "https://api-gw-q1.oera.no/security-token-service/rest/v1/sts/token",
+    "PDL_ENDPOINT_URL": "https://pdl-api.dev-fss-pub.nais.io/graphql",
+    "PDL_AUDIENCE": "dev-fss:pdl:pdl-api",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
     "UNLEASH_INSTANCE_ID": "dev-sbs-intern",
     "MELDINGER_KOMMUNENUMMER": "0301",

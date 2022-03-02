@@ -1,14 +1,22 @@
 package no.nav.sosialhjelp.innsyn.client.pdl
 
 import kotlinx.coroutines.runBlocking
+import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.common.PdlException
+import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -26,7 +34,8 @@ interface PdlClient {
 @Component
 class PdlClientImpl(
     private val pdlWebClient: WebClient,
-    private val pdlHeadersService: PdlHeadersService,
+    private val clientProperties: ClientProperties,
+    private val tokendingsService: TokendingsService,
     private val redisService: RedisService,
 ) : PdlClient {
 
@@ -48,7 +57,10 @@ class PdlClientImpl(
                     retryableExceptions = arrayOf(WebClientResponseException::class)
                 ) {
                     pdlWebClient.post()
-                        .headers { it.addAll(headers(ident, token)) }
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                        .header(HEADER_TEMA, TEMA_KOM)
+                        .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
                         .bodyValue(PdlRequest(query, Variables(ident)))
                         .retrieve()
                         .awaitBody<PdlPersonResponse>()
@@ -65,6 +77,9 @@ class PdlClientImpl(
         }
     }
 
+    private suspend fun tokenXtoken(ident: String, token: String) =
+        tokendingsService.exchangeToken(ident, token, clientProperties.pdlAudience)
+
     override fun ping() {
         pdlWebClient.options()
             .retrieve()
@@ -77,10 +92,6 @@ class PdlClientImpl(
     private fun getQuery(): String =
         this.javaClass.getResource("/pdl/hentPerson.graphql")?.readText()?.replace("[\n\r]", "")
             ?: throw RuntimeException("Feil ved lesing av graphql-spørring fra fil")
-
-    private fun headers(ident: String, token: String): HttpHeaders {
-        return pdlHeadersService.getHeaders(ident, token)
-    }
 
     private fun checkForPdlApiErrors(response: PdlPersonResponse?) {
         Optional.ofNullable(response)

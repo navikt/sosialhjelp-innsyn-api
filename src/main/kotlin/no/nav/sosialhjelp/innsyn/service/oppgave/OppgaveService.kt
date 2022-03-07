@@ -96,7 +96,8 @@ class OppgaveService(
                     it.referanse,
                     tittel,
                     beskrivelse,
-                    it.getOppgaveStatus()
+                    it.getOppgaveStatus(),
+                    it.utbetalingsReferanse
                 )
             }
             .sortedBy { it.hendelsetidspunkt }
@@ -135,6 +136,7 @@ class OppgaveService(
                 DokumentasjonkravResponse(
                     dokumentasjonkravId = value[0].dokumentasjonkravId,
                     frist = key,
+                    utbetalingsReferanse = value[0].utbetalingsReferanse,
                     dokumentasjonkravElementer = value.map {
                         val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
                         DokumentasjonkravElement(
@@ -143,7 +145,7 @@ class OppgaveService(
                             it.referanse,
                             tittel,
                             beskrivelse,
-                            it.getOppgaveStatus()
+                            it.getOppgaveStatus(),
                         )
                     }
                 )

@@ -56,14 +56,16 @@ data class VilkarResponse(
     val vilkarReferanse: String,
     val tittel: String?,
     val beskrivelse: String?,
-    val status: Oppgavestatus
+    val status: Oppgavestatus,
+    val utbetalingsReferanse: List<String>?
 )
 
 data class DokumentasjonkravResponse(
     val dokumentasjonkravElementer: List<DokumentasjonkravElement>,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val frist: LocalDate?,
-    val dokumentasjonkravId: String
+    val dokumentasjonkravId: String,
+    val utbetalingsReferanse: List<String>?
 )
 
 data class DokumentasjonkravElement(

@@ -97,6 +97,7 @@ sealed class Oppgavehendelse {
     abstract var tittel: String?
     abstract var beskrivelse: String?
     abstract var status: Oppgavestatus
+    abstract var utbetalingsReferanse: List<String>?
 
     fun getTittelOgBeskrivelse(): Pair<String?, String?> {
         if (tittel.isNullOrBlank()) {
@@ -118,8 +119,9 @@ data class Vilkar(
     override var tittel: String?,
     override var beskrivelse: String?,
     override var status: Oppgavestatus,
+    override var utbetalingsReferanse: List<String>?,
     var datoLagtTil: LocalDateTime,
-    var datoSistEndret: LocalDateTime,
+    var datoSistEndret: LocalDateTime
 ) : Oppgavehendelse()
 
 data class Dokumentasjonkrav(
@@ -129,6 +131,7 @@ data class Dokumentasjonkrav(
     override var tittel: String?,
     override var beskrivelse: String?,
     override var status: Oppgavestatus,
+    override var utbetalingsReferanse: List<String>?,
     var datoLagtTil: LocalDateTime,
     var frist: LocalDate?,
 ) : Oppgavehendelse()

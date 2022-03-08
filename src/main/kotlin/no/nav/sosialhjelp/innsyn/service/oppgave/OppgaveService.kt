@@ -136,7 +136,6 @@ class OppgaveService(
                 DokumentasjonkravResponse(
                     dokumentasjonkravId = value[0].dokumentasjonkravId,
                     frist = key,
-                    utbetalingsReferanse = value[0].utbetalingsReferanse,
                     dokumentasjonkravElementer = value.map {
                         val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
                         DokumentasjonkravElement(
@@ -146,6 +145,7 @@ class OppgaveService(
                             tittel,
                             beskrivelse,
                             it.getOppgaveStatus(),
+                            utbetalingsReferanse = it.utbetalingsReferanse
                         )
                     }
                 )

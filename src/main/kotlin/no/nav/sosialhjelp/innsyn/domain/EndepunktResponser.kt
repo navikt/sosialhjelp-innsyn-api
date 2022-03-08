@@ -65,7 +65,6 @@ data class DokumentasjonkravResponse(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val frist: LocalDate?,
     val dokumentasjonkravId: String,
-    val utbetalingsReferanse: List<String>?
 )
 
 data class DokumentasjonkravElement(
@@ -75,7 +74,8 @@ data class DokumentasjonkravElement(
     val dokumentasjonkravReferanse: String, // hendelsereferanse
     val tittel: String?,
     val beskrivelse: String?,
-    val status: Oppgavestatus
+    val status: Oppgavestatus,
+    val utbetalingsReferanse: List<String>?
 )
 
 data class UtbetalingerResponse(

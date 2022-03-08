@@ -14,7 +14,7 @@
   "outboundRulesApplications": [
     "sosialhjelp-mock-alt-api-mock",
     "sosialhjelp-innsyn-api-redis",
-    "sosialhjelp-dialog-api-gcp"
+    "sosialhjelp-dialog-api-mock"
   ],
   "fssProxyClusterName": "dev-fss",
   "env": {

@@ -102,7 +102,8 @@ data class ManedUtbetaling(
     val mottaker: String?,
     val annenMottaker: Boolean,
     val kontonummer: String?,
-    val utbetalingsmetode: String?
+    val utbetalingsmetode: String?,
+    val utbetlingsreferanse: String?
 )
 
 data class VedleggResponse(

@@ -24,7 +24,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
         beskrivelse = hendelse.beskrivelse,
         status = Oppgavestatus.valueOf(hendelse.status.value()),
         datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
-        frist = hendelse.frist?.toLocalDateTime()?.toLocalDate()
+        frist = hendelse.frist?.toLocalDateTime()?.toLocalDate(),
+        utbetalingsReferanse = hendelse.utbetalingsreferanse
     )
 
     this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav)

@@ -199,9 +199,9 @@ internal class OppgaveServiceTest {
         val beskrivelse = "mer vilkarer2"
         model.vilkar.addAll(
             listOf(
-                Vilkar("vilkar1", tittel, "mer vilkarer1", Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar2", null, beskrivelse, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now())
+                Vilkar("vilkar1", tittel, "mer vilkarer1", Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", null, beskrivelse, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now())
             )
         )
         every { eventService.createModel(any(), any()) } returns model
@@ -223,8 +223,8 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.vilkar.addAll(
             listOf(
-                Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar2", "tittel", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, null, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
             )
         )
         every { eventService.createModel(any(), any()) } returns model
@@ -249,6 +249,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     null,
                     Oppgavestatus.ANNULLERT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now()
                 ),
@@ -259,6 +260,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     null,
                     Oppgavestatus.LEVERT_TIDLIGERE,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now()
                 ),
@@ -269,6 +271,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     null,
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now()
                 )
@@ -297,6 +300,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "beskrivelse1",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now()
                 ),
@@ -307,6 +311,7 @@ internal class OppgaveServiceTest {
                     null,
                     "beskrivelse2",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now()
                 ),
@@ -317,6 +322,7 @@ internal class OppgaveServiceTest {
                     "",
                     null,
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now()
                 ),
@@ -327,6 +333,7 @@ internal class OppgaveServiceTest {
                     null,
                     " ",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now()
                 )
@@ -358,6 +365,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "beskrivelse1",
                     Oppgavestatus.OPPFYLT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now()
                 ),
@@ -368,6 +376,7 @@ internal class OppgaveServiceTest {
                     null,
                     "beskrivelse2",
                     Oppgavestatus.IKKE_OPPFYLT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now(),
                 ),
@@ -378,6 +387,7 @@ internal class OppgaveServiceTest {
                     null,
                     "beskrivelse",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     LocalDate.now(),
                 )
@@ -399,9 +409,9 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.vilkar.addAll(
             listOf(
-                Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar2", "tittel", null, Oppgavestatus.IKKE_OPPFYLT, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar3", "tittel", null, Oppgavestatus.RELEVANT, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar2", "tittel", null, Oppgavestatus.IKKE_OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now()),
+                Vilkar("vilkar3", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
 
             )
         )
@@ -429,6 +439,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     frist2.toLocalDate()
                 ),
@@ -439,6 +450,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     frist2.toLocalDate()
                 ),
@@ -449,6 +461,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     frist.toLocalDate()
                 ),
@@ -459,6 +472,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     frist3.toLocalDate()
                 ),
@@ -497,6 +511,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     frist.toLocalDate()
                 ),
@@ -507,6 +522,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     null
                 ),
@@ -517,6 +533,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     frist2.toLocalDate()
                 ),
@@ -527,6 +544,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     null
                 ),
@@ -558,6 +576,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     frist.toLocalDate()
                 ),
@@ -568,6 +587,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     null
                 ),
@@ -578,6 +598,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     frist2.toLocalDate()
                 ),
@@ -588,6 +609,7 @@ internal class OppgaveServiceTest {
                     "tittel",
                     "",
                     Oppgavestatus.RELEVANT,
+                    null,
                     LocalDateTime.now(),
                     null
                 ),

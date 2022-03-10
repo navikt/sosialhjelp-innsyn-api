@@ -96,7 +96,8 @@ class OppgaveService(
                     it.referanse,
                     tittel,
                     beskrivelse,
-                    it.getOppgaveStatus()
+                    it.getOppgaveStatus(),
+                    it.utbetalingsReferanse
                 )
             }
             .sortedBy { it.hendelsetidspunkt }
@@ -143,7 +144,8 @@ class OppgaveService(
                             it.referanse,
                             tittel,
                             beskrivelse,
-                            it.getOppgaveStatus()
+                            it.getOppgaveStatus(),
+                            utbetalingsReferanse = it.utbetalingsReferanse
                         )
                     }
                 )

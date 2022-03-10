@@ -86,7 +86,8 @@ class UtbetalingerService(
                     mottaker = utbetaling.mottaker,
                     annenMottaker = utbetaling.annenMottaker,
                     kontonummer = utbetaling.kontonummer,
-                    utbetalingsmetode = utbetaling.utbetalingsmetode
+                    utbetalingsmetode = utbetaling.utbetalingsmetode,
+                    utbetlingsreferanse = utbetaling.referanse
                 )
             }
     }

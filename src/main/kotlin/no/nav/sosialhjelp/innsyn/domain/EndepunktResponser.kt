@@ -56,7 +56,8 @@ data class VilkarResponse(
     val vilkarReferanse: String,
     val tittel: String?,
     val beskrivelse: String?,
-    val status: Oppgavestatus
+    val status: Oppgavestatus,
+    val utbetalingsReferanse: List<String>?
 )
 
 data class DokumentasjonkravResponse(
@@ -73,7 +74,8 @@ data class DokumentasjonkravElement(
     val dokumentasjonkravReferanse: String, // hendelsereferanse
     val tittel: String?,
     val beskrivelse: String?,
-    val status: Oppgavestatus
+    val status: Oppgavestatus,
+    val utbetalingsReferanse: List<String>?
 )
 
 data class UtbetalingerResponse(
@@ -100,7 +102,8 @@ data class ManedUtbetaling(
     val mottaker: String?,
     val annenMottaker: Boolean,
     val kontonummer: String?,
-    val utbetalingsmetode: String?
+    val utbetalingsmetode: String?,
+    val utbetlingsreferanse: String?
 )
 
 data class VedleggResponse(

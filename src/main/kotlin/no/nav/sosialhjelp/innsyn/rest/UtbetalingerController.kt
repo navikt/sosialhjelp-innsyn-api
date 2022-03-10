@@ -55,7 +55,7 @@ class UtbetalingerController(
     }
 
     @GetMapping("/utbetalinger/exists")
-    fun getUtbetalingExists(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "12") month: Int): ResponseEntity<Boolean> {
+    fun getUtbetalingExists(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "15") month: Int): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {

@@ -15,7 +15,7 @@ class SoknadMedInnsynService(
         val saker = fiksClient.hentAlleDigisosSaker(token)
 
         return saker
-            .filter { isDigisosSakNewerThanMonths(it, 12) }
+            .filter { isDigisosSakNewerThanMonths(it, 15) }
             .any { !kommuneService.erInnsynDeaktivertForKommune(it.fiksDigisosId, token) }
     }
 }

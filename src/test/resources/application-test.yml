@@ -20,6 +20,12 @@ client:
   dialog_audience: "dialog"
   tokendings_private_jwk: "generateRSA"
 
+#Maskinporten
+maskinporten_clientid: clientid
+maskinporten_scopes: scopes
+maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:https://maskinporten}
+maskinporten_client_jwk: generateRSA
+
 no.nav.sosialhjelp.idporten:
   token_url: tokenurl
   client_id: clientid

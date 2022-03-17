@@ -49,5 +49,6 @@
   "isGcp": false,
   "isLabsGcp": false,
   "vaultEnabled": true,
-  "tokenXEnabled": true
+  "tokenXEnabled": true,
+  "maskinportenEnabled": true
 }

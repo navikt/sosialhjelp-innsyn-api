@@ -32,6 +32,9 @@ spec:
 {{#if maskinportenEnabled}}
   maskinporten:
     enabled: true
+    scopes:
+      consumes:
+        - name: "ks:fiks"
 {{/if}}
 {{#if isGcp}}
   accessPolicy:
@@ -57,19 +60,6 @@ spec:
       {{/each}}
         - application: "sosialhjelp-fss-proxy"
           cluster: {{fssProxyClusterName}}
-{{/if}}
-{{#if isGcp}}
-  filesFrom:
-    - secret: {{virksomhetssertifikat}}
-{{/if}}
-  vault:
-    enabled: {{vaultEnabled}}
-{{#if vaultEnabled}}
-    paths:
-{{#each kvPaths}}
-      - mountPath: {{@key}}
-        kvPath: {{this}}
-{{/each}}
 {{/if}}
   ingresses:
 {{#each ingress}}

@@ -8,10 +8,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
-import no.nav.sosialhjelp.client.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.client.fiks.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.redis.RedisService
-import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,9 +19,8 @@ internal class KommuneServiceTest {
 
     private val fiksClient: FiksClient = mockk()
     private val kommuneInfoClient: KommuneInfoClient = mockk()
-    private val idPortenService: IdPortenService = mockk()
     private val redisService: RedisService = mockk()
-    private val service = KommuneService(fiksClient, kommuneInfoClient, idPortenService, redisService)
+    private val service = KommuneService(fiksClient, kommuneInfoClient, redisService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val kommuneNr = "1234"
@@ -38,13 +36,11 @@ internal class KommuneServiceTest {
         every { redisService.get(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
         every { redisService.defaultTimeToLiveSeconds } returns 1
-
-        every { idPortenService.getToken().token } returns "token"
     }
 
     @Test
     internal fun `innsyn er deaktivert`() {
-        every { kommuneInfoClient.get(any(), any()) } returns KommuneInfo(kommuneNr, false, false, false, false, null, true, null)
+        every { kommuneInfoClient.getKommuneInfo(any()) } returns KommuneInfo(kommuneNr, false, false, false, false, null, true, null)
 
         val svar = service.erInnsynDeaktivertForKommune("123", "token")
 
@@ -53,7 +49,7 @@ internal class KommuneServiceTest {
 
     @Test
     internal fun `innsyn er aktivert`() {
-        every { kommuneInfoClient.get(any(), any()) } returns KommuneInfo(kommuneNr, false, true, false, false, null, true, null)
+        every { kommuneInfoClient.getKommuneInfo(any()) } returns KommuneInfo(kommuneNr, false, true, false, false, null, true, null)
 
         val svar = service.erInnsynDeaktivertForKommune("123", "token")
 
@@ -64,7 +60,7 @@ internal class KommuneServiceTest {
     internal fun `hentKommuneInfo skal hente fra cache`() {
         val kommuneInfo = KommuneInfo(kommuneNr, false, true, false, false, null, true, null)
 
-        every { kommuneInfoClient.get(any(), any()) } returns kommuneInfo
+        every { kommuneInfoClient.getKommuneInfo(any()) } returns kommuneInfo
         val firstResult = service.hentKommuneInfo("123", "token")
         assertThat(firstResult).isEqualTo(kommuneInfo)
         verify(exactly = 1) { redisService.get(any(), any()) }

@@ -68,12 +68,6 @@ maskinporten_scopes: ${MASKINPORTEN_SCOPES}
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
 maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
 
-no.nav.sosialhjelp.idporten:
-  token_url: ${ID_PORTEN_TOKEN_URL}
-  client_id: ${ID_PORTEN_CLIENT_ID}
-  scope: ${ID_PORTEN_SCOPE}
-  config_url: ${ID_PORTEN_CONFIG_URL}
-
 #Token-validering
 no.nav.security.jwt:
   issuer.selvbetjening:

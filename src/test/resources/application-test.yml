@@ -26,12 +26,6 @@ maskinporten_scopes: scopes
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:https://maskinporten}
 maskinporten_client_jwk: generateRSA
 
-no.nav.sosialhjelp.idporten:
-  token_url: tokenurl
-  client_id: clientid
-  scope: scope
-  config_url: configurl
-
 innsyn:
   vedlegg:
     virusscan:

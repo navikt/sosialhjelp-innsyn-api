@@ -62,6 +62,12 @@ client:
   dialog_endpoint_url: ${DIALOG_ENDPOINT_URL}
   dialog_audience: ${DIALOG_AUDIENCE}
 
+#Maskinporten
+maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
+maskinporten_scopes: ${MASKINPORTEN_SCOPES}
+maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
+maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
+
 no.nav.sosialhjelp.idporten:
   token_url: ${ID_PORTEN_TOKEN_URL}
   client_id: ${ID_PORTEN_CLIENT_ID}

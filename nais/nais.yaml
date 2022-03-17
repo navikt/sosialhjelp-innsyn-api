@@ -29,6 +29,10 @@ spec:
   webproxy: {{webProxyEnabled}}
   tokenx:
     enabled: {{tokenXEnabled}}
+{{#if maskinportenEnabled}}
+  maskinporten:
+    enabled: true
+{{/if}}
 {{#if isGcp}}
   accessPolicy:
     inbound:

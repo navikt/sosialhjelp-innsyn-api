@@ -37,6 +37,12 @@ client:
   dialog_endpoint_url: ${DIALOG_ENDPOINT_URL:dialog_endpoint_url}
   dialog_audience: ${DIALOG_AUDIENCE:dialog_audience}
 
+#Maskinporten
+maskinporten_clientid: maskinporten_clientid
+maskinporten_scopes: scopes
+maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/maskinporten${mock-alt-api-wellknown-queryparam}}
+maskinporten_client_jwk: generateRSA
+
 no.nav.sosialhjelp.idporten:
   token_url: ${ID_PORTEN_TOKEN_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/token}
   client_id: ${ID_PORTEN_CLIENT_ID:1c3631f4-dbf2-4c12-bdc4-156cbd53c625}

@@ -2,9 +2,9 @@ package no.nav.sosialhjelp.innsyn.service.digisosapi
 
 import no.nav.sosialhjelp.innsyn.client.digisosapi.DigisosApiClient
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
+import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.service.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
@@ -24,7 +24,7 @@ class DigisosApiServiceImpl(
     private val digisosApiClient: DigisosApiClient,
     private val krypteringService: KrypteringService,
     private val virusScanner: VirusScanner,
-    private val idPortenService: IdPortenService,
+    private val maskinportenClient: MaskinportenClient,
     private val dokumentlagerClient: DokumentlagerClient
 ) : DigisosApiService {
 
@@ -34,10 +34,10 @@ class DigisosApiServiceImpl(
 
     override fun lastOppFil(fiksDigisosId: String, file: MultipartFile): String {
         virusScanner.scan(file.name, file.bytes)
-        val accessToken = idPortenService.getToken()
+        val accessToken = maskinportenClient.getToken()
 
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
-        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(BEARER + accessToken.token))
+        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(BEARER + accessToken))
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         val fiksIder = digisosApiClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
         waitForFutures(krypteringFutureList)

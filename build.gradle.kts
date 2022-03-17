@@ -8,7 +8,7 @@ group = "no.nav.sosialhjelp"
 object Versions {
     const val coroutines = "1.6.0"
     const val springBoot = "2.6.4"
-    const val sosialhjelpCommon = "1.4204e7e"
+    const val sosialhjelpCommon = "1.3cd78d5"
     const val logback = "1.2.10"
     const val logstash = "7.0.1"
     const val filformat = "1.2022.01.30-13.18-01cd95216e0b"
@@ -105,8 +105,6 @@ dependencies {
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-api:${Versions.sosialhjelpCommon}")
-    implementation("no.nav.sosialhjelp:sosialhjelp-common-kommuneinfo-client:${Versions.sosialhjelpCommon}")
-    implementation("no.nav.sosialhjelp:sosialhjelp-common-idporten-client:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-kotlin-utils:${Versions.sosialhjelpCommon}")
 
 //    tokendings mot dialog-api

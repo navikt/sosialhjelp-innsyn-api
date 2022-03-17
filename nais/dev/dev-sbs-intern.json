@@ -13,10 +13,6 @@
     "fiks-integrasjon-secret",
     "fiks-kommune-integrasjon-secret"
   ],
-  "virksomhetssertifikat": "virksomhetssertifikat",
-  "kvPaths": {
-    "/var/run/secrets/nais.io/virksomhetssertifikat": "/secret/virksomhetssertifikat/preprod/shared"
-  },
   "env": {
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",
@@ -24,10 +20,6 @@
     "NORG_PROXY_URL": "https://sosialhjelp-fss-proxy.dev-fss-pub.nais.io/proxy/norg/",
     "FSS_PROXY_AUDIENCE": "dev-fss:teamdigisos:sosialhjelp-fss-proxy",
     "FSS_PROXY_PING_URL": "https://sosialhjelp-fss-proxy.dev-fss-pub.nais.io/ping",
-    "ID_PORTEN_TOKEN_URL": "https://oidc-ver2.difi.no/idporten-oidc-provider/token",
-    "ID_PORTEN_CONFIG_URL": "https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
-    "ID_PORTEN_CLIENT_ID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
-    "ID_PORTEN_SCOPE": "ks:fiks",
     "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local",
@@ -51,7 +43,6 @@
   "webProxyEnabled": true,
   "isGcp": false,
   "isLabsGcp": false,
-  "vaultEnabled": true,
   "tokenXEnabled": true,
   "maskinportenEnabled": true
 }

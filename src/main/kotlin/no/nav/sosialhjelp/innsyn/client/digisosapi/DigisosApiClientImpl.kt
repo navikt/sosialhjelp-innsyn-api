@@ -5,9 +5,9 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.client.fiks.VedleggMetadata
+import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
@@ -36,7 +36,7 @@ import java.util.Collections
 class DigisosApiClientImpl(
     private val clientProperties: ClientProperties,
     private val fiksWebClient: WebClient,
-    private val idPortenService: IdPortenService,
+    private val maskinportenClient: MaskinportenClient,
     private val fiksClientImpl: FiksClientImpl,
 ) : DigisosApiClient {
 
@@ -153,7 +153,7 @@ class DigisosApiClientImpl(
         headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
         headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
         headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
-        headers.set(AUTHORIZATION, BEARER + idPortenService.getToken().token)
+        headers.set(AUTHORIZATION, BEARER + maskinportenClient.getToken())
         headers.contentType = MediaType.APPLICATION_JSON
         return headers
     }

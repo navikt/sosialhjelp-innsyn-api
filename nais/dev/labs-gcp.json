@@ -5,7 +5,6 @@
     "https://sosialhjelp-innsyn-api.labs.nais.io/sosialhjelp/innsyn-api"
   ],
   "envsecret": [],
-  "virksomhetssertifikat": "virksomhetssertifikat",
   "outboundExternalHosts": [
     "oidc-ver2.difi.no",
     "unleash.nais.io"
@@ -25,16 +24,11 @@
     "INTEGRASJONSID_FIKS_KOMMUNE" : "id2",
     "INTEGRASJONPASSORD_FIKS" : "pw1",
     "INTEGRASJONPASSORD_FIKS_KOMMUNE" : "pw2",
-    "ID_PORTEN_TOKEN_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/idporten/idporten-oidc-provider/token",
-    "ID_PORTEN_CLIENT_ID" : "idportenId",
-    "ID_PORTEN_SCOPE" : "ks:fiks",
-    "ID_PORTEN_CONFIG_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/well-known/idporten",
     "AZUREAD_LOGINURL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt/login",
     "NORG_PROXY_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/norg_endpoint_url",
     "FSS_PROXY_PING_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/fss-proxy/ping",
     "PDL_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/pdl_endpoint_url",
     "PDL_AUDIENCE": "dummyAudience",
-    "VIRKSERT_STI": "/var/run/secrets",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
     "UNLEASH_INSTANCE_ID": "labs-gcp",
     "MELDINGER_KOMMUNENUMMER": "0301",
@@ -54,7 +48,6 @@
   "webProxyEnabled": false,
   "isGcp": true,
   "isLabsGcp": true,
-  "vaultEnabled": false,
   "tokenXEnabled": false,
   "maskinportenEnabled": false
 }

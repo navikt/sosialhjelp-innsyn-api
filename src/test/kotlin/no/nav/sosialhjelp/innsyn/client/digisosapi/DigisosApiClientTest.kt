@@ -6,11 +6,11 @@ import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
+import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.domain.SakWrapper
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
-import no.nav.sosialhjelp.innsyn.service.idporten.IdPortenService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.client.WebClient
@@ -22,12 +22,12 @@ internal class DigisosApiClientTest {
     fun `Post digisos sak til mock`() {
         val mockWebServer = MockWebServer()
         val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
-        val idPortenService: IdPortenService = mockk()
+        val maskinportenClient: MaskinportenClient = mockk()
         val fiksClientImpl: FiksClientImpl = mockk()
 
-        val digisosApiClient = DigisosApiClientImpl(clientProperties, fiksWebClient, idPortenService, fiksClientImpl)
+        val digisosApiClient = DigisosApiClientImpl(clientProperties, fiksWebClient, maskinportenClient, fiksClientImpl)
 
-        coEvery { idPortenService.getToken().token } returns "Token"
+        coEvery { maskinportenClient.getToken() } returns "Token"
 
         mockWebServer.enqueue(
             MockResponse()

@@ -1,11 +1,25 @@
-![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Build%20image/badge.svg?branch=master)
-![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Deploy%20Dev/badge.svg?)
-![](https://github.com/navikt/sosialhjelp-innsyn-api/workflows/Deploy%20Prod/badge.svg?)
+[![Build image](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/build.yml)
+[![Deploy til prod-sbs](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml/badge.svg)](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml)
+
 # sosialhjelp-innsyn-api
 Backend-app som skal gi innsyn i egen sosialhjelp sak.
 
 ## Henvendelser
-Henvendelser kan sendes via Slack i kanalen #team-digisos.
+Spørsmål knyttet til koden eller teamet kan stilles til teamdigisos@nav.no.
+
+### For NAV-ansatte
+Interne henvendelser kan sendes via Slack i kanalen #team_digisos.
+
+## Teknologi
+* Kotlin
+* JDK 17
+* Gradle
+* Spring-boot
+* navikt/token-support
+* Redis (cache)
+
+### Krav
+- JDK 17
 
 ## Hvordan komme i gang
 

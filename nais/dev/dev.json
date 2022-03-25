@@ -2,16 +2,14 @@
   "applicationName": "sosialhjelp-innsyn-api-q",
   "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api-q.dev.nav.no/sosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api-dev.dev.nav.no/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
     "redis-password-innsyn-api",
     "fiks-integrasjon-secret",
     "fiks-kommune-integrasjon-secret"
   ],
-  "inboundRulesApplications": [
-    "sosialhjelp-login-api-q"
-  ],
+  "inboundRulesApplications": ["sosialhjelp-login-api-q"],
   "outboundExternalHosts": [
     "api.fiks.test.ks.no",
     "test.svarut.ks.no",
@@ -22,7 +20,7 @@
   ],
   "outboundRulesApplications": [
     "sosialhjelp-innsyn-api-redis",
-    "sosialhjelp-dialog-api-gcp"
+    "sosialhjelp-dialog-api-dev"
   ],
   "fssProxyClusterName": "dev-fss",
   "env": {
@@ -42,7 +40,7 @@
     "UNLEASH_INSTANCE_ID": "dev-gcp",
     "MELDINGER_KOMMUNENUMMER": "0301",
     "SWAGGER_ENABLED": "true",
-    "DIALOG_ENDPOINT_URL": "https://sosialhjelp.dev.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",
+    "DIALOG_ENDPOINT_URL": "http://sosialhjelp-dialog-api-dev/sosialhjelp/meldinger-api/system/brukerstatus",
     "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api"
   },
   "minReplicas": "1",

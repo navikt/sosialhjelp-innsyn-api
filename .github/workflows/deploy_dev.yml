@@ -8,8 +8,8 @@ on:
         default: 'dev-sbs-intern'
         type: choice
         options:
-          - 'dev-gcp-mock'
-          - 'dev-gcp-q'
+          - 'mock'
+          - 'dev'
           - 'dev-sbs'
           - 'dev-sbs-intern'
           - 'labs-gcp'

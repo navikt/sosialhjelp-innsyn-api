@@ -4,15 +4,10 @@
   "ingress": [
     "https://sosialhjelp-innsyn-api-mock.dev.nav.no/sosialhjelp/innsyn-api"
   ],
-  "envsecret": [
-    "redis-password-innsyn-api"
-  ],
-  "outboundExternalHosts": [
-    "unleash.nais.io"
-  ],
+  "envsecret": ["redis-password-innsyn-api"],
+  "outboundExternalHosts": ["unleash.nais.io"],
   "outboundRulesApplications": [
     "sosialhjelp-mock-alt-api-mock",
-    "sosialhjelp-innsyn-api-redis",
     "sosialhjelp-dialog-api-mock"
   ],
   "fssProxyClusterName": "dev-fss",
@@ -22,10 +17,10 @@
     "FIKS_DIGISOS_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/fiks/dokumentlager",
     "FIKS_SVAR_UT_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks/svarut",
-    "INTEGRASJONSID_FIKS" : "id1",
-    "INTEGRASJONSID_FIKS_KOMMUNE" : "id2",
-    "INTEGRASJONPASSORD_FIKS" : "pw1",
-    "INTEGRASJONPASSORD_FIKS_KOMMUNE" : "pw2",
+    "INTEGRASJONSID_FIKS": "id1",
+    "INTEGRASJONSID_FIKS_KOMMUNE": "id2",
+    "INTEGRASJONPASSORD_FIKS": "pw1",
+    "INTEGRASJONPASSORD_FIKS_KOMMUNE": "pw2",
     "AZUREAD_LOGINURL": "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt/login",
     "NORG_PROXY_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/norg_endpoint_url",
     "FSS_PROXY_PING_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fss-proxy/ping",

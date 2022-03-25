@@ -9,7 +9,9 @@
     "fiks-integrasjon-secret",
     "fiks-kommune-integrasjon-secret"
   ],
-  "inboundRulesApplications": ["sosialhjelp-login-api-dev"],
+  "inboundRulesApplications": [
+    "sosialhjelp-login-api-dev, sosialhjelp-proxy-dev"
+  ],
   "outboundExternalHosts": [
     "api.fiks.test.ks.no",
     "test.svarut.ks.no",

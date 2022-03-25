@@ -28,9 +28,8 @@ jobs:
           CLUSTER: dev-sbs
           TEAM: teamdigisos
           RESOURCE: "nais/redis-config.yml,nais/redisexporter.yml"
-
-  deploy-dev-gcp:
-    name: Auto-deploy redis to dev-gcp
+  deploy-dev:
+    name: Auto-deploy redis to dev
     runs-on: ubuntu-latest
     steps:
       - name: Hente kode

@@ -26,7 +26,7 @@ spec:
       rules:
         - application: sosialhjelp-innsyn-api
         - application: sosialhjelp-innsyn-api-redisexporter
-        - application: sosialhjelp-innsyn-api-q
+        - application: sosialhjelp-innsyn-api-dev
   service:
     port: 6379
     protocol: redis

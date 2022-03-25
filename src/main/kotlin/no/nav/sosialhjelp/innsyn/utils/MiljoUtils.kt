@@ -20,7 +20,10 @@ object MiljoUtils {
                 val env = if (getAppName().contains("-intern")) "-q1" else "-q0"
                 "www$env.dev.nav.no"
             }
-            "dev-gcp" -> "digisos-gcp.dev.nav.no"
+            "dev-gcp" -> {
+                val env = if (getAppName().contains("-dev")) "" else ".ekstern"
+                "digisos$env.dev.nav.no"
+            }
             "labs-gcp" -> "digisos.labs.nais.io"
             else -> "www.nav.no"
         }

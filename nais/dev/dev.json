@@ -1,5 +1,5 @@
 {
-  "applicationName": "sosialhjelp-innsyn-api-q",
+  "applicationName": "sosialhjelp-innsyn-api-dev",
   "namespace": "teamdigisos",
   "ingress": [
     "https://sosialhjelp-innsyn-api-dev.dev.nav.no/sosialhjelp/innsyn-api"
@@ -9,7 +9,7 @@
     "fiks-integrasjon-secret",
     "fiks-kommune-integrasjon-secret"
   ],
-  "inboundRulesApplications": ["sosialhjelp-login-api-q"],
+  "inboundRulesApplications": ["sosialhjelp-login-api-dev"],
   "outboundExternalHosts": [
     "api.fiks.test.ks.no",
     "test.svarut.ks.no",

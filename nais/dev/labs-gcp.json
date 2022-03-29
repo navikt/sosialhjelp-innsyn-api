@@ -45,7 +45,7 @@
   "prometheusEnabled": false,
   "webProxyEnabled": false,
   "isGcp": true,
-  "isLabsGcp": true,
+  "isMock": true,
   "tokenXEnabled": false,
   "maskinportenEnabled": false
 }

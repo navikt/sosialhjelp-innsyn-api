@@ -30,6 +30,7 @@ innsyn:
   vedlegg:
     virusscan:
       enabled: false
+      url:
 
 springdoc:
   api-docs:

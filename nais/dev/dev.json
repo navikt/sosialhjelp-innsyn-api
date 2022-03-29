@@ -41,7 +41,8 @@
     "MELDINGER_KOMMUNENUMMER": "0301",
     "SWAGGER_ENABLED": "true",
     "DIALOG_ENDPOINT_URL": "http://sosialhjelp-dialog-api-dev/sosialhjelp/meldinger-api/system/brukerstatus",
-    "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api"
+    "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api",
+    "CLAMAV_URL": "http://clamav.clamav.svc.cluster.local"
   },
   "minReplicas": "1",
   "maxReplicas": "1",
@@ -52,7 +53,7 @@
   "prometheusEnabled": true,
   "webProxyEnabled": false,
   "isGcp": true,
-  "isLabsGcp": false,
+  "isMock": false,
   "tokenXEnabled": true,
   "maskinportenEnabled": true
 }

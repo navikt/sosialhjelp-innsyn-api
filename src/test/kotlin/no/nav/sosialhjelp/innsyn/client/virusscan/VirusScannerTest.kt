@@ -1,49 +1,45 @@
 package no.nav.sosialhjelp.innsyn.client.virusscan
 
-import io.mockk.every
-import io.mockk.spyk
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
-internal class VirusScanClientTest {
+internal class VirusScannerTest {
 
     private val mockWebServer = MockWebServer()
     private val webClient: WebClient = WebClient.create(mockWebServer.url("/").toString())
 
-    private val virusScanClient = spyk(VirusScanClient(webClient))
+    private lateinit var virusScanner: VirusScanner
 
     private val filnavn = "ikke-virustest"
     private val data = byteArrayOf()
 
-    @BeforeEach
-    fun setUp() {
-        every { virusScanClient getProperty "enabled" } returns true
-    }
-
     @Test
     fun scanFile_scanningIsNotEnabled_doesNotThrowException() {
-        every { virusScanClient getProperty "enabled" } returns false
-        assertThatCode { virusScanClient.scan(filnavn, data) }
+        virusScanner = VirusScanner(webClient, enabled = false)
+        assertThatCode { virusScanner.scan(filnavn, data) }
             .doesNotThrowAnyException()
     }
 
     @Test
     fun scanFile_filenameIsVirustest_isInfected() {
+        virusScanner = VirusScanner(webClient, enabled = true)
+
         assertThatExceptionOfType(VirusScanException::class.java)
-            .isThrownBy { virusScanClient.scan("virustest", data) }
+            .isThrownBy { virusScanner.scan("virustest", data) }
     }
 
     @Test
     fun scanFile_resultatHasWrongLength_isNotInfected() {
+        virusScanner = VirusScanner(webClient, enabled = true)
+
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
@@ -55,12 +51,14 @@ internal class VirusScanClientTest {
                 )
         )
 
-        assertThatCode { virusScanClient.scan(filnavn, data) }
+        assertThatCode { virusScanner.scan(filnavn, data) }
             .doesNotThrowAnyException()
     }
 
     @Test
     fun scanFile_resultatIsOK_isNotInfected() {
+        virusScanner = VirusScanner(webClient, enabled = true)
+
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
@@ -71,12 +69,14 @@ internal class VirusScanClientTest {
                     )
                 )
         )
-        assertThatCode { virusScanClient.scan(filnavn, data) }
+        assertThatCode { virusScanner.scan(filnavn, data) }
             .doesNotThrowAnyException()
     }
 
     @Test
     fun scanFile_resultatIsNotOK_isInfected() {
+        virusScanner = VirusScanner(webClient, enabled = true)
+
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
@@ -88,6 +88,6 @@ internal class VirusScanClientTest {
                 )
         )
         assertThatExceptionOfType(VirusScanException::class.java)
-            .isThrownBy { virusScanClient.scan(filnavn, data) }
+            .isThrownBy { virusScanner.scan(filnavn, data) }
     }
 }

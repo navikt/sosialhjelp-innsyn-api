@@ -15,20 +15,13 @@ import org.springframework.web.reactive.function.client.awaitEntityList
 import org.springframework.web.reactive.function.client.awaitExchange
 import org.springframework.web.reactive.function.client.createExceptionAndAwait
 
-interface VirusScanner {
-
-    fun scan(filnavn: String?, data: ByteArray)
-}
-
 @Component
-class VirusScanClient(
-    private val virusScanWebClient: WebClient
-) : VirusScanner {
+class VirusScanner(
+    private val virusScanWebClient: WebClient,
+    @Value("\${innsyn.vedlegg.virusscan.enabled}") val enabled: Boolean
+) {
 
-    @Value("\${innsyn.vedlegg.virusscan.enabled}")
-    var enabled: Boolean = true
-
-    override fun scan(filnavn: String?, data: ByteArray) {
+    fun scan(filnavn: String?, data: ByteArray) {
         if (enabled && isInfected(filnavn, data)) {
             throw VirusScanException("Fant virus i fil forsøkt opplastet", null)
         } else if (!enabled) {

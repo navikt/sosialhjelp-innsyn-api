@@ -31,7 +31,8 @@
     "MELDINGER_KOMMUNENUMMER": "0301",
     "SWAGGER_ENABLED": "true",
     "DIALOG_ENDPOINT_URL": "https://sosialhjelp.dev.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",
-    "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api"
+    "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api",
+    "CLAMAV_URL": "http://clamav.nais.svc.nais.local/scan"
   },
   "minReplicas": "1",
   "maxReplicas": "2",
@@ -42,7 +43,7 @@
   "prometheusEnabled": true,
   "webProxyEnabled": true,
   "isGcp": false,
-  "isLabsGcp": false,
+  "isMock": false,
   "tokenXEnabled": true,
   "maskinportenEnabled": true
 }

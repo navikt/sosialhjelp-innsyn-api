@@ -2,9 +2,14 @@ package no.nav.sosialhjelp.innsyn.client.fiks
 
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -15,19 +20,27 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
 interface DokumentlagerClient {
-    fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate
+    fun getDokumentlagerPublicKeyX509Certificate(): X509Certificate
 }
 
 @Component
 class DokumentlagerClientImpl(
     private val clientProperties: ClientProperties,
     private val fiksWebClient: WebClient,
+    private val maskinportenClient: MaskinportenClient
 ) : DokumentlagerClient {
 
-    override fun getDokumentlagerPublicKeyX509Certificate(token: String): X509Certificate {
+    private var cachedPublicKey: X509Certificate? = null
+
+    override fun getDokumentlagerPublicKeyX509Certificate(): X509Certificate {
+        cachedPublicKey?.let { return it }
+
         val publicKey = fiksWebClient.get()
             .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
-            .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
+            .accept(APPLICATION_JSON)
+            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+            .header(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
+            .header(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .retrieve()
             .bodyToMono<ByteArray>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -43,7 +56,8 @@ class DokumentlagerClientImpl(
 
         try {
             val certificateFactory = CertificateFactory.getInstance("X.509")
-            return certificateFactory.generateCertificate(ByteArrayInputStream(publicKey!!)) as X509Certificate
+            return (certificateFactory.generateCertificate(ByteArrayInputStream(publicKey!!)) as X509Certificate)
+                .also { cachedPublicKey = it }
         } catch (e: CertificateException) {
             throw RuntimeException(e)
         }

@@ -68,7 +68,7 @@ class VedleggOpplastingService(
 
         val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(filerForOpplasting.size))
         try {
-            val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(token)
+            val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
             val filerForOpplastingEtterKryptering: List<FilForOpplasting> = filerForOpplasting
                 .map { file ->
                     val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, certificate)

@@ -88,7 +88,7 @@ internal class VedleggOpplastingServiceTest {
         every { virusScanner.scan(any(), any()) } just runs
         every { redisService.put(any(), any(), any()) } just runs
         every { redisService.defaultTimeToLiveSeconds } returns 1
-        every { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(any()) } returns mockCertificate
+        every { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate() } returns mockCertificate
         every { unleashClient.isEnabled(any(), false) } returns true
     }
 

@@ -14,8 +14,6 @@ object IntegrationUtils {
     const val BEARER = "Bearer "
 
     const val HEADER_CALL_ID = "Nav-Call-Id"
-    const val HEADER_NAV_APIKEY = "x-nav-apiKey"
-    const val HEADER_CONSUMER_TOKEN = "Nav-Consumer-Token"
     const val HEADER_TEMA = "Tema"
 
     const val TEMA_KOM = "KOM"

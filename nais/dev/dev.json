@@ -42,7 +42,7 @@
     "SWAGGER_ENABLED": "true",
     "DIALOG_ENDPOINT_URL": "http://sosialhjelp-dialog-api-dev/sosialhjelp/meldinger-api/system/brukerstatus",
     "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api",
-    "CLAMAV_URL": "http://clamav.clamav.svc.cluster.local"
+    "CLAMAV_URL": "http://clamav.clamav.svc.cluster.local/scan"
   },
   "minReplicas": "1",
   "maxReplicas": "1",

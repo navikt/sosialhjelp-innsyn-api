@@ -7,14 +7,14 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.0"
-    const val springBoot = "2.6.4"
-    const val sosialhjelpCommon = "1.231cd9b"
-    const val logback = "1.2.10"
+    const val springBoot = "2.6.5"
+    const val sosialhjelpCommon = "1.b0c30e9"
+    const val logback = "1.2.11"
     const val logstash = "7.0.1"
-    const val filformat = "1.2022.01.30-13.18-01cd95216e0b"
-    const val micrometerRegistry = "1.8.3"
+    const val filformat = "1.2022.03.31-11.15-8dc0e8820603"
+    const val micrometerRegistry = "1.8.4"
     const val prometheus = "0.15.0"
-    const val tokenValidation = "2.0.12"
+    const val tokenValidation = "2.0.14"
     const val jackson = "2.13.2"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
@@ -23,7 +23,7 @@ object Versions {
     const val tika = "2.3.0"
     const val pdfBox = "2.0.24"
     const val fiksKryptering = "1.1.2"
-    const val lettuce = "6.1.6.RELEASE"
+    const val lettuce = "6.1.8.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
     const val springdoc = "1.6.6"
@@ -31,16 +31,16 @@ object Versions {
     const val gson = "2.9.0"
     const val log4j = "2.17.1"
 
-    const val javaJwt = "3.19.0"
-    const val jwksRsa = "0.21.0"
-    const val nimbus = "9.20"
+    const val javaJwt = "3.19.1"
+    const val jwksRsa = "0.21.1"
+    const val nimbus = "9.21"
 
-    const val ktlint = "0.44.0"
+    const val ktlint = "0.45.1"
 
     //    Test only
     const val junitJupiter = "5.8.2"
     const val junit = "4.13.2"
-    const val mockk = "1.12.2"
+    const val mockk = "1.12.3"
     const val mockwebserver = "5.0.0-alpha.2"
 }
 

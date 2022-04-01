@@ -7,11 +7,11 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.0"
-    const val springBoot = "2.6.5"
-    const val sosialhjelpCommon = "1.b0c30e9"
+    const val springBoot = "2.6.6"
+    const val sosialhjelpCommon = "1.c57dc86"
     const val logback = "1.2.11"
     const val logstash = "7.0.1"
-    const val filformat = "1.2022.03.31-11.15-8dc0e8820603"
+    const val filformat = "1.2022.03.31-14.09-4daafcd63deb"
     const val micrometerRegistry = "1.8.4"
     const val prometheus = "0.15.0"
     const val tokenValidation = "2.0.14"
@@ -29,7 +29,7 @@ object Versions {
     const val springdoc = "1.6.6"
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
-    const val log4j = "2.17.1"
+    const val log4j = "2.17.2"
 
     const val javaJwt = "3.19.1"
     const val jwksRsa = "0.21.1"

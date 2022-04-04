@@ -286,7 +286,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.historikk).hasSize(5)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo("Vi har sett på dokumentene dine og vil gi beskjed om vi trenger mer fra deg.")
+        assertThat(hendelse.tittel).isEqualTo("Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg")
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
     }
 

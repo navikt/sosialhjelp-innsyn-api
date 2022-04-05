@@ -57,7 +57,7 @@ class VedleggOpplastingService(
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
         files.forEach { file ->
             file.originalFilename ?: throw BadStateException("Kan ikke sende fil når originalFilename er null")
-            val originalFilename = sanitizeFileName(file.originalFilename ?: "")
+            val originalFilename = file.originalFilename?.let { sanitizeFileName(it) }
             val filename = createFilename(originalFilename, valideringer)
             renameFilenameInMetadataJson(originalFilename, filename, metadata)
             val detectedMimetype = detectTikaType(file.inputStream)

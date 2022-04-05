@@ -61,7 +61,7 @@ class DialogClientImpl(
             return dialogStatus
         } catch (e: WebClientResponseException) {
             log.error("DialogClient - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
-            throw DialogException(e.message!!)
+            throw DialogException(e.message ?: "Ukjent DialogException")
         }
     }
 

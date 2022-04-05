@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.redis
 
 import io.lettuce.core.RedisClient
+import io.lettuce.core.RedisException
 import io.lettuce.core.RedisFuture
 import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.api.async.RedisAsyncCommands
@@ -18,7 +19,7 @@ class RedisStore(
 ) {
 
     private val connection: StatefulRedisConnection<String, ByteArray> = redisClient.connect(RedisCodec.of(StringCodec.UTF8, ByteArrayCodec.INSTANCE))
-    private val async: RedisAsyncCommands<String, ByteArray> = connection.async()!!
+    private val async: RedisAsyncCommands<String, ByteArray> = connection.async() ?: throw RedisException("Klarte ikke å få tak i connection.async()")
 
     fun get(key: String): ByteArray? {
         val get: RedisFuture<ByteArray> = async.get(key)

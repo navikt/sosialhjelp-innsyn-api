@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientFileExistsException
 import no.nav.sosialhjelp.innsyn.client.unleash.LOGGE_MISMATCH_FILNAVN
 import no.nav.sosialhjelp.innsyn.client.unleash.UTVIDE_VEDLEGG_JSON
 import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
+import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.rest.OpplastetVedleggMetadata
@@ -55,7 +56,8 @@ class VedleggOpplastingService(
 
         val filerForOpplasting = mutableListOf<FilForOpplasting>()
         files.forEach { file ->
-            val originalFilename = sanitizeFileName(file.originalFilename!!)
+            file.originalFilename ?: throw BadStateException("Kan ikke sende fil når originalFilename er null")
+            val originalFilename = sanitizeFileName(file.originalFilename ?: "")
             val filename = createFilename(originalFilename, valideringer)
             renameFilenameInMetadataJson(originalFilename, filename, metadata)
             val detectedMimetype = detectTikaType(file.inputStream)
@@ -206,7 +208,8 @@ class VedleggOpplastingService(
     fun renameFilenameInMetadataJson(originalFilename: String?, newFilename: String, metadata: MutableList<OpplastetVedleggMetadata>) {
         metadata.forEach { data ->
             data.filer.forEach { file ->
-                if (sanitizeFileName(file.filnavn) == sanitizeFileName(originalFilename!!)) {
+                originalFilename ?: throw BadStateException("Kan ikke rename fil når originalFilename er null")
+                if (sanitizeFileName(file.filnavn) == sanitizeFileName(originalFilename)) {
                     file.filnavn = newFilename
                     return
                 }
@@ -275,7 +278,7 @@ class VedleggOpplastingService(
         metadataListe.forEach { metadata ->
             val filValidering = mutableListOf<FilValidering>()
 
-            metadata.filer.forEach {
+            repeat(metadata.filer.size) {
                 val file = files[filesIndex]
                 val valideringstatus = validateFil(file)
                 if (valideringstatus.result != ValidationValues.OK) log.warn("Opplasting av fil $filesIndex av ${files.size} til ettersendelse feilet. Det var ${metadataListe.size} oppgaveElement. Status: $valideringstatus")
@@ -292,7 +295,7 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.FILE_TOO_LARGE)
         }
 
-        if (file.originalFilename == null || containsIllegalCharacters(file.originalFilename!!)) {
+        if (file.originalFilename == null || containsIllegalCharacters(file.originalFilename ?: "")) {
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
 
@@ -327,7 +330,8 @@ class VedleggOpplastingService(
             return ValidationResult(checkIfPdfIsValid(file.inputStream), TikaFileType.PDF)
         }
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
-            val ext: String = file.originalFilename!!.substringAfterLast(".")
+            val originalFilename = file.originalFilename ?: throw BadStateException("file mangler originalFilename")
+            val ext: String = originalFilename.substringAfterLast(".")
             if (ext.lowercase() in listOf("jfif", "pjpeg", "pjp")) {
                 log.warn("Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.")
                 return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)

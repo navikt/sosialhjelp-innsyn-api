@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.common
 
-class InvalidInputException(
+class BadStateException(
     message: String
 ) : Exception(message)
 

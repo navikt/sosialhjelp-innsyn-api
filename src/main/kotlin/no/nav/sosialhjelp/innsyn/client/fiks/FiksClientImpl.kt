@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
@@ -55,7 +56,7 @@ class FiksClientImpl(
     private fun hentDigisosSakFraFiks(digisosId: String, token: String): DigisosSak {
         log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
 
-        val digisosSak: DigisosSak? = withRetry {
+        val digisosSak: DigisosSak = withRetry {
             fiksWebClient.get()
                 .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
                 .headers { it.addAll(fiksHeaders(clientProperties, token)) }
@@ -70,10 +71,10 @@ class FiksClientImpl(
                     }
                 }
                 .block()
+                ?: throw BadStateException("digisosSak er null selv om request ikke har kastet exception")
         }
         log.debug("Hentet DigisosSak fra Fiks")
-        return digisosSak!!
-            .also { lagreTilCache(digisosId, it) }
+        return digisosSak.also { lagreTilCache(digisosId, it) }
     }
 
     private fun lagreTilCache(id: String, digisosSakEllerDokument: Any) =
@@ -98,7 +99,7 @@ class FiksClientImpl(
         requestedClass: Class<out Any>,
         token: String,
     ): Any {
-        val dokument: Any? = withRetry {
+        val dokument: Any = withRetry {
             log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
 
             fiksWebClient.get()
@@ -114,15 +115,14 @@ class FiksClientImpl(
                             .also { log.warn("responsebody (uten fnr): ${e.responseBodyAsString.maskerFnr}") }
                     }
                 }
-                .block()
+                .block() ?: throw FiksClientException(500, "dokument er null selv om request ikke har kastet exception", null)
         }
         log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
-        return dokument!!
-            .also { lagreTilCache(dokumentlagerId, it) }
+        return dokument.also { lagreTilCache(dokumentlagerId, it) }
     }
 
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        val digisosSaker: List<DigisosSak>? = withRetry {
+        val digisosSaker: List<DigisosSak> = withRetry {
             fiksWebClient.get()
                 .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
                 .headers { it.addAll(fiksHeaders(clientProperties, token)) }
@@ -135,9 +135,9 @@ class FiksClientImpl(
                         else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
                     }
                 }
-                .block()
+                .block() ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
         }
-        return digisosSaker!!
+        return digisosSaker
     }
 
     override fun lastOppNyEttersendelse(
@@ -179,9 +179,9 @@ class FiksClientImpl(
                     }
                 }
             }
-            .block()
+            .block() ?: throw FiksClientException(500, "responseEntity er null selv om request ikke har kastet exception", null)
 
-        log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity!!.statusCodeValue})")
+        log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue})")
     }
 
     private fun filErAlleredeLastetOpp(exception: WebClientResponseException, digisosId: String): Boolean =

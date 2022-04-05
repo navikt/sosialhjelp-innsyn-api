@@ -6,6 +6,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.client.fiks.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
+import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
@@ -91,8 +92,9 @@ class DigisosApiClientImpl(
                 }
             }
             .block()
+            ?: throw BadStateException("Ingen feil, men heller ingen opplastingResponseList")
         log.info("Filer sendt til Fiks")
-        return opplastingResponseList!!.map { it.dokumentlagerDokumentId }
+        return opplastingResponseList.map { it.dokumentlagerDokumentId }
     }
 
     override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
@@ -110,9 +112,10 @@ class DigisosApiClientImpl(
                     }
                 }
                 .block()
-                ?: return null
+                ?: throw BadStateException("Ingen feil, men heller ingen soknad")
+            val digisosSoker = soknad.digisosSoker ?: throw BadStateException("Soknad mangler digisosSoker")
             return fiksWebClient.get()
-                .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${soknad.digisosSoker!!.metadata}")
+                .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${digisosSoker.metadata}")
                 .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
                 .retrieve()
                 .bodyToMono(String::class.java)

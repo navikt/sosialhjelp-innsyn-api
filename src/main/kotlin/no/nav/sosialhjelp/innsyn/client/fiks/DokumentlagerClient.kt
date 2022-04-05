@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.client.fiks
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
+import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
@@ -51,12 +52,13 @@ class DokumentlagerClientImpl(
                 }
             }
             .block()
+            ?: throw BadStateException("Ingen feil, men heller ingen publicKey")
 
         log.info("Hentet public key for dokumentlager")
 
         try {
             val certificateFactory = CertificateFactory.getInstance("X.509")
-            return (certificateFactory.generateCertificate(ByteArrayInputStream(publicKey!!)) as X509Certificate)
+            return (certificateFactory.generateCertificate(ByteArrayInputStream(publicKey)) as X509Certificate)
                 .also { cachedPublicKey = it }
         } catch (e: CertificateException) {
             throw RuntimeException(e)

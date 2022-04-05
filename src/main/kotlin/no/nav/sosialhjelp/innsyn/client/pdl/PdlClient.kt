@@ -73,7 +73,7 @@ class PdlClientImpl(
                 .also { it?.let { lagreTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
             log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
-            throw PdlException(e.message!!)
+            throw PdlException(e.message ?: "Ukjent PdlException")
         }
     }
 
@@ -87,6 +87,7 @@ class PdlClientImpl(
             .doOnError { e ->
                 log.error("PDL - ping feilet", e)
             }
+            .subscribe()
     }
 
     private fun getQuery(): String =

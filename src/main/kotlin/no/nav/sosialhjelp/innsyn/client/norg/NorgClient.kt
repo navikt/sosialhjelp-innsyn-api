@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.client.norg
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
+import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.common.NorgException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getToken
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
@@ -44,7 +45,7 @@ class NorgClientImpl(
         val tokenXtoken = runBlocking {
             tokendingsService.exchangeToken(getUserIdFromToken(), getToken(), clientProperties.fssProxyAudience)
         }
-        val navEnhet: NavEnhet? = norgWebClient.get()
+        val navEnhet: NavEnhet = norgWebClient.get()
             .uri("/enhet/{enhetsnr}", enhetsnr)
             .accept(MediaType.APPLICATION_JSON)
             .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
@@ -56,10 +57,11 @@ class NorgClientImpl(
                 NorgException(e.message, e)
             }
             .block()
+            ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
 
         log.info("Hentet NAV-enhet $enhetsnr fra NORG2 (via fss-proxy)")
 
-        return navEnhet!!
+        return navEnhet
             .also { lagreTilCache(enhetsnr, it) }
     }
 

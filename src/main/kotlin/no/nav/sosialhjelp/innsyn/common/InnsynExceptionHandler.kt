@@ -21,10 +21,10 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 @ControllerAdvice
-class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
-
+class InnsynExceptionHandler(
     @Value("\${azuread.loginurl}")
-    private val azureadLoginurl: String? = null
+    private val azureadLoginurl: String
+) : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<FrontendErrorMessage> {
@@ -125,7 +125,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
                 .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
         }
         log.info("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl. Feilmelding: ${ex.message}")
-        return createUnauthorizedWithLoginUrlResponse(azureadLoginurl!!)
+        return createUnauthorizedWithLoginUrlResponse(azureadLoginurl)
     }
 
     @ExceptionHandler(value = [MetaDataNotAvailableException::class, IssuerConfigurationException::class])

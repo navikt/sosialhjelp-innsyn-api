@@ -6,15 +6,15 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val coroutines = "1.6.0"
-    const val springBoot = "2.6.6"
+    const val coroutines = "1.6.1"
+    const val springBoot = "2.6.7"
     const val sosialhjelpCommon = "1.c57dc86"
     const val logback = "1.2.11"
-    const val logstash = "7.0.1"
+    const val logstash = "7.1.1"
     const val filformat = "1.2022.03.31-14.09-4daafcd63deb"
-    const val micrometerRegistry = "1.8.4"
+    const val micrometerRegistry = "1.8.5"
     const val prometheus = "0.15.0"
-    const val tokenValidation = "2.0.14"
+    const val tokenValidation = "2.0.15"
     const val jackson = "2.13.2"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
@@ -26,14 +26,14 @@ object Versions {
     const val lettuce = "6.1.8.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
-    const val springdoc = "1.6.6"
+    const val springdoc = "1.6.7"
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
     const val log4j = "2.17.2"
 
     const val javaJwt = "3.19.1"
     const val jwksRsa = "0.21.1"
-    const val nimbus = "9.21"
+    const val nimbus = "9.22"
 
     const val ktlint = "0.45.1"
 

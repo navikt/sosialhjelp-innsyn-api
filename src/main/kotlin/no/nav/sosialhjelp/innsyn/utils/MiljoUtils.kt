@@ -16,10 +16,7 @@ object MiljoUtils {
 
     fun getDomain(): String {
         return when (getenv(NAIS_CLUSTER_NAME, "prod-sbs")) {
-            "dev-sbs" -> {
-                val env = if (getAppName().contains("-intern")) "-q1" else "-q0"
-                "www$env.dev.nav.no"
-            }
+            "dev-sbs" -> "www-q0.dev.nav.no"
             "dev-gcp" -> {
                 val env = if (getAppName().contains("-dev")) "" else ".ekstern"
                 "digisos$env.dev.nav.no"

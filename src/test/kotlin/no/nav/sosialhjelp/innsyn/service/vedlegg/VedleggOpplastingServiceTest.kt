@@ -9,7 +9,6 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.finn.unleash.Unleash
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
@@ -391,44 +390,6 @@ internal class VedleggOpplastingServiceTest {
 
         val utvalgAvGyldigeTegn = ".aAbBcCdDhHiIjJkKlLmMn   NoOpPqQrRsStTuUvVw...WxXyYzZæÆøØåÅ-_ (),._–-"
         assertThat(containsIllegalCharacters(utvalgAvGyldigeTegn)).isFalse
-    }
-
-    @Test
-    fun `vedleggJson skal ikke ha hendelsetype og hendelsereferanse om featureToggle er inaktiv`() {
-        every { unleashClient.isEnabled(any(), false) } returns false
-
-        val opplastetVedleggMetadata = OpplastetVedleggMetadata(
-            "type",
-            "tilleggsinfo",
-            JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
-            "hendelsereferanse",
-            mutableListOf(OpplastetFil("fil1")),
-            null
-        )
-
-        val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
-
-        assertThat(createJsonVedlegg.hendelseType).isNull()
-        assertThat(createJsonVedlegg.hendelseReferanse).isNull()
-    }
-
-    @Test
-    fun `vedleggJson skal ha hendelsetype og hendelsereferanse om featureToggle er aktiv`() {
-        every { unleashClient.isEnabled(any(), false) } returns true
-
-        val opplastetVedleggMetadata = OpplastetVedleggMetadata(
-            "type",
-            "tilleggsinfo",
-            JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
-            "hendelsereferanse",
-            mutableListOf(OpplastetFil("fil1")),
-            null
-        )
-
-        val createJsonVedlegg = service.createJsonVedlegg(opplastetVedleggMetadata, emptyList())!!
-
-        assertThat(createJsonVedlegg.hendelseType).isEqualTo(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT)
-        assertThat(createJsonVedlegg.hendelseReferanse).isEqualTo("hendelsereferanse")
     }
 
     @Test

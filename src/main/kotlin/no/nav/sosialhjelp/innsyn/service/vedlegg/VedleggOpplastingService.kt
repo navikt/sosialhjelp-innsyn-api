@@ -8,7 +8,6 @@ import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientFileExistsException
 import no.nav.sosialhjelp.innsyn.client.unleash.LOGGE_MISMATCH_FILNAVN
-import no.nav.sosialhjelp.innsyn.client.unleash.UTVIDE_VEDLEGG_JSON
 import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
@@ -147,20 +146,13 @@ class VedleggOpplastingService(
     }
 
     fun createJsonVedlegg(metadata: OpplastetVedleggMetadata, filer: List<JsonFiler>): JsonVedlegg? {
-        val jsonVedlegg = JsonVedlegg()
+        return JsonVedlegg()
             .withType(metadata.type)
             .withTilleggsinfo(metadata.tilleggsinfo)
             .withStatus(LASTET_OPP_STATUS)
             .withFiler(filer)
-
-        if (unleash.isEnabled(UTVIDE_VEDLEGG_JSON, false)) {
-            log.info("hendelsetype og hendelsereferanse blir inkludert i vedlegg.json")
-            jsonVedlegg
-                .withHendelseType(metadata.hendelsetype)
-                .withHendelseReferanse(metadata.hendelsereferanse)
-        }
-
-        return jsonVedlegg
+            .withHendelseType(metadata.hendelsetype)
+            .withHendelseReferanse(metadata.hendelsereferanse)
     }
 
     fun createFilename(originalFilename: String?, filValideringer: List<FilValidering>): String {

@@ -1,8 +1,10 @@
 package no.nav.sosialhjelp.innsyn.service.tilgangskontroll
 
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlPerson
 import no.nav.sosialhjelp.innsyn.client.pdl.isKode6Or7
+import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
@@ -14,6 +16,7 @@ import java.util.Locale
 interface Tilgangskontroll {
     fun sjekkTilgang(token: String)
     fun hentTilgang(ident: String, token: String): Tilgang
+    fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak)
 }
 
 @Profile("!local")
@@ -47,6 +50,12 @@ class TilgangskontrollService(
         }
     }
 
+    override fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
+        val gyldigeIdenter = pdlClient.hentIdenter(SubjectHandlerUtils.getUserIdFromToken(), SubjectHandlerUtils.getToken())
+        if (gyldigeIdenter?.contains(digisosSak.sokerFnr) != true)
+            throw BadStateException("digisosSak hører ikke til rett person")
+    }
+
     private fun fornavn(pdlPerson: PdlPerson?): String {
         val fornavn = pdlPerson?.navn?.firstOrNull()?.fornavn?.lowercase()?.replaceFirstChar { it.titlecase(Locale.getDefault()) } ?: ""
         if (fornavn.isEmpty()) {
@@ -73,6 +82,11 @@ class TilgangskontrollLocal : Tilgangskontroll {
             harTilgang = true,
             fornavn = "mockperson"
         )
+    }
+
+    override fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
+        if (digisosSak.sokerFnr != SubjectHandlerUtils.getUserIdFromToken())
+            throw BadStateException("digisosSak hører ikke til rett person")
     }
 }
 

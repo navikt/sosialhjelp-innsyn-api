@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
+import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.fiksHeaders
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
@@ -39,15 +40,18 @@ import org.springframework.web.reactive.function.client.toEntity
 class FiksClientImpl(
     private val clientProperties: ClientProperties,
     private val fiksWebClient: WebClient,
+    private val tilgangskontroll: Tilgangskontroll,
     private val retryProperties: FiksRetryProperties,
     private val redisService: RedisService,
 ) : FiksClient {
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
-        return when {
+        val sak =  when {
             useCache -> hentDigisosSakFraCache(digisosId) ?: hentDigisosSakFraFiks(digisosId, token)
             else -> hentDigisosSakFraFiks(digisosId, token)
         }
+        tilgangskontroll.verifyDigisosSakIsForCorrectUser(sak)
+        return sak
     }
 
     private fun hentDigisosSakFraCache(digisosId: String): DigisosSak? =
@@ -137,6 +141,7 @@ class FiksClientImpl(
                 }
                 .block() ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
         }
+        digisosSaker.forEach{ tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
         return digisosSaker
     }
 
@@ -151,6 +156,7 @@ class FiksClientImpl(
         val body = createBodyForUpload(vedleggJson, files)
 
         val digisosSak = hentDigisosSakFraFiks(digisosId, token)
+        tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val kommunenummer = digisosSak.kommunenummer
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 

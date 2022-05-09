@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.client.pdl
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.common.PdlException
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -27,6 +28,7 @@ import java.util.stream.Collectors
 
 interface PdlClient {
     fun hentPerson(ident: String, token: String): PdlHentPerson?
+    fun hentIdenter(ident: String, token: String): List<String>?
     fun ping()
 }
 
@@ -41,6 +43,11 @@ class PdlClientImpl(
 
     override fun hentPerson(ident: String, token: String): PdlHentPerson? {
         return hentFraCache(ident) ?: hentFraPdl(ident, token)
+    }
+
+    override fun hentIdenter(ident: String, token: String): List<String>? {
+        // TODO: Hent fra PDL
+        return listOf(SubjectHandlerUtils.getUserIdFromToken())
     }
 
     private fun hentFraCache(ident: String): PdlHentPerson? =

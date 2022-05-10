@@ -56,7 +56,7 @@ internal class DokumentasjonEtterspurtTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
         resetHendelser()
@@ -64,7 +64,7 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     fun `dokumentliste er satt OG vedtaksbrev er satt - skal gi oppgaver og historikk`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -98,7 +98,7 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     internal fun `dokumentliste er satt OG forvaltningsbrev mangler - skal gi oppgaver men ikke historikk`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -127,7 +127,7 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     fun `dokumentliste er tom OG forvaltningsbrev er satt - skal verken gi oppgaver eller historikk`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -150,7 +150,7 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     fun `oppgaver skal hentes fra soknaden dersom det ikke finnes dokumentasjonEtterspurt`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -160,7 +160,7 @@ internal class DokumentasjonEtterspurtTest {
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
             listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -186,8 +186,8 @@ internal class DokumentasjonEtterspurtTest {
     @Test
     fun `oppgaver som hentes fra soknad skal ha hendelseType og HendelseReferanse om de er satt i soknaden`() {
         val hendelseReferanse = "1234"
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
             listOf(
                 InternalVedlegg(
                     vedleggKrevesDokumenttype,
@@ -209,8 +209,8 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     fun `oppgaver som hentes fra soknad skal ha hendelseType men ikke hendelsereferanse om det ikke er satt i soknaden`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns null
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
             listOf(
                 InternalVedlegg(
                     vedleggKrevesDokumenttype,
@@ -231,7 +231,7 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     internal fun `dokumentasjonEtterspurt overstyrer gjenstaende vedleggskrav fra soknad`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -242,7 +242,7 @@ internal class DokumentasjonEtterspurtTest {
                         DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
             listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -262,7 +262,7 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     internal fun `ny dokumentasjonEtterspurt uten oppgaver skal overstyre og gi hendelse i historikk`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -274,7 +274,7 @@ internal class DokumentasjonEtterspurtTest {
                         DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
             listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -292,7 +292,7 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     internal fun `ny dokumentasjonEtterspurt uten oppgaver skal ikke gi hendelse i historikk ved soknadstatus ferdigbehandlet`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -304,7 +304,7 @@ internal class DokumentasjonEtterspurtTest {
                         DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
             listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -321,7 +321,7 @@ internal class DokumentasjonEtterspurtTest {
 
     @Test
     internal fun `ny dokumentasjonEtterspurt uten oppgaver skal ikke gi hendelse i historikk ved soknadstatus behandles_ikke`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -333,7 +333,7 @@ internal class DokumentasjonEtterspurtTest {
                         DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
             listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -357,7 +357,7 @@ internal class DokumentasjonEtterspurtTest {
         val tidspunktDokumentasjonEtterspurt = nowMinus31Days.minusMinutes(3).format(DateTimeFormatter.ISO_DATE_TIME)
 
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunktSendt31dagerSiden
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")

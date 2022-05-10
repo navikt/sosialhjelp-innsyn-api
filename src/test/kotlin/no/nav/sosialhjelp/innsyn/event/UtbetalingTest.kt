@@ -48,7 +48,7 @@ internal class UtbetalingTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
         resetHendelser()
@@ -56,7 +56,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetaling ETTER vedtakFattet og saksStatus`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -70,7 +70,7 @@ internal class UtbetalingTest {
                         UTBETALING.withHendelsestidspunkt(tidspunkt_6)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -100,7 +100,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetaling UTEN vedtakFattet`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -111,7 +111,7 @@ internal class UtbetalingTest {
                         UTBETALING_BANKOVERFORING.withHendelsestidspunkt(tidspunkt_3)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -124,7 +124,7 @@ internal class UtbetalingTest {
 
     @Test
     fun `utbetaling kontonummer settes kun hvis annenMottaker er false`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -135,7 +135,7 @@ internal class UtbetalingTest {
                         UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 

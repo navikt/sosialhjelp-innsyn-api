@@ -34,7 +34,7 @@ internal class OrginalSoknadServiceTest {
         every { mockDigisosSak.originalSoknadNAV } returns orginalSoknadNAV
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "metadata"
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
-        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns null
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns null
 
         assertThat(service.hentOrginalJsonSoknad("1234", "token")).isEqualTo(null)
     }
@@ -45,7 +45,7 @@ internal class OrginalSoknadServiceTest {
         every { mockDigisosSak.originalSoknadNAV } returns orginalSoknadNAV
         every { mockDigisosSak.originalSoknadNAV?.metadata } returns "metadata"
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
-        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
 
         assertThat(service.hentOrginalJsonSoknad("1234", "token")).isEqualTo(OrginalJsonSoknadResponse(mockJsonSoknad))
     }

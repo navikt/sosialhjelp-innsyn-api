@@ -35,6 +35,7 @@ internal class VedleggServiceTest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV } returns originalSoknad
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns ettersendelser
+        every { mockDigisosSak.fiksDigisosId } returns "fiksDigisosId"
 
         every { mockJsonVedleggSpesifikasjon.vedlegg } returns emptyList()
 
@@ -139,9 +140,10 @@ internal class VedleggServiceTest {
     }
 
     @Test
-    fun `skal hente søknadsvedlegg filtrert på status for digisosSak`() {
-        val lastetOppList = service.hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, id, originalSoknadMedVedleggKrevesOgLastetOpp, "token")
-        val vedleggKrevesList = service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, id, originalSoknadMedVedleggKrevesOgLastetOpp, "token")
+    fun `skal hente soknadsvedlegg filtrert pa status for digisosSak`() {
+        every { mockDigisosSak.originalSoknadNAV } returns originalSoknadMedVedleggKrevesOgLastetOpp
+        val lastetOppList = service.hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, mockDigisosSak, "token")
+        val vedleggKrevesList = service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, mockDigisosSak, "token")
 
         assertThat(lastetOppList).hasSize(1)
         assertThat(vedleggKrevesList).hasSize(1)

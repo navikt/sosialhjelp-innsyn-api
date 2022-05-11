@@ -1,9 +1,7 @@
 package no.nav.sosialhjelp.innsyn.service.innsyn
 
-import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
@@ -13,7 +11,6 @@ import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.service.kommune.KommuneService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,8 +19,7 @@ internal class InnsynServiceTest {
 
     private val fiksClient: FiksClient = mockk()
     private val kommuneService: KommuneService = mockk()
-    private val tilgangskontroll: Tilgangskontroll = mockk()
-    private val service = InnsynService(fiksClient, tilgangskontroll, kommuneService)
+    private val service = InnsynService(fiksClient, kommuneService)
     private val originalSoknad: OriginalSoknadNAV = mockk()
     private val digisosSoker: DigisosSoker = mockk()
     private val digisosSak: DigisosSak = mockk()
@@ -33,7 +29,6 @@ internal class InnsynServiceTest {
         clearAllMocks()
 
         every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
-        every { tilgangskontroll.verifyDigisosSakIsForCorrectUser(any()) } just Runs
         every { originalSoknad.metadata } returns "metadata"
         every { digisosSoker.metadata } returns "metadata"
         every { digisosSak.originalSoknadNAV } returns originalSoknad

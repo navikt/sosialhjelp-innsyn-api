@@ -73,7 +73,7 @@ internal class DittNavOppgaverServiceTest {
         coEvery { mockDigisosSak.sistEndret } returns LocalDateTime.now().minusDays(2).toInstant(ZoneOffset.UTC).toEpochMilli()
         coEvery { mockDigisosSak.originalSoknadNAV?.navEksternRefId } returns "behandlingsId"
 
-        coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+        coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
         val model = InternalDigisosSoker()
         coEvery { eventService.createSaksoversiktModel(any(), any()) } returns model
@@ -99,7 +99,7 @@ internal class DittNavOppgaverServiceTest {
         model.oppgaver.add(oppgave)
 
         coEvery { eventService.createSaksoversiktModel(mockDigisosSak, any()) } returns model
-        coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+        coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
         val aktiveOppgaver = service.hentAktiveOppgaver(token)
         val inaktiveOppgaver = service.hentInaktiveOppgaver(token)
@@ -132,7 +132,7 @@ internal class DittNavOppgaverServiceTest {
 
         coEvery { eventService.createSaksoversiktModel(mockDigisosSak, any()) } returns model
 
-        coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+        coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
             InternalVedlegg(oppgave.tittel, oppgave.tilleggsinfo, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, "ref", emptyList(), tidspunktEtterKrav)
         )
 
@@ -168,7 +168,7 @@ internal class DittNavOppgaverServiceTest {
 
         coEvery { eventService.createSaksoversiktModel(mockDigisosSak, any()) } returns model
 
-        coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+        coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
             InternalVedlegg(oppgave.tittel, oppgave.tilleggsinfo, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, "ref", emptyList(), tidspunktEtterKrav)
         )
 
@@ -217,8 +217,8 @@ internal class DittNavOppgaverServiceTest {
         coEvery { eventService.createSaksoversiktModel(mockDigisosSak, any()) } returns model
         coEvery { eventService.createSaksoversiktModel(mockDigisosSak2, any()) } returns model2
 
-        coEvery { vedleggService.hentEttersendteVedlegg(mockDigisosSak, any(), any()) } returns emptyList()
-        coEvery { vedleggService.hentEttersendteVedlegg(mockDigisosSak2, any(), any()) } returns emptyList()
+        coEvery { vedleggService.hentEttersendteVedlegg(mockDigisosSak, any()) } returns emptyList()
+        coEvery { vedleggService.hentEttersendteVedlegg(mockDigisosSak2, any()) } returns emptyList()
 
         val aktiveOppgaver = service.hentAktiveOppgaver(token)
         val inaktiveOppgaver = service.hentInaktiveOppgaver(token)
@@ -265,10 +265,10 @@ internal class DittNavOppgaverServiceTest {
         coEvery { eventService.createSaksoversiktModel(mockDigisosSak, any()) } returns model
         coEvery { eventService.createSaksoversiktModel(mockDigisosSak2, any()) } returns model2
 
-        coEvery { vedleggService.hentEttersendteVedlegg(mockDigisosSak, any(), any()) } returns listOf(
+        coEvery { vedleggService.hentEttersendteVedlegg(mockDigisosSak, any()) } returns listOf(
             InternalVedlegg(oppgave.tittel, oppgave.tilleggsinfo, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, "ref", emptyList(), tidspunktEtterKrav)
         )
-        coEvery { vedleggService.hentEttersendteVedlegg(mockDigisosSak2, any(), any()) } returns listOf(
+        coEvery { vedleggService.hentEttersendteVedlegg(mockDigisosSak2, any()) } returns listOf(
             InternalVedlegg(oppgave2.tittel, oppgave2.tilleggsinfo, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, "ref", emptyList(), tidspunktEtterKrav)
         )
 

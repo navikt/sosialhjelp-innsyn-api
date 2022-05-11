@@ -77,7 +77,7 @@ internal class HendelseServiceTest {
         model.historikk.add(Hendelse(tittel_sendt, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)))
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -99,7 +99,7 @@ internal class HendelseServiceTest {
         )
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -109,7 +109,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg`() {
         every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
             InternalVedlegg(dokumenttype_1, null, null, null, listOf(dok1), tidspunkt4),
             InternalVedlegg(dokumenttype_2, null, null, null, listOf(dok2, dok3), tidspunkt5)
         )
@@ -127,7 +127,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg - tom fil-liste skal ikke resultere i hendelse`() {
         every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
             InternalVedlegg(dokumenttype_2, null, null, null, emptyList(), tidspunkt5)
         )
 
@@ -141,7 +141,7 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
             InternalVedlegg(dokumenttype_1, null, null, null, listOf(dok1, dok2), tidspunkt4),
             InternalVedlegg(dokumenttype_2, null, null, null, listOf(dok2, dok3), tidspunkt5)
         )
@@ -161,7 +161,7 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
             InternalVedlegg(dokumenttype_1, null, null, null, listOf(dok1), tidspunkt4),
             InternalVedlegg(dokumenttype_2, null, null, null, listOf(dok2), tidspunkt4)
         )
@@ -179,7 +179,7 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
             InternalVedlegg(dokumenttype_1, null, null, null, listOf(dok1), tidspunkt4),
             InternalVedlegg(dokumenttype_2, null, null, null, listOf(dok2), tidspunkt4.plus(1, ChronoUnit.MILLIS))
         )
@@ -227,7 +227,7 @@ internal class HendelseServiceTest {
         )
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -299,7 +299,7 @@ internal class HendelseServiceTest {
         )
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 
@@ -388,7 +388,7 @@ internal class HendelseServiceTest {
         )
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
         val hendelser = service.hentHendelser("123", "Token")
 

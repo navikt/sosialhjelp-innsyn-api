@@ -5,7 +5,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
-import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.NedlastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -25,7 +24,7 @@ class VedleggService(
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
 
         val soknadVedlegg = hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, digisosSak, token)
-        val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak, digisosSak.ettersendtInfoNAV, token)
+        val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak, token)
 
         return soknadVedlegg.plus(ettersendteVedlegg)
     }
@@ -52,8 +51,8 @@ class VedleggService(
             }
     }
 
-    fun hentEttersendteVedlegg(digisosSak: DigisosSak, ettersendtInfoNAV: EttersendtInfoNAV?, token: String): List<InternalVedlegg> {
-        return ettersendtInfoNAV
+    fun hentEttersendteVedlegg(digisosSak: DigisosSak, token: String): List<InternalVedlegg> {
+        return digisosSak.ettersendtInfoNAV
             ?.ettersendelser
             ?.flatMap { ettersendelse ->
                 var filIndex = 0

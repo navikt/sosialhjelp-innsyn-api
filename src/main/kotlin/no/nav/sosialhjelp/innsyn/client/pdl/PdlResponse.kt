@@ -1,9 +1,18 @@
 package no.nav.sosialhjelp.innsyn.client.pdl
 
+interface PdlResponse {
+    val errors: List<PdlError>?
+}
+
 data class PdlPersonResponse(
-    val errors: List<PdlError>?,
+    override val errors: List<PdlError>?,
     val data: PdlHentPerson?
-)
+) : PdlResponse
+
+data class PdlIdenterResponse(
+    override val errors: List<PdlError>?,
+    val data: PdlHentIdenter?
+) : PdlResponse
 
 data class PdlError(
     val message: String,
@@ -20,6 +29,18 @@ data class PdlErrorLocation(
 data class PdlErrorExtension(
     val code: String?,
     val classification: String
+)
+
+data class PdlHentIdenter(
+    val hentIdenter: PdlIdenter?
+)
+
+data class PdlIdenter(
+    val identer: List<PdlIdent>
+)
+
+data class PdlIdent(
+    val ident: String,
 )
 
 data class PdlHentPerson(

@@ -53,7 +53,7 @@ class TilgangskontrollService(
     override fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
         val gyldigeIdenter = pdlClient.hentIdenter(SubjectHandlerUtils.getUserIdFromToken(), SubjectHandlerUtils.getToken())
         if (gyldigeIdenter?.contains(digisosSak.sokerFnr) != true)
-            throw BadStateException("digisosSak hører ikke til rett person")
+            throw TilgangskontrollException("digisosSak hører ikke til rett person")
     }
 
     private fun fornavn(pdlPerson: PdlPerson?): String {

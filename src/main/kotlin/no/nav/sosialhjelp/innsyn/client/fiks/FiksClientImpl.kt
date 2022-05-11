@@ -46,7 +46,7 @@ class FiksClientImpl(
 ) : FiksClient {
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
-        val sak =  when {
+        val sak = when {
             useCache -> hentDigisosSakFraCache(digisosId) ?: hentDigisosSakFraFiks(digisosId, token)
             else -> hentDigisosSakFraFiks(digisosId, token)
         }
@@ -141,7 +141,7 @@ class FiksClientImpl(
                 }
                 .block() ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
         }
-        digisosSaker.forEach{ tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
+        digisosSaker.forEach { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
         return digisosSaker
     }
 

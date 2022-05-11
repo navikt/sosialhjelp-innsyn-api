@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.service.tilgangskontroll
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.pdl.Adressebeskyttelse
 import no.nav.sosialhjelp.innsyn.client.pdl.Gradering
 import no.nav.sosialhjelp.innsyn.client.pdl.PdlClient
@@ -27,11 +28,15 @@ internal class TilgangskontrollServiceTest {
 
     private val mockSubjectHandler: SubjectHandler = mockk()
 
+    private val digisosSak: DigisosSak = mockk()
+
     @BeforeEach
     fun init() {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
 
         every { mockSubjectHandler.getUserIdFromToken() } returns ident
+        every { mockSubjectHandler.getToken() } returns "token"
+        every { digisosSak.sokerFnr } returns ident
     }
 
     @Test
@@ -152,5 +157,27 @@ internal class TilgangskontrollServiceTest {
 
         assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
         assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
+    }
+
+    @Test
+    internal fun `verifyDigisosSakIsForCorrectUser - ok - skal ikke kaste exception`() {
+        every { pdlClientMock.hentIdenter(any(), any()) } returns listOf(ident)
+
+        service.verifyDigisosSakIsForCorrectUser(digisosSak)
+    }
+
+    @Test
+    internal fun `verifyDigisosSakIsForCorrectUser - feil person - skal kaste exception`() {
+        every { pdlClientMock.hentIdenter(any(), any()) } returns listOf("fnr")
+
+        assertThatExceptionOfType(TilgangskontrollException::class.java)
+            .isThrownBy { service.verifyDigisosSakIsForCorrectUser(digisosSak) }
+    }
+
+    @Test
+    internal fun `verifyDigisosSakIsForCorrectUser - to fnr - ok`() {
+        every { pdlClientMock.hentIdenter(any(), any()) } returns listOf("fnr", ident)
+
+        service.verifyDigisosSakIsForCorrectUser(digisosSak)
     }
 }

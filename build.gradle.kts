@@ -30,6 +30,8 @@ object Versions {
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
     const val log4j = "2.17.2"
+    const val netty = "4.1.77.Final"
+    const val spring = "5.3.20"
 
     const val javaJwt = "3.19.2"
     const val jwksRsa = "0.21.1"
@@ -172,6 +174,15 @@ dependencies {
         }
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${Versions.log4j}") {
             because("0-day exploit i version 2.0.0-2.14.1")
+        }
+        implementation("io.netty:netty-handler:${Versions.netty}") {
+            because("snyk ønsker 4.1.77.Final eller høyere")
+        }
+        implementation("io.netty:netty-common:${Versions.netty}") {
+            because("snyk ønsker 4.1.77.Final eller høyere")
+        }
+        implementation("org.springframework:spring-beans:${Versions.spring}") {
+            because("snyk ønsker 5.3.20 eller høyere")
         }
 
         testImplementation("junit:junit:${Versions.junit}") {

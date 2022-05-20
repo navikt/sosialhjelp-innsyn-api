@@ -103,6 +103,11 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbus}")
 
 //    Micrometer/Prometheus
+    implementation("io.micrometer:micrometer-core") {
+        version {
+            strictly(Versions.micrometerRegistry)
+        }
+    }
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
     implementation("io.prometheus:simpleclient_common:${Versions.prometheus}")
     implementation("io.prometheus:simpleclient_hotspot:${Versions.prometheus}")

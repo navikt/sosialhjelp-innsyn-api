@@ -1,18 +1,15 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
-import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.1"
-    const val springBoot = "2.6.7"
+    const val springBoot = "2.7.0"
     const val sosialhjelpCommon = "1.2fac7a7"
     const val logback = "1.2.11"
-    const val logstash = "7.1.1"
+    const val logstash = "7.2"
     const val filformat = "1.2022.04.29-13.11-459bee049a7a"
-    const val micrometerRegistry = "1.8.5"
+    const val micrometerRegistry = "1.9.0"
     const val prometheus = "0.15.0"
     const val tokenValidation = "2.0.20"
     const val jackson = "2.13.3"
@@ -30,8 +27,6 @@ object Versions {
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
     const val log4j = "2.17.2"
-    const val netty = "4.1.77.Final"
-    const val spring = "5.3.20"
 
     const val javaJwt = "3.19.2"
     const val jwksRsa = "0.21.1"
@@ -47,18 +42,11 @@ object Versions {
 }
 
 plugins {
-    application
     kotlin("jvm") version "1.6.21"
-
-    id("org.jetbrains.kotlin.plugin.spring") version "1.6.21"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    kotlin("plugin.spring") version "1.6.21"
+    id("org.springframework.boot") version "2.7.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
-}
-
-application {
-    applicationName = "sosialhjelp-innsyn-api"
-    mainClass.set("no.nav.sosialhjelp.innsyn.ApplicationKt")
 }
 
 java {
@@ -175,15 +163,6 @@ dependencies {
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${Versions.log4j}") {
             because("0-day exploit i version 2.0.0-2.14.1")
         }
-        implementation("io.netty:netty-handler:${Versions.netty}") {
-            because("snyk ønsker 4.1.77.Final eller høyere")
-        }
-        implementation("io.netty:netty-common:${Versions.netty}") {
-            because("snyk ønsker 4.1.77.Final eller høyere")
-        }
-        implementation("org.springframework:spring-beans:${Versions.spring}") {
-            because("snyk ønsker 5.3.20 eller høyere")
-        }
 
         testImplementation("junit:junit:${Versions.junit}") {
             because("Snyk ønsker 4.13.1 eller høyere")
@@ -210,41 +189,17 @@ repositories {
     }
 }
 
-tasks {
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "17"
-            freeCompilerArgs = listOf("-Xjsr305=strict", "-XXLanguage:+InlineClasses")
-        }
-    }
-
-    withType<Test> {
-        useJUnitPlatform {
-            includeEngines("junit-jupiter")
-        }
-        testLogging {
-            events("skipped", "failed")
-        }
-    }
-
-    withType<ShadowJar> {
-        archiveClassifier.set("")
-        transform(ServiceFileTransformer::class.java) {
-            setPath("META-INF/cxf")
-            include("bus-extensions.txt")
-        }
-        transform(PropertiesFileTransformer::class.java) {
-            paths = listOf("META-INF/spring.factories")
-            mergeStrategy = "append"
-        }
-        mergeServiceFiles()
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "17"
     }
 }
 
-tasks.register("stage") {
-    dependsOn("build")
-    doLast {
-        delete(fileTree("dir" to "build", "exclude" to "libs"))
-        delete(fileTree("dir" to "build/libs", "exclude" to "*.jar"))
-    }
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    this.archiveFileName.set("app.jar")
 }

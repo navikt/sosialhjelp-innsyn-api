@@ -4,7 +4,7 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.1"
-    const val springBoot = "2.7.0"
+    const val springBoot = "2.6.8"
     const val sosialhjelpCommon = "1.2fac7a7"
     const val logback = "1.2.11"
     const val logstash = "7.2"
@@ -44,7 +44,7 @@ object Versions {
 plugins {
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
-    id("org.springframework.boot") version "2.7.0"
+    id("org.springframework.boot") version "2.6.8"
     id("com.github.ben-manes.versions") version "0.42.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
@@ -103,11 +103,6 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbus}")
 
 //    Micrometer/Prometheus
-    implementation("io.micrometer:micrometer-core") {
-        version {
-            strictly(Versions.micrometerRegistry)
-        }
-    }
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")
     implementation("io.prometheus:simpleclient_common:${Versions.prometheus}")
     implementation("io.prometheus:simpleclient_hotspot:${Versions.prometheus}")

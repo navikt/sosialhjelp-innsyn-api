@@ -19,7 +19,9 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
 import java.text.DateFormatSymbols
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.ZoneOffset
 import java.util.Locale
 
 const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
@@ -92,7 +94,10 @@ class UtbetalingerService(
     }
 
     fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean {
-        return digisosSak.sistEndret >= DateTime.now().minusMonths(months).millis
+        val testDato = LocalDateTime.now().minusMonths(months.toLong()).toInstant(ZoneOffset.UTC).toEpochMilli()
+        val oldTestDato = DateTime.now().minusMonths(months).millis
+        if (oldTestDato != testDato) log.error("LocalDateTime $testDato != joda.DateTime $oldTestDato")
+        return digisosSak.sistEndret >= testDato
     }
 
     fun isDateNewerThanMonths(date: LocalDate, months: Int): Boolean {

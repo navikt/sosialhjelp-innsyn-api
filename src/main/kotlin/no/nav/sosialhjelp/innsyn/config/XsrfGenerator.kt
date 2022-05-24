@@ -5,9 +5,10 @@ import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.apache.commons.codec.binary.Base64
-import org.joda.time.LocalDateTime
 import org.springframework.stereotype.Component
 import java.security.NoSuchAlgorithmException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -61,6 +62,7 @@ class XsrfGenerator(
     }
 
     companion object {
-        fun redisKey(token: String, date: LocalDateTime) = sha256(token + date.toString("yyyyMMdd"))
+        private val redisDatoFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+        fun redisKey(token: String, date: LocalDateTime) = sha256(token + redisDatoFormatter.format(date))
     }
 }

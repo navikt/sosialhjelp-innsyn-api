@@ -17,6 +17,8 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Component
 class DittNavOppgaverService(
@@ -91,8 +93,12 @@ class DittNavOppgaverService(
 
         private val log by logger()
 
-        fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean =
-            digisosSak.sistEndret >= DateTime.now().minusMonths(months).millis
+        fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean {
+            val testDato = LocalDateTime.now().minusMonths(months.toLong()).toInstant(ZoneOffset.UTC).toEpochMilli()
+            val oldTestDato = DateTime.now().minusMonths(months).millis
+            if (oldTestDato != testDato) log.error("LocalDateTime $testDato != joda.DateTime $oldTestDato")
+            return digisosSak.sistEndret >= testDato
+        }
 
         private fun erAlleredeLastetOpp(oppgave: Oppgave, vedleggListe: List<InternalVedlegg>): Boolean =
             vedleggListe

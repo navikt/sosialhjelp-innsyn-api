@@ -20,13 +20,13 @@ import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.event.apply
 import org.assertj.core.api.Assertions.assertThat
-import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 internal class UtbetalingerServiceTest {
@@ -52,7 +52,7 @@ internal class UtbetalingerServiceTest {
 
         coEvery { mockDigisosSak.fiksDigisosId } returns digisosId
         coEvery { mockDigisosSak.kommunenummer } returns "kommunenr"
-        coEvery { mockDigisosSak.sistEndret } returns DateTime.now().millis
+        coEvery { mockDigisosSak.sistEndret } returns LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
     }
 
     @Test
@@ -364,12 +364,13 @@ internal class UtbetalingerServiceTest {
         val mockDigisosSak2: DigisosSak = mockk()
         val id1 = "some id"
         val id2 = "other id"
+        val nowMillis = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
         coEvery { mockDigisosSak.fiksDigisosId } returns id1
         coEvery { mockDigisosSak.kommunenummer } returns "kommune1"
-        coEvery { mockDigisosSak.sistEndret } returns DateTime.now().millis
+        coEvery { mockDigisosSak.sistEndret } returns nowMillis
         coEvery { mockDigisosSak2.fiksDigisosId } returns id2
         coEvery { mockDigisosSak2.kommunenummer } returns "kommune2"
-        coEvery { mockDigisosSak2.sistEndret } returns DateTime.now().millis
+        coEvery { mockDigisosSak2.sistEndret } returns nowMillis
         coEvery { eventService.hentAlleUtbetalinger(token, mockDigisosSak) } returns model
         coEvery { eventService.hentAlleUtbetalinger(token, mockDigisosSak2) } returns model2
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak, mockDigisosSak2)

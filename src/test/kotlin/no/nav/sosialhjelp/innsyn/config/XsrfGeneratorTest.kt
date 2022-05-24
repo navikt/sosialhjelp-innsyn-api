@@ -12,9 +12,9 @@ import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.joda.time.LocalDateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import javax.servlet.http.HttpServletRequest
 
 internal class XsrfGeneratorTest {

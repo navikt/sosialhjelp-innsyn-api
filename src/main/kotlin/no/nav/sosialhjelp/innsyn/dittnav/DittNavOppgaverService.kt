@@ -58,7 +58,7 @@ class DittNavOppgaverService(
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak.fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, token)
 
         return model.oppgaver
             .filter {

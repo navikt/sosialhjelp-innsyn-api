@@ -52,7 +52,7 @@ internal class DokumentasjonkravTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
@@ -64,7 +64,7 @@ internal class DokumentasjonkravTest {
 
     @Test
     fun `dokumentasjonkrav ETTER utbetaling`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -78,7 +78,7 @@ internal class DokumentasjonkravTest {
                         DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -101,7 +101,7 @@ internal class DokumentasjonkravTest {
 
     @Test
     fun `dokumentasjonkrav UTEN utbetaling - skal ikke legge til dokumentasjonkrav eller historikk`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -112,7 +112,7 @@ internal class DokumentasjonkravTest {
                         DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_3)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -127,7 +127,7 @@ internal class DokumentasjonkravTest {
 
     @Test
     fun `dokumentasjonkrav ETTER utbetaling UTEN saksreferanse`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -140,7 +140,7 @@ internal class DokumentasjonkravTest {
                         DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -156,7 +156,7 @@ internal class DokumentasjonkravTest {
 
     @Test
     fun `dokumentasjonkrav samme dokumentasjonkravreferanse to ganger`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -170,7 +170,7 @@ internal class DokumentasjonkravTest {
                         DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -185,8 +185,8 @@ internal class DokumentasjonkravTest {
     }
 
     @Test
-    fun `dokumentasjonkrav FØR utbetaling - skal ikke gi noen dokumentasjonkrav`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+    fun `dokumentasjonkrav FOR utbetaling - skal ikke gi noen dokumentasjonkrav`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -200,7 +200,7 @@ internal class DokumentasjonkravTest {
                         UTBETALING.withHendelsestidspunkt(tidspunkt_6)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -215,7 +215,7 @@ internal class DokumentasjonkravTest {
 
     @Test
     fun `dokumentasjonkrav og utbetaling har identiske hendelsestidspunkt`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -229,7 +229,7 @@ internal class DokumentasjonkravTest {
                         UTBETALING.withHendelsestidspunkt(tidspunkt_5)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 

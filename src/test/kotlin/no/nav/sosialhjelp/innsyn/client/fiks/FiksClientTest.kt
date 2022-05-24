@@ -19,6 +19,7 @@ import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.service.pdf.EttersendelsePdfGenerator
+import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.service.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -48,7 +49,8 @@ internal class FiksClientTest {
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, fiksWebClient, retryProperties, redisService)
+    private val tilgangskontroll: Tilgangskontroll = mockk()
+    private val fiksClient = FiksClientImpl(clientProperties, fiksWebClient, tilgangskontroll, retryProperties, redisService)
 
     private val id = "123"
 
@@ -60,6 +62,8 @@ internal class FiksClientTest {
         every { redisService.get(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
         every { redisService.defaultTimeToLiveSeconds } returns 1
+
+        every { tilgangskontroll.verifyDigisosSakIsForCorrectUser(any()) } just Runs
 
         every { retryProperties.attempts } returns 2
         every { retryProperties.initialDelay } returns 5
@@ -254,7 +258,7 @@ internal class FiksClientTest {
     @Test // fikk ikke mockWebServer til å funke her uten å skjønner hvorfor (InputStream-relatert), så gikk for "klassisk" mockk stil
     fun `POST ny ettersendelse`() {
         val webClient: WebClient = mockk()
-        val clientForPost = FiksClientImpl(clientProperties, webClient, retryProperties, redisService)
+        val clientForPost = FiksClientImpl(clientProperties, webClient, tilgangskontroll, retryProperties, redisService)
 
         val fil1: InputStream = mockk()
         val fil2: InputStream = mockk()

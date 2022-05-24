@@ -17,7 +17,7 @@ class OrginalSoknadService(
 ) {
     fun hentOrginalJsonSoknad(fiksDigisosId: String, token: String): OrginalJsonSoknadResponse? {
         val digisosSak: DigisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        val orginalJsonSoknad = innsynService.hentOriginalSoknad(fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
+        val orginalJsonSoknad = innsynService.hentOriginalSoknad(digisosSak, token)
             ?: return null
 
         return OrginalJsonSoknadResponse(orginalJsonSoknad)

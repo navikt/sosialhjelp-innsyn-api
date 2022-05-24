@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
+import no.nav.sosialhjelp.innsyn.redis.PDL_IDENTER_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
@@ -27,6 +28,7 @@ import java.util.stream.Collectors
 
 interface PdlClient {
     fun hentPerson(ident: String, token: String): PdlHentPerson?
+    fun hentIdenter(ident: String, token: String): List<String>?
     fun ping()
 }
 
@@ -43,11 +45,17 @@ class PdlClientImpl(
         return hentFraCache(ident) ?: hentFraPdl(ident, token)
     }
 
+    override fun hentIdenter(ident: String, token: String): List<String> {
+        redisService.get(PDL_IDENTER_CACHE_KEY_PREFIX + ident, PdlIdenter::class.java)
+            ?.let { pdlIdenter -> return (pdlIdenter as PdlIdenter).identer.map { it.ident } }
+        return hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
+    }
+
     private fun hentFraCache(ident: String): PdlHentPerson? =
         redisService.get(cacheKey(ident), PdlHentPerson::class.java) as? PdlHentPerson
 
     private fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
-        val query = getQuery()
+        val query = getHentPersonResource().replace("[\n\r]", "")
         try {
             val pdlPersonResponse = runBlocking {
                 retry(
@@ -77,6 +85,37 @@ class PdlClientImpl(
         }
     }
 
+    private fun hentIdenterFraPdl(ident: String, token: String): PdlIdenter? {
+        val query = getHentIdenterResource().replace("[\n\r]", "")
+        try {
+            val pdlIdenterResponse = runBlocking {
+                retry(
+                    attempts = RETRY_ATTEMPTS,
+                    initialDelay = INITIAL_DELAY,
+                    maxDelay = MAX_DELAY,
+                    retryableExceptions = arrayOf(WebClientResponseException::class)
+                ) {
+                    pdlWebClient.post()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                        .header(HEADER_TEMA, TEMA_KOM)
+                        .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                        .bodyValue(PdlRequest(query, Variables(ident)))
+                        .retrieve()
+                        .awaitBody<PdlIdenterResponse>()
+                }
+            }
+
+            checkForPdlApiErrors(pdlIdenterResponse)
+
+            return pdlIdenterResponse.data?.hentIdenter
+                .also { it?.let { lagreIdenterTilCache(ident, it) } }
+        } catch (e: WebClientResponseException) {
+            log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
+            throw PdlException(e.message ?: "Ukjent PdlException")
+        }
+    }
+
     private suspend fun tokenXtoken(ident: String, token: String) =
         tokendingsService.exchangeToken(ident, token, clientProperties.pdlAudience)
 
@@ -90,13 +129,15 @@ class PdlClientImpl(
             .subscribe()
     }
 
-    private fun getQuery(): String =
-        this.javaClass.getResource("/pdl/hentPerson.graphql")?.readText()?.replace("[\n\r]", "")
-            ?: throw RuntimeException("Feil ved lesing av graphql-spørring fra fil")
+    private fun getHentPersonResource() = getResourceAsString("/pdl/hentPerson.graphql")
+    private fun getHentIdenterResource() = getResourceAsString("/pdl/hentIdenter.graphql")
+    private fun getResourceAsString(path: String) =
+        this::class.java.getResource(path)?.readText()
+            ?: throw RuntimeException("Klarte ikke å hente PDL query resurs: $path")
 
-    private fun checkForPdlApiErrors(response: PdlPersonResponse?) {
+    private fun checkForPdlApiErrors(response: PdlResponse?) {
         Optional.ofNullable(response)
-            .map(PdlPersonResponse::errors)
+            .map(PdlResponse::errors)
             .ifPresent { handleErrors(it) }
     }
 
@@ -114,6 +155,9 @@ class PdlClientImpl(
 
     private fun lagreTilCache(ident: String, pdlHentPerson: PdlHentPerson) =
         redisService.put(cacheKey(ident), objectMapper.writeValueAsBytes(pdlHentPerson))
+
+    private fun lagreIdenterTilCache(ident: String, pdlIdenter: PdlIdenter) =
+        redisService.put(PDL_IDENTER_CACHE_KEY_PREFIX + ident, objectMapper.writeValueAsBytes(pdlIdenter))
 
     companion object {
         private val log by logger()

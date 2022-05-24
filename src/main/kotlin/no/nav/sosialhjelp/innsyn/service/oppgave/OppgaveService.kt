@@ -31,7 +31,7 @@ class OppgaveService(
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, token)
 
         val oppgaveResponseList = model.oppgaver
             .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
@@ -114,7 +114,7 @@ class OppgaveService(
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(fiksDigisosId, digisosSak.ettersendtInfoNAV, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, token)
 
         // Logger om fagsystemene har tatt i bruk nye statuser
         val antallWithNewStatus = model.dokumentasjonkrav
@@ -125,6 +125,7 @@ class OppgaveService(
         }
 
         val dokumentasjonkravResponseList = model.dokumentasjonkrav
+            .asSequence()
             .filter {
                 !it.isEmpty()
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
@@ -151,6 +152,7 @@ class OppgaveService(
                 )
             }
             .sortedWith(compareBy(nullsLast()) { it.frist })
+            .toList()
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList

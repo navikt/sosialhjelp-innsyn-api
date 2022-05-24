@@ -49,7 +49,7 @@ internal class VilkarTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        every { innsynService.hentOriginalSoknad(any(), any(), any()) } returns mockJsonSoknad
+        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
         every { unleashClient.isEnabled(VILKAR, false) } returns true
@@ -58,7 +58,7 @@ internal class VilkarTest {
 
     @Test
     fun `vilkar ETTER utbetaling`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -72,7 +72,7 @@ internal class VilkarTest {
                         VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -91,7 +91,7 @@ internal class VilkarTest {
 
     @Test
     fun `vilkar UTEN utbetaling`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -102,7 +102,7 @@ internal class VilkarTest {
                         VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_3)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -113,8 +113,8 @@ internal class VilkarTest {
     }
 
     @Test
-    fun `vilkar FØR utbetaling - vilkar knyttes ikke til noen utbetaling`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+    fun `vilkar FOR utbetaling - vilkar knyttes ikke til noen utbetaling`() {
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -128,7 +128,7 @@ internal class VilkarTest {
                         UTBETALING.withHendelsestidspunkt(tidspunkt_6)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -142,7 +142,7 @@ internal class VilkarTest {
 
     @Test
     fun `vilkar og utbetaling har samme hendelsestidspunkt`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any(), any()) } returns
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
                 .withVersion("123")
@@ -156,7 +156,7 @@ internal class VilkarTest {
                         UTBETALING.withHendelsestidspunkt(tidspunkt_5)
                     )
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any(), any()) } returns emptyList()
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val model = service.createModel(mockDigisosSak, "token")
 

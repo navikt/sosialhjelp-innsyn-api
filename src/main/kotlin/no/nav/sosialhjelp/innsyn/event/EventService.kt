@@ -42,8 +42,8 @@ class EventService(
 ) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
-        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
-        val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak.fiksDigisosId, digisosSak.originalSoknadNAV?.metadata, token)
+        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
+        val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak, token)
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
         val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 
@@ -82,7 +82,7 @@ class EventService(
     }
 
     fun createSaksoversiktModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
-        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
+        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
 
         val model = InternalDigisosSoker()
@@ -106,13 +106,13 @@ class EventService(
             ?.isEmpty() ?: true
 
         if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)) {
-            model.applySoknadKrav(digisosSak.fiksDigisosId, originalSoknadNAV, vedleggService, originalSoknadNAV.timestampSendt, token)
+            model.applySoknadKrav(digisosSak, vedleggService, originalSoknadNAV.timestampSendt, token)
         }
     }
 
     fun hentAlleUtbetalinger(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
         val model = InternalDigisosSoker()
-        val jsonDigisosSoker: JsonDigisosSoker = innsynService.hentJsonDigisosSoker(digisosSak.fiksDigisosId, digisosSak.digisosSoker?.metadata, token)
+        val jsonDigisosSoker: JsonDigisosSoker = innsynService.hentJsonDigisosSoker(digisosSak, token)
             ?: return model
         jsonDigisosSoker.hendelser
             .filterIsInstance<JsonUtbetaling>()

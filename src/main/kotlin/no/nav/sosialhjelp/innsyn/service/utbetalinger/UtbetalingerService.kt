@@ -13,7 +13,6 @@ import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.flatMapParallel
 import no.nav.sosialhjelp.innsyn.utils.logger
-import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
@@ -94,9 +93,7 @@ class UtbetalingerService(
     }
 
     fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean {
-        val testDato = LocalDateTime.now().minusMonths(months.toLong()).toInstant(ZoneOffset.UTC).toEpochMilli()
-        val oldTestDato = DateTime.now().minusMonths(months).millis
-        if (oldTestDato != testDato) log.error("LocalDateTime $testDato != joda.DateTime $oldTestDato")
+        val testDato = LocalDateTime.now().minusMonths(months.toLong()).toInstant(ZoneOffset.ofHours(1)).toEpochMilli()
         return digisosSak.sistEndret >= testDato
     }
 

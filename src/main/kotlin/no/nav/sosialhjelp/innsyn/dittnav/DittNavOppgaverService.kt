@@ -14,7 +14,6 @@ import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.getDomain
 import no.nav.sosialhjelp.innsyn.utils.TimeUtils.toUtc
 import no.nav.sosialhjelp.innsyn.utils.flatMapParallel
 import no.nav.sosialhjelp.innsyn.utils.logger
-import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import java.time.LocalDateTime
@@ -95,8 +94,6 @@ class DittNavOppgaverService(
 
         fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean {
             val testDato = LocalDateTime.now().minusMonths(months.toLong()).toInstant(ZoneOffset.UTC).toEpochMilli()
-            val oldTestDato = DateTime.now().minusMonths(months).millis
-            if (oldTestDato != testDato) log.error("LocalDateTime $testDato != joda.DateTime $oldTestDato")
             return digisosSak.sistEndret >= testDato
         }
 

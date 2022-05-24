@@ -96,7 +96,7 @@ class DittNavOppgaverService(
         fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean {
             val testDato = LocalDateTime.now().minusMonths(months.toLong()).toInstant(ZoneOffset.UTC).toEpochMilli()
             val oldTestDato = DateTime.now().minusMonths(months).millis
-            if(oldTestDato != testDato) log.error("LocalDateTime $testDato != joda.DateTime $oldTestDato")
+            if (oldTestDato != testDato) log.error("LocalDateTime $testDato != joda.DateTime $oldTestDato")
             return digisosSak.sistEndret >= testDato
         }
 

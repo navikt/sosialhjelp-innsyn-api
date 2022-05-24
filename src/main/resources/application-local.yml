@@ -10,10 +10,15 @@ springdoc:
 
 #Token-validering
 no.nav.security.jwt:
-  issuer.selvbetjening:
-    discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
-    accepted_audience: someaudience
-    cookie_name: localhost-idtoken
+  issuer:
+    selvbetjening:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
+      accepted_audience: someaudience
+      cookie_name: localhost-idtoken
+    loginapi:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
+      cookiename: localhost-idtoken
+      accepted_audience: someaudience
 azuread.loginurl: ${AZUREAD_LOGINURL:http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}
 
 client:

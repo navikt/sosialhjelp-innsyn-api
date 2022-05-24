@@ -70,6 +70,7 @@ maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
 
 #Token-validering
 no.nav.security.jwt:
+  issuers: selvbetjening
   issuer.selvbetjening:
     discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
     cookie_name: selvbetjening-idtoken

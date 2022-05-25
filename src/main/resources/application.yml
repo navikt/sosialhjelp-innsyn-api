@@ -72,6 +72,7 @@ maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
 no.nav.security.jwt:
   issuer.selvbetjening:
     discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
+    accepted_audience: 1c3631f4-dbf2-4c12-bdc4-156cbd53c625
     validation:
       optional-claims: aud,nbf
 azuread.loginurl: ${AZUREAD_LOGINURL}

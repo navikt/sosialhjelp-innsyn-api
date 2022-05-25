@@ -8,11 +8,9 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.common.BadStateException
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.fiksHeaders
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.maskerFnr
@@ -38,7 +36,6 @@ import org.springframework.web.reactive.function.client.toEntity
 
 @Component
 class FiksClientImpl(
-    private val clientProperties: ClientProperties,
     private val fiksWebClient: WebClient,
     private val tilgangskontroll: Tilgangskontroll,
     private val retryProperties: FiksRetryProperties,
@@ -63,7 +60,8 @@ class FiksClientImpl(
         val digisosSak: DigisosSak = withRetry {
             fiksWebClient.get()
                 .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
-                .headers { it.addAll(fiksHeaders(clientProperties, token)) }
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, token)
                 .retrieve()
                 .bodyToMono<DigisosSak>()
                 .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -108,7 +106,8 @@ class FiksClientImpl(
 
             fiksWebClient.get()
                 .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
-                .headers { it.addAll(fiksHeaders(clientProperties, token)) }
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, token)
                 .retrieve()
                 .bodyToMono(requestedClass)
                 .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -129,7 +128,8 @@ class FiksClientImpl(
         val digisosSaker: List<DigisosSak> = withRetry {
             fiksWebClient.get()
                 .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
-                .headers { it.addAll(fiksHeaders(clientProperties, token)) }
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, token)
                 .retrieve()
                 .bodyToMono(typeRef<List<DigisosSak>>())
                 .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -162,7 +162,7 @@ class FiksClientImpl(
 
         val responseEntity = fiksWebClient.post()
             .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
-            .headers { it.addAll(fiksHeaders(clientProperties, token)) }
+            .header(HttpHeaders.AUTHORIZATION, token)
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(body))
             .retrieve()

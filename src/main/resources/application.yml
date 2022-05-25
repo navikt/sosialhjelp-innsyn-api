@@ -73,7 +73,7 @@ no.nav.security.jwt:
   issuer.selvbetjening:
     discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
     validation:
-      optional-claims: aud
+      optional-claims: aud,nbf
 azuread.loginurl: ${AZUREAD_LOGINURL}
 
 innsyn:

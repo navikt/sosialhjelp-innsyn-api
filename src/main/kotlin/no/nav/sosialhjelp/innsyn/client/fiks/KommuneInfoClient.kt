@@ -27,7 +27,7 @@ import reactor.netty.http.client.HttpClient
 @Component
 class KommuneInfoClient(
     private val maskinportenClient: MaskinportenClient,
-    private val clientProperties: ClientProperties,
+    clientProperties: ClientProperties,
     webClientBuilder: WebClient.Builder,
     proxiedHttpClient: HttpClient
 ) {
@@ -37,8 +37,6 @@ class KommuneInfoClient(
             .uri(PATH_ALLE_KOMMUNEINFO)
             .accept(MediaType.APPLICATION_JSON)
             .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-            .header(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
-            .header(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .retrieve()
             .bodyToMono(typeRef<List<KommuneInfo>>())
             .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -57,8 +55,6 @@ class KommuneInfoClient(
             .uri(PATH_KOMMUNEINFO, kommunenummer)
             .accept(MediaType.APPLICATION_JSON)
             .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-            .header(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
-            .header(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .retrieve()
             .bodyToMono<KommuneInfo>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -81,6 +77,8 @@ class KommuneInfoClient(
                 it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
                 it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
             }
+            .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
+            .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .build()
 
     companion object {

@@ -4,10 +4,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.common.BadStateException
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -26,7 +23,6 @@ interface DokumentlagerClient {
 
 @Component
 class DokumentlagerClientImpl(
-    private val clientProperties: ClientProperties,
     private val fiksWebClient: WebClient,
     private val maskinportenClient: MaskinportenClient
 ) : DokumentlagerClient {
@@ -40,8 +36,6 @@ class DokumentlagerClientImpl(
             .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
             .accept(APPLICATION_JSON)
             .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-            .header(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
-            .header(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .retrieve()
             .bodyToMono<ByteArray>()
             .onErrorMap(WebClientResponseException::class.java) { e ->

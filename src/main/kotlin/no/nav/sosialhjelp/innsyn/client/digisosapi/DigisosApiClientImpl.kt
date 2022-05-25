@@ -10,7 +10,6 @@ import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -18,16 +17,18 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.typeRef
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
+import org.springframework.http.codec.json.Jackson2JsonDecoder
+import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.util.Collections
+import reactor.netty.http.client.HttpClient
 
 /**
  * Brukes kun i dev-sbs eller ved lokal testing mot fiks-test
@@ -39,7 +40,21 @@ class DigisosApiClientImpl(
     private val fiksWebClient: WebClient,
     private val maskinportenClient: MaskinportenClient,
     private val fiksClientImpl: FiksClientImpl,
+    webClientBuilder: WebClient.Builder,
+    proxiedHttpClient: HttpClient
 ) : DigisosApiClient {
+
+    private val digisosApiWebClient = webClientBuilder
+        .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
+        .baseUrl(clientProperties.fiksDigisosEndpointUrl)
+        .codecs {
+            it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
+            it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
+            it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
+        }
+        .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
+        .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
+        .build()
 
     private val testbrukerNatalie = System.getenv("TESTBRUKER_NATALIE") ?: "11111111111"
 
@@ -50,9 +65,9 @@ class DigisosApiClientImpl(
             log.info("Laget ny digisossak: $id")
         }
 
-        return fiksWebClient.post()
+        return digisosApiWebClient.post()
             .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
-            .headers { it.addAll(headers()) }
+            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
             .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
             .retrieve()
             .bodyToMono<String>()
@@ -77,9 +92,9 @@ class DigisosApiClientImpl(
             body.add("dokument:$fileId", fiksClientImpl.createHttpEntityOfFile(file, "dokument:$fileId"))
         }
 
-        val opplastingResponseList = fiksWebClient.post()
+        val opplastingResponseList = digisosApiWebClient.post()
             .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
-            .headers { it.addAll(headers()) }
+            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(body))
             .retrieve()
@@ -101,7 +116,8 @@ class DigisosApiClientImpl(
         try {
             val soknad = fiksWebClient.get()
                 .uri("/digisos/api/v1/soknader/$fiksDigisosId")
-                .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AUTHORIZATION, token)
                 .retrieve()
                 .bodyToMono(DigisosSak::class.java)
                 .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -116,7 +132,8 @@ class DigisosApiClientImpl(
             val digisosSoker = soknad.digisosSoker ?: throw BadStateException("Soknad mangler digisosSoker")
             return fiksWebClient.get()
                 .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${digisosSoker.metadata}")
-                .headers { it.addAll(IntegrationUtils.fiksHeaders(clientProperties, token)) }
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AUTHORIZATION, token)
                 .retrieve()
                 .bodyToMono(String::class.java)
                 .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -133,9 +150,9 @@ class DigisosApiClientImpl(
     }
 
     fun opprettDigisosSak(): String? {
-        val response = fiksWebClient.post()
+        val response = digisosApiWebClient.post()
             .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
-            .headers { it.addAll(headers()) }
+            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
             .body(BodyInserters.fromValue(""))
             .retrieve()
             .bodyToMono<String>()
@@ -149,16 +166,6 @@ class DigisosApiClientImpl(
             .block()
         log.info("Opprettet sak hos Fiks. Digisosid: $response")
         return response?.replace("\"", "")
-    }
-
-    private fun headers(): HttpHeaders {
-        val headers = HttpHeaders()
-        headers.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-        headers.set(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
-        headers.set(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
-        headers.set(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-        headers.contentType = MediaType.APPLICATION_JSON
-        return headers
     }
 
     companion object {

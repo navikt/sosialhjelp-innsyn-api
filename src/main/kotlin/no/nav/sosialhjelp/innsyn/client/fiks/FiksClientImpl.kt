@@ -8,7 +8,6 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.common.BadStateException
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
@@ -37,7 +36,6 @@ import org.springframework.web.reactive.function.client.toEntity
 
 @Component
 class FiksClientImpl(
-    private val clientProperties: ClientProperties,
     private val fiksWebClient: WebClient,
     private val tilgangskontroll: Tilgangskontroll,
     private val retryProperties: FiksRetryProperties,

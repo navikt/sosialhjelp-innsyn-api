@@ -14,7 +14,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
@@ -43,14 +42,13 @@ internal class FiksClientTest {
 
     private val mockWebServer = MockWebServer()
 
-    private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
     private val redisService: RedisService = mockk()
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
     private val tilgangskontroll: Tilgangskontroll = mockk()
-    private val fiksClient = FiksClientImpl(clientProperties, fiksWebClient, tilgangskontroll, retryProperties, redisService)
+    private val fiksClient = FiksClientImpl(fiksWebClient, tilgangskontroll, retryProperties, redisService)
 
     private val id = "123"
 
@@ -258,7 +256,7 @@ internal class FiksClientTest {
     @Test // fikk ikke mockWebServer til å funke her uten å skjønner hvorfor (InputStream-relatert), så gikk for "klassisk" mockk stil
     fun `POST ny ettersendelse`() {
         val webClient: WebClient = mockk()
-        val clientForPost = FiksClientImpl(clientProperties, webClient, tilgangskontroll, retryProperties, redisService)
+        val clientForPost = FiksClientImpl(webClient, tilgangskontroll, retryProperties, redisService)
 
         val fil1: InputStream = mockk()
         val fil2: InputStream = mockk()
@@ -277,7 +275,8 @@ internal class FiksClientTest {
         every {
             webClient.get()
                 .uri(any(), any<String>())
-                .headers(any())
+                .accept(any())
+                .header(any(), any())
                 .retrieve()
                 .bodyToMono<DigisosSak>()
                 .onErrorMap(WebClientResponseException::class.java, any())
@@ -287,7 +286,7 @@ internal class FiksClientTest {
         every {
             webClient.post()
                 .uri(any(), any<String>(), any<String>(), any<String>())
-                .headers(any())
+                .header(any(), any())
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(any())
                 .retrieve()

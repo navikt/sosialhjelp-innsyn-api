@@ -11,7 +11,6 @@
         </appender>
 
         <logger name="no.nav.sosialhjelp.innsyn" level="INFO"/>
-        <logger name="no.nav.security.token.support" level="debug"/>
 
         <logger name="klientlogger" level="debug"/>
 

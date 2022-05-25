@@ -16,6 +16,8 @@ no.nav.security.jwt:
     cookie_name: localhost-idtoken
 azuread.loginurl: ${AZUREAD_LOGINURL:http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}
 
+login_api_idporten_clientid: clientId
+
 client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:https://api.fiks.test.ks.no}
   fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:https://minside.fiks.test.ks.no}

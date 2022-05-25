@@ -62,8 +62,6 @@ client:
   dialog_endpoint_url: ${DIALOG_ENDPOINT_URL}
   dialog_audience: ${DIALOG_AUDIENCE}
 
-login_api_idporten_clientid: 1c3631f4-dbf2-4c12-bdc4-156cbd53c625
-
 #Maskinporten
 maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
 maskinporten_scopes: ${MASKINPORTEN_SCOPES}
@@ -77,6 +75,8 @@ no.nav.security.jwt:
     validation:
       optional-claims: aud,nbf
 azuread.loginurl: ${AZUREAD_LOGINURL}
+
+login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID}
 
 innsyn:
   vedlegg:

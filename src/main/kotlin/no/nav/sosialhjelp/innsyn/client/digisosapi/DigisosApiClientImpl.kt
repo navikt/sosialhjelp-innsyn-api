@@ -7,28 +7,21 @@ import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.client.fiks.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.common.BadStateException
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.typeRef
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.http.codec.json.Jackson2JsonDecoder
-import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import reactor.netty.http.client.HttpClient
 
 /**
  * Brukes kun i dev-sbs eller ved lokal testing mot fiks-test
@@ -36,25 +29,11 @@ import reactor.netty.http.client.HttpClient
 @Profile("!prod-sbs")
 @Component
 class DigisosApiClientImpl(
-    private val clientProperties: ClientProperties,
     private val fiksWebClient: WebClient,
+    private val digisosApiWebClient: WebClient,
     private val maskinportenClient: MaskinportenClient,
     private val fiksClientImpl: FiksClientImpl,
-    webClientBuilder: WebClient.Builder,
-    proxiedHttpClient: HttpClient
 ) : DigisosApiClient {
-
-    private val digisosApiWebClient = webClientBuilder
-        .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
-        .baseUrl(clientProperties.fiksDigisosEndpointUrl)
-        .codecs {
-            it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
-            it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
-            it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
-        }
-        .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
-        .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
-        .build()
 
     private val testbrukerNatalie = System.getenv("TESTBRUKER_NATALIE") ?: "11111111111"
 

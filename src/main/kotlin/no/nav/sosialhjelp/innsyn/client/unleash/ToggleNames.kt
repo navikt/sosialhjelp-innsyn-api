@@ -6,7 +6,6 @@ const val DOKUMENTASJONKRAV_ENABLED = "sosialhjelp.innsyn.dokumentasjonkrav-enab
 const val DOKUMENTASJONKRAV = "sosialhjelp.innsyn.dokumentasjonkrav"
 const val UTVIDE_VEDLEGG_JSON = "sosialhjelp.innsyn.utvide-vedlegg-json"
 const val LOGGE_MISMATCH_FILNAVN = "sosialhjelp.innsyn.logge-mismatch-filnavn"
-const val DITTNAV_OPPGAVE_ENDEPUNKTER_ENABLED = "sosialhjelp.innsyn.dittnav-oppgave-endepunkter-enabled"
 
 const val DIALOG_UNDERSOKELSE_GRUPPE_1 = "sosialhjelp.innsyn.dialog-undersokelse-gruppe-1"
 const val DIALOG_UNDERSOKELSE_GRUPPE_2 = "sosialhjelp.innsyn.dialog-undersokelse-gruppe-2"

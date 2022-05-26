@@ -65,7 +65,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns xsrfValue
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
-        assertThatCode { xsrfGenerator.sjekkXsrfToken(request) }.doesNotThrowAnyException()
+        assertThatCode { xsrfGenerator.sjekkXsrfToken(request, token) }.doesNotThrowAnyException()
     }
 
     @Test
@@ -77,7 +77,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns null
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns xsrfValue
 
-        assertThatCode { xsrfGenerator.sjekkXsrfToken(request) }.doesNotThrowAnyException()
+        assertThatCode { xsrfGenerator.sjekkXsrfToken(request, token) }.doesNotThrowAnyException()
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns null
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
-        assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
+        assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request, token) }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessage("Feil xsrf token")
     }
@@ -103,7 +103,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns xsrfValue
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
-        assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
+        assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request, token) }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessage("Feil xsrf token")
     }

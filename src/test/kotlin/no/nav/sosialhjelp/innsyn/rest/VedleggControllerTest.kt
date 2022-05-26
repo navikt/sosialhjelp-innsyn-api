@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.XSRF_TOKEN_INNSYN_API_NY
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -200,7 +201,7 @@ internal class VedleggControllerTest {
     }
 
     private fun xsrfCookie(): Cookie {
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", "someRandomChars")
+        val xsrfCookie = Cookie(XSRF_TOKEN_INNSYN_API_NY, "someRandomChars")
         xsrfCookie.path = "/"
         xsrfCookie.isHttpOnly = true
         return xsrfCookie

@@ -12,4 +12,7 @@ object IntegrationUtils {
     const val HEADER_TEMA = "Tema"
 
     const val TEMA_KOM = "KOM"
+
+    const val XSRF_TOKEN_INNSYN_API = "XSRF-TOKEN-INNSYN-API"
+    const val XSRF_TOKEN_INNSYN_API_NY = "XSRF-TOKEN-INNSYN-API-NY"
 }

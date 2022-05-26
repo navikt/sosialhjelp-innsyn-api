@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.config
 
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.XSRF_TOKEN_INNSYN_API_NY
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.apache.commons.codec.binary.Base64
 import org.springframework.stereotype.Component
@@ -49,7 +50,7 @@ class XsrfGenerator(
     }
 
     fun sjekkXsrfToken(request: HttpServletRequest, token: String) {
-        val xsrfRequestString = request.getHeader("XSRF-TOKEN-INNSYN-API")
+        val xsrfRequestString = request.getHeader(XSRF_TOKEN_INNSYN_API_NY)
 
         val xsrfToken = hentXsrfToken(token) ?: UUID.randomUUID().toString()
         val yesterday = LocalDateTime.now().minusDays(1)

@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.config
 
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.XSRF_TOKEN_INNSYN_API
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.XSRF_TOKEN_INNSYN_API_NY
 import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,7 +30,7 @@ class CORSFilter : Filter {
 
         if (!isRunningInProd() && ALLOWED_ORIGINS.contains(origin)) {
             httpResponse.setHeader("Access-Control-Allow-Origin", origin)
-            httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-XSRF-TOKEN, XSRF-TOKEN-INNSYN-API, Authorization, Nav-Call-Id")
+            httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-XSRF-TOKEN, $XSRF_TOKEN_INNSYN_API, $XSRF_TOKEN_INNSYN_API_NY, Authorization, Nav-Call-Id")
             httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
             httpResponse.setHeader("Access-Control-Allow-Credentials", "true")
         }

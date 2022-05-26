@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatusResponse
 import no.nav.sosialhjelp.innsyn.service.soknadsstatus.SoknadsStatusService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.XSRF_TOKEN_INNSYN_API_NY
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
@@ -49,7 +50,7 @@ class SoknadsStatusController(
     }
 
     private fun xsrfCookie(token: String): Cookie {
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken(token))
+        val xsrfCookie = Cookie(XSRF_TOKEN_INNSYN_API_NY, xsrfGenerator.generateXsrfToken(token))
         xsrfCookie.path = "/sosialhjelp/innsyn"
         xsrfCookie.isHttpOnly = false
         return xsrfCookie

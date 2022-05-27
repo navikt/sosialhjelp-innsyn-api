@@ -55,7 +55,7 @@ class VedleggController(
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
         log.info("Forsøker å starter ettersendelse")
         tilgangskontroll.sjekkTilgang(token)
-        xsrfGenerator.sjekkXsrfToken(request)
+        xsrfGenerator.sjekkXsrfToken(request, token)
 
         val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
         validateFileListNotEmpty(files)

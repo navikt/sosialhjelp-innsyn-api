@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.config
 
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.utils.sha256
@@ -49,14 +48,12 @@ class XsrfGenerator(
         return redisService.get(XSRF_KEY_PREFIX + redisKey, String::class.java) as String?
     }
 
-    fun sjekkXsrfToken(request: HttpServletRequest) {
-        val idportenIdtoken = SubjectHandlerUtils.getToken()
-
+    fun sjekkXsrfToken(request: HttpServletRequest, token: String) {
         val xsrfRequestString = request.getHeader("XSRF-TOKEN-INNSYN-API")
 
-        val xsrfToken = hentXsrfToken(idportenIdtoken) ?: UUID.randomUUID().toString()
+        val xsrfToken = hentXsrfToken(token) ?: UUID.randomUUID().toString()
         val yesterday = LocalDateTime.now().minusDays(1)
-        val yesterdaysXsrfToken = hentXsrfToken(idportenIdtoken, yesterday) ?: UUID.randomUUID().toString()
+        val yesterdaysXsrfToken = hentXsrfToken(token, yesterday) ?: UUID.randomUUID().toString()
         val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
         require(valid) { "Feil xsrf token" }
     }

@@ -28,7 +28,7 @@ class TilgangskontrollService(
 ) : Tilgangskontroll {
 
     override fun sjekkTilgang(token: String) {
-//        if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
+        if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)
     }
 

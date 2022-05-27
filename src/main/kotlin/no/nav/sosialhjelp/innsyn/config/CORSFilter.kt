@@ -3,25 +3,23 @@ package no.nav.sosialhjelp.innsyn.config
 import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.IOException
+import org.springframework.stereotype.Component
 import javax.servlet.Filter
 import javax.servlet.FilterChain
 import javax.servlet.FilterConfig
-import javax.servlet.ServletException
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+@Component
 class CORSFilter : Filter {
     val log: Logger = LoggerFactory.getLogger(CORSFilter::class.java)
 
-    @Throws(ServletException::class)
     override fun init(filterConfig: FilterConfig?) {
         // no-op
     }
 
-    @Throws(IOException::class, ServletException::class)
     override fun doFilter(servletRequest: ServletRequest, servletResponse: ServletResponse, filterChain: FilterChain) {
         val httpResponse = servletResponse as HttpServletResponse
         val origin = if (servletRequest is HttpServletRequest) (servletRequest.getHeader("Origin")) else null

@@ -3,27 +3,8 @@ package no.nav.sosialhjelp.innsyn.utils
 import io.netty.resolver.DefaultAddressResolverGroup
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import reactor.netty.http.client.HttpClient
-import reactor.netty.transport.ProxyProvider
-import java.net.URL
 
 object HttpClientUtil {
-
-    fun getProxiedReactorClientHttpConnector(proxyUrl: String): ReactorClientHttpConnector {
-        val httpClient: HttpClient = proxiedHttpClient(proxyUrl)
-
-        return ReactorClientHttpConnector(httpClient)
-    }
-
-    fun proxiedHttpClient(proxyUrl: String): HttpClient {
-        val uri = URL(proxyUrl)
-
-        val httpClient: HttpClient = HttpClient.create()
-            .resolver(DefaultAddressResolverGroup.INSTANCE)
-            .proxy { proxy ->
-                proxy.type(ProxyProvider.Proxy.HTTP).host(uri.host).port(uri.port)
-            }
-        return httpClient
-    }
 
     fun getUnproxiedReactorClientHttpConnector(): ReactorClientHttpConnector {
         val httpClient: HttpClient = unproxiedHttpClient()

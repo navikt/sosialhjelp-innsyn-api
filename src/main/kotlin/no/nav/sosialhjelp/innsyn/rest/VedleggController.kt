@@ -49,7 +49,7 @@ class VedleggController(
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @RequiredIssuers(
         ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"]),
-        ProtectedWithClaims(issuer = "selvbetjening-old", claimMap = ["acr=Level4"]),
+        ProtectedWithClaims(issuer = "oldselvbetjening", claimMap = ["acr=Level4"]),
     )
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(

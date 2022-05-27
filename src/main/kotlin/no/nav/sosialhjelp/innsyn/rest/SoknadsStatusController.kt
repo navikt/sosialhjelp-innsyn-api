@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse
 
 @RequiredIssuers(
     ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"]),
-    ProtectedWithClaims(issuer = "selvbetjening-old", claimMap = ["acr=Level4"]),
+    ProtectedWithClaims(issuer = "oldselvbetjening", claimMap = ["acr=Level4"]),
 )
 @RestController
 @RequestMapping("/api/v1/innsyn/")

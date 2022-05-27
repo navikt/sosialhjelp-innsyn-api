@@ -53,7 +53,7 @@ class AzureAdSubjectHandlerImpl(
 
     companion object {
         private const val ISSUER = "selvbetjening"
-        private const val ISSUER_OLD = "selvbetjening-old"
+        private const val ISSUER_OLD = "oldselvbetjening"
         private const val PID = "pid"
         private const val CLIENT_ID = "client_id"
         private val log by logger()

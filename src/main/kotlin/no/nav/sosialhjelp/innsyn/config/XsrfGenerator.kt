@@ -1,8 +1,10 @@
 package no.nav.sosialhjelp.innsyn.config
 
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.XSRF_TOKEN_INNSYN_API_NY
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.apache.commons.codec.binary.Base64
 import org.springframework.stereotype.Component
@@ -50,17 +52,24 @@ class XsrfGenerator(
     }
 
     fun sjekkXsrfToken(request: HttpServletRequest, token: String) {
+        if (SubjectHandlerUtils.getToken() != token) {
+            log.error("token fra subjecthandler og header er ulike")
+        }
+
         val xsrfRequestString = request.getHeader(XSRF_TOKEN_INNSYN_API_NY)
 
-        val xsrfToken = hentXsrfToken(token) ?: UUID.randomUUID().toString()
+        val xsrfToken = hentXsrfToken(token)?.also { log.info("fant ikke xsrf i cache") } ?: UUID.randomUUID().toString()
         val yesterday = LocalDateTime.now().minusDays(1)
-        val yesterdaysXsrfToken = hentXsrfToken(token, yesterday) ?: UUID.randomUUID().toString()
+        val yesterdaysXsrfToken = hentXsrfToken(token, yesterday)?.also { log.info("fant ikke yesterdaysXsrfToken i cache") } ?: UUID.randomUUID().toString()
         val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
+        log.info("xsrfToken: $xsrfToken, xsrfRequestString: $xsrfRequestString")
         require(valid) { "Feil xsrf token" }
     }
 
     companion object {
         private val redisDatoFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         fun redisKey(token: String, date: LocalDateTime) = sha256(token + redisDatoFormatter.format(date))
+
+        private val log by logger()
     }
 }

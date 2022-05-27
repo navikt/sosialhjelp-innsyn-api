@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.rest
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.RequiredIssuers
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatusResponse
@@ -18,7 +19,10 @@ import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
+@RequiredIssuers(
+    ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"]),
+    ProtectedWithClaims(issuer = "selvbetjening-old", claimMap = ["acr=Level4"]),
+)
 @RestController
 @RequestMapping("/api/v1/innsyn/")
 class SoknadsStatusController(
@@ -50,7 +54,7 @@ class SoknadsStatusController(
     }
 
     private fun xsrfCookie(): Cookie {
-        val idportenIdtoken = SubjectHandlerUtils.getToken()
+        val idportenIdtoken = SubjectHandlerUtils.getTokenOld()
         val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken(idportenIdtoken))
         xsrfCookie.path = "/sosialhjelp/innsyn"
         xsrfCookie.isHttpOnly = false

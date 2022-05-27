@@ -50,7 +50,7 @@ class XsrfGenerator(
     }
 
     fun sjekkXsrfToken(request: HttpServletRequest) {
-        val idportenIdtoken = SubjectHandlerUtils.getToken()
+        val idportenIdtoken = SubjectHandlerUtils.getTokenOld()
 
         val xsrfRequestString = request.getHeader("XSRF-TOKEN-INNSYN-API")
 

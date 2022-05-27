@@ -21,6 +21,10 @@ object SubjectHandlerUtils {
         return subjectHandlerService.getToken()
     }
 
+    fun getTokenOld(): String {
+        return subjectHandlerService.getTokenOld()
+    }
+
     fun getClientId(): String {
         return subjectHandlerService.getClientId()
     }

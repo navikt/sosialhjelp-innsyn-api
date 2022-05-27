@@ -30,7 +30,7 @@ internal class XsrfGeneratorTest {
     internal fun setUp() {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
 
-        every { mockSubjectHandler.getToken() } returns token
+        every { mockSubjectHandler.getTokenOld() } returns token
     }
 
     @Test

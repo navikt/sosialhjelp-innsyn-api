@@ -10,6 +10,7 @@ interface SubjectHandler {
     fun getConsumerId(): String
     fun getUserIdFromToken(): String
     fun getToken(): String
+    fun getTokenOld(): String
     fun getClientId(): String
 }
 
@@ -38,6 +39,10 @@ class AzureAdSubjectHandlerImpl(
         return tokenValidationContext.getJwtToken(ISSUER).tokenAsString
     }
 
+    override fun getTokenOld(): String {
+        return tokenValidationContext.getJwtToken(ISSUER_OLD).tokenAsString
+    }
+
     override fun getClientId(): String {
         return tokenValidationContext.getClaims(ISSUER).getStringClaim(CLIENT_ID)
     }
@@ -48,6 +53,7 @@ class AzureAdSubjectHandlerImpl(
 
     companion object {
         private const val ISSUER = "selvbetjening"
+        private const val ISSUER_OLD = "selvbetjening-old"
         private const val PID = "pid"
         private const val CLIENT_ID = "client_id"
         private val log by logger()
@@ -65,6 +71,10 @@ class StaticSubjectHandlerImpl : SubjectHandler {
     }
 
     override fun getToken(): String {
+        return this.token
+    }
+
+    override fun getTokenOld(): String {
         return this.token
     }
 

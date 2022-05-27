@@ -70,12 +70,15 @@ maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
 
 #Token-validering
 no.nav.security.jwt:
-  issuer.selvbetjening:
-    discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
-    cookie_name: selvbetjening-idtoken
-    accepted_audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
-#    validation:
-#      optional-claims: aud,nbf
+  issuer:
+    selvbetjening:
+      discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
+      validation:
+        optional-claims: aud,nbf
+    selvbetjening-old:
+      discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
+      cookie_name: selvbetjening-idtoken
+      accepted_audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
 azuread.loginurl: ${AZUREAD_LOGINURL}
 
 login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID}

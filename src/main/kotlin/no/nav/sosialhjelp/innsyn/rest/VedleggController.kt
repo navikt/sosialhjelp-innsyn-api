@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.RequiredIssuers
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.OppgaveOpplastingResponse
@@ -46,6 +47,10 @@ class VedleggController(
 ) {
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
+    @RequiredIssuers(
+        ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"]),
+        ProtectedWithClaims(issuer = "selvbetjening-old", claimMap = ["acr=Level4"]),
+    )
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(
         @PathVariable fiksDigisosId: String,

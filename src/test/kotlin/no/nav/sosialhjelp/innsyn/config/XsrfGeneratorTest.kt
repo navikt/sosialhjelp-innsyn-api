@@ -9,7 +9,7 @@ import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.Companion.redisKey
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -24,14 +24,11 @@ internal class XsrfGeneratorTest {
     private val xsrfGenerator = XsrfGenerator(redisService)
 
     private val mockSubjectHandler: SubjectHandler = mockk()
-    val token = "TokenX"
     val fnr = "fnr"
 
     @BeforeEach
     internal fun setUp() {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
-
-        every { mockSubjectHandler.getToken() } returns token
         every { mockSubjectHandler.getUserIdFromToken() } returns fnr
     }
 
@@ -41,8 +38,8 @@ internal class XsrfGeneratorTest {
         every { redisService.get(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
 
-        val generatedToken = xsrfGenerator.generateXsrfToken(fnr, idag)
-        Assertions.assertThat(generatedToken).hasSize(43)
+        val generatedToken = xsrfGenerator.generateXsrfToken(idag)
+        assertThat(generatedToken).hasSize(43)
     }
 
     @Test
@@ -51,41 +48,21 @@ internal class XsrfGeneratorTest {
         every { redisService.get(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
 
-        val generatedToken1 = xsrfGenerator.generateXsrfToken(fnr, idag)
-        Assertions.assertThat(generatedToken1).hasSize(43)
-        val generatedToken2 = xsrfGenerator.generateXsrfToken(fnr, idag)
-        Assertions.assertThat(generatedToken2).hasSize(43)
-        Assertions.assertThat(generatedToken1).isNotEqualTo(generatedToken2)
+        val generatedToken1 = xsrfGenerator.generateXsrfToken(idag)
+        assertThat(generatedToken1).hasSize(43)
+        val generatedToken2 = xsrfGenerator.generateXsrfToken(idag)
+        assertThat(generatedToken2).hasSize(43)
+        assertThat(generatedToken1).isNotEqualTo(generatedToken2)
     }
 
     @Test
     fun sjekkXsrfToken_ok_dagensToken() {
         val xsrfValue = "XSRF"
         every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns xsrfValue
-        val keyIdagFraToken = redisKey(token, LocalDateTime.now())
-        val keyIgarFraToken = redisKey(token, LocalDateTime.now().minusDays(1))
-        val keyIdagFraFnr = redisKey(fnr, LocalDateTime.now())
-        val keyIgarFraFnr = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraToken, any()) } returns xsrfValue
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraFnr, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraFnr, any()) } returns null
-
-        assertThatCode { xsrfGenerator.sjekkXsrfToken(request) }.doesNotThrowAnyException()
-    }
-
-    @Test
-    fun sjekkXsrfToken_ok_dagensToken_fraFnr() {
-        val xsrfValue = "XSRF"
-        every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns xsrfValue
-        val keyIdagFraToken = redisKey(token, LocalDateTime.now())
-        val keyIgarFraToken = redisKey(token, LocalDateTime.now().minusDays(1))
-        val keyIdagFraFnr = redisKey(fnr, LocalDateTime.now())
-        val keyIgarFraFnr = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraToken, any()) } returns "noe tullball"
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraFnr, any()) } returns xsrfValue
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraFnr, any()) } returns null
+        val keyIdag = redisKey(fnr, LocalDateTime.now())
+        val keyIgar = redisKey(fnr, LocalDateTime.now().minusDays(1))
+        every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns xsrfValue
+        every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatCode { xsrfGenerator.sjekkXsrfToken(request) }.doesNotThrowAnyException()
     }
@@ -94,30 +71,10 @@ internal class XsrfGeneratorTest {
     fun sjekkXsrfToken_ok_garsdagensToken() {
         val xsrfValue = "XSRF"
         every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns xsrfValue
-        val keyIdagFraToken = redisKey(token, LocalDateTime.now())
-        val keyIgarFraToken = redisKey(token, LocalDateTime.now().minusDays(1))
-        val keyIdagFraFnr = redisKey(fnr, LocalDateTime.now())
-        val keyIgarFraFnr = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraToken, any()) } returns xsrfValue
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraFnr, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraFnr, any()) } returns null
-
-        assertThatCode { xsrfGenerator.sjekkXsrfToken(request) }.doesNotThrowAnyException()
-    }
-
-    @Test
-    fun sjekkXsrfToken_ok_garsdagensToken_fraFnr() {
-        val xsrfValue = "XSRF"
-        every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns xsrfValue
-        val keyIdagFraToken = redisKey(token, LocalDateTime.now())
-        val keyIgarFraToken = redisKey(token, LocalDateTime.now().minusDays(1))
-        val keyIdagFraFnr = redisKey(fnr, LocalDateTime.now())
-        val keyIgarFraFnr = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraFnr, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraFnr, any()) } returns xsrfValue
+        val keyIdag = redisKey(fnr, LocalDateTime.now())
+        val keyIgar = redisKey(fnr, LocalDateTime.now().minusDays(1))
+        every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns null
+        every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns xsrfValue
 
         assertThatCode { xsrfGenerator.sjekkXsrfToken(request) }.doesNotThrowAnyException()
     }
@@ -126,14 +83,10 @@ internal class XsrfGeneratorTest {
     fun sjekkXsrfToken_error_ikkeFunnetIRedis() {
         val xsrfValue = "XSRF"
         every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns xsrfValue
-        val keyIdagFraToken = redisKey(token, LocalDateTime.now())
-        val keyIgarFraToken = redisKey(token, LocalDateTime.now().minusDays(1))
-        val keyIdagFraFnr = redisKey(fnr, LocalDateTime.now())
-        val keyIgarFraFnr = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraFnr, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraFnr, any()) } returns null
+        val keyIdag = redisKey(fnr, LocalDateTime.now())
+        val keyIgar = redisKey(fnr, LocalDateTime.now().minusDays(1))
+        every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns null
+        every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
             .isInstanceOf(IllegalArgumentException::class.java)
@@ -144,32 +97,10 @@ internal class XsrfGeneratorTest {
     fun sjekkXsrfToken_error_feilXsrfString() {
         val xsrfValue = "XSRF"
         every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns "feilXsrf"
-        val keyIdagFraToken = redisKey(token, LocalDateTime.now())
-        val keyIgarFraToken = redisKey(token, LocalDateTime.now().minusDays(1))
-        val keyIdagFraFnr = redisKey(fnr, LocalDateTime.now())
-        val keyIgarFraFnr = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraToken, any()) } returns xsrfValue
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraFnr, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraFnr, any()) } returns null
-
-        assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessage("Feil xsrf token")
-    }
-
-    @Test
-    fun sjekkXsrfToken_error_feilXsrfString_fraFnr() {
-        val xsrfValue = "XSRF"
-        every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns "feilXsrf"
-        val keyIdagFraToken = redisKey(token, LocalDateTime.now())
-        val keyIgarFraToken = redisKey(token, LocalDateTime.now().minusDays(1))
-        val keyIdagFraFnr = redisKey(fnr, LocalDateTime.now())
-        val keyIgarFraFnr = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraToken, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdagFraFnr, any()) } returns xsrfValue
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgarFraFnr, any()) } returns null
+        val keyIdag = redisKey(fnr, LocalDateTime.now())
+        val keyIgar = redisKey(fnr, LocalDateTime.now().minusDays(1))
+        every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns xsrfValue
+        every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
             .isInstanceOf(IllegalArgumentException::class.java)

@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.rest
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatusResponse
 import no.nav.sosialhjelp.innsyn.service.soknadsstatus.SoknadsStatusService
@@ -50,8 +49,7 @@ class SoknadsStatusController(
     }
 
     private fun xsrfCookie(): Cookie {
-        val fnr = SubjectHandlerUtils.getUserIdFromToken()
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken(fnr))
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken())
         xsrfCookie.path = "/sosialhjelp/innsyn"
         xsrfCookie.isHttpOnly = false
         return xsrfCookie

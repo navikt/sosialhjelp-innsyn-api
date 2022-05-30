@@ -1,7 +1,9 @@
 package no.nav.sosialhjelp.innsyn.config
 
+import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.apache.commons.codec.binary.Base64
 import org.springframework.stereotype.Component
@@ -22,22 +24,22 @@ class XsrfGenerator(
 ) {
     private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
 
-    fun generateXsrfToken(token: String, date: LocalDateTime = LocalDateTime.now()): String {
-        redisService.get(redisKey(token, date), String::class.java)?.let { return it as String }
+    fun generateXsrfToken(fnr: String, date: LocalDateTime = LocalDateTime.now()): String {
+        redisService.get(redisKey(fnr, date), String::class.java)?.let { return it as String }
         try {
-            val xsrf = token + UUID.randomUUID().toString()
+            val xsrf = fnr + UUID.randomUUID().toString()
             val hmac = Mac.getInstance("HmacSHA256")
             val secretKey = SecretKeySpec(SECRET.toByteArray(), "HmacSHA256")
             hmac.init(secretKey)
             return Base64.encodeBase64URLSafeString(hmac.doFinal(xsrf.toByteArray()))
-                .also { lagreTilRedis(redisKey(token, date), it) }
+                .also { lagreTilRedis(redisKey(fnr, date), it) }
         } catch (e: NoSuchAlgorithmException) {
             throw IllegalArgumentException("Kunne ikke generere token: ", e)
         }
     }
 
-    private fun hentXsrfToken(token: String, date: LocalDateTime = LocalDateTime.now()): String? {
-        return hentFraRedis(redisKey(token, date))
+    private fun hentXsrfToken(id: String, date: LocalDateTime = LocalDateTime.now()): String? {
+        return hentFraRedis(redisKey(id, date))
     }
 
     private fun lagreTilRedis(redisKey: String, xsrfString: String) {
@@ -48,17 +50,28 @@ class XsrfGenerator(
         return redisService.get(XSRF_KEY_PREFIX + redisKey, String::class.java) as String?
     }
 
-    fun sjekkXsrfToken(request: HttpServletRequest, token: String) {
+    fun sjekkXsrfToken(request: HttpServletRequest) {
+        val idportenIdtoken = SubjectHandlerUtils.getToken()
+        val fnr = SubjectHandlerUtils.getUserIdFromToken()
+
         val xsrfRequestString = request.getHeader("XSRF-TOKEN-INNSYN-API")
 
-        val xsrfToken = hentXsrfToken(token) ?: UUID.randomUUID().toString()
         val yesterday = LocalDateTime.now().minusDays(1)
-        val yesterdaysXsrfToken = hentXsrfToken(token, yesterday) ?: UUID.randomUUID().toString()
-        val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
-        require(valid) { "Feil xsrf token" }
+
+        val xsrfTokenFraFnr = hentXsrfToken(fnr) ?: UUID.randomUUID().toString()
+        val yesterdaysXsrfTokenFraFnr = hentXsrfToken(fnr, yesterday) ?: UUID.randomUUID().toString()
+
+        val xsrfTokenFraToken = hentXsrfToken(idportenIdtoken) ?: UUID.randomUUID().toString()
+        val yesterdaysXsrfTokenFraToken = hentXsrfToken(idportenIdtoken, yesterday) ?: UUID.randomUUID().toString()
+
+        val validFraFnr = xsrfTokenFraFnr == xsrfRequestString || yesterdaysXsrfTokenFraFnr == xsrfRequestString
+        val validFraToken = xsrfTokenFraToken == xsrfRequestString || yesterdaysXsrfTokenFraToken == xsrfRequestString
+        log.info("Xsrf - validFraFnr=$validFraFnr, validFraToken=$validFraToken")
+        require(validFraFnr || validFraToken) { "Feil xsrf token" }
     }
 
     companion object {
+        private val log by logger()
         private val redisDatoFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         fun redisKey(token: String, date: LocalDateTime) = sha256(token + redisDatoFormatter.format(date))
     }

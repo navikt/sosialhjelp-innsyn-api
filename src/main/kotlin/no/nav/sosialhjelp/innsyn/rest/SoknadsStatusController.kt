@@ -50,8 +50,8 @@ class SoknadsStatusController(
     }
 
     private fun xsrfCookie(): Cookie {
-        val idportenIdtoken = SubjectHandlerUtils.getToken()
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken(idportenIdtoken))
+        val fnr = SubjectHandlerUtils.getUserIdFromToken()
+        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken(fnr))
         xsrfCookie.path = "/sosialhjelp/innsyn"
         xsrfCookie.isHttpOnly = false
         return xsrfCookie

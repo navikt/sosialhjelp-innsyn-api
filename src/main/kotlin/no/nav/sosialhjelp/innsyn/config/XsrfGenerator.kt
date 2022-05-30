@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.config
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.apache.commons.codec.binary.Base64
 import org.springframework.stereotype.Component
@@ -65,10 +66,12 @@ class XsrfGenerator(
 
         val validFraFnr = xsrfTokenFraFnr == xsrfRequestString || yesterdaysXsrfTokenFraFnr == xsrfRequestString
         val validFraToken = xsrfTokenFraToken == xsrfRequestString || yesterdaysXsrfTokenFraToken == xsrfRequestString
+        log.info("Xsrf - validFraFnr=$validFraFnr, validFraToken=$validFraToken")
         require(validFraFnr || validFraToken) { "Feil xsrf token" }
     }
 
     companion object {
+        private val log by logger()
         private val redisDatoFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         fun redisKey(token: String, date: LocalDateTime) = sha256(token + redisDatoFormatter.format(date))
     }

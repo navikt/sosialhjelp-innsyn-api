@@ -39,7 +39,7 @@ class AzureAdSubjectHandlerImpl(
     }
 
     override fun getClientId(): String {
-        return tokenValidationContext.getClaims(ISSUER).getStringClaim(CLIENT_ID)
+        return tokenValidationContext.getClaims(ISSUER).getStringClaim(CLIENT_ID) ?: DEFAULT_CLIENT_ID
     }
 
     override fun getConsumerId(): String {
@@ -50,6 +50,7 @@ class AzureAdSubjectHandlerImpl(
         private const val ISSUER = "selvbetjening"
         private const val PID = "pid"
         private const val CLIENT_ID = "client_id"
+        private const val DEFAULT_CLIENT_ID = "clientId"
         private val log by logger()
     }
 }

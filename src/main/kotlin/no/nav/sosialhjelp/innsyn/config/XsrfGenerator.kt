@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.config
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
-import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import org.apache.commons.codec.binary.Base64
 import org.springframework.stereotype.Component
@@ -24,7 +23,8 @@ class XsrfGenerator(
 ) {
     private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
 
-    fun generateXsrfToken(fnr: String, date: LocalDateTime = LocalDateTime.now()): String {
+    fun generateXsrfToken(date: LocalDateTime = LocalDateTime.now()): String {
+        val fnr = SubjectHandlerUtils.getUserIdFromToken()
         redisService.get(redisKey(fnr, date), String::class.java)?.let { return it as String }
         try {
             val xsrf = fnr + UUID.randomUUID().toString()
@@ -51,27 +51,19 @@ class XsrfGenerator(
     }
 
     fun sjekkXsrfToken(request: HttpServletRequest) {
-        val idportenIdtoken = SubjectHandlerUtils.getToken()
         val fnr = SubjectHandlerUtils.getUserIdFromToken()
-
         val xsrfRequestString = request.getHeader("XSRF-TOKEN-INNSYN-API")
 
         val yesterday = LocalDateTime.now().minusDays(1)
 
-        val xsrfTokenFraFnr = hentXsrfToken(fnr) ?: UUID.randomUUID().toString()
-        val yesterdaysXsrfTokenFraFnr = hentXsrfToken(fnr, yesterday) ?: UUID.randomUUID().toString()
+        val xsrfToken = hentXsrfToken(fnr) ?: UUID.randomUUID().toString()
+        val yesterdaysXsrfToken = hentXsrfToken(fnr, yesterday) ?: UUID.randomUUID().toString()
 
-        val xsrfTokenFraToken = hentXsrfToken(idportenIdtoken) ?: UUID.randomUUID().toString()
-        val yesterdaysXsrfTokenFraToken = hentXsrfToken(idportenIdtoken, yesterday) ?: UUID.randomUUID().toString()
-
-        val validFraFnr = xsrfTokenFraFnr == xsrfRequestString || yesterdaysXsrfTokenFraFnr == xsrfRequestString
-        val validFraToken = xsrfTokenFraToken == xsrfRequestString || yesterdaysXsrfTokenFraToken == xsrfRequestString
-        log.info("Xsrf - validFraFnr=$validFraFnr, validFraToken=$validFraToken")
-        require(validFraFnr || validFraToken) { "Feil xsrf token" }
+        val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
+        require(valid) { "Feil xsrf token" }
     }
 
     companion object {
-        private val log by logger()
         private val redisDatoFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         fun redisKey(token: String, date: LocalDateTime) = sha256(token + redisDatoFormatter.format(date))
     }

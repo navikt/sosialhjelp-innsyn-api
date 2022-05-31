@@ -139,7 +139,7 @@ internal class VedleggControllerTest {
         )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie())
-        every { xsrfGenerator.generateXsrfToken(any(), any()) } returns "someRandomChars"
+        every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
         every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
         assertThatExceptionOfType(IllegalStateException::class.java)
             .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
@@ -154,7 +154,7 @@ internal class VedleggControllerTest {
         )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie())
-        every { xsrfGenerator.generateXsrfToken(any(), any()) } returns "someRandomChars"
+        every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
         every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
         assertThatCode { controller.sendVedlegg(id, files, "token", request) }.doesNotThrowAnyException()
     }

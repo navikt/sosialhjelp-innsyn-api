@@ -3,8 +3,7 @@
   "namespace": "teamdigisos",
   "ingress": [
     "https://sosialhjelp-innsyn-api.dev.nav.no/sosialhjelp/innsyn-api",
-    "https://www-q0.dev.nav.no/sosialhjelp/innsyn-api",
-    "https://www-q0.nav.no/sosialhjelp/innsyn-api"
+    "https://www-q0.dev.nav.no/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
     "redis-password-innsyn-api",

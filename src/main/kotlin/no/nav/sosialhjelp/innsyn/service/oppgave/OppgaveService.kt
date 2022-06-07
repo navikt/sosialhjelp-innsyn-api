@@ -168,11 +168,34 @@ class OppgaveService(
         return dokumentasjonkrav.filter { it.dokumentasjonkravId == dokumentasjonkravId }
     }
 
-    private fun erAlleredeLastetOpp(dokumentasjonkrav: Dokumentasjonkrav, vedleggListe: List<InternalVedlegg>): Boolean {
+    private fun erAlleredeLastetOpp(
+        dokumentasjonkrav: Dokumentasjonkrav,
+        vedleggListe: List<InternalVedlegg>
+    ): Boolean {
         return vedleggListe
             .filter { it.type == dokumentasjonkrav.tittel }
             .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
             .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) }
+    }
+
+    fun getHarLevertDokumentasjonkrav(fiksDigisosId: String, token: String): Boolean {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
+        if (model.dokumentasjonkrav.isEmpty()) {
+            return false
+        }
+
+        val ettersendteVedlegg =
+            vedleggService.hentEttersendteVedlegg(digisosSak, token)
+
+        return model.dokumentasjonkrav
+            .filter {
+                !it.isEmpty()
+                    .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
+            }
+            .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
+            .filter { it.status == Oppgavestatus.LEVERT_TIDLIGERE }
+            .toList().isNotEmpty()
     }
 
     companion object {

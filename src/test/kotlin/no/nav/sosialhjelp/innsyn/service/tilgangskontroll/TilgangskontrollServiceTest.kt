@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 internal class TilgangskontrollServiceTest {
 
     private val pdlClientMock: PdlClient = mockk()
-    private val service = TilgangskontrollService(pdlClientMock)
+    private val service = TilgangskontrollService("clientId", pdlClientMock)
 
     private val ident = "123"
 
@@ -36,6 +36,7 @@ internal class TilgangskontrollServiceTest {
 
         every { mockSubjectHandler.getUserIdFromToken() } returns ident
         every { mockSubjectHandler.getToken() } returns "token"
+        every { mockSubjectHandler.getClientId() } returns "clientId"
         every { digisosSak.sokerFnr } returns ident
     }
 

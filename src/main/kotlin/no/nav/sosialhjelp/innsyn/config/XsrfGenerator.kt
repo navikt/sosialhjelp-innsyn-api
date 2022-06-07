@@ -23,22 +23,23 @@ class XsrfGenerator(
 ) {
     private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
 
-    fun generateXsrfToken(token: String, date: LocalDateTime = LocalDateTime.now()): String {
-        redisService.get(redisKey(token, date), String::class.java)?.let { return it as String }
+    fun generateXsrfToken(date: LocalDateTime = LocalDateTime.now()): String {
+        val fnr = SubjectHandlerUtils.getUserIdFromToken()
+        redisService.get(redisKey(fnr, date), String::class.java)?.let { return it as String }
         try {
-            val xsrf = token + UUID.randomUUID().toString()
+            val xsrf = fnr + UUID.randomUUID().toString()
             val hmac = Mac.getInstance("HmacSHA256")
             val secretKey = SecretKeySpec(SECRET.toByteArray(), "HmacSHA256")
             hmac.init(secretKey)
             return Base64.encodeBase64URLSafeString(hmac.doFinal(xsrf.toByteArray()))
-                .also { lagreTilRedis(redisKey(token, date), it) }
+                .also { lagreTilRedis(redisKey(fnr, date), it) }
         } catch (e: NoSuchAlgorithmException) {
             throw IllegalArgumentException("Kunne ikke generere token: ", e)
         }
     }
 
-    private fun hentXsrfToken(token: String, date: LocalDateTime = LocalDateTime.now()): String? {
-        return hentFraRedis(redisKey(token, date))
+    private fun hentXsrfToken(id: String, date: LocalDateTime = LocalDateTime.now()): String? {
+        return hentFraRedis(redisKey(id, date))
     }
 
     private fun lagreTilRedis(redisKey: String, xsrfString: String) {
@@ -50,13 +51,14 @@ class XsrfGenerator(
     }
 
     fun sjekkXsrfToken(request: HttpServletRequest) {
-        val idportenIdtoken = SubjectHandlerUtils.getToken()
-
+        val fnr = SubjectHandlerUtils.getUserIdFromToken()
         val xsrfRequestString = request.getHeader("XSRF-TOKEN-INNSYN-API")
 
-        val xsrfToken = hentXsrfToken(idportenIdtoken) ?: UUID.randomUUID().toString()
         val yesterday = LocalDateTime.now().minusDays(1)
-        val yesterdaysXsrfToken = hentXsrfToken(idportenIdtoken, yesterday) ?: UUID.randomUUID().toString()
+
+        val xsrfToken = hentXsrfToken(fnr) ?: UUID.randomUUID().toString()
+        val yesterdaysXsrfToken = hentXsrfToken(fnr, yesterday) ?: UUID.randomUUID().toString()
+
         val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
         require(valid) { "Feil xsrf token" }
     }

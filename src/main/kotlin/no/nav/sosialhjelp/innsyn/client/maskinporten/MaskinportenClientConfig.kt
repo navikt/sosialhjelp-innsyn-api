@@ -19,8 +19,8 @@ class MaskinportenClientConfig(
     @Value("\${maskinporten_scopes}") private val scopes: String,
     @Value("\${maskinporten_well_known_url}") private val wellKnownUrl: String,
     @Value("\${maskinporten_client_jwk}") private val clientJwk: String,
-    private val webClientBuilder: WebClient.Builder,
-    private val proxiedHttpClient: HttpClient,
+    webClientBuilder: WebClient.Builder,
+    proxiedHttpClient: HttpClient,
 ) {
 
     @Bean
@@ -35,8 +35,8 @@ class MaskinportenClientConfig(
         return MaskinportenClient(maskinportenWebClient, maskinportenProperties, WellKnown("issuer", "token_url"))
     }
 
-    private val maskinportenWebClient: WebClient
-        get() = webClientBuilder
+    private val maskinportenWebClient: WebClient =
+        webClientBuilder
             .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
@@ -45,13 +45,12 @@ class MaskinportenClientConfig(
             }
             .build()
 
-    private val maskinportenProperties: MaskinportenProperties
-        get() = MaskinportenProperties(
-            clientId = clientId,
-            clientJwk = clientJwk,
-            scope = scopes,
-            wellKnownUrl = wellKnownUrl
-        )
+    private val maskinportenProperties = MaskinportenProperties(
+        clientId = clientId,
+        clientJwk = clientJwk,
+        scope = scopes,
+        wellKnownUrl = wellKnownUrl
+    )
 
     private val wellknown: WellKnown
         get() = maskinportenWebClient.get()

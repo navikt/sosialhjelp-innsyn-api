@@ -629,22 +629,21 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].dokumentasjonkravId).isEqualTo(dokumentasjonkravId2)
     }
 
-
     @Test
-    fun `should return true if dokumentasjonkrav status is LEVERT_TIDLIGERE`(){
+    fun `should return true if dokumentasjonkrav status is LEVERT_TIDLIGERE`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav = mutableListOf(
-                Dokumentasjonkrav(
-                    dokumentasjonkravId,
-                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                    "dokumentasjonkrav1",
-                    "tittel",
-                    null,
-                    Oppgavestatus.LEVERT_TIDLIGERE,
-                    null,
-                    LocalDateTime.now(),
-                    LocalDate.now()
-                )
+            Dokumentasjonkrav(
+                dokumentasjonkravId,
+                JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                "dokumentasjonkrav1",
+                "tittel",
+                null,
+                Oppgavestatus.LEVERT_TIDLIGERE,
+                null,
+                LocalDateTime.now(),
+                LocalDate.now()
+            )
         )
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()

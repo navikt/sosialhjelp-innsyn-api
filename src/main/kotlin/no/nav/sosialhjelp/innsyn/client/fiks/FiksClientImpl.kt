@@ -209,6 +209,8 @@ class FiksClientImpl(
             )
             body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
         }
+
+        log.info("multipart data: $body")
         return body
     }
 

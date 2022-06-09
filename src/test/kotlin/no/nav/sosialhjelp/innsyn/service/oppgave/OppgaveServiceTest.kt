@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
@@ -50,6 +51,10 @@ internal class OppgaveServiceTest {
 
     private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce"
     private val dokumentasjonkravId2 = "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+
+    private val dokumenttype = "tittel"
+    private val dok = DokumentInfo("tittel 1", dokumentasjonkravId, 11)
+    private val tidspunkt = LocalDateTime.now().plusHours(9)
 
     private val token = "token"
 
@@ -630,7 +635,7 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun `should return true if dokumentasjonkrav status is LEVERT_TIDLIGERE`() {
+    fun `should return true if vedlegg for dokumentasjonkrav already uploaded`() {
         val model = InternalDigisosSoker()
         model.dokumentasjonkrav = mutableListOf(
             Dokumentasjonkrav(
@@ -639,14 +644,16 @@ internal class OppgaveServiceTest {
                 "dokumentasjonkrav1",
                 "tittel",
                 null,
-                Oppgavestatus.LEVERT_TIDLIGERE,
+                Oppgavestatus.RELEVANT,
                 null,
                 LocalDateTime.now(),
                 LocalDate.now()
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
+            InternalVedlegg(dokumenttype, null, JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", listOf(dok), tidspunkt)
+        )
 
         val response = service.getHarLevertDokumentasjonkrav("123", token)
 

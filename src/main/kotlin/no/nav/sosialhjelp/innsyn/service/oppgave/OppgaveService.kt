@@ -193,8 +193,7 @@ class OppgaveService(
                 !it.isEmpty()
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
             }
-            .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
-            .filter { it.status == Oppgavestatus.LEVERT_TIDLIGERE }
+            .filter { erAlleredeLastetOpp(it, ettersendteVedlegg) }
             .toList().isNotEmpty()
     }
 

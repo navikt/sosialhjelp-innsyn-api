@@ -20,7 +20,7 @@ class ForelopigSvarController(
     private val tilgangskontroll: Tilgangskontroll
 ) {
     @GetMapping("/{fiksDigisosId}/forelopigSvar")
-    fun hentForelopigSvarStatus(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<ForelopigSvarResponse> {
+    suspend fun hentForelopigSvarStatus(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<ForelopigSvarResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
         val forelopigSvarResponse: ForelopigSvarResponse = forelopigSvarService.hentForelopigSvar(fiksDigisosId, token)

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component
 import java.util.Locale
 
 interface Tilgangskontroll {
-    fun sjekkTilgang(token: String)
-    fun hentTilgang(ident: String, token: String): Tilgang
+    suspend fun sjekkTilgang(token: String)
+    suspend fun hentTilgang(ident: String, token: String): Tilgang
     fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak)
 }
 
@@ -27,24 +27,24 @@ class TilgangskontrollService(
     private val pdlClient: PdlClient
 ) : Tilgangskontroll {
 
-    override fun sjekkTilgang(token: String) {
+    override suspend fun sjekkTilgang(token: String) {
         if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)
     }
 
-    fun sjekkTilgang(ident: String, token: String) {
+    suspend fun sjekkTilgang(ident: String, token: String) {
         val hentPerson = hentPerson(ident, token)
         if (hentPerson != null && hentPerson.isKode6Or7()) {
             throw TilgangskontrollException("Bruker har ikke tilgang til innsyn")
         }
     }
 
-    override fun hentTilgang(ident: String, token: String): Tilgang {
+    override suspend fun hentTilgang(ident: String, token: String): Tilgang {
         val pdlPerson = hentPerson(ident, token) ?: return Tilgang(false, "")
         return Tilgang(!pdlPerson.isKode6Or7(), fornavn(pdlPerson))
     }
 
-    private fun hentPerson(ident: String, token: String): PdlPerson? {
+    private suspend fun hentPerson(ident: String, token: String): PdlPerson? {
         return try {
             pdlClient.hentPerson(ident, token)?.hentPerson
         } catch (e: PdlException) {
@@ -76,11 +76,11 @@ class TilgangskontrollService(
 @Component
 class TilgangskontrollLocal : Tilgangskontroll {
 
-    override fun sjekkTilgang(token: String) {
+    override suspend fun sjekkTilgang(token: String) {
         // no-op
     }
 
-    override fun hentTilgang(ident: String, token: String): Tilgang {
+    override suspend fun hentTilgang(ident: String, token: String): Tilgang {
         return Tilgang(
             harTilgang = true,
             fornavn = "mockperson"

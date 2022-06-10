@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.rest
 
+import kotlinx.coroutines.runBlocking
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
@@ -22,7 +23,7 @@ class TilgangController(
     @GetMapping("/tilgang")
     fun harTilgang(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<TilgangResponse> {
         return try {
-            val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
+            val tilgang = runBlocking { tilgangskontroll.hentTilgang(getUserIdFromToken(), token) }
             ResponseEntity.ok().body(TilgangResponse(tilgang.harTilgang, tilgang.fornavn))
         } catch (e: PdlException) {
             log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")

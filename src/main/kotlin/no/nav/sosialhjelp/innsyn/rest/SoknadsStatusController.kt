@@ -27,7 +27,7 @@ class SoknadsStatusController(
 ) {
 
     @GetMapping("{fiksDigisosId}/soknadsStatus")
-    fun hentSoknadsStatus(
+    suspend fun hentSoknadsStatus(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
         response: HttpServletResponse,

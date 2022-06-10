@@ -47,7 +47,7 @@ class VedleggController(
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun sendVedlegg(
+    suspend fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
         @RequestParam("files") files: MutableList<MultipartFile>,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
@@ -65,7 +65,7 @@ class VedleggController(
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
-    fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
+    suspend fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(fiksDigisosId, token)

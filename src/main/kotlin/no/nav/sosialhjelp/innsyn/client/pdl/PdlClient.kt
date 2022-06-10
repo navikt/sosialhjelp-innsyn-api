@@ -27,7 +27,7 @@ import java.util.Optional
 import java.util.stream.Collectors
 
 interface PdlClient {
-    fun hentPerson(ident: String, token: String): PdlHentPerson?
+    suspend fun hentPerson(ident: String, token: String): PdlHentPerson?
     fun hentIdenter(ident: String, token: String): List<String>?
     fun ping()
 }
@@ -41,7 +41,7 @@ class PdlClientImpl(
     private val redisService: RedisService,
 ) : PdlClient {
 
-    override fun hentPerson(ident: String, token: String): PdlHentPerson? {
+    override suspend fun hentPerson(ident: String, token: String): PdlHentPerson? {
         return hentFraCache(ident) ?: hentFraPdl(ident, token)
     }
 
@@ -54,10 +54,10 @@ class PdlClientImpl(
     private fun hentFraCache(ident: String): PdlHentPerson? =
         redisService.get(cacheKey(ident), PdlHentPerson::class.java) as? PdlHentPerson
 
-    private fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
+    private suspend fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
         val query = getHentPersonResource().replace("[\n\r]", "")
         try {
-            val pdlPersonResponse = runBlocking {
+            val pdlPersonResponse =
                 retry(
                     attempts = RETRY_ATTEMPTS,
                     initialDelay = INITIAL_DELAY,
@@ -73,7 +73,6 @@ class PdlClientImpl(
                         .retrieve()
                         .awaitBody<PdlPersonResponse>()
                 }
-            }
 
             checkForPdlApiErrors(pdlPersonResponse)
 

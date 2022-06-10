@@ -23,7 +23,7 @@ class OrginalSoknadController(
 ) {
 
     @GetMapping("/{fiksDigisosId}/orginalJsonSoknad")
-    fun getOrginalJsonSoknad(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalJsonSoknadResponse> {
+    suspend fun getOrginalJsonSoknad(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalJsonSoknadResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
         val orginalSoknadResponse: OrginalJsonSoknadResponse = orginalSoknadService.hentOrginalJsonSoknad(fiksDigisosId, token)
@@ -33,7 +33,7 @@ class OrginalSoknadController(
     }
 
     @GetMapping("/{fiksDigisosId}/orginalSoknadPdfLink")
-    fun getOrginalSoknadPdfLink(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalSoknadPdfLinkResponse> {
+    suspend fun getOrginalSoknadPdfLink(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<OrginalSoknadPdfLinkResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
         val orginalSoknadPdfLink = (

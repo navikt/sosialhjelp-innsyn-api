@@ -5,6 +5,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
@@ -63,7 +64,7 @@ internal class VedleggControllerTest {
         clearMocks(vedleggOpplastingService, vedleggService)
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { tilgangskontroll.sjekkTilgang("token") } just Runs
+        every { runBlocking { tilgangskontroll.sjekkTilgang("token") } } just Runs
     }
 
     @Test
@@ -79,7 +80,8 @@ internal class VedleggControllerTest {
             )
         )
 
-        val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
+        val vedleggResponses: ResponseEntity<List<VedleggResponse>> =
+            runBlocking { controller.hentVedlegg(id, "token") }
 
         val body = vedleggResponses.body
 
@@ -118,7 +120,8 @@ internal class VedleggControllerTest {
             )
         )
 
-        val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
+        val vedleggResponses: ResponseEntity<List<VedleggResponse>> =
+            runBlocking { controller.hentVedlegg(id, "token") }
 
         val body = vedleggResponses.body
 
@@ -142,7 +145,9 @@ internal class VedleggControllerTest {
         every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
         every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
         assertThatExceptionOfType(IllegalStateException::class.java)
-            .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
+            .isThrownBy {
+                runBlocking { controller.sendVedlegg(id, files, "token", request) }
+            }
     }
 
     @Test
@@ -156,7 +161,9 @@ internal class VedleggControllerTest {
         every { request.cookies } returns arrayOf(xsrfCookie())
         every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
         every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
-        assertThatCode { controller.sendVedlegg(id, files, "token", request) }.doesNotThrowAnyException()
+        assertThatCode {
+            runBlocking { controller.sendVedlegg(id, files, "token", request) }
+        }.doesNotThrowAnyException()
     }
 
     @Test
@@ -170,7 +177,9 @@ internal class VedleggControllerTest {
         every { request.cookies } returns arrayOf()
         every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
         assertThatExceptionOfType(IllegalArgumentException::class.java)
-            .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
+            .isThrownBy {
+                runBlocking { controller.sendVedlegg(id, files, "token", request) }
+            }
     }
 
     @Test

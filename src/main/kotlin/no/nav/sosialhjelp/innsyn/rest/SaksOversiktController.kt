@@ -50,7 +50,7 @@ class SaksOversiktController(
 ) {
 
     @GetMapping("/saker")
-    fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
+    suspend fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         val saker = try {
@@ -74,7 +74,7 @@ class SaksOversiktController(
     }
 
     @GetMapping("/skalViseMeldingerLenke")
-    fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+    suspend fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {
@@ -111,7 +111,7 @@ class SaksOversiktController(
     }
 
     @GetMapping("/sisteSak")
-    fun hentSisteSak(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DigisosSak> {
+    suspend fun hentSisteSak(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DigisosSak> {
         tilgangskontroll.sjekkTilgang(token)
 
         val saker = try {
@@ -142,7 +142,7 @@ class SaksOversiktController(
     }
 
     @GetMapping("/saksDetaljer")
-    fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
+    suspend fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
         if (id.isEmpty()) {

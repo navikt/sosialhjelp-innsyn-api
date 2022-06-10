@@ -45,7 +45,15 @@ internal class SaksOversiktControllerTest {
     private val clientProperties: ClientProperties = mockk()
     private val unleashClient: Unleash = mockk()
 
-    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, dialogClient, clientProperties, unleashClient)
+    private val controller = SaksOversiktController(
+        fiksClient,
+        eventService,
+        oppgaveService,
+        tilgangskontroll,
+        dialogClient,
+        clientProperties,
+        unleashClient
+    )
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -69,7 +77,9 @@ internal class SaksOversiktControllerTest {
 
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { tilgangskontroll.sjekkTilgang("token") } just Runs
+        every {
+            runBlocking { tilgangskontroll.sjekkTilgang("token") }
+        } just Runs
 
         every { digisosSak1.fiksDigisosId } returns "123"
         every { digisosSak1.sistEndret } returns 0L
@@ -82,12 +92,26 @@ internal class SaksOversiktControllerTest {
         every { oppgaveResponseMock.oppgaveElementer } returns listOf(oppgaveElement1)
         every { dokumentasjonkravResponseMock.dokumentasjonkravElementer } returns listOf(dokumentasjonkravElement1)
 
-        every { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
+        every { oppgaveService.hentOppgaver("123", any()) } returns listOf(
+            oppgaveResponseMock,
+            oppgaveResponseMock
+        ) // 2 oppgaver
         every { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
-        every { oppgaveService.getVilkar("123", any()) } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
+        every { oppgaveService.getVilkar("123", any()) } returns listOf(
+            vilkarResponseMock,
+            vilkarResponseMock
+        ) // 2 oppgaver
         every { oppgaveService.getVilkar("456", any()) } returns listOf(vilkarResponseMock) // 1 oppgave
-        every { oppgaveService.getDokumentasjonkrav("123", any()) } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
-        every { oppgaveService.getDokumentasjonkrav("456", any()) } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
+        every { oppgaveService.getDokumentasjonkrav("123", any()) } returns listOf(
+            dokumentasjonkravResponseMock,
+            dokumentasjonkravResponseMock
+        ) // 2 oppgaver
+        every {
+            oppgaveService.getDokumentasjonkrav(
+                "456",
+                any()
+            )
+        } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
     }
 
     @Test
@@ -105,7 +129,7 @@ internal class SaksOversiktControllerTest {
 
         every { model2.saker } returns mutableListOf(sak1, sak2)
 
-        val response = controller.hentAlleSaker("token")
+        val response = runBlocking { controller.hentAlleSaker("token") }
 
         val saker = response.body
         assertThat(saker).isNotNull
@@ -180,7 +204,11 @@ internal class SaksOversiktControllerTest {
         every { orgSoknadNavC.timestampSendt } returns 2L
         every { digisosSakIMidten.kommunenummer } returns "1234"
 
-        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakEldst, digisosSakNyeste, digisosSakIMidten)
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(
+            digisosSakEldst,
+            digisosSakNyeste,
+            digisosSakIMidten
+        )
         every { clientProperties.meldingerKommunenummer } returns "0301"
 
         runBlocking {
@@ -217,7 +245,7 @@ internal class SaksOversiktControllerTest {
         every { model1.saker } returns mutableListOf()
         every { model2.saker } returns mutableListOf(sak1, sak2)
 
-        val response1 = controller.hentSaksDetaljer("123", "token")
+        val response1 = runBlocking { controller.hentSaksDetaljer("123", "token") }
         val sak1 = response1.body
 
         assertThat(response1.statusCode).isEqualTo(HttpStatus.OK)
@@ -225,7 +253,7 @@ internal class SaksOversiktControllerTest {
         assertThat(sak1?.soknadTittel).isEqualTo("")
         assertThat(sak1?.antallNyeOppgaver).isEqualTo(6)
 
-        val response2 = controller.hentSaksDetaljer("456", "token")
+        val response2 = runBlocking { controller.hentSaksDetaljer("456", "token") }
         val sak2 = response2.body
 
         assertThat(response2.statusCode).isEqualTo(HttpStatus.OK)
@@ -246,7 +274,7 @@ internal class SaksOversiktControllerTest {
         every { model1.dokumentasjonkrav } returns mutableListOf()
         every { model1.saker } returns mutableListOf()
 
-        val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId, "token")
+        val response = runBlocking { controller.hentSaksDetaljer(digisosSak1.fiksDigisosId, "token") }
         val sak = response.body
 
         assertThat(sak).isNotNull

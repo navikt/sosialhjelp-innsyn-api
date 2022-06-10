@@ -19,7 +19,7 @@ class SoknadMedInnsynController(
 ) {
 
     @GetMapping("/harSoknaderMedInnsyn", produces = ["application/json;charset=UTF-8"])
-    fun harSoknaderMedInnsyn(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+    suspend fun harSoknaderMedInnsyn(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang(token)
         return ResponseEntity.ok(soknadMedInnsynService.harSoknaderMedInnsyn(token))
     }

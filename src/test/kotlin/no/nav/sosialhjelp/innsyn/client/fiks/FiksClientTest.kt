@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.client.fiks
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -41,14 +43,16 @@ import java.io.InputStream
 internal class FiksClientTest {
 
     private val mockWebServer = MockWebServer()
-
     private val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
+
     private val redisService: RedisService = mockk()
     private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
     private val tilgangskontroll: Tilgangskontroll = mockk()
-    private val fiksClient = FiksClientImpl(fiksWebClient, tilgangskontroll, retryProperties, redisService)
+    private val meterRegistry: MeterRegistry = mockk()
+    private val counterMock: Counter = mockk()
+    private lateinit var fiksClient: FiksClientImpl
 
     private val id = "123"
 
@@ -66,6 +70,11 @@ internal class FiksClientTest {
         every { retryProperties.attempts } returns 2
         every { retryProperties.initialDelay } returns 5
         every { retryProperties.maxDelay } returns 10
+
+        every { meterRegistry.counter(any()) } returns counterMock
+        every { counterMock.increment() } just Runs
+
+        fiksClient = FiksClientImpl(fiksWebClient, tilgangskontroll, retryProperties, redisService, meterRegistry)
     }
 
     @AfterEach
@@ -256,7 +265,7 @@ internal class FiksClientTest {
     @Test // fikk ikke mockWebServer til å funke her uten å skjønner hvorfor (InputStream-relatert), så gikk for "klassisk" mockk stil
     fun `POST ny ettersendelse`() {
         val webClient: WebClient = mockk()
-        val clientForPost = FiksClientImpl(webClient, tilgangskontroll, retryProperties, redisService)
+        val clientForPost = FiksClientImpl(webClient, tilgangskontroll, retryProperties, redisService, meterRegistry)
 
         val fil1: InputStream = mockk()
         val fil2: InputStream = mockk()

@@ -55,6 +55,7 @@ class EventService(
         if (originalSoknadNAV?.timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
+            model.fiksDigisosId = digisosSak.fiksDigisosId
 
             if (jsonSoknad != null && jsonSoknad.mottaker != null) {
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)

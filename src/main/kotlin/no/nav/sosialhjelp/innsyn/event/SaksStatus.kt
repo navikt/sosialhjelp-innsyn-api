@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
+import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import org.slf4j.LoggerFactory
 import java.util.Locale
@@ -42,6 +43,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
         }
     } else {
         // Opprett ny Sak
+        if (status == SoknadsStatus.FERDIGBEHANDLET) {
+            log.warn("Ny sak opprettet etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")
+        }
         val status = SaksStatus.valueOf(hendelse.status?.name ?: JsonSaksStatus.Status.UNDER_BEHANDLING.name)
         saker.add(
             Sak(

@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.config
 
+import no.nav.sosialhjelp.innsyn.common.XsrfException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
@@ -60,7 +61,7 @@ class XsrfGenerator(
         val yesterdaysXsrfToken = hentXsrfToken(fnr, yesterday) ?: UUID.randomUUID().toString()
 
         val valid = xsrfToken == xsrfRequestString || yesterdaysXsrfToken == xsrfRequestString
-        require(valid) { "Feil xsrf token" }
+        if (!valid) throw XsrfException("Feil xsrf token")
     }
 
     companion object {

@@ -4,6 +4,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import no.nav.sosialhjelp.innsyn.common.XsrfException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.Companion.redisKey
@@ -24,7 +25,7 @@ internal class XsrfGeneratorTest {
     private val xsrfGenerator = XsrfGenerator(redisService)
 
     private val mockSubjectHandler: SubjectHandler = mockk()
-    val fnr = "fnr"
+    private val fnr = "fnr"
 
     @BeforeEach
     internal fun setUp() {
@@ -89,7 +90,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+            .isInstanceOf(XsrfException::class.java)
             .hasMessage("Feil xsrf token")
     }
 
@@ -103,7 +104,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+            .isInstanceOf(XsrfException::class.java)
             .hasMessage("Feil xsrf token")
     }
 }

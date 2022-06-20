@@ -74,8 +74,9 @@ internal class VedleggControllerTest {
                 tilleggsinfo,
                 null,
                 null,
-                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
-                LocalDateTime.now()
+                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
+                LocalDateTime.now(),
+                null
             )
         )
 
@@ -105,16 +106,18 @@ internal class VedleggControllerTest {
                 null,
                 null,
                 null,
-                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                now
+                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                now,
+                null
             ),
             InternalVedlegg(
                 dokumenttype,
                 null,
                 null,
                 null,
-                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                now
+                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                now,
+                null
             )
         )
 

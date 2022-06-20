@@ -83,7 +83,7 @@ internal class OppgaveServiceTest {
         model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true))
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.hentOppgaver("123", token)
 
@@ -101,7 +101,7 @@ internal class OppgaveServiceTest {
         model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.hentOppgaver("123", token)
 
@@ -126,7 +126,7 @@ internal class OppgaveServiceTest {
         )
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.hentOppgaver("123", token)
 
@@ -165,11 +165,11 @@ internal class OppgaveServiceTest {
         )
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
-            InternalVedlegg(type, tillegg, null, null, emptyList(), tidspunktEtterKrav),
-            InternalVedlegg(type2, null, null, null, emptyList(), tidspunktEtterKrav),
-            InternalVedlegg(type3, tillegg3, null, null, emptyList(), tidspunktFoerKrav),
-            InternalVedlegg(type3, null, null, null, emptyList(), tidspunktEtterKrav)
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+            InternalVedlegg(type, tillegg, null, null, mutableListOf(), tidspunktEtterKrav, null),
+            InternalVedlegg(type2, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
+            InternalVedlegg(type3, tillegg3, null, null, mutableListOf(), tidspunktFoerKrav, null),
+            InternalVedlegg(type3, null, null, null, mutableListOf(), tidspunktEtterKrav, null)
         )
 
         val responseList = service.hentOppgaver("123", token)
@@ -190,7 +190,7 @@ internal class OppgaveServiceTest {
         model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.hentOppgaver("123", token)
 
@@ -283,7 +283,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -345,7 +345,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -399,7 +399,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -421,7 +421,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getVilkar("123", token)
 
@@ -484,7 +484,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -556,7 +556,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkrav("123", token)
 
@@ -621,7 +621,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
         val responseList = service.getDokumentasjonkravMedId("123", dokumentasjonkravId2, token)
 
@@ -651,8 +651,8 @@ internal class OppgaveServiceTest {
             )
         )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any()) } returns listOf(
-            InternalVedlegg(dokumenttype, null, JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", listOf(dok), tidspunkt)
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
+            InternalVedlegg(dokumenttype, null, JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", mutableListOf(dok), tidspunkt, null)
         )
 
         val response = service.getHarLevertDokumentasjonkrav("123", token)

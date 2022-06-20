@@ -530,8 +530,9 @@ internal class EventServiceTest {
                 tilleggsinfo = "dokumentasjon",
                 null,
                 null,
-                dokumentInfoList = emptyList(),
-                tidspunktLastetOpp = LocalDateTime.now()
+                dokumentInfoList = mutableListOf(),
+                tidspunktLastetOpp = LocalDateTime.now(),
+                null
             )
         )
 
@@ -565,8 +566,9 @@ internal class EventServiceTest {
                 tilleggsinfo = "dokumentasjon",
                 null,
                 null,
-                dokumentInfoList = emptyList(),
-                tidspunktLastetOpp = LocalDateTime.now()
+                dokumentInfoList = mutableListOf(),
+                tidspunktLastetOpp = LocalDateTime.now(),
+                null
             )
         )
 

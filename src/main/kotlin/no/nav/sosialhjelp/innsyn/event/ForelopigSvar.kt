@@ -17,7 +17,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: Cl
 
     forelopigSvar = ForelopigSvar(true, hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse))
 
-    val beskrivelse = "Du har fått ett brev om saksbehandlingstiden for søknaden din"
+    val beskrivelse = "Du har fått ett brev om saksbehandlingstiden for søknaden din."
     log.info("Hendelse: Forelopig svar. $beskrivelse")
     historikk.add(
         Hendelse(

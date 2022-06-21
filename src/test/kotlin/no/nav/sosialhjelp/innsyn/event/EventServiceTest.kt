@@ -475,7 +475,7 @@ internal class EventServiceTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittel).contains("Du har fått ett brev om saksbehandlingstiden for søknaden din")
+        assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din.")
         assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
     }
 

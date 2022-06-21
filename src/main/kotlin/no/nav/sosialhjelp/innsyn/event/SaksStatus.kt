@@ -58,7 +58,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
         )
         val tittel = hendelse.tittel ?: "saken din"
         val beskrivelse: String? = when (status) {
-            SaksStatus.UNDER_BEHANDLING -> "${tittel.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }} er under behandling"
+            SaksStatus.UNDER_BEHANDLING -> "${tittel.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }} er under behandling."
             SaksStatus.BEHANDLES_IKKE, SaksStatus.IKKE_INNSYN -> "Vi kan ikke vise status på søknaden din om $tittel på nav.no."
             else -> null
         }

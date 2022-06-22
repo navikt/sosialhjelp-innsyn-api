@@ -3,34 +3,34 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val coroutines = "1.6.1"
+    const val coroutines = "1.6.3"
     const val springBoot = "2.7.0"
     const val sosialhjelpCommon = "1.3f8acf5"
     const val logback = "1.2.11"
     const val logstash = "7.2"
     const val filformat = "1.2022.04.29-13.11-459bee049a7a"
     const val micrometerRegistry = "1.9.0"
-    const val prometheus = "0.15.0"
-    const val tokenValidation = "2.0.20"
+    const val prometheus = "0.16.0"
+    const val tokenValidation = "2.1.0"
     const val jackson = "2.13.3"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.8.0"
     const val fileUpload = "1.4"
-    const val tika = "2.4.0"
+    const val tika = "2.4.1"
     const val pdfBox = "2.0.24"
     const val fiksKryptering = "1.1.2"
     const val lettuce = "6.1.8.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "3.3.4"
-    const val springdoc = "1.6.8"
+    const val springdoc = "1.6.9"
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
     const val log4j = "2.17.2"
 
     const val javaJwt = "3.19.2"
     const val jwksRsa = "0.21.1"
-    const val nimbus = "9.22"
+    const val nimbus = "9.23"
 
     const val ktlint = "0.45.2"
 
@@ -42,8 +42,8 @@ object Versions {
 }
 
 plugins {
-    kotlin("jvm") version "1.6.21"
-    kotlin("plugin.spring") version "1.6.21"
+    kotlin("jvm") version "1.7.0"
+    kotlin("plugin.spring") version "1.7.0"
     id("org.springframework.boot") version "2.7.0"
     id("com.github.ben-manes.versions") version "0.42.0"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"

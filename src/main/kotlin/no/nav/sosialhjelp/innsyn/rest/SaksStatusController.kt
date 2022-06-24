@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.rest
 
+import kotlinx.coroutines.runBlocking
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.domain.SaksStatusResponse
 import no.nav.sosialhjelp.innsyn.service.saksstatus.SaksStatusService
@@ -22,8 +23,14 @@ class SaksStatusController(
 ) {
 
     @GetMapping("/{fiksDigisosId}/saksStatus", produces = ["application/json;charset=UTF-8"])
-    suspend fun hentSaksStatuser(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<SaksStatusResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    fun hentSaksStatuser(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String
+    ): ResponseEntity<List<SaksStatusResponse>> {
+
+        runBlocking {
+            tilgangskontroll.sjekkTilgang(token)
+        }
 
         val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
         if (saksStatuser.isEmpty()) {

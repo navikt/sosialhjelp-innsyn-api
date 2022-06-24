@@ -13,6 +13,8 @@ import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.event.tidspunkt_soknad
+import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -48,6 +50,7 @@ internal class VedleggServiceTest {
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_2, any(), "token") } returns ettersendteVedleggSpesifikasjon_2
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_3, any(), "token") } returns ettersendteVedleggSpesifikasjon_3
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_4, any(), "token") } returns ettersendteVedleggSpesifikasjon_4
+        every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_5, any(), "token") } returns ettersendteVedleggSpesifikasjon_5
     }
 
     @Test
@@ -125,7 +128,6 @@ internal class VedleggServiceTest {
         val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
         every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
-        // every { service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
         val list = service.hentAlleOpplastedeVedlegg(id, "token")
 
@@ -147,8 +149,8 @@ internal class VedleggServiceTest {
         assertThat(list[4].type).isEqualTo(dokumenttype_3)
         assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_2, zoneIdOslo))
 
-        assertThat(list[5].type).isEqualTo(dokumenttype_3)
-        assertThat(list[5].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_2, zoneIdOslo))
+        assertThat(list[5].type).isEqualTo(dokumenttype)
+        assertThat(list[5].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
     }
 
     @Test
@@ -237,6 +239,7 @@ private const val ettersendelse_filnavn_1 = "filnavn.pdf"
 private const val ettersendelse_filnavn_2 = "navn på fil.ocr"
 private const val ettersendelse_filnavn_3 = "denne filens navn.jpg"
 private const val ettersendelse_filnavn_4 = "gif.jpg"
+private const val ettersendelse_filnavn_5 = "ikke gif.jpg"
 private const val soknad_filnavn_1 = "originalSoknadVedlegg.png"
 private const val soknad_filnavn_2 = "originalSoknadVedlegg_2.exe"
 
@@ -282,6 +285,12 @@ private val ettersendelser = listOf(
         vedleggMetadata = vedleggMetadata_ettersendelse_4,
         vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_3, 1), DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_4, 2)),
         timestampSendt = tid_2.toEpochMilli()
+    ),
+    Ettersendelse(
+        navEksternRefId = "ref 3",
+        vedleggMetadata = vedleggMetadata_ettersendelse_5,
+        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_1, dokumentlagerId_2, 1), DokumentInfo(ettersendelse_filnavn_5, dokumentlagerId_1, 2)),
+        timestampSendt = tid_1.toEpochMilli()
     )
 )
 
@@ -405,5 +414,20 @@ private val ettersendteVedleggSpesifikasjon_4 = JsonVedleggSpesifikasjon()
                 )
                 .withStatus(LASTET_OPP_STATUS)
                 .withType(dokumenttype_3)
+        )
+    )
+
+private val ettersendteVedleggSpesifikasjon_5 = JsonVedleggSpesifikasjon()
+    .withVedlegg(
+        listOf(
+            JsonVedlegg()
+                .withFiler(
+                    listOf(
+                        JsonFiler().withFilnavn(ettersendelse_filnavn_1).withSha512("1231231"),
+                        JsonFiler().withFilnavn(ettersendelse_filnavn_5).withSha512("9786468")
+                    )
+                )
+                .withStatus(LASTET_OPP_STATUS)
+                .withType(dokumenttype)
         )
     )

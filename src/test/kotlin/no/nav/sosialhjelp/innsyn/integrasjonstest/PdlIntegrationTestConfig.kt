@@ -35,7 +35,7 @@ class HentPDLClientMock : PdlClient {
         .registerModule(JavaTimeModule())
         .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 
-    override suspend fun hentPerson(ident: String, token: String): PdlHentPerson{
+    override suspend fun hentPerson(ident: String, token: String): PdlHentPerson {
         val resourceAsStream = ClassLoader.getSystemResourceAsStream("pdl/pdlPersonResponse.json")
 
         assertThat(resourceAsStream).isNotNull

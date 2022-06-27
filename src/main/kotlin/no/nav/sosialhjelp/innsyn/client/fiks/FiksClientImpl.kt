@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.client.fiks
 
 import com.fasterxml.jackson.core.JsonProcessingException
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -40,7 +42,9 @@ class FiksClientImpl(
     private val tilgangskontroll: Tilgangskontroll,
     private val retryProperties: FiksRetryProperties,
     private val redisService: RedisService,
+    meterRegistry: MeterRegistry,
 ) : FiksClient {
+    private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
         val sak = when {
@@ -187,6 +191,7 @@ class FiksClientImpl(
             }
             .block() ?: throw FiksClientException(500, "responseEntity er null selv om request ikke har kastet exception", null)
 
+        opplastingsteller.increment()
         log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue})")
     }
 

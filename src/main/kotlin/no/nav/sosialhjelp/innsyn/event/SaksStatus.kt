@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
+import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import org.slf4j.LoggerFactory
 import java.util.Locale
@@ -42,6 +43,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
         }
     } else {
         // Opprett ny Sak
+        if (status == SoknadsStatus.FERDIGBEHANDLET) {
+            log.warn("Ny sak opprettet etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")
+        }
         val status = SaksStatus.valueOf(hendelse.status?.name ?: JsonSaksStatus.Status.UNDER_BEHANDLING.name)
         saker.add(
             Sak(
@@ -54,7 +58,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
         )
         val tittel = hendelse.tittel ?: "saken din"
         val beskrivelse: String? = when (status) {
-            SaksStatus.UNDER_BEHANDLING -> "${tittel.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }} er under behandling"
+            SaksStatus.UNDER_BEHANDLING -> "${tittel.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }} er under behandling."
             SaksStatus.BEHANDLES_IKKE, SaksStatus.IKKE_INNSYN -> "Vi kan ikke vise status på søknaden din om $tittel på nav.no."
             else -> null
         }

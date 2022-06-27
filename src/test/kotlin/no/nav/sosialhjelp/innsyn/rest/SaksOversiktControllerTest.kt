@@ -31,6 +31,7 @@ import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -112,6 +113,11 @@ internal class SaksOversiktControllerTest {
                 any()
             )
         } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test

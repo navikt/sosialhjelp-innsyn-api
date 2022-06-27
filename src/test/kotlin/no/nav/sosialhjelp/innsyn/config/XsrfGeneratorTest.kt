@@ -4,6 +4,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import no.nav.sosialhjelp.innsyn.common.XsrfException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.Companion.redisKey
@@ -12,6 +13,7 @@ import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -24,12 +26,17 @@ internal class XsrfGeneratorTest {
     private val xsrfGenerator = XsrfGenerator(redisService)
 
     private val mockSubjectHandler: SubjectHandler = mockk()
-    val fnr = "fnr"
+    private val fnr = "fnr"
 
     @BeforeEach
     internal fun setUp() {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
         every { mockSubjectHandler.getUserIdFromToken() } returns fnr
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test
@@ -89,7 +96,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+            .isInstanceOf(XsrfException::class.java)
             .hasMessage("Feil xsrf token")
     }
 
@@ -103,7 +110,7 @@ internal class XsrfGeneratorTest {
         every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+            .isInstanceOf(XsrfException::class.java)
             .hasMessage("Feil xsrf token")
     }
 }

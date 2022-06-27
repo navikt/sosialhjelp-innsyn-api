@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 
 data class InternalDigisosSoker(
     var referanse: String?,
+    var fiksDigisosId: String?,
     var status: SoknadsStatus?,
     var saker: MutableList<Sak>,
     var utbetalinger: MutableList<Utbetaling>,
@@ -23,6 +24,7 @@ data class InternalDigisosSoker(
 
     constructor() : this(
         referanse = null,
+        fiksDigisosId = null,
         status = null,
         saker = mutableListOf(),
         utbetalinger = mutableListOf(),

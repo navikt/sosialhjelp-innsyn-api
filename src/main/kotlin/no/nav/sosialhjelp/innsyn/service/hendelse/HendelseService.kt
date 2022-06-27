@@ -53,7 +53,7 @@ class HendelseService(
             .forEach { (tidspunkt, samtidigOpplastedeVedlegg) ->
                 val antallVedleggForTidspunkt = samtidigOpplastedeVedlegg.sumOf { it.dokumentInfoList.size }
                 historikk.add(
-                    Hendelse("Du har sendt $antallVedleggForTidspunkt vedlegg til NAV", tidspunkt)
+                    Hendelse("Du har sendt $antallVedleggForTidspunkt vedlegg til NAV.", tidspunkt)
                 )
             }
     }

@@ -34,6 +34,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
         }
         .toMutableList()
 
+    if (status == SoknadsStatus.FERDIGBEHANDLET) {
+        log.warn("Dokumentasjon etterspurt etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")
+    }
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {
         val beskrivelse = "Vi trenger flere opplysninger til søknaden din."
         val url = hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
@@ -42,7 +45,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
     }
 
     if (prevSize > 0 && oppgaver.size == 0 && status != SoknadsStatus.FERDIGBEHANDLET && status != SoknadsStatus.BEHANDLES_IKKE) {
-        val beskrivelse = "Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg"
+        val beskrivelse = "Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg."
         log.info("Hendelse: Dokumentasjon etterspurt. $beskrivelse")
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), null))
     }

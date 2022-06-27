@@ -77,4 +77,12 @@ class OppgaveController(
         }
         return ResponseEntity.ok(dokumentasjonkrav)
     }
+
+    @GetMapping("/{fiksDigisosId}/harLeverteDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
+    fun getHarLevertDokumentasjonkrav(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+        tilgangskontroll.sjekkTilgang(token)
+
+        val harLevertTidligere = oppgaveService.getHarLevertDokumentasjonkrav(fiksDigisosId, token)
+        return ResponseEntity.ok(harLevertTidligere)
+    }
 }

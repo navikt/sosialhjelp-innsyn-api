@@ -19,6 +19,7 @@ import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.ResponseEntity
@@ -65,6 +66,11 @@ internal class VedleggControllerTest {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
         every { runBlocking { tilgangskontroll.sjekkTilgang("token") } } just Runs
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test

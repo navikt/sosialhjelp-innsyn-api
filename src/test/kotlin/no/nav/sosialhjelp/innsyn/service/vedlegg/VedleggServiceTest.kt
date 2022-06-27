@@ -13,8 +13,6 @@ import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.event.tidspunkt_soknad
-import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -114,13 +112,15 @@ internal class VedleggServiceTest {
         assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(ettersendelse_filnavn_2)
 
         assertThat(list[2].type).isEqualTo(dokumenttype_3)
-        assertThat(list[2].dokumentInfoList).hasSize(2)
+        assertThat(list[2].dokumentInfoList).hasSize(3)
         assertThat(list[2].dokumentInfoList[0].filnavn).isEqualTo(ettersendelse_filnavn_3)
         assertThat(list[2].dokumentInfoList[1].filnavn).isEqualTo(ettersendelse_filnavn_4)
+        assertThat(list[2].dokumentInfoList[2].filnavn).isEqualTo(ettersendelse_filnavn_4)
 
-        assertThat(list[3].type).isEqualTo(dokumenttype_3)
-        assertThat(list[3].dokumentInfoList).hasSize(1)
-        assertThat(list[3].dokumentInfoList[0].filnavn).isEqualTo(ettersendelse_filnavn_4)
+        assertThat(list[3].type).isEqualTo(dokumenttype)
+        assertThat(list[3].dokumentInfoList).hasSize(2)
+        assertThat(list[3].dokumentInfoList[0].filnavn).isEqualTo(ettersendelse_filnavn_1)
+        assertThat(list[3].dokumentInfoList[1].filnavn).isEqualTo(ettersendelse_filnavn_5)
     }
 
     @Test

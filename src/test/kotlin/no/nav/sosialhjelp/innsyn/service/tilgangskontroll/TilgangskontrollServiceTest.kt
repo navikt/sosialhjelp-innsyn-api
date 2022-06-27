@@ -14,6 +14,7 @@ import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -38,6 +39,11 @@ internal class TilgangskontrollServiceTest {
         every { mockSubjectHandler.getToken() } returns "token"
         every { mockSubjectHandler.getClientId() } returns "clientId"
         every { digisosSak.sokerFnr } returns ident
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test

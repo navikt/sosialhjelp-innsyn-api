@@ -13,6 +13,7 @@ import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -31,6 +32,11 @@ internal class XsrfGeneratorTest {
     internal fun setUp() {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
         every { mockSubjectHandler.getUserIdFromToken() } returns fnr
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test

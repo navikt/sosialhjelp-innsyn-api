@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_kommuneinfo_response
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -25,6 +26,11 @@ internal class RedisServiceTest {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
 
         every { mockSubjectHandler.getUserIdFromToken() } returns "11111111111"
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test

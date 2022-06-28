@@ -26,7 +26,7 @@ internal class VedleggServiceTest {
     private val eventService: EventService = mockk()
     private val fiksClient: FiksClient = mockk()
 
-    private val service = VedleggService(fiksClient, eventService)
+    private val service = VedleggService(fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon = mockk()
@@ -53,23 +53,24 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() {
-        every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
+        val model = InternalDigisosSoker()
 
+        every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
-
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-        val list = service.hentAlleOpplastedeVedlegg(id, "token")
-
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
         assertThat(list).isEmpty()
     }
 
     @Test
     fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() {
-        every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
+        val model = InternalDigisosSoker()
+
+        every { eventService.createModel(any(), any()) } returns model
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-        val list = service.hentAlleOpplastedeVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
         assertThat(list).hasSize(2)
         assertThat(list[0].type).isEqualTo(dokumenttype)
@@ -80,9 +81,10 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() {
-        every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
-        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        val model = InternalDigisosSoker()
 
+        every { eventService.createModel(any(), any()) } returns model
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns listOf(
             Ettersendelse(
                 navEksternRefId = "ref 3",
@@ -92,17 +94,20 @@ internal class VedleggServiceTest {
             )
         )
 
-        val list = service.hentAlleOpplastedeVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
         assertThat(list).hasSize(0)
     }
 
     @Test
     fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() {
-        every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
+        val model = InternalDigisosSoker()
+
+        every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
-        val list = service.hentAlleOpplastedeVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
+
 
         assertThat(list).hasSize(4)
         assertThat(list[0].type).isEqualTo(dokumenttype_3)
@@ -125,15 +130,16 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal hente alle vedlegg for digisosSak`() {
-        val zoneIdOslo = ZoneId.of("Europe/Oslo")
+        val model = InternalDigisosSoker()
 
-        every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
+        every { eventService.createModel(any(), any()) } returns model
 
-        val list = service.hentAlleOpplastedeVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
         assertThat(list).hasSize(6)
 
         // nano-presisjon lacking
+        val zoneIdOslo = ZoneId.of("Europe/Oslo")
         assertThat(list[0].type).isEqualTo(dokumenttype)
         assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
@@ -173,9 +179,10 @@ internal class VedleggServiceTest {
 
     @Test
     fun `like filnavn i DokumentInfoList vil resultere i at de returneres for hver JsonFil med riktig filnavn`() {
-        every { eventService.createModel(any(), any()) } returns InternalDigisosSoker()
-        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
+        val model = InternalDigisosSoker()
 
+        every { eventService.createModel(any(), any()) } returns model
+        every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
         every { fiksClient.hentDokument(any(), vedleggMetadata_ettersendelse_5, any(), any()) } returns
             JsonVedleggSpesifikasjon()
                 .withVedlegg(
@@ -215,7 +222,7 @@ internal class VedleggServiceTest {
             )
         )
 
-        val list = service.hentAlleOpplastedeVedlegg(id, "token")
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
         assertThat(list).hasSize(2)
 
@@ -232,8 +239,6 @@ internal class VedleggServiceTest {
         assertThat(list[1].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(dokumentlagerId_4)
     }
 }
-
-private const val id = "123"
 
 private const val ettersendelse_filnavn_1 = "filnavn.pdf"
 private const val ettersendelse_filnavn_2 = "navn på fil.ocr"

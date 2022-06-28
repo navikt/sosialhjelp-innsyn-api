@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.OppgaveOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
+import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.OppgaveValidering
@@ -43,6 +45,8 @@ class VedleggController(
     private val clientProperties: ClientProperties,
     private val tilgangskontroll: Tilgangskontroll,
     private val xsrfGenerator: XsrfGenerator,
+    private val eventService: EventService,
+    private val fiksClient: FiksClient,
 ) {
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
@@ -67,8 +71,10 @@ class VedleggController(
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
     fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
         tilgangskontroll.sjekkTilgang(token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
 
-        val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(fiksDigisosId, token)
+        val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(digisosSak, model, token)
         if (internalVedleggList.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }

@@ -8,7 +8,6 @@ import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.NedlastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import org.springframework.stereotype.Component
@@ -20,13 +19,9 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 @Component
 class VedleggService(
     private val fiksClient: FiksClient,
-    private val eventService: EventService
 ) {
 
-    fun hentAlleOpplastedeVedlegg(fiksDigisosId: String, token: String): List<InternalVedlegg> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        val model = eventService.createModel(digisosSak, token)
-
+    fun hentAlleOpplastedeVedlegg(digisosSak: DigisosSak, model: InternalDigisosSoker, token: String): List<InternalVedlegg> {
         val soknadVedlegg = hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, digisosSak, token)
         val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak, model, token)
 

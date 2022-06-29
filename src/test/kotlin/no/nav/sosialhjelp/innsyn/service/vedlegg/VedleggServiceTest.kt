@@ -30,6 +30,7 @@ internal class VedleggServiceTest {
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon = mockk()
+    private val model = InternalDigisosSoker()
 
     @BeforeEach
     internal fun setUp() {
@@ -53,8 +54,6 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() {
-        val model = InternalDigisosSoker()
-
         every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
@@ -65,8 +64,6 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() {
-        val model = InternalDigisosSoker()
-
         every { eventService.createModel(any(), any()) } returns model
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
@@ -81,8 +78,6 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() {
-        val model = InternalDigisosSoker()
-
         every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns listOf(
@@ -101,8 +96,6 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() {
-        val model = InternalDigisosSoker()
-
         every { eventService.createModel(any(), any()) } returns model
         every { fiksClient.hentDokument(any(), vedleggMetadata_soknad_1, any(), any()) } returns mockJsonVedleggSpesifikasjon
 
@@ -129,8 +122,6 @@ internal class VedleggServiceTest {
 
     @Test
     fun `skal hente alle vedlegg for digisosSak`() {
-        val model = InternalDigisosSoker()
-
         every { eventService.createModel(any(), any()) } returns model
 
         val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")

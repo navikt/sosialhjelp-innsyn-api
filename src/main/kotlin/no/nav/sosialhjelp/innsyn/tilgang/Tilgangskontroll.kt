@@ -1,13 +1,13 @@
-package no.nav.sosialhjelp.innsyn.service.tilgangskontroll
+package no.nav.sosialhjelp.innsyn.tilgang
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.client.pdl.PdlClient
-import no.nav.sosialhjelp.innsyn.client.pdl.PdlPerson
-import no.nav.sosialhjelp.innsyn.client.pdl.isKode6Or7
 import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPerson
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.isKode6Or7
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile

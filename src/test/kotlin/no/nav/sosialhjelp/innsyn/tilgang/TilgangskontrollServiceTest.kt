@@ -1,16 +1,16 @@
-package no.nav.sosialhjelp.innsyn.service.tilgangskontroll
+package no.nav.sosialhjelp.innsyn.tilgang
 
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.client.pdl.Adressebeskyttelse
-import no.nav.sosialhjelp.innsyn.client.pdl.Gradering
-import no.nav.sosialhjelp.innsyn.client.pdl.PdlClient
-import no.nav.sosialhjelp.innsyn.client.pdl.PdlHentPerson
-import no.nav.sosialhjelp.innsyn.client.pdl.PdlNavn
 import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.Adressebeskyttelse
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.Gradering
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlNavn
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType

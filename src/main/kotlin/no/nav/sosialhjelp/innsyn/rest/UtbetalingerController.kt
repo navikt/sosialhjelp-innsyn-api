@@ -3,8 +3,8 @@ package no.nav.sosialhjelp.innsyn.rest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingerResponse
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.utbetalinger.UtbetalingerService
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus

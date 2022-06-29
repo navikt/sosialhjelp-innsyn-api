@@ -20,9 +20,9 @@ import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.service.pdf.EttersendelsePdfGenerator
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.service.vedlegg.KrypteringService
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode

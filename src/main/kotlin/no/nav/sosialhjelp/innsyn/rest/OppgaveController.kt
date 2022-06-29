@@ -5,7 +5,7 @@ import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

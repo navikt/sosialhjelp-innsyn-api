@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.pdl
+package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 data class PdlRequest(
     val query: String,

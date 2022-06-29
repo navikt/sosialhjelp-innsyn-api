@@ -23,7 +23,7 @@ import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.service.saksstatus.DEFAULT_TITTEL
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger

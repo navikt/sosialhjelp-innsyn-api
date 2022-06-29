@@ -31,7 +31,7 @@ class OppgaveService(
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, model, token)
 
         val oppgaveResponseList = model.oppgaver
             .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
@@ -114,7 +114,7 @@ class OppgaveService(
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, model, token)
 
         // Logger om fagsystemene har tatt i bruk nye statuser
         val antallWithNewStatus = model.dokumentasjonkrav
@@ -186,7 +186,7 @@ class OppgaveService(
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, model, token)
 
         return model.dokumentasjonkrav
             .filter {

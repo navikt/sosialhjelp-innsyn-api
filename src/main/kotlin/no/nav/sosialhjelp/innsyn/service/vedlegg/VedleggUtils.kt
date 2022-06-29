@@ -4,6 +4,9 @@ import org.apache.tika.Tika
 import java.io.InputStream
 import java.security.MessageDigest
 import java.text.Normalizer
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 fun getSha512FromByteArray(bytes: ByteArray?): String {
     if (bytes == null) {
@@ -50,3 +53,27 @@ fun splitFileName(fileName: String): FileNameSplit {
 }
 
 class FileNameSplit(val name: String, val extension: String)
+
+fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVedlegg> {
+    val kombinertListe = ArrayList<InternalVedlegg>()
+    alleVedlegg.forEach {
+        val funnet = kombinertListe.firstOrNull { kombinert ->
+            (
+                areDatesWithinOneMinute(it.tidspunktLastetOpp, kombinert.tidspunktLastetOpp) &&
+                    kombinert.type == it.type &&
+                    kombinert.tilleggsinfo == it.tilleggsinfo
+                )
+        }
+        if (funnet != null) {
+            funnet.dokumentInfoList.addAll(it.dokumentInfoList)
+        } else {
+            kombinertListe.add(it)
+        }
+    }
+    return kombinertListe
+}
+
+fun areDatesWithinOneMinute(firstDate: LocalDateTime?, secondDate: LocalDateTime?): Boolean {
+    return (firstDate == null && secondDate == null) ||
+        ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
+}

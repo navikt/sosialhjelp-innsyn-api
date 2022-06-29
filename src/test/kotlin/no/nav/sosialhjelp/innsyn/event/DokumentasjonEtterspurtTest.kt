@@ -161,7 +161,7 @@ internal class DokumentasjonEtterspurtTest {
                     )
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -194,8 +194,9 @@ internal class DokumentasjonEtterspurtTest {
                     vedleggKrevesTilleggsinfo,
                     JsonVedlegg.HendelseType.SOKNAD,
                     hendelseReferanse,
-                    emptyList(),
-                    unixToLocalDateTime(tidspunkt_soknad)
+                    mutableListOf(),
+                    unixToLocalDateTime(tidspunkt_soknad),
+                    null
                 )
             )
 
@@ -217,8 +218,9 @@ internal class DokumentasjonEtterspurtTest {
                     vedleggKrevesTilleggsinfo,
                     null,
                     null,
-                    emptyList(),
-                    unixToLocalDateTime(tidspunkt_soknad)
+                    mutableListOf(),
+                    unixToLocalDateTime(tidspunkt_soknad),
+                    null
                 )
             )
 
@@ -243,7 +245,7 @@ internal class DokumentasjonEtterspurtTest {
                     )
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -275,7 +277,7 @@ internal class DokumentasjonEtterspurtTest {
                     )
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -305,7 +307,7 @@ internal class DokumentasjonEtterspurtTest {
                     )
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -334,7 +336,7 @@ internal class DokumentasjonEtterspurtTest {
                     )
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, emptyList(), unixToLocalDateTime(tidspunkt_soknad)))
+            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
 
         val model = service.createModel(mockDigisosSak, "token")
 

@@ -5,12 +5,16 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
+import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
+import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
@@ -35,9 +39,13 @@ internal class VedleggControllerTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val tilgangskontroll: Tilgangskontroll = mockk()
     private val xsrfGenerator: XsrfGenerator = mockk()
+    private val eventService: EventService = mockk()
+    private val fiksClient: FiksClient = mockk()
+    private val digisosSak: DigisosSak = mockk()
+    private val model: InternalDigisosSoker = mockk()
 
     private val controller =
-        VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontroll, xsrfGenerator)
+        VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontroll, xsrfGenerator, eventService, fiksClient)
 
     private val id = "123"
 
@@ -65,6 +73,7 @@ internal class VedleggControllerTest {
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
         every { tilgangskontroll.sjekkTilgang("token") } just Runs
+        every { digisosSak.fiksDigisosId } returns "123"
     }
 
     @AfterEach
@@ -74,14 +83,17 @@ internal class VedleggControllerTest {
 
     @Test
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() {
-        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns listOf(
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
+        every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns listOf(
             InternalVedlegg(
                 dokumenttype,
                 tilleggsinfo,
                 null,
                 null,
-                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
-                LocalDateTime.now()
+                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
+                LocalDateTime.now(),
+                null
             )
         )
 
@@ -105,22 +117,26 @@ internal class VedleggControllerTest {
     @Test
     fun `skal utelate duplikater i response`() {
         val now = LocalDateTime.now()
-        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns listOf(
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
+        every { eventService.createModel(any(), any()) } returns model
+        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns listOf(
             InternalVedlegg(
                 dokumenttype,
                 null,
                 null,
                 null,
-                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                now
+                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                now,
+                null
             ),
             InternalVedlegg(
                 dokumenttype,
                 null,
                 null,
                 null,
-                listOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                now
+                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                now,
+                null
             )
         )
 

@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.rest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.domain.HendelseResponse
 import no.nav.sosialhjelp.innsyn.service.hendelse.HendelseService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

@@ -4,7 +4,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.domain.OrginalJsonSoknadResponse
 import no.nav.sosialhjelp.innsyn.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sosialhjelp.innsyn.service.originalsoknad.OrginalSoknadService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

@@ -15,10 +15,10 @@ import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
 import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType

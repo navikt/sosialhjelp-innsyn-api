@@ -28,7 +28,7 @@ import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach

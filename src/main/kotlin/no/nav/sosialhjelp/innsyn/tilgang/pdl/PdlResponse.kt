@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.pdl
+package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 interface PdlResponse {
     val errors: List<PdlError>?

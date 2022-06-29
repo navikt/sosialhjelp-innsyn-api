@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.rest
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.domain.SaksStatusResponse
 import no.nav.sosialhjelp.innsyn.service.saksstatus.SaksStatusService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

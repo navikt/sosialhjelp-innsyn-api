@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.pdl
+package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.pdl
+package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler

@@ -5,8 +5,8 @@ import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.kommuneinfo.ok_kommuneinfo_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
-import no.nav.sosialhjelp.innsyn.responses.ok_kommuneinfo_response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

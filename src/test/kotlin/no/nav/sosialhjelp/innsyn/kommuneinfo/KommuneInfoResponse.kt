@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.responses
+package no.nav.sosialhjelp.innsyn.kommuneinfo
 
 val ok_kommuneinfo_response = """
 {

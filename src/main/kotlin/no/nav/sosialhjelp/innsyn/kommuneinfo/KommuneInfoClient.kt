@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.fiks
+package no.nav.sosialhjelp.innsyn.kommuneinfo
 
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException

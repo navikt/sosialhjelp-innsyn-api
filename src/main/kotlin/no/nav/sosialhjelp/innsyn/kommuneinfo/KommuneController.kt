@@ -1,9 +1,7 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.kommuneinfo
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
-import no.nav.sosialhjelp.innsyn.domain.KommuneResponse
-import no.nav.sosialhjelp.innsyn.service.kommune.KommuneService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity

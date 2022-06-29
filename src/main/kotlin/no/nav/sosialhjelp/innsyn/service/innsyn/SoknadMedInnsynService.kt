@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.service.innsyn
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.service.kommune.KommuneService
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.ZoneOffset

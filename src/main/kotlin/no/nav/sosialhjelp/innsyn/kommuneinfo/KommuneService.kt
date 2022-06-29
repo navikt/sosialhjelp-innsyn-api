@@ -1,11 +1,10 @@
-package no.nav.sosialhjelp.innsyn.service.kommune
+package no.nav.sosialhjelp.innsyn.kommuneinfo
 
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.client.fiks.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.redis.KOMMUNEINFO_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger

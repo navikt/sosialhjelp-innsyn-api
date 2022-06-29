@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.kommune
+package no.nav.sosialhjelp.innsyn.kommuneinfo
 
 import io.mockk.Runs
 import io.mockk.clearMocks
@@ -9,7 +9,6 @@ import io.mockk.verify
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.client.fiks.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

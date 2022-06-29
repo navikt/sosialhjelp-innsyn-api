@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.vedlegg
+package no.nav.sosialhjelp.innsyn.vedlegg
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.vedlegg
+package no.nav.sosialhjelp.innsyn.vedlegg
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -13,14 +13,12 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
-import no.nav.sosialhjelp.innsyn.rest.OpplastetFil
-import no.nav.sosialhjelp.innsyn.rest.OpplastetVedleggMetadata
-import no.nav.sosialhjelp.innsyn.service.pdf.EttersendelsePdfGenerator
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService.Companion.containsIllegalCharacters
+import no.nav.sosialhjelp.innsyn.vedlegg.VedleggOpplastingService.Companion.containsIllegalCharacters
+import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
+import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.apache.commons.io.IOUtils
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -315,7 +313,11 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() {
         every { virusScanner.scan(any(), any()) } throws VirusScanException("mulig virus!", null)
 
-        val metadata = mutableListOf(OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null))
+        val metadata = mutableListOf(
+            OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(
+                OpplastetFil(filnavn0), OpplastetFil(filnavn1)
+            ), null)
+        )
         val files = mutableListOf<MultipartFile>(
             MockMultipartFile("files", filnavn0, filtype1, jpgFile),
             MockMultipartFile("files", filnavn1, filtype0, pngFile)

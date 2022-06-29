@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.vedlegg
+package no.nav.sosialhjelp.innsyn.vedlegg
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -266,25 +266,29 @@ private val ettersendelser = listOf(
     Ettersendelse(
         navEksternRefId = "ref 1",
         vedleggMetadata = vedleggMetadata_ettersendelse_1,
-        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_1, dokumentlagerId_1, 42), DokumentInfo(ettersendelse_filnavn_2, dokumentlagerId_2, 42)),
+        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_1, dokumentlagerId_1, 42), DokumentInfo(
+            ettersendelse_filnavn_2, dokumentlagerId_2, 42)),
         timestampSendt = tid_1.toEpochMilli()
     ),
     Ettersendelse(
         navEksternRefId = "ref 2",
         vedleggMetadata = vedleggMetadata_ettersendelse_2,
-        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_3, dokumentlagerId_3, 42), DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_4, 84)),
+        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_3, dokumentlagerId_3, 42), DokumentInfo(
+            ettersendelse_filnavn_4, dokumentlagerId_4, 84)),
         timestampSendt = tid_2.toEpochMilli()
     ),
     Ettersendelse(
         navEksternRefId = "ref 2",
         vedleggMetadata = vedleggMetadata_ettersendelse_4,
-        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_3, 1), DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_4, 2)),
+        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_4, dokumentlagerId_3, 1), DokumentInfo(
+            ettersendelse_filnavn_4, dokumentlagerId_4, 2)),
         timestampSendt = tid_2.toEpochMilli()
     ),
     Ettersendelse(
         navEksternRefId = "ref 3",
         vedleggMetadata = vedleggMetadata_ettersendelse_5,
-        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_1, dokumentlagerId_2, 1), DokumentInfo(ettersendelse_filnavn_5, dokumentlagerId_1, 2)),
+        vedlegg = listOf(DokumentInfo(ettersendelse_filnavn_1, dokumentlagerId_2, 1), DokumentInfo(
+            ettersendelse_filnavn_5, dokumentlagerId_1, 2)),
         timestampSendt = tid_1.toEpochMilli()
     )
 )

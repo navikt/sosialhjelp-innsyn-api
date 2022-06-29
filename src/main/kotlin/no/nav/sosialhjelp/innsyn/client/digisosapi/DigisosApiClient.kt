@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.client.digisosapi
 
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 
 interface DigisosApiClient {
     fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String?

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.vedlegg
+package no.nav.sosialhjelp.innsyn.vedlegg
 
 import org.apache.tika.Tika
 import java.io.InputStream

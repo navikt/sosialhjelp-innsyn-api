@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.virusscan
+package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 
 import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.getUnproxiedReactorClientHttpConnector
 import org.springframework.beans.factory.annotation.Value

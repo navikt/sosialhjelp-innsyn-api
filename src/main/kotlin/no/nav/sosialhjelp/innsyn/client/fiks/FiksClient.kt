@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.client.fiks
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 
 interface FiksClient {
 

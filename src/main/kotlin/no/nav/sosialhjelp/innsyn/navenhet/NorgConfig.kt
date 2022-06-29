@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.norg
+package no.nav.sosialhjelp.innsyn.navenhet
 
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.getUnproxiedReactorClientHttpConnector

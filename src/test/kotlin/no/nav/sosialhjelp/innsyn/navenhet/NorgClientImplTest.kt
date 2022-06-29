@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.norg
+package no.nav.sosialhjelp.innsyn.navenhet
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs
@@ -14,9 +14,7 @@ import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
-import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.RedisService
-import no.nav.sosialhjelp.innsyn.responses.ok_navenhet
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach

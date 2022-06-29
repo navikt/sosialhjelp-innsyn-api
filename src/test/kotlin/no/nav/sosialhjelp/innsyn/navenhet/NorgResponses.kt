@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.responses
+package no.nav.sosialhjelp.innsyn.navenhet
 
 val ok_navenhet = """
     {

@@ -108,7 +108,6 @@ internal class VedleggServiceTest {
 
         val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
-
         assertThat(list).hasSize(4)
         assertThat(list[0].type).isEqualTo(dokumenttype_3)
         assertThat(list[0].dokumentInfoList[0].filnavn).isEqualTo(ettersendelse_filnavn_1)

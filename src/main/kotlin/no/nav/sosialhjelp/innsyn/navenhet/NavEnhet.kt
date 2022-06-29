@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.domain
+package no.nav.sosialhjelp.innsyn.navenhet
 
 data class NavEnhet(
     val enhetId: Int,

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.norg
+package no.nav.sosialhjelp.innsyn.navenhet
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
@@ -7,7 +7,6 @@ import no.nav.sosialhjelp.innsyn.common.NorgException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getToken
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
-import no.nav.sosialhjelp.innsyn.domain.NavEnhet
 import no.nav.sosialhjelp.innsyn.redis.NAVENHET_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER

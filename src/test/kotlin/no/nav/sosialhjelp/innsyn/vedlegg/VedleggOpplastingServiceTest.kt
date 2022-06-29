@@ -314,9 +314,9 @@ internal class VedleggOpplastingServiceTest {
         every { virusScanner.scan(any(), any()) } throws VirusScanException("mulig virus!", null)
 
         val metadata = mutableListOf(
-            OpplastetVedleggMetadata(type0, tilleggsinfo0, null, null, mutableListOf(
-                OpplastetFil(filnavn0), OpplastetFil(filnavn1)
-            ), null)
+            OpplastetVedleggMetadata(
+                type0, tilleggsinfo0, null, null, mutableListOf(OpplastetFil(filnavn0), OpplastetFil(filnavn1)), null
+            )
         )
         val files = mutableListOf<MultipartFile>(
             MockMultipartFile("files", filnavn0, filtype1, jpgFile),

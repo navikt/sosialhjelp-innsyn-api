@@ -2,10 +2,10 @@ package no.nav.sosialhjelp.innsyn.service.digisosapi
 
 import no.nav.sosialhjelp.innsyn.client.digisosapi.DigisosApiClient
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.client.virusscan.VirusScanner
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
-import no.nav.sosialhjelp.innsyn.service.vedlegg.KrypteringService
+import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
+import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile

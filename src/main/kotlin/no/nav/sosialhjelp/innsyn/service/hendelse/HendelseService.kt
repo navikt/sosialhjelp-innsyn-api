@@ -8,10 +8,10 @@ import no.nav.sosialhjelp.innsyn.domain.HendelseResponse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
+import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit

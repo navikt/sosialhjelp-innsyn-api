@@ -8,11 +8,11 @@ import no.nav.sosialhjelp.innsyn.client.fiks.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.typeRef
+import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType

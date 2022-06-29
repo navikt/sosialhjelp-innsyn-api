@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.vedlegg
+package no.nav.sosialhjelp.innsyn.vedlegg
 
 import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sosialhjelp.innsyn.utils.logger

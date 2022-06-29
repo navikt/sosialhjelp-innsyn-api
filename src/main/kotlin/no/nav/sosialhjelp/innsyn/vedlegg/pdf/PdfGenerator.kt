@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.pdf
+package no.nav.sosialhjelp.innsyn.vedlegg.pdf
 
 import org.apache.jempbox.xmp.XMPMetadata
 import org.apache.jempbox.xmp.pdfa.XMPSchemaPDFAId

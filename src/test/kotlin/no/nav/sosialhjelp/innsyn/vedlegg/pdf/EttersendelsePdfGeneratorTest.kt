@@ -1,6 +1,6 @@
-package no.nav.sosialhjelp.innsyn.service.pdf
+package no.nav.sosialhjelp.innsyn.vedlegg.pdf
 
-import no.nav.sosialhjelp.innsyn.rest.OpplastetVedleggMetadata
+import no.nav.sosialhjelp.innsyn.vedlegg.OpplastetVedleggMetadata
 import org.apache.pdfbox.preflight.ValidationResult
 import org.apache.pdfbox.preflight.exception.SyntaxValidationException
 import org.apache.pdfbox.preflight.parser.PreflightParser

@@ -105,31 +105,6 @@ data class ManedUtbetaling(
     val utbetalingsmetode: String?,
 )
 
-data class VedleggResponse(
-    val filnavn: String,
-    val storrelse: Long,
-    val url: String,
-    val type: String,
-    val tilleggsinfo: String?,
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    val datoLagtTil: LocalDateTime
-)
-
-data class VedleggOpplastingResponse(
-    val filnavn: String?,
-    val status: String
-)
-
-data class OppgaveOpplastingResponse(
-    val type: String,
-    val tilleggsinfo: String?,
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    val innsendelsesfrist: LocalDate?,
-    val hendelsetype: JsonVedlegg.HendelseType?,
-    val hendelsereferanse: String?,
-    val filer: List<VedleggOpplastingResponse>
-)
-
 data class SaksListeResponse(
     val fiksDigisosId: String,
     val soknadTittel: String,

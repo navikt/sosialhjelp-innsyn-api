@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.vedlegg
 
 import io.mockk.Runs
 import io.mockk.clearMocks
@@ -13,12 +13,9 @@ import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType

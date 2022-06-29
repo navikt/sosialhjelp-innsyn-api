@@ -15,8 +15,8 @@ import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
+import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
+import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

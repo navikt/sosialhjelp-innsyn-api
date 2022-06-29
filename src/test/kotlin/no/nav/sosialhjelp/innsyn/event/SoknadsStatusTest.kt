@@ -12,10 +12,10 @@ import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.service.innsyn.InnsynService
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VEDLEGG_KREVES_STATUS
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
+import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

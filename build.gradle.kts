@@ -6,14 +6,14 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.3"
-    const val springBoot = "2.7.0"
+    const val springBoot = "2.7.1"
     const val sosialhjelpCommon = "1.0454405"
     const val logback = "1.2.11"
     const val logstash = "7.2"
     const val filformat = "1.2022.04.29-13.11-459bee049a7a"
     const val micrometerRegistry = "1.9.0"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "2.1.0"
+    const val tokenValidation = "2.1.1"
     const val jackson = "2.13.3"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
@@ -30,7 +30,7 @@ object Versions {
     const val gson = "2.9.0"
     const val log4j = "2.17.2"
 
-    const val javaJwt = "3.19.2"
+    const val javaJwt = "4.0.0"
     const val jwksRsa = "0.21.1"
     const val nimbus = "9.23"
 

@@ -1,11 +1,12 @@
 package no.nav.sosialhjelp.innsyn.client.virusscan
 
-import mockwebserver3.MockResponse
-import mockwebserver3.MockWebServer
 import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -20,6 +21,11 @@ internal class VirusScannerTest {
 
     private val filnavn = "ikke-virustest"
     private val data = byteArrayOf()
+
+    @AfterEach
+    internal fun tearDown() {
+        mockWebServer.shutdown()
+    }
 
     @Test
     fun scanFile_scanningIsNotEnabled_doesNotThrowException() {

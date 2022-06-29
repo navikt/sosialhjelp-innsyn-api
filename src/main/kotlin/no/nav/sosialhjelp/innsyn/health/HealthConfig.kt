@@ -19,7 +19,7 @@ class HealthConfig(
             appName = "sosialhjelp-innsyn-api",
             version = MiljoUtils.getAppImage(),
             dependencyChecks = dependencyChecks,
-            meterRegistry = meterRegistry
+            meterRegistry = meterRegistry,
         )
     }
 }

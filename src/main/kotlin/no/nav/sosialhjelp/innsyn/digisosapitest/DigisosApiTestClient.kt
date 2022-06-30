@@ -1,9 +1,9 @@
-package no.nav.sosialhjelp.innsyn.client.digisosapi
+package no.nav.sosialhjelp.innsyn.digisosapitest
 
-import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 
-interface DigisosApiClient {
+interface DigisosApiTestClient {
     fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String?
 
     fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String>

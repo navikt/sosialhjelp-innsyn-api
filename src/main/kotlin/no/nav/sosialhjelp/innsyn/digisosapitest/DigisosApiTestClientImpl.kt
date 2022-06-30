@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.digisosapi
+package no.nav.sosialhjelp.innsyn.digisosapitest
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
@@ -7,7 +7,8 @@ import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.client.fiks.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.common.BadStateException
-import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapitest.dto.FilOpplastingResponse
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -28,12 +29,12 @@ import org.springframework.web.reactive.function.client.bodyToMono
  */
 @Profile("!prod-sbs")
 @Component
-class DigisosApiClientImpl(
+class DigisosApiTestClientImpl(
     private val fiksWebClient: WebClient,
-    private val digisosApiWebClient: WebClient,
+    private val digisosApiTestWebClient: WebClient,
     private val maskinportenClient: MaskinportenClient,
     private val fiksClientImpl: FiksClientImpl,
-) : DigisosApiClient {
+) : DigisosApiTestClient {
 
     private val testbrukerNatalie = System.getenv("TESTBRUKER_NATALIE") ?: "11111111111"
 
@@ -44,7 +45,7 @@ class DigisosApiClientImpl(
             log.info("Laget ny digisossak: $id")
         }
 
-        return digisosApiWebClient.post()
+        return digisosApiTestWebClient.post()
             .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
             .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
             .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
@@ -71,7 +72,7 @@ class DigisosApiClientImpl(
             body.add("dokument:$fileId", fiksClientImpl.createHttpEntityOfFile(file, "dokument:$fileId"))
         }
 
-        val opplastingResponseList = digisosApiWebClient.post()
+        val opplastingResponseList = digisosApiTestWebClient.post()
             .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
             .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
             .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -129,7 +130,7 @@ class DigisosApiClientImpl(
     }
 
     fun opprettDigisosSak(): String? {
-        val response = digisosApiWebClient.post()
+        val response = digisosApiTestWebClient.post()
             .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
             .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
             .body(BodyInserters.fromValue(""))
@@ -151,9 +152,3 @@ class DigisosApiClientImpl(
         private val log by logger()
     }
 }
-
-data class FilOpplastingResponse(
-    val filnavn: String,
-    val dokumentlagerDokumentId: String,
-    val storrelse: Long,
-)

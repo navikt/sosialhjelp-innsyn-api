@@ -1,12 +1,12 @@
-package no.nav.sosialhjelp.innsyn.client.digisosapi
+package no.nav.sosialhjelp.innsyn.digisosapitest
 
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
-import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.domain.SakWrapper
+import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapitest.dto.SakWrapper
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import okhttp3.mockwebserver.MockResponse
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.client.WebClient
 
-internal class DigisosApiClientTest {
+internal class DigisosApiTestClientTest {
 
     private val mockWebServer = MockWebServer()
 
@@ -31,7 +31,7 @@ internal class DigisosApiClientTest {
         val maskinportenClient: MaskinportenClient = mockk()
         val fiksClientImpl: FiksClientImpl = mockk()
 
-        val digisosApiClient = DigisosApiClientImpl(fiksWebClient, digisosApiWebClient, maskinportenClient, fiksClientImpl)
+        val digisosApiTestClient = DigisosApiTestClientImpl(fiksWebClient, digisosApiWebClient, maskinportenClient, fiksClientImpl)
 
         coEvery { maskinportenClient.getToken() } returns "Token"
 
@@ -44,6 +44,6 @@ internal class DigisosApiClientTest {
         val jsonDigisosSoker =
             objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
 
-        digisosApiClient.oppdaterDigisosSak("123123", DigisosApiWrapper(SakWrapper(jsonDigisosSoker), ""))
+        digisosApiTestClient.oppdaterDigisosSak("123123", DigisosApiWrapper(SakWrapper(jsonDigisosSoker), ""))
     }
 }

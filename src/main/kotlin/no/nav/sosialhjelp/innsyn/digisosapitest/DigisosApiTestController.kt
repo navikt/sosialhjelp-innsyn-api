@@ -1,9 +1,8 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.digisosapitest
 
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.service.digisosapi.DigisosApiService
+import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
@@ -27,8 +26,8 @@ import org.springframework.web.multipart.MultipartFile
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
 @RestController
 @RequestMapping("/api/v1/digisosapi")
-class DigisosApiController(
-    private val digisosApiService: DigisosApiService
+class DigisosApiTestController(
+    private val digisosApiTestService: DigisosApiTestService
 ) {
 
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
@@ -37,7 +36,7 @@ class DigisosApiController(
         JsonSosialhjelpValidator.ensureValidInnsyn(json)
 
         val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
-        val digisosId = digisosApiService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
+        val digisosId = digisosApiTestService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
         if (digisosId?.contains("fiksDigisosId") == true) {
             return ResponseEntity.ok(digisosId) // Allerede wrappet i json.
         }
@@ -46,14 +45,14 @@ class DigisosApiController(
 
     @PostMapping("/{fiksDigisosId}/filOpplasting", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun filOpplasting(@PathVariable fiksDigisosId: String, @RequestParam("file") file: MultipartFile): ResponseEntity<String> {
-        val dokumentlagerId = digisosApiService.lastOppFil(fiksDigisosId, file)
+        val dokumentlagerId = digisosApiTestService.lastOppFil(fiksDigisosId, file)
 
         return ResponseEntity.ok(dokumentlagerId)
     }
 
     @GetMapping("/{digisosId}/innsynsfil")
     fun hentInnsynsfilWoldena(@PathVariable digisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?): ResponseEntity<ByteArray> {
-        val innsynsfil = digisosApiService.hentInnsynsfil(digisosId, token ?: "") ?: return ResponseEntity.noContent().build()
+        val innsynsfil = digisosApiTestService.hentInnsynsfil(digisosId, token ?: "") ?: return ResponseEntity.noContent().build()
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
     }
 }

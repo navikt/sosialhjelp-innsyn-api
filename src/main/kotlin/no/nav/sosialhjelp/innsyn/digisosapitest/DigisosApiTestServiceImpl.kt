@@ -1,8 +1,7 @@
-package no.nav.sosialhjelp.innsyn.service.digisosapi
+package no.nav.sosialhjelp.innsyn.digisosapitest
 
-import no.nav.sosialhjelp.innsyn.client.digisosapi.DigisosApiClient
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
@@ -18,15 +17,15 @@ import java.util.concurrent.TimeoutException
 
 @Profile("!prod-sbs")
 @Component
-class DigisosApiServiceImpl(
-    private val digisosApiClient: DigisosApiClient,
+class DigisosApiTestServiceImpl(
+    private val digisosApiTestClient: DigisosApiTestClient,
     private val krypteringService: KrypteringService,
     private val virusScanner: VirusScanner,
     private val dokumentlagerClient: DokumentlagerClient
-) : DigisosApiService {
+) : DigisosApiTestService {
 
     override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
-        return digisosApiClient.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
+        return digisosApiTestClient.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
     }
 
     override fun lastOppFil(fiksDigisosId: String, file: MultipartFile): String {
@@ -35,13 +34,13 @@ class DigisosApiServiceImpl(
         val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
         val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate())
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
-        val fiksIder = digisosApiClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
+        val fiksIder = digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
         waitForFutures(krypteringFutureList)
         return fiksIder[0]
     }
 
     override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
-        return digisosApiClient.hentInnsynsfil(fiksDigisosId, token)
+        return digisosApiTestClient.hentInnsynsfil(fiksDigisosId, token)
     }
 
     private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {

@@ -17,10 +17,10 @@ import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.service.innsyn.InnsynService
 import no.nav.sosialhjelp.innsyn.service.saksstatus.DEFAULT_TITTEL
-import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VEDLEGG_KREVES_STATUS
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
+import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
+import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
+import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

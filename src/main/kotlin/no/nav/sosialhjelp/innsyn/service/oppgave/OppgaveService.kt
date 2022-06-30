@@ -11,9 +11,9 @@ import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
+import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 
 @Component

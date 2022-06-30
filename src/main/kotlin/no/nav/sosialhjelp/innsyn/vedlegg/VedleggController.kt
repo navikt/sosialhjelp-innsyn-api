@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -7,18 +7,14 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
-import no.nav.sosialhjelp.innsyn.domain.OppgaveOpplastingResponse
-import no.nav.sosialhjelp.innsyn.domain.VedleggOpplastingResponse
-import no.nav.sosialhjelp.innsyn.domain.VedleggResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.service.vedlegg.InternalVedlegg
-import no.nav.sosialhjelp.innsyn.service.vedlegg.OppgaveValidering
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggOpplastingService
-import no.nav.sosialhjelp.innsyn.service.vedlegg.VedleggService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.vedlegg.dto.OppgaveOpplastingResponse
+import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggOpplastingResponse
+import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType

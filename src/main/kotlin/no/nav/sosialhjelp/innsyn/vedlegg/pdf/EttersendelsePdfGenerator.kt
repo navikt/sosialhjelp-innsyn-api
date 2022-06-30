@@ -1,7 +1,7 @@
-package no.nav.sosialhjelp.innsyn.service.pdf
+package no.nav.sosialhjelp.innsyn.vedlegg.pdf
 
-import no.nav.sosialhjelp.innsyn.rest.OpplastetVedleggMetadata
 import no.nav.sosialhjelp.innsyn.utils.formatLocalDateTime
+import no.nav.sosialhjelp.innsyn.vedlegg.OpplastetVedleggMetadata
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime

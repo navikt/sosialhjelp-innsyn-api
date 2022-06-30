@@ -1,9 +1,9 @@
-package no.nav.sosialhjelp.innsyn.service.digisosapi
+package no.nav.sosialhjelp.innsyn.digisosapitest
 
-import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
 import org.springframework.web.multipart.MultipartFile
 
-interface DigisosApiService {
+interface DigisosApiTestService {
 
     fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String?
 

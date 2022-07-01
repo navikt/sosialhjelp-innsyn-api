@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.client.tokendings
 
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.kotlin.utils.logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

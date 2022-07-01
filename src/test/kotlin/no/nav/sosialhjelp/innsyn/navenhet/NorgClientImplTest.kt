@@ -8,10 +8,10 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import okhttp3.mockwebserver.MockResponse

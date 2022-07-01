@@ -5,6 +5,7 @@ import no.finn.unleash.Unleash
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogException
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogStatus
@@ -14,7 +15,6 @@ import no.nav.sosialhjelp.innsyn.client.unleash.DIALOG_UNDERSOKELSE_GRUPPE_2
 import no.nav.sosialhjelp.innsyn.client.unleash.DIALOG_UNDERSOKELSE_GRUPPE_3
 import no.nav.sosialhjelp.innsyn.client.unleash.DIALOG_UNDERSOKELSE_GRUPPE_4
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksDetaljerResponse
 import no.nav.sosialhjelp.innsyn.domain.SaksListeResponse

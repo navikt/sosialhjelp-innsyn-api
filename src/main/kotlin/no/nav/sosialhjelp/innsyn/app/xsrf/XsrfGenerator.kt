@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.config
+package no.nav.sosialhjelp.innsyn.app.xsrf
 
 import no.nav.sosialhjelp.innsyn.common.XsrfException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils

@@ -1,8 +1,8 @@
 package no.nav.sosialhjelp.innsyn.service.originalsoknad
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.OrginalJsonSoknadResponse
 import no.nav.sosialhjelp.innsyn.domain.OrginalSoknadPdfLinkResponse
 import no.nav.sosialhjelp.innsyn.service.innsyn.InnsynService

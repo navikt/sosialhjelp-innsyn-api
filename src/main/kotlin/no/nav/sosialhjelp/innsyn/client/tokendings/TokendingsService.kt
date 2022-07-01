@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.TOKENDINGS_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd

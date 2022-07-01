@@ -1,11 +1,11 @@
-package no.nav.sosialhjelp.innsyn.utils.mdc
+package no.nav.sosialhjelp.innsyn.app.mdc
 
+import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.CALL_ID
+import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.DIGISOS_ID
+import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.clearMDC
+import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.generateCallId
+import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.put
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
-import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.CALL_ID
-import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.DIGISOS_ID
-import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.clearMDC
-import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.generateCallId
-import no.nav.sosialhjelp.innsyn.utils.mdc.MDCUtils.put
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter

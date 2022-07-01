@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.unproxiedHttpClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

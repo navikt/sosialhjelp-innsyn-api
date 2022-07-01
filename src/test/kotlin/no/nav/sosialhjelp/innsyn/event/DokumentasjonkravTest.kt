@@ -8,8 +8,8 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV
-import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV_ENABLED
+import no.nav.sosialhjelp.innsyn.app.featuretoggle.DOKUMENTASJONKRAV
+import no.nav.sosialhjelp.innsyn.app.featuretoggle.DOKUMENTASJONKRAV_ENABLED
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet

@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.event
 import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
-import no.nav.sosialhjelp.innsyn.client.unleash.DOKUMENTASJONKRAV_ENABLED
+import no.nav.sosialhjelp.innsyn.app.featuretoggle.DOKUMENTASJONKRAV_ENABLED
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker

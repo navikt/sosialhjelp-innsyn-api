@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.unleash.strategy
+package no.nav.sosialhjelp.innsyn.app.featuretoggle.strategy
 
 import no.finn.unleash.strategy.Strategy
 

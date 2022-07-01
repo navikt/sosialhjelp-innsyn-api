@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.unleash
+package no.nav.sosialhjelp.innsyn.app.featuretoggle
 
 const val VILKAR_ENABLED = "sosialhjelp.innsyn.vilkar-enabled"
 const val VILKAR = "sosialhjelp.innsyn.vilkar"

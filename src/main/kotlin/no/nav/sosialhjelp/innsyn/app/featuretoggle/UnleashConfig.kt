@@ -1,11 +1,11 @@
-package no.nav.sosialhjelp.innsyn.client.unleash
+package no.nav.sosialhjelp.innsyn.app.featuretoggle
 
 import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.FakeUnleash
 import no.finn.unleash.Unleash
 import no.finn.unleash.util.UnleashConfig
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.client.unleash.strategy.ByInstanceIdStrategy
+import no.nav.sosialhjelp.innsyn.app.featuretoggle.strategy.ByInstanceIdStrategy
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile

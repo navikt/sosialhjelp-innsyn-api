@@ -6,8 +6,8 @@ import io.mockk.mockk
 import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.client.unleash.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.common.VIS_BREVET
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker

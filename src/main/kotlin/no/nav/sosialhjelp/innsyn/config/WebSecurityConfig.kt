@@ -1,12 +1,10 @@
 package no.nav.sosialhjelp.innsyn.config
 
-import no.nav.sosialhjelp.innsyn.utils.mdc.MDCFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -19,14 +17,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc
 @EnableWebMvc
 class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
-    private val mdcFilter = MDCFilter()
-
-    @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.cors()
         http.csrf().disable()
-
-        addFilters(http)
     }
 
     @Bean
@@ -51,14 +44,5 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
-    }
-
-    @Bean
-    fun navCorsFilter(): CORSFilter {
-        return CORSFilter()
-    }
-
-    private fun addFilters(http: HttpSecurity) {
-        http.addFilterBefore(mdcFilter, SecurityContextPersistenceFilter::class.java)
     }
 }

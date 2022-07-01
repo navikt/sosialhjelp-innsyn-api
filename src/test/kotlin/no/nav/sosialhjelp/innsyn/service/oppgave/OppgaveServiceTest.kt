@@ -92,7 +92,7 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].oppgaveElementer).hasSize(1)
         assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
         assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg)
-        assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue()
+        assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].oppgaveElementer).hasSize(1)
         assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
         assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isNull()
-        assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue()
+        assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue
     }
 
     @Test
@@ -215,9 +215,9 @@ internal class OppgaveServiceTest {
 
         assertThat(responseList).isNotNull
         assertThat(responseList).hasSize(2)
-        assertThat(responseList[0].tittel).isNotNull()
+        assertThat(responseList[0].tittel).isNotNull
         assertThat(responseList[0].tittel).isEqualTo(tittel)
-        assertThat(responseList[1].tittel).isNotNull()
+        assertThat(responseList[1].tittel).isNotNull
         assertThat(responseList[1].tittel).isEqualTo(beskrivelse)
         assertThat(responseList[1].beskrivelse).isNull()
         assertThat(responseList[1].vilkarReferanse).isEqualTo("vilkar2")
@@ -290,7 +290,7 @@ internal class OppgaveServiceTest {
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
         assertThat(responseList[0].dokumentasjonkravElementer).hasSize(1)
-        assertThat(responseList[0].dokumentasjonkravElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList[0].dokumentasjonkravElementer[0].status).isEqualTo(Oppgavestatus.RELEVANT)
     }
 
     @Test
@@ -352,10 +352,10 @@ internal class OppgaveServiceTest {
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
         assertThat(responseList[0].dokumentasjonkravElementer).hasSize(2)
-        assertThat(responseList[0].dokumentasjonkravElementer.get(0).tittel).isNotNull()
-        assertThat(responseList[0].dokumentasjonkravElementer.get(1).beskrivelse).isNull()
-        assertThat(responseList[0].dokumentasjonkravElementer.get(1).tittel).isNotNull()
-        assertThat(responseList[0].dokumentasjonkravElementer.get(1).dokumentasjonkravReferanse).isEqualTo("dokumentasjonkrav2")
+        assertThat(responseList[0].dokumentasjonkravElementer[0].tittel).isNotNull
+        assertThat(responseList[0].dokumentasjonkravElementer[1].beskrivelse).isNull()
+        assertThat(responseList[0].dokumentasjonkravElementer[1].tittel).isNotNull
+        assertThat(responseList[0].dokumentasjonkravElementer[1].dokumentasjonkravReferanse).isEqualTo("dokumentasjonkrav2")
     }
 
     @Test
@@ -406,7 +406,7 @@ internal class OppgaveServiceTest {
         assertThat(responseList).isNotNull
         assertThat(responseList.size == 1)
         assertThat(responseList[0].dokumentasjonkravElementer).hasSize(1)
-        assertThat(responseList[0].dokumentasjonkravElementer.get(0).status).isEqualTo(Oppgavestatus.RELEVANT)
+        assertThat(responseList[0].dokumentasjonkravElementer[0].status).isEqualTo(Oppgavestatus.RELEVANT)
     }
 
     @Test
@@ -657,6 +657,6 @@ internal class OppgaveServiceTest {
 
         val response = service.getHarLevertDokumentasjonkrav("123", token)
 
-        assertThat(response).isTrue()
+        assertThat(response).isTrue
     }
 }

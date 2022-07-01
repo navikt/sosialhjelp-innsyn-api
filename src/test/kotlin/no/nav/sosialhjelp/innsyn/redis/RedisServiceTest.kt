@@ -39,7 +39,7 @@ internal class RedisServiceTest {
 
         val digisosSak = service.get("key", DigisosSak::class.java)
 
-        assertThat(digisosSak).isNotNull()
+        assertThat(digisosSak).isNotNull
     }
 
     @Test

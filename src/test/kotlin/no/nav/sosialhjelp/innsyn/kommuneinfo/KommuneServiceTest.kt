@@ -39,7 +39,16 @@ internal class KommuneServiceTest {
 
     @Test
     internal fun `innsyn er deaktivert`() {
-        every { kommuneInfoClient.getKommuneInfo(any()) } returns KommuneInfo(kommuneNr, false, false, false, false, null, true, null)
+        every { kommuneInfoClient.getKommuneInfo(any()) } returns KommuneInfo(
+            kommunenummer = kommuneNr,
+            kanMottaSoknader = false,
+            kanOppdatereStatus = false,
+            harMidlertidigDeaktivertMottak = false,
+            harMidlertidigDeaktivertOppdateringer = false,
+            kontaktpersoner = null,
+            harNksTilgang = true,
+            behandlingsansvarlig = null
+        )
 
         val svar = service.erInnsynDeaktivertForKommune("123", "token")
 
@@ -48,7 +57,16 @@ internal class KommuneServiceTest {
 
     @Test
     internal fun `innsyn er aktivert`() {
-        every { kommuneInfoClient.getKommuneInfo(any()) } returns KommuneInfo(kommuneNr, false, true, false, false, null, true, null)
+        every { kommuneInfoClient.getKommuneInfo(any()) } returns KommuneInfo(
+            kommunenummer = kommuneNr,
+            kanMottaSoknader = false,
+            kanOppdatereStatus = true,
+            harMidlertidigDeaktivertMottak = false,
+            harMidlertidigDeaktivertOppdateringer = false,
+            kontaktpersoner = null,
+            harNksTilgang = true,
+            behandlingsansvarlig = null
+        )
 
         val svar = service.erInnsynDeaktivertForKommune("123", "token")
 
@@ -57,7 +75,16 @@ internal class KommuneServiceTest {
 
     @Test
     internal fun `hentKommuneInfo skal hente fra cache`() {
-        val kommuneInfo = KommuneInfo(kommuneNr, false, true, false, false, null, true, null)
+        val kommuneInfo = KommuneInfo(
+            kommunenummer = kommuneNr,
+            kanMottaSoknader = false,
+            kanOppdatereStatus = true,
+            harMidlertidigDeaktivertMottak = false,
+            harMidlertidigDeaktivertOppdateringer = false,
+            kontaktpersoner = null,
+            harNksTilgang = true,
+            behandlingsansvarlig = null
+        )
 
         every { kommuneInfoClient.getKommuneInfo(any()) } returns kommuneInfo
         val firstResult = service.hentKommuneInfo("123", "token")

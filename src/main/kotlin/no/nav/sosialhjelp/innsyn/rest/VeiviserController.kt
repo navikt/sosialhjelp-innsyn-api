@@ -32,8 +32,8 @@ private class KommunenummerCache {
     private val referanse = AtomicReference(Intern())
 
     private class Intern {
-        internal var data = ""
-        internal var tidspunkt = OffsetDateTime.MIN
+        var data = ""
+        var tidspunkt: OffsetDateTime = OffsetDateTime.MIN
     }
 
     fun getKommunenr(): String {

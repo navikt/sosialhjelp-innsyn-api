@@ -20,10 +20,10 @@ class KommuneService(
 
     fun hentKommuneInfo(fiksDigisosId: String, token: String): KommuneInfo? {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        val kommunenummer: String? = digisosSak.kommunenummer
+        val kommunenummer: String = digisosSak.kommunenummer
 
-        if (kommunenummer == null) {
-            log.warn("Forsøkte å hente kommuneStatus, men JsonSoknad.mottaker.kommunenummer finnes ikke i soknad.json")
+        if (kommunenummer.isBlank()) {
+            log.warn("Forsøkte å hente kommuneStatus, men JsonSoknad.mottaker.kommunenummer er tom i soknad.json")
             throw RuntimeException("KommuneStatus kan ikke hentes fordi DigisosSak mangler kommunenummer")
         }
 

@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
-import no.nav.sosialhjelp.innsyn.common.NorgException
+import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient

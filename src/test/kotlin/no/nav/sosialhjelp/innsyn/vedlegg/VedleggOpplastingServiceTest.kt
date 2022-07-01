@@ -11,10 +11,10 @@ import io.mockk.verify
 import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.innsyn.app.exceptions.OpplastingFilnavnMismatchException
+import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
-import no.nav.sosialhjelp.innsyn.common.VirusScanException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggOpplastingService.Companion.containsIllegalCharacters
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator

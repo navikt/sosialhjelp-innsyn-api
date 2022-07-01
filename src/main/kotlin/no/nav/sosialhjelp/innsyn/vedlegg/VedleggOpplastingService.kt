@@ -4,12 +4,12 @@ import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
+import no.nav.sosialhjelp.innsyn.app.exceptions.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.LOGGE_MISMATCH_FILNAVN
 import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientFileExistsException
-import no.nav.sosialhjelp.innsyn.common.BadStateException
-import no.nav.sosialhjelp.innsyn.common.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper

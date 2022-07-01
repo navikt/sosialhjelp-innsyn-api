@@ -3,9 +3,9 @@ package no.nav.sosialhjelp.innsyn.tilgang
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Adressebeskyttelse
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Gradering
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient

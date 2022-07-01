@@ -3,10 +3,10 @@ package no.nav.sosialhjelp.innsyn.client.digisosapi
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.client.fiks.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
-import no.nav.sosialhjelp.innsyn.common.BadStateException
 import no.nav.sosialhjelp.innsyn.domain.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger

@@ -1,8 +1,8 @@
 package no.nav.sosialhjelp.innsyn.tilgang
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
-import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity

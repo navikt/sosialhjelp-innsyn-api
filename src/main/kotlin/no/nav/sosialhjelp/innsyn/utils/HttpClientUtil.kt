@@ -8,12 +8,6 @@ import java.net.URL
 
 object HttpClientUtil {
 
-    fun getProxiedReactorClientHttpConnector(proxyUrl: String): ReactorClientHttpConnector {
-        val httpClient: HttpClient = proxiedHttpClient(proxyUrl)
-
-        return ReactorClientHttpConnector(httpClient)
-    }
-
     fun proxiedHttpClient(proxyUrl: String): HttpClient {
         val uri = URL(proxyUrl)
 

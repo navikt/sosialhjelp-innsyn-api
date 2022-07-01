@@ -50,7 +50,7 @@ interface RedisService {
          * Kaster feil hvis det finnes additionalProperties på mappet objekt.
          * Tyder på at noe feil har skjedd ved mapping.
          */
-        fun valider(obj: Any?) {
+        private fun valider(obj: Any?) {
             when {
                 obj is DigisosSak && obj.sokerFnr != getUserIdFromToken() -> throw DigisosSakTilhorerAnnenBrukerException("DigisosSak tilhører annen bruker")
                 obj is JsonDigisosSoker && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonDigisosSoker har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")

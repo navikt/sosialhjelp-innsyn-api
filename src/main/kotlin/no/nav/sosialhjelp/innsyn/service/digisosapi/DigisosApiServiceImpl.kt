@@ -32,7 +32,7 @@ class DigisosApiServiceImpl(
     override fun lastOppFil(fiksDigisosId: String, file: MultipartFile): String {
         virusScanner.scan(file.name, file.bytes)
 
-        val krypteringFutureList = Collections.synchronizedList<CompletableFuture<Void>>(ArrayList<CompletableFuture<Void>>(1))
+        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(1))
         val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate())
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         val fiksIder = digisosApiClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)

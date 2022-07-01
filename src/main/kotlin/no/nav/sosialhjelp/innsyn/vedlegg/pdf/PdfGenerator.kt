@@ -29,13 +29,13 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     private var colorProfile: InputStream? = ClassPathResource("sRGB.icc").inputStream
     private var oi = PDOutputIntent(document, colorProfile)
 
-    private var cat: PDDocumentCatalog = document.getDocumentCatalog()
+    private var cat: PDDocumentCatalog = document.documentCatalog
     private var metadata: PDMetadata = PDMetadata(document)
 
     private var fontStream1: InputStream? = ClassPathResource("SourceSansPro-Bold.ttf").inputStream
-    val FONT_BOLD: PDFont = PDType0Font.load(document, fontStream1)
+    private val fontBold: PDFont = PDType0Font.load(document, fontStream1)
     private var fontStream2: InputStream? = ClassPathResource("SourceSansPro-Regular.ttf").inputStream
-    val FONT_PLAIN: PDFont = PDType0Font.load(document, fontStream2)
+    private val fontPlain: PDFont = PDType0Font.load(document, fontStream2)
 
     private fun calculateStartY(): Float {
         return MEDIA_BOX.upperRightY - MARGIN
@@ -82,18 +82,18 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     }
 
     fun addCenteredH1Bold(text: String) {
-        addCenteredParagraph(text, FONT_BOLD, FONT_H1_SIZE, LEADING_PERCENTAGE)
+        addCenteredParagraph(text, fontBold, FONT_H1_SIZE, LEADING_PERCENTAGE)
     }
 
     fun addCenteredH4Bold(text: String) {
-        addCenteredParagraph(text, FONT_BOLD, FONT_H4_SIZE, LEADING_PERCENTAGE)
+        addCenteredParagraph(text, fontBold, FONT_H4_SIZE, LEADING_PERCENTAGE)
     }
 
     fun addText(text: String) {
-        addParagraph(text, FONT_PLAIN, FONT_PLAIN_SIZE, MARGIN)
+        addParagraph(text, fontPlain, FONT_PLAIN_SIZE, MARGIN)
     }
 
-    fun addParagraph(text: String, font: PDFont, fontSize: Float, margin: Float) {
+    private fun addParagraph(text: String, font: PDFont, fontSize: Float, margin: Float) {
         val lines: List<String> = parseLines(text, font, fontSize)
         currentStream.setFont(font, fontSize)
         currentStream.beginText()
@@ -117,7 +117,7 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         currentStream.endText()
     }
 
-    fun addCenteredParagraph(
+    private fun addCenteredParagraph(
         text: String,
         font: PDFont,
         fontSize: Float,

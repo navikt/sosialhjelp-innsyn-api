@@ -7,7 +7,6 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 
 interface SubjectHandler {
-    fun getConsumerId(): String
     fun getUserIdFromToken(): String
     fun getToken(): String
     fun getClientId(): String
@@ -42,10 +41,6 @@ class AzureAdSubjectHandlerImpl(
         return tokenValidationContext.getClaims(ISSUER).getStringClaim(CLIENT_ID) ?: DEFAULT_CLIENT_ID
     }
 
-    override fun getConsumerId(): String {
-        return System.getProperty("consumerid")
-    }
-
     companion object {
         private const val ISSUER = "selvbetjening"
         private const val PID = "pid"
@@ -56,8 +51,12 @@ class AzureAdSubjectHandlerImpl(
 }
 
 class StaticSubjectHandlerImpl : SubjectHandler {
-    private val DEFAULT_USER = "11111111111"
-    private val DEFAULT_TOKEN = "token"
+
+    companion object {
+        private const val DEFAULT_USER = "11111111111"
+        private const val DEFAULT_TOKEN = "token"
+    }
+
     private var user = DEFAULT_USER
     private var token = DEFAULT_TOKEN
 
@@ -67,10 +66,6 @@ class StaticSubjectHandlerImpl : SubjectHandler {
 
     override fun getToken(): String {
         return this.token
-    }
-
-    override fun getConsumerId(): String {
-        return "StaticConsumerId"
     }
 
     override fun getClientId(): String {

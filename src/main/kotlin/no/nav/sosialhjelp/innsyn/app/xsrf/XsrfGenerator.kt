@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest
 class XsrfGenerator(
     private val redisService: RedisService,
 ) {
-    private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
 
     fun generateXsrfToken(date: LocalDateTime = LocalDateTime.now()): String {
         val fnr = SubjectHandlerUtils.getUserIdFromToken()
@@ -65,7 +64,10 @@ class XsrfGenerator(
     }
 
     companion object {
+        private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
         private val redisDatoFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-        fun redisKey(token: String, date: LocalDateTime) = sha256(token + redisDatoFormatter.format(date))
+
+        fun redisKey(token: String, date: LocalDateTime) =
+            sha256(token + redisDatoFormatter.format(date))
     }
 }

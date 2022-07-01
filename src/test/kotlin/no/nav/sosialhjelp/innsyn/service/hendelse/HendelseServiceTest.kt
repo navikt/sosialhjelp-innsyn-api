@@ -40,26 +40,28 @@ internal class HendelseServiceTest {
 
     private val mockDigisosSak: DigisosSak = mockk()
 
-    private val tidspunkt_sendt = LocalDateTime.now().minusDays(1)
-    private val tidspunkt_mottatt = LocalDateTime.now().minusHours(10)
-    private val tidspunkt3 = LocalDateTime.now().minusHours(9)
-    private val tidspunkt4 = LocalDateTime.now().minusHours(8)
-    private val tidspunkt5 = LocalDateTime.now().minusHours(7)
+    companion object {
+        private val tidspunkt_sendt = LocalDateTime.now().minusDays(1)
+        private val tidspunkt_mottatt = LocalDateTime.now().minusHours(10)
+        private val tidspunkt3 = LocalDateTime.now().minusHours(9)
+        private val tidspunkt4 = LocalDateTime.now().minusHours(8)
+        private val tidspunkt5 = LocalDateTime.now().minusHours(7)
 
-    private val tittel_sendt = "søknad sendt"
-    private val tittel_mottatt = "søknad mottatt"
-    private val tittel3 = "tittel 3"
+        private const val tittel_sendt = "søknad sendt"
+        private const val tittel_mottatt = "søknad mottatt"
+        private const val tittel3 = "tittel 3"
 
-    private val url = "some url"
-    private val url2 = "some url 2"
-    private val url3 = "some url 3"
+        private const val url = "some url"
+        private const val url2 = "some url 2"
+        private const val url3 = "some url 3"
 
-    private val dokumenttype_1 = "strømregning"
-    private val dokumenttype_2 = "tannlegeregning"
+        private const val dokumenttype_1 = "strømregning"
+        private const val dokumenttype_2 = "tannlegeregning"
 
-    private val dok1 = DokumentInfo("tittel 4", "id1", 11)
-    private val dok2 = DokumentInfo("tittel 5", "id2", 22)
-    private val dok3 = DokumentInfo("tittel 6", "id3", 33)
+        private val dok1 = DokumentInfo("tittel 4", "id1", 11)
+        private val dok2 = DokumentInfo("tittel 5", "id2", 22)
+        private val dok3 = DokumentInfo("tittel 6", "id3", 33)
+    }
 
     @BeforeEach
     fun init() {

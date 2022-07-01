@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.config
+package no.nav.sosialhjelp.innsyn.app.cors
 
 import io.mockk.every
 import io.mockk.mockkObject

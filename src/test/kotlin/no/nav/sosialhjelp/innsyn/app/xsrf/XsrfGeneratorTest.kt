@@ -1,13 +1,13 @@
-package no.nav.sosialhjelp.innsyn.config
+package no.nav.sosialhjelp.innsyn.app.xsrf
 
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator.Companion.redisKey
 import no.nav.sosialhjelp.innsyn.common.XsrfException
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.config.XsrfGenerator.Companion.redisKey
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import org.assertj.core.api.Assertions.assertThat

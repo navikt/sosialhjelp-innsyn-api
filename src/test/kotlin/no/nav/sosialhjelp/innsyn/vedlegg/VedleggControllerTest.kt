@@ -7,11 +7,11 @@ import io.mockk.just
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
-import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll

@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.rest
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.sosialhjelp.innsyn.config.XsrfGenerator
+import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatusResponse
 import no.nav.sosialhjelp.innsyn.service.soknadsstatus.SoknadsStatusService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll

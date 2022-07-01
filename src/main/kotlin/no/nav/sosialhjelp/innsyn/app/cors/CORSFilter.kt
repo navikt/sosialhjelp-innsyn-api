@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.config
+package no.nav.sosialhjelp.innsyn.app.cors
 
 import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
 import org.springframework.stereotype.Component

@@ -1,8 +1,8 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.common.VIS_BREVET
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak

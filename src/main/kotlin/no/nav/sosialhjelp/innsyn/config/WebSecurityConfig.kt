@@ -17,11 +17,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc
 @Configuration
 @EnableWebSecurity
 @EnableWebMvc
-class WebSecurityConfig : WebSecurityConfigurerAdapter() {
+class WebSecurityConfig(
+    private val mdcFilter: MDCFilter
+) : WebSecurityConfigurerAdapter() {
 
-    private val mdcFilter = MDCFilter()
-
-    @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.cors()
         http.csrf().disable()
@@ -51,11 +50,6 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
-    }
-
-    @Bean
-    fun navCorsFilter(): CORSFilter {
-        return CORSFilter()
     }
 
     private fun addFilters(http: HttpSecurity) {

@@ -1,10 +1,10 @@
 package no.nav.sosialhjelp.innsyn.tilgang
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.common.BadStateException
-import no.nav.sosialhjelp.innsyn.common.PdlException
-import no.nav.sosialhjelp.innsyn.common.TilgangskontrollException
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
+import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
+import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPerson
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.isKode6Or7

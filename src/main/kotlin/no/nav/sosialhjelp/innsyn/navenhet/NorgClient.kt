@@ -2,12 +2,12 @@ package no.nav.sosialhjelp.innsyn.navenhet
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
+import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getToken
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
-import no.nav.sosialhjelp.innsyn.common.BadStateException
-import no.nav.sosialhjelp.innsyn.common.NorgException
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getToken
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.redis.NAVENHET_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER

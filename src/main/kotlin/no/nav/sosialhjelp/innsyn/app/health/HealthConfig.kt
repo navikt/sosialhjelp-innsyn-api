@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.health
+package no.nav.sosialhjelp.innsyn.app.health
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sosialhjelp.innsyn.utils.MiljoUtils

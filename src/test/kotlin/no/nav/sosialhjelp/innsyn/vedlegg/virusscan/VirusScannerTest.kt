@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 
-import no.nav.sosialhjelp.innsyn.common.VirusScanException
+import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

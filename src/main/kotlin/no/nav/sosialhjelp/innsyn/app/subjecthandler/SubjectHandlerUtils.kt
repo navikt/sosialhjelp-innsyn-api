@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.common.subjecthandler
+package no.nav.sosialhjelp.innsyn.app.subjecthandler
 
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.common
+package no.nav.sosialhjelp.innsyn.event
 
 const val VIS_SOKNADEN = "Vis søknaden"
 const val VIS_BREVET = "Vis brevet"

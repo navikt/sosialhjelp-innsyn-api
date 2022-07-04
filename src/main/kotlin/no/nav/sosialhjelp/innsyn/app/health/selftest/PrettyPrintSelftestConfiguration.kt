@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.health.selftest
+package no.nav.sosialhjelp.innsyn.app.health.selftest
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.HttpMessageConverter

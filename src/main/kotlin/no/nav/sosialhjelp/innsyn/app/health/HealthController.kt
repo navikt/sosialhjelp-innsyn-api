@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.health
+package no.nav.sosialhjelp.innsyn.app.health
 
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.sosialhjelp.selftest.SelftestResult

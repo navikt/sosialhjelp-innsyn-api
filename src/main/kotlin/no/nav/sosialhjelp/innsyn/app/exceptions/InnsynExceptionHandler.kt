@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.common
+package no.nav.sosialhjelp.innsyn.app.exceptions
 
 import no.nav.security.token.support.core.exceptions.IssuerConfigurationException
 import no.nav.security.token.support.core.exceptions.JwtTokenMissingException

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.common
+package no.nav.sosialhjelp.innsyn.app.exceptions
 
 open class FrontendErrorMessage(
     val type: String?,

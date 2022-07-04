@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.app.xsrf
 
-import no.nav.sosialhjelp.innsyn.common.XsrfException
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.app.exceptions.XsrfException
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.utils.sha256

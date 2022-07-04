@@ -2,9 +2,9 @@ package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
-import no.nav.sosialhjelp.innsyn.common.PdlException
 import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.PDL_IDENTER_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService

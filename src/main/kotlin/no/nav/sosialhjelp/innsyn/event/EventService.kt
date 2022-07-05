@@ -28,8 +28,11 @@ import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
+import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 @Component
 class EventService(
@@ -73,6 +76,32 @@ class EventService(
         return model
     }
 
+    fun logTekniskSperre(
+        jsonDigisosSoker: JsonDigisosSoker?,
+        model: InternalDigisosSoker,
+        digisosSak: DigisosSak,
+        log: Logger,
+    ) {
+        model.utbetalinger
+            .filter { it.forfallsDato?.isBefore(LocalDate.now().minusDays(1)) ?: false }
+            .forEach { utbetaling ->
+                val testDato = utbetaling.utbetalingsDato ?: LocalDate.now()
+                if (utbetaling.forfallsDato?.isBefore(testDato.minusDays(1)) != false) {
+                    val overdueDays = ChronoUnit.DAYS.between(utbetaling.forfallsDato, testDato).absoluteValue
+                    val eventListe = mutableListOf<String>()
+                    jsonDigisosSoker?.hendelser?.filterIsInstance(JsonUtbetaling::class.java)
+                        ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
+                        ?.forEach { eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}") }
+                    log.info(
+                        "Utbetaling på overtid: {\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
+                            "\"status\": \"${utbetaling.status.name}\", \"overdueDays\": \"$overdueDays\", " +
+                            "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${utbetaling.forfallsDato}\", " +
+                            "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
+                    )
+                }
+            }
+    }
+
     fun setTidspunktSendtIfNotZero(model: InternalDigisosSoker, timestampSendt: Long) {
         if (timestampSendt == 0L) {
             log.error("Søknadens timestampSendt er 0")
@@ -92,6 +121,7 @@ class EventService(
         }
 
         applyHendelserOgSoknadKrav(jsonDigisosSoker, model, originalSoknadNAV, digisosSak, token)
+        logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
 
         return model
     }

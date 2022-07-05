@@ -93,7 +93,8 @@ class EventService(
                         ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
                         ?.forEach { eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}") }
                     log.info(
-                        "Utbetaling på overtid: {\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
+                        "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
+                            "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
                             "\"status\": \"${utbetaling.status.name}\", \"overdueDays\": \"$overdueDays\", " +
                             "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${utbetaling.forfallsDato}\", " +
                             "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"

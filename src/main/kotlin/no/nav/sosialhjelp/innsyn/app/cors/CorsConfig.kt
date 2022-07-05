@@ -17,7 +17,7 @@ class CorsConfig {
                     if (MiljoUtils.isRunningInProd()) ALLOWED_ORIGINS_PROD else ALLOWED_ORIGINS_NON_PROD
                 registry.addMapping("/**")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                    .allowedOrigins(*allowedOrigins)
+                    .allowedOriginPatterns(*allowedOrigins)
                     .allowedHeaders(
                         "Origin",
                         "Content-Type",

@@ -86,16 +86,18 @@ class EventService(
             .filter { it.forfallsDato?.isBefore(LocalDate.now().minusDays(1)) ?: false }
             .forEach { utbetaling ->
                 val testDato = utbetaling.utbetalingsDato ?: LocalDate.now()
-                if(utbetaling.forfallsDato?.isBefore(testDato.minusDays(1)) != false) {
+                if (utbetaling.forfallsDato?.isBefore(testDato.minusDays(1)) != false) {
                     val overdueDays = ChronoUnit.DAYS.between(utbetaling.forfallsDato, testDato).absoluteValue
                     val eventListe = mutableListOf<String>()
                     jsonDigisosSoker?.hendelser?.filterIsInstance(JsonUtbetaling::class.java)
                         ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
                         ?.forEach { eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}") }
-                    log.info("Utbetaling på overtid: {\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
+                    log.info(
+                        "Utbetaling på overtid: {\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
                             "\"status\": \"${utbetaling.status.name}\", \"overdueDays\": \"$overdueDays\", " +
                             "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${utbetaling.forfallsDato}\", " +
-                            "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}")
+                            "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
+                    )
                 }
             }
     }

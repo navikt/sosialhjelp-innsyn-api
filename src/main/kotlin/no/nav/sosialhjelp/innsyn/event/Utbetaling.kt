@@ -19,7 +19,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     if (hendelse.status == null) log.info("utbetalingsstatus er null")
     if (hendelse.status == JsonUtbetaling.Status.PLANLAGT_UTBETALING) log.info("utbetalingsstatus er PLANLAGT_UTBETALING")
 
-    log.info("Hendelse: Utbetaling. Status: ${hendelse.status?.name ?: "null"}")
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Utbetaling. Status: ${hendelse.status?.name ?: "null"}")
 
     val utbetaling = Utbetaling(
         referanse = hendelse.utbetalingsreferanse,

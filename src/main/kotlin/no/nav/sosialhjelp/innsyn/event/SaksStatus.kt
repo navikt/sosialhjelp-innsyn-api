@@ -66,5 +66,5 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
         }
     }
-    log.info("Hendelse: Sakstatus: ${hendelse.status?.name ?: "null"}")
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Sakstatus: ${hendelse.status?.name ?: "null"}")
 }

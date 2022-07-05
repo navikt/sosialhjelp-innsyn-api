@@ -63,7 +63,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
 
     if (unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false)) {
         val beskrivelse = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."
-        log.info("Hendelse: Dokumentasjonskrav. Beskrivelse: $beskrivelse")
+        log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav. Beskrivelse: $beskrivelse")
         historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
     }
 }

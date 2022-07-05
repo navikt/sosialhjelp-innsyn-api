@@ -1,17 +1,24 @@
 package no.nav.sosialhjelp.innsyn.event
 
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
+import no.nav.sosialhjelp.innsyn.domain.Utbetaling
+import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -25,6 +32,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.slf4j.Logger
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.util.Locale
@@ -46,6 +56,11 @@ internal class EventServiceTest {
     private val soknadsmottaker = "The Office"
     private val enhetsnr = "2317"
 
+    private val jsonDigisosSoker: JsonDigisosSoker = mockk()
+    private val model: InternalDigisosSoker = mockk()
+    private val digisosSak: DigisosSak = mockk()
+    private val log: Logger = mockk()
+
     @BeforeEach
     fun init() {
         clearAllMocks()
@@ -60,6 +75,8 @@ internal class EventServiceTest {
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
         every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
+        every { digisosSak.fiksDigisosId } returns "fiksDigisosId"
+        every { digisosSak.kommunenummer } returns "1234"
 
         resetHendelser()
     }
@@ -581,5 +598,93 @@ internal class EventServiceTest {
         assertThat(saksoversiktModel).isNotNull
         assertThat(saksoversiktModel.oppgaver).hasSize(0)
         verify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }
+    }
+
+    @Test
+    fun `skal ikke logge nar vi ikke har utbetalinger`() {
+        val utbetalinger = mutableListOf<Utbetaling>()
+        every { model.utbetalinger } returns utbetalinger
+
+        service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
+
+        verify(exactly = 0) { log.info(any()) }
+    }
+
+    @Test
+    fun `skal ikke logge nar vi ikke har gamle utbetalinger`() {
+        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp", LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val utbetalinger = mutableListOf(nyUtbetaling)
+        every { model.utbetalinger } returns utbetalinger
+
+        service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
+
+        verify(exactly = 0) { log.info(any()) }
+    }
+
+    @Test
+    fun `skal ikke logge nar vi har gamel utbetaling som er utbetalt i tide`() {
+        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(2), LocalDate.now().minusDays(2), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val utbetalinger = mutableListOf(nyUtbetaling)
+        every { model.utbetalinger } returns utbetalinger
+
+        service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
+
+        verify(exactly = 0) { log.info(any()) }
+    }
+
+    @Test
+    fun `skal logge nar vi har gamel utbetaling som ikke er utbetalt`() {
+        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(2), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val utbetalinger = mutableListOf(nyUtbetaling)
+        every { model.utbetalinger } returns utbetalinger
+        val nyUtbetalingHendelse = JsonUtbetaling()
+            .withUtbetalingsreferanse("referanse")
+            .withStatus(JsonUtbetaling.Status.UTBETALT)
+            .withBelop(10.0)
+            .withBeskrivelse("Nødhjelp")
+            .withForfallsdato(LocalDate.now().minusDays(2).toString())
+            .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
+            .withHendelsestidspunkt(LocalDateTime.now().minusDays(8).toString())
+        val hendelser = listOf(nyUtbetalingHendelse)
+        every { jsonDigisosSoker.hendelser } returns hendelser
+        every { log.info(any()) } just Runs
+
+        service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
+
+        val logtekstSlot = slot<String>()
+        verify(exactly = 1) { log.info(capture(logtekstSlot)) }
+        assertThat(logtekstSlot.captured).startsWith("Utbetaling på overtid:")
+    }
+
+    @Test
+    fun `skal logge nar vi har gamel utbetaling som ikke er utbetalt for sent`() {
+        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(4), LocalDate.now().minusDays(2), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val utbetalinger = mutableListOf(nyUtbetaling)
+        every { model.utbetalinger } returns utbetalinger
+        val nyUtbetalingHendelse1 = JsonUtbetaling()
+            .withUtbetalingsreferanse("referanse")
+            .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
+            .withBelop(10.0)
+            .withBeskrivelse("Nødhjelp")
+            .withForfallsdato(LocalDate.now().minusDays(4).toString())
+            .withUtbetalingsdato(null)
+            .withHendelsestidspunkt(LocalDateTime.now().minusDays(8).toString())
+        val nyUtbetalingHendelse2 = JsonUtbetaling()
+            .withUtbetalingsreferanse("referanse")
+            .withStatus(JsonUtbetaling.Status.UTBETALT)
+            .withBelop(10.0)
+            .withBeskrivelse("Nødhjelp")
+            .withForfallsdato(LocalDate.now().minusDays(4).toString())
+            .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
+            .withHendelsestidspunkt(LocalDateTime.now().minusDays(2).toString())
+        val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
+        every { jsonDigisosSoker.hendelser } returns hendelser
+        every { log.info(any()) } just Runs
+
+        service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
+
+        val logtekstSlot = slot<String>()
+        verify(exactly = 1) { log.info(capture(logtekstSlot)) }
+        assertThat(logtekstSlot.captured).startsWith("Utbetaling på overtid:")
     }
 }

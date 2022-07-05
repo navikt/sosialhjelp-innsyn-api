@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.digisosapi
+package no.nav.sosialhjelp.innsyn.digisosapitest
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
@@ -14,12 +14,12 @@ import reactor.netty.http.client.HttpClient
 
 @Profile("!prod-sbs")
 @Configuration
-class DigisosApiConfig(
+class DigisosApiTestConfig(
     private val clientProperties: ClientProperties,
 ) {
 
     @Bean
-    fun digisosApiWebClient(webClientBuilder: WebClient.Builder, proxiedHttpClient: HttpClient) =
+    fun digisosApiTestWebClient(webClientBuilder: WebClient.Builder, proxiedHttpClient: HttpClient) =
         webClientBuilder
             .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)

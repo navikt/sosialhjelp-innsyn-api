@@ -55,6 +55,10 @@ class EventService(
         // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
         model.status = SoknadsStatus.SENDT
 
+        if (jsonDigisosSoker?.avsender != null) {
+            log.info("Avsender er fagsystem ", jsonDigisosSoker.avsender.systemnavn)
+        }
+
         if (originalSoknadNAV?.timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId

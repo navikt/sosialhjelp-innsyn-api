@@ -55,7 +55,7 @@ class EventService(
         // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
         model.status = SoknadsStatus.SENDT
 
-        if (jsonDigisosSoker?.avsender != null) {
+        if (jsonDigisosSoker?.avsender != null && jsonDigisosSoker.avsender.systemnavn != null && jsonDigisosSoker.avsender.systemnavn.isNotEmpty()) {
             log.info("Avsender er fagsystem ", jsonDigisosSoker.avsender.systemnavn)
         }
 

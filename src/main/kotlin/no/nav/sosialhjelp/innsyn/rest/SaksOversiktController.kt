@@ -25,7 +25,9 @@ import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.service.saksstatus.DEFAULT_TITTEL
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixTimestampToDate
 import org.springframework.http.HttpHeaders
@@ -36,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-@ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
+@ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class SaksOversiktController(

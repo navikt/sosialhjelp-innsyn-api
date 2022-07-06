@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.app.klientlogg
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

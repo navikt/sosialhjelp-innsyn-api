@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.soknadsstatus
+package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import io.mockk.clearAllMocks
 import io.mockk.every

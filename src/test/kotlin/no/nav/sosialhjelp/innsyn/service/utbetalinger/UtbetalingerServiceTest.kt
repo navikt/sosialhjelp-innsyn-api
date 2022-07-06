@@ -99,6 +99,7 @@ internal class UtbetalingerServiceTest {
                 beskrivelse = "Nødhjelp",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now().minusMonths(13),
+                stoppetDato = null,
                 fom = LocalDate.now().minusMonths(13).withDayOfMonth(1),
                 tom = LocalDate.now().minusMonths(13).withDayOfMonth(28),
                 mottaker = "utleier",
@@ -130,6 +131,7 @@ internal class UtbetalingerServiceTest {
                 beskrivelse = "Nødhjelp",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now().minusMonths(12),
+                stoppetDato = null,
                 fom = LocalDate.now().minusMonths(12).withDayOfMonth(1),
                 tom = LocalDate.now().minusMonths(12).withDayOfMonth(28),
                 mottaker = "utleier",
@@ -170,6 +172,7 @@ internal class UtbetalingerServiceTest {
                 beskrivelse = "Nødhjelp",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.of(2019, 8, 10),
+                stoppetDato = null,
                 fom = LocalDate.of(2019, 8, 1),
                 tom = LocalDate.of(2019, 8, 31),
                 mottaker = "utleier",
@@ -208,8 +211,8 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 2 utbetalinger for 1 maned`() {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(
-            Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()),
-            Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 8, 12), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+            Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()),
+            Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 8, 12), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
         )
 
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
@@ -237,8 +240,8 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere response med 1 utbetaling for 2 maneder`() {
         val model = InternalDigisosSoker()
         model.utbetalinger = mutableListOf(
-            Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()),
-            Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 9, 12), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+            Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null, LocalDate.of(2019, 8, 10), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()),
+            Utbetaling("Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null, LocalDate.of(2019, 9, 12), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
         )
 
         coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
@@ -275,7 +278,7 @@ internal class UtbetalingerServiceTest {
         val vilkar = Vilkar("vilkar1", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, null, now, now)
         val utbetaling1 = Utbetaling(
             "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
-            null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now()
+            null, LocalDate.of(2019, 8, 10), null, null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now()
         )
         model.saker.add(
             Sak(
@@ -287,7 +290,7 @@ internal class UtbetalingerServiceTest {
                     utbetaling1,
                     Utbetaling(
                         "Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null,
-                        LocalDate.of(2019, 9, 12), null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now()
+                        LocalDate.of(2019, 9, 12), null, null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now()
                     )
                 )
             )
@@ -321,7 +324,7 @@ internal class UtbetalingerServiceTest {
         )
         val utbetaling1 = Utbetaling(
             "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
-            null, LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now()
+            null, LocalDate.of(2019, 8, 10), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now()
         )
         model.saker.add(
             Sak(
@@ -349,7 +352,7 @@ internal class UtbetalingerServiceTest {
         model.utbetalinger = mutableListOf(
             Utbetaling(
                 "Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", null,
-                LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()
+                LocalDate.of(2019, 8, 10), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()
             )
         )
 
@@ -357,7 +360,7 @@ internal class UtbetalingerServiceTest {
         model2.utbetalinger = mutableListOf(
             Utbetaling(
                 "Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.ONE, "Barnehage og SFO", null,
-                LocalDate.of(2019, 9, 12), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()
+                LocalDate.of(2019, 9, 12), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()
             )
         )
 
@@ -405,7 +408,7 @@ internal class UtbetalingerServiceTest {
         model.utbetalinger = mutableListOf(
             Utbetaling(
                 "Sak1", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, null, null,
-                LocalDate.of(2019, 8, 10), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()
+                LocalDate.of(2019, 8, 10), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now()
             )
         )
 
@@ -479,6 +482,7 @@ internal class UtbetalingerServiceTest {
                 beskrivelse = "Nødhjelp",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.of(2019, 8, 10),
+                stoppetDato = null,
                 fom = LocalDate.of(2019, 8, 1),
                 tom = LocalDate.of(2019, 8, 31),
                 mottaker = "utleier",
@@ -496,6 +500,7 @@ internal class UtbetalingerServiceTest {
                 beskrivelse = "Nødhjelp",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.of(2019, 9, 10),
+                stoppetDato = null,
                 fom = LocalDate.of(2019, 8, 1),
                 tom = LocalDate.of(2019, 8, 31),
                 mottaker = "utleier",
@@ -530,6 +535,7 @@ internal class UtbetalingerServiceTest {
                 beskrivelse = "Nødhjelp",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.of(2019, 8, 10),
+                stoppetDato = null,
                 fom = LocalDate.of(2019, 8, 1),
                 tom = LocalDate.of(2019, 8, 31),
                 mottaker = "utleier",
@@ -547,6 +553,7 @@ internal class UtbetalingerServiceTest {
                 beskrivelse = "Nødhjelp",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.of(2019, 9, 10),
+                stoppetDato = null,
                 fom = LocalDate.of(2019, 8, 1),
                 tom = LocalDate.of(2019, 8, 31),
                 mottaker = "utleier",

@@ -4,36 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.Date
-
-data class SoknadsStatusResponse(
-    val status: SoknadsStatus,
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    val tidspunktSendt: LocalDateTime?,
-    val soknadsalderIMinutter: Long?,
-    val navKontor: String?,
-    val filUrl: UrlResponse?
-)
-
-data class SaksStatusResponse(
-    val tittel: String,
-    val status: SaksStatus?,
-    val skalViseVedtakInfoPanel: Boolean,
-    val vedtaksfilUrlList: List<VedtaksfilUrl>?
-)
-
-data class VedtaksfilUrl(
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    val dato: LocalDate?,
-    val vedtaksfilUrl: String
-)
-
-data class HendelseResponse(
-    val tidspunkt: String,
-    val beskrivelse: String,
-    val filUrl: UrlResponse?
-)
 
 data class OppgaveResponse(
     val oppgaveId: String,
@@ -118,11 +89,6 @@ data class SaksDetaljerResponse(
     val soknadTittel: String,
     val status: String,
     val antallNyeOppgaver: Int?
-)
-
-data class ForelopigSvarResponse(
-    val harMottattForelopigSvar: Boolean,
-    val link: String?
 )
 
 data class OrginalJsonSoknadResponse(

@@ -27,6 +27,7 @@ import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.service.innsyn.InnsynService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.slf4j.Logger
@@ -55,8 +56,13 @@ class EventService(
         // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
         model.status = SoknadsStatus.SENDT
 
-        if (jsonDigisosSoker?.avsender != null) {
-            model.fagsystem = Fagsystem(jsonDigisosSoker.avsender.systemnavn, jsonDigisosSoker.avsender.systemversjon)
+
+        if (jsonDigisosSoker?.avsender != null && jsonDigisosSoker.avsender.systemnavn != null && jsonDigisosSoker.avsender.systemnavn.isNotBlank()) {
+            log.info("Avsender er fagsystem ${jsonDigisosSoker.avsender.systemnavn}")
+        }
+
+        if (jsonDigisosSoker?.avsender != null && jsonDigisosSoker.avsender.systemversjon != null && jsonDigisosSoker.avsender.systemversjon.isNotBlank()) {
+            log.info("Avsender har fagsystemversjon ${jsonDigisosSoker.avsender.systemversjon}")
         }
 
         if (originalSoknadNAV?.timestampSendt != null) {
@@ -90,20 +96,30 @@ class EventService(
         model.utbetalinger
             .filter { it.forfallsDato?.isBefore(LocalDate.now().minusDays(1)) ?: false }
             .forEach { utbetaling ->
-                val testDato = utbetaling.utbetalingsDato ?: LocalDate.now()
-                if (utbetaling.forfallsDato?.isBefore(testDato.minusDays(1)) != false) {
-                    val overdueDays = ChronoUnit.DAYS.between(utbetaling.forfallsDato, testDato).absoluteValue
-                    val eventListe = mutableListOf<String>()
-                    jsonDigisosSoker?.hendelser?.filterIsInstance(JsonUtbetaling::class.java)
-                        ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
-                        ?.forEach { eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}") }
-                    log.info(
-                        "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
-                            "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
-                            "\"status\": \"${utbetaling.status.name}\", \"overdueDays\": \"$overdueDays\", " +
-                            "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${utbetaling.forfallsDato}\", " +
-                            "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
-                    )
+                val sluttdato = utbetaling.utbetalingsDato ?: utbetaling.stoppetDato ?: LocalDate.now()
+                val forfallsDato = utbetaling.forfallsDato
+                if (forfallsDato != null) {
+                    if (forfallsDato.isBefore(sluttdato.minusDays(1))) {
+                        val eventListe = mutableListOf<String>()
+                        var opprettelsesdato = LocalDate.now()
+                        jsonDigisosSoker?.hendelser?.filterIsInstance(JsonUtbetaling::class.java)
+                            ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
+                            ?.forEach {
+                                eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
+                                opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
+                            }
+                        val overdueDays = ChronoUnit.DAYS.between(forfallsDato, sluttdato).absoluteValue
+                        val startdato = maxOf(forfallsDato, opprettelsesdato)
+                        if (startdato.isBefore(sluttdato.minusDays(1))) {
+                            log.info(
+                                "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
+                                    "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
+                                    "\"status\": \"${utbetaling.status.name}\", \"overdueDays\": \"$overdueDays\", " +
+                                    "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${forfallsDato}\", " +
+                                    "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
+                            )
+                        }
+                    }
                 }
             }
     }

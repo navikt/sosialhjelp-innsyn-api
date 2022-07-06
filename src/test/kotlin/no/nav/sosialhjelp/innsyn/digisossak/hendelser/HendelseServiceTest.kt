@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.hendelse
+package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -210,6 +210,7 @@ internal class HendelseServiceTest {
                         beskrivelse = "beskrivelse",
                         forfallsDato = null,
                         utbetalingsDato = LocalDate.now(),
+                        stoppetDato = null,
                         fom = null,
                         tom = null,
                         mottaker = "mottaker",
@@ -254,6 +255,7 @@ internal class HendelseServiceTest {
                 beskrivelse = "beskrivelse",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now(),
+                stoppetDato = null,
                 fom = null,
                 tom = null,
                 mottaker = "mottaker",
@@ -271,6 +273,7 @@ internal class HendelseServiceTest {
                 beskrivelse = "beskrivelse",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now(),
+                stoppetDato = null,
                 fom = null,
                 tom = null,
                 mottaker = "mottaker",
@@ -288,6 +291,7 @@ internal class HendelseServiceTest {
                 beskrivelse = "beskrivelse",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now(),
+                stoppetDato = null,
                 fom = null,
                 tom = null,
                 mottaker = "mottaker",
@@ -326,6 +330,7 @@ internal class HendelseServiceTest {
                 beskrivelse = "beskrivelse",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now(),
+                stoppetDato = null,
                 fom = null,
                 tom = null,
                 mottaker = "mottaker",
@@ -343,6 +348,7 @@ internal class HendelseServiceTest {
                 beskrivelse = "beskrivelse",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now(),
+                stoppetDato = null,
                 fom = null,
                 tom = null,
                 mottaker = "mottaker",
@@ -360,6 +366,7 @@ internal class HendelseServiceTest {
                 beskrivelse = "beskrivelse",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now(),
+                stoppetDato = null,
                 fom = null,
                 tom = null,
                 mottaker = "mottaker",
@@ -377,6 +384,7 @@ internal class HendelseServiceTest {
                 beskrivelse = "utbetalt utbetaling",
                 forfallsDato = null,
                 utbetalingsDato = LocalDate.now(),
+                stoppetDato = null,
                 fom = null,
                 tom = null,
                 mottaker = "mottaker",

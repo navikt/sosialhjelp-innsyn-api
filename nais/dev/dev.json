@@ -44,7 +44,7 @@
     "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api-dev",
     "CLAMAV_URL": "http://clamav.clamav.svc.cluster.local/scan",
     "LOGIN_API_IDPORTEN_CLIENTID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
-    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "10.1.16,1.0-MOCKVERSJON"
+    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
   },
   "minReplicas": "1",
   "maxReplicas": "1",

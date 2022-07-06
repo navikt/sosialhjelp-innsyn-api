@@ -1,9 +1,11 @@
 package no.nav.sosialhjelp.innsyn.service.oppgave
 
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
+import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
 import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
@@ -21,6 +23,7 @@ class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksClient: FiksClient,
+    private val clientProperties: ClientProperties,
 ) {
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
@@ -200,11 +203,13 @@ class OppgaveService(
     fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String, token: String): Boolean {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
-        if (model.dokumentasjonkrav.isEmpty()) {
+        if (model.fagsystem == null) {
             return false
         }
-
-        return false
+        return clientProperties.vilkarDokkravFagsystemVersjoner.map {
+            val split = it.split(";")
+            Fagsystem(split[0], split[1])
+        }.contains(model.fagsystem)
     }
 
     companion object {

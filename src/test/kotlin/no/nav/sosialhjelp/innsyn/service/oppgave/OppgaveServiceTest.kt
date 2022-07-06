@@ -7,8 +7,10 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
+import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
@@ -28,7 +30,8 @@ internal class OppgaveServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
-    private val service = OppgaveService(eventService, vedleggService, fiksClient)
+    private val clientProperties: ClientProperties = mockk()
+    private val service = OppgaveService(eventService, vedleggService, fiksClient, clientProperties)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockEttersendtInfoNAV: EttersendtInfoNAV = mockk()
@@ -63,6 +66,7 @@ internal class OppgaveServiceTest {
         clearAllMocks()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
+        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("socio;10.1.16", "mock-alt;1.0-MOCKVERSJON")
     }
 
     @Test
@@ -658,5 +662,33 @@ internal class OppgaveServiceTest {
         val response = service.getHarLevertDokumentasjonkrav("123", token)
 
         assertThat(response).isTrue
+    }
+
+    @Test
+    fun `should return true if fagsystemversjon equals client properties versjons`() {
+        val model = InternalDigisosSoker()
+        model.fagsystem = Fagsystem("socio", "10.1.16")
+        every { eventService.createModel(any(), any()) } returns model
+
+        var response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+
+        assertThat(response).isTrue
+
+        model.fagsystem = Fagsystem("mock-alt", "1.0-MOCKVERSJON")
+
+        response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+
+        assertThat(response).isTrue
+    }
+
+    @Test
+    fun `should return false if fagsystemversjon does not equals client properties versjons`() {
+        val model = InternalDigisosSoker()
+        model.fagsystem = Fagsystem("utdatertSystem", "0.0.3:0")
+        every { eventService.createModel(any(), any()) } returns model
+
+        val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+
+        assertThat(response).isFalse
     }
 }

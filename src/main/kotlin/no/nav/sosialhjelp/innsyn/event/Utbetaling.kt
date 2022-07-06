@@ -21,7 +21,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
 
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Utbetaling. Status: ${hendelse.status?.name ?: "null"}")
 
-    val gammelUtbetaling = utbetalinger.firstOrNull{ it.referanse == hendelse.utbetalingsreferanse }
+    val gammelUtbetaling = utbetalinger.firstOrNull { it.referanse == hendelse.utbetalingsreferanse }
     val utbetaling = Utbetaling(
         referanse = hendelse.utbetalingsreferanse,
         status = UtbetalingsStatus.valueOf(

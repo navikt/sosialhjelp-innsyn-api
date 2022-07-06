@@ -96,10 +96,10 @@ class EventService(
                     if (eventListe.size > 1 || utbetaling.status == UtbetalingsStatus.PLANLAGT_UTBETALING) {
                         log.info(
                             "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
-                                    "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
-                                    "\"status\": \"${utbetaling.status.name}\", \"overdueDays\": \"$overdueDays\", " +
-                                    "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${utbetaling.forfallsDato}\", " +
-                                    "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
+                                "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
+                                "\"status\": \"${utbetaling.status.name}\", \"overdueDays\": \"$overdueDays\", " +
+                                "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${utbetaling.forfallsDato}\", " +
+                                "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
                         )
                     }
                 }

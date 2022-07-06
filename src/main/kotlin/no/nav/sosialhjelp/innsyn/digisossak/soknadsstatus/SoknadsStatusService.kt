@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.soknadsstatus
+package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient

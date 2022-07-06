@@ -1,8 +1,6 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.digisossak.forelopigsvar
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.sosialhjelp.innsyn.domain.ForelopigSvarResponse
-import no.nav.sosialhjelp.innsyn.service.forelopigsvar.ForelopigSvarService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity

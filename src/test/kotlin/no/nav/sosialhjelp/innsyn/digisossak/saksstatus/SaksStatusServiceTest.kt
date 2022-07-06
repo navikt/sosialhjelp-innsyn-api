@@ -1,14 +1,14 @@
-package no.nav.sosialhjelp.innsyn.service.saksstatus
+package no.nav.sosialhjelp.innsyn.digisossak.saksstatus
 
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService.Companion.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
-import no.nav.sosialhjelp.innsyn.domain.SaksStatusResponse
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -110,7 +110,7 @@ internal class SaksStatusServiceTest {
             Sak(
                 referanse = referanse,
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
-                tittel = DEFAULT_TITTEL,
+                tittel = DEFAULT_SAK_TITTEL,
                 vedtak = mutableListOf(
                     Vedtak(
                         utfall = UtfallVedtak.INNVILGET,
@@ -129,7 +129,7 @@ internal class SaksStatusServiceTest {
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
         assertThat(response[0].status).isEqualTo(SaksStatus.FERDIGBEHANDLET)
-        assertThat(response[0].tittel).isEqualTo(DEFAULT_TITTEL)
+        assertThat(response[0].tittel).isEqualTo(DEFAULT_SAK_TITTEL)
         assertThat(response[0].vedtaksfilUrlList).hasSize(1)
         assertThat(response[0].vedtaksfilUrlList?.get(0)?.vedtaksfilUrl).isEqualTo(vedtaksfilUrl)
     }
@@ -160,7 +160,7 @@ internal class SaksStatusServiceTest {
                 Sak(
                     referanse = referanse,
                     saksStatus = SaksStatus.IKKE_INNSYN,
-                    tittel = DEFAULT_TITTEL,
+                    tittel = DEFAULT_SAK_TITTEL,
                     vedtak = mutableListOf(),
                     utbetalinger = mutableListOf()
                 )
@@ -174,7 +174,7 @@ internal class SaksStatusServiceTest {
         assertThat(response).isNotNull
         assertThat(response).hasSize(2)
         assertThat(response[0].tittel).isEqualTo(tittel)
-        assertThat(response[1].tittel).isEqualTo(DEFAULT_TITTEL)
+        assertThat(response[1].tittel).isEqualTo(DEFAULT_SAK_TITTEL)
 
         assertThat(response[0].vedtaksfilUrlList).hasSize(2)
         assertThat(response[1].vedtaksfilUrlList).isNull()

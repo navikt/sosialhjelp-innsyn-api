@@ -1,9 +1,7 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
-import no.nav.sosialhjelp.innsyn.domain.SoknadsStatusResponse
-import no.nav.sosialhjelp.innsyn.service.soknadsstatus.SoknadsStatusService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
 import org.springframework.http.HttpHeaders.AUTHORIZATION

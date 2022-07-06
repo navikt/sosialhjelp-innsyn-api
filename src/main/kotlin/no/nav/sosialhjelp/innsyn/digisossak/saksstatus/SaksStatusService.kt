@@ -1,16 +1,12 @@
-package no.nav.sosialhjelp.innsyn.service.saksstatus
+package no.nav.sosialhjelp.innsyn.digisossak.saksstatus
 
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
-import no.nav.sosialhjelp.innsyn.domain.SaksStatusResponse
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
-import no.nav.sosialhjelp.innsyn.domain.VedtaksfilUrl
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
-
-const val DEFAULT_TITTEL: String = "Økonomisk sosialhjelp"
 
 @Component
 class SaksStatusService(
@@ -42,7 +38,7 @@ class SaksStatusService(
             }
         }
         val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak)
-        return SaksStatusResponse(sak.tittel ?: DEFAULT_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList)
+        return SaksStatusResponse(sak.tittel ?: DEFAULT_SAK_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList)
     }
 
     private fun hentStatusNavn(sak: Sak): SaksStatus {
@@ -65,5 +61,7 @@ class SaksStatusService(
 
     companion object {
         private val log by logger()
+
+        const val DEFAULT_SAK_TITTEL: String = "Økonomisk sosialhjelp"
     }
 }

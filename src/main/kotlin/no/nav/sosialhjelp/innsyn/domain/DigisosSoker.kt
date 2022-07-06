@@ -82,6 +82,7 @@ data class Utbetaling(
     var beskrivelse: String?,
     var forfallsDato: LocalDate?,
     var utbetalingsDato: LocalDate?,
+    var stoppetDato: LocalDate?,
     var fom: LocalDate?,
     var tom: LocalDate?,
     var mottaker: String?,

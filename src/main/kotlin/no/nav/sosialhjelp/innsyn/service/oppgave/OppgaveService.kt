@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.service.oppgave
 
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
@@ -22,7 +21,6 @@ class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksClient: FiksClient,
-    private val clientProperties: ClientProperties,
 ) {
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
@@ -197,6 +195,16 @@ class OppgaveService(
             }
             .filter { erAlleredeLastetOpp(it, ettersendteVedlegg) }
             .toList().isNotEmpty()
+    }
+
+    fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String, token: String): Boolean {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
+        if (model.dokumentasjonkrav.isEmpty()) {
+            return false
+        }
+
+        return false
     }
 
     companion object {

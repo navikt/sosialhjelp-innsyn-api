@@ -5,6 +5,8 @@ import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatusResponse
 import no.nav.sosialhjelp.innsyn.service.soknadsstatus.SoknadsStatusService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
@@ -17,7 +19,7 @@ import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
+@ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
 @RequestMapping("/api/v1/innsyn/")
 class SoknadsStatusController(

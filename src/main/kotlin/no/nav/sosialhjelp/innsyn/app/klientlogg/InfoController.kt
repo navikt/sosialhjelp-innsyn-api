@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.app.klientlogg
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -28,23 +28,4 @@ class InfoController {
             else -> klientlogger.debug(logg.melding())
         }
     }
-}
-
-data class Logg(
-    val level: String,
-    val message: String,
-    val jsFileUrl: String,
-    val lineNumber: String,
-    val columnNumber: String,
-    val url: String,
-    val userAgent: String
-)
-
-fun Logg.melding(): String {
-    var useragentWithoutSpaceAndComma = ""
-    if (userAgent.isNotEmpty()) {
-        val useragentWithoutSpace = userAgent.replace(" ".toRegex(), "_")
-        useragentWithoutSpaceAndComma = useragentWithoutSpace.replace(",".toRegex(), "_")
-    }
-    return "jsmessagehash=${message.hashCode()}, fileUrl=$jsFileUrl:$lineNumber:$columnNumber, url=$url, userAgent=$useragentWithoutSpaceAndComma, melding: $message"
 }

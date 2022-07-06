@@ -206,8 +206,9 @@ class OppgaveService(
         if (model.fagsystem == null) {
             return false
         }
+        val fagsystem = model.fagsystem
 
-        return clientProperties.vilkarDokkravFagsystemVersjoner.mapNotNull {
+        val fagsystemer = clientProperties.vilkarDokkravFagsystemVersjoner.mapNotNull {
             try {
                 val split = it.split(";")
                 Fagsystem(split[0], split[1])
@@ -215,7 +216,15 @@ class OppgaveService(
                 log.error("Kan ikke splitte fagsystem-versjon i app config $it")
                 null
             }
-        }.contains(model.fagsystem)
+        }
+        // todo fix this null check thing
+        return fagsystemer
+            .filter { fagsystem?.systemnavn.equals(it.systemnavn) }
+            .any { versionEqualsOrIsNewer(fagsystem?.systemversjon, it.systemversjon) }
+    }
+
+    private fun versionEqualsOrIsNewer(systemversjon: String?, godkjentVersjon: String?): Boolean {
+        TODO("Not yet implemented")
     }
 
     companion object {

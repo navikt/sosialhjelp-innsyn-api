@@ -59,6 +59,10 @@ class EventService(
             log.info("Avsender er fagsystem ${jsonDigisosSoker.avsender.systemnavn}")
         }
 
+        if (jsonDigisosSoker?.avsender != null && jsonDigisosSoker.avsender.systemversjon != null && jsonDigisosSoker.avsender.systemversjon.isNullOrBlank()) {
+            log.info("Avsender har fagsystemversjon ${jsonDigisosSoker.avsender.systemversjon}")
+        }
+
         if (originalSoknadNAV?.timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId

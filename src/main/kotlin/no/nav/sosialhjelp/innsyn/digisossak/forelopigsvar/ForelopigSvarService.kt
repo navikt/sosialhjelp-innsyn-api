@@ -1,8 +1,7 @@
-package no.nav.sosialhjelp.innsyn.service.forelopigsvar
+package no.nav.sosialhjelp.innsyn.digisossak.forelopigsvar
 
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
-import no.nav.sosialhjelp.innsyn.domain.ForelopigSvarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
 import org.springframework.stereotype.Component
 

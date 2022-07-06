@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService.Companion.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
@@ -9,7 +10,6 @@ import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.domain.Vedtak
-import no.nav.sosialhjelp.innsyn.service.saksstatus.DEFAULT_TITTEL
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import org.slf4j.LoggerFactory
@@ -31,7 +31,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
         sakForReferanse = Sak(
             referanse = hendelse.saksreferanse ?: "default",
             saksStatus = SaksStatus.UNDER_BEHANDLING,
-            tittel = DEFAULT_TITTEL,
+            tittel = DEFAULT_SAK_TITTEL,
             vedtak = mutableListOf(),
             utbetalinger = mutableListOf()
         )
@@ -39,7 +39,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     }
     sakForReferanse.vedtak.add(vedtakFattet)
 
-    val beskrivelse = "${sakForReferanse.tittel ?: DEFAULT_TITTEL} er ferdigbehandlet"
+    val beskrivelse = "${sakForReferanse.tittel ?: DEFAULT_SAK_TITTEL} er ferdigbehandlet"
 
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Vedtak fattet. <skjult tittel> er ferdigbehandlet")
     historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, vedtaksfilUrl)))

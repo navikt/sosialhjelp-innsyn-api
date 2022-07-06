@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class InternalDigisosSoker(
-    var avsender: Fagsystem?,
+    var fagsystem: Fagsystem?,
     var referanse: String?,
     var fiksDigisosId: String?,
     var status: SoknadsStatus?,
@@ -24,7 +24,7 @@ data class InternalDigisosSoker(
 ) {
 
     constructor() : this(
-        avsender = null,
+        fagsystem = null,
         referanse = null,
         fiksDigisosId = null,
         status = null,

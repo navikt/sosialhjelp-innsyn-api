@@ -3,6 +3,8 @@ package no.nav.sosialhjelp.innsyn.digisosapitest
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
@@ -23,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile
  *  Endepunkter som kun tilbys for woldena -> kun tilgjengelig i preprod, ved lokal kjøring og i mock
  */
 @Profile("!prod-sbs")
-@ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
+@ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
 @RequestMapping("/api/v1/digisosapi")
 class DigisosApiTestController(

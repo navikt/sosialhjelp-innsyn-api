@@ -9,6 +9,8 @@ import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -30,9 +32,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import javax.servlet.http.HttpServletRequest
 
-const val LENGTH_OF_UUID_PART = 9
-
-@ProtectedWithClaims(issuer = "selvbetjening", claimMap = ["acr=Level4"])
+@ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class VedleggController(
@@ -129,6 +129,8 @@ class VedleggController(
 
     companion object {
         private val log by logger()
+
+        private const val LENGTH_OF_UUID_PART = 9
     }
 }
 

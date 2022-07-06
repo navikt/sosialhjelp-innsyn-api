@@ -1,8 +1,6 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.sosialhjelp.innsyn.domain.HendelseResponse
-import no.nav.sosialhjelp.innsyn.service.hendelse.HendelseService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING

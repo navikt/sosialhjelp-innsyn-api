@@ -1,10 +1,9 @@
-package no.nav.sosialhjelp.innsyn.service.hendelse
+package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
 import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
-import no.nav.sosialhjelp.innsyn.domain.HendelseResponse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService

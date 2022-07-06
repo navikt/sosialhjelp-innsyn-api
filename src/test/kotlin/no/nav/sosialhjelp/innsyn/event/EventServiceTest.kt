@@ -13,6 +13,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService.Companion.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -23,7 +24,6 @@ import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.service.innsyn.InnsynService
-import no.nav.sosialhjelp.innsyn.service.saksstatus.DEFAULT_TITTEL
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
@@ -269,7 +269,7 @@ internal class EventServiceTest {
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
             assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isEqualTo(DEFAULT_TITTEL)
+            assertThat(sak.tittel).isEqualTo(DEFAULT_SAK_TITTEL)
             assertThat(sak.vedtak).hasSize(1)
             assertThat(sak.utbetalinger).isEmpty()
 
@@ -279,7 +279,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdigbehandlet")
+            assertThat(hendelse.tittel).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -311,7 +311,7 @@ internal class EventServiceTest {
             assertThat(sak.referanse).isEqualTo(referanse_1)
             assertThat(sak.tittel)
                 .isEqualTo(tittel_1)
-                .isNotEqualTo(DEFAULT_TITTEL)
+                .isNotEqualTo(DEFAULT_SAK_TITTEL)
             assertThat(sak.vedtak).hasSize(1)
 
             val vedtak = sak.vedtak.last()
@@ -320,7 +320,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdigbehandlet")
+            assertThat(hendelse.tittel).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -398,7 +398,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_TITTEL er ferdigbehandlet")
+            assertThat(hendelse.tittel).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 

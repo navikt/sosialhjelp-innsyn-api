@@ -1,15 +1,10 @@
-package no.nav.sosialhjelp.innsyn.service.oppgave
+package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
-import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
-import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
-import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
-import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
-import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg

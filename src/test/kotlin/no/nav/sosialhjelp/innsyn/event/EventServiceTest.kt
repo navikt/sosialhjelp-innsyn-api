@@ -36,7 +36,9 @@ import org.slf4j.Logger
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 internal class EventServiceTest {
@@ -644,7 +646,7 @@ internal class EventServiceTest {
     }
 
     @Test
-    fun `skal ikke logge nar vi har gamel forfallsdato som er er utbetalt samtidig som event er opprettet`() {
+    fun `skal ikke logge nar vi har gamel forfallsdato som er utbetalt samtidig som event er opprettet`() {
         val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -655,8 +657,37 @@ internal class EventServiceTest {
             .withBeskrivelse("Nødhjelp")
             .withForfallsdato(LocalDate.now().minusDays(20).toString())
             .withUtbetalingsdato(LocalDate.now().toString())
-            .withHendelsestidspunkt(LocalDateTime.now().toString())
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse)
+        every { jsonDigisosSoker.hendelser } returns hendelser
+
+        service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
+
+        verify(exactly = 0) { log.info(any()) }
+    }
+
+    @Test
+    fun `skal ikke logge nar vi har gamel forfallsdato som er utbetalt fort nok etter at event er opprettet`() {
+        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val utbetalinger = mutableListOf(nyUtbetaling)
+        every { model.utbetalinger } returns utbetalinger
+        val nyUtbetalingHendelse1 = JsonUtbetaling()
+            .withUtbetalingsreferanse("referanse")
+            .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
+            .withBelop(10.0)
+            .withBeskrivelse("Nødhjelp")
+            .withForfallsdato(LocalDate.now().minusDays(20).toString())
+            .withUtbetalingsdato(null)
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(1).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse2 = JsonUtbetaling()
+            .withUtbetalingsreferanse("referanse")
+            .withStatus(JsonUtbetaling.Status.UTBETALT)
+            .withBelop(10.0)
+            .withBeskrivelse("Nødhjelp")
+            .withForfallsdato(LocalDate.now().minusDays(20).toString())
+            .withUtbetalingsdato(LocalDate.now().toString())
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+        val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
 
         service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
@@ -676,7 +707,7 @@ internal class EventServiceTest {
             .withBeskrivelse("Nødhjelp")
             .withForfallsdato(LocalDate.now().minusDays(2).toString())
             .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
-            .withHendelsestidspunkt(LocalDateTime.now().minusDays(8).toString())
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -700,7 +731,7 @@ internal class EventServiceTest {
             .withBeskrivelse("Nødhjelp")
             .withForfallsdato(LocalDate.now().minusDays(4).toString())
             .withUtbetalingsdato(null)
-            .withHendelsestidspunkt(LocalDateTime.now().minusDays(8).toString())
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
         val nyUtbetalingHendelse2 = JsonUtbetaling()
             .withUtbetalingsreferanse("referanse")
             .withStatus(JsonUtbetaling.Status.UTBETALT)
@@ -708,7 +739,7 @@ internal class EventServiceTest {
             .withBeskrivelse("Nødhjelp")
             .withForfallsdato(LocalDate.now().minusDays(4).toString())
             .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
-            .withHendelsestidspunkt(LocalDateTime.now().minusDays(2).toString())
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -732,7 +763,7 @@ internal class EventServiceTest {
             .withBeskrivelse("Nødhjelp")
             .withForfallsdato(LocalDate.now().minusDays(4).toString())
             .withUtbetalingsdato(null)
-            .withHendelsestidspunkt(LocalDateTime.now().minusDays(8).toString())
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
         val nyUtbetalingHendelse2 = JsonUtbetaling()
             .withUtbetalingsreferanse("referanse")
             .withStatus(JsonUtbetaling.Status.STOPPET)
@@ -740,7 +771,39 @@ internal class EventServiceTest {
             .withBeskrivelse("Nødhjelp")
             .withForfallsdato(LocalDate.now().minusDays(4).toString())
             .withUtbetalingsdato(null)
-            .withHendelsestidspunkt(LocalDateTime.now().minusDays(2).toString())
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
+        val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
+        every { jsonDigisosSoker.hendelser } returns hendelser
+        every { log.info(any()) } just Runs
+
+        service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
+
+        val logtekstSlot = slot<String>()
+        verify(exactly = 1) { log.info(capture(logtekstSlot)) }
+        assertThat(logtekstSlot.captured).startsWith("Utbetaling på overtid:")
+    }
+
+    @Test
+    fun `skal logge nar vi har gamel forfallsdato som ikke er utbetalt fort nok etter at event er opprettet`() {
+        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val utbetalinger = mutableListOf(nyUtbetaling)
+        every { model.utbetalinger } returns utbetalinger
+        val nyUtbetalingHendelse1 = JsonUtbetaling()
+            .withUtbetalingsreferanse("referanse")
+            .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
+            .withBelop(10.0)
+            .withBeskrivelse("Nødhjelp")
+            .withForfallsdato(LocalDate.now().minusDays(20).toString())
+            .withUtbetalingsdato(null)
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse2 = JsonUtbetaling()
+            .withUtbetalingsreferanse("referanse")
+            .withStatus(JsonUtbetaling.Status.UTBETALT)
+            .withBelop(10.0)
+            .withBeskrivelse("Nødhjelp")
+            .withForfallsdato(LocalDate.now().minusDays(20).toString())
+            .withUtbetalingsdato(LocalDate.now().toString())
+            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs

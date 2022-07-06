@@ -206,9 +206,15 @@ class OppgaveService(
         if (model.fagsystem == null) {
             return false
         }
-        return clientProperties.vilkarDokkravFagsystemVersjoner.map {
-            val split = it.split(";")
-            Fagsystem(split[0], split[1])
+
+        return clientProperties.vilkarDokkravFagsystemVersjoner.mapNotNull {
+            try {
+                val split = it.split(";")
+                Fagsystem(split[0], split[1])
+            } catch (e: IndexOutOfBoundsException) {
+                log.error("Kan ikke splitte fagsystem-versjon i app config $it")
+                null
+            }
         }.contains(model.fagsystem)
     }
 

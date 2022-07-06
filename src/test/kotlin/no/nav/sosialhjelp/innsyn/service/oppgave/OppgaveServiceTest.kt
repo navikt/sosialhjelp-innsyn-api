@@ -691,4 +691,16 @@ internal class OppgaveServiceTest {
 
         assertThat(response).isFalse
     }
+
+    @Test
+    fun `should skip incorrect config for fagsystemversjon and still return true when wanted version is correctly configured in list`() {
+        val model = InternalDigisosSoker()
+        model.fagsystem = Fagsystem("mock-alt", "1.0-MOCKVERSJON")
+        every { eventService.createModel(any(), any()) } returns model
+        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("ugyldigFormatertFagsystemConfig--0.1.1", "mock-alt;1.0-MOCKVERSJON")
+
+        val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+
+        assertThat(response).isTrue
+    }
 }

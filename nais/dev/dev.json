@@ -24,7 +24,7 @@
   ],
   "fssProxyClusterName": "dev-fss",
   "env": {
-    "SPRING_PROFILES_ACTIVE": "dev,log-kibana",
+    "SPRING_PROFILES_ACTIVE": "dev,log-console",
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",
     "FIKS_SVAR_UT_ENDPOINT_URL": "https://test.svarut.ks.no",

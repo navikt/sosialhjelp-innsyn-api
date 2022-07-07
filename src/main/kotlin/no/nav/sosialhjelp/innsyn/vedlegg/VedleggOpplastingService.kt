@@ -170,7 +170,7 @@ class VedleggOpplastingService(
 
         val matchendeFiler = filValideringer.filter { it.filename == originalFilename }
         if (matchendeFiler.size > 1) log.warn("Vi har funnet ${matchendeFiler.size} validerte filer med samme navn. Det er flere enn 1.")
-        if (matchendeFiler.isEmpty()) log.warn("0 validerte filer med samme navn. Antall filvalideringer totalt: {} Dette burde undersøkes nærmere.", filValideringer.size)
+        if (matchendeFiler.isEmpty()) log.warn("0 validerte filer med samme navn. Antall filvalideringer totalt: ${filValideringer.size} Dette burde undersøkes nærmere.")
 
         filename += "-" + uuid.split("-")[0]
 

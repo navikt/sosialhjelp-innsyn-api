@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.digisossak.isNewerThanMonths
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
@@ -16,9 +17,7 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
 import java.text.DateFormatSymbols
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.ZoneOffset
 import java.util.Locale
 
 @Component
@@ -44,7 +43,7 @@ class UtbetalingerService(
 
         val alleUtbetalinger = runBlocking(Dispatchers.IO + MDCContext()) {
             digisosSaker
-                .filter { isDigisosSakNewerThanMonths(it, months) }
+                .filter { it.isNewerThanMonths(months) }
                 .flatMapParallel {
                     setRequestAttributes(requestAttributes)
                     manedsutbetalinger(token, it) { status -> status == UtbetalingsStatus.UTBETALT }
@@ -88,11 +87,6 @@ class UtbetalingerService(
             }
     }
 
-    fun isDigisosSakNewerThanMonths(digisosSak: DigisosSak, months: Int): Boolean {
-        val testDato = LocalDateTime.now().minusMonths(months.toLong()).toInstant(ZoneOffset.ofHours(1)).toEpochMilli()
-        return digisosSak.sistEndret >= testDato
-    }
-
     fun isDateNewerThanMonths(date: LocalDate, months: Int): Boolean {
         return date >= LocalDate.now().minusMonths(months.toLong())
     }
@@ -115,9 +109,9 @@ class UtbetalingerService(
         }
         return digisosSaker
             .asSequence()
-            .filter { digisosSak -> isDigisosSakNewerThanMonths(digisosSak, months) }
-            .any { digisosSak ->
-                val model = eventService.hentAlleUtbetalinger(token, digisosSak)
+            .filter { it.isNewerThanMonths(months) }
+            .any {
+                val model = eventService.hentAlleUtbetalinger(token, it)
                 (containsUtbetalingNewerThanMonth(model, months))
             }
     }

@@ -19,8 +19,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     if (hendelse.status == null) log.info("utbetalingsstatus er null")
     if (hendelse.status == JsonUtbetaling.Status.PLANLAGT_UTBETALING) log.info("utbetalingsstatus er PLANLAGT_UTBETALING")
 
-    log.info("Hendelse: Utbetaling. Status: ${hendelse.status?.name ?: "null"}")
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Utbetaling. Status: ${hendelse.status?.name ?: "null"}")
 
+    val gammelUtbetaling = utbetalinger.firstOrNull { it.referanse == hendelse.utbetalingsreferanse }
     val utbetaling = Utbetaling(
         referanse = hendelse.utbetalingsreferanse,
         status = UtbetalingsStatus.valueOf(
@@ -29,8 +30,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
         ),
         belop = BigDecimal.valueOf(hendelse.belop ?: 0.0),
         beskrivelse = hendelse.beskrivelse,
-        forfallsDato = if (hendelse.forfallsdato == null) null else hendelse.forfallsdato.toLocalDate(),
-        utbetalingsDato = if (hendelse.utbetalingsdato == null) null else hendelse.utbetalingsdato.toLocalDate(),
+        forfallsDato = hendelse.forfallsdato?.toLocalDate(),
+        utbetalingsDato = hendelse.utbetalingsdato?.toLocalDate(),
+        stoppetDato = if (hendelse.status == JsonUtbetaling.Status.STOPPET)
+            hendelse.hendelsestidspunkt.toLocalDateTime().toLocalDate() else gammelUtbetaling?.stoppetDato,
         fom = if (hendelse.fom == null) null else hendelse.fom.toLocalDate(),
         tom = if (hendelse.tom == null) null else hendelse.tom.toLocalDate(),
         mottaker = hendelse.mottaker,

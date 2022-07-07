@@ -30,6 +30,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
         else -> throw RuntimeException("Statustype ${hendelse.status.value()} mangler mapping")
     }
 
-    log.info("Hendelse: Søknadsstatus: ${hendelse.status} Tittel: $tittel")
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Søknadsstatus: ${hendelse.status} Tittel: $tittel")
     historikk.add(Hendelse(tittel, hendelse.hendelsestidspunkt.toLocalDateTime()))
 }

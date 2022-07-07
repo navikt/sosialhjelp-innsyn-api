@@ -1,12 +1,10 @@
 package no.nav.sosialhjelp.innsyn.client.dialog
 
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
 import no.nav.sosialhjelp.innsyn.redis.DIALOG_API_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.logger
 import no.nav.sosialhjelp.kotlin.utils.retry
@@ -81,7 +79,6 @@ class DialogClientImpl(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.set(HttpHeaders.AUTHORIZATION, BEARER + tokenXToken)
-        headers.set(HEADER_TEMA, TEMA_KOM)
         return headers
     }
 

@@ -9,8 +9,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import mockwebserver3.MockResponse
-import mockwebserver3.MockWebServer
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -19,11 +17,13 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
-import no.nav.sosialhjelp.innsyn.service.pdf.EttersendelsePdfGenerator
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
-import no.nav.sosialhjelp.innsyn.service.vedlegg.FilForOpplasting
-import no.nav.sosialhjelp.innsyn.service.vedlegg.KrypteringService
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
+import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -59,7 +59,6 @@ internal class FiksClientTest {
     @BeforeEach
     fun init() {
         clearAllMocks()
-        mockWebServer.start()
 
         every { redisService.get(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs

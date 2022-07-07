@@ -4,31 +4,31 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.3"
-    const val springBoot = "2.7.0"
-    const val sosialhjelpCommon = "1.0454405"
+    const val springBoot = "2.7.1"
+    const val sosialhjelpCommon = "1.20220629.1332-dfb4541"
     const val logback = "1.2.11"
     const val logstash = "7.2"
     const val filformat = "1.2022.04.29-13.11-459bee049a7a"
-    const val micrometerRegistry = "1.9.0"
+    const val micrometerRegistry = "1.9.1"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "2.1.0"
+    const val tokenValidation = "2.1.1"
     const val jackson = "2.13.3"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
-    const val commonsIo = "2.8.0"
+    const val commonsIo = "2.11.0"
     const val fileUpload = "1.4"
     const val tika = "2.4.1"
     const val pdfBox = "2.0.24"
     const val fiksKryptering = "1.1.2"
     const val lettuce = "6.1.8.RELEASE"
     const val jempbox = "1.8.16"
-    const val unleash = "3.3.4"
+    const val unleash = "4.4.1"
     const val springdoc = "1.6.9"
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
     const val log4j = "2.17.2"
 
-    const val javaJwt = "3.19.2"
+    const val javaJwt = "4.0.0"
     const val jwksRsa = "0.21.1"
     const val nimbus = "9.23"
 
@@ -45,8 +45,8 @@ object Versions {
 plugins {
     kotlin("jvm") version "1.7.0"
     kotlin("plugin.spring") version "1.7.0"
-    id("org.springframework.boot") version "2.7.0"
-    id("com.github.ben-manes.versions") version "0.42.0"
+    id("org.springframework.boot") version "2.7.1"
+    id("com.github.ben-manes.versions") version "0.42.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
@@ -87,7 +87,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-webflux:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-jetty:${Versions.springBoot}")
-    implementation("org.springframework.boot:spring-boot-starter-security:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.springBoot}")
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.springBoot}")
@@ -146,7 +145,6 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
     testImplementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("no.nav.security:token-validation-spring-test:${Versions.tokenValidation}")
-    testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:${Versions.mockwebserver}")
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
     constraints {
@@ -199,6 +197,13 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        events = setOf(TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+        exceptionFormat = TestExceptionFormat.FULL
+        showCauses = true
+        showExceptions = true
+        showStackTraces = true
+    }
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

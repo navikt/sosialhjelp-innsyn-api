@@ -4,8 +4,8 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.common.DigisosSakTilhorerAnnenBrukerException
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
+import no.nav.sosialhjelp.innsyn.app.exceptions.DigisosSakTilhorerAnnenBrukerException
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.redis.RedisService.Companion.pakkUtRedisData
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.maskerFnr
@@ -50,7 +50,7 @@ interface RedisService {
          * Kaster feil hvis det finnes additionalProperties på mappet objekt.
          * Tyder på at noe feil har skjedd ved mapping.
          */
-        fun valider(obj: Any?) {
+        private fun valider(obj: Any?) {
             when {
                 obj is DigisosSak && obj.sokerFnr != getUserIdFromToken() -> throw DigisosSakTilhorerAnnenBrukerException("DigisosSak tilhører annen bruker")
                 obj is JsonDigisosSoker && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonDigisosSoker har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")

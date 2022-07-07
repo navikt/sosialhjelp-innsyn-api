@@ -21,60 +21,8 @@ Interne henvendelser kan sendes via Slack i kanalen #team_digisos.
 ### Krav
 - JDK 17
 
-## Hvordan komme i gang
-
 ### Manuell deploy til dev
 Gjøres via Github Actions, se: https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_dev.yml
-
-### Hente github-package-registry pakker fra NAV-IT
-Enkelte pakker brukt i repoet er lastet opp til Github Package Registry, som krever autentisering for å kunne lastes ned.
-Ved bruk av f.eks Gradle, kan det løses slik:
-```
-val githubUser: String by project
-val githubPassword: String by project
-repositories {
-    maven {
-        credentials {
-            username = githubUser
-            password = githubPassword
-        }
-        setUrl("https://maven.pkg.github.com/navikt/sosialhjelp-common")
-    }
-}
-```
-
-`githubUser` og `githubPassword` er da properties som settes i `~/.gradle/gradle.properties`:
-
-```                                                     
-githubUser=x-access-token
-githubPassword=<token>
-```
-
-Hvor `<token>` er et personal access token med scope `read:packages`.
-
-Alternativt kan variablene kan også konfigureres som miljøvariabler, eller brukes i kommandolinjen:
-
-* `ORG_GRADLE_PROJECT_githubUser`
-* `ORG_GRADLE_PROJECT_githubPassword`
-
-```
-./gradlew -PgithubUser=x-access-token -PgithubPassword=[token]
-```
-
-## Ktlint
-Hvordan kjøre Ktlint:
-* Fra IDEA: Kjør Gradle Task: sosialhjelp-innsyn-api -> Tasks -> formatting -> ktlintFormat
-* Fra terminal:
-    * Kun formater: `./gradlew ktlintFormat`
-    * Formater og bygg: `./gradlew ktlintFormat build`
-    * Hvis IntelliJ begynner å hikke, kan en kjøre `./gradlew clean ktlintFormat build`
-
-Endre IntelliJ autoformateringskonfigurasjon for dette prosjektet:
-* `./gradlew ktlintApplyToIdea`
-
-Legg til pre-commit check/format hooks:
-* `./gradlew addKtlintCheckGitPreCommitHook`
-* `./gradlew addKtlintFormatGitPreCommitHook`
 
 ## Oppsett av nytt prosjekt
 Dette prosjektet bygger og deployer vha Github Actions
@@ -123,3 +71,6 @@ For å ta i bruk Redis lokalt anbefaler vi bruk av Docker. (portnummer må samsv
 (kjører opp redis (`--name <myredis>` må samsvare med referansen i redis-config.yaml))
 3. `docker run -it --link myredis:redis --rm redis redis-cli -h redis -p 6379` 
 (kommandolinjeverktøy mot redis for å sjekke innholdet.)
+
+## Hvordan komme i gang
+### [Felles dokumentasjon for våre backend apper](https://github.com/navikt/digisos/blob/main/oppsett-devmiljo.md#backend-gradle)

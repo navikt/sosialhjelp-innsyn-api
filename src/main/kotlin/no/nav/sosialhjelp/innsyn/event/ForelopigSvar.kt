@@ -1,8 +1,7 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
-import no.nav.sosialhjelp.innsyn.common.VIS_BREVET
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -18,7 +17,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: Cl
     forelopigSvar = ForelopigSvar(true, hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse))
 
     val beskrivelse = "Du har fått et brev om saksbehandlingstiden for søknaden din."
-    log.info("Hendelse: Forelopig svar. $beskrivelse")
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Forelopig svar. $beskrivelse")
     historikk.add(
         Hendelse(
             beskrivelse,

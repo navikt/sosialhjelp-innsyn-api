@@ -11,24 +11,24 @@ import kotlinx.coroutines.runBlocking
 import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.StaticSubjectHandlerImpl
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.config.ClientProperties
-import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravElement
-import no.nav.sosialhjelp.innsyn.domain.DokumentasjonkravResponse
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravElement
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveElement
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.OppgaveElement
-import no.nav.sosialhjelp.innsyn.domain.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.MOTTATT
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.UNDER_BEHANDLING
-import no.nav.sosialhjelp.innsyn.domain.VilkarResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
-import no.nav.sosialhjelp.innsyn.service.tilgangskontroll.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -113,6 +113,11 @@ internal class SaksOversiktControllerTest {
                 any()
             )
         } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @AfterEach

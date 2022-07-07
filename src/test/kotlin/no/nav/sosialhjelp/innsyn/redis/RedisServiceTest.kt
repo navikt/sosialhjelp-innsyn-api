@@ -3,10 +3,10 @@ package no.nav.sosialhjelp.innsyn.redis
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandler
-import no.nav.sosialhjelp.innsyn.common.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.kommuneinfo.ok_kommuneinfo_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
-import no.nav.sosialhjelp.innsyn.responses.ok_kommuneinfo_response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +39,7 @@ internal class RedisServiceTest {
 
         val digisosSak = service.get("key", DigisosSak::class.java)
 
-        assertThat(digisosSak).isNotNull()
+        assertThat(digisosSak).isNotNull
     }
 
     @Test

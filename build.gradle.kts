@@ -139,6 +139,7 @@ dependencies {
     implementation("org.apache.tika:tika-core:${Versions.tika}")
     implementation("org.apache.pdfbox:preflight:${Versions.pdfBox}")
     implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
+    implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")

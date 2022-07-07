@@ -1,19 +1,14 @@
 package no.nav.sosialhjelp.innsyn.rest
 
-import kotlinx.coroutines.runBlocking
 import no.finn.unleash.Unleash
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.DIALOG_UNDERSOKELSE_GRUPPE_1
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.DIALOG_UNDERSOKELSE_GRUPPE_2
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.DIALOG_UNDERSOKELSE_GRUPPE_3
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.DIALOG_UNDERSOKELSE_GRUPPE_4
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
-import no.nav.sosialhjelp.innsyn.client.dialog.DialogException
-import no.nav.sosialhjelp.innsyn.client.dialog.DialogStatus
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService
@@ -26,7 +21,6 @@ import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixTimestampToDate
@@ -46,9 +40,7 @@ class SaksOversiktController(
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: Tilgangskontroll,
-    private val dialogClient: DialogClient,
-    private val clientProperties: ClientProperties,
-    private val unleashClient: Unleash,
+    private val unleashClient: Unleash
 ) {
 
     @GetMapping("/saker")
@@ -73,43 +65,6 @@ class SaksOversiktController(
         log.info("Hentet alle (${responselist.size}) DigisosSaker for bruker.")
 
         return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
-    }
-
-    @GetMapping("/skalViseMeldingerLenke")
-    fun skalViseMeldingerLenke(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
-        tilgangskontroll.sjekkTilgang(token)
-
-        try {
-            val status = runBlocking {
-                dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.removePrefix(BEARER))
-            }
-            return ResponseEntity.ok().body(status.tilgangTilDialog)
-        } catch (e: Exception) { // DialogException
-            log.warn("Status kall mot dialog-api har feilet. Bruker gammel metode som backup.", e)
-        }
-
-        val saker = try {
-            fiksClient.hentAlleDigisosSaker(token)
-        } catch (e: FiksException) {
-            return ResponseEntity.status(503).build()
-        }
-
-        val sisteSoknad = saker.sortedByDescending { it.originalSoknadNAV?.timestampSendt }.firstOrNull()
-
-        return ResponseEntity.ok().body(sisteSoknad?.kommunenummer == clientProperties.meldingerKommunenummer)
-    }
-
-    @GetMapping("/dialogstatus")
-    suspend fun hentDialogStatus(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<DialogStatus> {
-        tilgangskontroll.sjekkTilgang(token)
-
-        return try {
-            val status = dialogClient.hentDialogStatus(SubjectHandlerUtils.getUserIdFromToken(), token.removePrefix(BEARER))
-            ResponseEntity.ok().body(status)
-        } catch (e: DialogException) {
-            log.warn("Status kall mot dialog-api har feilet.", e)
-            ResponseEntity.status(503).build()
-        }
     }
 
     @GetMapping("/sisteSak")

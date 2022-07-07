@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.dialog
+package no.nav.sosialhjelp.innsyn.dialogstatus
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService

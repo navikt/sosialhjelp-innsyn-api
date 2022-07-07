@@ -29,7 +29,7 @@
     "UNLEASH_INSTANCE_ID": "dev-sbs",
     "MELDINGER_KOMMUNENUMMER": "0301",
     "SWAGGER_ENABLED": "true",
-    "DIALOG_ENDPOINT_URL": "https://sosialhjelp.dev.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",
+    "DIALOG_ENDPOINT_URL": "https://digisos.dev.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",
     "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api-dev",
     "CLAMAV_URL": "http://clamav.nais.svc.nais.local/scan",
     "LOGIN_API_IDPORTEN_CLIENTID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625"

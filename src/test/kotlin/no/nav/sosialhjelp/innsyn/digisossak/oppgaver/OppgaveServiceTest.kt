@@ -701,7 +701,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `should skip incorrect config for fagsystemversjon and still return true when wanted version is correctly configured in list`() {
         val model = InternalDigisosSoker()
-        model.fagsystem = Fagsystem("mock-alt", "1.0.0:MOCKVERSJON")
+        model.fagsystem = Fagsystem("mock-alt", "1.0.1:MOCKVERSJON")
         every { eventService.createModel(any(), any()) } returns model
         every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("ugyldigFormatertFagsystemConfig--0.1.1", "mock-alt;1.0.0:MOCKVERSJON")
 
@@ -713,7 +713,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `should return true if fagsystemversjon is newer than configured for that system`() {
         val model = InternalDigisosSoker()
-        model.fagsystem = Fagsystem("mock-alt", "1.2.0:MOCKVERSJON")
+        model.fagsystem = Fagsystem("mock-alt", "1.0.0.3")
         every { eventService.createModel(any(), any()) } returns model
 
         val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)

@@ -66,7 +66,7 @@ internal class OppgaveServiceTest {
         clearAllMocks()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
-        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("socio;10.1.16", "mock-alt;1.0-MOCKVERSJON")
+        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("socio;10.1.16", "mock-alt;1.0.0:MOCKVERSJON")
     }
 
     @Test
@@ -682,12 +682,18 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun `should return false if fagsystemversjon does not equals client properties versjons`() {
+    fun `should return false if fagsystemversjon is older client properties versjons or if fagsystem name is not configured for that version`() {
         val model = InternalDigisosSoker()
-        model.fagsystem = Fagsystem("utdatertSystem", "0.0.3:0")
+        model.fagsystem = Fagsystem("mock-alt", "0.0.3:0")
         every { eventService.createModel(any(), any()) } returns model
 
-        val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+        var response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+
+        assertThat(response).isFalse
+
+        model.fagsystem = Fagsystem("annet system", "1.0.0:MOCKVERSJON")
+
+        response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
 
         assertThat(response).isFalse
     }
@@ -695,12 +701,34 @@ internal class OppgaveServiceTest {
     @Test
     fun `should skip incorrect config for fagsystemversjon and still return true when wanted version is correctly configured in list`() {
         val model = InternalDigisosSoker()
-        model.fagsystem = Fagsystem("mock-alt", "1.0-MOCKVERSJON")
+        model.fagsystem = Fagsystem("mock-alt", "1.0.0:MOCKVERSJON")
         every { eventService.createModel(any(), any()) } returns model
-        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("ugyldigFormatertFagsystemConfig--0.1.1", "mock-alt;1.0-MOCKVERSJON")
+        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("ugyldigFormatertFagsystemConfig--0.1.1", "mock-alt;1.0.0:MOCKVERSJON")
 
         val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
 
         assertThat(response).isTrue
+    }
+
+    @Test
+    fun `should return true if fagsystemversjon is newer than configured for that system`() {
+        val model = InternalDigisosSoker()
+        model.fagsystem = Fagsystem("mock-alt", "1.2.0:MOCKVERSJON")
+        every { eventService.createModel(any(), any()) } returns model
+
+        val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+
+        assertThat(response).isTrue
+    }
+
+    @Test
+    fun `should return false if fagsystemversjon of another fagsystem is newer than configured for another fagsystem`() {
+        val model = InternalDigisosSoker()
+        model.fagsystem = Fagsystem("socio", "1.2.0:MOCKVERSJON")
+        every { eventService.createModel(any(), any()) } returns model
+
+        val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+
+        assertThat(response).isFalse
     }
 }

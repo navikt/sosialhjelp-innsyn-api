@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
+import com.fasterxml.jackson.core.util.VersionUtil
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
@@ -198,10 +199,9 @@ class OppgaveService(
     fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String, token: String): Boolean {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
-        if (model.fagsystem == null) {
+        if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
             return false
         }
-        val fagsystem = model.fagsystem
 
         val fagsystemer = clientProperties.vilkarDokkravFagsystemVersjoner.mapNotNull {
             try {
@@ -212,14 +212,21 @@ class OppgaveService(
                 null
             }
         }
-        // todo fix this null check thing
+
         return fagsystemer
-            .filter { fagsystem?.systemnavn.equals(it.systemnavn) }
-            .any { versionEqualsOrIsNewer(fagsystem?.systemversjon, it.systemversjon) }
+            .filter { model.fagsystem!!.systemnavn.equals(it.systemnavn) }
+            .any { versionEqualsOrIsNewer(model.fagsystem!!.systemversjon!!, it.systemversjon!!) }
     }
 
-    private fun versionEqualsOrIsNewer(systemversjon: String?, godkjentVersjon: String?): Boolean {
-        TODO("Not yet implemented")
+    private fun versionEqualsOrIsNewer(avsender: String, godkjent: String): Boolean {
+        val avsenderVersion = VersionUtil.parseVersion(avsender, null, null)
+        val godkjentVersion = VersionUtil.parseVersion(godkjent, null, null)
+
+        if (avsenderVersion == null || godkjentVersion == null) {
+            return false
+        }
+
+        return avsenderVersion >= godkjentVersion
     }
 
     companion object {

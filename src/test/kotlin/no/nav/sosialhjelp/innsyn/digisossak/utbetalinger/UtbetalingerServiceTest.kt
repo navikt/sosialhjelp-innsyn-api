@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.utbetalinger
+package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -8,13 +8,13 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.digisossak.utbetalinger.UtbetalingerService.Companion.UTBETALING_DEFAULT_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
-import no.nav.sosialhjelp.innsyn.domain.UtbetalingerResponse
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService

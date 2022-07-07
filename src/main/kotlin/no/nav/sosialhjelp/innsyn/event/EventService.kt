@@ -56,13 +56,8 @@ class EventService(
         // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
         model.status = SoknadsStatus.SENDT
 
-
-        if (jsonDigisosSoker?.avsender != null && jsonDigisosSoker.avsender.systemnavn != null && jsonDigisosSoker.avsender.systemnavn.isNotBlank()) {
-            log.info("Avsender er fagsystem ${jsonDigisosSoker.avsender.systemnavn}")
-        }
-
-        if (jsonDigisosSoker?.avsender != null && jsonDigisosSoker.avsender.systemversjon != null && jsonDigisosSoker.avsender.systemversjon.isNotBlank()) {
-            log.info("Avsender har fagsystemversjon ${jsonDigisosSoker.avsender.systemversjon}")
+        if (jsonDigisosSoker?.avsender != null) {
+            model.fagsystem = Fagsystem(jsonDigisosSoker.avsender.systemnavn, jsonDigisosSoker.avsender.systemversjon)
         }
 
         if (originalSoknadNAV?.timestampSendt != null) {

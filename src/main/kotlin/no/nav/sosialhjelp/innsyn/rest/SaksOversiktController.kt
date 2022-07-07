@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogException
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogStatus
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksDetaljerResponse
@@ -22,7 +23,6 @@ import no.nav.sosialhjelp.innsyn.domain.SaksListeResponse
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.service.oppgave.OppgaveService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4

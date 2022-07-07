@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.domain
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import java.util.Date
 
 data class SaksListeResponse(
@@ -17,12 +16,4 @@ data class SaksDetaljerResponse(
     val soknadTittel: String,
     val status: String,
     val antallNyeOppgaver: Int?
-)
-
-data class OrginalJsonSoknadResponse(
-    val jsonSoknad: JsonSoknad
-)
-
-data class OrginalSoknadPdfLinkResponse(
-    val orginalSoknadPdfLink: String
 )

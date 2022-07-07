@@ -1,9 +1,7 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
-import no.nav.sosialhjelp.innsyn.domain.UtbetalingerResponse
-import no.nav.sosialhjelp.innsyn.service.utbetalinger.UtbetalingerService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING

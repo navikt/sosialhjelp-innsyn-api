@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.utbetalinger
+package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -6,9 +6,7 @@ import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.ManedUtbetaling
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
-import no.nav.sosialhjelp.innsyn.domain.UtbetalingerResponse
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.flatMapParallel
@@ -22,8 +20,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.util.Locale
-
-const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
 
 @Component
 class UtbetalingerService(
@@ -146,5 +142,7 @@ class UtbetalingerService(
 
     companion object {
         private val log by logger()
+
+        const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
     }
 }

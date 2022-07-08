@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.innsyn
+package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad

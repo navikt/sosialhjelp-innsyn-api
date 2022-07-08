@@ -65,7 +65,6 @@ class SaksOversiktController(
             }
             .sortedByDescending { it.sistOppdatert }
 
-
         log.info("Hentet alle (${responselist.size}) DigisosSaker for bruker.")
 
         if (unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false)) {

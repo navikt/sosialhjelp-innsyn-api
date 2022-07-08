@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.innsyn
+package no.nav.sosialhjelp.innsyn.event
 
 import io.mockk.clearAllMocks
 import io.mockk.every

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.saksoversikt
 
 import io.mockk.Called
 import io.mockk.Runs

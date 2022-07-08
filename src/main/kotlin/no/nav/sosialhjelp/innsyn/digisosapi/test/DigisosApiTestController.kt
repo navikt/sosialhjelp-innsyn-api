@@ -1,8 +1,8 @@
-package no.nav.sosialhjelp.innsyn.digisosapitest
+package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.objectMapper

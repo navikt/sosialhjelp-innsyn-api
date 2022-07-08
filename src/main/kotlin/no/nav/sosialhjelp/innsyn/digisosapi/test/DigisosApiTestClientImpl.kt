@@ -1,14 +1,14 @@
-package no.nav.sosialhjelp.innsyn.digisosapitest
+package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
-import no.nav.sosialhjelp.innsyn.client.fiks.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
-import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.digisosapitest.dto.FilOpplastingResponse
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
+import no.nav.sosialhjelp.innsyn.digisosapi.VedleggMetadata
+import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper

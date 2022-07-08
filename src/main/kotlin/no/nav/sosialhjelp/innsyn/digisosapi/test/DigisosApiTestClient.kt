@@ -1,6 +1,6 @@
-package no.nav.sosialhjelp.innsyn.digisosapitest
+package no.nav.sosialhjelp.innsyn.digisosapi.test
 
-import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 
 interface DigisosApiTestClient {

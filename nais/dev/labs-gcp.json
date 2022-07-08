@@ -34,7 +34,8 @@
     "TOKEN_X_CLIENT_ID": "labs-gcp:teamdigisos:sosialhjelp-innsyn-api",
     "TOKEN_X_PRIVATE_JWK": "generateRSA",
     "DIALOG_ENDPOINT_URL": "https://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/dialog-api/status",
-    "MASKINPORTEN_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/well-known/maskinporten"
+    "MASKINPORTEN_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/well-known/maskinporten",
+    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
   },
   "minReplicas": "1",
   "maxReplicas": "1",

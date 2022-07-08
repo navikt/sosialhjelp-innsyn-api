@@ -35,4 +35,6 @@ class ClientProperties {
 
     lateinit var dialogEndpointUrl: String
     lateinit var dialogAudience: String
+
+    lateinit var vilkarDokkravFagsystemVersjoner: List<String>
 }

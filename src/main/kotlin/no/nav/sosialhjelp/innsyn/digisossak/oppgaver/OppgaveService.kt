@@ -1,7 +1,10 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
+import com.fasterxml.jackson.core.util.VersionUtil
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
+import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -16,6 +19,7 @@ class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksClient: FiksClient,
+    private val clientProperties: ClientProperties,
 ) {
 
     fun hentOppgaver(fiksDigisosId: String, token: String): List<OppgaveResponse> {
@@ -190,6 +194,39 @@ class OppgaveService(
             }
             .filter { erAlleredeLastetOpp(it, ettersendteVedlegg) }
             .toList().isNotEmpty()
+    }
+
+    fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String, token: String): Boolean {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
+        if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
+            return false
+        }
+
+        val fagsystemer = clientProperties.vilkarDokkravFagsystemVersjoner.mapNotNull {
+            try {
+                val split = it.split(";")
+                Fagsystem(split[0], split[1])
+            } catch (e: IndexOutOfBoundsException) {
+                log.error("Kan ikke splitte fagsystem-versjon i app config $it")
+                null
+            }
+        }
+
+        return fagsystemer
+            .filter { model.fagsystem!!.systemnavn.equals(it.systemnavn) }
+            .any { versionEqualsOrIsNewer(model.fagsystem!!.systemversjon!!, it.systemversjon!!) }
+    }
+
+    private fun versionEqualsOrIsNewer(avsender: String, godkjent: String): Boolean {
+        val avsenderVersion = VersionUtil.parseVersion(avsender, null, null)
+        val godkjentVersion = VersionUtil.parseVersion(godkjent, null, null)
+
+        if (avsenderVersion == null || godkjentVersion == null) {
+            return false
+        }
+
+        return avsenderVersion >= godkjentVersion
     }
 
     companion object {

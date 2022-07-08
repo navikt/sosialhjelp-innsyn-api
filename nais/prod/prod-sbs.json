@@ -30,7 +30,8 @@
     "DIALOG_ENDPOINT_URL": "https://www.nav.no/sosialhjelp/meldinger-api/system/brukerstatus",
     "DIALOG_AUDIENCE": "prod-gcp:teamdigisos:sosialhjelp-dialog-api",
     "CLAMAV_URL": "http://clamav.nais.svc.nais.local/scan",
-    "LOGIN_API_IDPORTEN_CLIENTID": "bd520e59-6e01-4669-a7c8-f68fa2cac362"
+    "LOGIN_API_IDPORTEN_CLIENTID": "bd520e59-6e01-4669-a7c8-f68fa2cac362",
+    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "socio;10.1.16"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

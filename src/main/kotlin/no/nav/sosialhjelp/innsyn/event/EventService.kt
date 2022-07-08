@@ -17,6 +17,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -55,12 +56,8 @@ class EventService(
         // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
         model.status = SoknadsStatus.SENDT
 
-        if (jsonDigisosSoker?.avsender != null && jsonDigisosSoker.avsender.systemnavn != null && jsonDigisosSoker.avsender.systemnavn.isNotBlank()) {
-            log.info("Avsender er fagsystem ${jsonDigisosSoker.avsender.systemnavn}")
-        }
-
-        if (jsonDigisosSoker?.avsender != null && jsonDigisosSoker.avsender.systemversjon != null && jsonDigisosSoker.avsender.systemversjon.isNotBlank()) {
-            log.info("Avsender har fagsystemversjon ${jsonDigisosSoker.avsender.systemversjon}")
+        if (jsonDigisosSoker?.avsender != null) {
+            model.fagsystem = Fagsystem(jsonDigisosSoker.avsender.systemnavn, jsonDigisosSoker.avsender.systemversjon)
         }
 
         if (originalSoknadNAV?.timestampSendt != null) {

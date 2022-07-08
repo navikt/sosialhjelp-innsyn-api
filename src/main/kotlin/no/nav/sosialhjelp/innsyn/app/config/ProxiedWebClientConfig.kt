@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.config
+package no.nav.sosialhjelp.innsyn.app.config
 
 import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.proxiedHttpClient
 import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.unproxiedHttpClient

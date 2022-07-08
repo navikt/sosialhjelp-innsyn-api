@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.rest
+package no.nav.sosialhjelp.innsyn.saksoversikt
 
 import io.mockk.Called
 import io.mockk.Runs
@@ -7,7 +7,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
@@ -38,9 +37,8 @@ internal class SaksOversiktControllerTest {
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val tilgangskontroll: Tilgangskontroll = mockk()
-    private val unleashClient: Unleash = mockk()
 
-    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, unleashClient)
+    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()

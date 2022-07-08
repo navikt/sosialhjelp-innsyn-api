@@ -1,7 +1,7 @@
-package no.nav.sosialhjelp.innsyn.client.maskinporten
+package no.nav.sosialhjelp.innsyn.app.maskinporten
 
 import com.nimbusds.jwt.SignedJWT
-import no.nav.sosialhjelp.innsyn.client.maskinporten.dto.MaskinportenResponse
+import no.nav.sosialhjelp.innsyn.app.maskinporten.dto.MaskinportenResponse
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap

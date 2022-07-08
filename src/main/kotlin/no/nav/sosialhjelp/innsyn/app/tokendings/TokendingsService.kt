@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.tokendings
+package no.nav.sosialhjelp.innsyn.app.tokendings
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm

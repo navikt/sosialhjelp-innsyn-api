@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.maskinporten
+package no.nav.sosialhjelp.innsyn.app.maskinporten
 
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper

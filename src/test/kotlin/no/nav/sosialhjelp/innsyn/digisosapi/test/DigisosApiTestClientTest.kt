@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.digisosapi.test
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
+import no.nav.sosialhjelp.innsyn.app.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.SakWrapper

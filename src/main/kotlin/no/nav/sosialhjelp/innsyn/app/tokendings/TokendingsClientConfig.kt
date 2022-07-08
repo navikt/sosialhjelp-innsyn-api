@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.tokendings
+package no.nav.sosialhjelp.innsyn.app.tokendings
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.kotlin.utils.logger

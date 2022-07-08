@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.digisosapitest.dto
+package no.nav.sosialhjelp.innsyn.digisosapi.test.dto
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 

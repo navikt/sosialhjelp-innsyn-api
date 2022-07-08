@@ -11,7 +11,7 @@ import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach

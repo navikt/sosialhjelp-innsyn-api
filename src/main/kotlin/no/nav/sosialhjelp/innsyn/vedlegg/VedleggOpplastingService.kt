@@ -7,9 +7,9 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.LOGGE_MISMATCH_FILNAVN
-import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientFileExistsException
+import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper

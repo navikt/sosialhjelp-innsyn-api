@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.fiks
+package no.nav.sosialhjelp.innsyn.digisosapi
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.micrometer.core.instrument.Counter

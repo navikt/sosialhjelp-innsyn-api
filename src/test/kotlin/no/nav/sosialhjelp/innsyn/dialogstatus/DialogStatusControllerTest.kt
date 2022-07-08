@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
@@ -24,8 +25,9 @@ internal class DialogStatusControllerTest {
     private val tilgangskontroll: Tilgangskontroll = mockk()
     private val dialogClient: DialogClient = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
+    private val unleash: Unleash = mockk()
 
-    private val controller = DialogStatusController(fiksClient, tilgangskontroll, dialogClient, clientProperties)
+    private val controller = DialogStatusController(fiksClient, tilgangskontroll, dialogClient, clientProperties, unleash)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()

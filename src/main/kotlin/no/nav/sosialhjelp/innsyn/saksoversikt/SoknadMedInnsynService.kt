@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.service.innsyn
+package no.nav.sosialhjelp.innsyn.saksoversikt
 
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.isNewerThanMonths

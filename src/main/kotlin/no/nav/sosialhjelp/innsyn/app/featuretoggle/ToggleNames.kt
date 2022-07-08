@@ -11,3 +11,5 @@ const val DIALOG_UNDERSOKELSE_GRUPPE_1 = "sosialhjelp.innsyn.dialog-undersokelse
 const val DIALOG_UNDERSOKELSE_GRUPPE_2 = "sosialhjelp.innsyn.dialog-undersokelse-gruppe-2"
 const val DIALOG_UNDERSOKELSE_GRUPPE_3 = "sosialhjelp.innsyn.dialog-undersokelse-gruppe-3"
 const val DIALOG_UNDERSOKELSE_GRUPPE_4 = "sosialhjelp.innsyn.dialog-undersokelse-gruppe-4"
+
+const val FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER = "sosialhjelp.innsyn.fagsystem-med-papirsoknader-loggmelding"

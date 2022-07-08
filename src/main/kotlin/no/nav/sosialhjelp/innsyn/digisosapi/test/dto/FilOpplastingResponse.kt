@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.digisosapitest.dto
+package no.nav.sosialhjelp.innsyn.digisosapi.test.dto
 
 data class FilOpplastingResponse(
     val filnavn: String,

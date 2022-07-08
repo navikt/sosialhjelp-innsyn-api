@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.fiks
+package no.nav.sosialhjelp.innsyn.digisosapi
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID

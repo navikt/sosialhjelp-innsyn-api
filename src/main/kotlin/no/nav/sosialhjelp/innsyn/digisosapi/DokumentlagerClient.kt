@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.fiks
+package no.nav.sosialhjelp.innsyn.digisosapi
 
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException

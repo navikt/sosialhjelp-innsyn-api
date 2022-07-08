@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.service.innsyn
 
-import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.isNewerThanMonths
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import org.springframework.stereotype.Component

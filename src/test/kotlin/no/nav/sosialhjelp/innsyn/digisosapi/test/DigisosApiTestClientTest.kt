@@ -1,12 +1,12 @@
-package no.nav.sosialhjelp.innsyn.digisosapitest
+package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
-import no.nav.sosialhjelp.innsyn.digisosapitest.dto.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.digisosapitest.dto.SakWrapper
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
+import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.SakWrapper
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import okhttp3.mockwebserver.MockResponse

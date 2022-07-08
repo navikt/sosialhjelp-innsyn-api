@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.fiks
+package no.nav.sosialhjelp.innsyn.digisosapi
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component

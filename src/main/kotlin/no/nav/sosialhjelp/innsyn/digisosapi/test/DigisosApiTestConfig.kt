@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.digisosapitest
+package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils

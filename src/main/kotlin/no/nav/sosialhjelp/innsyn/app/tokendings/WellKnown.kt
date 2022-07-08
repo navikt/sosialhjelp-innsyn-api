@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.tokendings
+package no.nav.sosialhjelp.innsyn.app.tokendings
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

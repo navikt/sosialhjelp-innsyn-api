@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.maskinporten
+package no.nav.sosialhjelp.innsyn.app.maskinporten
 
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm

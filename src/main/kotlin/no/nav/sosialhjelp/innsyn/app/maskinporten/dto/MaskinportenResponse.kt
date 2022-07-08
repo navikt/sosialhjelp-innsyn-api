@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.maskinporten.dto
+package no.nav.sosialhjelp.innsyn.app.maskinporten.dto
 
 data class MaskinportenResponse(
     val access_token: String,

@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.digisosapi
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.client.maskinporten.MaskinportenClient
+import no.nav.sosialhjelp.innsyn.app.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION

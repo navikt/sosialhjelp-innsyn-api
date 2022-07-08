@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.client.tokendings
+package no.nav.sosialhjelp.innsyn.app.tokendings
 
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler

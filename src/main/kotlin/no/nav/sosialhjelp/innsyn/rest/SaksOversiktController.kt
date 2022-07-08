@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.innsyn.app.featuretoggle.DIALOG_UNDERSOKELSE_GRUPPE_1
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.DIALOG_UNDERSOKELSE_GRUPPE_2
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.DIALOG_UNDERSOKELSE_GRUPPE_3
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.DIALOG_UNDERSOKELSE_GRUPPE_4
+import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogClient
 import no.nav.sosialhjelp.innsyn.client.dialog.DialogException
@@ -70,9 +71,21 @@ class SaksOversiktController(
                     IntegrationUtils.KILDE_INNSYN_API
                 )
             }
+            .sortedByDescending { it.sistOppdatert }
+
         log.info("Hentet alle (${responselist.size}) DigisosSaker for bruker.")
 
-        return ResponseEntity.ok().body(responselist.sortedByDescending { it.sistOppdatert })
+        if (unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false)) {
+            if (saker.isNotEmpty() && oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(
+                    saker[0].fiksDigisosId,
+                    token
+                )
+            ) {
+                log.info("Kommune med kommunenummer ${saker[0].kommunenummer} har fagsystemversjon som støtter innsyn i papirsøknader")
+            }
+        }
+
+        return ResponseEntity.ok().body(responselist)
     }
 
     @GetMapping("/skalViseMeldingerLenke")

@@ -2,7 +2,6 @@
   "applicationName": "sosialhjelp-innsyn-api",
   "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api.dev.nav.no/sosialhjelp/innsyn-api",
     "https://www-q0.dev.nav.no/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
@@ -46,5 +45,6 @@
   "isGcp": false,
   "isMock": false,
   "tokenXEnabled": true,
-  "maskinportenEnabled": true
+  "maskinportenEnabled": true,
+  "idportenEnabled": true
 }

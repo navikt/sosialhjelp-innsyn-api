@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.app.cors
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.sosialhjelp.innsyn.utils.MiljoUtils
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

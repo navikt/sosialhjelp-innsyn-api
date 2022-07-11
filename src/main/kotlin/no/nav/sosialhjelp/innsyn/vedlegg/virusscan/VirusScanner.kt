@@ -1,9 +1,9 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 
 import kotlinx.coroutines.runBlocking
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
-import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.beans.factory.annotation.Value

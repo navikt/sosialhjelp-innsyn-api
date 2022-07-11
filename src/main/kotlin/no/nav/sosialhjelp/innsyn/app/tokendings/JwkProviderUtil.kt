@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.app.tokendings
 
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
-import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.unproxiedHttpClient
+import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.unproxiedHttpClient
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ReactorClientHttpConnector

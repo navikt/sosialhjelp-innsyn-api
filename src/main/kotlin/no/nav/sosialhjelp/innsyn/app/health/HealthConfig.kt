@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.app.health
 
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.sosialhjelp.innsyn.utils.MiljoUtils
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.selftest.DependencyCheck
 import no.nav.sosialhjelp.selftest.SelftestService
 import org.springframework.context.annotation.Bean

@@ -26,6 +26,8 @@ object MiljoUtils {
         }
     }
 
+    // comment
+
     private fun getAppName(): String {
         return getenv(NAIS_APP_NAME, "sosialhjelp-innsyn-api")
     }

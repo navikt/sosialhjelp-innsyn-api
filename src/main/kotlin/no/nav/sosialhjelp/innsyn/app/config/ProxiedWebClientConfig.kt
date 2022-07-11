@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.app.config
 
-import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.proxiedHttpClient
-import no.nav.sosialhjelp.innsyn.utils.HttpClientUtil.unproxiedHttpClient
+import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.proxiedHttpClient
+import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.unproxiedHttpClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

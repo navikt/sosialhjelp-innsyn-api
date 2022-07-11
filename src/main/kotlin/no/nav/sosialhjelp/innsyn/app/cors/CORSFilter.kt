@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app.cors
 
-import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils.isRunningInProd
 import org.springframework.stereotype.Component
 import javax.servlet.Filter
 import javax.servlet.FilterChain

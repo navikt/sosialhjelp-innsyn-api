@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.utils
+package no.nav.sosialhjelp.innsyn.app.config
 
 import io.netty.resolver.DefaultAddressResolverGroup
 import org.springframework.http.client.reactive.ReactorClientHttpConnector

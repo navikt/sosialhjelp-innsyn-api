@@ -6,9 +6,9 @@ import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.TOKENDINGS_CACHE_KEY_PREFIX
-import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.kotlin.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClientResponseException

@@ -9,7 +9,7 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import no.nav.sosialhjelp.innsyn.utils.MiljoUtils
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import java.time.Instant
 import java.util.Date
 import java.util.UUID

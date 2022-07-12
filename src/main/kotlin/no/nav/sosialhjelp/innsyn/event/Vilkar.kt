@@ -74,4 +74,7 @@ private fun MutableList<Vilkar>.oppdaterEllerLeggTilVilkar(hendelse: JsonVilkar,
 private fun Vilkar.oppdaterFelter(hendelse: JsonVilkar) {
     datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime()
     beskrivelse = hendelse.beskrivelse
+    tittel = hendelse.tittel
+    status = Oppgavestatus.valueOf(hendelse.status.value())
+    utbetalingsReferanse = hendelse.utbetalingsreferanse
 }

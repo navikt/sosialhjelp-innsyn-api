@@ -44,5 +44,6 @@
   "isGcp": false,
   "isMock": false,
   "tokenXEnabled": true,
-  "maskinportenEnabled": true
+  "maskinportenEnabled": true,
+  "idportenEnabled": false
 }

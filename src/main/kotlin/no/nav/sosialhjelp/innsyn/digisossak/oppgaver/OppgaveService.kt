@@ -213,15 +213,8 @@ class OppgaveService(
             }
         }
 
-        val fagsystemFilter = fagsystemer
+        return fagsystemer
             .filter { model.fagsystem!!.systemnavn.equals(it.systemnavn) }
-            .toList()
-
-        if (fagsystemFilter.isNotEmpty()) {
-            log.info("Match på fagsystem med dokumentasjonkrav og vilkår ${fagsystemFilter[0].systemnavn}:${fagsystemFilter[0].systemversjon}")
-        }
-
-        return fagsystemFilter
             .any { versionEqualsOrIsNewer(model.fagsystem!!.systemversjon!!, it.systemversjon!!) }
     }
 

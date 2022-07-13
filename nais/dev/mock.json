@@ -36,7 +36,7 @@
     "TOKEN_X_PRIVATE_JWK": "generateRSA",
     "DIALOG_ENDPOINT_URL": "http://sosialhjelp-dialog-api-mock/sosialhjelp/meldinger-api/system/brukerstatus",
     "MASKINPORTEN_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/maskinporten",
-    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
+    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
   },
   "minReplicas": "1",
   "maxReplicas": "1",

@@ -74,8 +74,6 @@ spec:
       {{else}}
         []
       {{/each}}
-        - application: "sosialhjelp-fss-proxy"
-          cluster: {{fssProxyClusterName}}
       {{#unless isMock}}
         - application: clamav
           namespace: clamav

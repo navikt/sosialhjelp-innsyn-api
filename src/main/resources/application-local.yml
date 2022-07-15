@@ -26,9 +26,7 @@ client:
   fiks_integrasjonid_kommune: ${INTEGRASJONSID_FIKS_KOMMUNE}
   fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS}
   fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE}
-  norg_proxy_url: ${NORG_PROXY_URL:norg_endpoint_url}
-  fss_proxy_audience: ${FSS_PROXY_AUDIENCE:fss-proxy-audience}
-  fss_proxy_ping_url: ${FSS_PROXY_PING_URL:fss_proxy_ping_url}
+  norg_url: ${NORG_URL:norg_endpoint_url}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL:pdl_endpoint_url}
   pdl_audience: ${PDL_AUDIENCE:dummyAudience}
   unleash_url: ${UNLEASH_API_URL:https://unleash.nais.io/api}

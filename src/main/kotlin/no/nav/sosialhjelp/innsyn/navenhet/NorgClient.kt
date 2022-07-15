@@ -1,21 +1,14 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
-import kotlinx.coroutines.runBlocking
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getToken
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
-import no.nav.sosialhjelp.innsyn.app.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.redis.NAVENHET_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -31,8 +24,6 @@ interface NorgClient {
 class NorgClientImpl(
     private val norgWebClient: WebClient,
     private val redisService: RedisService,
-    private val clientProperties: ClientProperties,
-    private val tokendingsService: TokendingsService
 ) : NorgClient {
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
@@ -40,25 +31,21 @@ class NorgClientImpl(
     }
 
     private fun hentFraNorg(enhetsnr: String): NavEnhet {
-        log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2 (via fss-proxy)")
-        val tokenXtoken = runBlocking {
-            tokendingsService.exchangeToken(getUserIdFromToken(), getToken(), clientProperties.fssProxyAudience)
-        }
+        log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
         val navEnhet: NavEnhet = norgWebClient.get()
             .uri("/enhet/{enhetsnr}", enhetsnr)
             .accept(MediaType.APPLICATION_JSON)
             .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-            .header(AUTHORIZATION, BEARER + tokenXtoken)
             .retrieve()
             .bodyToMono<NavEnhet>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Noe feilet ved kall mot NORG2 (via fss-proxy) ${e.statusCode}", e)
+                log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
                 NorgException(e.message, e)
             }
             .block()
             ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
 
-        log.info("Hentet NAV-enhet $enhetsnr fra NORG2 (via fss-proxy)")
+        log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
 
         return navEnhet
             .also { lagreTilCache(enhetsnr, it) }

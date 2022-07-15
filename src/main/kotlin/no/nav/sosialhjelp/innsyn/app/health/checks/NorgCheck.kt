@@ -12,27 +12,27 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 
 @Component
-class FssProxyCheck(
+class NorgCheck(
     webClientBuilder: WebClient.Builder,
     clientProperties: ClientProperties
 ) : DependencyCheck {
 
     override val type = DependencyType.REST
-    override val name = "FssProxy"
-    override val address = clientProperties.fssProxyPingUrl
+    override val name = "Norg"
+    override val address = clientProperties.norgUrl
     override val importance = Importance.WARNING
 
-    private val fssProxyWebClient = webClientBuilder
+    private val norgWebClient = webClientBuilder
         .clientConnector(HttpClientUtil.getUnproxiedReactorClientHttpConnector())
-        .baseUrl(clientProperties.fssProxyPingUrl)
         .build()
 
     override fun doCheck() {
-        fssProxyWebClient.options()
+        norgWebClient.get()
+            .uri("$address/kodeverk/EnhetstyperNorg")
             .retrieve()
             .bodyToMono<String>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Ping - feilet mot fss-proxy ${e.statusCode}", e)
+                log.warn("Ping - feilet mot Norg ${e.statusCode}", e)
                 RuntimeException(e.message, e)
             }
             .block()

@@ -63,7 +63,7 @@ class SaksOversiktController(
             if (saker.isNotEmpty() && oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(
                     saker[0].fiksDigisosId,
                     token
-                )
+                ) && oppgaveService.sakHarStatusMottattOgIkkeHattSendt(saker[0].fiksDigisosId, token)
             ) {
                 log.info("Kommune med kommunenummer ${saker[0].kommunenummer} har fagsystemversjon som støtter innsyn i papirsøknader")
             }

@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
+import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
@@ -730,5 +731,28 @@ internal class OppgaveServiceTest {
         val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
 
         assertThat(response).isFalse
+    }
+
+    @Test
+    fun `should return true if soknad har mottat-status og ikke har hatt SENDT-status`() {
+        val model = InternalDigisosSoker()
+        model.status = SoknadsStatus.MOTTATT
+        model.historikk.add(Hendelse("Søknaden kommer kanskje fra papirsøknad", LocalDateTime.now(), null))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123", token)
+        assertThat(sakHarStatusMottattOgIkkeHattSendt).isTrue
+    }
+
+    @Test
+    fun `should return false if soknad har mottat-status og har hatt SENDT-status`() {
+        val model = InternalDigisosSoker()
+        model.status = SoknadsStatus.MOTTATT
+        model.historikk.add(Hendelse("Random hendelse", LocalDateTime.now(), null))
+        model.historikk.add(Hendelse("Søknaden med vedlegg er sendt til test kommune", LocalDateTime.now(), null))
+        every { eventService.createModel(any(), any()) } returns model
+
+        val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123", token)
+        assertThat(sakHarStatusMottattOgIkkeHattSendt).isFalse
     }
 }

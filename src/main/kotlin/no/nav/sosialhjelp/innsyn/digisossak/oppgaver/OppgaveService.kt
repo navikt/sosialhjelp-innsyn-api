@@ -229,6 +229,16 @@ class OppgaveService(
         return avsenderVersion >= godkjentVersion
     }
 
+    fun sakHarStatusMottattOgIkkeHattSendt(fiksDigisosId: String, token: String): Boolean {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val model = eventService.createModel(digisosSak, token)
+        if (model.status == null || model.status != SoknadsStatus.MOTTATT) {
+            return false
+        }
+
+        return model.historikk.filter { hendelse -> hendelse.tittel.startsWith("Søknaden med vedlegg er sendt til") }.isEmpty()
+    }
+
     companion object {
         private val log by logger()
     }

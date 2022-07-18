@@ -1,9 +1,9 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 
 import kotlinx.coroutines.runBlocking
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
-import no.nav.sosialhjelp.innsyn.utils.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.beans.factory.annotation.Value
@@ -62,7 +62,7 @@ class VirusScanner(
                 return false
             }
             val scanResult = scanResults[0]
-            log.debug("Fikk scan result {}", scanResult)
+            log.debug("Fikk scan result $scanResult")
             if (Result.OK == scanResult.result) {
                 log.info("Ingen virus i fil (${data.size} bytes)")
                 return false

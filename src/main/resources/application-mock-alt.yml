@@ -36,9 +36,7 @@ client:
   fiks_integrasjonid_kommune: ${INTEGRASJONSID_FIKS_KOMMUNE:id2}
   fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS:pw1}
   fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE:pw2}
-  norg_proxy_url: ${NORG_PROXY_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/norg_endpoint_url/}
-  fss_proxy_audience: ${FSS_PROXY_AUDIENCE:fss-proxy_audience}
-  fss_proxy_ping_url: ${FSS_PROXY_PING_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/fss-proxy/ping}
+  norg_url: ${NORG_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/norg_endpoint_url/}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/pdl_endpoint_url}
   pdl_audience: ${PDL_AUDIENCE:dummyAudience}
   unleash_url: ${UNLEASH_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/internal/unleash}
@@ -49,6 +47,8 @@ client:
   tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK:generateRSA}
   dialog_endpoint_url: ${DIALOG_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/dialog-api/status}
   dialog_audience: ${DIALOG_AUDIENCE:dialog_audience}
+  vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
+
 
 #Maskinporten
 maskinporten_clientid: maskinporten_clientid

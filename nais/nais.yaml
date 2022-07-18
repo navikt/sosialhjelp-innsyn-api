@@ -36,6 +36,22 @@ spec:
       consumes:
         - name: "ks:fiks"
 {{/if}}
+{{#if idportenEnabled}}
+  idporten:
+    enabled: true
+    accessTokenLifetime: 3600 #default
+    clientURI: https://www.nav.no #default
+    frontchannelLogoutPath: /oauth2/logout #default
+    integrationType: api_klient
+    postLogoutRedirectURIs:
+      - https://www.nav.no #default
+    redirectPath: /oauth2/callback #default
+    scopes:
+     - openid
+     - profile
+     - ks:fiks
+    sessionLifetime: 7200 #default
+{{/if}}
 {{#if isGcp}}
   accessPolicy:
     inbound:
@@ -58,8 +74,6 @@ spec:
       {{else}}
         []
       {{/each}}
-        - application: "sosialhjelp-fss-proxy"
-          cluster: {{fssProxyClusterName}}
       {{#unless isMock}}
         - application: clamav
           namespace: clamav

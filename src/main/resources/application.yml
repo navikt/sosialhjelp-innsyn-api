@@ -47,9 +47,7 @@ client:
   fiks_integrasjonid_kommune: ${INTEGRASJONSID_FIKS_KOMMUNE}
   fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS}
   fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE}
-  norg_proxy_url: ${NORG_PROXY_URL}
-  fss_proxy_audience: ${FSS_PROXY_AUDIENCE}
-  fss_proxy_ping_url: ${FSS_PROXY_PING_URL}
+  norg_url: ${NORG_URL}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL}
   pdl_audience: ${PDL_AUDIENCE}
   unleash_url: ${UNLEASH_API_URL}
@@ -60,6 +58,8 @@ client:
   tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK}
   dialog_endpoint_url: ${DIALOG_ENDPOINT_URL}
   dialog_audience: ${DIALOG_AUDIENCE}
+  vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
+
 
 #Maskinporten
 maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}

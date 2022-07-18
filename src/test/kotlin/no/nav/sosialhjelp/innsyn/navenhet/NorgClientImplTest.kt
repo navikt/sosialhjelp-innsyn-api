@@ -3,15 +3,12 @@ package no.nav.sosialhjelp.innsyn.navenhet
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.Runs
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.client.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import okhttp3.mockwebserver.MockResponse
@@ -29,9 +26,7 @@ internal class NorgClientImplTest {
     private val mockWebServer = MockWebServer()
     private val webClient: WebClient = WebClient.create(mockWebServer.url("/").toString())
     private val redisService: RedisService = mockk()
-    private val clientProperties: ClientProperties = mockk()
-    private val tokendingsService: TokendingsService = mockk()
-    private val norgClient = NorgClientImpl(webClient, redisService, clientProperties, tokendingsService)
+    private val norgClient = NorgClientImpl(webClient, redisService)
 
     private val enhetsnr = "8888"
 
@@ -41,11 +36,8 @@ internal class NorgClientImplTest {
 
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { clientProperties.fssProxyAudience } returns "fssProxyAudience"
-
         every { redisService.get(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
-        coEvery { tokendingsService.exchangeToken(any(), any(), any()) } returns "tokenXtoken"
     }
 
     @AfterEach

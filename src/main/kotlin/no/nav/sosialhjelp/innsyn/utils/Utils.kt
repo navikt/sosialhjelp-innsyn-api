@@ -145,14 +145,6 @@ fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableF
     )
 }
 
-fun getenv(key: String, default: String): String {
-    return try {
-        System.getenv(key)
-    } catch (e: Exception) {
-        default
-    }
-}
-
 suspend fun <A, B> Iterable<A>.flatMapParallel(f: suspend (A) -> List<B>): List<B> = coroutineScope {
     map {
         async {

@@ -11,18 +11,18 @@ object Versions {
     const val logback = "1.2.11"
     const val logstash = "7.2"
     const val filformat = "1.2022.04.29-13.11-459bee049a7a"
-    const val micrometerRegistry = "1.9.1"
+    const val micrometerRegistry = "1.9.2"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "2.1.1"
+    const val tokenValidation = "2.1.2"
     const val jackson = "2.13.3"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.11.0"
     const val fileUpload = "1.4"
     const val tika = "2.4.1"
-    const val pdfBox = "2.0.24"
+    const val pdfBox = "2.0.26"
     const val fiksKryptering = "1.1.2"
-    const val lettuce = "6.1.8.RELEASE"
+    const val lettuce = "6.2.0.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "4.4.1"
     const val springdoc = "1.6.9"
@@ -43,8 +43,8 @@ object Versions {
 }
 
 plugins {
-    kotlin("jvm") version "1.7.0"
-    kotlin("plugin.spring") version "1.7.0"
+    kotlin("jvm") version "1.7.10"
+    kotlin("plugin.spring") version "1.7.10"
     id("org.springframework.boot") version "2.7.1"
     id("com.github.ben-manes.versions") version "0.42.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"

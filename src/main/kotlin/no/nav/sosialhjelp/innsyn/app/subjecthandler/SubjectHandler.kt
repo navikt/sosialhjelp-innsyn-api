@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.app.subjecthandler
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 
@@ -28,21 +29,20 @@ class AzureAdSubjectHandlerImpl(
         }
 
     override fun getUserIdFromToken(): String {
-        val pid: String? = tokenValidationContext.getClaims(ISSUER).getStringClaim(PID)
-        val sub: String? = tokenValidationContext.getClaims(ISSUER).subject
+        val pid: String? = tokenValidationContext.getClaims(SELVBETJENING).getStringClaim(PID)
+        val sub: String? = tokenValidationContext.getClaims(SELVBETJENING).subject
         return pid ?: sub ?: throw RuntimeException("Could not find any userId for token in pid or sub claim")
     }
 
     override fun getToken(): String {
-        return tokenValidationContext.getJwtToken(ISSUER).tokenAsString
+        return tokenValidationContext.getJwtToken(SELVBETJENING).tokenAsString
     }
 
     override fun getClientId(): String {
-        return tokenValidationContext.getClaims(ISSUER).getStringClaim(CLIENT_ID) ?: DEFAULT_CLIENT_ID
+        return tokenValidationContext.getClaims(SELVBETJENING).getStringClaim(CLIENT_ID) ?: DEFAULT_CLIENT_ID
     }
 
     companion object {
-        private const val ISSUER = "selvbetjening"
         private const val PID = "pid"
         private const val CLIENT_ID = "client_id"
         private const val DEFAULT_CLIENT_ID = "clientId"

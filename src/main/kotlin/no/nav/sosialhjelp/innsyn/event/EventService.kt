@@ -17,19 +17,23 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
-import no.nav.sosialhjelp.innsyn.service.innsyn.InnsynService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
+import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 @Component
 class EventService(
@@ -50,6 +54,10 @@ class EventService(
 
         // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
         model.status = SoknadsStatus.SENDT
+
+        if (jsonDigisosSoker?.avsender != null) {
+            model.fagsystem = Fagsystem(jsonDigisosSoker.avsender.systemnavn, jsonDigisosSoker.avsender.systemversjon)
+        }
 
         if (originalSoknadNAV?.timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
@@ -73,6 +81,45 @@ class EventService(
         return model
     }
 
+    fun logTekniskSperre(
+        jsonDigisosSoker: JsonDigisosSoker?,
+        model: InternalDigisosSoker,
+        digisosSak: DigisosSak,
+        log: Logger,
+    ) {
+        model.utbetalinger
+            .filter { it.forfallsDato?.isBefore(LocalDate.now().minusDays(1)) ?: false }
+            .forEach { utbetaling ->
+                val sluttdato = utbetaling.utbetalingsDato ?: utbetaling.stoppetDato ?: LocalDate.now()
+                val forfallsDato = utbetaling.forfallsDato
+                if (forfallsDato != null) {
+                    if (forfallsDato.isBefore(sluttdato.minusDays(1))) {
+                        val eventListe = mutableListOf<String>()
+                        var opprettelsesdato = LocalDate.now()
+                        jsonDigisosSoker?.hendelser?.filterIsInstance(JsonUtbetaling::class.java)
+                            ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
+                            ?.forEach {
+                                eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
+                                opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
+                            }
+                        val startdato = maxOf(forfallsDato, opprettelsesdato)
+                        val overdueDays = ChronoUnit.DAYS.between(startdato, sluttdato).absoluteValue
+                        val tilbakevirkende = opprettelsesdato.isAfter(forfallsDato)
+                        if (startdato.isBefore(sluttdato.minusDays(1))) {
+                            log.info(
+                                "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
+                                    "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
+                                    "\"status\": \"${utbetaling.status.name}\", " +
+                                    "\"tilbakevirkende\": \"$tilbakevirkende\", \"overdueDays\": \"$overdueDays\", " +
+                                    "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${forfallsDato}\", " +
+                                    "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
+                            )
+                        }
+                    }
+                }
+            }
+    }
+
     fun setTidspunktSendtIfNotZero(model: InternalDigisosSoker, timestampSendt: Long) {
         if (timestampSendt == 0L) {
             log.error("Søknadens timestampSendt er 0")
@@ -92,6 +139,7 @@ class EventService(
         }
 
         applyHendelserOgSoknadKrav(jsonDigisosSoker, model, originalSoknadNAV, digisosSak, token)
+        logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
 
         return model
     }

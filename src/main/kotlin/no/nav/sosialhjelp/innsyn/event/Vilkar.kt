@@ -12,7 +12,7 @@ private val log = LoggerFactory.getLogger(JsonVilkar::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
 
-    log.info("Hendelse: Vilkar. Status: ${hendelse.status?.name ?: "null"}")
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Vilkar. Status: ${hendelse.status?.name ?: "null"}")
 
     val vilkar = Vilkar(
         referanse = hendelse.vilkarreferanse,
@@ -74,4 +74,7 @@ private fun MutableList<Vilkar>.oppdaterEllerLeggTilVilkar(hendelse: JsonVilkar,
 private fun Vilkar.oppdaterFelter(hendelse: JsonVilkar) {
     datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime()
     beskrivelse = hendelse.beskrivelse
+    tittel = hendelse.tittel
+    status = Oppgavestatus.valueOf(hendelse.status.value())
+    utbetalingsReferanse = hendelse.utbetalingsreferanse
 }

@@ -17,9 +17,7 @@ class ClientProperties {
     lateinit var fiksIntegrasjonpassord: String
     lateinit var fiksIntegrasjonPassordKommune: String
 
-    lateinit var norgProxyUrl: String
-    lateinit var fssProxyAudience: String
-    lateinit var fssProxyPingUrl: String
+    lateinit var norgUrl: String
 
     lateinit var pdlEndpointUrl: String
     lateinit var pdlAudience: String
@@ -35,4 +33,6 @@ class ClientProperties {
 
     lateinit var dialogEndpointUrl: String
     lateinit var dialogAudience: String
+
+    lateinit var vilkarDokkravFagsystemVersjoner: List<String>
 }

@@ -7,9 +7,9 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.LOGGE_MISMATCH_FILNAVN
-import no.nav.sosialhjelp.innsyn.client.fiks.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.client.fiks.FiksClient
-import no.nav.sosialhjelp.innsyn.client.fiks.FiksClientFileExistsException
+import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -170,7 +170,7 @@ class VedleggOpplastingService(
 
         val matchendeFiler = filValideringer.filter { it.filename == originalFilename }
         if (matchendeFiler.size > 1) log.warn("Vi har funnet ${matchendeFiler.size} validerte filer med samme navn. Det er flere enn 1.")
-        if (matchendeFiler.isEmpty()) log.warn("0 validerte filer med samme navn. Antall filvalideringer totalt: {} Dette burde undersøkes nærmere.", filValideringer.size)
+        if (matchendeFiler.isEmpty()) log.warn("0 validerte filer med samme navn. Antall filvalideringer totalt: ${filValideringer.size} Dette burde undersøkes nærmere.")
 
         filename += "-" + uuid.split("-")[0]
 

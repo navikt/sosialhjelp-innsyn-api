@@ -22,15 +22,12 @@
     "sosialhjelp-innsyn-api-redis",
     "sosialhjelp-dialog-api-dev"
   ],
-  "fssProxyClusterName": "dev-fss",
   "env": {
     "SPRING_PROFILES_ACTIVE": "dev,log-kibana",
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.test.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",
     "FIKS_SVAR_UT_ENDPOINT_URL": "https://test.svarut.ks.no",
-    "NORG_PROXY_URL": "https://sosialhjelp-fss-proxy.dev-fss-pub.nais.io/proxy/norg/",
-    "FSS_PROXY_AUDIENCE": "dev-fss:teamdigisos:sosialhjelp-fss-proxy",
-    "FSS_PROXY_PING_URL": "https://sosialhjelp-fss-proxy.dev-fss-pub.nais.io/ping",
+    "NORG_URL": "https://norg2.dev-fss-pub.nais.io/norg2/api/v1",
     "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
@@ -43,7 +40,8 @@
     "DIALOG_ENDPOINT_URL": "http://sosialhjelp-dialog-api-dev/sosialhjelp/meldinger-api/system/brukerstatus",
     "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api-dev",
     "CLAMAV_URL": "http://clamav.clamav.svc.cluster.local/scan",
-    "LOGIN_API_IDPORTEN_CLIENTID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625"
+    "LOGIN_API_IDPORTEN_CLIENTID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
+    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
   },
   "minReplicas": "1",
   "maxReplicas": "1",
@@ -56,5 +54,6 @@
   "isGcp": true,
   "isMock": false,
   "tokenXEnabled": true,
-  "maskinportenEnabled": true
+  "maskinportenEnabled": true,
+  "idportenEnabled": false
 }

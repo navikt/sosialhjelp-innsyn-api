@@ -10,7 +10,6 @@
     "sosialhjelp-mock-alt-api",
     "sosialhjelp-innsyn-api-redis"
   ],
-  "fssProxyClusterName": "dev-fss",
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,mock-redis",
     "METADATA_URL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt-api/well-known/selvbetjening",
@@ -22,8 +21,7 @@
     "INTEGRASJONPASSORD_FIKS": "pw1",
     "INTEGRASJONPASSORD_FIKS_KOMMUNE": "pw2",
     "AZUREAD_LOGINURL": "https://digisos.labs.nais.io/sosialhjelp/mock-alt/login",
-    "NORG_PROXY_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/norg_endpoint_url",
-    "FSS_PROXY_PING_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/fss-proxy/ping",
+    "NORG_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/norg_endpoint_url",
     "PDL_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/pdl_endpoint_url",
     "PDL_AUDIENCE": "dummyAudience",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
@@ -34,7 +32,8 @@
     "TOKEN_X_CLIENT_ID": "labs-gcp:teamdigisos:sosialhjelp-innsyn-api",
     "TOKEN_X_PRIVATE_JWK": "generateRSA",
     "DIALOG_ENDPOINT_URL": "https://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/dialog-api/status",
-    "MASKINPORTEN_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/well-known/maskinporten"
+    "MASKINPORTEN_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api/sosialhjelp/mock-alt-api/well-known/maskinporten",
+    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
   },
   "minReplicas": "1",
   "maxReplicas": "1",
@@ -47,5 +46,6 @@
   "isGcp": true,
   "isMock": true,
   "tokenXEnabled": false,
-  "maskinportenEnabled": false
+  "maskinportenEnabled": false,
+  "idportenEnabled": false
 }

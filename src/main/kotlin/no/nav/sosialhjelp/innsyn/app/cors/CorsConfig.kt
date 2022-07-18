@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app.cors
 
-import no.nav.sosialhjelp.innsyn.utils.MiljoUtils
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.CorsRegistry

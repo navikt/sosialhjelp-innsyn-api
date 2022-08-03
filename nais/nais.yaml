@@ -71,12 +71,15 @@ spec:
       rules:
       {{#each outboundRulesApplications}}
         - application: "{{this}}"
+      {{else}}
+        []
       {{/each}}
       {{#unless isMock}}
         - application: clamav
           namespace: clamav
       {{/unless}}
 {{/if}}
+
   ingresses:
 {{#each ingress}}
     - "{{this}}"

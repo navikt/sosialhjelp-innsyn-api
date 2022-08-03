@@ -71,11 +71,7 @@ spec:
       rules:
       {{#each outboundRulesApplications}}
         - application: "{{this}}"
-      {{else}}
-        []
       {{/each}}
-        - application: "sosialhjelp-fss-proxy"
-          cluster: {{fssProxyClusterName}}
       {{#unless isMock}}
         - application: clamav
           namespace: clamav

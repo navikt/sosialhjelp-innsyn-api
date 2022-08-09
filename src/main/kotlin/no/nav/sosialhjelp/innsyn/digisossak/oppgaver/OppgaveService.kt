@@ -222,7 +222,7 @@ class OppgaveService(
         val avsenderVersion = VersionUtil.parseVersion(avsender, null, null)
         val godkjentVersion = VersionUtil.parseVersion(godkjent, null, null)
 
-        if (avsenderVersion == null || godkjentVersion == null) {
+        if (avsenderVersion.isUnknownVersion || godkjentVersion.isUnknownVersion) {
             return false
         }
 

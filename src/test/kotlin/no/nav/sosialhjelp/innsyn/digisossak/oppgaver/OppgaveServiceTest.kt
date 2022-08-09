@@ -67,7 +67,7 @@ internal class OppgaveServiceTest {
         clearAllMocks()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
-        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("socio;10.1.16", "mock-alt;1.0.0:MOCKVERSJON")
+        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("socio;10.1.16", "mock-alt;1.0.0:MOCKVERSJON", "Testsystemet")
     }
 
     @Test
@@ -715,6 +715,17 @@ internal class OppgaveServiceTest {
     fun `should return true if fagsystemversjon is newer than configured for that system`() {
         val model = InternalDigisosSoker()
         model.fagsystem = Fagsystem("mock-alt", "1.0.0.3")
+        every { eventService.createModel(any(), any()) } returns model
+
+        val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+
+        assertThat(response).isTrue
+    }
+
+    @Test
+    fun `should return true if godkjent versjon av fagsystem is null`() {
+        val model = InternalDigisosSoker()
+        model.fagsystem = Fagsystem("Testsystemet", null)
         every { eventService.createModel(any(), any()) } returns model
 
         val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)

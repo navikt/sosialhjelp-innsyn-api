@@ -199,14 +199,15 @@ class OppgaveService(
     fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String, token: String): Boolean {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
-        if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
+        if (model.fagsystem == null || model.fagsystem!!.systemnavn == null) {
             return false
         }
 
         val fagsystemer = clientProperties.vilkarDokkravFagsystemVersjoner.mapNotNull {
             try {
                 val split = it.split(";")
-                Fagsystem(split[0], split[1])
+                val versjonsnummer = if (split.size > 1) split[1] else null
+                Fagsystem(split[0], versjonsnummer)
             } catch (e: IndexOutOfBoundsException) {
                 log.error("Kan ikke splitte fagsystem-versjon i app config $it")
                 null
@@ -215,14 +216,18 @@ class OppgaveService(
 
         return fagsystemer
             .filter { model.fagsystem!!.systemnavn.equals(it.systemnavn) }
-            .any { versionEqualsOrIsNewer(model.fagsystem!!.systemversjon!!, it.systemversjon!!) }
+            .any { versionEqualsOrIsNewer(model.fagsystem!!.systemversjon, it.systemversjon) }
     }
 
-    private fun versionEqualsOrIsNewer(avsender: String, godkjent: String): Boolean {
+    private fun versionEqualsOrIsNewer(avsender: String?, godkjent: String?): Boolean {
+        if (godkjent == null && avsender == null) {
+            return true
+        }
+
         val avsenderVersion = VersionUtil.parseVersion(avsender, null, null)
         val godkjentVersion = VersionUtil.parseVersion(godkjent, null, null)
 
-        if (avsenderVersion == null || godkjentVersion == null) {
+        if (avsenderVersion.isUnknownVersion || godkjentVersion.isUnknownVersion) {
             return false
         }
 

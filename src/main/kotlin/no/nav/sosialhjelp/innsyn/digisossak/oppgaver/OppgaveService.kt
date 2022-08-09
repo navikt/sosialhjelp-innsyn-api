@@ -199,7 +199,7 @@ class OppgaveService(
     fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String, token: String): Boolean {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
-        if (model.fagsystem == null  || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
+        if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
             return false
         }
 

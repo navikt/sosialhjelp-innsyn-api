@@ -79,6 +79,7 @@ spec:
           namespace: clamav
       {{/unless}}
 {{/if}}
+
   ingresses:
 {{#each ingress}}
     - "{{this}}"

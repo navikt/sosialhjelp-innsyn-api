@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.context.request.RequestAttributes
+import org.springframework.web.context.request.RequestContextHolder
 
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
@@ -54,6 +56,8 @@ class SaksOversiktController(
     @GetMapping("/saker")
     suspend fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
         tilgangskontroll.sjekkTilgang(token)
+
+        println("Requestattributtnavn: ${RequestContextHolder.getRequestAttributes()?.getAttributeNames(RequestAttributes.SCOPE_REQUEST).contentToString()}")
 
         val saker = try {
             fiksClient.hentAlleDigisosSaker(token)

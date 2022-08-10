@@ -4,7 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import no.nav.sosialhjelp.innsyn.TestApplication
-import no.nav.sosialhjelp.innsyn.service.saksstatus.SaksStatusService
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService
 import no.nav.sosialhjelp.innsyn.utils.MockOauth2ServerUtils
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +22,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
-internal class SaksStatusControllerTest {
+internal class SaksStatusITest {
 
     @Autowired
     lateinit var mockLogin: MockOauth2ServerUtils

@@ -5,8 +5,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import no.nav.sosialhjelp.api.fiks.DigisosSak
 import kotlinx.coroutines.runBlocking
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
@@ -70,7 +70,7 @@ internal class VedleggControllerTest {
         clearMocks(vedleggOpplastingService, vedleggService)
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { tilgangskontroll.sjekkTilgang("token") } just Runs
+        every { runBlocking { tilgangskontroll.sjekkTilgang("token") } } just Runs
         every { digisosSak.fiksDigisosId } returns "123"
     }
 
@@ -78,11 +78,6 @@ internal class VedleggControllerTest {
     internal fun tearDown() {
         SubjectHandlerUtils.resetSubjectHandlerImpl()
         every { runBlocking { tilgangskontroll.sjekkTilgang("token") } } just Runs
-    }
-
-    @AfterEach
-    internal fun tearDown() {
-        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test

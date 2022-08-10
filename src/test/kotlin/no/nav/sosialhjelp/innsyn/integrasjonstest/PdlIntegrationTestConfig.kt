@@ -6,8 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import no.nav.sosialhjelp.innsyn.client.pdl.PdlClient
-import no.nav.sosialhjelp.innsyn.client.pdl.PdlHentPerson
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.apache.commons.io.IOUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.context.annotation.Bean

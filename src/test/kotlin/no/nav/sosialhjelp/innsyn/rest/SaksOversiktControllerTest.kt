@@ -120,11 +120,6 @@ internal class SaksOversiktControllerTest {
         SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
-    @AfterEach
-    internal fun tearDown() {
-        SubjectHandlerUtils.resetSubjectHandlerImpl()
-    }
-
     @Test
     fun `skal mappe fra DigisosSak til SakResponse`() {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2)

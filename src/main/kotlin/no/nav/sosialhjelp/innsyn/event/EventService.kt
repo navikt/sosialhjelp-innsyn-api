@@ -33,7 +33,6 @@ import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import kotlin.math.absoluteValue
 
 @Component
 class EventService(
@@ -102,7 +101,7 @@ class EventService(
                             opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
                         }
                     val startdato = maxOf(forfallsDato, opprettelsesdato)
-                    val overdueDays = ChronoUnit.DAYS.between(startdato, sluttdato).absoluteValue
+                    val overdueDays = ChronoUnit.DAYS.between(startdato, sluttdato)
                     val tilbakevirkende = opprettelsesdato.isAfter(forfallsDato)
                     log.info(
                         "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +

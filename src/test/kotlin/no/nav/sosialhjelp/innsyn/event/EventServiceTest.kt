@@ -645,7 +645,7 @@ internal class EventServiceTest {
     }
 
     @Test
-    fun `skal ikke logge nar vi har gamel forfallsdato som er utbetalt samtidig som event er opprettet`() {
+    fun `skal logge selv nar vi har gamel forfallsdato som er utbetalt samtidig som event er opprettet`() {
         val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -659,14 +659,15 @@ internal class EventServiceTest {
             .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
+        every { log.info(any()) } just Runs
 
         service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
 
-        verify(exactly = 0) { log.info(any()) }
+        verify(exactly = 1) { log.info(any()) }
     }
 
     @Test
-    fun `skal ikke logge nar vi har gamel forfallsdato som er utbetalt fort nok etter at event er opprettet`() {
+    fun `skal logge selv nar vi har gamel forfallsdato som er utbetalt fort nok etter at event er opprettet`() {
         val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -688,10 +689,11 @@ internal class EventServiceTest {
             .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
+        every { log.info(any()) } just Runs
 
         service.logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
 
-        verify(exactly = 0) { log.info(any()) }
+        verify(exactly = 1) { log.info(any()) }
     }
 
     @Test

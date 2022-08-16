@@ -105,16 +105,14 @@ class EventService(
                         val startdato = maxOf(forfallsDato, opprettelsesdato)
                         val overdueDays = ChronoUnit.DAYS.between(startdato, sluttdato).absoluteValue
                         val tilbakevirkende = opprettelsesdato.isAfter(forfallsDato)
-                        if (startdato.isBefore(sluttdato.minusDays(1))) {
-                            log.info(
-                                "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
-                                    "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
-                                    "\"status\": \"${utbetaling.status.name}\", " +
-                                    "\"tilbakevirkende\": \"$tilbakevirkende\", \"overdueDays\": \"$overdueDays\", " +
-                                    "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${forfallsDato}\", " +
-                                    "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
-                            )
-                        }
+                        log.info(
+                            "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
+                                "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
+                                "\"status\": \"${utbetaling.status.name}\", " +
+                                "\"tilbakevirkende\": \"$tilbakevirkende\", \"overdueDays\": \"$overdueDays\", " +
+                                "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${forfallsDato}\", " +
+                                "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
+                        )
                     }
                 }
             }

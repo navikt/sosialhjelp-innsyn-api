@@ -68,6 +68,11 @@ maskinporten_scopes: ${MASKINPORTEN_SCOPES}
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
 maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
 
+idporten_well_known_url: ${IDPORTEN_WELL_KNOWN_URL}
+idporten_clientid: ${IDPORTEN_CLIENT_ID}
+idporten_client_jwk: ${IDPORTEN_CLIENT_JWK}
+idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI}
+
 #Token-validering
 no.nav.security.jwt:
   issuer.selvbetjening:

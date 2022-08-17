@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.innsyn.idporten.IdPortenClient
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -22,8 +23,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 class InnsynExceptionHandler(
-    @Value("\${azuread.loginurl}")
-    private val azureadLoginurl: String
+    @Value("\${azuread.loginurl}") private val azureadLoginurl: String,
+    private val idPortenClient: IdPortenClient
 ) : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(Throwable::class)
@@ -132,7 +133,8 @@ class InnsynExceptionHandler(
                 .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
         }
         log.info("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl. Feilmelding: ${ex.message}")
-        return createUnauthorizedWithLoginUrlResponse(azureadLoginurl)
+//        return createUnauthorizedWithLoginUrlResponse(azureadLoginurl)
+        return createUnauthorizedWithLoginUrlResponse(idPortenClient.getAuthorizeUrl().toString())
     }
 
     @ExceptionHandler(value = [MetaDataNotAvailableException::class, IssuerConfigurationException::class])

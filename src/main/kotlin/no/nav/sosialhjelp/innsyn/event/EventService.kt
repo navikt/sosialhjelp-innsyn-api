@@ -33,7 +33,6 @@ import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import kotlin.math.absoluteValue
 
 @Component
 class EventService(
@@ -93,29 +92,25 @@ class EventService(
                 val sluttdato = utbetaling.utbetalingsDato ?: utbetaling.stoppetDato ?: LocalDate.now()
                 val forfallsDato = utbetaling.forfallsDato
                 if (forfallsDato != null) {
-                    if (forfallsDato.isBefore(sluttdato.minusDays(1))) {
-                        val eventListe = mutableListOf<String>()
-                        var opprettelsesdato = LocalDate.now()
-                        jsonDigisosSoker?.hendelser?.filterIsInstance(JsonUtbetaling::class.java)
-                            ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
-                            ?.forEach {
-                                eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
-                                opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
-                            }
-                        val startdato = maxOf(forfallsDato, opprettelsesdato)
-                        val overdueDays = ChronoUnit.DAYS.between(startdato, sluttdato).absoluteValue
-                        val tilbakevirkende = opprettelsesdato.isAfter(forfallsDato)
-                        if (startdato.isBefore(sluttdato.minusDays(1))) {
-                            log.info(
-                                "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
-                                    "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
-                                    "\"status\": \"${utbetaling.status.name}\", " +
-                                    "\"tilbakevirkende\": \"$tilbakevirkende\", \"overdueDays\": \"$overdueDays\", " +
-                                    "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${forfallsDato}\", " +
-                                    "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
-                            )
+                    val eventListe = mutableListOf<String>()
+                    var opprettelsesdato = LocalDate.now()
+                    jsonDigisosSoker?.hendelser?.filterIsInstance(JsonUtbetaling::class.java)
+                        ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
+                        ?.forEach {
+                            eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
+                            opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
                         }
-                    }
+                    val startdato = maxOf(forfallsDato, opprettelsesdato)
+                    val overdueDays = ChronoUnit.DAYS.between(startdato, sluttdato)
+                    val tilbakevirkende = opprettelsesdato.isAfter(forfallsDato)
+                    log.info(
+                        "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
+                            "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
+                            "\"status\": \"${utbetaling.status.name}\", " +
+                            "\"tilbakevirkende\": \"$tilbakevirkende\", \"overdueDays\": \"$overdueDays\", " +
+                            "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${forfallsDato}\", " +
+                            "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
+                    )
                 }
             }
     }

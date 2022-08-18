@@ -8,41 +8,40 @@ import com.nimbusds.oauth2.sdk.id.State
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import com.nimbusds.openid.connect.sdk.Nonce
-import no.nav.sosialhjelp.innsyn.app.tokendings.downloadWellKnown
-import org.springframework.beans.factory.annotation.Value
+import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import java.net.URI
 
 @Component
 class IdPortenClient(
-    @Value("\${idporten_well_known_url}") private val idportenWellKnownUrl: String,
-    @Value("\${idporten_clientid}") private val idportenClientId: String,
-    @Value("\${idporten_redirect_uri}") private val idportenRedirectUri: String,
+    private val idPortenProperties: IdPortenProperties
 ) {
 
-    val wellknown = downloadWellKnown(idportenWellKnownUrl)
-
     fun getAuthorizeUrl(): URI {
-
         // todo: lagre state til redis
 
         val state = State()
         val nonce = Nonce()
 
         val codeVerifier = CodeVerifier()
+        log.info("code_verifier: ${codeVerifier.value}")
 
         return AuthorizationRequest.Builder(
             ResponseType(ResponseType.Value.CODE),
-            ClientID(idportenClientId)
+            ClientID(idPortenProperties.clientId)
         )
-            .scope(Scope("openid", "profile")) // , "ks:fiks")) // KS må godkjenne vår clientId
+            .scope(Scope("openid", "profile")) // , "ks:fiks")) // Hvis ks:fiks scope skal med her?
             .state(state)
             .customParameter("nonce", nonce.value)
             .customParameter("acr_values", "Level4")
             .codeChallenge(codeVerifier, CodeChallengeMethod.S256)
-            .redirectionURI(URI(idportenRedirectUri))
-            .endpointURI(URI(wellknown.authorizationEndpoint))
+            .redirectionURI(URI(idPortenProperties.redirectUri))
+            .endpointURI(URI(idPortenProperties.wellKnown.authorizationEndpoint))
             .build()
             .toURI()
+    }
+
+    companion object {
+        private val log by logger()
     }
 }

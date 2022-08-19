@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class MockOauth2ServerUtils(private val mockOauth2Server: MockOAuth2Server) {
 
-    fun hentLevel14SelvbetjeningToken(): String {
+    fun hentLevel4SelvbetjeningToken(): String {
         return mockOauth2Server.issueToken(
             issuerId = "selvbetjening",
             subject = "selvbetjening",

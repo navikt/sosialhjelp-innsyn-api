@@ -37,7 +37,6 @@ object Versions {
     const val ktlint = "0.45.2"
 
     //    Test only
-    const val junitJupiter = "5.8.2"
     const val junit = "4.13.2"
     const val mockk = "1.12.4"
     const val springmockk = "3.1.1"

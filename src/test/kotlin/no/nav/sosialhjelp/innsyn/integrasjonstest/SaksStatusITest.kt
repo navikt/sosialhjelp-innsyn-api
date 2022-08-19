@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -43,9 +44,6 @@ internal class SaksStatusITest {
     private val navEnhet: NavEnhet = mockk()
 
     @MockkBean
-    lateinit var soknad: JsonSoknad
-
-    @MockkBean
     lateinit var fiksClient: FiksClientImpl
 
     @MockkBean
@@ -58,7 +56,7 @@ internal class SaksStatusITest {
 
     @BeforeEach
     fun setUp() {
-        token = mockLogin.hentLevel14SelvbetjeningToken()
+        token = mockLogin.hentLevel4SelvbetjeningToken()
     }
 
     @AfterEach

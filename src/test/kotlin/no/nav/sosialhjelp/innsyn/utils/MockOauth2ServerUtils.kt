@@ -18,14 +18,4 @@ class MockOauth2ServerUtils(private val mockOauth2Server: MockOAuth2Server) {
             )
         ).serialize()
     }
-
-//    fun leggAzureVeilederTokenPåAlleRequests(testRestTemplate: TestRestTemplate, token: String) {
-//
-//        println("********Legger på azureveiledertoken*****")
-//
-//        testRestTemplate.restTemplate.interceptors.add(ClientHttpRequestInterceptor { request, body, execution ->
-//            request.headers.set("Authorization", "Bearer $token")
-//            execution.execute(request, body)
-//        })
-//    }
 }

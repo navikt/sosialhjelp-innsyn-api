@@ -3,9 +3,19 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.TestApplication
-import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
+import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
+import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
+import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
+import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.utils.MockOauth2ServerUtils
+import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,7 +41,19 @@ internal class SaksStatusITest {
     private lateinit var webClient: WebTestClient
 
     @MockkBean
-    lateinit var saksStatusService: SaksStatusService
+    lateinit var navEnhet: NavEnhet
+
+    @MockkBean
+    lateinit var soknad: JsonSoknad
+
+    @MockkBean
+    lateinit var fiksClient: FiksClientImpl
+
+    @MockkBean
+    lateinit var kommuneService: KommuneService
+
+    @MockkBean
+    lateinit var norgClient: NorgClient
 
     var token: String = ""
 
@@ -45,8 +67,19 @@ internal class SaksStatusITest {
     }
 
     @Test
-    fun `tilgansgkontroll gir ingen feil`() {
-        every { saksStatusService.hentSaksStatuser(any(), any()) } returns emptyList()
+    fun `Skal hente saksstatus for fiksDigisoID`() {
+
+        val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val soknad = JsonSoknad()
+        val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
+
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
+        every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
+        every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        every { kommuneService.hentKommuneInfo(any(), any()) } returns lagKommuneInfoStub()
+        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
+        every { norgClient.hentNavEnhet(any()) } returns navEnhet
+        every { navEnhet.navn } returns "testNavKontor"
 
         webClient
             .get()
@@ -54,6 +87,20 @@ internal class SaksStatusITest {
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
-            .expectStatus().isNoContent
+            .expectStatus().isOk
+    }
+
+    private fun lagKommuneInfoStub(): KommuneInfo {
+        val kommuneInfo = KommuneInfo(
+            "1001",
+            true,
+            true,
+            false,
+            false,
+            null,
+            true,
+            "Tester"
+        )
+        return kommuneInfo
     }
 }

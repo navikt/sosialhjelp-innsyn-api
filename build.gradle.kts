@@ -37,9 +37,9 @@ object Versions {
     const val ktlint = "0.45.2"
 
     //    Test only
-    const val junitJupiter = "5.8.2"
     const val junit = "4.13.2"
     const val mockk = "1.12.4"
+    const val springmockk = "3.1.1"
 }
 
 plugins {
@@ -142,8 +142,8 @@ dependencies {
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
-    testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
-    implementation("io.mockk:mockk:${Versions.mockk}")
+    testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
+    testImplementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("no.nav.security:token-validation-spring-test:${Versions.tokenValidation}")
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk

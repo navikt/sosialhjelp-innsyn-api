@@ -40,8 +40,7 @@ internal class SaksStatusITest {
     @Autowired
     private lateinit var webClient: WebTestClient
 
-    @MockkBean
-    lateinit var navEnhet: NavEnhet
+    private val navEnhet: NavEnhet = mockk()
 
     @MockkBean
     lateinit var soknad: JsonSoknad

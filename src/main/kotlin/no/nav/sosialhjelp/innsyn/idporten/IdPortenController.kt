@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.oauth2.sdk.AuthorizationResponse
 import com.nimbusds.oauth2.sdk.id.State
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.createSignedAssertion
@@ -33,7 +34,7 @@ class IdPortenController(
         val response = AuthorizationResponse.parse(URI(redirectUri))
 
         val sessionId = RequestContextHolder.currentRequestAttributes().sessionId
-        val state = redisService.get("IDPORTEN_STATE_$sessionId", State::class.java)
+        val state = redisService.get("IDPORTEN_STATE_$sessionId", State::class.java) as? State
             ?: throw RuntimeException("No state found on sessionId")
 
         // Check the returned state parameter, must match the original
@@ -61,7 +62,10 @@ class IdPortenController(
         log.info("code: ${code.value}")
         log.info("client_assertion: $clientAssertion")
 
-        idPortenClient.getToken(code, clientAssertion)
+        val codeVerifierValue = redisService.get("IDPORTEN_CODE_VERIFIER_$sessionId", String::class.java) as? String
+            ?: throw RuntimeException("No code_verifier found on sessionId")
+
+        idPortenClient.getToken(code, clientAssertion, CodeVerifier(codeVerifierValue))
 
         return ResponseEntity.ok().build()
     }

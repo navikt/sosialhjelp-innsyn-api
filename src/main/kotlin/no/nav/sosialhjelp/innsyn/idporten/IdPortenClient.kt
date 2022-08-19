@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
+import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.oauth2.sdk.AuthorizationCode
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant
 import com.nimbusds.oauth2.sdk.AuthorizationGrant
@@ -7,6 +8,8 @@ import com.nimbusds.oauth2.sdk.AuthorizationRequest
 import com.nimbusds.oauth2.sdk.ResponseType
 import com.nimbusds.oauth2.sdk.Scope
 import com.nimbusds.oauth2.sdk.TokenRequest
+import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT
+import com.nimbusds.oauth2.sdk.http.HTTPResponse
 import com.nimbusds.oauth2.sdk.id.ClientID
 import com.nimbusds.oauth2.sdk.id.State
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod
@@ -35,7 +38,7 @@ class IdPortenClient(
         }
 
         val codeVerifier = CodeVerifier().also {
-            redisService.put("IDPORTEN_CODE_VERIFYER_$sessionId", objectMapper.writeValueAsBytes(it))
+            redisService.put("IDPORTEN_CODE_VERIFIER_$sessionId", it.value.toByteArray())
         }
         log.info("code_verifier: ${codeVerifier.value}")
 
@@ -54,24 +57,21 @@ class IdPortenClient(
             .toURI()
     }
 
-//    public TokenRequest(final URI uri,
-//    final ClientID clientID,
-//    final AuthorizationGrant authzGrant,
-//    final Scope scope,
-//    final List<URI> resources,
-//    final RefreshToken existingGrant,
-//    final Map<String,List<String>> customParams) {
-
-
-        fun getToken(authorizationCode: AuthorizationCode?, clientAssertion: String) {
+    fun getToken(authorizationCode: AuthorizationCode?, clientAssertion: String, codeVerifier: CodeVerifier) {
         val callback = URI(idPortenProperties.redirectUri)
-        val codeGrant: AuthorizationGrant = AuthorizationCodeGrant(authorizationCode, callback)
+        val codeGrant: AuthorizationGrant = AuthorizationCodeGrant(authorizationCode, callback, codeVerifier)
+        val clientAuth = PrivateKeyJWT(SignedJWT.parse(clientAssertion))
 
         val tokenRequest = TokenRequest(
             URI(idPortenProperties.wellKnown.tokenEndpoint),
-            ClientID(idPortenProperties.clientId),
-            codeGrant
+            clientAuth,
+            codeGrant,
+            Scope("openid profile ks:fiks")
         )
+
+        val httpResponse: HTTPResponse = tokenRequest.toHTTPRequest().send()
+
+        log.info("Response: ${httpResponse.content}")
     }
 
     companion object {

@@ -66,7 +66,7 @@ class IdPortenClient(
             URI(idPortenProperties.wellKnown.tokenEndpoint),
             clientAuth,
             codeGrant,
-            Scope("openid profile ks:fiks")
+            Scope("openid", "profile", "ks:fiks")
         )
 
         val httpResponse: HTTPResponse = tokenRequest.toHTTPRequest().send()

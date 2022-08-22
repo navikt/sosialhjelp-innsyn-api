@@ -34,11 +34,11 @@ class IdPortenConfig(
             .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
             .build()
 
-    private val wellknown: WellKnown
+    private val wellknown: IdPortenWellKnown
         get() = idportenWebClient.get()
             .uri(wellKnownUrl)
             .retrieve()
-            .bodyToMono<WellKnown>()
+            .bodyToMono<IdPortenWellKnown>()
             .doOnSuccess { log.info("Hentet WellKnown for ID-porten") }
             .doOnError { log.warn("Feil ved henting av WellKnown for ID-porten", it) }
             .block() ?: throw RuntimeException("Feil ved henting av WellKnown for ID-porten")

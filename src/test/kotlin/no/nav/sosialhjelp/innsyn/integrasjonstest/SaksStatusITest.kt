@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -30,7 +31,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @ContextConfiguration(classes = [PdlIntegrationTestConfig::class])
-@SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
 internal class SaksStatusITest {
@@ -85,6 +86,10 @@ internal class SaksStatusITest {
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
             .expectStatus().isOk
+
+        verify(exactly = 1) { fiksClient.hentDigisosSak(any(), any(), any()) }
+        verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }
+        verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
     }
 
     private fun lagKommuneInfoStub(): KommuneInfo {

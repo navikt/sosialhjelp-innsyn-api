@@ -1,7 +1,14 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.jwk.source.RemoteJWKSet
+import com.nimbusds.jose.proc.JWSVerificationKeySelector
+import com.nimbusds.jose.proc.SecurityContext
+import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier
+import com.nimbusds.jwt.proc.DefaultJWTProcessor
 import com.nimbusds.oauth2.sdk.AuthorizationCode
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant
 import com.nimbusds.oauth2.sdk.AuthorizationGrant
@@ -22,6 +29,7 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import java.net.URI
+import java.net.URL
 
 @Component
 class IdPortenClient(
@@ -72,12 +80,23 @@ class IdPortenClient(
         )
 
         val httpResponse: HTTPResponse = tokenRequest.toHTTPRequest().send()
-
-        log.info("Response: ${httpResponse.content}")
         val tokenResponse = objectMapper.readValue<TokenResponse>(httpResponse.content)
-        val signedJwt = SignedJWT.parse(tokenResponse.idToken)
-        // todo valider idoken?
-        val sid = signedJwt.jwtClaimsSet.getStringClaim("sid") ?: throw RuntimeException("Fant ikke 'sid' i idtoken")
+
+        val jwtProcessor = DefaultJWTProcessor<SecurityContext>()
+        log.debug("Response: ${httpResponse.content}")
+        val keySource = RemoteJWKSet<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri))
+        val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, keySource)
+        jwtProcessor.jwsKeySelector = keySelector
+        jwtProcessor.jwtClaimsSetVerifier = DefaultJWTClaimsVerifier(
+            JWTClaimsSet.Builder().issuer(idPortenProperties.wellKnown.issuer).build(),
+            setOf("sid")
+        )
+        val claimsSet = jwtProcessor.process(tokenResponse.idToken, null)
+        log.debug("claim set: ${claimsSet.toJSONObject()}")
+
+        val sid = claimsSet.getStringClaim("sid")
+        if (sid.isEmpty()) throw RuntimeException("Empty sid")
+
         redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray())
     }
 

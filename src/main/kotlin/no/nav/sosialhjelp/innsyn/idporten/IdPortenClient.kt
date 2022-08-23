@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.nimbusds.jwt.SignedJWT
 import com.nimbusds.oauth2.sdk.AuthorizationCode
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant
@@ -46,7 +47,7 @@ class IdPortenClient(
             ResponseType(ResponseType.Value.CODE),
             ClientID(idPortenProperties.clientId)
         )
-            .scope(Scope("openid", "profile")) // , "ks:fiks")) // Hvis ks:fiks scope skal med her?
+            .scope(Scope("openid", "profile", "ks:fiks"))
             .state(state)
             .customParameter("nonce", nonce.value)
             .customParameter("acr_values", "Level4")
@@ -58,6 +59,7 @@ class IdPortenClient(
     }
 
     fun getToken(authorizationCode: AuthorizationCode?, clientAssertion: String, codeVerifier: CodeVerifier) {
+        val sessionId = RequestContextHolder.currentRequestAttributes().sessionId
         val callback = URI(idPortenProperties.redirectUri)
         val codeGrant: AuthorizationGrant = AuthorizationCodeGrant(authorizationCode, callback, codeVerifier)
         val clientAuth = PrivateKeyJWT(SignedJWT.parse(clientAssertion))
@@ -72,6 +74,11 @@ class IdPortenClient(
         val httpResponse: HTTPResponse = tokenRequest.toHTTPRequest().send()
 
         log.info("Response: ${httpResponse.content}")
+        val tokenResponse = objectMapper.readValue<TokenResponse>(httpResponse.content)
+        val signedJwt = SignedJWT.parse(tokenResponse.idToken)
+        // todo valider idoken?
+        val sid = signedJwt.jwtClaimsSet.getStringClaim("sid") ?: throw RuntimeException("Fant ikke 'sid' i idtoken")
+        redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray())
     }
 
     companion object {

@@ -35,4 +35,11 @@ class RedisStore(
             set.get()
         } else null
     }
+
+    fun delete(key: String): Boolean {
+        val del = async.del(key)
+        return if (del.await(500, TimeUnit.MILLISECONDS)) {
+            del.get() == 1L
+        } else false
+    }
 }

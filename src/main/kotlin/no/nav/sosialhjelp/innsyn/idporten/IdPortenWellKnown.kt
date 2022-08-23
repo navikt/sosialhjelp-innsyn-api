@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.idporten
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class WellKnown(
+data class IdPortenWellKnown(
     val issuer: String,
     @JsonProperty("authorization_endpoint")
     val authorizationEndpoint: String,
@@ -10,6 +10,6 @@ data class WellKnown(
     val tokenEndpoint: String,
     @JsonProperty("jwks_uri")
     val jwksUri: String,
-    @JsonProperty("endsession_endpoint")
-    val endsessionEndpoint: String,
+    @JsonProperty("end_session_endpoint")
+    val endSessionEndpoint: String,
 )

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.utils
+package no.nav.sosialhjelp.innsyn.testutils
 
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration

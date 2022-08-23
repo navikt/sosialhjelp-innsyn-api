@@ -8,7 +8,6 @@ import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.TestApplication
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
@@ -16,7 +15,8 @@ import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
-import no.nav.sosialhjelp.innsyn.utils.MockOauth2ServerUtils
+import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
+import no.nav.sosialhjelp.innsyn.testutils.MockOauth2ServerUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -74,7 +74,7 @@ internal class SaksStatusITest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
         every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
         every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
-        every { kommuneService.hentKommuneInfo(any(), any()) } returns lagKommuneInfoStub()
+        every { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
         every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
         every { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
@@ -90,19 +90,5 @@ internal class SaksStatusITest {
         verify(exactly = 1) { fiksClient.hentDigisosSak(any(), any(), any()) }
         verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }
         verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
-    }
-
-    private fun lagKommuneInfoStub(): KommuneInfo {
-        val kommuneInfo = KommuneInfo(
-            "1001",
-            true,
-            true,
-            false,
-            false,
-            null,
-            true,
-            "Tester"
-        )
-        return kommuneInfo
     }
 }

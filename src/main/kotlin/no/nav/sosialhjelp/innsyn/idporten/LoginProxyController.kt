@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
+import no.nav.security.token.support.core.api.Unprotected
 import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -29,10 +30,11 @@ class LoginProxyController(
     private val restTemplate: RestTemplate,
 ) {
 
-    @RequestMapping("/login-api/**")
+    @RequestMapping("/login-proxy/**")
     @ResponseBody
+    @Unprotected
     @Throws(URISyntaxException::class)
-    fun soknadProxy(
+    fun loginProxy(
         @RequestBody(required = false) body: String?,
         method: HttpMethod,
         request: HttpServletRequest,

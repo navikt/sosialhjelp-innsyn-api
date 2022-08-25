@@ -34,7 +34,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
 
-class SaksOversiktItest {
+class SaksOversiktIntegrasjonstest {
 
     @Autowired
     private lateinit var webClient: WebTestClient

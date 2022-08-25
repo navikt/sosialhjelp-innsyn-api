@@ -34,7 +34,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
-internal class SaksStatusITest {
+internal class SaksStatusIntegrasjonsTest {
 
     @Autowired
     lateinit var mockLogin: MockOauth2ServerUtils

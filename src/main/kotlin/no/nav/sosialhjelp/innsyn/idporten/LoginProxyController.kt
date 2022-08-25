@@ -42,9 +42,9 @@ class LoginProxyController(
     ): ResponseEntity<ByteArray> {
         log.debug("LoginProxy request for path: ${request.servletPath}, metode: $method, metode fra request: ${request.method}, body: $body")
         if (request is MultipartHttpServletRequest) {
-            return sendRequests(getMultipartBody(request), method, request)
+            return sendRequests(getMultipartBody(request), method, request, response)
         }
-        return sendRequests(body, method, request)
+        return sendRequests(body, method, request, response)
     }
 
     private fun getMultipartBody(request: MultipartHttpServletRequest): LinkedMultiValueMap<String, Any> {
@@ -62,6 +62,7 @@ class LoginProxyController(
         body: Any?,
         method: HttpMethod,
         request: HttpServletRequest,
+        response: HttpServletResponse
     ): ResponseEntity<ByteArray> {
         var newUri = request.requestURL.append(getQueryString(request)).toString()
 
@@ -74,7 +75,13 @@ class LoginProxyController(
 
         log.debug("sendRequests newUri: $newUri")
         return try {
-            restTemplate.exchange(newUri, method, HttpEntity(body, headers), ByteArray::class.java)
+            val exchange = restTemplate.exchange(newUri, method, HttpEntity(body, headers), ByteArray::class.java)
+            if (exchange.headers.containsKey("Access-Control-Allow-Credentials")) {
+                response.reset()
+                val origin = request.getHeader("Origin") ?: "*"
+                response.setHeader("Access-Control-Allow-Origin", origin)
+            }
+            exchange
         } catch (e: HttpClientErrorException) {
             ResponseEntity.status(e.rawStatusCode).body(e.responseBodyAsByteArray)
         }

@@ -105,10 +105,6 @@ class IdPortenController(
         RSAKey.parse(idPortenProperties.clientJwk)
     }
 
-    @GetMapping("/oauth2/logout") // samme som 'frontchannelLogoutPath' i nais.yaml
-    fun handleLogout() {
-    }
-
     companion object {
         private val log by logger()
 
@@ -122,7 +118,7 @@ class IdPortenController(
         private fun nonCacheableRedirectResponse(redirectLocation: String, loginId: String): ResponseEntity<Nothing> {
             return nonCacheableResponse(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, redirectLocation)
-                .header(HttpHeaders.SET_COOKIE, "login_id=$loginId; Max-Age=3600; Path=/sosialhjelp/innsyn-api; Secure; HttpOnly")
+                .header(HttpHeaders.SET_COOKIE, "login_id=$loginId; Max-Age=3600; Path=/; Secure; HttpOnly")
                 .build()
         }
     }

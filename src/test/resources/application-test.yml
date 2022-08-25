@@ -40,6 +40,6 @@ no.nav.security.jwt:
     discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
     accepted_audience: someaudience
     cookie_name: localhost-idtoken
-azuread.loginurl: http://localhost:8080/sosialhjelp/innsyn-api/local/cookie
+innsyn.loginurl: http://localhost:8080/sosialhjelp/innsyn-api/local/cookie
 
 login_api_idporten_clientid: clientId

@@ -79,7 +79,7 @@ no.nav.security.jwt:
     discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
     validation:
       optional-claims: aud,nbf
-azuread.loginurl: ${AZUREAD_LOGINURL}
+innsyn.loginurl: ${INNSYN_LOGINURL}
 
 login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID}
 

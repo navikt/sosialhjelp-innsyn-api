@@ -89,7 +89,7 @@ class SaksOversiktController(
         val saksDetaljerResponse = SaksDetaljerResponse(
             sak.fiksDigisosId,
             hentNavn(model),
-            model.status?.let { mapStatus(it) } ?: "",
+            mapStatus(model.status),
             antallOppgaver
         )
         return ResponseEntity.ok().body(saksDetaljerResponse)

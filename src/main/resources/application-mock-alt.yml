@@ -26,7 +26,7 @@ no.nav.security.jwt:
 #    cookie_name: localhost-idtoken
     validation:
       optional-claims: aud,nbf
-innsyn.loginurl: ${INNSYN_LOGINURL:http://127.0.0.1:8080/sosialhjelp/innsyn-api/oauth2/login}
+innsyn.loginurl: ${INNSYN_LOGINURL:http://localhost:8080/sosialhjelp/innsyn-api/oauth2/login}
 
 login_api_idporten_clientid: clientId
 

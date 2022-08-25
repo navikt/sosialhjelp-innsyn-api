@@ -27,7 +27,6 @@ import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.stereotype.Component
-import org.springframework.web.context.request.RequestContextHolder
 import java.net.URI
 import java.net.URL
 
@@ -37,8 +36,8 @@ class IdPortenClient(
     private val redisService: RedisService,
 ) {
 
-    fun getAuthorizeUrl(): URI {
-        val sessionId = RequestContextHolder.currentRequestAttributes().sessionId
+    fun getAuthorizeUrl(sessionId: String): URI {
+
         val state = State().also {
             redisService.put("IDPORTEN_STATE_$sessionId", objectMapper.writeValueAsBytes(it))
         }
@@ -66,8 +65,7 @@ class IdPortenClient(
             .toURI()
     }
 
-    fun getToken(authorizationCode: AuthorizationCode?, clientAssertion: String, codeVerifier: CodeVerifier) {
-        val sessionId = RequestContextHolder.currentRequestAttributes().sessionId
+    fun getToken(authorizationCode: AuthorizationCode?, clientAssertion: String, codeVerifier: CodeVerifier, sessionId: String) {
         val callback = URI(idPortenProperties.redirectUri)
         val codeGrant: AuthorizationGrant = AuthorizationCodeGrant(authorizationCode, callback, codeVerifier)
         val clientAuth = PrivateKeyJWT(SignedJWT.parse(clientAssertion))
@@ -98,6 +96,7 @@ class IdPortenClient(
         if (sid.isEmpty()) throw RuntimeException("Empty sid")
 
         redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray())
+        redisService.put("IDPORTEN_ACCESS_TOKEN_$sessionId", tokenResponse.accessToken.toByteArray())
     }
 
     companion object {

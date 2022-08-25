@@ -44,6 +44,7 @@ interface RedisService {
                     null
                 }
             } else {
+                log.debug("Fant ikke key=${key.maskerFnr}")
                 null
             }
 
@@ -119,6 +120,7 @@ class RedisServiceMock : RedisService {
 
     override fun put(key: String, value: ByteArray, timeToLiveSeconds: Long) {
         mockMap[key] = value
+        log.debug("redis set key=$key, value=$value")
         expiryMap[key] = LocalDateTime.now().plusSeconds(timeToLiveSeconds)
     }
 

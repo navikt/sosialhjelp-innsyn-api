@@ -65,11 +65,11 @@ class LoginProxyController(
     ): ResponseEntity<ByteArray> {
         var newUri = request.requestURL.append(getQueryString(request)).toString()
 
-        newUri = newUri.replace("/sosialhjelp/innsyn-api/login-api", "")
+        newUri = newUri.replace("/login-proxy", "")
 
         val headers = getHeaders(request)
 
-        addAccessTokenHeader(headers)
+        addAccessTokenHeader(request, headers)
         addXSRFCookie(request, headers)
 
         log.debug("sendRequests newUri: $newUri")
@@ -103,8 +103,10 @@ class LoginProxyController(
         return httpHeaders
     }
 
-    private fun addAccessTokenHeader(httpHeaders: HttpHeaders) {
-        val token = redisService.get("", String::class.java) as String? ?: throw JwtTokenMissingException("Missing token in redis")
+    private fun addAccessTokenHeader(request: HttpServletRequest, httpHeaders: HttpHeaders) {
+        val sessionId = request.cookies.firstOrNull { it.name == "login_id" }?.value
+            ?: throw JwtTokenMissingException("No sessionId found on cookie")
+        val token = redisService.get("IDPORTEN_ACCESS_TOKEN_$sessionId", String::class.java) as String? ?: throw JwtTokenMissingException("Missing token in redis")
         httpHeaders.setBearerAuth(token)
     }
 

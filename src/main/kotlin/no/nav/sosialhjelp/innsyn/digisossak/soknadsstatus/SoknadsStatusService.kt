@@ -24,10 +24,7 @@ class SoknadsStatusService(
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
         val status = model.status
-        if (status == null) {
-            log.warn("SoknadsStatus er null")
-            throw RuntimeException("SoknadsStatus er null")
-        }
+
         log.info("Hentet nåværende søknadsstatus=${status.name}")
         val erInnsynDeaktivertForKommune = kommuneService.erInnsynDeaktivertForKommune(fiksDigisosId, token)
         val dokumentlagerId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId

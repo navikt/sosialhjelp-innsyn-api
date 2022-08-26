@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
-import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -21,21 +20,17 @@ import javax.servlet.http.HttpServletRequestWrapper
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class IdPortenAuthorizationHeaderFilter(
-    private val redisService: RedisService,
+    private val idPortenSessionHandler: IdPortenSessionHandler
 ) : Filter {
 
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
         if (request is HttpServletRequest) {
-            val loginId = request.cookies?.firstOrNull { it.name == "login_id" }?.value
-            if (loginId != null) {
-                val accessToken = redisService.get("IDPORTEN_ACCESS_TOKEN_$loginId", String::class.java) as String?
-                // todo: if accessToken==null && refreshToken exists -> should refresh
-                if (accessToken != null) {
-                    val mutableRequest = MutableHttpServletRequest(request)
-                    mutableRequest.putHeader(HttpHeaders.AUTHORIZATION, BEARER + accessToken)
-                    chain.doFilter(mutableRequest, response)
-                    return
-                }
+            val accessToken = idPortenSessionHandler.getToken(request)
+            if (accessToken != null) {
+                val mutableRequest = MutableHttpServletRequest(request)
+                mutableRequest.putHeader(HttpHeaders.AUTHORIZATION, BEARER + accessToken)
+                chain.doFilter(mutableRequest, response)
+                return
             }
         }
         chain.doFilter(request, response)

@@ -55,5 +55,5 @@
   "isMock": false,
   "tokenXEnabled": true,
   "maskinportenEnabled": true,
-  "idportenEnabled": false
+  "idportenEnabled": true
 }

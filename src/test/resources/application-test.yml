@@ -24,6 +24,11 @@ maskinporten_scopes: scopes
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:https://maskinporten}
 maskinporten_client_jwk: generateRSA
 
+idporten_well_known_url: ${IDPORTEN_WELL_KNOWN_URL:https://idporten}
+idporten_clientid: ${IDPORTEN_CLIENT_ID:clientId}
+idporten_client_jwk: ${IDPORTEN_CLIENT_JWK:generateRSA}
+idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI:https://idporten}
+
 innsyn:
   vedlegg:
     virusscan:

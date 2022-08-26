@@ -18,7 +18,6 @@ import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.testutils.MockOauth2ServerUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -34,15 +33,14 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
-internal class SaksStatusITest {
 
-    @Autowired
-    lateinit var mockLogin: MockOauth2ServerUtils
+class SaksOversiktItest {
 
     @Autowired
     private lateinit var webClient: WebTestClient
 
-    private val navEnhet: NavEnhet = mockk()
+    @Autowired
+    lateinit var mockLogin: MockOauth2ServerUtils
 
     @MockkBean
     lateinit var fiksClient: FiksClientImpl
@@ -53,6 +51,8 @@ internal class SaksStatusITest {
     @MockkBean
     lateinit var norgClient: NorgClient
 
+    private val navEnhet: NavEnhet = mockk()
+
     var token: String = ""
 
     @BeforeEach
@@ -60,35 +60,60 @@ internal class SaksStatusITest {
         token = mockLogin.hentLevel4SelvbetjeningToken()
     }
 
-    @AfterEach
-    fun tearDown() {
-    }
-
     @Test
-    fun `Skal hente saksstatus for fiksDigisoID`() {
+    fun `skal hente liste med saker`() {
 
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        val soknad = JsonSoknad()
-        val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
-
-        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
-        every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
-        every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
-        every { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
-        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
-        every { norgClient.hentNavEnhet(any()) } returns navEnhet
-        every { navEnhet.navn } returns "testNavKontor"
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
 
         webClient
             .get()
-            .uri("/api/v1/innsyn/1234/saksStatus")
+            .uri("/api/v1/innsyn/saker")
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 1) { fiksClient.hentDigisosSak(any(), any(), any()) }
+        verify(exactly = 1) { fiksClient.hentAlleDigisosSaker(any()) }
+    }
+
+    @Test
+    fun `skal hente saksdetaljer for sak`() {
+
+        val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
+        val soknad = JsonSoknad()
+
+        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
+        every { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
+        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
+        every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        every { norgClient.hentNavEnhet(any()) } returns navEnhet
+        every { navEnhet.navn } returns "testNavKontor"
+        every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
+
+        webClient
+            .get()
+            .uri("/api/v1/innsyn/saksDetaljer?id=1234")
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .exchange()
+            .expectStatus().isOk
+
+        verify(exactly = 2) { fiksClient.hentDigisosSak(any(), any(), any()) }
         verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }
-        verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
+        verify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
+    }
+
+    @Test
+    fun `skal returnere bad request dersom id requestparameter ikke er lagt til for saksDetaljer endepunkt`() {
+
+        webClient
+            .get()
+            .uri("/api/v1/innsyn/saksDetaljer")
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .exchange()
+            .expectStatus().isBadRequest
     }
 }

@@ -11,7 +11,6 @@ import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.createSignedAssertion
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -34,7 +33,7 @@ class IdPortenController(
     fun login(
         request: HttpServletRequest,
         @RequestParam("goto") redirectPath: String?,
-    ): ResponseEntity<Nothing> {
+    ): ResponseEntity<String> {
 
         val sessionId = UUID.randomUUID().toString()
 
@@ -75,21 +74,18 @@ class IdPortenController(
         // an access token at the token endpoint of the server
         val code = successResponse.authorizationCode
 
-        redisService.put("IDPORTEN_CODE_$sessionId", objectMapper.writeValueAsBytes(code))
-
-        // for å teste /token-endepunkt lokalt
-        log.info("code: ${code.value}")
-        log.info("client_assertion: $clientAssertion")
-
         val codeVerifierValue = redisService.get("IDPORTEN_CODE_VERIFIER_$sessionId", String::class.java) as? String
             ?: throw RuntimeException("No code_verifier found on sessionId")
 
         idPortenClient.getToken(code, clientAssertion, CodeVerifier(codeVerifierValue), sessionId)
 
-        val headers = HttpHeaders()
+        // Disse trengs bare midlertidig
+        redisService.delete("IDPORTEN_STATE_$sessionId")
+        redisService.delete("IDPORTEN_NONCE_$sessionId")
+        redisService.delete("IDPORTEN_CODE_VERIFIER_$sessionId")
+
         val redirect = redisService.get("LOGIN_REDIRECT_$sessionId", String::class.java) as String?
-        headers.set(HttpHeaders.LOCATION, redirect ?: "/sosialhjelp/innsyn")
-        return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build()
+        return nonCacheableRedirectResponse(redirect ?: "/sosialhjelp/innsyn")
     }
 
     private val clientAssertion get() = createSignedAssertion(
@@ -108,18 +104,13 @@ class IdPortenController(
     companion object {
         private val log by logger()
 
-        private fun nonCacheableResponse(status: HttpStatus): ResponseEntity.BodyBuilder {
+        private fun nonCacheableRedirectResponse(redirectLocation: String, loginId: String? = null): ResponseEntity<String> {
             val headers = HttpHeaders()
             headers.add(HttpHeaders.CACHE_CONTROL, "no-store, no-cache")
             headers.add(HttpHeaders.PRAGMA, "no-cache")
-            return ResponseEntity.status(status).headers(headers)
-        }
-
-        private fun nonCacheableRedirectResponse(redirectLocation: String, loginId: String): ResponseEntity<Nothing> {
-            return nonCacheableResponse(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, redirectLocation)
-                .header(HttpHeaders.SET_COOKIE, "login_id=$loginId; Max-Age=3600; Path=/; Secure; HttpOnly")
-                .build()
+            headers.add(HttpHeaders.LOCATION, redirectLocation)
+            loginId?.let { headers.add(HttpHeaders.SET_COOKIE, "login_id=$it; Max-Age=3600; Path=/; Secure; HttpOnly") }
+            return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build()
         }
     }
 }

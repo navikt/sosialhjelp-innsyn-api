@@ -24,21 +24,21 @@ class FrontchannelLogoutController(
         @RequestParam(name = "sid") idPortenSessionId: String?,
     ): ResponseEntity<String> {
         if (idPortenProperties.wellKnown.issuer != issuer) {
-            log.error("Feil issuer ved utlogging")
+            log.warn("Feil issuer ved utlogging")
             return ResponseEntity.badRequest().build()
         }
 
         if (!isValidSid(idPortenSessionId)) {
-            log.error("Ugyldig 'sid' ved utlogging")
+            log.warn("Ugyldig 'sid' ved utlogging")
             return ResponseEntity.badRequest().build()
         }
 
         val sessionId = redisService.get("IDPORTEN_SESSION_ID_$idPortenSessionId", String::class.java) as? String
         if (sessionId != null) {
             log.debug("Frontchannel logout")
-            clearCache(sessionId)
+            redisService.delete("IDPORTEN_REFRESH_TOKEN_$sessionId")
+            redisService.delete("IDPORTEN_ACCESS_TOKEN_$sessionId")
             redisService.delete("IDPORTEN_SESSION_ID_$idPortenSessionId")
-            // clear security context ?
             return ResponseEntity.ok().build()
         }
 
@@ -48,14 +48,6 @@ class FrontchannelLogoutController(
     private fun isValidSid(sid: String?): Boolean {
         if (sid == null) return false
         return sid.matches(Regex("[0-9a-zA-Z_=-]{1,100}"))
-    }
-
-    private fun clearCache(sessionId: String) {
-        redisService.delete("IDPORTEN_STATE_$sessionId")
-        redisService.delete("IDPORTEN_NONCE_$sessionId")
-        redisService.delete("IDPORTEN_CODE_VERIFIER_$sessionId")
-        redisService.delete("IDPORTEN_CODE_$sessionId")
-        redisService.delete("IDPORTEN_REFRESH_TOKEN_$sessionId")
     }
 
     companion object {

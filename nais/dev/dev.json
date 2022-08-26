@@ -28,7 +28,7 @@
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.fiks.test.ks.no",
     "FIKS_SVAR_UT_ENDPOINT_URL": "https://test.svarut.ks.no",
     "NORG_URL": "https://norg2.dev-fss-pub.nais.io/norg2/api/v1",
-    "INNSYN_LOGINURL": "https://loginservice.dev.nav.no/login",
+    "INNSYN_LOGINURL": "https://sosialhjelp-innsyn-api-dev.dev.nav.no/sosialhjelp/innsyn-api/oauth2/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
     "PDL_ENDPOINT_URL": "https://pdl-api.dev-fss-pub.nais.io/graphql",

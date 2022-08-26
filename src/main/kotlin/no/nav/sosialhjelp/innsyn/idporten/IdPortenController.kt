@@ -1,14 +1,9 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
-import com.nimbusds.jose.jwk.KeyUse
-import com.nimbusds.jose.jwk.RSAKey
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.oauth2.sdk.AuthorizationResponse
 import com.nimbusds.oauth2.sdk.id.State
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import no.nav.security.token.support.core.api.Unprotected
-import no.nav.sosialhjelp.innsyn.app.MiljoUtils
-import no.nav.sosialhjelp.innsyn.app.tokendings.createSignedAssertion
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders
@@ -24,7 +19,6 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 class IdPortenController(
     private val idPortenClient: IdPortenClient,
-    private val idPortenProperties: IdPortenProperties,
     private val redisService: RedisService,
 ) {
 
@@ -77,7 +71,7 @@ class IdPortenController(
         val codeVerifierValue = redisService.get("IDPORTEN_CODE_VERIFIER_$sessionId", String::class.java) as? String
             ?: throw RuntimeException("No code_verifier found on sessionId")
 
-        idPortenClient.getToken(code, clientAssertion, CodeVerifier(codeVerifierValue), sessionId)
+        idPortenClient.getToken(code, CodeVerifier(codeVerifierValue), sessionId)
 
         // Disse trengs bare midlertidig
         redisService.delete("IDPORTEN_STATE_$sessionId")
@@ -86,19 +80,6 @@ class IdPortenController(
 
         val redirect = redisService.get("LOGIN_REDIRECT_$sessionId", String::class.java) as String?
         return nonCacheableRedirectResponse(redirect ?: "/sosialhjelp/innsyn")
-    }
-
-    private val clientAssertion get() = createSignedAssertion(
-        clientId = idPortenProperties.clientId,
-        audience = idPortenProperties.wellKnown.issuer,
-        rsaKey = privateRsaKey
-    )
-
-    private val privateRsaKey: RSAKey = if (idPortenProperties.clientJwk == "generateRSA") {
-        if (MiljoUtils.isRunningInProd()) throw RuntimeException("Generation of RSA keys is not allowed in prod.")
-        RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyID(UUID.randomUUID().toString()).generate()
-    } else {
-        RSAKey.parse(idPortenProperties.clientJwk)
     }
 
     companion object {

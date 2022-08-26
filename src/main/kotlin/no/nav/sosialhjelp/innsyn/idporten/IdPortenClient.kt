@@ -31,7 +31,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import com.nimbusds.oauth2.sdk.token.AccessToken
 import com.nimbusds.oauth2.sdk.token.RefreshToken
 import com.nimbusds.openid.connect.sdk.Nonce
-import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.createSignedAssertion
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -123,7 +122,7 @@ class IdPortenClient(
             // We got an error response...
             val errorResponse: TokenErrorResponse = response.toErrorResponse()
             log.error("Error: ${errorResponse.errorObject}")
-            throw JwtTokenMissingException("Fikk ikke tak i token")
+            throw RuntimeException("Fikk ikke tak i token")
         }
 
         val successResponse: AccessTokenResponse = response.toSuccessResponse()

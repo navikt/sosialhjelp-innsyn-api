@@ -104,7 +104,7 @@ class IdPortenClient(
 
         redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray())
         redisService.put("IDPORTEN_ACCESS_TOKEN_$sessionId", tokenResponse.accessToken.toByteArray())
-        redisService.put("IDPORTEN_REFRESH_TOKEN_$sessionId", tokenResponse.refreshToken.toByteArray())
+        redisService.put("IDPORTEN_REFRESH_TOKEN_$sessionId", tokenResponse.refreshToken.toByteArray(), 600)
     }
 
     fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String {
@@ -134,7 +134,7 @@ class IdPortenClient(
 
         redisService.put("IDPORTEN_ACCESS_TOKEN_$loginId", accessToken.value.toByteArray())
         if (maybeUpdatedRefreshToken.value != refreshTokenString) {
-            redisService.put("IDPORTEN_REFRESH_TOKEN_$loginId", maybeUpdatedRefreshToken.value.toByteArray())
+            redisService.put("IDPORTEN_REFRESH_TOKEN_$loginId", maybeUpdatedRefreshToken.value.toByteArray(), 600)
         }
 
         return accessToken.value

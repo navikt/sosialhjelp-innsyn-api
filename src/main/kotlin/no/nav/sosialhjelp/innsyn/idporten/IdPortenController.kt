@@ -82,6 +82,19 @@ class IdPortenController(
         return nonCacheableRedirectResponse(redirect ?: "/sosialhjelp/innsyn")
     }
 
+    /**
+     * Utlogging initiert fra egen tjeneste (/endsession)
+     */
+    @Unprotected
+    @GetMapping("/oauth2/logout")
+    fun logout(request: HttpServletRequest): ResponseEntity<String> {
+        val loginId = request.cookies.firstOrNull { it.name == "login_id" }?.value
+            ?: throw RuntimeException("No sessionId found on cookie")
+
+        val endSessionRedirectUrl = idPortenClient.getEndSessionRedirectUrl(loginId)
+        return nonCacheableRedirectResponse(endSessionRedirectUrl.toString())
+    }
+
     companion object {
         private val log by logger()
 

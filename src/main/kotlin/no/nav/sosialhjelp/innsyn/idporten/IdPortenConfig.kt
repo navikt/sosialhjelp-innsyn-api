@@ -16,6 +16,7 @@ class IdPortenConfig(
     @Value("\${idporten_client_jwk}") private val clientJwk: String,
     @Value("\${idporten_redirect_uri}") private val redirectUri: String,
     @Value("\${idporten_clientid}") private val clientId: String,
+    @Value("\${idporten_post_logout_redirect_uri}") private val postLogoutRedirectUri: String,
     webClientBuilder: WebClient.Builder,
     proxiedHttpClient: HttpClient,
 ) {
@@ -27,7 +28,8 @@ class IdPortenConfig(
             wellKnown = wellknown,
             redirectUri = redirectUri,
             clientId = clientId,
-            clientJwk = clientJwk
+            clientJwk = clientJwk,
+            postLogoutRedirectUri = postLogoutRedirectUri
         )
     }
 
@@ -38,7 +40,8 @@ class IdPortenConfig(
             wellKnown = IdPortenWellKnown("issuer", "token_url", "tokenEndepunkt", "jwks_uri", "endSession"),
             redirectUri = redirectUri,
             clientId = clientId,
-            clientJwk = clientJwk
+            clientJwk = clientJwk,
+            postLogoutRedirectUri = postLogoutRedirectUri
         )
     }
 

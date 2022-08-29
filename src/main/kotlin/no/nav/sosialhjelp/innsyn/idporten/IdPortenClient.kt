@@ -30,6 +30,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import com.nimbusds.oauth2.sdk.token.AccessToken
 import com.nimbusds.oauth2.sdk.token.RefreshToken
+import com.nimbusds.openid.connect.sdk.LogoutRequest
 import com.nimbusds.openid.connect.sdk.Nonce
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.createSignedAssertion
@@ -105,6 +106,7 @@ class IdPortenClient(
         redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray())
         redisService.put("IDPORTEN_ACCESS_TOKEN_$sessionId", tokenResponse.accessToken.toByteArray())
         redisService.put("IDPORTEN_REFRESH_TOKEN_$sessionId", tokenResponse.refreshToken.toByteArray(), 600)
+        redisService.put("IDPORTEN_ID_TOKEN_$sessionId", tokenResponse.idToken.toByteArray())
     }
 
     fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String {
@@ -138,6 +140,22 @@ class IdPortenClient(
         }
 
         return accessToken.value
+    }
+
+    fun getEndSessionRedirectUrl(loginId: String): URI {
+        val endSessionEndpointURI = URI(idPortenProperties.wellKnown.endSessionEndpoint)
+        val postLogoutRedirectURI = URI(idPortenProperties.postLogoutRedirectUri)
+        val idToken = redisService.get("IDPORTEN_ID_TOKEN_$loginId", String::class.java) ?: RuntimeException("Uh-oh, fant ikke id_token i cache")
+        val idTokenString = idToken as String
+        val state = State()
+
+        val logoutRequest = LogoutRequest(
+            endSessionEndpointURI,
+            SignedJWT.parse(idTokenString),
+            postLogoutRedirectURI,
+            state
+        )
+        return logoutRequest.toURI()
     }
 
     private val clientAssertion get() = createSignedAssertion(

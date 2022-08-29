@@ -62,3 +62,4 @@ idporten_well_known_url: ${IDPORTEN_WELL_KNOWN_URL:https://oidc-ver2.difi.no/idp
 idporten_clientid: ${IDPORTEN_CLIENT_ID:clientId}
 idporten_client_jwk: ${IDPORTEN_CLIENT_JWK:generateRSA}
 idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI:https://www-q0.dev.nav.no/sosialhjelp/innsyn-api/oauth2/callback}
+idporten_post_logout_redirect_uri: ${IDPORTEN_POST_LOGOUT_REDIRECT_URI:https://www.nav.no}

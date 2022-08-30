@@ -4,6 +4,7 @@ import com.nimbusds.oauth2.sdk.AuthorizationResponse
 import com.nimbusds.oauth2.sdk.id.State
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import no.nav.security.token.support.core.api.Unprotected
+import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders
@@ -44,9 +45,9 @@ class IdPortenController(
         val response = AuthorizationResponse.parse(URI(redirectUri))
 
         val sessionId = request.cookies.firstOrNull { it.name == "login_id" }?.value
-            ?: throw RuntimeException("No sessionId found on cookie")
+            ?: throw TilgangskontrollException("No login_id found from cookie")
         val state = redisService.get("IDPORTEN_STATE_$sessionId", State::class.java) as? State
-            ?: throw RuntimeException("No state found on sessionId")
+            ?: throw TilgangskontrollException("No state found on sessionId")
 
         // Check the returned state parameter, must match the original
         if (state != response.state) {
@@ -68,7 +69,7 @@ class IdPortenController(
         val code = successResponse.authorizationCode
 
         val codeVerifierValue = redisService.get("IDPORTEN_CODE_VERIFIER_$sessionId", String::class.java) as? String
-            ?: throw RuntimeException("No code_verifier found on sessionId")
+            ?: throw TilgangskontrollException("No code_verifier found on sessionId")
 
         idPortenClient.getToken(code, CodeVerifier(codeVerifierValue), sessionId)
 

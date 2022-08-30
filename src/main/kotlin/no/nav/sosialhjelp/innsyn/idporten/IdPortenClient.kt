@@ -102,15 +102,17 @@ class IdPortenClient(
         val claimsSet = jwtProcessor.process(tokenResponse.idToken, null)
 
         val sid = claimsSet.getStringClaim("sid")
-        if (sid.isEmpty()) throw RuntimeException("Empty sid")
+        if (sid.isEmpty()) {
+            log.error("Finner ikke \"sid\" claim i jwt fra idporten. Utlogging vil bli litt trøblete.")
+        }
 
-        redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray(), idPortenProperties.sessionTimeout)
+        sid?.let { redisService.put("IDPORTEN_SESSION_ID_$it", sessionId.toByteArray(), idPortenProperties.sessionTimeout) }
         redisService.put("IDPORTEN_ACCESS_TOKEN_$sessionId", tokenResponse.accessToken.toByteArray(), idPortenProperties.tokenTimeout)
         redisService.put("IDPORTEN_REFRESH_TOKEN_$sessionId", tokenResponse.refreshToken.toByteArray(), idPortenProperties.sessionTimeout)
         redisService.put("IDPORTEN_ID_TOKEN_$sessionId", tokenResponse.idToken.toByteArray())
     }
 
-    fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String {
+    fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String? {
         val refreshToken = RefreshToken(refreshTokenString)
         val refreshTokenGrant: AuthorizationGrant = RefreshTokenGrant(refreshToken)
         val clientAuth = PrivateKeyJWT(SignedJWT.parse(clientAssertion))
@@ -125,7 +127,7 @@ class IdPortenClient(
             // We got an error response...
             val errorResponse: TokenErrorResponse = response.toErrorResponse()
             log.error("Error: ${errorResponse.errorObject}")
-            throw RuntimeException("Fikk ikke tak i token")
+            return null
         }
 
         val successResponse: AccessTokenResponse = response.toSuccessResponse()

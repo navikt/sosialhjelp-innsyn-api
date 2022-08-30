@@ -30,7 +30,7 @@ internal class SaksOversiktServiceTest {
     @BeforeEach
     internal fun setUp() {
         every { digisosSak1.fiksDigisosId } returns "123"
-        every { digisosSak1.sistEndret } returns 0L
+        every { digisosSak1.sistEndret } returns 2000L
         every { digisosSak1.kommunenummer } returns "0301"
 
         every { digisosSak2.fiksDigisosId } returns "456"

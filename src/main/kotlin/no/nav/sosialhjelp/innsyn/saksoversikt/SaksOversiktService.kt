@@ -20,7 +20,7 @@ class SaksOversiktService(
     fun hentAlleSaker(token: String): List<SaksListeResponse> {
         return hentAlleDigisosSakerFraFiks(token).toMutableList()
             .plus(hentAlleSvarUtSoknaderFraSoknadApi(token))
-            .sortedBy { it.sistOppdatert }
+            .sortedByDescending { it.sistOppdatert }
     }
 
     private fun hentAlleDigisosSakerFraFiks(token: String): List<SaksListeResponse> {

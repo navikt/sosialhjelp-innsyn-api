@@ -6,7 +6,7 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.3"
-    const val springBoot = "2.7.1"
+    const val springBoot = "2.7.3"
     const val sosialhjelpCommon = "1.20220629.1332-dfb4541"
     const val logback = "1.2.11"
     const val logstash = "7.2"
@@ -29,6 +29,7 @@ object Versions {
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
     const val log4j = "2.17.2"
+    const val snakeyaml = "1.31"
 
     const val javaJwt = "4.0.0"
     const val jwksRsa = "0.21.1"
@@ -45,7 +46,7 @@ object Versions {
 plugins {
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.spring") version "1.7.10"
-    id("org.springframework.boot") version "2.7.1"
+    id("org.springframework.boot") version "2.7.3"
     id("com.github.ben-manes.versions") version "0.42.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
@@ -161,6 +162,10 @@ dependencies {
         }
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${Versions.log4j}") {
             because("0-day exploit i version 2.0.0-2.14.1")
+        }
+
+        implementation("org.yaml:snakeyaml:${Versions.snakeyaml}") {
+            because("Snyk ønsker 1.31 eller høyere")
         }
 
         testImplementation("junit:junit:${Versions.junit}") {

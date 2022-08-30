@@ -28,6 +28,7 @@ idporten_well_known_url: ${IDPORTEN_WELL_KNOWN_URL:https://idporten}
 idporten_clientid: ${IDPORTEN_CLIENT_ID:clientId}
 idporten_client_jwk: ${IDPORTEN_CLIENT_JWK:generateRSA}
 idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI:https://idporten}
+idporten_post_logout_redirect_uri: https://www.nav.no
 
 innsyn:
   vedlegg:

@@ -30,7 +30,8 @@
     "DIALOG_AUDIENCE": "dev-gcp:teamdigisos:sosialhjelp-dialog-api-dev",
     "CLAMAV_URL": "http://clamav.nais.svc.nais.local/scan",
     "LOGIN_API_IDPORTEN_CLIENTID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
-    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
+    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON",
+    "IDPORTEN_POST_LOGOUT_REDIRECT_URI": "https://www.dev.nav.no/no/utlogget"
   },
   "minReplicas": "1",
   "maxReplicas": "2",
@@ -44,5 +45,6 @@
   "isMock": false,
   "tokenXEnabled": true,
   "maskinportenEnabled": true,
-  "idportenEnabled": true
+  "idportenEnabled": true,
+  "postLogoutRedirectURI": "https://www.dev.nav.no/no/utlogget"
 }

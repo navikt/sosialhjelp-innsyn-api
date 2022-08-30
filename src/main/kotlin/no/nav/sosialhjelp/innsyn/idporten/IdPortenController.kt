@@ -82,6 +82,24 @@ class IdPortenController(
         return nonCacheableRedirectResponse(redirect ?: "/sosialhjelp/innsyn")
     }
 
+    /**
+     * Utlogging initiert fra egen tjeneste (/endsession)
+     */
+    @Unprotected
+    @GetMapping("/oauth2/logout")
+    fun logout(request: HttpServletRequest): ResponseEntity<String> {
+        val loginId = request.cookies.firstOrNull { it.name == "login_id" }?.value
+
+        val endSessionRedirectUrl = idPortenClient.getEndSessionRedirectUrl(loginId)
+
+        log.debug("Single-logout fra egen tjeneste")
+        redisService.delete("IDPORTEN_REFRESH_TOKEN_$loginId")
+        redisService.delete("IDPORTEN_ACCESS_TOKEN_$loginId")
+        redisService.delete("IDPORTEN_ID_TOKEN_$loginId")
+
+        return nonCacheableRedirectResponse(endSessionRedirectUrl.toString())
+    }
+
     companion object {
         private val log by logger()
 

@@ -44,7 +44,7 @@ spec:
     frontchannelLogoutPath: /frontchannel/logout #default
     integrationType: api_klient
     postLogoutRedirectURIs:
-      - https://www.nav.no #default
+      - {{postLogoutRedirectURI}}
     redirectPath: /oauth2/callback #default
     scopes:
      - openid

@@ -38,6 +38,7 @@ class FrontchannelLogoutController(
             log.debug("Frontchannel logout")
             redisService.delete("IDPORTEN_REFRESH_TOKEN_$sessionId")
             redisService.delete("IDPORTEN_ACCESS_TOKEN_$sessionId")
+            redisService.delete("IDPORTEN_ID_TOKEN_$sessionId")
             redisService.delete("IDPORTEN_SESSION_ID_$idPortenSessionId")
             return ResponseEntity.ok().build()
         }

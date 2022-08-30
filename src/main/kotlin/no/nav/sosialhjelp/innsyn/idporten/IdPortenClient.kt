@@ -30,6 +30,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import com.nimbusds.oauth2.sdk.token.AccessToken
 import com.nimbusds.oauth2.sdk.token.RefreshToken
+import com.nimbusds.openid.connect.sdk.LogoutRequest
 import com.nimbusds.openid.connect.sdk.Nonce
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.createSignedAssertion
@@ -105,6 +106,7 @@ class IdPortenClient(
         redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray())
         redisService.put("IDPORTEN_ACCESS_TOKEN_$sessionId", tokenResponse.accessToken.toByteArray())
         redisService.put("IDPORTEN_REFRESH_TOKEN_$sessionId", tokenResponse.refreshToken.toByteArray(), 600)
+        redisService.put("IDPORTEN_ID_TOKEN_$sessionId", tokenResponse.idToken.toByteArray())
     }
 
     fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String {
@@ -140,6 +142,28 @@ class IdPortenClient(
         return accessToken.value
     }
 
+    fun getEndSessionRedirectUrl(loginId: String?): URI {
+        if (loginId == null) {
+            log.info("Ingen sesjonsId funnet - redirecter til /endsession uten id_token_hint og post_logout_redirect_uri")
+            return LogoutRequest(endSessionEndpointURI).toURI()
+        }
+
+        val idToken = redisService.get("IDPORTEN_ID_TOKEN_$loginId", String::class.java)
+        if (idToken == null) {
+            log.info("Fant ikke id_token i cache - redirecter til /endsession uten id_token_hint og post_logout_redirect_uri")
+            return LogoutRequest(endSessionEndpointURI).toURI()
+        }
+
+        val idTokenString = idToken as String
+        val logoutRequest = LogoutRequest(
+            endSessionEndpointURI,
+            SignedJWT.parse(idTokenString),
+            URI(idPortenProperties.postLogoutRedirectUri),
+            null // State er optional.
+        )
+        return logoutRequest.toURI()
+    }
+
     private val clientAssertion get() = createSignedAssertion(
         clientId = idPortenProperties.clientId,
         audience = idPortenProperties.wellKnown.issuer,
@@ -152,6 +176,8 @@ class IdPortenClient(
     } else {
         RSAKey.parse(idPortenProperties.clientJwk)
     }
+
+    private val endSessionEndpointURI get() = URI(idPortenProperties.wellKnown.endSessionEndpoint)
 
     companion object {
         private val log by logger()

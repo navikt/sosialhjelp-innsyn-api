@@ -142,8 +142,11 @@ class IdPortenClient(
         return accessToken.value
     }
 
-    fun getEndSessionRedirectUrl(loginId: String): URI {
-        val endSessionEndpointURI = URI(idPortenProperties.wellKnown.endSessionEndpoint)
+    fun getEndSessionRedirectUrl(loginId: String?): URI {
+        if (loginId == null) {
+            log.debug("Ingen sesjonsId funnet - logger ut uten bruk av idTokenHint og postLogoutRedirectUri")
+            return LogoutRequest(endSessionEndpointURI).toURI()
+        }
         val postLogoutRedirectURI = URI(idPortenProperties.postLogoutRedirectUri)
         val idToken = redisService.get("IDPORTEN_ID_TOKEN_$loginId", String::class.java) ?: RuntimeException("Uh-oh, fant ikke id_token i cache")
         val idTokenString = idToken as String
@@ -169,6 +172,8 @@ class IdPortenClient(
     } else {
         RSAKey.parse(idPortenProperties.clientJwk)
     }
+
+    private val endSessionEndpointURI get() = URI(idPortenProperties.wellKnown.endSessionEndpoint)
 
     companion object {
         private val log by logger()

@@ -89,7 +89,6 @@ class IdPortenController(
     @GetMapping("/oauth2/logout")
     fun logout(request: HttpServletRequest): ResponseEntity<String> {
         val loginId = request.cookies.firstOrNull { it.name == "login_id" }?.value
-            ?: throw RuntimeException("No sessionId found on cookie")
 
         val endSessionRedirectUrl = idPortenClient.getEndSessionRedirectUrl(loginId)
 

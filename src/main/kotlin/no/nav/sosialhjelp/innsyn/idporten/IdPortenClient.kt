@@ -48,16 +48,17 @@ class IdPortenClient(
     private val redisService: RedisService,
 ) {
 
-    fun getAuthorizeUrl(sessionId: String): URI {
+    fun getAuthorizeUrl(sessionId: String, redirectPath: String?): URI {
+        redirectPath?.let { redisService.put("LOGIN_REDIRECT_$sessionId", it.toByteArray(), idPortenProperties.loginTimeout) }
         val state = State().also {
-            redisService.put("IDPORTEN_STATE_$sessionId", objectMapper.writeValueAsBytes(it))
+            redisService.put("IDPORTEN_STATE_$sessionId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
         }
         val nonce = Nonce().also {
-            redisService.put("IDPORTEN_NONCE_$sessionId", objectMapper.writeValueAsBytes(it))
+            redisService.put("IDPORTEN_NONCE_$sessionId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
         }
 
         val codeVerifier = CodeVerifier().also {
-            redisService.put("IDPORTEN_CODE_VERIFIER_$sessionId", it.value.toByteArray())
+            redisService.put("IDPORTEN_CODE_VERIFIER_$sessionId", it.value.toByteArray(), idPortenProperties.loginTimeout)
         }
 
         return AuthorizationRequest.Builder(
@@ -103,9 +104,9 @@ class IdPortenClient(
         val sid = claimsSet.getStringClaim("sid")
         if (sid.isEmpty()) throw RuntimeException("Empty sid")
 
-        redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray())
-        redisService.put("IDPORTEN_ACCESS_TOKEN_$sessionId", tokenResponse.accessToken.toByteArray())
-        redisService.put("IDPORTEN_REFRESH_TOKEN_$sessionId", tokenResponse.refreshToken.toByteArray(), 600)
+        redisService.put("IDPORTEN_SESSION_ID_$sid", sessionId.toByteArray(), idPortenProperties.sessionTimeout)
+        redisService.put("IDPORTEN_ACCESS_TOKEN_$sessionId", tokenResponse.accessToken.toByteArray(), idPortenProperties.tokenTimeout)
+        redisService.put("IDPORTEN_REFRESH_TOKEN_$sessionId", tokenResponse.refreshToken.toByteArray(), idPortenProperties.sessionTimeout)
         redisService.put("IDPORTEN_ID_TOKEN_$sessionId", tokenResponse.idToken.toByteArray())
     }
 

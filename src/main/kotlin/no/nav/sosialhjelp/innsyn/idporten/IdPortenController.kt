@@ -31,9 +31,7 @@ class IdPortenController(
 
         val sessionId = UUID.randomUUID().toString()
 
-        val redirectLocation = idPortenClient.getAuthorizeUrl(sessionId).toString()
-
-        redirectPath?.let { redisService.put("LOGIN_REDIRECT_$sessionId", it.toByteArray()) }
+        val redirectLocation = idPortenClient.getAuthorizeUrl(sessionId, redirectPath).toString()
 
         return nonCacheableRedirectResponse(redirectLocation, sessionId)
     }

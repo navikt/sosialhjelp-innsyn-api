@@ -92,6 +92,12 @@ class IdPortenController(
             ?: throw RuntimeException("No sessionId found on cookie")
 
         val endSessionRedirectUrl = idPortenClient.getEndSessionRedirectUrl(loginId)
+
+        log.debug("Single-logout fra egen tjeneste")
+        redisService.delete("IDPORTEN_REFRESH_TOKEN_$loginId")
+        redisService.delete("IDPORTEN_ACCESS_TOKEN_$loginId")
+        redisService.delete("IDPORTEN_ID_TOKEN_$loginId")
+
         return nonCacheableRedirectResponse(endSessionRedirectUrl.toString())
     }
 

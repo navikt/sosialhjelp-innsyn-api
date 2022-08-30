@@ -147,13 +147,12 @@ class IdPortenClient(
         val postLogoutRedirectURI = URI(idPortenProperties.postLogoutRedirectUri)
         val idToken = redisService.get("IDPORTEN_ID_TOKEN_$loginId", String::class.java) ?: RuntimeException("Uh-oh, fant ikke id_token i cache")
         val idTokenString = idToken as String
-//        val state = State()
 
         val logoutRequest = LogoutRequest(
             endSessionEndpointURI,
             SignedJWT.parse(idTokenString),
             postLogoutRedirectURI,
-            null
+            null // State er optional.
         )
         return logoutRequest.toURI()
     }

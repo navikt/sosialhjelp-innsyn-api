@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 class IdPortenController(
     private val idPortenClient: IdPortenClient,
+    private val idPortenProperties: IdPortenProperties,
     private val redisService: RedisService,
 ) {
 
@@ -31,9 +32,7 @@ class IdPortenController(
 
         val sessionId = UUID.randomUUID().toString()
 
-        val redirectLocation = idPortenClient.getAuthorizeUrl(sessionId).toString()
-
-        redirectPath?.let { redisService.put("LOGIN_REDIRECT_$sessionId", it.toByteArray()) }
+        val redirectLocation = idPortenClient.getAuthorizeUrl(sessionId, redirectPath).toString()
 
         return nonCacheableRedirectResponse(redirectLocation, sessionId)
     }
@@ -100,16 +99,16 @@ class IdPortenController(
         return nonCacheableRedirectResponse(endSessionRedirectUrl.toString())
     }
 
+    private fun nonCacheableRedirectResponse(redirectLocation: String, loginId: String? = null): ResponseEntity<String> {
+        val headers = HttpHeaders()
+        headers.add(HttpHeaders.CACHE_CONTROL, "no-store, no-cache")
+        headers.add(HttpHeaders.PRAGMA, "no-cache")
+        headers.add(HttpHeaders.LOCATION, redirectLocation)
+        loginId?.let { headers.add(HttpHeaders.SET_COOKIE, "login_id=$it; Max-Age=${idPortenProperties.sessionTimeout}; Path=/; Secure; HttpOnly") }
+        return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build()
+    }
+
     companion object {
         private val log by logger()
-
-        private fun nonCacheableRedirectResponse(redirectLocation: String, loginId: String? = null): ResponseEntity<String> {
-            val headers = HttpHeaders()
-            headers.add(HttpHeaders.CACHE_CONTROL, "no-store, no-cache")
-            headers.add(HttpHeaders.PRAGMA, "no-cache")
-            headers.add(HttpHeaders.LOCATION, redirectLocation)
-            loginId?.let { headers.add(HttpHeaders.SET_COOKIE, "login_id=$it; Max-Age=3600; Path=/; Secure; HttpOnly") }
-            return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build()
-        }
     }
 }

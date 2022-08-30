@@ -73,6 +73,9 @@ idporten_clientid: ${IDPORTEN_CLIENT_ID}
 idporten_client_jwk: ${IDPORTEN_CLIENT_JWK}
 idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI}
 idporten_post_logout_redirect_uri: ${IDPORTEN_POST_LOGOUT_REDIRECT_URI}
+idporten_login_timeout: ${IDPORTEN_LOGIN_TIMEOUT:3600}
+idporten_session_timeout: ${IDPORTEN_SESSION_TIMEOUT:7200}
+idporten_token_timeout: ${IDPORTEN_TOKEN_TIMEOUT:3600}
 
 #Token-validering
 no.nav.security.jwt:

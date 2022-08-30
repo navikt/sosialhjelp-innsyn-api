@@ -17,6 +17,9 @@ class IdPortenConfig(
     @Value("\${idporten_redirect_uri}") private val redirectUri: String,
     @Value("\${idporten_clientid}") private val clientId: String,
     @Value("\${idporten_post_logout_redirect_uri}") private val postLogoutRedirectUri: String,
+    @Value("\${idporten_login_timeout}") private val loginTimeout: Long,
+    @Value("\${idporten_session_timeout}") private val sessionTimeout: Long,
+    @Value("\${idporten_token_timeout}") private val tokenTimeout: Long,
     webClientBuilder: WebClient.Builder,
     proxiedHttpClient: HttpClient,
 ) {
@@ -29,7 +32,10 @@ class IdPortenConfig(
             redirectUri = redirectUri,
             clientId = clientId,
             clientJwk = clientJwk,
-            postLogoutRedirectUri = postLogoutRedirectUri
+            postLogoutRedirectUri = postLogoutRedirectUri,
+            loginTimeout = loginTimeout,
+            sessionTimeout = sessionTimeout,
+            tokenTimeout = tokenTimeout
         )
     }
 
@@ -41,7 +47,10 @@ class IdPortenConfig(
             redirectUri = redirectUri,
             clientId = clientId,
             clientJwk = clientJwk,
-            postLogoutRedirectUri = postLogoutRedirectUri
+            postLogoutRedirectUri = postLogoutRedirectUri,
+            loginTimeout = loginTimeout,
+            sessionTimeout = sessionTimeout,
+            tokenTimeout = tokenTimeout
         )
     }
 

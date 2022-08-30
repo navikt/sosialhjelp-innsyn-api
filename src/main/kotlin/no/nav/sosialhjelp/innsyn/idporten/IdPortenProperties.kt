@@ -5,5 +5,8 @@ data class IdPortenProperties(
     val redirectUri: String,
     val clientId: String,
     val clientJwk: String,
-    val postLogoutRedirectUri: String
+    val postLogoutRedirectUri: String,
+    val loginTimeout: Long,
+    val sessionTimeout: Long,
+    val tokenTimeout: Long
 )

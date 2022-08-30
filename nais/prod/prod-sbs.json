@@ -29,7 +29,8 @@
     "DIALOG_AUDIENCE": "prod-gcp:teamdigisos:sosialhjelp-dialog-api",
     "CLAMAV_URL": "http://clamav.nais.svc.nais.local/scan",
     "LOGIN_API_IDPORTEN_CLIENTID": "bd520e59-6e01-4669-a7c8-f68fa2cac362",
-    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16"
+    "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16",
+    "IDPORTEN_POST_LOGOUT_REDIRECT_URI": "https://www.nav.no/no/utlogget"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

@@ -7,9 +7,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
+import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
@@ -26,7 +25,6 @@ import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.MOTTATT
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -35,13 +33,13 @@ import org.springframework.http.HttpStatus
 
 internal class SaksOversiktControllerTest {
 
+    private val saksOversiktService: SaksOversiktService = mockk()
     private val fiksClient: FiksClient = mockk()
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val tilgangskontroll: Tilgangskontroll = mockk()
-    private val unleashClient: Unleash = mockk()
 
-    private val controller = SaksOversiktController(fiksClient, eventService, oppgaveService, tilgangskontroll, unleashClient)
+    private val controller = SaksOversiktController(saksOversiktService, fiksClient, eventService, oppgaveService, tilgangskontroll)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -84,8 +82,6 @@ internal class SaksOversiktControllerTest {
         every { oppgaveService.getVilkar("456", any()) } returns listOf(vilkarResponseMock) // 1 oppgave
         every { oppgaveService.getDokumentasjonkrav("123", any()) } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
         every { oppgaveService.getDokumentasjonkrav("456", any()) } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
-
-        every { unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false) } returns false
     }
 
     @AfterEach
@@ -94,35 +90,12 @@ internal class SaksOversiktControllerTest {
     }
 
     @Test
-    fun `skal mappe fra DigisosSak til SakResponse`() {
-        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2)
-
-        every { model1.status } returns MOTTATT
-        every { model2.status } returns UNDER_BEHANDLING
-
-        every { model1.oppgaver.isEmpty() } returns false
-        every { model2.oppgaver.isEmpty() } returns false
-
-        every { sak1.tittel } returns "Livsopphold"
-        every { sak2.tittel } returns "Strøm"
-
-        every { model2.saker } returns mutableListOf(sak1, sak2)
+    internal fun `skal returnere 503 ved FiksException`() {
+        every { saksOversiktService.hentAlleSaker(any()) } throws FiksException("message", null)
 
         val response = controller.hentAlleSaker("token")
 
-        val saker = response.body
-        assertThat(saker).isNotNull
-        assertThat(saker).hasSize(2)
-
-        if (saker != null && saker.size == 2) {
-            val first = saker[0]
-            assertThat(first.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
-            assertThat(first.kilde).isEqualTo(KILDE_INNSYN_API)
-
-            val second = saker[1]
-            assertThat(second.soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
-            assertThat(second.kilde).isEqualTo(KILDE_INNSYN_API)
-        }
+        assertThat(response.statusCode).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
     }
 
     @Test

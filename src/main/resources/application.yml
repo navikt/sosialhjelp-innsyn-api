@@ -60,6 +60,8 @@ client:
   dialog_endpoint_url: ${DIALOG_ENDPOINT_URL}
   dialog_audience: ${DIALOG_AUDIENCE}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
+  soknad_api_url: ${SOKNAD_API_URL}
+  soknad_api_audience: ${SOKNAD_API_AUDIENCE}
 
 
 #Maskinporten

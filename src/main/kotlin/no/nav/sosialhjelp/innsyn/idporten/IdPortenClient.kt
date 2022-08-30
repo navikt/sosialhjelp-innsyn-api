@@ -144,17 +144,21 @@ class IdPortenClient(
 
     fun getEndSessionRedirectUrl(loginId: String?): URI {
         if (loginId == null) {
-            log.debug("Ingen sesjonsId funnet - logger ut uten bruk av idTokenHint og postLogoutRedirectUri")
+            log.info("Ingen sesjonsId funnet - redirecter til /endsession uten id_token_hint og post_logout_redirect_uri")
             return LogoutRequest(endSessionEndpointURI).toURI()
         }
-        val postLogoutRedirectURI = URI(idPortenProperties.postLogoutRedirectUri)
-        val idToken = redisService.get("IDPORTEN_ID_TOKEN_$loginId", String::class.java) ?: RuntimeException("Uh-oh, fant ikke id_token i cache")
-        val idTokenString = idToken as String
 
+        val idToken = redisService.get("IDPORTEN_ID_TOKEN_$loginId", String::class.java)
+        if (idToken == null) {
+            log.info("Fant ikke id_token i cache - redirecter til /endsession uten id_token_hint og post_logout_redirect_uri")
+            return LogoutRequest(endSessionEndpointURI).toURI()
+        }
+
+        val idTokenString = idToken as String
         val logoutRequest = LogoutRequest(
             endSessionEndpointURI,
             SignedJWT.parse(idTokenString),
-            postLogoutRedirectURI,
+            URI(idPortenProperties.postLogoutRedirectUri),
             null // State er optional.
         )
         return logoutRequest.toURI()

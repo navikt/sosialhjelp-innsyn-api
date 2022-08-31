@@ -31,7 +31,7 @@
     "CLAMAV_URL": "http://clamav.nais.svc.nais.local/scan",
     "LOGIN_API_IDPORTEN_CLIENTID": "1c3631f4-dbf2-4c12-bdc4-156cbd53c625",
     "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON",
-    "SOKNAD_API_URL": "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api",
+    "SOKNAD_API_URL": "https://sosialhjelp-soknad-api.dev.nav.no/sosialhjelp/soknad-api",
     "SOKNAD_API_AUDIENCE": "dev-sbs:teamdigisos:sosialhjelp-soknad-api"
   },
   "minReplicas": "1",

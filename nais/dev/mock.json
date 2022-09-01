@@ -8,7 +8,8 @@
   "outboundExternalHosts": ["unleash.nais.io"],
   "outboundRulesApplications": [
     "sosialhjelp-mock-alt-api-mock",
-    "sosialhjelp-dialog-api-mock"
+    "sosialhjelp-dialog-api-mock",
+    "sosialhjelp-soknad-api-mock"
   ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "mock-alt,log-console,mock-redis",

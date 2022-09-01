@@ -20,7 +20,8 @@
   ],
   "outboundRulesApplications": [
     "sosialhjelp-innsyn-api-redis",
-    "sosialhjelp-dialog-api-dev"
+    "sosialhjelp-dialog-api-dev",
+    "sosialhjelp-soknad-api-dev"
   ],
   "env": {
     "SPRING_PROFILES_ACTIVE": "dev,log-kibana",

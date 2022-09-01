@@ -35,7 +35,7 @@ class FrontchannelLogoutController(
 
         val sessionId = redisService.get("IDPORTEN_SESSION_ID_$idPortenSessionId", String::class.java) as? String
         if (sessionId != null) {
-            log.debug("Frontchannel logout")
+            log.info("Frontchannel logout trigget")
             redisService.delete("IDPORTEN_REFRESH_TOKEN_$sessionId")
             redisService.delete("IDPORTEN_ACCESS_TOKEN_$sessionId")
             redisService.delete("IDPORTEN_ID_TOKEN_$sessionId")

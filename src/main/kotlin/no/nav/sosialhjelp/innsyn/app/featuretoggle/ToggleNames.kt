@@ -13,3 +13,5 @@ const val DIALOG_UNDERSOKELSE_GRUPPE_3 = "sosialhjelp.innsyn.dialog-undersokelse
 const val DIALOG_UNDERSOKELSE_GRUPPE_4 = "sosialhjelp.innsyn.dialog-undersokelse-gruppe-4"
 
 const val FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER = "sosialhjelp.innsyn.fagsystem-med-papirsoknader-loggmelding"
+
+const val HENT_SVARUT_SOKNADER_I_BACKEND = "sosialhjelp.innsyn.hent-svarut-soknader-i-backend"

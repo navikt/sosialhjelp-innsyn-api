@@ -33,6 +33,7 @@ import com.nimbusds.oauth2.sdk.token.RefreshToken
 import com.nimbusds.openid.connect.sdk.LogoutRequest
 import com.nimbusds.openid.connect.sdk.Nonce
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
+import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.app.tokendings.createSignedAssertion
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -94,10 +95,17 @@ class IdPortenClient(
         val jwtProcessor = DefaultJWTProcessor<SecurityContext>()
         val keySource = RemoteJWKSet<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri))
         val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, keySource)
+
+        val storedNonce = redisService.get("IDPORTEN_NONCE_$sessionId", Nonce::class.java) as? Nonce
+            ?: throw TilgangskontrollException("No nonce found on sessionId")
+
         jwtProcessor.jwsKeySelector = keySelector
         jwtProcessor.jwtClaimsSetVerifier = DefaultJWTClaimsVerifier(
-            JWTClaimsSet.Builder().issuer(idPortenProperties.wellKnown.issuer).build(),
-            setOf("sid")
+            JWTClaimsSet.Builder()
+                .issuer(idPortenProperties.wellKnown.issuer)
+                .claim("nonce", storedNonce.value)
+                .build(),
+            setOf("sid", "nonce")
         )
         val claimsSet = jwtProcessor.process(tokenResponse.idToken, null)
 

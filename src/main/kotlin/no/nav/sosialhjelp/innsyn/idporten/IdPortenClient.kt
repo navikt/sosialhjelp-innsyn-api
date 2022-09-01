@@ -109,6 +109,7 @@ class IdPortenClient(
         )
         val claimsSet = jwtProcessor.process(tokenResponse.idToken, null)
 
+        // Kan hende denne sjekken er overflødig
         val sid = claimsSet.getStringClaim("sid")
         if (sid.isEmpty()) {
             log.error("Finner ikke \"sid\" claim i jwt fra idporten. Utlogging vil bli litt trøblete.")

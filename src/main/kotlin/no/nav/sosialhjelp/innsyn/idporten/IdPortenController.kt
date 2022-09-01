@@ -2,7 +2,6 @@ package no.nav.sosialhjelp.innsyn.idporten
 
 import com.nimbusds.oauth2.sdk.AuthorizationResponse
 import com.nimbusds.oauth2.sdk.id.State
-import com.nimbusds.oauth2.sdk.pkce.CodeVerifier
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -68,10 +67,7 @@ class IdPortenController(
         // an access token at the token endpoint of the server
         val code = successResponse.authorizationCode
 
-        val codeVerifierValue = redisService.get("IDPORTEN_CODE_VERIFIER_$sessionId", String::class.java) as? String
-            ?: throw TilgangskontrollException("No code_verifier found on sessionId")
-
-        idPortenClient.getToken(code, CodeVerifier(codeVerifierValue), sessionId)
+        idPortenClient.getToken(code, sessionId)
 
         // Disse trengs bare midlertidig
         redisService.delete("IDPORTEN_STATE_$sessionId")

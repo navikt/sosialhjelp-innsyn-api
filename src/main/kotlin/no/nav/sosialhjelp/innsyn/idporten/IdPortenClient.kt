@@ -77,15 +77,21 @@ class IdPortenClient(
             .toURI()
     }
 
-    fun getToken(authorizationCode: AuthorizationCode?, codeVerifier: CodeVerifier, sessionId: String) {
-        val callback = URI(idPortenProperties.redirectUri)
-        val codeGrant: AuthorizationGrant = AuthorizationCodeGrant(authorizationCode, callback, codeVerifier)
+    fun getToken(authorizationCode: AuthorizationCode?, sessionId: String) {
+        val codeVerifierValue = redisService.get("IDPORTEN_CODE_VERIFIER_$sessionId", String::class.java) as? String
+            ?: throw TilgangskontrollException("No code_verifier found on sessionId")
+
+        val authorizationCodeGrant = AuthorizationCodeGrant(
+            authorizationCode,
+            URI(idPortenProperties.redirectUri),
+            CodeVerifier(codeVerifierValue)
+        )
         val clientAuth = PrivateKeyJWT(SignedJWT.parse(clientAssertion))
 
         val tokenRequest = TokenRequest(
             URI(idPortenProperties.wellKnown.tokenEndpoint),
             clientAuth,
-            codeGrant,
+            authorizationCodeGrant,
             Scope("openid", "profile", "ks:fiks")
         )
 

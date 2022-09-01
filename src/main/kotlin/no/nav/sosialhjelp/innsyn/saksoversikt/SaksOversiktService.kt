@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.saksoversikt
 
 import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
+import no.nav.sosialhjelp.innsyn.app.featuretoggle.HENT_SVARUT_SOKNADER_I_BACKEND
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.saksoversikt.soknadapi.SoknadApiClient
@@ -52,7 +53,10 @@ class SaksOversiktService(
     }
 
     private fun hentAlleSvarUtSoknaderFraSoknadApi(token: String): List<SaksListeResponse> {
-        return soknadApiClient.getSvarUtSoknader(token)
+        if (unleashClient.isEnabled(HENT_SVARUT_SOKNADER_I_BACKEND, false)) {
+            return soknadApiClient.getSvarUtSoknader(token)
+        }
+        return emptyList()
     }
 
     companion object {

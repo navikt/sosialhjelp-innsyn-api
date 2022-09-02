@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
+import no.nav.sosialhjelp.innsyn.saksoversikt.soknadapi.SoknadApiClient
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.testutils.MockOauth2ServerUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -51,6 +52,9 @@ class SaksOversiktItest {
     @MockkBean
     lateinit var norgClient: NorgClient
 
+    @MockkBean
+    lateinit var soknadApiClient: SoknadApiClient
+
     private val navEnhet: NavEnhet = mockk()
 
     var token: String = ""
@@ -65,6 +69,8 @@ class SaksOversiktItest {
 
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
+
+        every { soknadApiClient.getSvarUtSoknader(any()) } returns emptyList()
 
         webClient
             .get()

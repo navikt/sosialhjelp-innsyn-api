@@ -15,8 +15,11 @@ import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
+import no.nav.sosialhjelp.innsyn.saksoversikt.SaksListeResponse
+import no.nav.sosialhjelp.innsyn.saksoversikt.soknadapi.SoknadApiClient
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.testutils.MockOauth2ServerUtils
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_SOKNAD_API
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,6 +31,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
+import java.util.Date
 
 @ContextConfiguration(classes = [PdlIntegrationTestConfig::class])
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -51,6 +55,9 @@ class SaksOversiktIntegrasjonstest {
     @MockkBean
     lateinit var norgClient: NorgClient
 
+    @MockkBean
+    lateinit var soknadApiClient: SoknadApiClient
+
     private val navEnhet: NavEnhet = mockk()
 
     var token: String = ""
@@ -66,6 +73,9 @@ class SaksOversiktIntegrasjonstest {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
 
+        val svarUtSoknadInfo = SaksListeResponse(null, "tittel", Date(), KILDE_SOKNAD_API, "someUrl")
+        every { soknadApiClient.getSvarUtSoknader(any()) } returns listOf(svarUtSoknadInfo)
+
         webClient
             .get()
             .uri("/api/v1/innsyn/saker")
@@ -73,8 +83,11 @@ class SaksOversiktIntegrasjonstest {
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
             .expectStatus().isOk
+            .expectBodyList(SaksListeResponse::class.java)
+            .hasSize(2)
 
         verify(exactly = 1) { fiksClient.hentAlleDigisosSaker(any()) }
+        verify(exactly = 1) { soknadApiClient.getSvarUtSoknader(any()) }
     }
 
     @Test

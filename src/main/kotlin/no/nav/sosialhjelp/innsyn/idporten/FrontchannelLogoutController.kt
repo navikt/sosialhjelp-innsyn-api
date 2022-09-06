@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
 import no.nav.security.token.support.core.api.Unprotected
-import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class FrontchannelLogoutController(
     private val idPortenProperties: IdPortenProperties,
-    private val redisService: RedisService,
+    private val idPortenSessionHandler: IdPortenSessionHandler,
 ) {
 
     /**
@@ -28,26 +27,17 @@ class FrontchannelLogoutController(
             return ResponseEntity.badRequest().build()
         }
 
-        if (!isValidSid(idPortenSessionId)) {
+        if (idPortenSessionId == null || !isValidSid(idPortenSessionId)) {
             log.warn("Ugyldig 'sid' ved utlogging")
             return ResponseEntity.badRequest().build()
         }
 
-        val sessionId = redisService.get("IDPORTEN_SESSION_ID_$idPortenSessionId", String::class.java) as? String
-        if (sessionId != null) {
-            log.info("Frontchannel logout trigget")
-            redisService.delete("IDPORTEN_REFRESH_TOKEN_$sessionId")
-            redisService.delete("IDPORTEN_ACCESS_TOKEN_$sessionId")
-            redisService.delete("IDPORTEN_ID_TOKEN_$sessionId")
-            redisService.delete("IDPORTEN_SESSION_ID_$idPortenSessionId")
-            return ResponseEntity.ok().build()
-        }
-
-        return ResponseEntity.badRequest().build()
+        log.info("Frontchannel logout trigget")
+        idPortenSessionHandler.clearSession(idPortenSessionId)
+        return ResponseEntity.ok().build()
     }
 
-    private fun isValidSid(sid: String?): Boolean {
-        if (sid == null) return false
+    private fun isValidSid(sid: String): Boolean {
         return sid.matches(Regex("[0-9a-zA-Z_=-]{1,100}"))
     }
 

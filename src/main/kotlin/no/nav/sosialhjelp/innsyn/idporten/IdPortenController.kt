@@ -4,6 +4,8 @@ import com.nimbusds.oauth2.sdk.AuthorizationResponse
 import com.nimbusds.oauth2.sdk.id.State
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.LOGIN_REDIRECT_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.STATE_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders
@@ -21,6 +23,7 @@ class IdPortenController(
     private val idPortenClient: IdPortenClient,
     private val idPortenProperties: IdPortenProperties,
     private val redisService: RedisService,
+    private val idPortenSessionHandler: IdPortenSessionHandler
 ) {
 
     @Unprotected
@@ -45,7 +48,7 @@ class IdPortenController(
 
         val sessionId = request.cookies.firstOrNull { it.name == "login_id" }?.value
             ?: throw TilgangskontrollException("No login_id found from cookie")
-        val state = redisService.get("IDPORTEN_STATE_$sessionId", State::class.java) as? State
+        val state = redisService.get("$STATE_CACHE_PREFIX$sessionId", State::class.java) as? State
             ?: throw TilgangskontrollException("No state found on sessionId")
 
         // Check the returned state parameter, must match the original
@@ -69,17 +72,14 @@ class IdPortenController(
 
         idPortenClient.getToken(code, sessionId)
 
-        // Disse trengs bare midlertidig
-        redisService.delete("IDPORTEN_STATE_$sessionId")
-        redisService.delete("IDPORTEN_NONCE_$sessionId")
-        redisService.delete("IDPORTEN_CODE_VERIFIER_$sessionId")
+        idPortenSessionHandler.clearPropertiesForLogin(sessionId)
 
-        val redirect = redisService.get("LOGIN_REDIRECT_$sessionId", String::class.java) as String?
+        val redirect = redisService.get("$LOGIN_REDIRECT_CACHE_PREFIX$sessionId", String::class.java) as String?
         return nonCacheableRedirectResponse(redirect ?: "/sosialhjelp/innsyn")
     }
 
     /**
-     * Utlogging initiert fra egen tjeneste (/endsession)
+     * Utlogging initiert fra egen tjeneste
      */
     @Unprotected
     @GetMapping("/oauth2/logout")
@@ -89,9 +89,7 @@ class IdPortenController(
         val endSessionRedirectUrl = idPortenClient.getEndSessionRedirectUrl(loginId)
 
         log.debug("Single-logout fra egen tjeneste")
-        redisService.delete("IDPORTEN_REFRESH_TOKEN_$loginId")
-        redisService.delete("IDPORTEN_ACCESS_TOKEN_$loginId")
-        redisService.delete("IDPORTEN_ID_TOKEN_$loginId")
+        loginId?.let { idPortenSessionHandler.clearTokens(it) }
 
         return nonCacheableRedirectResponse(endSessionRedirectUrl.toString())
     }

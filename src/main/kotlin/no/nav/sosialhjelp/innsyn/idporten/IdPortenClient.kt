@@ -35,6 +35,14 @@ import com.nimbusds.openid.connect.sdk.Nonce
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.app.tokendings.createSignedAssertion
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.ACCESS_TOKEN_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.CODE_VERIFIER_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.ID_TOKEN_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.LOGIN_REDIRECT_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.NONCE_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.REFRESH_TOKEN_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.SESSION_ID_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.STATE_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -50,16 +58,16 @@ class IdPortenClient(
 ) {
 
     fun getAuthorizeUrl(sessionId: String, redirectPath: String?): URI {
-        redirectPath?.let { redisService.put("LOGIN_REDIRECT_$sessionId", it.toByteArray(), idPortenProperties.loginTimeout) }
+        redirectPath?.let { redisService.put("$LOGIN_REDIRECT_CACHE_PREFIX$sessionId", it.toByteArray(), idPortenProperties.loginTimeout) }
         val state = State().also {
-            redisService.put("IDPORTEN_STATE_$sessionId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
+            redisService.put("$STATE_CACHE_PREFIX$sessionId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
         }
         val nonce = Nonce().also {
-            redisService.put("IDPORTEN_NONCE_$sessionId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
+            redisService.put("$NONCE_CACHE_PREFIX$sessionId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
         }
 
         val codeVerifier = CodeVerifier().also {
-            redisService.put("IDPORTEN_CODE_VERIFIER_$sessionId", it.value.toByteArray(), idPortenProperties.loginTimeout)
+            redisService.put("$CODE_VERIFIER_CACHE_PREFIX$sessionId", it.value.toByteArray(), idPortenProperties.loginTimeout)
         }
 
         return AuthorizationRequest.Builder(
@@ -78,7 +86,7 @@ class IdPortenClient(
     }
 
     fun getToken(authorizationCode: AuthorizationCode?, sessionId: String) {
-        val codeVerifierValue = redisService.get("IDPORTEN_CODE_VERIFIER_$sessionId", String::class.java) as? String
+        val codeVerifierValue = redisService.get("$CODE_VERIFIER_CACHE_PREFIX$sessionId", String::class.java) as? String
             ?: throw TilgangskontrollException("No code_verifier found on sessionId")
 
         val authorizationCodeGrant = AuthorizationCodeGrant(
@@ -102,7 +110,7 @@ class IdPortenClient(
         val keySource = RemoteJWKSet<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri))
         val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, keySource)
 
-        val storedNonce = redisService.get("IDPORTEN_NONCE_$sessionId", Nonce::class.java) as? Nonce
+        val storedNonce = redisService.get("$NONCE_CACHE_PREFIX$sessionId", Nonce::class.java) as? Nonce
             ?: throw TilgangskontrollException("No nonce found on sessionId")
 
         jwtProcessor.jwsKeySelector = keySelector
@@ -121,10 +129,10 @@ class IdPortenClient(
             log.error("Finner ikke \"sid\" claim i jwt fra idporten. Utlogging vil bli litt trøblete.")
         }
 
-        sid?.let { redisService.put("IDPORTEN_SESSION_ID_$it", sessionId.toByteArray(), idPortenProperties.sessionTimeout) }
-        redisService.put("IDPORTEN_ACCESS_TOKEN_$sessionId", tokenResponse.accessToken.toByteArray(), idPortenProperties.tokenTimeout)
-        redisService.put("IDPORTEN_REFRESH_TOKEN_$sessionId", tokenResponse.refreshToken.toByteArray(), idPortenProperties.sessionTimeout)
-        redisService.put("IDPORTEN_ID_TOKEN_$sessionId", tokenResponse.idToken.toByteArray())
+        sid?.let { redisService.put("$SESSION_ID_CACHE_PREFIX$it", sessionId.toByteArray(), idPortenProperties.sessionTimeout) }
+        redisService.put("$ACCESS_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.accessToken.toByteArray(), idPortenProperties.tokenTimeout)
+        redisService.put("$REFRESH_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.refreshToken.toByteArray(), idPortenProperties.sessionTimeout)
+        redisService.put("$ID_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.idToken.toByteArray())
     }
 
     fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String? {
@@ -150,11 +158,10 @@ class IdPortenClient(
         // Get the access token, the refresh token may be updated
         val accessToken: AccessToken = successResponse.tokens.accessToken
         val maybeUpdatedRefreshToken = successResponse.tokens.refreshToken
-        successResponse.tokens.bearerAccessToken
 
-        redisService.put("IDPORTEN_ACCESS_TOKEN_$loginId", accessToken.value.toByteArray())
+        redisService.put("$ACCESS_TOKEN_CACHE_PREFIX$loginId", accessToken.value.toByteArray())
         if (maybeUpdatedRefreshToken.value != refreshTokenString) {
-            redisService.put("IDPORTEN_REFRESH_TOKEN_$loginId", maybeUpdatedRefreshToken.value.toByteArray(), 600)
+            redisService.put("$REFRESH_TOKEN_CACHE_PREFIX$loginId", maybeUpdatedRefreshToken.value.toByteArray(), 600)
         }
 
         return accessToken.value
@@ -166,7 +173,7 @@ class IdPortenClient(
             return LogoutRequest(endSessionEndpointURI).toURI()
         }
 
-        val idToken = redisService.get("IDPORTEN_ID_TOKEN_$loginId", String::class.java)
+        val idToken = redisService.get("$ID_TOKEN_CACHE_PREFIX$loginId", String::class.java)
         if (idToken == null) {
             log.info("Fant ikke id_token i cache - redirecter til /endsession uten id_token_hint og post_logout_redirect_uri")
             return LogoutRequest(endSessionEndpointURI).toURI()

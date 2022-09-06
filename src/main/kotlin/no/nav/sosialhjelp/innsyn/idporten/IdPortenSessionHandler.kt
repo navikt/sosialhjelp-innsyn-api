@@ -8,7 +8,6 @@ import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.REFRESH_TOKEN_CACHE_PREF
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.SESSION_ID_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.STATE_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
-import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import javax.servlet.http.HttpServletRequest
 
@@ -50,9 +49,5 @@ class IdPortenSessionHandler(
     private fun getAccessTokenFromRefreshToken(loginId: String): String? {
         val refreshToken = redisService.get("$REFRESH_TOKEN_CACHE_PREFIX$loginId", String::class.java) as String?
         return refreshToken?.let { idPortenClient.getAccessTokenFromRefreshToken(it, loginId) }
-    }
-
-    companion object {
-        private val log by logger()
     }
 }

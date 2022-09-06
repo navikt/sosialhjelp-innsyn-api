@@ -9,7 +9,7 @@ object Versions {
     const val coroutines = "1.6.4"
     const val springBoot = "2.7.3"
     const val sosialhjelpCommon = "1.20220718.1347-2b1045d"
-    const val logback = "1.4.0"
+    const val logback = "1.2.11"
     const val logstash = "7.2"
     const val filformat = "1.2022.07.19-14.28-614820e5640b"
     const val micrometerRegistry = "1.9.3"

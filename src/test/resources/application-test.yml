@@ -49,5 +49,3 @@ no.nav.security.jwt:
     accepted_audience: someaudience
     cookie_name: localhost-idtoken
 innsyn.loginurl: http://localhost:8080/sosialhjelp/innsyn-api/local/cookie
-
-login_api_idporten_clientid: clientId

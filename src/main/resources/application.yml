@@ -89,8 +89,6 @@ no.nav.security.jwt:
     order: -2147483647 # Integer.MIN + 1 = -2147483647
 innsyn.loginurl: ${INNSYN_LOGINURL}
 
-login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID}
-
 innsyn:
   vedlegg:
     virusscan:

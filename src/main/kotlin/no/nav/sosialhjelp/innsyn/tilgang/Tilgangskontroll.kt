@@ -9,7 +9,6 @@ import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPerson
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.isKode6Or7
 import no.nav.sosialhjelp.innsyn.utils.logger
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.util.Locale
@@ -23,12 +22,10 @@ interface Tilgangskontroll {
 @Profile("!local")
 @Component
 class TilgangskontrollService(
-    @Value("\${login_api_idporten_clientid}") private val loginApiClientId: String,
     private val pdlClient: PdlClient
 ) : Tilgangskontroll {
 
     override fun sjekkTilgang(token: String) {
-//        if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)
     }
 

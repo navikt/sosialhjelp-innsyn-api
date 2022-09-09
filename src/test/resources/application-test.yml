@@ -26,10 +26,10 @@ maskinporten_scopes: scopes
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:https://maskinporten}
 maskinporten_client_jwk: generateRSA
 
-idporten_well_known_url: ${IDPORTEN_WELL_KNOWN_URL:http://localhost:${mock-oauth2-server.port}/idporten/.well-known/openid-configuration}
-idporten_clientid: ${IDPORTEN_CLIENT_ID:clientId}
-idporten_client_jwk: ${IDPORTEN_CLIENT_JWK:generateRSA}
-idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI:https://idporten}
+idporten_well_known_url: http://localhost:${mock-oauth2-server.port}/idporten/.well-known/openid-configuration
+idporten_clientid: sosialhjelp-innsyn-api
+idporten_client_jwk: generateRSA
+idporten_redirect_uri: http://localhost:8080/sosialhjelp/innsyn-api/oauth2/callback
 idporten_post_logout_redirect_uri: https://www.nav.no
 
 innsyn:

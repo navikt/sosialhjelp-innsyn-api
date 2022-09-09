@@ -99,7 +99,7 @@ class IdPortenController(
         headers.add(HttpHeaders.CACHE_CONTROL, "no-store, no-cache")
         headers.add(HttpHeaders.PRAGMA, "no-cache")
         headers.add(HttpHeaders.LOCATION, redirectLocation)
-        loginId?.let { headers.add(HttpHeaders.SET_COOKIE, "login_id=$it; Max-Age=${idPortenProperties.sessionTimeout}; Path=/; Secure; HttpOnly") }
+        loginId?.let { headers.add(HttpHeaders.SET_COOKIE, "login_id=$it; Max-Age=${idPortenProperties.sessionTimeout}; Path=/sosialhjelp; Secure; HttpOnly") }
         return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build()
     }
 

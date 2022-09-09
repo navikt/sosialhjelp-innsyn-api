@@ -32,12 +32,9 @@ class IdPortenController(
         request: HttpServletRequest,
         @RequestParam("goto") redirectPath: String?,
     ): ResponseEntity<String> {
-
-        val sessionId = UUID.randomUUID().toString()
-
-        val redirectLocation = idPortenClient.getAuthorizeUrl(sessionId, redirectPath).toString()
-
-        return nonCacheableRedirectResponse(redirectLocation, sessionId)
+        val loginId = UUID.randomUUID().toString()
+        val redirectLocation = idPortenClient.getAuthorizeUrl(loginId, redirectPath).toString()
+        return nonCacheableRedirectResponse(redirectLocation, loginId)
     }
 
     @Unprotected
@@ -46,10 +43,10 @@ class IdPortenController(
         val redirectUri = request.requestURL.append('?').append(request.queryString).toString()
         val response = AuthorizationResponse.parse(URI(redirectUri))
 
-        val sessionId = request.cookies.firstOrNull { it.name == "login_id" }?.value
+        val loginId = request.cookies.firstOrNull { it.name == "login_id" }?.value
             ?: throw TilgangskontrollException("No login_id found from cookie")
-        val state = redisService.get("$STATE_CACHE_PREFIX$sessionId", State::class.java) as? State
-            ?: throw TilgangskontrollException("No state found on sessionId")
+        val state = redisService.get("$STATE_CACHE_PREFIX$loginId", State::class.java) as? State
+            ?: throw TilgangskontrollException("No state found on loginId")
 
         // Check the returned state parameter, must match the original
         if (state != response.state) {
@@ -70,11 +67,11 @@ class IdPortenController(
         // an access token at the token endpoint of the server
         val code = successResponse.authorizationCode
 
-        idPortenClient.getToken(code, sessionId)
+        idPortenClient.getToken(code, loginId)
 
-        idPortenSessionHandler.clearPropertiesForLogin(sessionId)
+        idPortenSessionHandler.clearPropertiesForLogin(loginId)
 
-        val redirect = redisService.get("$LOGIN_REDIRECT_CACHE_PREFIX$sessionId", String::class.java) as String?
+        val redirect = redisService.get("$LOGIN_REDIRECT_CACHE_PREFIX$loginId", String::class.java) as String?
         return nonCacheableRedirectResponse(redirect ?: "/sosialhjelp/innsyn")
     }
 

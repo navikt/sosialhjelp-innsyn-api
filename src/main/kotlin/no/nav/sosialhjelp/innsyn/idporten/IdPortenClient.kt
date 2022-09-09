@@ -57,17 +57,17 @@ class IdPortenClient(
     private val redisService: RedisService,
 ) {
 
-    fun getAuthorizeUrl(sessionId: String, redirectPath: String?): URI {
-        redirectPath?.let { redisService.put("$LOGIN_REDIRECT_CACHE_PREFIX$sessionId", it.toByteArray(), idPortenProperties.loginTimeout) }
+    fun getAuthorizeUrl(loginId: String, redirectPath: String?): URI {
+        redirectPath?.let { redisService.put("$LOGIN_REDIRECT_CACHE_PREFIX$loginId", it.toByteArray(), idPortenProperties.loginTimeout) }
         val state = State().also {
-            redisService.put("$STATE_CACHE_PREFIX$sessionId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
+            redisService.put("$STATE_CACHE_PREFIX$loginId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
         }
         val nonce = Nonce().also {
-            redisService.put("$NONCE_CACHE_PREFIX$sessionId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
+            redisService.put("$NONCE_CACHE_PREFIX$loginId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
         }
 
         val codeVerifier = CodeVerifier().also {
-            redisService.put("$CODE_VERIFIER_CACHE_PREFIX$sessionId", it.value.toByteArray(), idPortenProperties.loginTimeout)
+            redisService.put("$CODE_VERIFIER_CACHE_PREFIX$loginId", it.value.toByteArray(), idPortenProperties.loginTimeout)
         }
 
         return AuthorizationRequest.Builder(
@@ -85,9 +85,9 @@ class IdPortenClient(
             .toURI()
     }
 
-    fun getToken(authorizationCode: AuthorizationCode?, sessionId: String) {
-        val codeVerifierValue = redisService.get("$CODE_VERIFIER_CACHE_PREFIX$sessionId", String::class.java) as? String
-            ?: throw TilgangskontrollException("No code_verifier found on sessionId")
+    fun getToken(authorizationCode: AuthorizationCode?, loginId: String) {
+        val codeVerifierValue = redisService.get("$CODE_VERIFIER_CACHE_PREFIX$loginId", String::class.java) as? String
+            ?: throw TilgangskontrollException("No code_verifier found on loginId")
 
         val authorizationCodeGrant = AuthorizationCodeGrant(
             authorizationCode,
@@ -110,8 +110,8 @@ class IdPortenClient(
         val keySource = RemoteJWKSet<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri))
         val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, keySource)
 
-        val storedNonce = redisService.get("$NONCE_CACHE_PREFIX$sessionId", Nonce::class.java) as? Nonce
-            ?: throw TilgangskontrollException("No nonce found on sessionId")
+        val storedNonce = redisService.get("$NONCE_CACHE_PREFIX$loginId", Nonce::class.java) as? Nonce
+            ?: throw TilgangskontrollException("No nonce found on loginId")
 
         jwtProcessor.jwsKeySelector = keySelector
         jwtProcessor.jwtClaimsSetVerifier = DefaultJWTClaimsVerifier(
@@ -129,10 +129,10 @@ class IdPortenClient(
             log.error("Finner ikke \"sid\" claim i jwt fra idporten. Utlogging vil bli litt trøblete.")
         }
 
-        sid?.let { redisService.put("$SESSION_ID_CACHE_PREFIX$it", sessionId.toByteArray(), idPortenProperties.sessionTimeout) }
-        redisService.put("$ACCESS_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.accessToken.toByteArray(), idPortenProperties.tokenTimeout)
-        redisService.put("$REFRESH_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.refreshToken.toByteArray(), idPortenProperties.sessionTimeout)
-        redisService.put("$ID_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.idToken.toByteArray(), idPortenProperties.sessionTimeout)
+        sid?.let { redisService.put("$SESSION_ID_CACHE_PREFIX$it", loginId.toByteArray(), idPortenProperties.sessionTimeout) }
+        redisService.put("$ACCESS_TOKEN_CACHE_PREFIX$loginId", tokenResponse.accessToken.toByteArray(), idPortenProperties.tokenTimeout)
+        redisService.put("$REFRESH_TOKEN_CACHE_PREFIX$loginId", tokenResponse.refreshToken.toByteArray(), idPortenProperties.sessionTimeout)
+        redisService.put("$ID_TOKEN_CACHE_PREFIX$loginId", tokenResponse.idToken.toByteArray(), idPortenProperties.sessionTimeout)
     }
 
     fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String? {

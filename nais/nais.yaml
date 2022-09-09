@@ -97,7 +97,6 @@ spec:
       value: "{{this}}"
 {{/each}}
   envFrom:
-    - configmap: loginservice-idporten
 {{#each envsecret}}
     - secret: "{{this}}"
 {{/each}}

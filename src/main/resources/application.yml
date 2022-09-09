@@ -82,7 +82,7 @@ idporten_token_timeout: ${IDPORTEN_TOKEN_TIMEOUT:3600}
 #Token-validering
 no.nav.security.jwt:
   issuer.selvbetjening:
-    discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
+    discoveryurl: ${IDPORTEN_WELL_KNOWN_URL}
     validation:
       optional-claims: aud,nbf
   tokenvalidationfilter:

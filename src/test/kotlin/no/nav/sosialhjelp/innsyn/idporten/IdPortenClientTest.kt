@@ -21,17 +21,19 @@ internal class IdPortenClientTest {
     private val server = MockOAuth2Server()
     private val keyGenerator = KeyGenerator()
 
+    private val issuer = "issuer"
+
     private val idPortenProperties = IdPortenProperties(
         wellKnown = IdPortenWellKnown(
-            "issuer",
-            server.authorizationEndpointUrl("issuer").toString(),
-            server.tokenEndpointUrl("issuer").toString(),
-            server.jwksUrl("issuer").toString(),
-            server.endSessionEndpointUrl("issuer").toString()
+            issuer,
+            server.authorizationEndpointUrl(issuer).toString(),
+            server.tokenEndpointUrl(issuer).toString(),
+            server.jwksUrl(issuer).toString(),
+            server.endSessionEndpointUrl(issuer).toString()
         ),
         redirectUri = "redirect.com",
         clientId = "clientId",
-        clientJwk = keyGenerator.generateKey("issuer").toString(),
+        clientJwk = keyGenerator.generateKey(issuer).toString(),
         postLogoutRedirectUri = "postLogout.com",
         loginTimeout = 5L,
         sessionTimeout = 10L,
@@ -59,7 +61,7 @@ internal class IdPortenClientTest {
         every { redisService.put(any(), any(), any()) } just runs
 
         val authorizeUrl = idPortenClient.getAuthorizeUrl("sessionId", null)
-        assertThat(authorizeUrl.path).isEqualTo("/issuer/authorize")
+        assertThat(authorizeUrl.path).isEqualTo("/$issuer/authorize")
         assertThat(authorizeUrl.query)
             .contains("redirect_uri=${idPortenProperties.redirectUri}")
             .contains("client_id=${idPortenProperties.clientId}")
@@ -76,7 +78,7 @@ internal class IdPortenClientTest {
         every { redisService.put(any(), any(), any()) } just runs
 
         val authorizeUrl = idPortenClient.getAuthorizeUrl("sessionId", "/some/redirect")
-        assertThat(authorizeUrl.path).isEqualTo("/issuer/authorize")
+        assertThat(authorizeUrl.path).isEqualTo("/$issuer/authorize")
         assertThat(authorizeUrl.query)
             .contains("redirect_uri=${idPortenProperties.redirectUri}")
             .contains("client_id=${idPortenProperties.clientId}")
@@ -91,7 +93,7 @@ internal class IdPortenClientTest {
     @Test
     fun `should construct endsession url without sessionId set`() {
         val url = idPortenClient.getEndSessionRedirectUrl(null)
-        assertThat(url.path).isEqualTo("/issuer/endsession")
+        assertThat(url.path).isEqualTo("/$issuer/endsession")
         assertThat(url.query).isNull()
     }
 
@@ -100,7 +102,7 @@ internal class IdPortenClientTest {
         every { redisService.get("${ID_TOKEN_CACHE_PREFIX}sessionId", String::class.java) } returns null
 
         val url = idPortenClient.getEndSessionRedirectUrl("sessionId")
-        assertThat(url.path).isEqualTo("/issuer/endsession")
+        assertThat(url.path).isEqualTo("/$issuer/endsession")
         assertThat(url.query).isNull()
     }
 }

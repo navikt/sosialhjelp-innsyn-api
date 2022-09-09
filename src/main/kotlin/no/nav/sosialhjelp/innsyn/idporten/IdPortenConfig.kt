@@ -43,7 +43,7 @@ class IdPortenConfig(
     @Profile("test")
     fun idPortenTestProperties(): IdPortenProperties {
         return IdPortenProperties(
-            wellKnown = IdPortenWellKnown("issuer", "token_url", "tokenEndepunkt", "jwks_uri", "endSession"),
+            wellKnown = IdPortenWellKnown("issuer", "authorization_endpoint", "token_endpoint", "jwks_uri", "end_session_endpoint"),
             redirectUri = redirectUri,
             clientId = clientId,
             clientJwk = clientJwk,

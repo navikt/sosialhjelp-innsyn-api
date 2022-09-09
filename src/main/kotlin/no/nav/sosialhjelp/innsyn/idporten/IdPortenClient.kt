@@ -132,7 +132,7 @@ class IdPortenClient(
         sid?.let { redisService.put("$SESSION_ID_CACHE_PREFIX$it", sessionId.toByteArray(), idPortenProperties.sessionTimeout) }
         redisService.put("$ACCESS_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.accessToken.toByteArray(), idPortenProperties.tokenTimeout)
         redisService.put("$REFRESH_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.refreshToken.toByteArray(), idPortenProperties.sessionTimeout)
-        redisService.put("$ID_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.idToken.toByteArray())
+        redisService.put("$ID_TOKEN_CACHE_PREFIX$sessionId", tokenResponse.idToken.toByteArray(), idPortenProperties.sessionTimeout)
     }
 
     fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String? {

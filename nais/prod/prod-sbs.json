@@ -45,6 +45,6 @@
   "isMock": false,
   "tokenXEnabled": true,
   "maskinportenEnabled": true,
-  "idportenEnabled": false,
+  "idportenEnabled": true,
   "postLogoutRedirectURI": "https://www.nav.no/no/utlogget"
 }

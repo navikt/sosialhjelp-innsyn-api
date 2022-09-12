@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.PDL_RETRY
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.TokendingsService
@@ -14,14 +15,12 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.Optional
 import java.util.stream.Collectors
@@ -57,27 +56,20 @@ class PdlClientImpl(
     private fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
         val query = getHentPersonResource().replace("[\n\r]", "")
         try {
-            val pdlPersonResponse = runBlocking {
-                retry(
-                    attempts = RETRY_ATTEMPTS,
-                    initialDelay = INITIAL_DELAY,
-                    maxDelay = MAX_DELAY,
-                    retryableExceptions = arrayOf(WebClientResponseException::class)
-                ) {
-                    pdlWebClient.post()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                        .header(HEADER_TEMA, TEMA_KOM)
-                        .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
-                        .bodyValue(PdlRequest(query, Variables(ident)))
-                        .retrieve()
-                        .awaitBody<PdlPersonResponse>()
-                }
-            }
+            val pdlPersonResponse = pdlWebClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                .header(HEADER_TEMA, TEMA_KOM)
+                .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                .bodyValue(PdlRequest(query, Variables(ident)))
+                .retrieve()
+                .bodyToMono<PdlPersonResponse>()
+                .retryWhen(PDL_RETRY)
+                .block()
 
             checkForPdlApiErrors(pdlPersonResponse)
 
-            return pdlPersonResponse.data
+            return pdlPersonResponse?.data
                 .also { it?.let { lagreTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
             log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
@@ -88,27 +80,20 @@ class PdlClientImpl(
     private fun hentIdenterFraPdl(ident: String, token: String): PdlIdenter? {
         val query = getHentIdenterResource().replace("[\n\r]", "")
         try {
-            val pdlIdenterResponse = runBlocking {
-                retry(
-                    attempts = RETRY_ATTEMPTS,
-                    initialDelay = INITIAL_DELAY,
-                    maxDelay = MAX_DELAY,
-                    retryableExceptions = arrayOf(WebClientResponseException::class)
-                ) {
-                    pdlWebClient.post()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                        .header(HEADER_TEMA, TEMA_KOM)
-                        .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
-                        .bodyValue(PdlRequest(query, Variables(ident)))
-                        .retrieve()
-                        .awaitBody<PdlIdenterResponse>()
-                }
-            }
+            val pdlIdenterResponse = pdlWebClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                .header(HEADER_TEMA, TEMA_KOM)
+                .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                .bodyValue(PdlRequest(query, Variables(ident)))
+                .retrieve()
+                .bodyToMono<PdlIdenterResponse>()
+                .retryWhen(PDL_RETRY)
+                .block()
 
             checkForPdlApiErrors(pdlIdenterResponse)
 
-            return pdlIdenterResponse.data?.hentIdenter
+            return pdlIdenterResponse?.data?.hentIdenter
                 .also { it?.let { lagreIdenterTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
             log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
@@ -116,8 +101,9 @@ class PdlClientImpl(
         }
     }
 
-    private suspend fun tokenXtoken(ident: String, token: String) =
+    private fun tokenXtoken(ident: String, token: String) = runBlocking {
         tokendingsService.exchangeToken(ident, token, clientProperties.pdlAudience)
+    }
 
     override fun ping() {
         pdlWebClient.options()

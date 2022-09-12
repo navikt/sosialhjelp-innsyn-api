@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
+import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
@@ -38,6 +39,7 @@ class NorgClientImpl(
             .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
             .retrieve()
             .bodyToMono<NavEnhet>()
+            .retryWhen(RetryUtils.DEFAULT_RETRY_SERVER_ERRORS)
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
                 NorgException(e.message, e)

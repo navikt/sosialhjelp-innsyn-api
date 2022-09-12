@@ -1,0 +1,15 @@
+{
+  "hentPerson": {
+
+    "navn": [
+      {
+        "fornavn": "Fornavn"
+      }
+    ],
+    "adressebeskyttelse": [
+      {
+        "gradering": "UGRADERT"
+      }
+    ]
+  }
+}

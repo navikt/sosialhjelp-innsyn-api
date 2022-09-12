@@ -5,7 +5,6 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
@@ -24,15 +23,8 @@ class MaskinportenClientConfig(
 ) {
 
     @Bean
-    @Profile("!test")
     fun maskinportenClient(): MaskinportenClient {
         return MaskinportenClient(maskinportenWebClient, maskinportenProperties, wellknown)
-    }
-
-    @Bean
-    @Profile("test")
-    fun maskinportenClientTest(): MaskinportenClient {
-        return MaskinportenClient(maskinportenWebClient, maskinportenProperties, WellKnown("issuer", "token_url"))
     }
 
     private val maskinportenWebClient: WebClient =

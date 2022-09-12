@@ -15,8 +15,9 @@ class RedisConfig {
 
     @Bean
     fun redisClient(properties: RedisProperties): RedisClient {
-        val redisUri = RedisURI.create(properties.host, properties.port)
-        redisUri.setPassword(properties.password as CharSequence)
+        val redisUri = RedisURI.Builder.redis(properties.host, properties.port)
+            .withPassword(properties.password as CharSequence)
+            .build()
 
         return RedisClient.create(redisUri)
     }

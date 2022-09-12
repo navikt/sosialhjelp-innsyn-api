@@ -1,3 +1,4 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -5,47 +6,48 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 object Versions {
-    const val coroutines = "1.6.3"
-    const val springBoot = "2.7.1"
-    const val sosialhjelpCommon = "1.20220629.1332-dfb4541"
+    const val coroutines = "1.6.4"
+    const val springBoot = "2.7.3"
+    const val sosialhjelpCommon = "1.20220718.1347-2b1045d"
     const val logback = "1.2.11"
     const val logstash = "7.2"
-    const val filformat = "1.2022.04.29-13.11-459bee049a7a"
-    const val micrometerRegistry = "1.9.2"
+    const val filformat = "1.2022.07.19-14.28-614820e5640b"
+    const val micrometerRegistry = "1.9.3"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "2.1.2"
-    const val jackson = "2.13.3"
+    const val tokenValidation = "2.1.4"
+    const val jackson = "2.13.4"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.11.0"
     const val fileUpload = "1.4"
     const val tika = "2.4.1"
     const val pdfBox = "2.0.26"
-    const val fiksKryptering = "1.1.2"
+    const val fiksKryptering = "1.2.0"
     const val lettuce = "6.2.0.RELEASE"
     const val jempbox = "1.8.16"
     const val unleash = "4.4.1"
-    const val springdoc = "1.6.9"
+    const val springdoc = "1.6.11"
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
     const val log4j = "2.17.2"
+    const val snakeyaml = "1.31"
 
     const val javaJwt = "4.0.0"
     const val jwksRsa = "0.21.1"
-    const val nimbus = "9.23"
+    const val nimbus = "9.24.3"
 
     const val ktlint = "0.45.2"
 
     //    Test only
-    const val junitJupiter = "5.8.2"
     const val junit = "4.13.2"
-    const val mockk = "1.12.4"
+    const val mockk = "1.12.7"
+    const val springmockk = "3.1.1"
 }
 
 plugins {
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.spring") version "1.7.10"
-    id("org.springframework.boot") version "2.7.1"
+    id("org.springframework.boot") version "2.7.3"
     id("com.github.ben-manes.versions") version "0.42.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
@@ -142,8 +144,8 @@ dependencies {
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
-    testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junitJupiter}")
-    implementation("io.mockk:mockk:${Versions.mockk}")
+    testImplementation("com.ninja-squad:springmockk:${Versions.springmockk}")
+    testImplementation("io.mockk:mockk:${Versions.mockk}")
     testImplementation("no.nav.security:token-validation-spring-test:${Versions.tokenValidation}")
 
 //    spesifikke versjoner oppgradert etter ønske fra snyk
@@ -161,6 +163,10 @@ dependencies {
         }
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${Versions.log4j}") {
             because("0-day exploit i version 2.0.0-2.14.1")
+        }
+
+        implementation("org.yaml:snakeyaml:${Versions.snakeyaml}") {
+            because("Snyk ønsker 1.31 eller høyere")
         }
 
         testImplementation("junit:junit:${Versions.junit}") {
@@ -185,6 +191,19 @@ repositories {
             username = githubUser
             password = githubPassword
         }
+    }
+}
+
+fun String.isNonStable(): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { toUpperCase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(this)
+    return isStable.not()
+}
+
+tasks.withType<DependencyUpdatesTask> {
+    rejectVersionIf {
+        candidate.version.isNonStable() && !currentVersion.isNonStable()
     }
 }
 

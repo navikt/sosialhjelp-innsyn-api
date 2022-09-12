@@ -13,17 +13,18 @@ client:
   unleash_url: "http://localhost:58888"
   unleash_instance_id: "local"
   meldinger_kommunenummer: "0301"
-  tokendings_url: "http://localhost:59999"
+  tokendings_url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
+  tokendings_client_id: localhost:teamdigisos:sosialhjelp-dialog-api
+  tokendings_private_jwk: generateRSA
   dialog_endpoint_url: "http://localhost:59999"
   dialog_audience: "dialog"
-  tokendings_private_jwk: "generateRSA"
   soknad_api_url: "http://localhost:59999"
   soknad_api_audience: "soknadAudience"
 
 #Maskinporten
 maskinporten_clientid: clientid
 maskinporten_scopes: scopes
-maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:https://maskinporten}
+maskinporten_well_known_url: http://localhost:${mock-oauth2-server.port}/maskinporten/.well-known/openid-configuration
 maskinporten_client_jwk: generateRSA
 
 innsyn:

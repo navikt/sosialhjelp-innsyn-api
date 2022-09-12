@@ -1,18 +1,18 @@
 package no.nav.sosialhjelp.innsyn.dialogstatus
 
+import kotlinx.coroutines.reactor.awaitSingle
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.redis.DIALOG_API_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.kotlin.utils.logger
-import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.bodyToMono
 
 interface DialogClient {
@@ -30,7 +30,8 @@ class DialogClientImpl(
 ) : DialogClient {
 
     override suspend fun hentDialogStatus(ident: String, token: String): DialogStatus {
-        redisService.get(DIALOG_API_CACHE_KEY_PREFIX + ident, DialogStatus::class.java)?. let { return it as DialogStatus }
+        redisService.get(DIALOG_API_CACHE_KEY_PREFIX + ident, DialogStatus::class.java)
+            ?.let { return it as DialogStatus }
         return hentDialogStatusFraServer(ident, token).also { lagrePersonTilCache(it, ident) }
     }
 
@@ -41,19 +42,13 @@ class DialogClientImpl(
     private suspend fun hentDialogStatusFraServer(ident: String, token: String): DialogStatus {
         val headers = tokendingsHeaders(ident, token)
         try {
-            val dialogStatus =
-                retry(
-                    attempts = RETRY_ATTEMPTS,
-                    initialDelay = INITIAL_DELAY,
-                    maxDelay = MAX_DELAY,
-                    retryableExceptions = arrayOf(WebClientResponseException::class)
-                ) {
-                    dialogWebClient.webClient.post()
-                        .headers { it.addAll(headers) }
-                        .bodyValue(DialogStatusRequest(ident))
-                        .retrieve()
-                        .awaitBody<DialogStatus>()
-                }
+            val dialogStatus = dialogWebClient.webClient.post()
+                .headers { it.addAll(headers) }
+                .bodyValue(DialogStatusRequest(ident))
+                .retrieve()
+                .bodyToMono<DialogStatus>()
+                .retryWhen(RetryUtils.DEFAULT_RETRY_SERVER_ERRORS)
+                .awaitSingle()
 
             if (dialogStatus.ident != ident) throw DialogException("Dialog returnerte status for feil ident.")
             return dialogStatus
@@ -84,13 +79,7 @@ class DialogClientImpl(
 
     companion object {
         private val log by logger()
-
-        private const val RETRY_ATTEMPTS = 5
-        private const val INITIAL_DELAY = 100L
-        private const val MAX_DELAY = 2000L
     }
 }
 
-class DialogException(
-    override val message: String
-) : RuntimeException(message)
+class DialogException(override val message: String) : RuntimeException(message)

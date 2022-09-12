@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
-import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
+import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
@@ -27,6 +27,11 @@ class NorgClientImpl(
     private val redisService: RedisService,
 ) : NorgClient {
 
+    private val norgRetry = retryBackoffSpec()
+        .onRetryExhaustedThrow { spec, retrySignal ->
+            throw NorgException("Norg - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
+        }
+
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
         return hentFraCache(enhetsnr) ?: hentFraNorg(enhetsnr)
     }
@@ -39,7 +44,7 @@ class NorgClientImpl(
             .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
             .retrieve()
             .bodyToMono<NavEnhet>()
-            .retryWhen(RetryUtils.DEFAULT_RETRY_SERVER_ERRORS)
+            .retryWhen(norgRetry)
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
                 NorgException(e.message, e)

@@ -17,6 +17,8 @@ class VirusScanner(
     @Value("\${innsyn.vedlegg.virusscan.enabled}") val enabled: Boolean
 ) {
 
+    private val virusScanRetry = RetryUtils.retryBackoffSpec()
+
     fun scan(filnavn: String?, data: ByteArray) {
         if (enabled && isInfected(filnavn, data)) {
             throw VirusScanException("Fant virus i fil forsøkt opplastet", null)
@@ -36,7 +38,7 @@ class VirusScanner(
                 .body(BodyInserters.fromValue(data))
                 .retrieve()
                 .bodyToMono<List<ScanResult>>()
-                .retryWhen(RetryUtils.DEFAULT_RETRY_SERVER_ERRORS)
+                .retryWhen(virusScanRetry)
                 .block()
                 ?: throw BadStateException("scanResult er null")
 
@@ -60,9 +62,5 @@ class VirusScanner(
 
     companion object {
         private val log by logger()
-
-        private const val RETRY_ATTEMPTS = 5
-        private const val INITIAL_DELAY = 100L
-        private const val MAX_DELAY = 2000L
     }
 }

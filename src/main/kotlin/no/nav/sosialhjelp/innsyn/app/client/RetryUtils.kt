@@ -9,14 +9,10 @@ object RetryUtils {
     private const val DEFAULT_MAX_ATTEMPTS: Long = 5
     private const val DEFAULT_INITIAL_WAIT_INTERVAL_MILLIS: Long = 100
 
-    val DEFAULT_SERVER_ERROR_FILTER: (Throwable) -> (Boolean) = { it is WebClientResponseException && it.statusCode.is5xxServerError }
-
-    val DEFAULT_RETRY_SERVER_ERRORS = retryBackoffSpec(DEFAULT_SERVER_ERROR_FILTER)
-
-    val PDL_RETRY: RetryBackoffSpec = retryBackoffSpec({ it is WebClientResponseException })
+    private val DEFAULT_SERVER_ERROR_FILTER: (Throwable) -> (Boolean) = { it is WebClientResponseException && it.statusCode.is5xxServerError }
 
     fun retryBackoffSpec(
-        predicate: (Throwable) -> (Boolean),
+        predicate: (Throwable) -> (Boolean) = DEFAULT_SERVER_ERROR_FILTER,
         maxAttempts: Long = DEFAULT_MAX_ATTEMPTS,
         initialWaitIntervalMillis: Long = DEFAULT_INITIAL_WAIT_INTERVAL_MILLIS
     ): RetryBackoffSpec {

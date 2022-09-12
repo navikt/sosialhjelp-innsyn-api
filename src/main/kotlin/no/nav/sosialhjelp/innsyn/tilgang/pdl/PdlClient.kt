@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.PDL_RETRY
+import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.TokendingsService
@@ -40,6 +40,11 @@ class PdlClientImpl(
     private val redisService: RedisService,
 ) : PdlClient {
 
+    private val pdlRetry = RetryUtils.retryBackoffSpec({ it is WebClientResponseException })
+        .onRetryExhaustedThrow { spec, retrySignal ->
+            throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
+        }
+
     override fun hentPerson(ident: String, token: String): PdlHentPerson? {
         return hentFraCache(ident) ?: hentFraPdl(ident, token)
     }
@@ -64,7 +69,7 @@ class PdlClientImpl(
                 .bodyValue(PdlRequest(query, Variables(ident)))
                 .retrieve()
                 .bodyToMono<PdlPersonResponse>()
-                .retryWhen(PDL_RETRY)
+                .retryWhen(pdlRetry)
                 .block()
 
             checkForPdlApiErrors(pdlPersonResponse)
@@ -88,7 +93,7 @@ class PdlClientImpl(
                 .bodyValue(PdlRequest(query, Variables(ident)))
                 .retrieve()
                 .bodyToMono<PdlIdenterResponse>()
-                .retryWhen(PDL_RETRY)
+                .retryWhen(pdlRetry)
                 .block()
 
             checkForPdlApiErrors(pdlIdenterResponse)

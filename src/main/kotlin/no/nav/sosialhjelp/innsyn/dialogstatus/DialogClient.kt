@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.dialogstatus
 
 import kotlinx.coroutines.reactor.awaitSingle
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
+import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.redis.DIALOG_API_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -29,6 +29,8 @@ class DialogClientImpl(
     private val clientProperties: ClientProperties,
 ) : DialogClient {
 
+    private val dialogRetry = retryBackoffSpec()
+
     override suspend fun hentDialogStatus(ident: String, token: String): DialogStatus {
         redisService.get(DIALOG_API_CACHE_KEY_PREFIX + ident, DialogStatus::class.java)
             ?.let { return it as DialogStatus }
@@ -47,7 +49,7 @@ class DialogClientImpl(
                 .bodyValue(DialogStatusRequest(ident))
                 .retrieve()
                 .bodyToMono<DialogStatus>()
-                .retryWhen(RetryUtils.DEFAULT_RETRY_SERVER_ERRORS)
+                .retryWhen(dialogRetry)
                 .awaitSingle()
 
             if (dialogStatus.ident != ident) throw DialogException("Dialog returnerte status for feil ident.")

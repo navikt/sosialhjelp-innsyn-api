@@ -13,7 +13,6 @@ import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.io.IOException
 import java.sql.Timestamp
@@ -33,8 +32,6 @@ import java.util.concurrent.ExecutorService
 import kotlin.reflect.full.companionObject
 
 const val COUNTER_SUFFIX_LENGTH = 4
-
-inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
 fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
     return when (filreferanse) {

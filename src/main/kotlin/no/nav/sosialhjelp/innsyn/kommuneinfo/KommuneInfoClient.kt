@@ -12,7 +12,6 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import no.nav.sosialhjelp.innsyn.utils.typeRef
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
@@ -38,7 +37,7 @@ class KommuneInfoClient(
             .accept(MediaType.APPLICATION_JSON)
             .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
             .retrieve()
-            .bodyToMono(typeRef<List<KommuneInfo>>())
+            .bodyToMono<List<KommuneInfo>>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 log.warn("Fiks - hentKommuneInfoForAlle feilet", e)
                 when {

@@ -7,8 +7,8 @@ import no.nav.sosialhjelp.innsyn.app.tokendings.TokendingsService
 import no.nav.sosialhjelp.innsyn.redis.DIALOG_API_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import no.nav.sosialhjelp.kotlin.utils.logger
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component

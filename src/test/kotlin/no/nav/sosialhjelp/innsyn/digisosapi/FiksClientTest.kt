@@ -46,7 +46,6 @@ internal class FiksClientTest {
     private val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
 
     private val redisService: RedisService = mockk()
-    private val retryProperties: FiksRetryProperties = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
     private val tilgangskontroll: Tilgangskontroll = mockk()
@@ -66,14 +65,10 @@ internal class FiksClientTest {
 
         every { tilgangskontroll.verifyDigisosSakIsForCorrectUser(any()) } just Runs
 
-        every { retryProperties.attempts } returns 2
-        every { retryProperties.initialDelay } returns 5
-        every { retryProperties.maxDelay } returns 10
-
         every { meterRegistry.counter(any()) } returns counterMock
         every { counterMock.increment() } just Runs
 
-        fiksClient = FiksClientImpl(fiksWebClient, tilgangskontroll, retryProperties, redisService, meterRegistry)
+        fiksClient = FiksClientImpl(fiksWebClient, tilgangskontroll, redisService, 2L, 5L, meterRegistry)
     }
 
     @AfterEach
@@ -134,31 +129,31 @@ internal class FiksClientTest {
     }
 
     @Test
-    fun `GET DigisosSak feiler hvis Fiks gir 500`() {
-        every { retryProperties.attempts } returns 1
-
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(500)
-        )
+    fun `GET DigisosSak skal bruke retry hvis Fiks gir 5xx-feil`() {
+        repeat(3) {
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(500)
+            )
+        }
 
         assertThatExceptionOfType(FiksServerException::class.java)
             .isThrownBy { fiksClient.hentDigisosSak(id, "Token", true) }
+        assertThat(mockWebServer.requestCount).isEqualTo(3)
     }
 
     @Test
     fun `GET alle DigisosSaker skal bruke retry hvis Fiks gir 5xx-feil`() {
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(500)
-        )
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(500)
-        )
+        repeat(3) {
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(500)
+            )
+        }
 
-        assertThatExceptionOfType(FiksServerException::class.java).isThrownBy { fiksClient.hentAlleDigisosSaker("Token") }
-        assertThat(mockWebServer.requestCount).isEqualTo(2)
+        assertThatExceptionOfType(FiksServerException::class.java)
+            .isThrownBy { fiksClient.hentAlleDigisosSaker("Token") }
+        assertThat(mockWebServer.requestCount).isEqualTo(3)
     }
 
     @Test
@@ -264,7 +259,7 @@ internal class FiksClientTest {
     @Test // fikk ikke mockWebServer til å funke her uten å skjønner hvorfor (InputStream-relatert), så gikk for "klassisk" mockk stil
     fun `POST ny ettersendelse`() {
         val webClient: WebClient = mockk()
-        val clientForPost = FiksClientImpl(webClient, tilgangskontroll, retryProperties, redisService, meterRegistry)
+        val clientForPost = FiksClientImpl(webClient, tilgangskontroll, redisService, 2, 5, meterRegistry)
 
         val fil1: InputStream = mockk()
         val fil2: InputStream = mockk()
@@ -287,6 +282,7 @@ internal class FiksClientTest {
                 .header(any(), any())
                 .retrieve()
                 .bodyToMono<DigisosSak>()
+                .retryWhen(any())
                 .onErrorMap(WebClientResponseException::class.java, any())
                 .block()
         } returns objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)

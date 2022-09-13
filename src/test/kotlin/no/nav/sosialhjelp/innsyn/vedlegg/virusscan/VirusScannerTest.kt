@@ -96,4 +96,28 @@ internal class VirusScannerTest {
         assertThatExceptionOfType(VirusScanException::class.java)
             .isThrownBy { virusScanner.scan(filnavn, data) }
     }
+
+    @Test
+    fun `skal trigge retry ved serverfeil`() {
+        virusScanner = VirusScanner(webClient, enabled = true)
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(500)
+        )
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(
+                    objectMapper.writeValueAsString(
+                        listOf(ScanResult("test", Result.OK))
+                    )
+                )
+        )
+
+        assertThatCode { virusScanner.scan(filnavn, data) }
+            .doesNotThrowAnyException()
+    }
 }

@@ -152,9 +152,5 @@ class PdlClientImpl(
 
     companion object {
         private val log by logger()
-
-        private const val RETRY_ATTEMPTS = 5
-        private const val INITIAL_DELAY = 100L
-        private const val MAX_DELAY = 2000L
     }
 }

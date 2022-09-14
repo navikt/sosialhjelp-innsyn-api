@@ -1,9 +1,7 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
-import no.finn.unleash.Unleash
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService
@@ -12,11 +10,9 @@ import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.unixTimestampToDate
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -29,51 +25,25 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class SaksOversiktController(
+    private val saksOversiktService: SaksOversiktService,
     private val fiksClient: FiksClient,
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: Tilgangskontroll,
-    private val unleashClient: Unleash
 ) {
 
     @GetMapping("/saker")
     fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
-        val saker = try {
-            fiksClient.hentAlleDigisosSaker(token)
+        val alleSaker = try {
+            saksOversiktService.hentAlleSaker(token)
         } catch (e: FiksException) {
             return ResponseEntity.status(503).build()
         }
 
-        val responselist = saker
-            .map {
-                SaksListeResponse(
-                    fiksDigisosId = it.fiksDigisosId,
-                    soknadTittel = "Søknad om økonomisk sosialhjelp",
-                    sistOppdatert = unixTimestampToDate(it.sistEndret),
-                    kilde = IntegrationUtils.KILDE_INNSYN_API
-                )
-            }
-            .sortedByDescending { it.sistOppdatert }
-
-        log.info("Hentet alle (${responselist.size}) DigisosSaker for bruker.")
-
-        if (unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false)) {
-            if (saker.isNotEmpty() && oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(
-                    saker[0].fiksDigisosId,
-                    token
-                )
-            ) {
-                if (oppgaveService.sakHarStatusMottattOgIkkeHattSendt(saker[0].fiksDigisosId, token)) {
-                    log.info("Kommune med kommunenummer ${saker[0].kommunenummer} har aktivert innsyn i papirsøknader")
-                } else {
-                    log.info("Kommune med kommunenummer ${saker[0].kommunenummer} har fagsystemversjon som støtter innsyn i papirsøknader")
-                }
-            }
-        }
-
-        return ResponseEntity.ok().body(responselist)
+        log.info("Hentet alle (${alleSaker.size}) søknader for bruker, fra DigisosApi og fra SvarUt (via soknad-api).")
+        return ResponseEntity.ok().body(alleSaker)
     }
 
     @GetMapping("/saksDetaljer")
@@ -89,7 +59,7 @@ class SaksOversiktController(
         val saksDetaljerResponse = SaksDetaljerResponse(
             sak.fiksDigisosId,
             hentNavn(model),
-            model.status?.let { mapStatus(it) } ?: "",
+            mapStatus(model.status),
             antallOppgaver
         )
         return ResponseEntity.ok().body(saksDetaljerResponse)

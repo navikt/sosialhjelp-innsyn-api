@@ -12,7 +12,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import no.nav.sosialhjelp.innsyn.utils.typeRef
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -78,7 +77,7 @@ class DigisosApiTestClientImpl(
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(body))
             .retrieve()
-            .bodyToMono(typeRef<List<FilOpplastingResponse>>())
+            .bodyToMono<List<FilOpplastingResponse>>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
                 when {

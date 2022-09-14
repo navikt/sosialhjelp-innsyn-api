@@ -51,13 +51,11 @@ class EventService(
 
         val model = InternalDigisosSoker()
 
-        // Default status == SENDT. Gjelder også for papirsøknader hvor timestampSendt == null
-        model.status = SoknadsStatus.SENDT
-
         if (jsonDigisosSoker?.avsender != null) {
             model.fagsystem = Fagsystem(jsonDigisosSoker.avsender.systemnavn, jsonDigisosSoker.avsender.systemversjon)
         }
 
+        // Hvis søknad er papirsøknad, vil 'timestampSendt' være null:
         if (originalSoknadNAV?.timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
@@ -75,7 +73,7 @@ class EventService(
             }
         }
 
-        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, originalSoknadNAV, digisosSak, token)
+        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak, token)
 
         return model
     }
@@ -133,13 +131,13 @@ class EventService(
             model.status = SoknadsStatus.SENDT
         }
 
-        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, originalSoknadNAV, digisosSak, token)
+        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak, token)
         logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
 
         return model
     }
 
-    private fun applyHendelserOgSoknadKrav(jsonDigisosSoker: JsonDigisosSoker?, model: InternalDigisosSoker, originalSoknadNAV: OriginalSoknadNAV?, digisosSak: DigisosSak, token: String) {
+    private fun applyHendelserOgSoknadKrav(jsonDigisosSoker: JsonDigisosSoker?, model: InternalDigisosSoker, digisosSak: DigisosSak, token: String) {
         jsonDigisosSoker?.hendelser
             ?.sortedWith(hendelseComparator)
             ?.forEach { model.applyHendelse(it) }
@@ -148,6 +146,7 @@ class EventService(
             ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
             ?.isEmpty() ?: true
 
+        val originalSoknadNAV = digisosSak.originalSoknadNAV
         if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)) {
             model.applySoknadKrav(digisosSak, vedleggService, originalSoknadNAV.timestampSendt, token)
         }

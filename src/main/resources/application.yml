@@ -60,6 +60,8 @@ client:
   dialog_endpoint_url: ${DIALOG_ENDPOINT_URL}
   dialog_audience: ${DIALOG_AUDIENCE}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
+  soknad_api_url: ${SOKNAD_API_URL}
+  soknad_api_audience: ${SOKNAD_API_AUDIENCE}
 
 
 #Maskinporten
@@ -85,8 +87,6 @@ innsyn:
       url: ${CLAMAV_URL}
   cache:
     time_to_live_seconds: ${CACHE_TIME_TO_LIVE_SECONDS:10}
-  retry:
-    fiks:
-      attempts: 5 # number of attempts
-      initial_delay: 250 # initial delay in ms
-      max_delay: 10000 # max delay in ms
+
+retry_fiks_max_attempts: 5
+retry_fiks_initial_delay: 100 # initial delay in ms

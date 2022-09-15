@@ -30,6 +30,9 @@ class DialogClientImpl(
 ) : DialogClient {
 
     private val dialogRetry = retryBackoffSpec()
+        .onRetryExhaustedThrow { spec, retrySignal ->
+            throw DialogException("Dialog-api - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
+        }
 
     override suspend fun hentDialogStatus(ident: String, token: String): DialogStatus {
         redisService.get(DIALOG_API_CACHE_KEY_PREFIX + ident, DialogStatus::class.java)
@@ -84,4 +87,7 @@ class DialogClientImpl(
     }
 }
 
-class DialogException(override val message: String) : RuntimeException(message)
+class DialogException(
+    override val message: String,
+    override val cause: Throwable? = null
+) : RuntimeException(message, cause)

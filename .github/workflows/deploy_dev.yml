@@ -10,6 +10,7 @@ on:
         options:
           - 'mock'
           - 'dev'
+          - 'dev-fss'
           - 'dev-sbs'
 
 jobs:
@@ -29,7 +30,9 @@ jobs:
           echo "CONFIG_FILE=${{ github.event.inputs.config-file-name }}" >> $GITHUB_ENV
       - name: Sett cluster basert på config-file
         run: |
-          if [[ ${{ github.event.inputs.config-file-name }} = 'dev-sbs' ]]; then
+          if [[ ${{ github.event.inputs.config-file-name }} = 'dev-fss' ]]; then
+            echo "CLUSTER_NAME=dev-fss" >> $GITHUB_ENV
+          elif [[ ${{ github.event.inputs.config-file-name }} = 'dev-sbs' ]]; then
             echo "CLUSTER_NAME=dev-sbs" >> $GITHUB_ENV
           else
             echo "CLUSTER_NAME=dev-gcp" >> $GITHUB_ENV

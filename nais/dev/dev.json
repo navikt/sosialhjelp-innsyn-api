@@ -35,7 +35,7 @@
     "PDL_ENDPOINT_URL": "https://pdl-api.dev-fss-pub.nais.io/graphql",
     "PDL_AUDIENCE": "dev-fss:pdl:pdl-api",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
-    "UNLEASH_INSTANCE_ID": "dev-gcp",
+    "UNLEASH_INSTANCE_ID": "dev",
     "MELDINGER_KOMMUNENUMMER": "0301",
     "SWAGGER_ENABLED": "true",
     "DIALOG_ENDPOINT_URL": "http://sosialhjelp-dialog-api-dev/sosialhjelp/meldinger-api/system/brukerstatus",

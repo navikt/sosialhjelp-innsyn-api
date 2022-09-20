@@ -26,7 +26,7 @@
     "PDL_ENDPOINT_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/pdl_endpoint_url",
     "PDL_AUDIENCE": "dummyAudience",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
-    "UNLEASH_INSTANCE_ID": "dev-gcp-mock",
+    "UNLEASH_INSTANCE_ID": "mock",
     "MELDINGER_KOMMUNENUMMER": "0301",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
     "SWAGGER_ENABLED": "true",

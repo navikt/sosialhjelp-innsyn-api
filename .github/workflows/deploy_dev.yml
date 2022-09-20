@@ -5,13 +5,13 @@ on:
       config-file-name:
         description: 'Config-fil som skal deployes'
         required: true
-        default: 'dev-sbs'
+        default: 'dev-fss'
         type: choice
         options:
           - 'mock'
           - 'dev'
+          - 'dev-fss'
           - 'dev-sbs'
-          - 'labs-gcp'
 
 jobs:
   deploy:
@@ -30,10 +30,10 @@ jobs:
           echo "CONFIG_FILE=${{ github.event.inputs.config-file-name }}" >> $GITHUB_ENV
       - name: Sett cluster basert på config-file
         run: |
-          if [[ ${{ github.event.inputs.config-file-name }} = 'dev-sbs' ]]; then
+          if [[ ${{ github.event.inputs.config-file-name }} = 'dev-fss' ]]; then
+            echo "CLUSTER_NAME=dev-fss" >> $GITHUB_ENV
+          elif [[ ${{ github.event.inputs.config-file-name }} = 'dev-sbs' ]]; then
             echo "CLUSTER_NAME=dev-sbs" >> $GITHUB_ENV
-          elif [[ ${{ github.event.inputs.config-file-name }} = 'labs-gcp' ]]; then
-            echo "CLUSTER_NAME=labs-gcp" >> $GITHUB_ENV
           else
             echo "CLUSTER_NAME=dev-gcp" >> $GITHUB_ENV
           fi

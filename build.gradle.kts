@@ -97,7 +97,6 @@ dependencies {
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-api:${Versions.sosialhjelpCommon}")
-    implementation("no.nav.sosialhjelp:sosialhjelp-common-kotlin-utils:${Versions.sosialhjelpCommon}")
 
 //    tokendings mot dialog-api
     implementation("com.auth0:java-jwt:${Versions.javaJwt}")

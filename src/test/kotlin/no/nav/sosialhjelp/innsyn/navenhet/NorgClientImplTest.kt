@@ -77,4 +77,28 @@ internal class NorgClientImplTest {
         verify(exactly = 1) { redisService.get(any(), any()) }
         verify(exactly = 1) { redisService.put(any(), any(), any()) }
     }
+
+    @Test
+    fun `skal trigge retry ved serverfeil fra Norg`() {
+        every { redisService.get(any(), NavEnhet::class.java) } returns null
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(500)
+        )
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(ok_navenhet)
+        )
+
+        val result2 = norgClient.hentNavEnhet(enhetsnr)
+
+        assertThat(result2).isNotNull
+
+        verify(exactly = 1) { redisService.get(any(), any()) }
+        verify(exactly = 1) { redisService.put(any(), any(), any()) }
+    }
 }

@@ -24,7 +24,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 
 /**
- * Brukes kun i dev-sbs eller ved lokal testing mot fiks-test
+ * Brukes kun i dev eller ved lokal testing mot fiks-test
  */
 @Profile("!prod-sbs")
 @Component

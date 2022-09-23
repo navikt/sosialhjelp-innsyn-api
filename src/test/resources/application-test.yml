@@ -12,12 +12,8 @@ client:
   pdl_audience: 'dummyAudience'
   unleash_url: "http://localhost:58888"
   unleash_instance_id: "local"
-  meldinger_kommunenummer: "0301"
   tokendings_url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
-  tokendings_client_id: localhost:teamdigisos:sosialhjelp-dialog-api
   tokendings_private_jwk: generateRSA
-  dialog_endpoint_url: "http://localhost:59999"
-  dialog_audience: "dialog"
   soknad_api_url: "http://localhost:59999"
   soknad_api_audience: "soknadAudience"
 

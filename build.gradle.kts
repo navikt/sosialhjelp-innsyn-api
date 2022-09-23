@@ -98,7 +98,7 @@ dependencies {
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.sosialhjelpCommon}")
     implementation("no.nav.sosialhjelp:sosialhjelp-common-api:${Versions.sosialhjelpCommon}")
 
-//    tokendings mot dialog-api
+//    tokendings
     implementation("com.auth0:java-jwt:${Versions.javaJwt}")
     implementation("com.auth0:jwks-rsa:${Versions.jwksRsa}")
     implementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbus}")

@@ -41,12 +41,8 @@ client:
   pdl_audience: ${PDL_AUDIENCE:dummyAudience}
   unleash_url: ${UNLEASH_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/internal/unleash}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID:local}
-  meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER:0301}
   tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/selvbetjening${mock-alt-api-wellknown-queryparam}}
-  tokendings_client_id: ${TOKEN_X_CLIENT_ID:localhost:teamdigisos:sosialhjelp-dialog-api}
   tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK:generateRSA}
-  dialog_endpoint_url: ${DIALOG_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/dialog-api/status}
-  dialog_audience: ${DIALOG_AUDIENCE:dialog_audience}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/soknad-api}
   soknad_api_audience: ${SOKNAD_API_AUDIENCE:soknadAudience}

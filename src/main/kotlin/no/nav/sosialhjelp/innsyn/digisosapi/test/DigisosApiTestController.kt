@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
 /**
- *  Endepunkter som kun tilbys for sosialhjelp-fagsyste-mock -> kun tilgjengelig i preprod, ved lokal kjøring og i mock
+ *  Endepunkter som kun tilbys for sosialhjelp-fagsystem-mock -> kun tilgjengelig i preprod, ved lokal kjøring og i mock
  */
 @Profile("!prod-sbs")
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])

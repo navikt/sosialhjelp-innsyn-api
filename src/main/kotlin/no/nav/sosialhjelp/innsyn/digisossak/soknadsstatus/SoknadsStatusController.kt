@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -51,6 +52,9 @@ class SoknadsStatusController(
     private fun xsrfCookie(): Cookie {
         val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken())
         xsrfCookie.path = "/sosialhjelp/innsyn"
+        if (MiljoUtils.isRunningInFss() && !MiljoUtils.isRunningInProd()) {
+            xsrfCookie.domain = ".dev.nav.no"
+        }
         xsrfCookie.isHttpOnly = false
         return xsrfCookie
     }

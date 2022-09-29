@@ -12,4 +12,9 @@ object MiljoUtils {
         val clusterName = System.getenv(NAIS_CLUSTER_NAME)
         return clusterName != null && clusterName.contains("prod")
     }
+
+    fun isRunningInFss(): Boolean {
+        val clusterName = System.getenv(NAIS_CLUSTER_NAME)
+        return clusterName != null && clusterName.endsWith("-fss")
+    }
 }

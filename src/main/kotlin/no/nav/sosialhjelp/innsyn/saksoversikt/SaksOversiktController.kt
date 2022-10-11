@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
+import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
@@ -55,7 +57,7 @@ class SaksOversiktController(
         }
         val sak = fiksClient.hentDigisosSak(id, token, true)
         val model = eventService.createSaksoversiktModel(sak, token)
-        val antallOppgaver = hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) + hentAntallNyeVilkar(model, sak.fiksDigisosId, token) + hentAntallNyeDokumentasjonkrav(model, sak.fiksDigisosId, token)
+        val antallOppgaver = hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) + hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
         val saksDetaljerResponse = SaksDetaljerResponse(
             sak.fiksDigisosId,
             hentNavn(model),
@@ -76,6 +78,18 @@ class SaksOversiktController(
     private fun hentNavn(model: InternalDigisosSoker): String {
         return model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString {
             it.tittel ?: SaksStatusService.DEFAULT_SAK_TITTEL
+        }
+    }
+
+    private fun hentAntallNyeVilkarOgDokumentasjonkrav(model: InternalDigisosSoker, fiksDigisosId: String, token: String): Int {
+        // Alle vilkår og dokumentasjonskrav fjernes hvis alle utbetalinger har status utbetalt/annullert og er forbigått utbetalingsperioden med 21 dager
+        val filterUtbetalinger = model.utbetalinger
+            .filter { utbetaling -> utbetaling.status == UtbetalingsStatus.UTBETALT || utbetaling.status == UtbetalingsStatus.ANNULLERT }
+            .filter { utbetaling -> utbetaling.tom?.isBefore(LocalDate.now().minusDays(21)) ?: false }
+
+        return when {
+            model.utbetalinger.size > 0 && model.utbetalinger.size == filterUtbetalinger.size -> 0
+            else -> hentAntallNyeVilkar(model, fiksDigisosId, token) + hentAntallNyeDokumentasjonkrav(model, fiksDigisosId, token)
         }
     }
 

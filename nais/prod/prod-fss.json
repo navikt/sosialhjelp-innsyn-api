@@ -2,8 +2,7 @@
   "applicationName": "sosialhjelp-innsyn-api",
   "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api.nais.oera.no/sosialhjelp/innsyn-api",
-    "https://www.nav.no/sosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api.prod-fss-pub.nais.io/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
     "redis-password-innsyn-api",
@@ -14,21 +13,21 @@
     "FIKS_DIGISOS_ENDPOINT_URL": "https://api.fiks.ks.no",
     "FIKS_DOKUMENTLAGER_ENDPOINT_URL": "https://minside.kommune.no",
     "FIKS_SVAR_UT_ENDPOINT_URL": "https://svarut.ks.no",
-    "NORG_URL": "https://norg2.prod-fss-pub.nais.io/norg2/api/v1",
+    "NORG_URL": "https://norg2.intern.nav.no/norg2/api/v1",
     "AZUREAD_LOGINURL": "https://loginservice.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "180",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local",
     "SPRING_PROFILES_ACTIVE": "prod,log-kibana",
-    "PDL_ENDPOINT_URL": "https://pdl-api.prod-fss-pub.nais.io/graphql",
+    "PDL_ENDPOINT_URL": "https://pdl-api.intern.nav.no/graphql",
     "PDL_AUDIENCE": "prod-fss:pdl:pdl-api",
     "UNLEASH_API_URL": "https://unleash.nais.io/api",
-    "UNLEASH_INSTANCE_ID": "prod-sbs",
+    "UNLEASH_INSTANCE_ID": "prod-fss",
     "SWAGGER_ENABLED": "false",
     "CLAMAV_URL": "http://clamav.nais.svc.nais.local/scan",
     "LOGIN_API_IDPORTEN_CLIENTID": "bd520e59-6e01-4669-a7c8-f68fa2cac362",
     "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16",
-    "SOKNAD_API_URL": "https://www.nav.no/sosialhjelp/soknad-api",
-    "SOKNAD_API_AUDIENCE": "prod-sbs:teamdigisos:sosialhjelp-soknad-api"
+    "SOKNAD_API_URL": "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api",
+    "SOKNAD_API_AUDIENCE": "prod-fss:teamdigisos:sosialhjelp-soknad-api"
   },
   "minReplicas": "2",
   "maxReplicas": "4",

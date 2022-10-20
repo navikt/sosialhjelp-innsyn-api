@@ -73,7 +73,7 @@ fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long {
  * Generer navEksternRefId for nytt opplastet vedlegg
  * HVIS digisosSak har ettersendelser, hent siste navEksternRefId og inkrementer
  * HVIS digisosSak ikke har ettersendelser -> hent originalSøknads navEksternRefId, legg på "0000" og inkrementer
- * HVIS digisosSak ikke har originalSøknad (ergo papirsøknad) -> generer UUID, legg på "0000" og inkrementer
+ * HVIS digisosSak ikke har originalSøknad (dvs papirsøknad) -> bruk digisosId, legg på "0000" og inkrementer
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser

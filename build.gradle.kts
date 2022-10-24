@@ -7,48 +7,48 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.4"
-    const val springBoot = "2.7.3"
-    const val sosialhjelpCommon = "1.20220718.1347-2b1045d"
+    const val springBoot = "2.7.5"
+    const val sosialhjelpCommon = "1.20221019.1049-614783b"
     const val logback = "1.2.11"
     const val logstash = "7.2"
-    const val filformat = "1.2022.07.19-14.28-614820e5640b"
-    const val micrometerRegistry = "1.9.3"
+    const val filformat = "1.2022.10.21-12.33-ed1a97d500e4"
+    const val micrometerRegistry = "1.9.5"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "2.1.4"
+    const val tokenValidation = "2.1.6"
     const val jackson = "2.13.4"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.11.0"
     const val fileUpload = "1.4"
     const val tika = "2.4.1"
-    const val pdfBox = "2.0.26"
-    const val fiksKryptering = "1.2.0"
-    const val lettuce = "6.2.0.RELEASE"
-    const val jempbox = "1.8.16"
+    const val pdfBox = "2.0.27"
+    const val fiksKryptering = "1.3.0"
+    const val lettuce = "6.2.1.RELEASE"
+    const val jempbox = "1.8.17"
     const val unleash = "4.4.1"
-    const val springdoc = "1.6.11"
+    const val springdoc = "1.6.12"
     const val jsonSmart = "2.4.7"
     const val gson = "2.9.0"
-    const val log4j = "2.17.2"
-    const val snakeyaml = "1.31"
+    const val log4j = "2.19.0"
+    const val snakeyaml = "1.33"
 
-    const val javaJwt = "4.0.0"
-    const val jwksRsa = "0.21.1"
-    const val nimbus = "9.24.3"
+    const val javaJwt = "4.2.0"
+    const val jwksRsa = "0.21.2"
+    const val nimbus = "9.25.6"
 
     const val ktlint = "0.45.2"
 
     //    Test only
     const val junit = "4.13.2"
-    const val mockk = "1.12.7"
+    const val mockk = "1.13.2"
     const val springmockk = "3.1.1"
 }
 
 plugins {
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.spring") version "1.7.10"
-    id("org.springframework.boot") version "2.7.3"
-    id("com.github.ben-manes.versions") version "0.42.0" // ./gradlew dependencyUpdates
+    kotlin("jvm") version "1.7.20"
+    kotlin("plugin.spring") version "1.7.20"
+    id("org.springframework.boot") version "2.7.5"
+    id("com.github.ben-manes.versions") version "0.43.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 

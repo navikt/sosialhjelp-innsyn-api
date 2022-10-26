@@ -1,5 +1,5 @@
 [![Build image](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/build.yml)
-[![Deploy til prod-sbs](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml/badge.svg)](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml)
+[![Deploy til prod](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml/badge.svg)](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml)
 
 # sosialhjelp-innsyn-api
 Backend-app som skal gi innsyn i egen sosialhjelp sak.
@@ -33,7 +33,7 @@ Dette prosjektet bygger og deployer vha Github Actions
 ### Github Actions
 - Docker image bygges ved push => `.github/workflows/build.yml`
 - Deploy til dev => `.github/workflows/deploy_dev.yml`
-- Autodeploy til prod-sbs fra master => `.github/workflows/deploy_prod.yml`
+- Autodeploy til prod-fss fra master => `.github/workflows/deploy_prod.yml`
 
 ### Github deployment
 - Github deployments - registrer ditt github-repo [her](https://deployment.prod-sbs.nais.io/auth/form)

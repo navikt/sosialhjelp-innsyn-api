@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RestController
 @Unprotected
 @RestController
 @RequestMapping("/api/veiviser/")
-class KommunenummerController {
-
-    private val kommunenummerCache = KommunenummerCache()
+class KommunenummerController(
+    private val kommunenummerService: KommunenummerService
+) {
 
     @GetMapping("kommunenummer", produces = ["application/json;charset=UTF-8"])
     fun hentKommunenummer(): ResponseEntity<String> {
-        return ResponseEntity.ok(kommunenummerCache.getKommunenr())
+        return ResponseEntity.ok(kommunenummerService.getKommunenummer())
     }
 }

@@ -2,7 +2,8 @@
   "applicationName": "sosialhjelp-innsyn-api",
   "namespace": "teamdigisos",
   "ingress": [
-    "https://sosialhjelp-innsyn-api.dev-fss-pub.nais.io/sosialhjelp/innsyn-api"
+    "https://sosialhjelp-innsyn-api.dev-fss-pub.nais.io/sosialhjelp/innsyn-api",
+    "https://sosialhjelp-innsyn-api.dev.intern.nav.no/sosialhjelp/innsyn-api"
   ],
   "envsecret": [
     "redis-password-innsyn-api",

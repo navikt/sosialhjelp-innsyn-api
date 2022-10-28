@@ -28,7 +28,7 @@
     "UNLEASH_INSTANCE_ID": "mock",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
     "SWAGGER_ENABLED": "true",
-    "TOKEN_X_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/selvbetjening",
+    "TOKEN_X_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/tokenx",
     "TOKEN_X_CLIENT_ID": "dev-gcp:teamdigisos:sosialhjelp-innsyn-api",
     "TOKEN_X_PRIVATE_JWK": "generateRSA",
     "MASKINPORTEN_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/maskinporten",

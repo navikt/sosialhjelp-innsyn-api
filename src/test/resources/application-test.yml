@@ -15,7 +15,7 @@ client:
   tokendings_url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
   tokendings_private_jwk: generateRSA
   soknad_api_url: "http://localhost:59999"
-  soknad_api_audience: "soknadAudience"
+  soknad_api_audience: "dummyAudience"
 
 #Maskinporten
 maskinporten_clientid: clientid

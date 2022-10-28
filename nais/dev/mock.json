@@ -33,7 +33,7 @@
     "TOKEN_X_PRIVATE_JWK": "generateRSA",
     "MASKINPORTEN_WELL_KNOWN_URL": "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/maskinporten",
     "VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER": "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON,Testsystemet;1.0.0",
-    "SOKNAD_API_URL": "https://digisos.ekstern.dev.nav.no/sosialhjelp/soknad-api"
+    "SOKNAD_API_URL": "http://sosialhjelp-soknad-api-mock/sosialhjelp/soknad-api"
   },
   "minReplicas": "1",
   "maxReplicas": "1",

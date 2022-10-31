@@ -175,6 +175,10 @@ class FiksClientImpl(
         val kommunenummer = digisosSak.kommunenummer
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
+        if (erPapirsoknad(digisosSak)) {
+            log.info("Kommune ${digisosSak.kommunenummer} har innsyn i papirsøknader.")
+        }
+
         val responseEntity = fiksWebClient.post()
             .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
             .header(HttpHeaders.AUTHORIZATION, token)
@@ -204,6 +208,10 @@ class FiksClientImpl(
 
         opplastingsteller.increment()
         log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue})")
+    }
+
+    private fun erPapirsoknad(digisosSak: DigisosSak): Boolean {
+        return digisosSak.ettersendtInfoNAV?.ettersendelser?.isEmpty() != false && digisosSak.originalSoknadNAV == null
     }
 
     private fun filErAlleredeLastetOpp(exception: WebClientResponseException, digisosId: String): Boolean =

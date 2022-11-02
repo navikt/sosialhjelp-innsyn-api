@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.util.Optional
 import java.util.stream.Collectors
 
 interface PdlClient {
@@ -127,9 +126,7 @@ class PdlClientImpl(
             ?: throw RuntimeException("Klarte ikke å hente PDL query resurs: $path")
 
     private fun checkForPdlApiErrors(response: PdlResponse?) {
-        Optional.ofNullable(response)
-            .map(PdlResponse::errors)
-            .ifPresent { handleErrors(it) }
+        response?.errors?.let { handleErrors(it) }
     }
 
     private fun handleErrors(errors: List<PdlError>) {

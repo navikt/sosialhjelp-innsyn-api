@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.util.stream.Collectors
 
 interface PdlClient {
     fun hentPerson(ident: String, token: String): PdlHentPerson?
@@ -130,14 +129,11 @@ class PdlClientImpl(
     }
 
     private fun handleErrors(errors: List<PdlError>) {
-        val errorList = errors.stream()
+        val errorString = errors
             .map { it.message + "(feilkode: " + it.extensions.code + ")" }
-            .collect(Collectors.toList())
-        throw PdlException(errorMessage(errorList))
+            .joinToString(prefix = "Error i respons fra pdl-api: ") { it }
+        throw PdlException(errorString)
     }
-
-    private fun errorMessage(errors: List<String>): String =
-        "Error i respons fra pdl-api: ${errors.joinToString { it }}"
 
     private fun cacheKey(ident: String): String = ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX + ident
 

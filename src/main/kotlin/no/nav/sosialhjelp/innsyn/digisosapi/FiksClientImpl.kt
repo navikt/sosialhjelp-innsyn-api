@@ -27,7 +27,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE
 import org.springframework.http.MediaType
-import org.springframework.lang.NonNull
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
@@ -50,9 +49,9 @@ class FiksClientImpl(
     private val fiksRetry = retryBackoffSpec(maxAttempts = retryMaxAttempts, initialWaitIntervalMillis = retryInitialDelay)
         .onRetryExhaustedThrow { _, retrySignal ->
             throw FiksServerException(
-                SERVICE_UNAVAILABLE.value(),
-                "Fiks - retry har nådd max antall forsøk (=$retryMaxAttempts)",
-                retrySignal.failure()
+                status = SERVICE_UNAVAILABLE.value(),
+                message = "Fiks - retry har nådd max antall forsøk (=$retryMaxAttempts)",
+                cause = retrySignal.failure()
             )
         }
 
@@ -187,14 +186,8 @@ class FiksClientImpl(
             .retrieve()
             .toEntity<String>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.info("e.rawStatusCode = ${e.rawStatusCode}")
-                log.info("400 == ${e.rawStatusCode} -> ${e.rawStatusCode == 400}")
-                log.info("toFiksErrorMessageUtenFnr(e) = ${toFiksErrorMessageUtenFnr(e)}")
                 if (e.rawStatusCode == 400 && filErAlleredeLastetOpp(e, digisosId)) {
-                    log.warn(
-                        "Fiks - Opplasting av ettersendelse er allerede på plass hos Fiks - ${messageUtenFnr(e)}",
-                        e
-                    )
+                    log.warn("Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}", e)
                     FiksClientFileExistsException(e.message?.maskerFnr, e)
                 } else {
                     log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
@@ -257,7 +250,7 @@ class FiksClientImpl(
         return HttpEntity(body, headerMap)
     }
 
-    fun serialiser(@NonNull metadata: Any): String {
+    fun serialiser(metadata: Any): String {
         try {
             return objectMapper.writeValueAsString(metadata)
         } catch (e: JsonProcessingException) {

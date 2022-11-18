@@ -8,14 +8,14 @@ group = "no.nav.sosialhjelp"
 object Versions {
     const val coroutines = "1.6.4"
     const val springBoot = "2.7.5"
-    const val sosialhjelpCommon = "1.20221019.1049-614783b"
+    const val sosialhjelpCommon = "1.20221108.1040-97f1b80"
     const val logback = "1.2.11"
     const val logstash = "7.2"
-    const val filformat = "1.2022.10.21-12.33-ed1a97d500e4"
+    const val filformat = "1.2022.11.11-08.08-6af9f821a746"
     const val micrometerRegistry = "1.9.5"
     const val prometheus = "0.16.0"
     const val tokenValidation = "2.1.6"
-    const val jackson = "2.13.4"
+    const val jackson = "2.14.0"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.11.0"
@@ -48,8 +48,8 @@ plugins {
     kotlin("jvm") version "1.7.20"
     kotlin("plugin.spring") version "1.7.20"
     id("org.springframework.boot") version "2.7.5"
-    id("com.github.ben-manes.versions") version "0.43.0" // ./gradlew dependencyUpdates
-    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
+    id("com.github.ben-manes.versions") version "0.44.0" // ./gradlew dependencyUpdates
+    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }
 
 java {

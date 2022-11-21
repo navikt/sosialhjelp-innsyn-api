@@ -41,7 +41,7 @@ class MDCFilter : OncePerRequestFilter() {
     }
 
     private fun addDigisosId(request: HttpServletRequest) {
-        if (request.requestURI.matches(Regex("^$INNSYN_BASE_URL(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)|saksStatus|soknadsStatus|vedlegg|vilkar|dokumentasjonkrav|dokumentasjonkrav/(.*))|harLeverteDokumentasjonkrav|fagsystemHarDokumentasjonkrav"))) {
+        if (request.requestURI.matches(Regex("^$INNSYN_BASE_URL(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)|saksStatus|soknadsStatus|vedlegg|vilkar|dokumentasjonkrav|dokumentasjonkrav/(.*)|harLeverteDokumentasjonkrav|fagsystemHarDokumentasjonkrav)"))) {
             val digisosId = request.requestURI.substringAfter(INNSYN_BASE_URL).substringBefore("/")
             put(DIGISOS_ID, digisosId)
         } else if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}saksDetaljer")) && request.parameterMap.containsKey("id")) {

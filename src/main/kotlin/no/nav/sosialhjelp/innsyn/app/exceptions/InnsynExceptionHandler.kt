@@ -18,6 +18,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 @ControllerAdvice
@@ -60,7 +61,11 @@ class InnsynExceptionHandler(
 
     @ExceptionHandler(FiksClientException::class)
     fun handleFiksClientError(e: FiksClientException): ResponseEntity<FrontendErrorMessage> {
-        log.error("Client-feil ved kall til Fiks", e)
+        if (e.cause is WebClientResponseException.Unauthorized) {
+            log.warn("Bruker er ikke autorisert for kall mot fiks. Token har utløpt")
+        } else {
+            log.error("Client-feil ved kall til Fiks", e)
+        }
         val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -149,7 +154,14 @@ class InnsynExceptionHandler(
     private fun createUnauthorizedWithLoginUrlResponse(loginUrl: String): ResponseEntity<FrontendErrorMessage> {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .contentType(MediaType.APPLICATION_JSON)
-            .body(FrontendUnauthorizedMessage("azuread_authentication_error", "azuread_authentication_error", "Autentiseringsfeil", loginUrl))
+            .body(
+                FrontendUnauthorizedMessage(
+                    "azuread_authentication_error",
+                    "azuread_authentication_error",
+                    "Autentiseringsfeil",
+                    loginUrl
+                )
+            )
     }
 
     companion object {

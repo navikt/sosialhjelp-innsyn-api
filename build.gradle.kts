@@ -7,14 +7,14 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.4"
-    const val springBoot = "2.7.7"
+    const val springBoot = "3.0.0"
     const val sosialhjelpCommon = "1.20230209.0920-45d9782"
     const val logback = "1.2.11"
     const val logstash = "7.2"
     const val filformat = "1.2023.02.09-08.34-aad9baa612d3"
     const val micrometerRegistry = "1.10.3"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "2.1.9"
+    const val tokenValidation = "3.0.0"
     const val jackson = "2.14.1"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
@@ -39,6 +39,15 @@ object Versions {
 
     const val ktlint = "0.45.2"
 
+    const val jakartaActivationApi = "2.1.0"
+    const val jakartaAnnotationApi = "2.1.1"
+    const val jakartaXmlBindApi = "4.0.0"
+    const val jakartaWebsocketApi = "2.1.0"
+    const val jakartaWebsocketClientApi = "2.1.0"
+    const val jakartaTransactionApi = "2.0.1"
+    const val jakartaServletApi = "6.0.0"
+    const val jakartaValidationApi = "3.0.2"
+
     //    Test only
     const val junit = "4.13.2"
     const val mockk = "1.13.4"
@@ -48,7 +57,7 @@ object Versions {
 plugins {
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.spring") version "1.8.10"
-    id("org.springframework.boot") version "2.7.7"
+    id("org.springframework.boot") version "3.0.0"
     id("com.github.ben-manes.versions") version "0.45.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
 }
@@ -173,6 +182,16 @@ dependencies {
         implementation("commons-fileupload:commons-fileupload:${Versions.commonsFileupload}") {
             because("https://security.snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-3326457")
         }
+
+        // spring boot 3.0.0 -> jakarta
+        implementation("jakarta.activation:jakarta.activation-api:${Versions.jakartaActivationApi}")
+        implementation("jakarta.annotation:jakarta.annotation-api:${Versions.jakartaAnnotationApi}")
+        implementation("jakarta.validation:jakarta.validation-api:${Versions.jakartaValidationApi}")
+        implementation("jakarta.xml.bind:jakarta.xml.bind-api:${Versions.jakartaXmlBindApi}")
+        implementation("jakarta.websocket:jakarta.websocket-api:${Versions.jakartaWebsocketApi}")
+        implementation("jakarta.websocket:jakarta.websocket-client-api:${Versions.jakartaWebsocketClientApi}")
+        implementation("jakarta.transaction:jakarta.transaction-api:${Versions.jakartaTransactionApi}")
+        implementation("jakarta.servlet:jakarta.servlet-api:${Versions.jakartaServletApi}")
 
         testImplementation("junit:junit:${Versions.junit}") {
             because("Snyk ønsker 4.13.1 eller høyere")

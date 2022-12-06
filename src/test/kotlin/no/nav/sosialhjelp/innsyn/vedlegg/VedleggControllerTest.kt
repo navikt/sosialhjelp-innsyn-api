@@ -5,6 +5,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
@@ -26,8 +28,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
-import javax.servlet.http.Cookie
-import javax.servlet.http.HttpServletRequest
 
 internal class VedleggControllerTest {
 

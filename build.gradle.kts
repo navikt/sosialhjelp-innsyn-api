@@ -45,7 +45,7 @@ object Versions {
     const val jakartaWebsocketApi = "2.1.0"
     const val jakartaWebsocketClientApi = "2.1.0"
     const val jakartaTransactionApi = "2.0.1"
-    const val jakartaServletApi = "6.0.0"
+    const val jakartaServletApi = "5.0.0"
     const val jakartaValidationApi = "3.0.2"
 
     //    Test only
@@ -191,7 +191,9 @@ dependencies {
         implementation("jakarta.websocket:jakarta.websocket-api:${Versions.jakartaWebsocketApi}")
         implementation("jakarta.websocket:jakarta.websocket-client-api:${Versions.jakartaWebsocketClientApi}")
         implementation("jakarta.transaction:jakarta.transaction-api:${Versions.jakartaTransactionApi}")
-        implementation("jakarta.servlet:jakarta.servlet-api:${Versions.jakartaServletApi}")
+        implementation("jakarta.servlet:jakarta.servlet-api") {
+            version { strictly(Versions.jakartaServletApi) }
+        }
 
         testImplementation("junit:junit:${Versions.junit}") {
             because("Snyk ønsker 4.13.1 eller høyere")

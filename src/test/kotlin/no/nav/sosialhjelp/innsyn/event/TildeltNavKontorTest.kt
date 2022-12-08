@@ -7,6 +7,8 @@ import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -192,5 +194,67 @@ internal class TildeltNavKontorTest {
 
         assertThat(model.historikk[2].tittel).contains(enhetNavn)
         assertThat(model.historikk[3].tittel).contains(enhetNavn2)
+    }
+
+    @Test
+    fun `forste gang en papirSoknad faar tildeltNavKontor skal hendelsen ikke nevne videresendt`() {
+        every { norgClient.hentNavEnhet(navKontor) } returns mockNavEnhet
+        every { mockNavEnhet.navn } returns enhetNavn
+        every { mockDigisosSak.originalSoknadNAV } returns
+            OriginalSoknadNAV("", "", "", DokumentInfo("", "", 0), emptyList(), null)
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            JsonDigisosSoker()
+                .withAvsender(avsender)
+                .withVersion("123")
+                .withHendelser(
+                    listOf(
+                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                    )
+                )
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
+        assertThat(model.saker).hasSize(0)
+        assertThat(model.historikk).hasSize(2)
+
+        assertThat(model.historikk[0].tittel).contains("Søknaden med vedlegg er mottatt")
+        assertThat(model.historikk[1].tittel).contains(enhetNavn)
+        assertThat(model.historikk[1].tittel).doesNotContain("videresendt")
+    }
+
+    @Test
+    fun `andre gang en papirSoknad faar tildeltNavKontor skal hendelsen vise videresendt`() {
+        every { norgClient.hentNavEnhet(navKontor) } returns mockNavEnhet
+        every { norgClient.hentNavEnhet(navKontor2) } returns mockNavEnhet2
+        every { mockNavEnhet.navn } returns enhetNavn
+        every { mockNavEnhet2.navn } returns enhetNavn2
+        every { mockDigisosSak.originalSoknadNAV } returns
+            OriginalSoknadNAV("", "", "", DokumentInfo("", "", 0), emptyList(), null)
+        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            JsonDigisosSoker()
+                .withAvsender(avsender)
+                .withVersion("123")
+                .withHendelser(
+                    listOf(
+                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                        TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(tidspunkt_3),
+                    )
+                )
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+
+        val model = service.createModel(mockDigisosSak, "token")
+
+        assertThat(model).isNotNull
+        assertThat(model.status).isEqualTo(SoknadsStatus.MOTTATT)
+        assertThat(model.saker).hasSize(0)
+        assertThat(model.historikk).hasSize(3)
+
+        assertThat(model.historikk[0].tittel).contains("Søknaden med vedlegg er mottatt")
+        assertThat(model.historikk[2].tittel).contains("videresendt", enhetNavn2)
     }
 }

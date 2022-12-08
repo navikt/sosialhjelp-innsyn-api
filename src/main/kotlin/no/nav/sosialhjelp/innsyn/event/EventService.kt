@@ -56,18 +56,24 @@ class EventService(
         }
 
         // Hvis søknad er papirsøknad, vil 'timestampSendt' være null:
-        if (originalSoknadNAV?.timestampSendt != null) {
-            setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
+        originalSoknadNAV?.timestampSendt?.let { timestamp ->
+            setTidspunktSendtIfNotZero(model, timestamp)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
             model.fiksDigisosId = digisosSak.fiksDigisosId
 
             if (jsonSoknad != null && jsonSoknad.mottaker != null) {
-                model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
+                model.soknadsmottaker =
+                    Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
                 model.historikk.add(
                     Hendelse(
                         "Søknaden med vedlegg er sendt til ${stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn)} kommune.",
-                        unixToLocalDateTime(originalSoknadNAV.timestampSendt),
-                        dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
+                        unixToLocalDateTime(timestamp),
+                        dokumentlagerDokumentId?.let {
+                            UrlResponse(
+                                VIS_SOKNADEN,
+                                hentDokumentlagerUrl(clientProperties, it)
+                            )
+                        }
                     )
                 )
             }
@@ -96,7 +102,8 @@ class EventService(
                         ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
                         ?.forEach {
                             eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
-                            opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
+                            opprettelsesdato =
+                                minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
                         }
                     val startdato = maxOf(forfallsDato, opprettelsesdato)
                     val overdueDays = ChronoUnit.DAYS.between(startdato, sluttdato)
@@ -137,7 +144,12 @@ class EventService(
         return model
     }
 
-    private fun applyHendelserOgSoknadKrav(jsonDigisosSoker: JsonDigisosSoker?, model: InternalDigisosSoker, digisosSak: DigisosSak, token: String) {
+    private fun applyHendelserOgSoknadKrav(
+        jsonDigisosSoker: JsonDigisosSoker?,
+        model: InternalDigisosSoker,
+        digisosSak: DigisosSak,
+        token: String,
+    ) {
         jsonDigisosSoker?.hendelser
             ?.sortedWith(hendelseComparator)
             ?.forEach { model.applyHendelse(it) }
@@ -147,8 +159,11 @@ class EventService(
             ?.isEmpty() ?: true
 
         val originalSoknadNAV = digisosSak.originalSoknadNAV
-        if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)) {
-            model.applySoknadKrav(digisosSak, vedleggService, originalSoknadNAV.timestampSendt, token)
+        if (originalSoknadNAV != null &&
+            ingenDokumentasjonskravFraInnsyn &&
+            soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)
+        ) {
+            model.applySoknadKrav(digisosSak, vedleggService, originalSoknadNAV.timestampSendt!!, token)
         }
     }
 
@@ -199,8 +214,9 @@ class EventService(
             return 0
         }
 
-        private fun soknadSendtForMindreEnn30DagerSiden(timestampSendt: Long) =
-            unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
+        private fun soknadSendtForMindreEnn30DagerSiden(timestampSendt: Long?) =
+            if (timestampSendt == null) false else unixToLocalDateTime(timestampSendt).toLocalDate()
+                .isAfter(LocalDate.now().minusDays(30))
 
         fun stripEnhetsnavnForKommune(navEnhetsnavn: String): String {
             return navEnhetsnavn.replace(" kommune", "")

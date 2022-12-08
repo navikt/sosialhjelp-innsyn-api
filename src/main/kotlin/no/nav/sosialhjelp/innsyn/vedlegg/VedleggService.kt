@@ -45,7 +45,7 @@ class VedleggService(
                     vedlegg.hendelseType,
                     vedlegg.hendelseReferanse,
                     matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer).toMutableList(),
-                    unixToLocalDateTime(originalSoknadNAV.timestampSendt),
+                    unixToLocalDateTime(originalSoknadNAV.timestampSendt!!),
                     null
                 )
             }

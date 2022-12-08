@@ -21,7 +21,7 @@ class HendelseService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksClient: FiksClient,
-    private val unleashClient: Unleash
+    private val unleashClient: Unleash,
 ) {
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {

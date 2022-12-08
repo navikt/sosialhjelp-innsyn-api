@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.domain
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg.HendelseType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -151,8 +152,13 @@ data class Hendelse(
     // type som felt?
     val tittel: String,
     val tidspunkt: LocalDateTime,
-    val url: UrlResponse? = null
+    val url: UrlResponse? = null,
+    val type: HistorikkType? = null,
 )
+
+enum class HistorikkType {
+    TILDELT_NAV_KONTOR
+}
 
 data class UrlResponse(
     val linkTekst: String,

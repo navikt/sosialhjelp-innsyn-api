@@ -147,11 +147,10 @@ data class Dokumentasjonkrav(
 ) : Oppgavehendelse()
 
 data class Hendelse(
-    // egentlig historikk
-    // type som felt?
     val tittel: String,
     val tidspunkt: LocalDateTime,
-    val url: UrlResponse? = null
+    val url: UrlResponse? = null,
+    val type: HistorikkType? = null,
 )
 
 data class UrlResponse(
@@ -182,4 +181,8 @@ enum class UtfallVedtak {
 
 enum class Oppgavestatus {
     RELEVANT, ANNULLERT, OPPFYLT, IKKE_OPPFYLT, LEVERT_TIDLIGERE
+}
+
+enum class HistorikkType {
+    TILDELT_NAV_KONTOR, DOKUMENTASJONSKRAV
 }

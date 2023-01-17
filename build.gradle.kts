@@ -123,6 +123,7 @@ dependencies {
 
 //    Springdoc
     implementation("org.springdoc:springdoc-openapi-ui:${Versions.springdoc}")
+    implementation("org.springdoc:springdoc-openapi-kotlin:${Versions.springdoc}")
 
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")

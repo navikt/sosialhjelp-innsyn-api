@@ -8,7 +8,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.DOKUMENTASJONKRAV
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.DOKUMENTASJONKRAV_ENABLED
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -56,7 +55,6 @@ internal class DokumentasjonkravTest {
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
         every { unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false) } returns true
-        every { unleashClient.isEnabled(DOKUMENTASJONKRAV, false) } returns true
 
         resetHendelser()
     }

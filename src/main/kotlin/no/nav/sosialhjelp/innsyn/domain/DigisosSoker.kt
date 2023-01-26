@@ -6,41 +6,22 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class InternalDigisosSoker(
-    var fagsystem: Fagsystem?,
-    var referanse: String?,
-    var fiksDigisosId: String?,
-    var status: SoknadsStatus,
-    var saker: MutableList<Sak>,
-    var utbetalinger: MutableList<Utbetaling>,
-    var forvaltningsbrev: MutableList<Forvaltningsbrev>,
-    var soknadsmottaker: Soknadsmottaker?,
-    var tildeltNavKontor: String?,
-    var oppgaver: MutableList<Oppgave>,
-    var historikk: MutableList<Hendelse>,
-    var forelopigSvar: ForelopigSvar,
-    var tidspunktSendt: LocalDateTime?,
-    var vilkar: MutableList<Vilkar>,
-    var dokumentasjonkrav: MutableList<Dokumentasjonkrav>,
-) {
-
-    constructor() : this(
-        fagsystem = null,
-        referanse = null,
-        fiksDigisosId = null,
-        status = SoknadsStatus.SENDT,
-        saker = mutableListOf(),
-        utbetalinger = mutableListOf(),
-        forvaltningsbrev = mutableListOf(),
-        soknadsmottaker = null,
-        tildeltNavKontor = null,
-        oppgaver = mutableListOf(),
-        historikk = mutableListOf(),
-        forelopigSvar = ForelopigSvar(false, null),
-        tidspunktSendt = null,
-        vilkar = mutableListOf(),
-        dokumentasjonkrav = mutableListOf()
-    )
-}
+    var fagsystem: Fagsystem? = null,
+    var referanse: String? = null,
+    var fiksDigisosId: String? = null,
+    var status: SoknadsStatus = SoknadsStatus.SENDT,
+    var saker: MutableList<Sak> = mutableListOf(),
+    var utbetalinger: MutableList<Utbetaling> = mutableListOf(),
+    var forvaltningsbrev: MutableList<Forvaltningsbrev> = mutableListOf(),
+    var soknadsmottaker: Soknadsmottaker? = null,
+    var tildeltNavKontor: String? = null,
+    var oppgaver: MutableList<Oppgave> = mutableListOf(),
+    var historikk: MutableList<Hendelse> = mutableListOf(),
+    var forelopigSvar: ForelopigSvar = ForelopigSvar(false, null),
+    var tidspunktSendt: LocalDateTime? = null,
+    var vilkar: MutableList<Vilkar> = mutableListOf(),
+    var dokumentasjonkrav: MutableList<Dokumentasjonkrav> = mutableListOf(),
+)
 
 data class Fagsystem(
     var systemnavn: String?,

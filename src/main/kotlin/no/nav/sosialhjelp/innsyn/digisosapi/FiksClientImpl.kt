@@ -14,7 +14,6 @@ import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.maskerFnr
 import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
@@ -78,11 +77,11 @@ class FiksClientImpl(
             .bodyToMono<DigisosSak>()
             .retryWhen(fiksRetry)
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}", e)
+                val feilmelding = "Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}"
                 when {
-                    e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(e.message?.maskerFnr, e)
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
+                    e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(feilmelding, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, feilmelding, e)
+                    else -> FiksServerException(e.rawStatusCode, feilmelding, e)
                 }
             }
             .block()
@@ -123,11 +122,10 @@ class FiksClientImpl(
             .bodyToMono(requestedClass)
             .retryWhen(fiksRetry)
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - hentDokument feilet - ${messageUtenFnr(e)}", e)
+                val feilmelding = "Fiks - hentDokument feilet - ${messageUtenFnr(e)}"
                 when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
-                        .also { log.warn("responsebody (uten fnr): ${e.responseBodyAsString.maskerFnr}") }
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, feilmelding, e)
+                    else -> FiksServerException(e.rawStatusCode, feilmelding, e)
                 }
             }
             .block()
@@ -146,10 +144,10 @@ class FiksClientImpl(
             .bodyToMono<List<DigisosSak>>()
             .retryWhen(fiksRetry)
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}", e)
+                val feilmelding = "Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}"
                 when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, feilmelding, e)
+                    else -> FiksServerException(e.rawStatusCode, feilmelding, e)
                 }
             }
             .block()
@@ -187,13 +185,13 @@ class FiksClientImpl(
             .toEntity<String>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 if (e.rawStatusCode == 400 && filErAlleredeLastetOpp(e, digisosId)) {
-                    log.warn("Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}", e)
-                    FiksClientFileExistsException(e.message?.maskerFnr, e)
+                    val feilmeldingAlleredeFinnes = "Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}"
+                    FiksClientFileExistsException(feilmeldingAlleredeFinnes, e)
                 } else {
-                    log.warn("Fiks - Opplasting av ettersendelse på $digisosId feilet - ${messageUtenFnr(e)}", e)
+                    val feilmelding = "Fiks - Opplasting av ettersendelse til digisosId=$digisosId feilet - ${messageUtenFnr(e)}"
                     when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message?.maskerFnr, e)
-                        else -> FiksServerException(e.rawStatusCode, e.message?.maskerFnr, e)
+                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, feilmelding, e)
+                        else -> FiksServerException(e.rawStatusCode, feilmelding, e)
                     }
                 }
             }

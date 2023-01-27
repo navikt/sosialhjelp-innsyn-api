@@ -186,6 +186,7 @@ class FiksClientImpl(
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 if (e.rawStatusCode == 400 && filErAlleredeLastetOpp(e, digisosId)) {
                     val feilmeldingAlleredeFinnes = "Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}"
+                    log.warn(feilmeldingAlleredeFinnes, e)
                     FiksClientFileExistsException(feilmeldingAlleredeFinnes, e)
                 } else {
                     val feilmelding = "Fiks - Opplasting av ettersendelse til digisosId=$digisosId feilet - ${messageUtenFnr(e)}"

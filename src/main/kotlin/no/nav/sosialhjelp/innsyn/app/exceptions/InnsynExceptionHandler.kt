@@ -64,7 +64,7 @@ class InnsynExceptionHandler(
         if (e.cause is WebClientResponseException.Unauthorized) {
             log.warn("Bruker er ikke autorisert for kall mot fiks. Token har utløpt")
         } else {
-            log.error("Client-feil ${e.message}", e)
+            log.error("Client-feil - ${e.message}", e)
         }
         val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
@@ -72,7 +72,7 @@ class InnsynExceptionHandler(
 
     @ExceptionHandler(FiksServerException::class)
     fun handleFiksServerError(e: FiksServerException): ResponseEntity<FrontendErrorMessage> {
-        log.error("Server-feil ${e.message}", e)
+        log.error("Server-feil - ${e.message}", e)
         val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }

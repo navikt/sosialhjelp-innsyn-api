@@ -30,6 +30,7 @@
     "NORG_URL": "https://norg2.dev-fss-pub.nais.io/norg2/api/v1",
     "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
+    "DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS": "3600",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local",
     "PDL_ENDPOINT_URL": "https://pdl-api.dev-fss-pub.nais.io/graphql",
     "PDL_AUDIENCE": "dev-fss:pdl:pdl-api",

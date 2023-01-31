@@ -19,6 +19,7 @@
     "NORG_URL": "https://norg2.dev.intern.nav.no/norg2/api/v1",
     "AZUREAD_LOGINURL": "https://loginservice.dev.nav.no/login",
     "CACHE_TIME_TO_LIVE_SECONDS": "10",
+    "DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS": "3600",
     "REDIS_HOST": "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local",
     "SPRING_PROFILES_ACTIVE": "dev-fss,log-kibana",
     "PDL_ENDPOINT_URL": "https://pdl-api.dev.intern.nav.no/graphql",

@@ -96,7 +96,7 @@ class VedleggService(
     }
 
     private fun hentVedleggSpesifikasjon(digisosSak: DigisosSak, dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {
-        return fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token) as JsonVedleggSpesifikasjon
+        return fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token)
     }
 
     private fun matchDokumentInfoAndJsonFiler(dokumentInfoList: List<DokumentInfo>, jsonFiler: List<JsonFiler>): List<DokumentInfo> {

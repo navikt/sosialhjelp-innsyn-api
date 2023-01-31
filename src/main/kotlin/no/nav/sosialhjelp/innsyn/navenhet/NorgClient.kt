@@ -59,7 +59,7 @@ class NorgClientImpl(
     }
 
     private fun hentFraCache(enhetsnr: String): NavEnhet? =
-        redisService.get(cacheKey(enhetsnr), NavEnhet::class.java) as NavEnhet?
+        redisService.get(cacheKey(enhetsnr), NavEnhet::class.java)
 
     private fun lagreTilCache(enhetsnr: String, navEnhet: NavEnhet) {
         redisService.put(

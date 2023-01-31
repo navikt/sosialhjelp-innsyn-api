@@ -28,6 +28,8 @@ innsyn:
     virusscan:
       enabled: false
       url:
+  cache:
+    dokument_cache_time_to_live_seconds: 10
 
 springdoc:
   api-docs:

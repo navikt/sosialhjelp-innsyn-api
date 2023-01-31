@@ -49,12 +49,12 @@ class PdlClientImpl(
 
     override fun hentIdenter(ident: String, token: String): List<String> {
         redisService.get(PDL_IDENTER_CACHE_KEY_PREFIX + ident, PdlIdenter::class.java)
-            ?.let { pdlIdenter -> return (pdlIdenter as PdlIdenter).identer.map { it.ident } }
+            ?.let { pdlIdenter -> return pdlIdenter.identer.map { it.ident } }
         return hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
     }
 
     private fun hentFraCache(ident: String): PdlHentPerson? =
-        redisService.get(cacheKey(ident), PdlHentPerson::class.java) as? PdlHentPerson
+        redisService.get(cacheKey(ident), PdlHentPerson::class.java)
 
     private fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
         val query = getHentPersonResource().replace("[\n\r]", "")

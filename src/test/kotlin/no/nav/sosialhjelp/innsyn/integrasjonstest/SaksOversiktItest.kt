@@ -34,7 +34,6 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
-
 class SaksOversiktItest {
 
     @Autowired
@@ -93,10 +92,10 @@ class SaksOversiktItest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
         every { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
         every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
-        every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
         every { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
-        every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
+        every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) } returns soknad
 
         webClient
             .get()
@@ -107,8 +106,8 @@ class SaksOversiktItest {
             .expectStatus().isOk
 
         verify(exactly = 2) { fiksClient.hentDigisosSak(any(), any(), any()) }
-        verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }
-        verify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
+        verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
+        verify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
     }
 
     @Test

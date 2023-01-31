@@ -42,7 +42,8 @@ class FiksClientImpl(
     private val redisService: RedisService,
     @Value("\${retry_fiks_max_attempts}") private val retryMaxAttempts: Long,
     @Value("\${retry_fiks_initial_delay}") private val retryInitialDelay: Long,
-    meterRegistry: MeterRegistry
+    @Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long?,
+    meterRegistry: MeterRegistry,
 ) : FiksClient {
     private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
 
@@ -65,7 +66,7 @@ class FiksClientImpl(
     }
 
     private fun hentDigisosSakFraCache(digisosId: String): DigisosSak? =
-        redisService.get(digisosId, DigisosSak::class.java) as DigisosSak?
+        redisService.get(digisosId, DigisosSak::class.java)
 
     private fun hentDigisosSakFraFiks(digisosId: String, token: String): DigisosSak {
         log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
@@ -92,30 +93,37 @@ class FiksClientImpl(
         return digisosSak.also { lagreTilCache(digisosId, it) }
     }
 
+    private fun <T : Any> lagreTilCache(id: String, digisosSakEllerDokument: T, ttl: Long?) =
+        if (ttl != null) {
+            redisService.put(id, objectMapper.writeValueAsBytes(digisosSakEllerDokument), ttl)
+        } else redisService.put(id, objectMapper.writeValueAsBytes(digisosSakEllerDokument))
+
     private fun lagreTilCache(id: String, digisosSakEllerDokument: Any) =
         redisService.put(id, objectMapper.writeValueAsBytes(digisosSakEllerDokument))
 
-    override fun hentDokument(
+    override fun <T : Any> hentDokument(
         digisosId: String,
         dokumentlagerId: String,
-        requestedClass: Class<out Any>,
+        requestedClass: Class<out T>,
         token: String,
-    ): Any {
-        return hentDokumentFraCache(dokumentlagerId, requestedClass)
-            ?: hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass, token)
+        cacheKey: String,
+    ): T {
+        return hentDokumentFraCache(cacheKey, requestedClass)
+            ?: hentDokumentFraFiks(digisosId, dokumentlagerId, cacheKey, requestedClass, token)
     }
 
-    private fun hentDokumentFraCache(dokumentlagerId: String, requestedClass: Class<out Any>): Any? =
-        redisService.get(dokumentlagerId, requestedClass)
+    private fun <T : Any> hentDokumentFraCache(key: String, requestedClass: Class<out T>): T? =
+        redisService.get(key, requestedClass)
 
-    private fun hentDokumentFraFiks(
+    private fun <T : Any> hentDokumentFraFiks(
         digisosId: String,
         dokumentlagerId: String,
-        requestedClass: Class<out Any>,
+        cacheKey: String,
+        requestedClass: Class<out T>,
         token: String,
-    ): Any {
+    ): T {
         log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
-        val dokument: Any = fiksWebClient.get()
+        val dokument = fiksWebClient.get()
             .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, token)
@@ -134,7 +142,7 @@ class FiksClientImpl(
             ?: throw FiksClientException(500, "dokument er null selv om request ikke har kastet exception", null)
 
         log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
-        return dokument.also { lagreTilCache(dokumentlagerId, it) }
+        return dokument.also { lagreTilCache(cacheKey, it, dokumentTTL) }
     }
 
     override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {

@@ -21,7 +21,7 @@ internal class KommunenummerServiceTest {
 
     @Test
     internal fun `skal hente fra cache`() {
-        every { redisService.get(KARTVERKET_KOMMUNENUMMER_KEY, any()) } returns "something"
+        every { redisService.get<String>(KARTVERKET_KOMMUNENUMMER_KEY, any()) } returns "something"
 
         val response = kommunenummerService.getKommunenummer()
 
@@ -32,7 +32,7 @@ internal class KommunenummerServiceTest {
 
     @Test
     internal fun `skal hente fra server hvis cache er tom`() {
-        every { redisService.get(KARTVERKET_KOMMUNENUMMER_KEY, any()) } returns null
+        every { redisService.get<Any>(KARTVERKET_KOMMUNENUMMER_KEY, any()) } returns null
         every { redisService.put(KARTVERKET_KOMMUNENUMMER_KEY, any(), any()) } just runs
         every { kartverketClient.getKommunenummer() } returns "something"
 
@@ -45,7 +45,7 @@ internal class KommunenummerServiceTest {
 
     @Test
     internal fun `skal kaste feil hvis cache er tom og server gir feil`() {
-        every { redisService.get(KARTVERKET_KOMMUNENUMMER_KEY, any()) } returns null
+        every { redisService.get<Any>(KARTVERKET_KOMMUNENUMMER_KEY, any()) } returns null
         every { kartverketClient.getKommunenummer() } throws RuntimeException("some error")
 
         assertThatExceptionOfType(RuntimeException::class.java)

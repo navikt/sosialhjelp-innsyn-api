@@ -84,7 +84,7 @@ innsyn:
       url: ${CLAMAV_URL}
   cache:
     time_to_live_seconds: ${CACHE_TIME_TO_LIVE_SECONDS:10}
-    dokument_time_to_live_seconds: ${DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS:3600}
+    dokument_cache_time_to_live_seconds: ${DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS:3600}
 
 retry_fiks_max_attempts: 5
 retry_fiks_initial_delay: 100 # initial delay in ms

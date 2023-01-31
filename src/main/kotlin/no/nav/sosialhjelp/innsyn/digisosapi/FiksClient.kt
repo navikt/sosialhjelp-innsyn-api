@@ -12,5 +12,5 @@ interface FiksClient {
 
     fun lastOppNyEttersendelse(files: List<FilForOpplasting>, vedleggJson: JsonVedleggSpesifikasjon, digisosId: String, token: String)
 
-    fun hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out Any>, token: String, cacheKey: String = dokumentlagerId): Any
+    fun <T : Any> hentDokument(digisosId: String, dokumentlagerId: String, requestedClass: Class<out T>, token: String, cacheKey: String = dokumentlagerId): T
 }

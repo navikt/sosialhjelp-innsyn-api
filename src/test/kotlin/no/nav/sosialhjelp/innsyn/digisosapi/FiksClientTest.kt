@@ -59,7 +59,7 @@ internal class FiksClientTest {
     fun init() {
         clearAllMocks()
 
-        every { redisService.get(any(), any()) } returns null
+        every { redisService.get<Any>(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
         every { redisService.defaultTimeToLiveSeconds } returns 1
 
@@ -68,7 +68,7 @@ internal class FiksClientTest {
         every { meterRegistry.counter(any()) } returns counterMock
         every { counterMock.increment() } just Runs
 
-        fiksClient = FiksClientImpl(fiksWebClient, tilgangskontroll, redisService, 2L, 5L, meterRegistry)
+        fiksClient = FiksClientImpl(fiksWebClient, tilgangskontroll, redisService, 2L, 5L, 10L, meterRegistry)
     }
 
     @AfterEach
@@ -125,7 +125,7 @@ internal class FiksClientTest {
         assertThat(result).isNotNull
 
         verify(exactly = 1) { redisService.put(any(), any(), any()) }
-        verify(exactly = 2) { redisService.get(any(), any()) }
+        verify(exactly = 2) { redisService.get<Any>(any(), any()) }
     }
 
     @Test
@@ -259,7 +259,7 @@ internal class FiksClientTest {
     @Test // fikk ikke mockWebServer til å funke her uten å skjønner hvorfor (InputStream-relatert), så gikk for "klassisk" mockk stil
     fun `POST ny ettersendelse`() {
         val webClient: WebClient = mockk()
-        val clientForPost = FiksClientImpl(webClient, tilgangskontroll, redisService, 2, 5, meterRegistry)
+        val clientForPost = FiksClientImpl(webClient, tilgangskontroll, redisService, 2, 5, 10, meterRegistry)
 
         val fil1: InputStream = mockk()
         val fil2: InputStream = mockk()

@@ -24,8 +24,8 @@ class InnsynService(
                 metadataId,
                 JsonDigisosSoker::class.java,
                 token,
-                "${metadataId}_${sistOppdatert}"
-            ) as JsonDigisosSoker
+                "${metadataId}_$sistOppdatert"
+            )
 
             else -> null
         }
@@ -34,7 +34,7 @@ class InnsynService(
     fun hentOriginalSoknad(digisosSak: DigisosSak, token: String): JsonSoknad? {
         val originalMetadataId = digisosSak.originalSoknadNAV?.metadata
         return when {
-            originalMetadataId != null -> fiksClient.hentDokument(digisosSak.fiksDigisosId, originalMetadataId, JsonSoknad::class.java, token) as JsonSoknad
+            originalMetadataId != null -> fiksClient.hentDokument(digisosSak.fiksDigisosId, originalMetadataId, JsonSoknad::class.java, token)
             else -> null
         }
     }

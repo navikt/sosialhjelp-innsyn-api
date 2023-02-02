@@ -42,7 +42,7 @@ class FiksClientImpl(
     private val redisService: RedisService,
     @Value("\${retry_fiks_max_attempts}") private val retryMaxAttempts: Long,
     @Value("\${retry_fiks_initial_delay}") private val retryInitialDelay: Long,
-    @Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long?,
+    @Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long,
     meterRegistry: MeterRegistry,
 ) : FiksClient {
     private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
@@ -93,13 +93,11 @@ class FiksClientImpl(
         return digisosSak.also { lagreTilCache(digisosId, it) }
     }
 
-    private fun <T : Any> lagreTilCache(id: String, digisosSakEllerDokument: T, ttl: Long?) =
-        if (ttl != null) {
-            redisService.put(id, objectMapper.writeValueAsBytes(digisosSakEllerDokument), ttl)
-        } else redisService.put(id, objectMapper.writeValueAsBytes(digisosSakEllerDokument))
+    private fun <T : Any> lagreTilCache(id: String, dokument: T, ttl: Long) =
+        redisService.put(id, objectMapper.writeValueAsBytes(dokument), ttl)
 
-    private fun lagreTilCache(id: String, digisosSakEllerDokument: Any) =
-        redisService.put(id, objectMapper.writeValueAsBytes(digisosSakEllerDokument))
+    private fun lagreTilCache(id: String, digisosSak: DigisosSak) =
+        redisService.put(id, objectMapper.writeValueAsBytes(digisosSak))
 
     override fun <T : Any> hentDokument(
         digisosId: String,

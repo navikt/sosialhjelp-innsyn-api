@@ -7,7 +7,7 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.4"
-    const val springBoot = "2.7.6"
+    const val springBoot = "2.7.7"
     const val sosialhjelpCommon = "1.20221214.0749-b633a3e"
     const val logback = "1.2.11"
     const val logstash = "7.2"
@@ -47,7 +47,7 @@ object Versions {
 plugins {
     kotlin("jvm") version "1.7.22"
     kotlin("plugin.spring") version "1.7.22"
-    id("org.springframework.boot") version "2.7.6"
+    id("org.springframework.boot") version "2.7.7"
     id("com.github.ben-manes.versions") version "0.44.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
 }

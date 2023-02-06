@@ -35,19 +35,19 @@ class InnsynExceptionHandler(
     }
 
     override fun handleHttpMessageNotReadable(
-        ex: HttpMessageNotReadableException,
+        e: HttpMessageNotReadableException,
         headers: HttpHeaders,
         status: HttpStatus,
         request: WebRequest
     ): ResponseEntity<Any> {
-        log.error(ex.message, ex)
-        val error = FrontendErrorMessage(UNEXPECTED_ERROR, ex.message)
+        log.error(e.message, e)
+        val error = FrontendErrorMessage(UNEXPECTED_ERROR, e.message)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(FiksNotFoundException::class)
     fun handleFiksNotFoundError(e: FiksNotFoundException): ResponseEntity<FrontendErrorMessage> {
-        log.error("DigisosSak finnes ikke i FIKS", e)
+        log.error(e.message, e)
         val error = FrontendErrorMessage(FIKS_ERROR, "DigisosSak finnes ikke")
         return ResponseEntity(error, HttpStatus.NOT_FOUND)
     }
@@ -64,7 +64,7 @@ class InnsynExceptionHandler(
         if (e.cause is WebClientResponseException.Unauthorized) {
             log.warn("Bruker er ikke autorisert for kall mot fiks. Token har utløpt")
         } else {
-            log.error("Client-feil ved kall til Fiks", e)
+            log.error("Client-feil - ${e.message}", e)
         }
         val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
@@ -72,7 +72,7 @@ class InnsynExceptionHandler(
 
     @ExceptionHandler(FiksServerException::class)
     fun handleFiksServerError(e: FiksServerException): ResponseEntity<FrontendErrorMessage> {
-        log.error("Server-feil ved kall til Fiks", e)
+        log.error("Server-feil - ${e.message}", e)
         val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }

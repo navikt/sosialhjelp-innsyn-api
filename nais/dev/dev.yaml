@@ -1,0 +1,119 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: sosialhjelp-innsyn-api-dev
+  namespace: teamdigisos
+  labels:
+    team: teamdigisos
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "150M"
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    path: /sosialhjelp/innsyn-api/internal/isAlive
+    initialDelay: 45
+    timeout: 1
+    periodSeconds: 10
+    failureThreshold: 10
+  readiness:
+    path: /sosialhjelp/innsyn-api/internal/isReady
+    initialDelay: 20
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /sosialhjelp/innsyn-api/internal/prometheus
+  replicas:
+    min: 1
+    max: 1
+  tokenx:
+    enabled: true
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: "ks:fiks"
+  idporten:
+    enabled: false # endre for å ta i bruk idporten-client
+    accessTokenLifetime: 3600 #default
+    clientURI: https://www.nav.no #default
+    frontchannelLogoutPath: /oauth2/logout #default
+    integrationType: api_klient
+    postLogoutRedirectURIs:
+      - https://www.nav.no #default
+    redirectPath: /oauth2/callback #default
+    scopes:
+      - openid
+      - profile
+      - ks:fiks
+    sessionLifetime: 7200 #default
+  accessPolicy:
+    inbound:
+      rules:
+        - application: sosialhjelp-login-api-dev
+outbound:
+  external:
+    - host: "api.fiks.test.ks.no"
+    - host: "test.svarut.ks.no"
+    - host: "minside.fiks.test.ks.no"
+    - host: "pdl-api.dev-fss-pub.nais.io"
+    - host: "oidc-ver2.difi.no"
+    - host: "unleash.nais.io"
+  rules:
+     - application: sosialhjelp-innsyn-api-redis
+     - application: sosialhjelp-soknad-api-dev
+     - application: clamav
+       namespace: clamav
+  ingresses:
+    - "https://sosialhjelp-innsyn-api-dev.dev.nav.no/sosialhjelp/innsyn-api"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2Gi
+    requests:
+      cpu: 10m
+      memory: 512Mi
+  envFrom:
+    - configmap: loginservice-idporten
+    - secret: redis-password-innsyn-api
+    - secret: fiks-integrasjon-secret
+    - secret: fiks-kommune-integrasjon-secret
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "dev,log-kibana"
+    - name: FIKS_DIGISOS_ENDPOINT_URL
+      value: "https://api.fiks.test.ks.no"
+    - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
+      value: "https://minside.fiks.test.ks.no"
+    - name: FIKS_SVAR_UT_ENDPOINT_URL
+      value: "https://test.svarut.ks.no"
+    - name: NORG_URL
+      value: "https://norg2.dev-fss-pub.nais.io/norg2/api/v1"
+    - name: AZUREAD_LOGINURL
+      value: "https://loginservice.dev.nav.no/login"
+    - name: CACHE_TIME_TO_LIVE_SECONDS
+      value: "10"
+    - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS
+      value: "3600"
+    - name: REDIS_HOST
+      value: "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local"
+    - name: PDL_ENDPOINT_URL
+      value: "https://pdl-api.dev-fss-pub.nais.io/graphql"
+    - name: PDL_AUDIENCE
+      value: "dev-fss:pdl:pdl-api"
+    - name: UNLEASH_API_URL
+      value: "https://unleash.nais.io/api"
+    - name: UNLEASH_INSTANCE_ID
+      value: "dev"
+    - name: SWAGGER_ENABLED
+      value: "true"
+    - name: CLAMAV_URL
+      value: "http://clamav.clamav/scan"
+    - name: LOGIN_API_IDPORTEN_CLIENTID
+      value: "1c3631f4-dbf2-4c12-bdc4-156cbd53c625"
+    - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
+      value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
+    - name: SOKNAD_API_URL
+      value: "http://sosialhjelp-soknad-api-dev/sosialhjelp/soknad-api"
+    - name: SOKNAD_API_AUDIENCE
+      value: "dev-gcp:teamdigisos:sosialhjelp-soknad-api-dev"

@@ -8,11 +8,11 @@ group = "no.nav.sosialhjelp"
 object Versions {
     const val coroutines = "1.6.4"
     const val springBoot = "2.7.7"
-    const val sosialhjelpCommon = "1.20221214.0749-b633a3e"
+    const val sosialhjelpCommon = "1.20230209.0920-45d9782"
     const val logback = "1.2.11"
     const val logstash = "7.2"
-    const val filformat = "1.2022.12.02-08.47-423f51003cee"
-    const val micrometerRegistry = "1.10.2"
+    const val filformat = "1.2023.02.09-08.34-aad9baa612d3"
+    const val micrometerRegistry = "1.10.3"
     const val prometheus = "0.16.0"
     const val tokenValidation = "2.1.9"
     const val jackson = "2.14.1"
@@ -22,34 +22,34 @@ object Versions {
     const val fileUpload = "1.4"
     const val tika = "2.4.1"
     const val pdfBox = "2.0.27"
-    const val fiksKryptering = "1.3.0"
+    const val fiksKryptering = "1.3.1"
     const val lettuce = "6.2.2.RELEASE"
     const val jempbox = "1.8.17"
     const val unleash = "4.4.1"
     const val springdoc = "1.6.14"
-    const val jsonSmart = "2.4.7"
+    const val jsonSmart = "2.4.8"
     const val gson = "2.10"
     const val log4j = "2.19.0"
     const val snakeyaml = "1.33"
 
-    const val javaJwt = "4.2.1"
-    const val jwksRsa = "0.21.2"
-    const val nimbus = "9.25.6"
+    const val javaJwt = "4.2.2"
+    const val jwksRsa = "0.21.3"
+    const val nimbusJoseJwt = "9.30.1"
 
     const val ktlint = "0.45.2"
 
     //    Test only
     const val junit = "4.13.2"
-    const val mockk = "1.13.3"
+    const val mockk = "1.13.4"
     const val springmockk = "3.1.1"
 }
 
 plugins {
-    kotlin("jvm") version "1.7.22"
-    kotlin("plugin.spring") version "1.7.22"
+    kotlin("jvm") version "1.8.10"
+    kotlin("plugin.spring") version "1.8.10"
     id("org.springframework.boot") version "2.7.7"
-    id("com.github.ben-manes.versions") version "0.44.0" // ./gradlew dependencyUpdates
-    id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
+    id("com.github.ben-manes.versions") version "0.45.0" // ./gradlew dependencyUpdates
+    id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
 }
 
 java {
@@ -101,7 +101,7 @@ dependencies {
 //    tokendings
     implementation("com.auth0:java-jwt:${Versions.javaJwt}")
     implementation("com.auth0:jwks-rsa:${Versions.jwksRsa}")
-    implementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbus}")
+    implementation("com.nimbusds:nimbus-jose-jwt:${Versions.nimbusJoseJwt}")
 
 //    Micrometer/Prometheus
     implementation("io.micrometer:micrometer-registry-prometheus:${Versions.micrometerRegistry}")

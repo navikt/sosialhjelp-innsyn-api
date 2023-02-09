@@ -34,13 +34,13 @@ spec:
         - application: sosialhjelp-soknad-api-mock
   ingresses:
     - "https://sosialhjelp-innsyn-api-mock.dev.nav.no/sosialhjelp/innsyn-api"
-resources:
-  limits:
-    cpu: 500m
-    memory: 2Gi
-  requests:
-    cpu: 10m
-    memory: 512Mi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2Gi
+    requests:
+      cpu: 10m
+      memory: 512Mi
   envFrom:
     - configmap: loginservice-idporten
     - secret: redis-password-innsyn-api

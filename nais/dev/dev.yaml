@@ -51,19 +51,19 @@ spec:
     inbound:
       rules:
         - application: sosialhjelp-login-api-dev
-outbound:
-  external:
-    - host: "api.fiks.test.ks.no"
-    - host: "test.svarut.ks.no"
-    - host: "minside.fiks.test.ks.no"
-    - host: "pdl-api.dev-fss-pub.nais.io"
-    - host: "oidc-ver2.difi.no"
-    - host: "unleash.nais.io"
-  rules:
-     - application: sosialhjelp-innsyn-api-redis
-     - application: sosialhjelp-soknad-api-dev
-     - application: clamav
-       namespace: clamav
+    outbound:
+      external:
+        - host: "api.fiks.test.ks.no"
+        - host: "test.svarut.ks.no"
+        - host: "minside.fiks.test.ks.no"
+        - host: "pdl-api.dev-fss-pub.nais.io"
+        - host: "oidc-ver2.difi.no"
+        - host: "unleash.nais.io"
+      rules:
+        - application: sosialhjelp-innsyn-api-redis
+        - application: sosialhjelp-soknad-api-dev
+        - application: clamav
+          namespace: clamav
   ingresses:
     - "https://sosialhjelp-innsyn-api-dev.dev.nav.no/sosialhjelp/innsyn-api"
   resources:

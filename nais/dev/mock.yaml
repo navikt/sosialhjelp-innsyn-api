@@ -43,7 +43,6 @@ spec:
       memory: 512Mi
   envFrom:
     - configmap: loginservice-idporten
-    - secret: redis-password-innsyn-api
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
@@ -65,8 +64,6 @@ spec:
       value: "https://unleash.nais.io/api"
     - name: UNLEASH_INSTANCE_ID
       value: "mock"
-    - name: REDIS_HOST
-      value: "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local"
     - name: TOKEN_X_WELL_KNOWN_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/tokenx"
     - name: TOKEN_X_CLIENT_ID

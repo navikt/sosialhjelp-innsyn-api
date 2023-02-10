@@ -43,7 +43,6 @@ spec:
       memory: 512Mi
   envFrom:
     - configmap: loginservice-idporten
-    - secret: redis-password-innsyn-api
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
@@ -55,36 +54,20 @@ spec:
       value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/fiks/dokumentlager"
     - name: FIKS_SVAR_UT_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks/svarut"
-    - name: INTEGRASJONSID_FIKS
-      value: "id1"
-    - name: INTEGRASJONSID_FIKS_KOMMUNE
-      value: "id2"
-    - name: INTEGRASJONPASSORD_FIKS
-      value: "pw1"
-    - name: INTEGRASJONPASSORD_FIKS_KOMMUNE
-      value: "pw2"
     - name: AZUREAD_LOGINURL
       value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt/login"
     - name: NORG_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/norg_endpoint_url"
     - name: PDL_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/pdl_endpoint_url"
-    - name: PDL_AUDIENCE
-      value: "dummyAudience"
     - name: UNLEASH_API_URL
       value: "https://unleash.nais.io/api"
     - name: UNLEASH_INSTANCE_ID
       value: "mock"
-    - name: REDIS_HOST
-      value: "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local"
-    - name: SWAGGER_ENABLED
-      value: "true"
     - name: TOKEN_X_WELL_KNOWN_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/tokenx"
     - name: TOKEN_X_CLIENT_ID
       value: "dev-gcp:teamdigisos:sosialhjelp-innsyn-api-mock"
-    - name: TOKEN_X_PRIVATE_JWK
-      value: "generateRSA"
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/maskinporten"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER

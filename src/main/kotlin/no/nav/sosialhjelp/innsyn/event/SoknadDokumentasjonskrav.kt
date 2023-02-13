@@ -22,8 +22,7 @@ fun InternalDigisosSoker.applySoknadKrav(digisosSak: DigisosSak, vedleggService:
                 JsonVedlegg.HendelseType.SOKNAD,
                 it.hendelseReferanse,
                 null,
-                unixToLocalDateTime(timestampSendt),
-                false
+                unixToLocalDateTime(timestampSendt)
             )
         }
         .toMutableList()

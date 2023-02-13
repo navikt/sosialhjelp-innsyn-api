@@ -85,7 +85,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return oppgave`() {
         val model = InternalDigisosSoker()
-        model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true))
+        model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist, tidspunktForKrav))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -97,13 +97,13 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].oppgaveElementer).hasSize(1)
         assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
         assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg)
-        assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue
+        assertThat(responseList[0].oppgaveElementer[0].hendelsetype).isEqualTo(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT)
     }
 
     @Test
     fun `Should return oppgave without tilleggsinformasjon`() {
         val model = InternalDigisosSoker()
-        model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
+        model.oppgaver.add(Oppgave("oppgaveId1", type, null, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist, tidspunktForKrav))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -115,7 +115,7 @@ internal class OppgaveServiceTest {
         assertThat(responseList[0].oppgaveElementer).hasSize(1)
         assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
         assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isNull()
-        assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue
+        assertThat(responseList[0].oppgaveElementer[0].hendelsetype).isEqualTo(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT)
     }
 
     @Test
@@ -123,10 +123,10 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.oppgaver.addAll(
             listOf(
-                Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
-                Oppgave("oppgaveId2", type3, tillegg3, null, null, frist3, tidspunktForKrav, true),
-                Oppgave("oppgaveId3", type4, tillegg4, null, null, frist4, tidspunktForKrav, true),
-                Oppgave("oppgaveId4", type2, tillegg2, null, null, frist2, tidspunktForKrav, true)
+                Oppgave("oppgaveId1", type, tillegg, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist, tidspunktForKrav),
+                Oppgave("oppgaveId2", type3, tillegg3, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist3, tidspunktForKrav),
+                Oppgave("oppgaveId3", type4, tillegg4, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist4, tidspunktForKrav),
+                Oppgave("oppgaveId4", type2, tillegg2, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist2, tidspunktForKrav)
             )
         )
 
@@ -163,9 +163,9 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.oppgaver.addAll(
             listOf(
-                Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
-                Oppgave("oppgaveId2", type2, null, null, null, frist2, tidspunktForKrav, true),
-                Oppgave("oppgaveId3", type3, tillegg3, null, null, frist3, tidspunktForKrav, true)
+                Oppgave("oppgaveId1", type, tillegg, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist, tidspunktForKrav),
+                Oppgave("oppgaveId2", type2, null, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist2, tidspunktForKrav),
+                Oppgave("oppgaveId3", type3, tillegg3, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist3, tidspunktForKrav)
             )
         )
 
@@ -192,7 +192,7 @@ internal class OppgaveServiceTest {
     fun `Should not return oppgaver when soknad is ferdig behandla`() {
         val model = InternalDigisosSoker()
         model.status = SoknadsStatus.FERDIGBEHANDLET
-        model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
+        model.oppgaver.add(Oppgave("oppgaveId1", type, null, JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT, null, frist, tidspunktForKrav))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()

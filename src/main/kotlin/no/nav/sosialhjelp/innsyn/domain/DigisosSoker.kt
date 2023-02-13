@@ -46,7 +46,6 @@ data class Oppgave(
     val hendelsereferanse: String?,
     var innsendelsesfrist: LocalDateTime?,
     var tidspunktForKrav: LocalDateTime,
-    var erFraInnsyn: Boolean,
 )
 
 data class Sak(

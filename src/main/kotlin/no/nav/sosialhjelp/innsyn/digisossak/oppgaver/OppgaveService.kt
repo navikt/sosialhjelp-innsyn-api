@@ -45,7 +45,6 @@ class OppgaveService(
                             it.tilleggsinfo,
                             it.hendelsetype,
                             it.hendelsereferanse,
-                            it.erFraInnsyn
                         )
                     }
                 )

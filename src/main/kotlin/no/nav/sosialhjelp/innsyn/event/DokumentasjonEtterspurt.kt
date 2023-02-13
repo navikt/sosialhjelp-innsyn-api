@@ -27,8 +27,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
                 JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT,
                 it.dokumentreferanse,
                 it.innsendelsesfrist.toLocalDateTime(),
-                hendelse.hendelsestidspunkt.toLocalDateTime(),
-                true
+                hendelse.hendelsestidspunkt.toLocalDateTime()
             )
         }
         .toMutableList()

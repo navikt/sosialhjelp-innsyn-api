@@ -87,7 +87,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(oppgave.tittel).isEqualTo(dokumenttype)
         assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
-        assertThat(oppgave.erFraInnsyn).isEqualTo(true)
+        assertThat(oppgave.hendelsetype).isEqualTo(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT)
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
@@ -121,7 +121,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(oppgave.tittel).isEqualTo(dokumenttype)
         assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
-        assertThat(oppgave.erFraInnsyn).isEqualTo(true)
+        assertThat(oppgave.hendelsetype).isEqualTo(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT)
     }
 
     @Test
@@ -174,7 +174,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(oppgave.tittel).isEqualTo(vedleggKrevesDokumenttype)
         assertThat(oppgave.tilleggsinfo).isEqualTo(vedleggKrevesTilleggsinfo)
         assertThat(oppgave.innsendelsesfrist).isNull()
-        assertThat(oppgave.erFraInnsyn).isEqualTo(false)
+        assertThat(oppgave.hendelsetype).isEqualTo(JsonVedlegg.HendelseType.SOKNAD)
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
@@ -258,7 +258,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(oppgave.tittel).isEqualTo(dokumenttype)
         assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
-        assertThat(oppgave.erFraInnsyn).isEqualTo(true)
+        assertThat(oppgave.hendelsetype).isEqualTo(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT)
     }
 
     @Test
@@ -379,6 +379,6 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(oppgave.tittel).isEqualTo(dokumenttype)
         assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
-        assertThat(oppgave.erFraInnsyn).isEqualTo(true)
+        assertThat(oppgave.hendelsetype).isEqualTo(JsonVedlegg.HendelseType.DOKUMENTASJON_ETTERSPURT)
     }
 }

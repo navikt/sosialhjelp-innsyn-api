@@ -82,32 +82,32 @@ internal class EventServiceTest {
         resetHendelser()
     }
 
-/* Test-caser:
- [x] ingen innsyn, ingen sendt soknad
- [x] ingen innsyn, sendt soknad -> status SENDT
- [x] status mottatt
- [x] status under behandling
- [x] status ferdigbehandlet
- [x] saksStatus uten vedtakFattet
- [x] saksStatus før vedtakFattet
- [x] vedtakFattet uten saksStatus
- [x] vedtakFattet før saksStatus
- [x] saksStatus med 2 vedtakFattet
- [x] dokumentasjonEtterspurt
- [x] dokumentasjonEtterspurt med tom dokumentliste
- [x] ingen dokumentasjonEtterspurt-hendelser
- [x] forelopigSvar
- [ ] forelopigSvar - flere caser?
- [x] utbetaling
- [?] utbetaling - flere caser?
- [x] dokumentasjonkrav
- [x] vilkår
- [x] tildeltNavKontor - OK response fra Norg
- [x] tildeltNavKontor - generell melding ved Norg-feil
- [ ] rammevedtak
- ...
- [ ] komplett case
-*/
+    /* Test-caser:
+     [x] ingen innsyn, ingen sendt soknad
+     [x] ingen innsyn, sendt soknad -> status SENDT
+     [x] status mottatt
+     [x] status under behandling
+     [x] status ferdigbehandlet
+     [x] saksStatus uten vedtakFattet
+     [x] saksStatus før vedtakFattet
+     [x] vedtakFattet uten saksStatus
+     [x] vedtakFattet før saksStatus
+     [x] saksStatus med 2 vedtakFattet
+     [x] dokumentasjonEtterspurt
+     [x] dokumentasjonEtterspurt med tom dokumentliste
+     [x] ingen dokumentasjonEtterspurt-hendelser
+     [x] forelopigSvar
+     [ ] forelopigSvar - flere caser?
+     [x] utbetaling
+     [?] utbetaling - flere caser?
+     [x] dokumentasjonkrav
+     [x] vilkår
+     [x] tildeltNavKontor - OK response fra Norg
+     [x] tildeltNavKontor - generell melding ved Norg-feil
+     [ ] rammevedtak
+     ...
+     [ ] komplett case
+    */
 
     @Test
     fun `ingen innsyn OG ingen soknad, men med sendTidspunkt`() {
@@ -613,7 +613,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal ikke logge nar vi ikke har gamle utbetalinger`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp", LocalDate.now(), null, null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.PLANLAGT_UTBETALING,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now(),
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
 
@@ -624,7 +641,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge selv nar vi har gamel utbetaling som er utbetalt i tide`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(2), LocalDate.now().minusDays(2), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.UTBETALT,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now().minusDays(2),
+            LocalDate.now().minusDays(2),
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse = JsonUtbetaling()
@@ -646,7 +680,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge selv nar vi har gamel utbetaling som er stoppet i tide`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.STOPPET, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(2), null, LocalDate.now().minusDays(2), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.STOPPET,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now().minusDays(2),
+            null,
+            LocalDate.now().minusDays(2),
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse = JsonUtbetaling()
@@ -668,7 +719,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge selv nar vi har gamel forfallsdato som er utbetalt samtidig som event er opprettet`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.UTBETALT,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now().minusDays(20),
+            LocalDate.now(),
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse = JsonUtbetaling()
@@ -690,7 +758,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge selv nar vi har gamel forfallsdato som er utbetalt fort nok etter at event er opprettet`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.UTBETALT,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now().minusDays(20),
+            LocalDate.now(),
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse1 = JsonUtbetaling()
@@ -720,7 +805,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge nar vi har gamel utbetaling som ikke er utbetalt`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(2), null, null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.PLANLAGT_UTBETALING,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now().minusDays(2),
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse = JsonUtbetaling()
@@ -744,7 +846,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge nar vi har gamel utbetaling som er utbetalt for sent`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(4), LocalDate.now().minusDays(2), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.UTBETALT,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now().minusDays(4),
+            LocalDate.now().minusDays(2),
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse1 = JsonUtbetaling()
@@ -776,7 +895,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge nar vi har gamel utbetaling som er stoppet for sent`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.STOPPET, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(4), null, LocalDate.now().minusDays(2), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.STOPPET,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now().minusDays(4),
+            null,
+            LocalDate.now().minusDays(2),
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse1 = JsonUtbetaling()
@@ -808,7 +944,24 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge nar vi har gamel forfallsdato som ikke er utbetalt fort nok etter at event er opprettet`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling = Utbetaling(
+            "referanse",
+            UtbetalingsStatus.UTBETALT,
+            BigDecimal.TEN,
+            "Nødhjelp",
+            LocalDate.now().minusDays(20),
+            LocalDate.now(),
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            mutableListOf(),
+            mutableListOf(),
+            LocalDateTime.now()
+        )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse1 = JsonUtbetaling()
@@ -836,5 +989,33 @@ internal class EventServiceTest {
         val logtekstSlot = slot<String>()
         verify(exactly = 1) { log.info(capture(logtekstSlot)) }
         assertThat(logtekstSlot.captured).startsWith("Utbetaling på overtid:")
+    }
+
+    @Test
+    fun `hvis en digisosId ikke er reell (ikke har noe mer info) skal saksoversiktmodel ha soknadstatus ukjent`() {
+        val tomDigisosSak: DigisosSak = mockk(relaxed = true) {
+            every { originalSoknadNAV } returns null
+        }
+        every {
+            innsynService.hentJsonDigisosSoker(tomDigisosSak, "token")
+        } returns mockk(relaxed = true)
+
+        val model = service.createSaksoversiktModel(tomDigisosSak, "token")
+
+        assertThat(model.status).isEqualTo(SoknadsStatus.UKJENT)
+    }
+
+    @Test
+    fun `hvis en digisosId ikke er reell (ikke har noe mer info) skal model ha soknadstatus ukjent`() {
+        val tomDigisosSak: DigisosSak = mockk(relaxed = true) {
+            every { originalSoknadNAV } returns null
+        }
+        every {
+            innsynService.hentJsonDigisosSoker(tomDigisosSak, "token")
+        } returns mockk(relaxed = true)
+
+        val model = service.createModel(tomDigisosSak, "token")
+
+        assertThat(model.status).isEqualTo(SoknadsStatus.UKJENT)
     }
 }

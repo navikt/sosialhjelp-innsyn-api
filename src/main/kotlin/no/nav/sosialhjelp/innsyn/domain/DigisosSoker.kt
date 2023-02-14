@@ -9,7 +9,7 @@ data class InternalDigisosSoker(
     var fagsystem: Fagsystem? = null,
     var referanse: String? = null,
     var fiksDigisosId: String? = null,
-    var status: SoknadsStatus = SoknadsStatus.SENDT,
+    var status: SoknadsStatus = SoknadsStatus.UKJENT,
     var saker: MutableList<Sak> = mutableListOf(),
     var utbetalinger: MutableList<Utbetaling> = mutableListOf(),
     var forvaltningsbrev: MutableList<Forvaltningsbrev> = mutableListOf(),
@@ -145,7 +145,7 @@ data class ForelopigSvar(
 )
 
 enum class SoknadsStatus {
-    SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE
+    SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE, UKJENT
 }
 
 enum class SaksStatus {

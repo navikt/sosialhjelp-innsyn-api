@@ -57,6 +57,7 @@ class EventService(
 
         // Hvis søknad er papirsøknad, vil 'originalSoknad' være null:
         if (originalSoknadNAV?.timestampSendt != null) {
+            model.status = SoknadsStatus.SENDT
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
             model.fiksDigisosId = digisosSak.fiksDigisosId

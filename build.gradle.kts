@@ -31,6 +31,7 @@ object Versions {
     const val gson = "2.10"
     const val log4j = "2.19.0"
     const val snakeyaml = "1.33"
+    const val commonsFileupload = "1.5"
 
     const val javaJwt = "4.2.2"
     const val jwksRsa = "0.21.3"
@@ -167,6 +168,10 @@ dependencies {
 
         implementation("org.yaml:snakeyaml:${Versions.snakeyaml}") {
             because("Snyk ønsker 1.31 eller høyere")
+        }
+
+        implementation("commons-fileupload:commons-fileupload:${Versions.commonsFileupload}") {
+            because("https://security.snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-3326457")
         }
 
         testImplementation("junit:junit:${Versions.junit}") {

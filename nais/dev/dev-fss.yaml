@@ -90,3 +90,5 @@ spec:
       value: "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api"
     - name: SOKNAD_API_AUDIENCE
       value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
+    - name: MASKINPORTEN_WELL_KNOWN_URL
+      value: "https://ver2.maskinporten.no/.well-known/oauth-authorization-server"

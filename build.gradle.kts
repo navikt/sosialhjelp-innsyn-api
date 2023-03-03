@@ -151,6 +151,12 @@ dependencies {
     implementation("org.apache.tika:tika-core:${Versions.tika}")
     implementation("org.apache.pdfbox:preflight:${Versions.pdfBox}")
     implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
+    implementation("javax.activation:javax.activation-api:1.2.0") {
+        because("pdfbox 2.x.x trenger javax.activation pakker. Kan fjernes når pdfbox 3.x.x er tilgjengelig")
+    }
+    implementation("javax.xml.bind:jaxb-api:2.3.1") {
+        because("pdfbox 2.x.x trenger javax.xml.bind pakker. Kan fjernes når pdfbox 3.x.x er tilgjengelig")
+    }
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")

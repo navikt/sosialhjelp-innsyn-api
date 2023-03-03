@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
 /**
- *  Endepunkter som kun tilbys for woldena -> kun tilgjengelig i preprod, ved lokal kjøring og i mock
+ *  Endepunkter som kun tilbys for sosialhjelp-fagsystem-mock -> kun tilgjengelig i preprod, ved lokal kjøring og i mock
  */
-@Profile("!prod-sbs")
+@Profile("!prod")
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
 @RequestMapping("/api/v1/digisosapi")
@@ -53,7 +53,7 @@ class DigisosApiTestController(
     }
 
     @GetMapping("/{digisosId}/innsynsfil")
-    fun hentInnsynsfilWoldena(@PathVariable digisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?): ResponseEntity<ByteArray> {
+    fun getInnsynsfil(@PathVariable digisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?): ResponseEntity<ByteArray> {
         val innsynsfil = digisosApiTestService.hentInnsynsfil(digisosId, token ?: "") ?: return ResponseEntity.noContent().build()
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
     }

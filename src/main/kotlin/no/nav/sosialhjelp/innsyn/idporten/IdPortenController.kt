@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.LOGIN_REDIRECT_CACHE_PRE
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.STATE_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,6 +19,7 @@ import java.net.URI
 import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 
+@Profile("dev")
 @RestController
 class IdPortenController(
     private val idPortenClient: IdPortenClient,
@@ -45,7 +47,7 @@ class IdPortenController(
 
         val loginId = request.cookies.firstOrNull { it.name == "login_id" }?.value
             ?: throw TilgangskontrollException("No login_id found from cookie")
-        val state = redisService.get("$STATE_CACHE_PREFIX$loginId", State::class.java) as? State
+        val state = redisService.get("$STATE_CACHE_PREFIX$loginId", State::class.java)
             ?: throw TilgangskontrollException("No state found on loginId")
 
         // Check the returned state parameter, must match the original
@@ -71,7 +73,7 @@ class IdPortenController(
 
         idPortenSessionHandler.clearPropertiesForLogin(loginId)
 
-        val redirect = redisService.get("$LOGIN_REDIRECT_CACHE_PREFIX$loginId", String::class.java) as String?
+        val redirect = redisService.get("$LOGIN_REDIRECT_CACHE_PREFIX$loginId", String::class.java)
         return nonCacheableRedirectResponse(redirect ?: "/sosialhjelp/innsyn")
     }
 

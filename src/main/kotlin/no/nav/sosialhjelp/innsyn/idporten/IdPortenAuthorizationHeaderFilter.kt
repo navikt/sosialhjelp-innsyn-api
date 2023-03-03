@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
+import org.springframework.context.annotation.Profile
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequestWrapper
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@Profile("dev")
 class IdPortenAuthorizationHeaderFilter(
     private val idPortenSessionHandler: IdPortenSessionHandler
 ) : Filter {

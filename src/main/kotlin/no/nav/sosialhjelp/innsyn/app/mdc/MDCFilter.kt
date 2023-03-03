@@ -9,7 +9,6 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
-import java.util.Optional
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -17,7 +16,11 @@ import javax.servlet.http.HttpServletResponse
 @Component
 class MDCFilter : OncePerRequestFilter() {
 
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain,
+    ) {
         addCallId(request)
         addDigisosId(request)
         put(MDCUtils.PATH, request.requestURI)
@@ -32,15 +35,13 @@ class MDCFilter : OncePerRequestFilter() {
     }
 
     private fun addCallId(request: HttpServletRequest) {
-        Optional.ofNullable(request.getHeader(HEADER_CALL_ID))
-            .ifPresentOrElse(
-                { put(CALL_ID, it) },
-                { put(CALL_ID, generateCallId()) }
-            )
+        request.getHeader(HEADER_CALL_ID)
+            ?.let { put(CALL_ID, it) }
+            ?: put(CALL_ID, generateCallId())
     }
 
     private fun addDigisosId(request: HttpServletRequest) {
-        if (request.requestURI.matches(Regex("^$INNSYN_BASE_URL(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)|orginalJsonSoknad|orginalSoknadPdlLink|saksStatus|soknadsStatus|vedlegg)"))) {
+        if (request.requestURI.matches(Regex("^$INNSYN_BASE_URL(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)|saksStatus|soknadsStatus|vedlegg|vilkar|dokumentasjonkrav|dokumentasjonkrav/(.*)|harLeverteDokumentasjonkrav|fagsystemHarDokumentasjonkrav)"))) {
             val digisosId = request.requestURI.substringAfter(INNSYN_BASE_URL).substringBefore("/")
             put(DIGISOS_ID, digisosId)
         } else if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}saksDetaljer")) && request.parameterMap.containsKey("id")) {

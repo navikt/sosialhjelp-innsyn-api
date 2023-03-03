@@ -2,11 +2,13 @@ package no.nav.sosialhjelp.innsyn.idporten
 
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+@Profile("dev")
 @RestController
 class FrontchannelLogoutController(
     private val idPortenProperties: IdPortenProperties,

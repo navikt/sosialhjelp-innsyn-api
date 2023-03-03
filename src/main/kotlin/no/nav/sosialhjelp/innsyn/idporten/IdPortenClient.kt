@@ -46,11 +46,13 @@ import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.STATE_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.net.URI
 import java.net.URL
 import java.util.UUID
 
+@Profile("dev")
 @Component
 class IdPortenClient(
     private val idPortenProperties: IdPortenProperties,
@@ -86,7 +88,7 @@ class IdPortenClient(
     }
 
     fun getToken(authorizationCode: AuthorizationCode?, loginId: String) {
-        val codeVerifierValue = redisService.get("$CODE_VERIFIER_CACHE_PREFIX$loginId", String::class.java) as? String
+        val codeVerifierValue = redisService.get("$CODE_VERIFIER_CACHE_PREFIX$loginId", String::class.java)
             ?: throw TilgangskontrollException("No code_verifier found on loginId")
 
         val authorizationCodeGrant = AuthorizationCodeGrant(
@@ -110,7 +112,7 @@ class IdPortenClient(
         val keySource = RemoteJWKSet<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri))
         val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, keySource)
 
-        val storedNonce = redisService.get("$NONCE_CACHE_PREFIX$loginId", Nonce::class.java) as? Nonce
+        val storedNonce = redisService.get("$NONCE_CACHE_PREFIX$loginId", Nonce::class.java)
             ?: throw TilgangskontrollException("No nonce found on loginId")
 
         jwtProcessor.jwsKeySelector = keySelector
@@ -179,7 +181,7 @@ class IdPortenClient(
             return LogoutRequest(endSessionEndpointURI).toURI()
         }
 
-        val idTokenString = idToken as String
+        val idTokenString = idToken
         val logoutRequest = LogoutRequest(
             endSessionEndpointURI,
             SignedJWT.parse(idTokenString),

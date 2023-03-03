@@ -4,11 +4,13 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.netty.http.client.HttpClient
 
+@Profile("dev")
 @Configuration
 class IdPortenConfig(
     @Value("\${idporten_well_known_url}") private val wellKnownUrl: String,

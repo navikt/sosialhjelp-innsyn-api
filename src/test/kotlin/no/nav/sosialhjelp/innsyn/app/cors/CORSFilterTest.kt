@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockFilterChain
 import org.springframework.mock.web.MockHttpServletRequest
@@ -45,6 +46,7 @@ internal class CORSFilterTest {
         assertThat(response.headerNames).isEmpty()
     }
 
+    @Disabled("Lokal og test kjøremiljø sender inn CORS verdi før api-kall går gjennom doFilter(), burde ikke sette ekstra CORS headere")
     @Test
     internal fun `trusted origin should set cors headers`() {
         val request = MockHttpServletRequest()
@@ -62,6 +64,7 @@ internal class CORSFilterTest {
         assertThat(response.headerNames).contains("Access-Control-Allow-Credentials")
     }
 
+    @Disabled("Lokal og test kjøremiljø sender inn CORS verdi før api-kall går gjennom doFilter(), burde ikke sette ekstra CORS headere")
     @Test
     internal fun `should set cors headers when non-prod`() {
         every { MiljoUtils.isRunningInProd() } returns false

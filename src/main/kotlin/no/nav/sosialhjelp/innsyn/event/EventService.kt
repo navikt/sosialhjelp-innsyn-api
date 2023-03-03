@@ -55,7 +55,7 @@ class EventService(
             model.fagsystem = Fagsystem(jsonDigisosSoker.avsender.systemnavn, jsonDigisosSoker.avsender.systemversjon)
         }
 
-        // Hvis søknad er papirsøknad, vil 'timestampSendt' være null:
+        // Hvis søknad er papirsøknad, vil 'originalSoknad' være null:
         if (originalSoknadNAV?.timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
@@ -140,7 +140,7 @@ class EventService(
     private fun applyHendelserOgSoknadKrav(jsonDigisosSoker: JsonDigisosSoker?, model: InternalDigisosSoker, digisosSak: DigisosSak, token: String) {
         jsonDigisosSoker?.hendelser
             ?.sortedWith(hendelseComparator)
-            ?.forEach { model.applyHendelse(it) }
+            ?.forEach { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
 
         val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker?.hendelser
             ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
@@ -159,14 +159,14 @@ class EventService(
         jsonDigisosSoker.hendelser
             .filterIsInstance<JsonUtbetaling>()
             .sortedBy { it.hendelsestidspunkt }
-            .map { model.applyHendelse(it) }
+            .map { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
         return model
     }
 
-    private fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {
+    private fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse, isPapirSoknad: Boolean) {
         when (hendelse) {
             is JsonSoknadsStatus -> apply(hendelse)
-            is JsonTildeltNavKontor -> apply(hendelse, norgClient)
+            is JsonTildeltNavKontor -> apply(hendelse, norgClient, isPapirSoknad)
             is JsonSaksStatus -> apply(hendelse)
             is JsonVedtakFattet -> apply(hendelse, clientProperties)
             is JsonDokumentasjonEtterspurt -> apply(hendelse, clientProperties)

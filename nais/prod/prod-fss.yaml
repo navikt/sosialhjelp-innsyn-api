@@ -1,0 +1,90 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: sosialhjelp-innsyn-api
+  namespace: teamdigisos
+  labels:
+    team: teamdigisos
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "150M"
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    path: /sosialhjelp/innsyn-api/internal/isAlive
+    initialDelay: 45
+    timeout: 1
+    periodSeconds: 10
+    failureThreshold: 10
+  readiness:
+    path: /sosialhjelp/innsyn-api/internal/isReady
+    initialDelay: 20
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /sosialhjelp/innsyn-api/internal/prometheus
+  replicas:
+    min: 2
+    max: 4
+  webproxy: true
+  tokenx:
+    enabled: true
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: "ks:fiks"
+  ingresses:
+    - "https://sosialhjelp-innsyn-api.prod-fss-pub.nais.io/sosialhjelp/innsyn-api"
+    - "https://sosialhjelp-innsyn-api.intern.nav.no/sosialhjelp/innsyn-api"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 4Gi
+    requests:
+      cpu: 25m
+      memory: 1Gi
+  envFrom:
+    - configmap: loginservice-idporten
+    - secret: redis-password-innsyn-api
+    - secret: xsrf-secret
+    - secret: fiks-integrasjon-secret
+  env:
+    - name: FIKS_DIGISOS_ENDPOINT_URL
+      value: "https://api.fiks.ks.no"
+    - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
+      value: "https://minside.kommune.no"
+    - name: FIKS_SVAR_UT_ENDPOINT_URL
+      value: "https://svarut.ks.no"
+    - name: NORG_URL
+      value: "https://norg2.intern.nav.no/norg2/api/v1"
+    - name: INNSYN_LOGINURL
+      value: "https://loginservice.nav.no/login"
+    - name: CACHE_TIME_TO_LIVE_SECONDS
+      value: "180"
+    - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS
+      value: "3600"
+    - name: REDIS_HOST
+      value: "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local"
+    - name: SPRING_PROFILES_ACTIVE
+      value: "prod,log-kibana"
+    - name: PDL_ENDPOINT_URL
+      value: "https://pdl-api.intern.nav.no/graphql"
+    - name: PDL_AUDIENCE
+      value: "prod-fss:pdl:pdl-api"
+    - name: UNLEASH_API_URL
+      value: "https://unleash.nais.io/api"
+    - name: UNLEASH_INSTANCE_ID
+      value: "prod-fss"
+    - name: SWAGGER_ENABLED
+      value: "false"
+    - name: CLAMAV_URL
+      value: "http://clamav.nais-system.svc.nais.local/scan"
+    - name: LOGIN_API_IDPORTEN_CLIENTID
+      value: "bd520e59-6e01-4669-a7c8-f68fa2cac362"
+    - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
+      value: "Socio;10.1.16"
+    - name: SOKNAD_API_URL
+      value: "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api"
+    - name: SOKNAD_API_AUDIENCE
+      value: "prod-fss:teamdigisos:sosialhjelp-soknad-api"

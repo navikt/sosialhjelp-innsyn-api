@@ -53,12 +53,9 @@ client:
   pdl_audience: ${PDL_AUDIENCE}
   unleash_url: ${UNLEASH_API_URL}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID}
-  meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER}
   tokendings_url: ${TOKEN_X_WELL_KNOWN_URL}
   tokendings_client_id: ${TOKEN_X_CLIENT_ID}
   tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK}
-  dialog_endpoint_url: ${DIALOG_ENDPOINT_URL}
-  dialog_audience: ${DIALOG_AUDIENCE}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL}
   soknad_api_audience: ${SOKNAD_API_AUDIENCE}
@@ -69,15 +66,6 @@ maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
 maskinporten_scopes: ${MASKINPORTEN_SCOPES}
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
 maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
-
-idporten_well_known_url: ${IDPORTEN_WELL_KNOWN_URL}
-idporten_clientid: ${IDPORTEN_CLIENT_ID}
-idporten_client_jwk: ${IDPORTEN_CLIENT_JWK}
-idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI}
-idporten_post_logout_redirect_uri: ${IDPORTEN_POST_LOGOUT_REDIRECT_URI}
-idporten_login_timeout: ${IDPORTEN_LOGIN_TIMEOUT:3600}
-idporten_session_timeout: ${IDPORTEN_SESSION_TIMEOUT:7200}
-idporten_token_timeout: ${IDPORTEN_TOKEN_TIMEOUT:3600}
 
 #Token-validering
 no.nav.security.jwt:
@@ -96,6 +84,7 @@ innsyn:
       url: ${CLAMAV_URL}
   cache:
     time_to_live_seconds: ${CACHE_TIME_TO_LIVE_SECONDS:10}
+    dokument_cache_time_to_live_seconds: ${DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS:3600}
 
 retry_fiks_max_attempts: 5
 retry_fiks_initial_delay: 100 # initial delay in ms

@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.util.Optional
-import java.util.stream.Collectors
 
 interface PdlClient {
     fun hentPerson(ident: String, token: String): PdlHentPerson?
@@ -51,12 +49,12 @@ class PdlClientImpl(
 
     override fun hentIdenter(ident: String, token: String): List<String> {
         redisService.get(PDL_IDENTER_CACHE_KEY_PREFIX + ident, PdlIdenter::class.java)
-            ?.let { pdlIdenter -> return (pdlIdenter as PdlIdenter).identer.map { it.ident } }
+            ?.let { pdlIdenter -> return pdlIdenter.identer.map { it.ident } }
         return hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
     }
 
     private fun hentFraCache(ident: String): PdlHentPerson? =
-        redisService.get(cacheKey(ident), PdlHentPerson::class.java) as? PdlHentPerson
+        redisService.get(cacheKey(ident), PdlHentPerson::class.java)
 
     private fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
         val query = getHentPersonResource().replace("[\n\r]", "")
@@ -127,20 +125,15 @@ class PdlClientImpl(
             ?: throw RuntimeException("Klarte ikke å hente PDL query resurs: $path")
 
     private fun checkForPdlApiErrors(response: PdlResponse?) {
-        Optional.ofNullable(response)
-            .map(PdlResponse::errors)
-            .ifPresent { handleErrors(it) }
+        response?.errors?.let { handleErrors(it) }
     }
 
     private fun handleErrors(errors: List<PdlError>) {
-        val errorList = errors.stream()
+        val errorString = errors
             .map { it.message + "(feilkode: " + it.extensions.code + ")" }
-            .collect(Collectors.toList())
-        throw PdlException(errorMessage(errorList))
+            .joinToString(prefix = "Error i respons fra pdl-api: ") { it }
+        throw PdlException(errorString)
     }
-
-    private fun errorMessage(errors: List<String>): String =
-        "Error i respons fra pdl-api: ${errors.joinToString { it }}"
 
     private fun cacheKey(ident: String): String = ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX + ident
 

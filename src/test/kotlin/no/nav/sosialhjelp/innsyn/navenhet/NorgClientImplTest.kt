@@ -36,7 +36,7 @@ internal class NorgClientImplTest {
 
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { redisService.get(any(), any()) } returns null
+        every { redisService.get<Any>(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
     }
 
@@ -55,7 +55,7 @@ internal class NorgClientImplTest {
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 1) { redisService.get(any(), any()) }
+        verify(exactly = 1) { redisService.get<Any>(any(), any()) }
         verify(exactly = 0) { redisService.put(any(), any(), any()) }
     }
 
@@ -74,7 +74,7 @@ internal class NorgClientImplTest {
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 1) { redisService.get(any(), any()) }
+        verify(exactly = 1) { redisService.get<Any>(any(), any()) }
         verify(exactly = 1) { redisService.put(any(), any(), any()) }
     }
 
@@ -98,7 +98,7 @@ internal class NorgClientImplTest {
 
         assertThat(result2).isNotNull
 
-        verify(exactly = 1) { redisService.get(any(), any()) }
+        verify(exactly = 1) { redisService.get<Any>(any(), any()) }
         verify(exactly = 1) { redisService.put(any(), any(), any()) }
     }
 }

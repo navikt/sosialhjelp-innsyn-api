@@ -65,7 +65,7 @@ spec:
         - application: clamav
           namespace: clamav
   ingresses:
-    - "https://sosialhjelp-innsyn-api-dev.dev.nav.no/sosialhjelp/innsyn-api"
+    - "https://digisos.dev.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
       cpu: 500m
@@ -90,7 +90,7 @@ spec:
     - name: NORG_URL
       value: "https://norg2.dev-fss-pub.nais.io/norg2/api/v1"
     - name: INNSYN_LOGINURL
-      value: "https://sosialhjelp-innsyn-api-dev.dev.nav.no/sosialhjelp/innsyn-api/oauth2/login"
+      value: "https://digisos.dev.nav.no/sosialhjelp/innsyn-api/oauth2/login"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "10"
     - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS

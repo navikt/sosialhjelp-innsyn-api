@@ -7,14 +7,14 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.4"
-    const val springBoot = "3.0.0"
+    const val springBoot = "3.0.3"
     const val sosialhjelpCommon = "1.20230209.0920-45d9782"
     const val logback = "1.2.11"
     const val logstash = "7.2"
     const val filformat = "1.2023.02.09-08.34-aad9baa612d3"
     const val micrometerRegistry = "1.10.3"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "3.0.0"
+    const val tokenValidation = "3.0.4"
     const val jackson = "2.14.1"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
@@ -57,7 +57,7 @@ object Versions {
 plugins {
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.spring") version "1.8.10"
-    id("org.springframework.boot") version "3.0.0"
+    id("org.springframework.boot") version "3.0.3"
     id("com.github.ben-manes.versions") version "0.45.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
 }
@@ -72,12 +72,12 @@ ktlint {
 }
 
 configurations {
-    "implementation" {
+    implementation {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
         exclude(group = "javax.activation", module = "activation")
         exclude(group = "javax.validation", module = "validation-api")
     }
-    "testImplementation" {
+    testImplementation {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")

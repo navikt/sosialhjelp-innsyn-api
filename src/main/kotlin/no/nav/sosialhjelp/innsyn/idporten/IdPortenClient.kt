@@ -5,7 +5,7 @@ import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
-import com.nimbusds.jose.jwk.source.JWKSourceBuilder
+import com.nimbusds.jose.jwk.source.RemoteJWKSet
 import com.nimbusds.jose.proc.JWSVerificationKeySelector
 import com.nimbusds.jose.proc.SecurityContext
 import com.nimbusds.jwt.JWTClaimsSet
@@ -109,7 +109,7 @@ class IdPortenClient(
         val tokenResponse = objectMapper.readValue<TokenResponse>(httpResponse.content)
 
         val jwtProcessor = DefaultJWTProcessor<SecurityContext>()
-        val keySource = JWKSourceBuilder.create<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri)).build()
+        val keySource = RemoteJWKSet<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri))
         val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, keySource)
 
         val storedNonce = redisService.get("$NONCE_CACHE_PREFIX$loginId", Nonce::class.java)

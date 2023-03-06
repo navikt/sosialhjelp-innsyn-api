@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
 interface SubjectHandler {
     fun getUserIdFromToken(): String
     fun getToken(): String
+    fun getClientId(): String
 }
 
 @Component
@@ -37,8 +38,14 @@ class AzureAdSubjectHandlerImpl(
         return tokenValidationContext.getJwtToken(SELVBETJENING).tokenAsString
     }
 
+    override fun getClientId(): String {
+        return tokenValidationContext.getClaims(SELVBETJENING).getStringClaim(CLIENT_ID) ?: DEFAULT_CLIENT_ID
+    }
+
     companion object {
         private const val PID = "pid"
+        private const val CLIENT_ID = "client_id"
+        private const val DEFAULT_CLIENT_ID = "clientId"
         private val log by logger()
     }
 }
@@ -59,6 +66,10 @@ class StaticSubjectHandlerImpl : SubjectHandler {
 
     override fun getToken(): String {
         return this.token
+    }
+
+    override fun getClientId(): String {
+        return "clientId"
     }
 
     fun setUser(user: String) {

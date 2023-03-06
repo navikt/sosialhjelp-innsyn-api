@@ -17,6 +17,10 @@ object SubjectHandlerUtils {
         return subjectHandlerService.getToken()
     }
 
+    fun getClientId(): String {
+        return subjectHandlerService.getClientId()
+    }
+
     fun setNewSubjectHandlerImpl(subjectHandlerImpl: SubjectHandler) {
         if (isRunningInProd()) {
             log.error("Forsøker å sette en annen SubjectHandlerImpl i prod!")

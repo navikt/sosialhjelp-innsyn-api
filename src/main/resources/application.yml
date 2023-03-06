@@ -70,7 +70,7 @@ maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
 #Token-validering
 no.nav.security.jwt:
   issuer.selvbetjening:
-    discoveryurl: ${IDPORTEN_WELL_KNOWN_URL}
+    discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
     validation:
       optional-claims: aud,nbf
   tokenvalidationfilter:

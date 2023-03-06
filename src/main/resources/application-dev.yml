@@ -6,3 +6,11 @@ idporten_post_logout_redirect_uri: ${IDPORTEN_POST_LOGOUT_REDIRECT_URI}
 idporten_login_timeout: ${IDPORTEN_LOGIN_TIMEOUT:3600}
 idporten_session_timeout: ${IDPORTEN_SESSION_TIMEOUT:7200}
 idporten_token_timeout: ${IDPORTEN_TOKEN_TIMEOUT:3600}
+
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: ${IDPORTEN_WELL_KNOWN_URL}
+    validation:
+      optional-claims: aud,nbf
+    tokenvalidationfilter:
+      order: -2147483647 # Integer.MIN + 1 = -2147483647

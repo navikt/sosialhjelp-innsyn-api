@@ -75,7 +75,7 @@ no.nav.security.jwt:
       optional-claims: aud,nbf
 innsyn.loginurl: ${INNSYN_LOGINURL}
 
-login_api_idporten_clientid: clientId
+login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID}
 
 innsyn:
   vedlegg:

@@ -57,6 +57,7 @@ spec:
         - host: "test.svarut.ks.no"
         - host: "minside.fiks.test.ks.no"
         - host: "pdl-api.dev-fss-pub.nais.io"
+        - host: "sosialhjelp-soknad-api.dev-fss-pub.nais.io"
         - host: "oidc-ver2.difi.no"
         - host: "unleash.nais.io"
       rules:
@@ -111,9 +112,9 @@ spec:
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
     - name: SOKNAD_API_URL
-      value: "http://sosialhjelp-soknad-api-dev/sosialhjelp/soknad-api"
+      value: "https://sosialhjelp-soknad-api.dev-fss-pub.nais.io/sosialhjelp/soknad-api"
     - name: SOKNAD_API_AUDIENCE
-      value: "dev-gcp:teamdigisos:sosialhjelp-soknad-api-dev"
+      value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: "https://ver2.maskinporten.no/.well-known/oauth-authorization-server"
     - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI

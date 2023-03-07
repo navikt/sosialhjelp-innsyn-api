@@ -12,7 +12,7 @@ no.nav.security.jwt:
     discoveryurl: ${IDPORTEN_WELL_KNOWN_URL}
     validation:
       optional-claims: aud,nbf
-    tokenvalidationfilter:
-      order: -2147483647 # Integer.MIN + 1 = -2147483647
+  tokenvalidationfilter:
+    order: -2147483647 # Integer.MIN + 1 = -2147483647
 
 login_api_idporten_clientid: clientId #property kan fjernes etter sky-migrering og ikke lengre avhengig av login-api

@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.netty.http.client.HttpClient
 
-@Profile("dev")
+@Profile("idporten")
 @Configuration
 class IdPortenConfig(
     @Value("\${idporten_well_known_url}") private val wellKnownUrl: String,

@@ -18,9 +18,9 @@ import javax.servlet.http.HttpServletRequestWrapper
 /**
  * Beriker innkommende request med Authorization header, hvis vi har data for login_id i Redis
  */
+@Profile("idporten")
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@Profile("dev")
 class IdPortenAuthorizationHeaderFilter(
     private val idPortenSessionHandler: IdPortenSessionHandler
 ) : Filter {

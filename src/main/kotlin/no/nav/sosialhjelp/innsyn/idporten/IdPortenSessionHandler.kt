@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import javax.servlet.http.HttpServletRequest
 
-@Profile("dev")
+@Profile("idporten")
 @Component
 class IdPortenSessionHandler(
     private val redisService: RedisService,

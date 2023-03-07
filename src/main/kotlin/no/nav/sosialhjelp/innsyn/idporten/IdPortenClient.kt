@@ -52,7 +52,7 @@ import java.net.URI
 import java.net.URL
 import java.util.UUID
 
-@Profile("dev")
+@Profile("idporten")
 @Component
 class IdPortenClient(
     private val idPortenProperties: IdPortenProperties,

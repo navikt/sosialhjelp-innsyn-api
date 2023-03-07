@@ -19,7 +19,7 @@ import java.net.URI
 import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 
-@Profile("dev")
+@Profile("idporten")
 @RestController
 class IdPortenController(
     private val idPortenClient: IdPortenClient,

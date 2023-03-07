@@ -30,7 +30,7 @@ class TilgangskontrollService(
 ) : Tilgangskontroll {
 
     override fun sjekkTilgang(token: String) {
-        if (!environment.activeProfiles.contains("dev")) {
+        if (!environment.activeProfiles.contains("idporten")) {
             if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         }
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)

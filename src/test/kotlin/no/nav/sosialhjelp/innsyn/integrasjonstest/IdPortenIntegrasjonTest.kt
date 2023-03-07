@@ -17,7 +17,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @Import(MockOAuth2ServerAutoConfiguration::class)
 @ContextConfiguration(classes = [PdlIntegrationTestConfig::class])
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = ["dev", "mock-redis", "test", "local_unleash"])
+@ActiveProfiles(profiles = ["idporten", "mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
 class IdPortenIntegrasjonTest {
 

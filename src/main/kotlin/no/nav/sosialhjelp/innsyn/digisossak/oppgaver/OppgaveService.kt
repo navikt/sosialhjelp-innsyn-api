@@ -34,7 +34,7 @@ class OppgaveService(
 
         val oppgaveResponseList = model.oppgaver
             .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
-            .groupBy { if (it.innsendelsesfrist == null) null else it.innsendelsesfrist!!.toLocalDate() }
+            .groupBy { it.innsendelsesfrist?.toLocalDate() }
             .map { (key, value) ->
                 OppgaveResponse(
                     innsendelsesfrist = key,

@@ -99,7 +99,7 @@ class VedleggController(
                 it.innsendelsesfrist,
                 it.hendelsetype,
                 it.hendelsereferanse,
-                it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result.name) }
+                it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result) }
             )
         }
 

@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import io.mockk.junit5.MockKExtension
 import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration
 import no.nav.sosialhjelp.innsyn.TestApplication
+import no.nav.sosialhjelp.innsyn.idporten.IdPortenController.Companion.LOGIN_ID_COOKIE
 import no.nav.sosialhjelp.innsyn.idporten.IdPortenProperties
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -35,6 +36,6 @@ class IdPortenIntegrasjonTest {
             .exchange()
             .expectStatus().is3xxRedirection
             .expectHeader().value(HttpHeaders.LOCATION) { it.contains(idPortenProperties.wellKnown.authorizationEndpoint) }
-            .expectHeader().value(HttpHeaders.SET_COOKIE) { it.contains("login_id") }
+            .expectHeader().value(HttpHeaders.SET_COOKIE) { it.contains(LOGIN_ID_COOKIE) }
     }
 }

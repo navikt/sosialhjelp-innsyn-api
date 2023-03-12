@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.NONCE_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.REFRESH_TOKEN_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.SESSION_ID_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.STATE_CACHE_PREFIX
+import no.nav.sosialhjelp.innsyn.idporten.IdPortenController.Companion.LOGIN_ID_COOKIE
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -40,7 +41,7 @@ class IdPortenSessionHandler(
     }
 
     fun getToken(request: HttpServletRequest): String? {
-        val loginId = request.cookies?.firstOrNull { it.name == "login_id" }?.value
+        val loginId = request.cookies?.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
         if (loginId != null) {
             val accessToken = redisService.get("$ACCESS_TOKEN_CACHE_PREFIX$loginId", String::class.java)
             return accessToken ?: getAccessTokenFromRefreshToken(loginId)

@@ -35,8 +35,8 @@ class IdPortenController(
         @RequestParam("goto") redirectPath: String?,
     ): ResponseEntity<String> {
         val loginId = UUID.randomUUID().toString()
-        val redirectLocation = idPortenClient.getAuthorizeUrl(loginId, redirectPath).toString()
-        return nonCacheableRedirectResponse(redirectLocation, loginId)
+        val authorizeUri = idPortenClient.getAuthorizeUri(loginId, redirectPath)
+        return nonCacheableRedirectResponseEntity(authorizeUri.toString(), loginId)
     }
 
     @Unprotected
@@ -45,7 +45,7 @@ class IdPortenController(
         val redirectUri = request.requestURL.append('?').append(request.queryString).toString()
         val response = AuthorizationResponse.parse(URI(redirectUri))
 
-        val loginId = request.cookies.firstOrNull { it.name == "login_id" }?.value
+        val loginId = request.cookies.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
             ?: throw TilgangskontrollException("No login_id found from cookie")
         val state = redisService.get("$STATE_CACHE_PREFIX$loginId", State::class.java)
             ?: throw TilgangskontrollException("No state found on loginId")
@@ -74,7 +74,7 @@ class IdPortenController(
         idPortenSessionHandler.clearPropertiesForLogin(loginId)
 
         val redirect = redisService.get("$LOGIN_REDIRECT_CACHE_PREFIX$loginId", String::class.java)
-        return nonCacheableRedirectResponse(redirect ?: "/sosialhjelp/innsyn")
+        return nonCacheableRedirectResponseEntity(redirect ?: "/sosialhjelp/innsyn")
     }
 
     /**
@@ -83,26 +83,28 @@ class IdPortenController(
     @Unprotected
     @GetMapping("/oauth2/logout")
     fun logout(request: HttpServletRequest): ResponseEntity<String> {
-        val loginId = request.cookies.firstOrNull { it.name == "login_id" }?.value
+        val loginId = request.cookies.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
 
-        val endSessionRedirectUrl = idPortenClient.getEndSessionRedirectUrl(loginId)
+        val endSessionRedirectUrl = idPortenClient.getEndSessionRedirectUri(loginId)
 
         log.debug("Single-logout fra egen tjeneste")
         loginId?.let { idPortenSessionHandler.clearTokens(it) }
 
-        return nonCacheableRedirectResponse(endSessionRedirectUrl.toString())
+        return nonCacheableRedirectResponseEntity(endSessionRedirectUrl.toString())
     }
 
-    private fun nonCacheableRedirectResponse(redirectLocation: String, loginId: String? = null): ResponseEntity<String> {
+    private fun nonCacheableRedirectResponseEntity(redirectLocation: String, loginId: String? = null): ResponseEntity<String> {
         val headers = HttpHeaders()
         headers.add(HttpHeaders.CACHE_CONTROL, "no-store, no-cache")
         headers.add(HttpHeaders.PRAGMA, "no-cache")
         headers.add(HttpHeaders.LOCATION, redirectLocation)
-        loginId?.let { headers.add(HttpHeaders.SET_COOKIE, "login_id=$it; Max-Age=${idPortenProperties.sessionTimeout}; Path=/sosialhjelp; Secure; HttpOnly; SameSite=None") }
+        loginId?.let { headers.add(HttpHeaders.SET_COOKIE, "$LOGIN_ID_COOKIE=$it; Max-Age=${idPortenProperties.sessionTimeout}; Path=/sosialhjelp; Secure; HttpOnly; SameSite=None") }
         return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build()
     }
 
     companion object {
         private val log by logger()
+
+        const val LOGIN_ID_COOKIE = "login_id"
     }
 }

@@ -59,7 +59,7 @@ class IdPortenClient(
     private val redisService: RedisService,
 ) {
 
-    fun getAuthorizeUrl(loginId: String, redirectPath: String?): URI {
+    fun getAuthorizeUri(loginId: String, redirectPath: String?): URI {
         redirectPath?.let { redisService.put("$LOGIN_REDIRECT_CACHE_PREFIX$loginId", it.toByteArray(), idPortenProperties.loginTimeout) }
         val state = State().also {
             redisService.put("$STATE_CACHE_PREFIX$loginId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
@@ -169,7 +169,7 @@ class IdPortenClient(
         return accessToken.value
     }
 
-    fun getEndSessionRedirectUrl(loginId: String?): URI {
+    fun getEndSessionRedirectUri(loginId: String?): URI {
         if (loginId == null) {
             log.info("Ingen sesjonsId funnet - redirecter til /endsession uten id_token_hint og post_logout_redirect_uri")
             return LogoutRequest(endSessionEndpointURI).toURI()
@@ -181,10 +181,9 @@ class IdPortenClient(
             return LogoutRequest(endSessionEndpointURI).toURI()
         }
 
-        val idTokenString = idToken
         val logoutRequest = LogoutRequest(
             endSessionEndpointURI,
-            SignedJWT.parse(idTokenString),
+            SignedJWT.parse(idToken),
             URI(idPortenProperties.postLogoutRedirectUri),
             null // State er optional.
         )

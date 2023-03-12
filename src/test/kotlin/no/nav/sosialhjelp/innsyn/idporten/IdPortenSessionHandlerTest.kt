@@ -4,6 +4,7 @@ import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.sosialhjelp.innsyn.idporten.IdPortenController.Companion.LOGIN_ID_COOKIE
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +23,7 @@ internal class IdPortenSessionHandlerTest {
 
     @BeforeEach
     internal fun setUp() {
-        request.setCookies(Cookie("login_id", "uuid"))
+        request.setCookies(Cookie(LOGIN_ID_COOKIE, "uuid"))
     }
 
     @Test

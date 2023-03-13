@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.verify
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.idporten.IdPortenController.Companion.LOGIN_ID_COOKIE
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpServletRequest
+import java.net.URI
 import javax.servlet.http.Cookie
 
 class IdPortenControllerTest {
@@ -89,5 +91,22 @@ class IdPortenControllerTest {
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.FOUND)
         assertThat(response.headers[HttpHeaders.LOCATION]).contains("/sosialhjelp/innsyn")
+    }
+
+    @Test
+    fun `utlogging skal fjerne tokens via sessionhandler`() {
+        val request = MockHttpServletRequest()
+        request.requestURI = "www.redirect.com"
+        request.setCookies(Cookie(LOGIN_ID_COOKIE, "loginId"))
+
+        val endSessionUrl = "https://endsession.com"
+        every { idPortenClient.getEndSessionRedirectUri("loginId") } returns URI(endSessionUrl)
+        every { idPortenSessionHandler.clearTokens("loginId") } just runs
+
+        val response = idPortenController.logout(request)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.FOUND)
+        assertThat(response.headers[HttpHeaders.LOCATION]).contains(endSessionUrl)
+
+        verify(exactly = 1) { idPortenSessionHandler.clearTokens("loginId") }
     }
 }

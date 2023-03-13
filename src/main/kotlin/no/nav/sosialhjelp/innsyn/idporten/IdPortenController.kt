@@ -45,7 +45,7 @@ class IdPortenController(
         val redirectUri = request.requestURL.append('?').append(request.queryString).toString()
         val response = AuthorizationResponse.parse(URI(redirectUri))
 
-        val loginId = request.cookies.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
+        val loginId = request.cookies?.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
             ?: throw TilgangskontrollException("No login_id found from cookie")
         val state = redisService.get("$STATE_CACHE_PREFIX$loginId", State::class.java)
             ?: throw TilgangskontrollException("No state found on loginId")

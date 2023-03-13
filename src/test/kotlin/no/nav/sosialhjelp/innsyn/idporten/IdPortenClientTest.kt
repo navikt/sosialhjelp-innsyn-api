@@ -25,11 +25,11 @@ internal class IdPortenClientTest {
 
     private val idPortenProperties = IdPortenProperties(
         wellKnown = IdPortenWellKnown(
-            issuer,
-            server.authorizationEndpointUrl(issuer).toString(),
-            server.tokenEndpointUrl(issuer).toString(),
-            server.jwksUrl(issuer).toString(),
-            server.endSessionEndpointUrl(issuer).toString()
+            issuer = issuer,
+            authorizationEndpoint = server.authorizationEndpointUrl(issuer).toString(),
+            tokenEndpoint = server.tokenEndpointUrl(issuer).toString(),
+            jwksUri = server.jwksUrl(issuer).toString(),
+            endSessionEndpoint = server.endSessionEndpointUrl(issuer).toString()
         ),
         redirectUri = "redirect.com",
         clientId = "clientId",

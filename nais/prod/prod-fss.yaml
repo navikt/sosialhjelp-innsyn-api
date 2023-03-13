@@ -67,7 +67,7 @@ spec:
     - name: REDIS_HOST
       value: "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local"
     - name: SPRING_PROFILES_ACTIVE
-      value: "prod,log-kibana"
+      value: "prod-fss,log-kibana"
     - name: PDL_ENDPOINT_URL
       value: "https://pdl-api.intern.nav.no/graphql"
     - name: PDL_AUDIENCE

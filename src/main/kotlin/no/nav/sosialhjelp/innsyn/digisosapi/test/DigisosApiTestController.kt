@@ -24,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile
 /**
  *  Endepunkter som kun tilbys for sosialhjelp-fagsystem-mock -> kun tilgjengelig i preprod, ved lokal kjøring og i mock
  */
-@Profile("!prod")
+@Profile("!prod-fss")
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
 @RequestMapping("/api/v1/digisosapi")

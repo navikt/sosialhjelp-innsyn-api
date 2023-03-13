@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import reactor.netty.http.client.HttpClient
 
-@Profile("!(idporten|mock-alt|local|test)")
+@Profile("(prod-fss|dev-fss)")
 @Configuration
 class ProxiedHttpClientConfig {
 
@@ -19,7 +19,7 @@ class ProxiedHttpClientConfig {
     fun proxiedHttpClient(): HttpClient = proxiedHttpClient(proxyUrl)
 }
 
-@Profile("(idporten|mock-alt|local|test)")
+@Profile("!(prod-fss|dev-fss)")
 @Configuration
 class MockProxiedHttpClientConfig {
 

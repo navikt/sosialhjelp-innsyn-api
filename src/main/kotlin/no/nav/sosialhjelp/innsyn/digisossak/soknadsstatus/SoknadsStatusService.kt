@@ -31,8 +31,8 @@ class SoknadsStatusService(
         return UtvidetSoknadsStatus(
             status = status,
             tidspunktSendt = model.tidspunktSendt,
-            navKontor = if (erInnsynDeaktivertForKommune) model.soknadsmottaker?.navEnhetsnavn else null,
-            soknadUrl = if (erInnsynDeaktivertForKommune && dokumentlagerId != null) UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, dokumentlagerId)) else null
+            navKontor = model.soknadsmottaker?.navEnhetsnavn?.takeIf { erInnsynDeaktivertForKommune },
+            soknadUrl = dokumentlagerId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }.takeIf { erInnsynDeaktivertForKommune }
         )
     }
 

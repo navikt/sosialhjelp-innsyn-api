@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.ACCESS_TOKEN_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.CODE_VERIFIER_CACHE_PREFIX
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.ID_TOKEN_CACHE_PREFIX
@@ -11,7 +12,6 @@ import no.nav.sosialhjelp.innsyn.idporten.IdPortenController.Companion.LOGIN_ID_
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import javax.servlet.http.HttpServletRequest
 
 @Profile("idporten")
 @Component

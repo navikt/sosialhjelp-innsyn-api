@@ -4,13 +4,13 @@ import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.innsyn.idporten.IdPortenController.Companion.LOGIN_ID_COOKIE
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.mock.web.MockHttpServletRequest
-import javax.servlet.http.Cookie
 
 internal class IdPortenSessionHandlerTest {
 
@@ -19,11 +19,11 @@ internal class IdPortenSessionHandlerTest {
 
     private val idPortenSessionHandler = IdPortenSessionHandler(redisService, idPortenClient)
 
-    private val request = MockHttpServletRequest()
+    private val request: HttpServletRequest = mockk()
 
     @BeforeEach
     internal fun setUp() {
-        request.setCookies(Cookie(LOGIN_ID_COOKIE, "uuid"))
+        every { request.cookies } returns arrayOf(Cookie(LOGIN_ID_COOKIE, "uuid"))
     }
 
     @Test
@@ -61,7 +61,8 @@ internal class IdPortenSessionHandlerTest {
 
     @Test
     internal fun `skal returnere null hvis login_id ikke finnes i cookies`() {
-        val requestWithoutCookie = MockHttpServletRequest()
+        val requestWithoutCookie: HttpServletRequest = mockk()
+        every { requestWithoutCookie.cookies } returns emptyArray()
 
         assertThat(idPortenSessionHandler.getToken(requestWithoutCookie)).isNull()
 

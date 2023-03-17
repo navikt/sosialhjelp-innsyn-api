@@ -1,5 +1,11 @@
 package no.nav.sosialhjelp.innsyn.idporten
 
+import jakarta.servlet.Filter
+import jakarta.servlet.FilterChain
+import jakarta.servlet.ServletRequest
+import jakarta.servlet.ServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequestWrapper
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import org.springframework.context.annotation.Profile
 import org.springframework.core.Ordered
@@ -8,12 +14,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import java.util.Collections
 import java.util.Enumeration
-import javax.servlet.Filter
-import javax.servlet.FilterChain
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletRequestWrapper
 
 /**
  * Beriker innkommende request med Authorization header, hvis vi har data for login_id i Redis

@@ -2,16 +2,15 @@ package no.nav.sosialhjelp.innsyn.idporten
 
 import io.mockk.every
 import io.mockk.mockk
+import jakarta.servlet.FilterChain
+import jakarta.servlet.ServletRequest
+import jakarta.servlet.ServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
-import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.mock.web.MockHttpServletResponse
-import javax.servlet.FilterChain
-import javax.servlet.ServletRequest
-import javax.servlet.ServletResponse
-import javax.servlet.http.HttpServletRequest
 
 class IdPortenAuthorizationHeaderFilterTest {
 
@@ -24,9 +23,9 @@ class IdPortenAuthorizationHeaderFilterTest {
     fun `skal legge auth-header til request`() {
         every { idPortenSessionHandler.getToken(any()) } returns token
 
-        val request = MockHttpServletRequest()
+        val request: HttpServletRequest = mockk()
 
-        val response = MockHttpServletResponse()
+        val response: HttpServletResponse = mockk()
         val filter = AuthorizationHeaderCapturingMockFilterChain()
 
         idPortenAuthorizationHeaderFilter.doFilter(request, response, filter)
@@ -38,8 +37,9 @@ class IdPortenAuthorizationHeaderFilterTest {
     fun `hvis sessionhandler ikke har token legges ikke auth-header til request`() {
         every { idPortenSessionHandler.getToken(any()) } returns null
 
-        val request = MockHttpServletRequest()
-        val response = MockHttpServletResponse()
+        val request: HttpServletRequest = mockk()
+        every { request.getHeader(HttpHeaders.AUTHORIZATION) } returns null
+        val response: HttpServletResponse = mockk()
         val filter = AuthorizationHeaderCapturingMockFilterChain()
 
         idPortenAuthorizationHeaderFilter.doFilter(request, response, filter)

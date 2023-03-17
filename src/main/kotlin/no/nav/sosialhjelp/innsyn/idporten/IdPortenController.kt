@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.idporten
 
 import com.nimbusds.oauth2.sdk.AuthorizationResponse
 import com.nimbusds.oauth2.sdk.id.State
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.LOGIN_REDIRECT_CACHE_PREFIX
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 import java.util.UUID
-import javax.servlet.http.HttpServletRequest
 
 @Profile("idporten")
 @RestController

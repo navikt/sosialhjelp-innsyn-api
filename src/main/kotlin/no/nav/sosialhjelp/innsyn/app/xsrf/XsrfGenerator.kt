@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app.xsrf
 
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.innsyn.app.exceptions.XsrfException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -13,7 +14,6 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import javax.servlet.http.HttpServletRequest
 
 /**
  * Klasse som genererer og sjekker xsrf token som sendes inn

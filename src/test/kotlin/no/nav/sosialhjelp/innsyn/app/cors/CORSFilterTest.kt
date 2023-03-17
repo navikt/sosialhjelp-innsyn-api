@@ -33,6 +33,7 @@ internal class CORSFilterTest {
         unmockkObject(MiljoUtils)
     }
 
+    @Disabled("MockHttpServletRequest har avhengighet til servlet-api 6.0, som p.t ikke støttes av jetty 11.x")
     @Test
     internal fun `unknown origin should not set cors headers`() {
         val request = MockHttpServletRequest()

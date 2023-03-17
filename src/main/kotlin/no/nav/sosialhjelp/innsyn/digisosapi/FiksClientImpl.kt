@@ -81,8 +81,8 @@ class FiksClientImpl(
                 val feilmelding = "Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}"
                 when {
                     e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(feilmelding, e)
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, feilmelding, e)
-                    else -> FiksServerException(e.rawStatusCode, feilmelding, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                    else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                 }
             }
             .block()
@@ -130,8 +130,8 @@ class FiksClientImpl(
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 val feilmelding = "Fiks - hentDokument feilet - ${messageUtenFnr(e)}"
                 when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, feilmelding, e)
-                    else -> FiksServerException(e.rawStatusCode, feilmelding, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                    else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                 }
             }
             .block()
@@ -152,8 +152,8 @@ class FiksClientImpl(
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 val feilmelding = "Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}"
                 when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, feilmelding, e)
-                    else -> FiksServerException(e.rawStatusCode, feilmelding, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                    else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                 }
             }
             .block()
@@ -190,22 +190,22 @@ class FiksClientImpl(
             .retrieve()
             .toEntity<String>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
-                if (e.rawStatusCode == 400 && filErAlleredeLastetOpp(e, digisosId)) {
+                if (e.statusCode.value() == 400 && filErAlleredeLastetOpp(e, digisosId)) {
                     val feilmeldingAlleredeFinnes = "Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}"
                     log.warn(feilmeldingAlleredeFinnes, e)
                     FiksClientFileExistsException(feilmeldingAlleredeFinnes, e)
                 } else {
                     val feilmelding = "Fiks - Opplasting av ettersendelse til digisosId=$digisosId feilet - ${messageUtenFnr(e)}"
                     when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, feilmelding, e)
-                        else -> FiksServerException(e.rawStatusCode, feilmelding, e)
+                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                        else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                     }
                 }
             }
             .block() ?: throw FiksClientException(500, "responseEntity er null selv om request ikke har kastet exception", null)
 
         opplastingsteller.increment()
-        log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCodeValue})")
+        log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCode})")
     }
 
     private fun erPapirsoknad(digisosSak: DigisosSak): Boolean {

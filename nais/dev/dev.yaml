@@ -37,7 +37,7 @@ spec:
     enabled: true # endre for å ta i bruk idporten-client
     accessTokenLifetime: 3600 #default
     clientURI: https://www.nav.no #default
-    frontchannelLogoutPath: /frontchannel/logout
+    frontchannelLogoutPath: /oauth2/logout
     integrationType: api_klient
     postLogoutRedirectURIs:
       - https://www.nav.no #default
@@ -48,9 +48,6 @@ spec:
       - ks:fiks
     sessionLifetime: 7200 #default
   accessPolicy:
-    inbound:
-      rules:
-        - application: sosialhjelp-login-api-dev
     outbound:
       external:
         - host: "api.fiks.test.ks.no"

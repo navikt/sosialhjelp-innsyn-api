@@ -19,7 +19,7 @@ class FrontchannelLogoutController(
      * Front-channel logouts are logouts initiated by other ID-porten clients
      */
     @Unprotected
-    @GetMapping("/frontchannel/logout")
+    @GetMapping("/oauth2/logout")
     fun frontchannelLogout(
         @RequestParam(name = "iss") issuer: String?,
         @RequestParam(name = "sid") idPortenSessionId: String?,

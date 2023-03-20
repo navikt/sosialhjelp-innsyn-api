@@ -81,7 +81,7 @@ class IdPortenController(
      * Utlogging initiert fra egen tjeneste
      */
     @Unprotected
-    @GetMapping("/oauth2/logout")
+    @GetMapping("/oauth2/slo")
     fun logout(request: HttpServletRequest): ResponseEntity<String> {
         val loginId = request.cookies?.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
 

@@ -30,7 +30,7 @@ class FrontChannelLogoutIntegrasjonsTest {
     fun `should logout with correct issuer`() {
         webClient
             .get()
-            .uri("/frontchannel/logout?iss=${idPortenProperties.wellKnown.issuer}&sid=idporten_session_id")
+            .uri("/oauth2/logout?iss=${idPortenProperties.wellKnown.issuer}&sid=idporten_session_id")
             .exchange()
             .expectStatus().isOk
     }
@@ -39,7 +39,7 @@ class FrontChannelLogoutIntegrasjonsTest {
     fun `should return 400 on wrong issuer`() {
         webClient
             .get()
-            .uri("/frontchannel/logout?iss=wrong-issuer&sid=idporten_session_id")
+            .uri("/oauth2/logout?iss=wrong-issuer&sid=idporten_session_id")
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -48,7 +48,7 @@ class FrontChannelLogoutIntegrasjonsTest {
     fun `should return 400 on missing sid`() {
         webClient
             .get()
-            .uri("/frontchannel/logout?iss=${idPortenProperties.wellKnown.issuer}")
+            .uri("/oauth2/logout?iss=${idPortenProperties.wellKnown.issuer}")
             .exchange()
             .expectStatus().isBadRequest
     }
@@ -57,7 +57,7 @@ class FrontChannelLogoutIntegrasjonsTest {
     fun `should return 400 on invalid sid`() {
         webClient
             .get()
-            .uri("/frontchannel/logout?iss=${idPortenProperties.wellKnown.issuer}&sid=#\$sid")
+            .uri("/oauth2/logout?iss=${idPortenProperties.wellKnown.issuer}&sid=#\$sid")
             .exchange()
             .expectStatus().isBadRequest
     }

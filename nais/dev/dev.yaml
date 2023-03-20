@@ -37,7 +37,7 @@ spec:
     enabled: true # endre for å ta i bruk idporten-client
     accessTokenLifetime: 3600 #default
     clientURI: https://www.nav.no #default
-    frontchannelLogoutPath: /oauth2/logout #default
+    frontchannelLogoutPath: /frontchannel/logout
     integrationType: api_klient
     postLogoutRedirectURIs:
       - https://www.nav.no #default

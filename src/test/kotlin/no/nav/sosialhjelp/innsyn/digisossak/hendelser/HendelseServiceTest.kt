@@ -29,6 +29,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 internal class HendelseServiceTest {
 
@@ -76,7 +77,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Skal returnere respons med 1 hendelse`() {
         val model = InternalDigisosSoker()
-        model.historikk.add(Hendelse(tittel_sendt, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)))
+        model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -84,7 +85,7 @@ internal class HendelseServiceTest {
         val hendelser = service.hentHendelser("123", "Token")
 
         assertThat(hendelser).hasSize(1)
-        assertThat(hendelser[0].beskrivelse).isEqualTo(tittel_sendt)
+        assertThat(hendelser[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR.name)
         assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt_sendt.toString())
         assertThat(hendelser[0].filUrl?.link).isEqualTo(url)
     }
@@ -94,9 +95,9 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
         model.historikk.addAll(
             listOf(
-                Hendelse(tittel_sendt, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)),
-                Hendelse(tittel_mottatt, tidspunkt_mottatt, UrlResponse(VIS_BREVET, url2)),
-                Hendelse(tittel3, tidspunkt3, UrlResponse(VIS_BREVET, url3))
+                Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)),
+                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE, tidspunkt_mottatt, UrlResponse(VIS_BREVET, url2)),
+                Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, tidspunkt3, UrlResponse(VIS_BREVET, url3))
             )
         )
 
@@ -120,9 +121,10 @@ internal class HendelseServiceTest {
 
         assertThat(hendelser).hasSize(2)
 
-        assertThat(hendelser[0].beskrivelse).contains("Du har sendt 1 vedlegg til NAV")
+        assertThat(hendelser[0].hendelseType).isEqualTo(HendelseTekstType.ANTALL_SENDTE_VEDLEGG.name)
         assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt4.toString())
-        assertThat(hendelser[1].beskrivelse).contains("Du har sendt 2 vedlegg til NAV")
+        assertThat(hendelser[0].tekstArgument).isEqualTo("1")
+        assertThat(hendelser[1].hendelseType).isEqualTo(HendelseTekstType.ANTALL_SENDTE_VEDLEGG.name)
         assertThat(hendelser[1].tidspunkt).isEqualTo(tidspunkt5.toString())
     }
 
@@ -152,10 +154,13 @@ internal class HendelseServiceTest {
 
         assertThat(hendelser).hasSize(2)
 
-        assertThat(hendelser[0].beskrivelse).contains("Du har sendt 2 vedlegg til NAV")
+        assertThat(hendelser[0].hendelseType).isEqualTo(HendelseTekstType.ANTALL_SENDTE_VEDLEGG.name)
         assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt4.toString())
-        assertThat(hendelser[1].beskrivelse).contains("Du har sendt 2 vedlegg til NAV")
+        assertThat(hendelser[0].tekstArgument).isEqualTo("2")
+        assertThat(hendelser[1].hendelseType).contains(HendelseTekstType.ANTALL_SENDTE_VEDLEGG.name)
         assertThat(hendelser[1].tidspunkt).isEqualTo(tidspunkt5.toString())
+        assertThat(hendelser[1].tekstArgument).isEqualTo("2")
+
     }
 
     @Test
@@ -172,8 +177,9 @@ internal class HendelseServiceTest {
 
         assertThat(hendelser).hasSize(1)
 
-        assertThat(hendelser[0].beskrivelse).contains("Du har sendt 2 vedlegg til NAV")
+        assertThat(hendelser[0].hendelseType).contains(HendelseTekstType.ANTALL_SENDTE_VEDLEGG.name)
         assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt4.toString())
+        assertThat(hendelser[0].tekstArgument).isEqualTo("2")
     }
 
     @Test

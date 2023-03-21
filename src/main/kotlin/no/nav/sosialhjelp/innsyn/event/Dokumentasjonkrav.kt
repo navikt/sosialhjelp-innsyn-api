@@ -46,7 +46,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
     union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav) }
 
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav. Beskrivelse: Dine oppgaver er oppdatert, les mer i vedtaket.")
-    historikk.add(Hendelse(HendelseTekstType.DOKUMENTASJON_ETTERSPURT, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.DOKUMENTASJONSKRAV))
+    historikk.add(Hendelse(HendelseTekstType.DOKUMENTASJONKRAV, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.DOKUMENTASJONSKRAV))
 }
 
 private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav: Dokumentasjonkrav) {

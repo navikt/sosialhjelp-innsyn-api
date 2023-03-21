@@ -8,6 +8,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
@@ -36,7 +37,7 @@ internal class DokumentasjonkravTest {
     private val soknadsmottaker = "The Office"
     private val enhetsnr = "2317"
 
-    private val hendelsetekst = "Dine oppgaver er oppdatert, les mer i vedtaket."
+    private val hendelsetekst = HendelseTekstType.DOKUMENTASJONKRAV
 
     @BeforeEach
     fun init() {
@@ -89,7 +90,7 @@ internal class DokumentasjonkravTest {
         assertThat(utbetaling.dokumentasjonkrav[0].getOppgaveStatus()).isEqualTo(Oppgavestatus.RELEVANT)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittelFrontendKey).isEqualTo(hendelsetekst)
+        assertThat(hendelse.hendelseType).isEqualTo(hendelsetekst)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
     }
 
@@ -116,7 +117,7 @@ internal class DokumentasjonkravTest {
         assertThat(model.historikk).hasSize(3)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittelFrontendKey).isNotEqualTo(hendelsetekst)
+        assertThat(hendelse.hendelseType).isNotEqualTo(hendelsetekst)
     }
 
     @Test
@@ -144,7 +145,7 @@ internal class DokumentasjonkravTest {
         assertThat(model.historikk).hasSize(5)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittelFrontendKey).isEqualTo(hendelsetekst)
+        assertThat(hendelse.hendelseType).isEqualTo(hendelsetekst)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_5.toLocalDateTime())
     }
 
@@ -174,7 +175,7 @@ internal class DokumentasjonkravTest {
         assertThat(model.historikk).hasSize(6)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittelFrontendKey).isEqualTo(hendelsetekst)
+        assertThat(hendelse.hendelseType).isEqualTo(hendelsetekst)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
     }
 

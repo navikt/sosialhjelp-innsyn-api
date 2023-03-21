@@ -9,6 +9,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -81,7 +82,8 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk.last().tittelFrontendKey).contains(enhetNavn)
+        assertThat(model.historikk.last().hendelseType).isEqualTo(HendelseTekstType.SOKNAD_VIDERESENDT)
+        assertThat(model.historikk.last().tekstArgument).isEqualTo(enhetNavn)
     }
 
     @Test
@@ -106,8 +108,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk.last().tittelFrontendKey).doesNotContain(enhetNavn)
-        assertThat(model.historikk.last().tittelFrontendKey).contains("et annet NAV-kontor")
+        assertThat(model.historikk.last().tekstArgument).isNull()
     }
 
     @Test
@@ -134,7 +135,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(2)
 
-        assertThat(model.historikk.last().tittelFrontendKey).contains("mottatt")
+        assertThat(model.historikk.last().hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
     }
 
     @Test
@@ -161,7 +162,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk.last().tittelFrontendKey).contains(enhetNavn)
+        assertThat(model.historikk.last().tekstArgument).isEqualTo(enhetNavn)
     }
 
     @Test
@@ -190,8 +191,8 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(4)
 
-        assertThat(model.historikk[2].tittelFrontendKey).contains(enhetNavn)
-        assertThat(model.historikk[3].tittelFrontendKey).contains(enhetNavn2)
+        assertThat(model.historikk[2].tekstArgument).isEqualTo(enhetNavn)
+        assertThat(model.historikk[3].tekstArgument).isEqualTo(enhetNavn2)
     }
 
     @Test
@@ -218,9 +219,8 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(2)
 
-        assertThat(model.historikk[0].tittelFrontendKey).contains("Søknaden med vedlegg er mottatt")
-        assertThat(model.historikk[1].tittelFrontendKey).contains(enhetNavn)
-        assertThat(model.historikk[1].tittelFrontendKey).doesNotContain("videresendt")
+        assertThat(model.historikk[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
+        assertThat(model.historikk[1].tekstArgument).isEqualTo(enhetNavn)
     }
 
     @Test
@@ -250,7 +250,8 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk[0].tittelFrontendKey).contains("Søknaden med vedlegg er mottatt")
-        assertThat(model.historikk[2].tittelFrontendKey).contains("videresendt", enhetNavn2)
+        assertThat(model.historikk[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
+        assertThat(model.historikk[2].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_VIDERESENDT)
+        assertThat(model.historikk[2].tekstArgument).isEqualTo(enhetNavn2)
     }
 }

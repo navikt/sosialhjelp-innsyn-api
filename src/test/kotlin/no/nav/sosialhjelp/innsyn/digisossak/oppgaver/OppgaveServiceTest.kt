@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 internal class OppgaveServiceTest {
 
@@ -737,7 +738,7 @@ internal class OppgaveServiceTest {
     fun `should return true if soknad har mottat-status og ikke har hatt SENDT-status`() {
         val model = InternalDigisosSoker()
         model.status = SoknadsStatus.MOTTATT
-        model.historikk.add(Hendelse("Søknaden kommer kanskje fra papirsøknad", LocalDateTime.now(), null))
+        model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, LocalDateTime.now(), null))
         every { eventService.createModel(any(), any()) } returns model
 
         val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123", token)
@@ -748,8 +749,8 @@ internal class OppgaveServiceTest {
     fun `should return false if soknad har mottat-status og har hatt SENDT-status`() {
         val model = InternalDigisosSoker()
         model.status = SoknadsStatus.MOTTATT
-        model.historikk.add(Hendelse("Random hendelse", LocalDateTime.now(), null))
-        model.historikk.add(Hendelse("Søknaden med vedlegg er sendt til test kommune", LocalDateTime.now(), null))
+        model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_VIDERESENDT, LocalDateTime.now(), null))
+        model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, LocalDateTime.now(), null))
         every { eventService.createModel(any(), any()) } returns model
 
         val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123", token)

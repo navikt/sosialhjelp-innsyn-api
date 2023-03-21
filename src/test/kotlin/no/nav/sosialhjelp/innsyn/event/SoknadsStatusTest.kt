@@ -8,6 +8,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -67,7 +68,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(unixToLocalDateTime(tidspunkt_soknad_fixed))
-        assertThat(hendelse.tittelFrontendKey).contains("Søknaden med vedlegg er sendt til ")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR)
     }
 
     @Test
@@ -91,7 +92,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_1.toLocalDateTime())
-        assertThat(hendelse.tittelFrontendKey).contains("Søknaden med vedlegg er mottatt hos ")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
     }
 
     @Test
@@ -145,7 +146,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_1.toLocalDateTime())
-        assertThat(hendelse.tittelFrontendKey).isEqualTo("Søknaden med vedlegg er mottatt.")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
     }
 
     @Test
@@ -171,7 +172,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.tittelFrontendKey).isEqualTo("Søknaden er under behandling.")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_UNDER_BEHANDLING)
     }
 
     @Test
@@ -198,7 +199,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittelFrontendKey).isEqualTo("Søknaden er ferdigbehandlet.")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_FERDIGBEHANDLET)
     }
 
     @Test
@@ -224,7 +225,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.tittelFrontendKey).isEqualTo("Vi kan ikke vise status for søknaden din på nav.no.")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD)
     }
 
     @Test

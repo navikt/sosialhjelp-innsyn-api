@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 internal class DokumentasjonEtterspurtTest {
 
@@ -91,7 +92,7 @@ internal class DokumentasjonEtterspurtTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittelFrontendKey).contains("Vi trenger flere opplysninger")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON)
         assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
     }
 
@@ -178,7 +179,7 @@ internal class DokumentasjonEtterspurtTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.tittelFrontendKey).contains("Søknaden er under behandling")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_UNDER_BEHANDLING)
         assertThat(hendelse.url).isNull()
     }
 
@@ -287,7 +288,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.historikk).hasSize(5)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittelFrontendKey).isEqualTo("Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg.")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.DOKUMENTASJONKRAV)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
     }
 

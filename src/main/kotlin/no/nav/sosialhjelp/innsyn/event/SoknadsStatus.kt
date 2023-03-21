@@ -25,7 +25,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
                 null
             }
 
-            Hendelse(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE, hendelse.hendelsestidspunkt.toLocalDateTime(), tittelTekstArgument = tekstArgument)
+            Hendelse(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = tekstArgument)
         }
         JsonSoknadsStatus.Status.UNDER_BEHANDLING -> Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, hendelse.hendelsestidspunkt.toLocalDateTime())
         JsonSoknadsStatus.Status.FERDIGBEHANDLET ->  Hendelse(HendelseTekstType.SOKNAD_FERDIGBEHANDLET, hendelse.hendelsestidspunkt.toLocalDateTime())

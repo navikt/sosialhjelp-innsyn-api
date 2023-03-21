@@ -41,5 +41,5 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
     sakForReferanse.vedtak.add(vedtakFattet)
 
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Vedtak fattet. <skjult tittel> er ferdigbehandlet")
-    historikk.add(Hendelse(HendelseTekstType.SAK_FERDIGBEHANDLET, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, vedtaksfilUrl), tittelTekstArgument = sakForReferanse.tittel))
+    historikk.add(Hendelse(HendelseTekstType.SAK_FERDIGBEHANDLET, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, vedtaksfilUrl), tekstArgument = sakForReferanse.tittel))
 }

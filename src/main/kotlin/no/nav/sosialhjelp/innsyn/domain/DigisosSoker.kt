@@ -132,7 +132,7 @@ data class Hendelse(
     val tidspunkt: LocalDateTime,
     val url: UrlResponse? = null,
     val type: HistorikkType? = null,
-    val tittelTekstArgument: String? = null
+    val tekstArgument: String? = null
 )
 
 data class UrlResponse(
@@ -184,5 +184,8 @@ enum class HendelseTekstType {
     SOKNAD_FERDIGBEHANDLET,
     SOKNAD_BEHANDLES_IKKE,
     SOKNAD_VIDERESENDT_PAPIRSOKNAD,
-    SOKNAD_VIDERESENDT
+    SOKNAD_VIDERESENDT,
+    ETTERSPOR_MER_DOKUMENTASJON,
+    ETTERSPOR_IKKE_MER_DOKUMENTASJON,
+    DOKUMENTASJON_ETTERSPURT
 }

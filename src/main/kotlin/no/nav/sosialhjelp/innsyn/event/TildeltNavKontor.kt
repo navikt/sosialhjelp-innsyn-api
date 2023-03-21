@@ -49,5 +49,5 @@ fun InternalDigisosSoker.apply(
         }
 
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Tildelt Navkontor. Beskrivelse: ${hendelseTekstType.name}")
-    historikk.add(Hendelse(hendelseTekstType, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.TILDELT_NAV_KONTOR, tittelTekstArgument = destinasjon))
+    historikk.add(Hendelse(hendelseTekstType, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.TILDELT_NAV_KONTOR, tekstArgument = destinasjon))
 }

@@ -40,7 +40,7 @@ class HendelseService(
 
         val responseList = model.historikk
             .sortedBy { it.tidspunkt }
-            .map { HendelseResponse(it.tidspunkt.toString(), it.tittelFrontendKey, it.url) }
+            .map { HendelseResponse(it.tidspunkt.toString(), it.hendelseType.name, it.url, it.tekstArgument) }
         log.info("Hentet historikk med ${responseList.size} hendelser")
         return responseList
     }
@@ -53,7 +53,7 @@ class HendelseService(
             .forEach { (tidspunkt, samtidigOpplastedeVedlegg) ->
                 val antallVedleggForTidspunkt = samtidigOpplastedeVedlegg.sumOf { it.dokumentInfoList.size }
                 historikk.add(
-                    Hendelse(HendelseTekstType.ANTALL_SENDTE_VEDLEGG, tidspunkt, tittelTekstArgument = "$antallVedleggForTidspunkt")
+                    Hendelse(HendelseTekstType.ANTALL_SENDTE_VEDLEGG, tidspunkt, tekstArgument = "$antallVedleggForTidspunkt")
                 )
             }
     }

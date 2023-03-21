@@ -69,7 +69,7 @@ class EventService(
                         HendelseTekstType.SOKNAD_SEND_TIL_KONTOR,
                         unixToLocalDateTime(originalSoknadNAV.timestampSendt),
                         dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) },
-                        tittelTekstArgument = stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn),
+                        tekstArgument = stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn),
                     )
                 )
             }

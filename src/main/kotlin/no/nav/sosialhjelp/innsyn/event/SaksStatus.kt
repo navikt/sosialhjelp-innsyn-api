@@ -8,7 +8,6 @@ import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import org.slf4j.LoggerFactory
-import java.util.Locale
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 private val log = LoggerFactory.getLogger(JsonSaksStatus::class.java.name)
@@ -33,7 +32,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             if (prevStatus != sakForReferanse.saksStatus &&
                 (sakForReferanse.saksStatus == SaksStatus.IKKE_INNSYN || sakForReferanse.saksStatus == SaksStatus.BEHANDLES_IKKE)
             ) {
-                historikk.add(Hendelse(hendelseType = HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD, hendelse.hendelsestidspunkt.toLocalDateTime(), tittelTekstArgument = sakForReferanse.tittel))
+                historikk.add(Hendelse(hendelseType = HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = sakForReferanse.tittel))
 
             }
             if (sakForReferanse.saksStatus == SaksStatus.UNDER_BEHANDLING &&
@@ -63,7 +62,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             else -> null
         }
         if (hendelsestype != null) {
-            historikk.add(Hendelse(hendelsestype, hendelse.hendelsestidspunkt.toLocalDateTime(), tittelTekstArgument = hendelse.tittel))
+            historikk.add(Hendelse(hendelsestype, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = hendelse.tittel))
         }
     }
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Sakstatus: ${hendelse.status?.name ?: "null"}")

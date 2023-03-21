@@ -128,10 +128,11 @@ data class Dokumentasjonkrav(
 ) : Oppgavehendelse()
 
 data class Hendelse(
-    val tittel: String,
+    val hendelseType: HendelseTekstType,
     val tidspunkt: LocalDateTime,
     val url: UrlResponse? = null,
     val type: HistorikkType? = null,
+    val tittelTekstArgument: String? = null
 )
 
 data class UrlResponse(
@@ -166,4 +167,22 @@ enum class Oppgavestatus {
 
 enum class HistorikkType {
     TILDELT_NAV_KONTOR, DOKUMENTASJONSKRAV
+}
+
+enum class HendelseTekstType {
+    SOKNAD_SEND_TIL_KONTOR,
+    ANTALL_SENDTE_VEDLEGG,
+    VILKAR_OPPDATERT,
+    UTBETALINGER_OPPDATERT,
+    BREV_OM_SAKSBEANDLINGSTID,
+    KAN_IKKE_VISE_STATUS_SOKNAD,
+    SAK_UNDER_BEHANDLING,
+    SAK_FERDIGBEHANDLET,
+    KAN_IKKE_VISE_STATUS_SAK,
+    SOKNAD_UNDER_BEHANDLING,
+    SOKNAD_MOTTATT_HOS_KOMMUNE,
+    SOKNAD_FERDIGBEHANDLET,
+    SOKNAD_BEHANDLES_IKKE,
+    SOKNAD_VIDERESENDT_PAPIRSOKNAD,
+    SOKNAD_VIDERESENDT
 }

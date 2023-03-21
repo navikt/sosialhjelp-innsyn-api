@@ -33,6 +33,7 @@ import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 @Component
 class EventService(
@@ -65,9 +66,10 @@ class EventService(
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
                 model.historikk.add(
                     Hendelse(
-                        "Søknaden med vedlegg er sendt til ${stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn)} kommune.",
+                        HendelseTekstType.SOKNAD_SEND_TIL_KONTOR,
                         unixToLocalDateTime(originalSoknadNAV.timestampSendt),
-                        dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
+                        dokumentlagerDokumentId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) },
+                        tittelTekstArgument = stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn),
                     )
                 )
             }

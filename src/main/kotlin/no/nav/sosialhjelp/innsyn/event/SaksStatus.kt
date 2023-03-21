@@ -9,6 +9,7 @@ import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import org.slf4j.LoggerFactory
 import java.util.Locale
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 private val log = LoggerFactory.getLogger(JsonSaksStatus::class.java.name)
 
@@ -32,8 +33,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             if (prevStatus != sakForReferanse.saksStatus &&
                 (sakForReferanse.saksStatus == SaksStatus.IKKE_INNSYN || sakForReferanse.saksStatus == SaksStatus.BEHANDLES_IKKE)
             ) {
-                val tittel = sakForReferanse.tittel ?: "saken din"
-                historikk.add(Hendelse("Vi kan ikke vise status på søknaden din om $tittel på nav.no.", hendelse.hendelsestidspunkt.toLocalDateTime()))
+                historikk.add(Hendelse(hendelseType = HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD, hendelse.hendelsestidspunkt.toLocalDateTime(), tittelTekstArgument = sakForReferanse.tittel))
+
             }
             if (sakForReferanse.saksStatus == SaksStatus.UNDER_BEHANDLING &&
                 (prevStatus == SaksStatus.IKKE_INNSYN || prevStatus == SaksStatus.BEHANDLES_IKKE)
@@ -56,14 +57,13 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                 utbetalinger = mutableListOf()
             )
         )
-        val tittel = hendelse.tittel ?: "saken din"
-        val beskrivelse: String? = when (status) {
-            SaksStatus.UNDER_BEHANDLING -> "${tittel.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }} er under behandling."
-            SaksStatus.BEHANDLES_IKKE, SaksStatus.IKKE_INNSYN -> "Vi kan ikke vise status på søknaden din om $tittel på nav.no."
+        val hendelsestype: HendelseTekstType? = when (status) {
+            SaksStatus.UNDER_BEHANDLING -> HendelseTekstType.SAK_UNDER_BEHANDLING
+            SaksStatus.BEHANDLES_IKKE, SaksStatus.IKKE_INNSYN ->  HendelseTekstType.KAN_IKKE_VISE_STATUS_SAK
             else -> null
         }
-        if (beskrivelse != null) {
-            historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
+        if (hendelsestype != null) {
+            historikk.add(Hendelse(hendelsestype, hendelse.hendelsestidspunkt.toLocalDateTime(), tittelTekstArgument = hendelse.tittel))
         }
     }
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Sakstatus: ${hendelse.status?.name ?: "null"}")

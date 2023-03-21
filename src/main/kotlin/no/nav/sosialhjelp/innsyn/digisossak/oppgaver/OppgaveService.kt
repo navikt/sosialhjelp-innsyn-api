@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -236,7 +237,7 @@ class OppgaveService(
             return false
         }
 
-        return model.historikk.none { hendelse -> hendelse.tittel.startsWith("Søknaden med vedlegg er sendt til") }
+        return model.historikk.none { hendelse -> hendelse.hendelseType == HendelseTekstType.SOKNAD_SEND_TIL_KONTOR}
     }
 
     companion object {

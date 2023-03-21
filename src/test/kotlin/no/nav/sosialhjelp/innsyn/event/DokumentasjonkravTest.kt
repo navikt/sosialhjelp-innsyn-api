@@ -89,7 +89,7 @@ internal class DokumentasjonkravTest {
         assertThat(utbetaling.dokumentasjonkrav[0].getOppgaveStatus()).isEqualTo(Oppgavestatus.RELEVANT)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tittelFrontendKey).isEqualTo(hendelsetekst)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
     }
 
@@ -116,7 +116,7 @@ internal class DokumentasjonkravTest {
         assertThat(model.historikk).hasSize(3)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isNotEqualTo(hendelsetekst)
+        assertThat(hendelse.tittelFrontendKey).isNotEqualTo(hendelsetekst)
     }
 
     @Test
@@ -144,7 +144,7 @@ internal class DokumentasjonkravTest {
         assertThat(model.historikk).hasSize(5)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tittelFrontendKey).isEqualTo(hendelsetekst)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_5.toLocalDateTime())
     }
 
@@ -174,7 +174,7 @@ internal class DokumentasjonkravTest {
         assertThat(model.historikk).hasSize(6)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo(hendelsetekst)
+        assertThat(hendelse.tittelFrontendKey).isEqualTo(hendelsetekst)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_6.toLocalDateTime())
     }
 

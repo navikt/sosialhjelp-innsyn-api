@@ -4,6 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
@@ -16,11 +17,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: Cl
 
     forelopigSvar = ForelopigSvar(true, hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse))
 
-    val beskrivelse = "Du har fått et brev om saksbehandlingstiden for søknaden din."
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Forelopig svar. $beskrivelse")
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Forelopig svar. Du har fått et brev om saksbehandlingstiden for søknaden din.")
     historikk.add(
         Hendelse(
-            beskrivelse,
+            HendelseTekstType.BREV_OM_SAKSBEANDLINGSTID,
             hendelse.hendelsestidspunkt.toLocalDateTime(),
             UrlResponse(
                 VIS_BREVET,

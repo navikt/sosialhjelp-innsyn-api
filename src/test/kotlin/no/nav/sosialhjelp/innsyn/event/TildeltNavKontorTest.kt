@@ -81,7 +81,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk.last().tittel).contains(enhetNavn)
+        assertThat(model.historikk.last().tittelFrontendKey).contains(enhetNavn)
     }
 
     @Test
@@ -106,8 +106,8 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk.last().tittel).doesNotContain(enhetNavn)
-        assertThat(model.historikk.last().tittel).contains("et annet NAV-kontor")
+        assertThat(model.historikk.last().tittelFrontendKey).doesNotContain(enhetNavn)
+        assertThat(model.historikk.last().tittelFrontendKey).contains("et annet NAV-kontor")
     }
 
     @Test
@@ -134,7 +134,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(2)
 
-        assertThat(model.historikk.last().tittel).contains("mottatt")
+        assertThat(model.historikk.last().tittelFrontendKey).contains("mottatt")
     }
 
     @Test
@@ -161,7 +161,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk.last().tittel).contains(enhetNavn)
+        assertThat(model.historikk.last().tittelFrontendKey).contains(enhetNavn)
     }
 
     @Test
@@ -190,8 +190,8 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(4)
 
-        assertThat(model.historikk[2].tittel).contains(enhetNavn)
-        assertThat(model.historikk[3].tittel).contains(enhetNavn2)
+        assertThat(model.historikk[2].tittelFrontendKey).contains(enhetNavn)
+        assertThat(model.historikk[3].tittelFrontendKey).contains(enhetNavn2)
     }
 
     @Test
@@ -218,9 +218,9 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(2)
 
-        assertThat(model.historikk[0].tittel).contains("Søknaden med vedlegg er mottatt")
-        assertThat(model.historikk[1].tittel).contains(enhetNavn)
-        assertThat(model.historikk[1].tittel).doesNotContain("videresendt")
+        assertThat(model.historikk[0].tittelFrontendKey).contains("Søknaden med vedlegg er mottatt")
+        assertThat(model.historikk[1].tittelFrontendKey).contains(enhetNavn)
+        assertThat(model.historikk[1].tittelFrontendKey).doesNotContain("videresendt")
     }
 
     @Test
@@ -250,7 +250,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk[0].tittel).contains("Søknaden med vedlegg er mottatt")
-        assertThat(model.historikk[2].tittel).contains("videresendt", enhetNavn2)
+        assertThat(model.historikk[0].tittelFrontendKey).contains("Søknaden med vedlegg er mottatt")
+        assertThat(model.historikk[2].tittelFrontendKey).contains("videresendt", enhetNavn2)
     }
 }

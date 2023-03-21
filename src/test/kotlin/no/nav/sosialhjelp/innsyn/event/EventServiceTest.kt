@@ -168,7 +168,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("${tittel_1.replaceFirstChar { it.titlecase(Locale.getDefault()) }} er under behandling")
+            assertThat(hendelse.tittelFrontendKey).contains("${tittel_1.replaceFirstChar { it.titlecase(Locale.getDefault()) }} er under behandling")
         }
 
         @Test
@@ -202,7 +202,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("Saken din er under behandling")
+            assertThat(hendelse.tittelFrontendKey).contains("Saken din er under behandling")
         }
 
         @Test
@@ -241,7 +241,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$tittel_1 er ferdigbehandlet")
+            assertThat(hendelse.tittelFrontendKey).contains("$tittel_1 er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -280,7 +280,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
+            assertThat(hendelse.tittelFrontendKey).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -321,7 +321,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
+            assertThat(hendelse.tittelFrontendKey).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -399,7 +399,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
+            assertThat(hendelse.tittelFrontendKey).contains("$DEFAULT_SAK_TITTEL er ferdigbehandlet")
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -432,7 +432,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("Vi kan ikke vise status på søknaden din om $tittel_1 på nav.no.")
+            assertThat(hendelse.tittelFrontendKey).contains("Vi kan ikke vise status på søknaden din om $tittel_1 på nav.no.")
         }
 
         @Test
@@ -465,7 +465,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.tittel).contains("Vi kan ikke vise status på søknaden din om $tittel_1 på nav.no.")
+            assertThat(hendelse.tittelFrontendKey).contains("Vi kan ikke vise status på søknaden din om $tittel_1 på nav.no.")
         }
     }
 
@@ -493,7 +493,7 @@ internal class EventServiceTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittel).contains("Du har fått et brev om saksbehandlingstiden for søknaden din.")
+        assertThat(hendelse.tittelFrontendKey).contains("Du har fått et brev om saksbehandlingstiden for søknaden din.")
         assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
     }
 
@@ -510,7 +510,7 @@ internal class EventServiceTest {
         assertThat(model).isNotNull
         val hendelse: Hendelse = model.historikk[0]
         assertThat(hendelse).isNotNull
-        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til The Office")
+        assertThat(hendelse.tittelFrontendKey).contains("Søknaden med vedlegg er sendt til The Office")
         assertThat(hendelse.url?.linkTekst).isEqualTo("Vis søknaden")
     }
 
@@ -527,7 +527,7 @@ internal class EventServiceTest {
         assertThat(model).isNotNull
         val hendelse = model.historikk[0]
         assertThat(hendelse).isNotNull
-        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til The Office")
+        assertThat(hendelse.tittelFrontendKey).contains("Søknaden med vedlegg er sendt til The Office")
         assertThat(hendelse.url).isNull()
     }
 

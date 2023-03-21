@@ -67,7 +67,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(unixToLocalDateTime(tidspunkt_soknad_fixed))
-        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er sendt til ")
+        assertThat(hendelse.tittelFrontendKey).contains("Søknaden med vedlegg er sendt til ")
     }
 
     @Test
@@ -91,7 +91,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_1.toLocalDateTime())
-        assertThat(hendelse.tittel).contains("Søknaden med vedlegg er mottatt hos ")
+        assertThat(hendelse.tittelFrontendKey).contains("Søknaden med vedlegg er mottatt hos ")
     }
 
     @Test
@@ -145,7 +145,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_1.toLocalDateTime())
-        assertThat(hendelse.tittel).isEqualTo("Søknaden med vedlegg er mottatt.")
+        assertThat(hendelse.tittelFrontendKey).isEqualTo("Søknaden med vedlegg er mottatt.")
     }
 
     @Test
@@ -171,7 +171,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.tittel).isEqualTo("Søknaden er under behandling.")
+        assertThat(hendelse.tittelFrontendKey).isEqualTo("Søknaden er under behandling.")
     }
 
     @Test
@@ -198,7 +198,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittel).isEqualTo("Søknaden er ferdigbehandlet.")
+        assertThat(hendelse.tittelFrontendKey).isEqualTo("Søknaden er ferdigbehandlet.")
     }
 
     @Test
@@ -224,7 +224,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.tittel).isEqualTo("Vi kan ikke vise status for søknaden din på nav.no.")
+        assertThat(hendelse.tittelFrontendKey).isEqualTo("Vi kan ikke vise status for søknaden din på nav.no.")
     }
 
     @Test

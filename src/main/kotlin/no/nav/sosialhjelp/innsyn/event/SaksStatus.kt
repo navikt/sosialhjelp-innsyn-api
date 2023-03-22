@@ -32,7 +32,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             if (prevStatus != sakForReferanse.saksStatus &&
                 (sakForReferanse.saksStatus == SaksStatus.IKKE_INNSYN || sakForReferanse.saksStatus == SaksStatus.BEHANDLES_IKKE)
             ) {
-                historikk.add(Hendelse(hendelseType = HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = sakForReferanse.tittel))
+                historikk.add(Hendelse(hendelseType = HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD_MED_TITTEL, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = sakForReferanse.tittel))
             }
             if (sakForReferanse.saksStatus == SaksStatus.UNDER_BEHANDLING &&
                 (prevStatus == SaksStatus.IKKE_INNSYN || prevStatus == SaksStatus.BEHANDLES_IKKE)
@@ -56,8 +56,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             )
         )
         val hendelsestype: HendelseTekstType? = when (status) {
-            SaksStatus.UNDER_BEHANDLING -> HendelseTekstType.SAK_UNDER_BEHANDLING
-            SaksStatus.BEHANDLES_IKKE, SaksStatus.IKKE_INNSYN -> HendelseTekstType.KAN_IKKE_VISE_STATUS_SAK
+            SaksStatus.UNDER_BEHANDLING -> HendelseTekstType.SAK_UNDER_BEHANDLING_MED_TITTEL
+            SaksStatus.BEHANDLES_IKKE, SaksStatus.IKKE_INNSYN -> HendelseTekstType.KAN_IKKE_VISE_STATUS_SAK_MED_TITTEL
             else -> null
         }
         if (hendelsestype != null) {

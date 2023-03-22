@@ -97,7 +97,7 @@ internal class HendelseServiceTest {
             listOf(
                 Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)),
                 Hendelse(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE, tidspunkt_mottatt, UrlResponse(VIS_BREVET, url2)),
-                Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, tidspunkt3, UrlResponse(VIS_BREVET, url3))
+                Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING_MED_TITTEL, tidspunkt3, UrlResponse(VIS_BREVET, url3))
             )
         )
 

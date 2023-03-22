@@ -168,7 +168,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_UNDER_BEHANDLING)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_UNDER_BEHANDLING_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
         }
 
@@ -203,7 +203,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_UNDER_BEHANDLING)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_UNDER_BEHANDLING_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isNull()
         }
 
@@ -243,7 +243,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
@@ -283,7 +283,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isEqualTo(DEFAULT_SAK_TITTEL) // eller DEFAULT_SAKSTITTEL
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
@@ -325,7 +325,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL)
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -403,7 +403,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL)
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -436,7 +436,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SAK)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SAK_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
         }
 
@@ -470,7 +470,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
         }
     }

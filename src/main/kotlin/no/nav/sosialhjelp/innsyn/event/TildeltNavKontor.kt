@@ -43,9 +43,9 @@ fun InternalDigisosSoker.apply(
     // og det er første gang den er tildelt et nav-kontor
     val hendelseTekstType =
         if (isPapirSoknad && isFirstTimeTildeltNavKontor) {
-            HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD
+            HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD_MED_NORG_ENHET
         } else {
-            HendelseTekstType.SOKNAD_VIDERESENDT
+            HendelseTekstType.SOKNAD_VIDERESENDT_MED_NORG_ENHET
         }
 
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Tildelt Navkontor. Beskrivelse: ${hendelseTekstType.name}")

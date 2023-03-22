@@ -103,7 +103,7 @@ class RedisServiceImpl(
 @Profile("mock-redis")
 @Component
 class RedisServiceMock : RedisService {
-    override val defaultTimeToLiveSeconds: Long = 1000
+    override val defaultTimeToLiveSeconds: Long = 1
     val mockMap = HashMap<String, ByteArray>()
     val expiryMap = HashMap<String, LocalDateTime>()
 

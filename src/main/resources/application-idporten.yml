@@ -13,7 +13,7 @@ no.nav.security.jwt:
     validation:
       optional-claims: aud,nbf
   tokenvalidationfilter:
-    order: -2147483647 # Integer.MIN + 1 = -2147483647
+    order: -2147483647 # Integer.MIN + 1 = -2147483647. Må ha lavere order enn IdPortenAuthorizationHeaderFilter
 
 #property kan fjernes etter sky-migrering og ikke lengre avhengig av login-api
 login_api_idporten_clientid: clientId

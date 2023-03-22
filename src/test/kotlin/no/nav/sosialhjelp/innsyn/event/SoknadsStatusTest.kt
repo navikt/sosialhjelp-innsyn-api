@@ -92,7 +92,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_1.toLocalDateTime())
-        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN)
     }
 
     @Test

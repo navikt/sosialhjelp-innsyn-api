@@ -436,7 +436,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SAK_MED_TITTEL)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_KAN_IKKE_VISE_STATUS_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
         }
 
@@ -470,7 +470,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD_MED_TITTEL)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_KAN_IKKE_VISE_STATUS_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
         }
     }

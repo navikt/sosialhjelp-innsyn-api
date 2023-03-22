@@ -22,7 +22,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
             if (navEnhetsnavn == null) {
                 Hendelse(HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN, hendelse.hendelsestidspunkt.toLocalDateTime())
             } else {
-                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = stripEnhetsnavnForKommune(navEnhetsnavn))
+                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = stripEnhetsnavnForKommune(navEnhetsnavn))
             }
         }
         JsonSoknadsStatus.Status.UNDER_BEHANDLING -> Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, hendelse.hendelsestidspunkt.toLocalDateTime())

@@ -96,7 +96,7 @@ internal class HendelseServiceTest {
         model.historikk.addAll(
             listOf(
                 Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)),
-                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE, tidspunkt_mottatt, UrlResponse(VIS_BREVET, url2)),
+                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN, tidspunkt_mottatt, UrlResponse(VIS_BREVET, url2)),
                 Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, tidspunkt3, UrlResponse(VIS_BREVET, url3))
             )
         )

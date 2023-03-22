@@ -135,7 +135,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(2)
 
-        assertThat(model.historikk.last().hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
+        assertThat(model.historikk.last().hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN)
     }
 
     @Test

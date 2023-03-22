@@ -219,7 +219,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(2)
 
-        assertThat(model.historikk[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
+        assertThat(model.historikk[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN)
         assertThat(model.historikk[1].tekstArgument).isEqualTo(enhetNavn)
     }
 
@@ -250,7 +250,7 @@ internal class TildeltNavKontorTest {
         assertThat(model.saker).hasSize(0)
         assertThat(model.historikk).hasSize(3)
 
-        assertThat(model.historikk[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE)
+        assertThat(model.historikk[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN)
         assertThat(model.historikk[2].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_VIDERESENDT_MED_NORG_ENHET)
         assertThat(model.historikk[2].tekstArgument).isEqualTo(enhetNavn2)
     }

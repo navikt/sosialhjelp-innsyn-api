@@ -19,16 +19,14 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
         JsonSoknadsStatus.Status.MOTTATT -> {
             val navEnhetsnavn = soknadsmottaker?.navEnhetsnavn
 
-            val tekstArgument = if (navEnhetsnavn != null) {
-                stripEnhetsnavnForKommune(navEnhetsnavn)
+            if (navEnhetsnavn == null) {
+                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN, hendelse.hendelsestidspunkt.toLocalDateTime())
             } else {
-                null
+                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = stripEnhetsnavnForKommune(navEnhetsnavn))
             }
-
-            Hendelse(HendelseTekstType.SOKNAD_MOTTATT_HOS_KOMMUNE, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = tekstArgument)
         }
-        JsonSoknadsStatus.Status.UNDER_BEHANDLING -> Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING_MED_TITTEL, hendelse.hendelsestidspunkt.toLocalDateTime())
-        JsonSoknadsStatus.Status.FERDIGBEHANDLET -> Hendelse(HendelseTekstType.SOKNAD_FERDIGBEHANDLET_MED_TITTEL, hendelse.hendelsestidspunkt.toLocalDateTime())
+        JsonSoknadsStatus.Status.UNDER_BEHANDLING -> Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, hendelse.hendelsestidspunkt.toLocalDateTime())
+        JsonSoknadsStatus.Status.FERDIGBEHANDLET -> Hendelse(HendelseTekstType.SOKNAD_FERDIGBEHANDLET, hendelse.hendelsestidspunkt.toLocalDateTime())
         JsonSoknadsStatus.Status.BEHANDLES_IKKE -> Hendelse(HendelseTekstType.SOKNAD_BEHANDLES_IKKE, hendelse.hendelsestidspunkt.toLocalDateTime())
         else -> throw RuntimeException("Statustype ${hendelse.status.value()} mangler mapping")
     }

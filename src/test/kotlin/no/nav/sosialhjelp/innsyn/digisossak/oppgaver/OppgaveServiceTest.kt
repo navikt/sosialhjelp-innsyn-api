@@ -738,7 +738,7 @@ internal class OppgaveServiceTest {
     fun `should return true if soknad har mottat-status og ikke har hatt SENDT-status`() {
         val model = InternalDigisosSoker()
         model.status = SoknadsStatus.MOTTATT
-        model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING_MED_TITTEL, LocalDateTime.now(), null))
+        model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, LocalDateTime.now(), null))
         every { eventService.createModel(any(), any()) } returns model
 
         val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123", token)

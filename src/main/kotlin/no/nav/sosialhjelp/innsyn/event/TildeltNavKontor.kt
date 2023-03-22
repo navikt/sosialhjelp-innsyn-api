@@ -36,16 +36,24 @@ fun InternalDigisosSoker.apply(
         null
     }
 
-    soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet NAV-kontor")
+    soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet NAV-kontor") // flytt denne teksten ut i frontend?
 
     val isFirstTimeTildeltNavKontor = historikk.none { it.type == HistorikkType.TILDELT_NAV_KONTOR }
     // Ikke si at søknaden er videresendt hvis søknaden er en papirsøknad (originalSoknadNAV == null)
     // og det er første gang den er tildelt et nav-kontor
     val hendelseTekstType =
         if (isPapirSoknad && isFirstTimeTildeltNavKontor) {
-            HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD_MED_NORG_ENHET
+            if (destinasjon != null) {
+                HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD_MED_NORG_ENHET
+            } else {
+                HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD_UTEN_NORG_ENHET
+            }
         } else {
-            HendelseTekstType.SOKNAD_VIDERESENDT_MED_NORG_ENHET
+            if (destinasjon != null) {
+                HendelseTekstType.SOKNAD_VIDERESENDT_MED_NORG_ENHET
+            } else {
+                HendelseTekstType.SOKNAD_VIDERESENDT_UTEN_NORG_ENHET
+            }
         }
 
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Tildelt Navkontor. Beskrivelse: ${hendelseTekstType.name}")

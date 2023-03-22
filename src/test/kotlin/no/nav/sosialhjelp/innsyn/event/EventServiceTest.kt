@@ -203,7 +203,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_UNDER_BEHANDLING_MED_TITTEL)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_UNDER_BEHANDLING_UTEN_TITTEL)
             assertThat(hendelse.tekstArgument).isNull()
         }
 
@@ -403,7 +403,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_UTEN_TITTEL)
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 

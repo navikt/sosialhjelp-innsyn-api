@@ -3,13 +3,12 @@ package no.nav.sosialhjelp.innsyn.event
 import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.DOKUMENTASJONKRAV_ENABLED
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HistorikkType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
-import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import org.slf4j.LoggerFactory
@@ -29,26 +28,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
         utbetalingsReferanse = hendelse.utbetalingsreferanse
     )
 
-    this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav)
+    this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav)
 
-    val utbetalingerMedSakKnytning = mutableListOf<Utbetaling>()
-    val utbetalingerUtenSakKnytning = mutableListOf<Utbetaling>()
-    for (utbetalingsreferanse in hendelse.utbetalingsreferanse) {
-        // utbetalinger knyttet til sak
-        for (sak in saker) {
-            for (utbetaling in sak.utbetalinger) {
-                if (utbetaling.referanse == utbetalingsreferanse) {
-                    utbetalingerMedSakKnytning.add(utbetaling)
-                }
-            }
-        }
-        // utbetalinger ikke knyttet til sak
-        for (utbetalingUtenSak in utbetalinger) {
-            if (utbetalingUtenSak.referanse == utbetalingsreferanse) {
-                utbetalingerUtenSakKnytning.add(utbetalingUtenSak)
-            }
-        }
-    }
+    val utbetalingerMedSakKnytning = saker.flatMap { it.utbetalinger }.filter { it.referanse in hendelse.utbetalingsreferanse }
+    val utbetalingerUtenSakKnytning = utbetalinger.filter { it.referanse in hendelse.utbetalingsreferanse }
 
     if (status == SoknadsStatus.FERDIGBEHANDLET) {
         log.warn("Dokumentasjonkrav lagt til etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")
@@ -59,24 +42,22 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
     }
 
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
-    union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(hendelse, dokumentasjonkrav) }
+    union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav) }
 
-    if (unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false)) {
-        val beskrivelse = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."
-        log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav. Beskrivelse: $beskrivelse")
-        historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime()))
-    }
+    val beskrivelse = "Dine oppgaver er oppdatert, les mer i vedtaket."
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav. Beskrivelse: $beskrivelse")
+    historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.DOKUMENTASJONSKRAV))
 }
 
-private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(hendelse: JsonDokumentasjonkrav, dokumentasjonkrav: Dokumentasjonkrav) {
-    if (any { it.referanse == hendelse.dokumentasjonkravreferanse }) {
-        filter { it.referanse == hendelse.dokumentasjonkravreferanse }
-            .forEach { it.oppdaterFelter(hendelse) }
+private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav: Dokumentasjonkrav) {
+    if (any { it.referanse == dokumentasjonkrav.referanse }) {
+        filter { it.referanse == dokumentasjonkrav.referanse }
+            .forEach { it.oppdaterFelter(dokumentasjonkrav.beskrivelse) }
     } else {
         this.add(dokumentasjonkrav)
     }
 }
 
-private fun Dokumentasjonkrav.oppdaterFelter(hendelse: JsonDokumentasjonkrav) {
-    beskrivelse = hendelse.beskrivelse
+private fun Dokumentasjonkrav.oppdaterFelter(beskrivelse: String?) {
+    this.beskrivelse = beskrivelse
 }

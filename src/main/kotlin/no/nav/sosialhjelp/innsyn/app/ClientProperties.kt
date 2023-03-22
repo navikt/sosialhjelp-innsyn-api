@@ -25,14 +25,9 @@ class ClientProperties {
     lateinit var unleashUrl: String
     lateinit var unleashInstanceId: String
 
-    lateinit var meldingerKommunenummer: String
-
     lateinit var tokendingsUrl: String
     lateinit var tokendingsClientId: String
     lateinit var tokendingsPrivateJwk: String
-
-    lateinit var dialogEndpointUrl: String
-    lateinit var dialogAudience: String
 
     lateinit var vilkarDokkravFagsystemVersjoner: List<String>
 

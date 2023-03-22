@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.tokendings.TokendingsService
@@ -14,17 +15,13 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import no.nav.sosialhjelp.kotlin.utils.retry
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.util.Optional
-import java.util.stream.Collectors
 
 interface PdlClient {
     fun hentPerson(ident: String, token: String): PdlHentPerson?
@@ -41,46 +38,44 @@ class PdlClientImpl(
     private val redisService: RedisService,
 ) : PdlClient {
 
+    private val pdlRetry = RetryUtils.retryBackoffSpec({ it is WebClientResponseException })
+        .onRetryExhaustedThrow { spec, retrySignal ->
+            throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
+        }
+
     override fun hentPerson(ident: String, token: String): PdlHentPerson? {
         return hentFraCache(ident) ?: hentFraPdl(ident, token)
     }
 
     override fun hentIdenter(ident: String, token: String): List<String> {
         redisService.get(PDL_IDENTER_CACHE_KEY_PREFIX + ident, PdlIdenter::class.java)
-            ?.let { pdlIdenter -> return (pdlIdenter as PdlIdenter).identer.map { it.ident } }
+            ?.let { pdlIdenter -> return pdlIdenter.identer.map { it.ident } }
         return hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
     }
 
     private fun hentFraCache(ident: String): PdlHentPerson? =
-        redisService.get(cacheKey(ident), PdlHentPerson::class.java) as? PdlHentPerson
+        redisService.get(cacheKey(ident), PdlHentPerson::class.java)
 
     private fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
         val query = getHentPersonResource().replace("[\n\r]", "")
         try {
-            val pdlPersonResponse = runBlocking {
-                retry(
-                    attempts = RETRY_ATTEMPTS,
-                    initialDelay = INITIAL_DELAY,
-                    maxDelay = MAX_DELAY,
-                    retryableExceptions = arrayOf(WebClientResponseException::class)
-                ) {
-                    pdlWebClient.post()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                        .header(HEADER_TEMA, TEMA_KOM)
-                        .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
-                        .bodyValue(PdlRequest(query, Variables(ident)))
-                        .retrieve()
-                        .awaitBody<PdlPersonResponse>()
-                }
-            }
+            val pdlPersonResponse = pdlWebClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                .header(HEADER_TEMA, TEMA_KOM)
+                .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                .bodyValue(PdlRequest(query, Variables(ident)))
+                .retrieve()
+                .bodyToMono<PdlPersonResponse>()
+                .retryWhen(pdlRetry)
+                .block()
 
             checkForPdlApiErrors(pdlPersonResponse)
 
-            return pdlPersonResponse.data
+            return pdlPersonResponse?.data
                 .also { it?.let { lagreTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
-            log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
+            log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
             throw PdlException(e.message ?: "Ukjent PdlException")
         }
     }
@@ -88,36 +83,30 @@ class PdlClientImpl(
     private fun hentIdenterFraPdl(ident: String, token: String): PdlIdenter? {
         val query = getHentIdenterResource().replace("[\n\r]", "")
         try {
-            val pdlIdenterResponse = runBlocking {
-                retry(
-                    attempts = RETRY_ATTEMPTS,
-                    initialDelay = INITIAL_DELAY,
-                    maxDelay = MAX_DELAY,
-                    retryableExceptions = arrayOf(WebClientResponseException::class)
-                ) {
-                    pdlWebClient.post()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                        .header(HEADER_TEMA, TEMA_KOM)
-                        .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
-                        .bodyValue(PdlRequest(query, Variables(ident)))
-                        .retrieve()
-                        .awaitBody<PdlIdenterResponse>()
-                }
-            }
+            val pdlIdenterResponse = pdlWebClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                .header(HEADER_TEMA, TEMA_KOM)
+                .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                .bodyValue(PdlRequest(query, Variables(ident)))
+                .retrieve()
+                .bodyToMono<PdlIdenterResponse>()
+                .retryWhen(pdlRetry)
+                .block()
 
             checkForPdlApiErrors(pdlIdenterResponse)
 
-            return pdlIdenterResponse.data?.hentIdenter
+            return pdlIdenterResponse?.data?.hentIdenter
                 .also { it?.let { lagreIdenterTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
-            log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
+            log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
             throw PdlException(e.message ?: "Ukjent PdlException")
         }
     }
 
-    private suspend fun tokenXtoken(ident: String, token: String) =
+    private fun tokenXtoken(ident: String, token: String) = runBlocking {
         tokendingsService.exchangeToken(ident, token, clientProperties.pdlAudience)
+    }
 
     override fun ping() {
         pdlWebClient.options()
@@ -136,20 +125,15 @@ class PdlClientImpl(
             ?: throw RuntimeException("Klarte ikke å hente PDL query resurs: $path")
 
     private fun checkForPdlApiErrors(response: PdlResponse?) {
-        Optional.ofNullable(response)
-            .map(PdlResponse::errors)
-            .ifPresent { handleErrors(it) }
+        response?.errors?.let { handleErrors(it) }
     }
 
     private fun handleErrors(errors: List<PdlError>) {
-        val errorList = errors.stream()
+        val errorString = errors
             .map { it.message + "(feilkode: " + it.extensions.code + ")" }
-            .collect(Collectors.toList())
-        throw PdlException(errorMessage(errorList))
+            .joinToString(prefix = "Error i respons fra pdl-api: ") { it }
+        throw PdlException(errorString)
     }
-
-    private fun errorMessage(errors: List<String>): String =
-        "Error i respons fra pdl-api: ${errors.joinToString { it }}"
 
     private fun cacheKey(ident: String): String = ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX + ident
 
@@ -161,9 +145,5 @@ class PdlClientImpl(
 
     companion object {
         private val log by logger()
-
-        private const val RETRY_ATTEMPTS = 5
-        private const val INITIAL_DELAY = 100L
-        private const val MAX_DELAY = 2000L
     }
 }

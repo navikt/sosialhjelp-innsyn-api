@@ -13,7 +13,6 @@ import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.io.IOException
 import java.sql.Timestamp
@@ -33,8 +32,6 @@ import java.util.concurrent.ExecutorService
 import kotlin.reflect.full.companionObject
 
 const val COUNTER_SUFFIX_LENGTH = 4
-
-inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
 fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
     return when (filreferanse) {
@@ -76,7 +73,7 @@ fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long {
  * Generer navEksternRefId for nytt opplastet vedlegg
  * HVIS digisosSak har ettersendelser, hent siste navEksternRefId og inkrementer
  * HVIS digisosSak ikke har ettersendelser -> hent originalSøknads navEksternRefId, legg på "0000" og inkrementer
- * HVIS digisosSak ikke har originalSøknad (ergo papirsøknad) -> generer UUID, legg på "0000" og inkrementer
+ * HVIS digisosSak ikke har originalSøknad (dvs papirsøknad) -> bruk digisosId, legg på "0000" og inkrementer
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser

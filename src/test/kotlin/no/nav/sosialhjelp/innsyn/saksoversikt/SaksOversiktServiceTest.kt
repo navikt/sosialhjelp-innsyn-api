@@ -32,10 +32,14 @@ internal class SaksOversiktServiceTest {
         every { digisosSak1.fiksDigisosId } returns "123"
         every { digisosSak1.sistEndret } returns 2000L
         every { digisosSak1.kommunenummer } returns "0301"
+        every { digisosSak1.originalSoknadNAV } returns mockk()
+        every { digisosSak1.digisosSoker } returns null
 
         every { digisosSak2.fiksDigisosId } returns "456"
         every { digisosSak2.sistEndret } returns 1000L
         every { digisosSak2.kommunenummer } returns "0301"
+        every { digisosSak2.originalSoknadNAV } returns mockk()
+        every { digisosSak2.digisosSoker } returns mockk()
 
         every { unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false) } returns false
     }
@@ -78,5 +82,15 @@ internal class SaksOversiktServiceTest {
         assertThat(alleSaker[0].soknadTittel).isEqualTo("Tittel")
         assertThat(alleSaker[0].kilde).isEqualTo(KILDE_SOKNAD_API)
         assertThat(alleSaker[0].url).isEqualTo("someUrl")
+    }
+
+    @Test
+    internal fun `ikke returner 'tomme' saker`() {
+        val tomDigisosSak = DigisosSak("123", "123", "123", "123", 123L, null, null, null, null)
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(tomDigisosSak)
+        every { soknadApiClient.getSvarUtSoknader(any()) } returns emptyList()
+        val alleSaker = saksOversiktService.hentAlleSaker("token")
+
+        assertThat(alleSaker).hasSize(0)
     }
 }

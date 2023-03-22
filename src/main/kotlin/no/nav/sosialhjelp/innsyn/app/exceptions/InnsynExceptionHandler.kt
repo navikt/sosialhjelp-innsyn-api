@@ -12,18 +12,19 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 @ControllerAdvice
 class InnsynExceptionHandler(
-    @Value("\${azuread.loginurl}")
-    private val azureadLoginurl: String
+    @Value("\${innsyn.loginurl}") private val innsynLoginUrl: String,
 ) : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(Throwable::class)
@@ -34,19 +35,19 @@ class InnsynExceptionHandler(
     }
 
     override fun handleHttpMessageNotReadable(
-        ex: HttpMessageNotReadableException,
+        e: HttpMessageNotReadableException,
         headers: HttpHeaders,
-        status: HttpStatus,
+        status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any> {
-        log.error(ex.message, ex)
-        val error = FrontendErrorMessage(UNEXPECTED_ERROR, ex.message)
+        log.error(e.message, e)
+        val error = FrontendErrorMessage(UNEXPECTED_ERROR, e.message)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(FiksNotFoundException::class)
     fun handleFiksNotFoundError(e: FiksNotFoundException): ResponseEntity<FrontendErrorMessage> {
-        log.error("DigisosSak finnes ikke i FIKS", e)
+        log.error(e.message, e)
         val error = FrontendErrorMessage(FIKS_ERROR, "DigisosSak finnes ikke")
         return ResponseEntity(error, HttpStatus.NOT_FOUND)
     }
@@ -60,14 +61,18 @@ class InnsynExceptionHandler(
 
     @ExceptionHandler(FiksClientException::class)
     fun handleFiksClientError(e: FiksClientException): ResponseEntity<FrontendErrorMessage> {
-        log.error("Client-feil ved kall til Fiks", e)
+        if (e.cause is WebClientResponseException.Unauthorized) {
+            log.warn("Bruker er ikke autorisert for kall mot fiks. Token har utløpt")
+        } else {
+            log.error("Client-feil - ${e.message}", e)
+        }
         val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(FiksServerException::class)
     fun handleFiksServerError(e: FiksServerException): ResponseEntity<FrontendErrorMessage> {
-        log.error("Server-feil ved kall til Fiks", e)
+        log.error("Server-feil - ${e.message}", e)
         val error = FrontendErrorMessage(FIKS_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -132,7 +137,7 @@ class InnsynExceptionHandler(
                 .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
         }
         log.info("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl. Feilmelding: ${ex.message}")
-        return createUnauthorizedWithLoginUrlResponse(azureadLoginurl)
+        return createUnauthorizedWithLoginUrlResponse(innsynLoginUrl)
     }
 
     @ExceptionHandler(value = [MetaDataNotAvailableException::class, IssuerConfigurationException::class])
@@ -149,7 +154,14 @@ class InnsynExceptionHandler(
     private fun createUnauthorizedWithLoginUrlResponse(loginUrl: String): ResponseEntity<FrontendErrorMessage> {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .contentType(MediaType.APPLICATION_JSON)
-            .body(FrontendUnauthorizedMessage("azuread_authentication_error", "azuread_authentication_error", "Autentiseringsfeil", loginUrl))
+            .body(
+                FrontendUnauthorizedMessage(
+                    "azuread_authentication_error",
+                    "azuread_authentication_error",
+                    "Autentiseringsfeil",
+                    loginUrl
+                )
+            )
     }
 
     companion object {

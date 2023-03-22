@@ -10,10 +10,12 @@ innsyn:
     virusscan:
       enabled: false
       url:
+  cache:
+    dokument_cache_time_to_live_seconds: 100
 
 springdoc:
   api-docs:
-    enabled: ${SWAGGER_ENABLED:true}
+    enabled: true
 
 mock-alt-api-host: ${MOCK_ALT_API_HOST:127.0.0.1}
 mock-alt-api-wellknown-queryparam: ${MOCK_ALT_API_WELLKNOWN_QUERYPARAM:}
@@ -22,9 +24,11 @@ mock-alt-api-wellknown-queryparam: ${MOCK_ALT_API_WELLKNOWN_QUERYPARAM:}
 no.nav.security.jwt:
   issuer.selvbetjening:
     discoveryurl: ${METADATA_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/selvbetjening${mock-alt-api-wellknown-queryparam}}
-    accepted_audience: someaudience
-    cookie_name: localhost-idtoken
-azuread.loginurl: ${AZUREAD_LOGINURL:http://127.0.0.1:3008/sosialhjelp/mock-alt/login}
+#    accepted_audience: someaudience
+#    cookie_name: localhost-idtoken
+    validation:
+      optional-claims: aud,nbf
+innsyn.loginurl: ${INNSYN_LOGINURL:http://127.0.0.1:3008/sosialhjelp/mock-alt/login}
 
 login_api_idporten_clientid: clientId
 
@@ -32,24 +36,20 @@ client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/fiks}
   fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/fiks/dokumentlager}
   fiks_svar_ut_endpoint_url: ${FIKS_SVAR_UT_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/fiks/svarut}
-  fiks_integrasjonid: ${INTEGRASJONSID_FIKS:id1}
-  fiks_integrasjonid_kommune: ${INTEGRASJONSID_FIKS_KOMMUNE:id2}
-  fiks_integrasjonpassord: ${INTEGRASJONPASSORD_FIKS:pw1}
-  fiks_integrasjonpassord_kommune: ${INTEGRASJONPASSORD_FIKS_KOMMUNE:pw2}
+  fiks_integrasjonid: id1
+  fiks_integrasjonid_kommune: id2
+  fiks_integrasjonpassord: pw1
+  fiks_integrasjonpassord_kommune: pw2
   norg_url: ${NORG_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/norg_endpoint_url/}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/pdl_endpoint_url}
-  pdl_audience: ${PDL_AUDIENCE:dummyAudience}
+  pdl_audience: dummyAudience
   unleash_url: ${UNLEASH_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/internal/unleash}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID:local}
-  meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER:0301}
-  tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/selvbetjening${mock-alt-api-wellknown-queryparam}}
-  tokendings_client_id: ${TOKEN_X_CLIENT_ID:localhost:teamdigisos:sosialhjelp-dialog-api}
-  tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK:generateRSA}
-  dialog_endpoint_url: ${DIALOG_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/dialog-api/status}
-  dialog_audience: ${DIALOG_AUDIENCE:dialog_audience}
+  tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/tokenx${mock-alt-api-wellknown-queryparam}}
+  tokendings_private_jwk: generateRSA
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/soknad-api}
-  soknad_api_audience: ${SOKNAD_API_AUDIENCE:soknadAudience}
+  soknad_api_audience: dummyAudience
 
 
 #Maskinporten
@@ -57,3 +57,12 @@ maskinporten_clientid: maskinporten_clientid
 maskinporten_scopes: scopes
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/maskinporten${mock-alt-api-wellknown-queryparam}}
 maskinporten_client_jwk: generateRSA
+
+idporten_well_known_url: ${IDPORTEN_WELL_KNOWN_URL:https://oidc-ver2.difi.no/idporten-oidc-provider/.well-known/openid-configuration}
+idporten_clientid: ${IDPORTEN_CLIENT_ID:clientId}
+idporten_client_jwk: ${IDPORTEN_CLIENT_JWK:generateRSA}
+idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI:https://www-q0.dev.nav.no/sosialhjelp/innsyn-api/oauth2/callback}
+idporten_post_logout_redirect_uri: ${IDPORTEN_POST_LOGOUT_REDIRECT_URI:https://www.nav.no}
+idporten_login_timeout: ${IDPORTEN_LOGIN_TIMEOUT:3600}
+idporten_session_timeout: ${IDPORTEN_SESSION_TIMEOUT:7200}
+idporten_token_timeout: ${IDPORTEN_TOKEN_TIMEOUT:3600}

@@ -1,5 +1,5 @@
 [![Build image](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/build.yml)
-[![Deploy til prod-sbs](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml/badge.svg)](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml)
+[![Deploy til prod](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml/badge.svg)](https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_prod.yml)
 
 # sosialhjelp-innsyn-api
 Backend-app som skal gi innsyn i egen sosialhjelp sak.
@@ -33,15 +33,12 @@ Dette prosjektet bygger og deployer vha Github Actions
 ### Github Actions
 - Docker image bygges ved push => `.github/workflows/build.yml`
 - Deploy til dev => `.github/workflows/deploy_dev.yml`
-- Autodeploy til prod-sbs fra master => `.github/workflows/deploy_prod.yml`
+- Autodeploy til prod-fss fra master => `.github/workflows/deploy_prod.yml`
 
 ### Github deployment
 - Github deployments - registrer ditt github-repo [her](https://deployment.prod-sbs.nais.io/auth/form)
 - Deployments vises [her](https://github.com/navikt/sosialhjelp-innsyn-api/deployments)
 
-### Vault
-- Lag PR til `vault-iac` slik at man kan lagre secrets på vault.
-- Denne må godkjennes og merges før man kan opprette secrets i din apps katalog `.../app/namespace`.
 
 ### Redis
 Vi bruker Redis som cache. Se [https://doc.nais.io/persistence/redis/](https://doc.nais.io/persistence/redis/)
@@ -59,8 +56,8 @@ Manuell deploy kan også gjøres med kubectl ved bruk av `kubectl apply` i ønsk
 #### *med* integrasjon til Fiks og login-api
 `TestApplication` og profile=`local,log-console` (`,mock-redis`)
 
-Da må følgende env-variabler settes (hentes fra vault): \
-`FIKS_DIGISOS_ENDPOINT_URL`, `INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS` og `TESTBRUKER_NATALIE`.
+Da må følgende env-variabler settes (hentes fra kubernetes secrets): \
+`INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS` og `TESTBRUKER_NATALIE`.
 
 #### Med redis
 Bruk spring-profilen `mock-redis` for å disable redis.

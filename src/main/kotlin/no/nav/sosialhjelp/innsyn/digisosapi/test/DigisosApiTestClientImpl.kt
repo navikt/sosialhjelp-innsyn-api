@@ -12,7 +12,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import no.nav.sosialhjelp.innsyn.utils.typeRef
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -25,9 +24,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 
 /**
- * Brukes kun i dev-sbs eller ved lokal testing mot fiks-test
+ * Brukes kun i dev eller ved lokal testing mot fiks-test
  */
-@Profile("!prod-sbs")
+@Profile("!prod-fss")
 @Component
 class DigisosApiTestClientImpl(
     private val fiksWebClient: WebClient,
@@ -54,8 +53,8 @@ class DigisosApiTestClientImpl(
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 log.warn("Fiks - oppdaterDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
                 when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
+                    else -> FiksServerException(e.statusCode.value(), e.message, e)
                 }
             }
             .block()
@@ -78,12 +77,12 @@ class DigisosApiTestClientImpl(
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(body))
             .retrieve()
-            .bodyToMono(typeRef<List<FilOpplastingResponse>>())
+            .bodyToMono<List<FilOpplastingResponse>>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
                 when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
+                    else -> FiksServerException(e.statusCode.value(), e.message, e)
                 }
             }
             .block()
@@ -103,8 +102,8 @@ class DigisosApiTestClientImpl(
                 .onErrorMap(WebClientResponseException::class.java) { e ->
                     log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
                     when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                        else -> FiksServerException(e.rawStatusCode, e.message, e)
+                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
+                        else -> FiksServerException(e.statusCode.value(), e.message, e)
                     }
                 }
                 .block()
@@ -119,8 +118,8 @@ class DigisosApiTestClientImpl(
                 .onErrorMap(WebClientResponseException::class.java) { e ->
                     log.warn("Fiks - Nedlasting av innsynsfil feilet - ${e.statusCode} ${e.statusText}", e)
                     when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                        else -> FiksServerException(e.rawStatusCode, e.message, e)
+                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
+                        else -> FiksServerException(e.statusCode.value(), e.message, e)
                     }
                 }
                 .block()
@@ -139,8 +138,8 @@ class DigisosApiTestClientImpl(
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
                 when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.rawStatusCode, e.message, e)
-                    else -> FiksServerException(e.rawStatusCode, e.message, e)
+                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
+                    else -> FiksServerException(e.statusCode.value(), e.message, e)
                 }
             }
             .block()

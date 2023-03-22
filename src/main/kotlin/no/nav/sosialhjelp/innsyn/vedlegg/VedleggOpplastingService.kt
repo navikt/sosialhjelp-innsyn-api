@@ -89,9 +89,6 @@ class VedleggOpplastingService(
             redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
 
             return oppgaveValideringer
-        } catch (e: Exception) {
-            log.error("Ettersendelse feilet ved generering av ettersendelsePdf, kryptering av filer eller sending til FIKS", e)
-            throw e
         } finally {
             val notCancelledFutureList = krypteringFutureList
                 .filter { !it.isDone && !it.isCancelled }

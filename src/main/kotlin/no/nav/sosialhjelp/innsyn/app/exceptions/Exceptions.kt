@@ -33,8 +33,9 @@ class DigisosSakTilhorerAnnenBrukerException(
 ) : RuntimeException(message)
 
 class PdlException(
-    override val message: String
-) : RuntimeException(message)
+    override val message: String,
+    override val cause: Throwable? = null
+) : RuntimeException(message, cause)
 
 class TilgangskontrollException(
     override val message: String?

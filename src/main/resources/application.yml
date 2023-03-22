@@ -3,12 +3,17 @@ spring:
     banner-mode: 'off'
   application:
     name: "sosialhjelp-innsyn-api"
-  redis:
-    host: ${REDIS_HOST}
-    port: 6379
-    password: ${REDIS_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+      password: ${REDIS_PASSWORD}
   session:
     store-type: redis
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 150MB
 
 server:
   servlet:
@@ -20,7 +25,7 @@ server:
         secure: true
         max-age: 30M
         http-only: true
-  max-http-header-size: 16KB
+  max-http-request-header-size: 16KB
   shutdown: graceful
 
 
@@ -53,12 +58,9 @@ client:
   pdl_audience: ${PDL_AUDIENCE}
   unleash_url: ${UNLEASH_API_URL}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID}
-  meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER}
   tokendings_url: ${TOKEN_X_WELL_KNOWN_URL}
   tokendings_client_id: ${TOKEN_X_CLIENT_ID}
   tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK}
-  dialog_endpoint_url: ${DIALOG_ENDPOINT_URL}
-  dialog_audience: ${DIALOG_AUDIENCE}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL}
   soknad_api_audience: ${SOKNAD_API_AUDIENCE}
@@ -76,7 +78,8 @@ no.nav.security.jwt:
     discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
     validation:
       optional-claims: aud,nbf
-azuread.loginurl: ${AZUREAD_LOGINURL}
+
+innsyn.loginurl: ${INNSYN_LOGINURL}
 
 login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID}
 
@@ -87,8 +90,7 @@ innsyn:
       url: ${CLAMAV_URL}
   cache:
     time_to_live_seconds: ${CACHE_TIME_TO_LIVE_SECONDS:10}
-  retry:
-    fiks:
-      attempts: 5 # number of attempts
-      initial_delay: 250 # initial delay in ms
-      max_delay: 10000 # max delay in ms
+    dokument_cache_time_to_live_seconds: ${DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS:3600}
+
+retry_fiks_max_attempts: 5
+retry_fiks_initial_delay: 100 # initial delay in ms

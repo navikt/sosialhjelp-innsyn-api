@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.saksoversikt.soknadapi
 
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
@@ -25,6 +26,7 @@ class SoknadApiClient(
     private val soknadApiWebClient = webClientBuilder
         .clientConnector(HttpClientUtil.getUnproxiedReactorClientHttpConnector())
         .baseUrl(clientProperties.soknadApiUrl)
+        .filter(mdcExchangeFilter)
         .build()
 
     fun getSvarUtSoknader(token: String): List<SaksListeResponse> {

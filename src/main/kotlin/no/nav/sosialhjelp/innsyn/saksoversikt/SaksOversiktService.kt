@@ -26,6 +26,7 @@ class SaksOversiktService(
     private fun hentAlleDigisosSakerFraFiks(token: String): List<SaksListeResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
         val responseList = digisosSaker
+            .filterNot { it.originalSoknadNAV == null && it.digisosSoker == null } // Ikke returner "tomme" søknader som som regel er feilregistreringer
             .map {
                 SaksListeResponse(
                     fiksDigisosId = it.fiksDigisosId,

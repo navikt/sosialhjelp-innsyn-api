@@ -17,11 +17,13 @@ import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.core.env.Environment
 
 internal class TilgangskontrollServiceTest {
 
     private val pdlClientMock: PdlClient = mockk()
-    private val service = TilgangskontrollService("clientId", pdlClientMock)
+    private val environment: Environment = mockk()
+    private val service = TilgangskontrollService("clientId", environment, pdlClientMock)
 
     private val ident = "123"
 
@@ -39,6 +41,7 @@ internal class TilgangskontrollServiceTest {
         every { mockSubjectHandler.getToken() } returns "token"
         every { mockSubjectHandler.getClientId() } returns "clientId"
         every { digisosSak.sokerFnr } returns ident
+        every { environment.activeProfiles } returns arrayOf("test")
     }
 
     @AfterEach

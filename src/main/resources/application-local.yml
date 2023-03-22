@@ -3,6 +3,8 @@ innsyn:
     virusscan:
       enabled: false
       url:
+  cache:
+    dokument_cache_time_to_live_seconds: 100
 
 springdoc:
   api-docs:
@@ -14,7 +16,7 @@ no.nav.security.jwt:
     discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
     accepted_audience: someaudience
     cookie_name: localhost-idtoken
-azuread.loginurl: ${AZUREAD_LOGINURL:http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}
+innsyn.loginurl: ${INNSYN_LOGINURL:http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}
 
 login_api_idporten_clientid: clientId
 
@@ -31,15 +33,11 @@ client:
   pdl_audience: ${PDL_AUDIENCE:dummyAudience}
   unleash_url: ${UNLEASH_API_URL:https://unleash.nais.io/api}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID:local}
-  meldinger_kommunenummer: ${MELDINGER_KOMMUNENUMMER:0301}
   tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:tokendings_endpoint_url}
-  tokendings_client_id: ${TOKEN_X_CLIENT_ID:localhost:teamdigisos:sosialhjelp-dialog-api}
   tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK:generateRSA}
-  dialog_endpoint_url: ${DIALOG_ENDPOINT_URL:dialog_endpoint_url}
-  dialog_audience: ${DIALOG_AUDIENCE:dialog_audience}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL:soknad_api_url}
-  soknad_api_audience: ${SOKNAD_API_AUDIENCE:soknadAudience}
+  soknad_api_audience: ${SOKNAD_API_AUDIENCE:dummyAudience}
 
 
 #Maskinporten

@@ -55,7 +55,7 @@ class EventService(
             model.fagsystem = Fagsystem(jsonDigisosSoker.avsender.systemnavn, jsonDigisosSoker.avsender.systemversjon)
         }
 
-        // Hvis søknad er papirsøknad, vil 'timestampSendt' være null:
+        // Hvis søknad er papirsøknad, vil 'originalSoknad' være null:
         if (originalSoknadNAV?.timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
@@ -140,7 +140,7 @@ class EventService(
     private fun applyHendelserOgSoknadKrav(jsonDigisosSoker: JsonDigisosSoker?, model: InternalDigisosSoker, digisosSak: DigisosSak, token: String) {
         jsonDigisosSoker?.hendelser
             ?.sortedWith(hendelseComparator)
-            ?.forEach { model.applyHendelse(it) }
+            ?.forEach { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
 
         val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker?.hendelser
             ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
@@ -159,14 +159,14 @@ class EventService(
         jsonDigisosSoker.hendelser
             .filterIsInstance<JsonUtbetaling>()
             .sortedBy { it.hendelsestidspunkt }
-            .map { model.applyHendelse(it) }
+            .map { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
         return model
     }
 
-    private fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse) {
+    private fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse, isPapirSoknad: Boolean) {
         when (hendelse) {
             is JsonSoknadsStatus -> apply(hendelse)
-            is JsonTildeltNavKontor -> apply(hendelse, norgClient)
+            is JsonTildeltNavKontor -> apply(hendelse, norgClient, isPapirSoknad)
             is JsonSaksStatus -> apply(hendelse)
             is JsonVedtakFattet -> apply(hendelse, clientProperties)
             is JsonDokumentasjonEtterspurt -> apply(hendelse, clientProperties)
@@ -189,6 +189,22 @@ class EventService(
          */
         private val hendelseComparator = compareBy<JsonHendelse> { it.hendelsestidspunkt }
             .thenComparator { a, b -> compareHendelseByType(a.type, b.type) }
+            .thenComparator { a, b ->
+                if (a is JsonSoknadsStatus && b is JsonSoknadsStatus) {
+                    mottattBeforeUnderBehandling(a, b)
+                } else {
+                    0
+                }
+            }
+
+        private fun mottattBeforeUnderBehandling(a: JsonSoknadsStatus, b: JsonSoknadsStatus): Int {
+            if (a.status == JsonSoknadsStatus.Status.MOTTATT && b.status == JsonSoknadsStatus.Status.UNDER_BEHANDLING) {
+                return -1
+            } else if (b.status == JsonSoknadsStatus.Status.MOTTATT && a.status == JsonSoknadsStatus.Status.UNDER_BEHANDLING) {
+                return 1
+            }
+            return 0
+        }
 
         private fun compareHendelseByType(a: JsonHendelse.Type, b: JsonHendelse.Type): Int {
             if (a == JsonHendelse.Type.UTBETALING && (b == JsonHendelse.Type.VILKAR || b == JsonHendelse.Type.DOKUMENTASJONKRAV)) {

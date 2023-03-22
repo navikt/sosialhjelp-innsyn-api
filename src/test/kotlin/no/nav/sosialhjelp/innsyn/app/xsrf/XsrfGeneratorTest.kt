@@ -4,6 +4,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.innsyn.app.exceptions.XsrfException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import javax.servlet.http.HttpServletRequest
 
 internal class XsrfGeneratorTest {
     private val redisService: RedisService = mockk()
@@ -42,7 +42,7 @@ internal class XsrfGeneratorTest {
     @Test
     fun generateXsrfToken_ok() {
         val idag = LocalDateTime.now()
-        every { redisService.get(any(), any()) } returns null
+        every { redisService.get<Any>(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
 
         val generatedToken = xsrfGenerator.generateXsrfToken(idag)
@@ -52,7 +52,7 @@ internal class XsrfGeneratorTest {
     @Test
     fun generateXsrfToken_okOgForskjelligeHverGang() {
         val idag = LocalDateTime.now()
-        every { redisService.get(any(), any()) } returns null
+        every { redisService.get<Any>(any(), any()) } returns null
         every { redisService.put(any(), any(), any()) } just Runs
 
         val generatedToken1 = xsrfGenerator.generateXsrfToken(idag)
@@ -68,8 +68,8 @@ internal class XsrfGeneratorTest {
         every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns xsrfValue
         val keyIdag = redisKey(fnr, LocalDateTime.now())
         val keyIgar = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns xsrfValue
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
+        every { redisService.get<String>(XSRF_KEY_PREFIX + keyIdag, any()) } returns xsrfValue
+        every { redisService.get<String>(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatCode { xsrfGenerator.sjekkXsrfToken(request) }.doesNotThrowAnyException()
     }
@@ -80,8 +80,8 @@ internal class XsrfGeneratorTest {
         every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns xsrfValue
         val keyIdag = redisKey(fnr, LocalDateTime.now())
         val keyIgar = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns xsrfValue
+        every { redisService.get<String>(XSRF_KEY_PREFIX + keyIdag, any()) } returns null
+        every { redisService.get<String>(XSRF_KEY_PREFIX + keyIgar, any()) } returns xsrfValue
 
         assertThatCode { xsrfGenerator.sjekkXsrfToken(request) }.doesNotThrowAnyException()
     }
@@ -92,8 +92,8 @@ internal class XsrfGeneratorTest {
         every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns xsrfValue
         val keyIdag = redisKey(fnr, LocalDateTime.now())
         val keyIgar = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns null
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
+        every { redisService.get<String>(XSRF_KEY_PREFIX + keyIdag, any()) } returns null
+        every { redisService.get<String>(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
             .isInstanceOf(XsrfException::class.java)
@@ -106,8 +106,8 @@ internal class XsrfGeneratorTest {
         every { request.getHeader("XSRF-TOKEN-INNSYN-API") } returns "feilXsrf"
         val keyIdag = redisKey(fnr, LocalDateTime.now())
         val keyIgar = redisKey(fnr, LocalDateTime.now().minusDays(1))
-        every { redisService.get(XSRF_KEY_PREFIX + keyIdag, any()) } returns xsrfValue
-        every { redisService.get(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
+        every { redisService.get<String>(XSRF_KEY_PREFIX + keyIdag, any()) } returns xsrfValue
+        every { redisService.get<String>(XSRF_KEY_PREFIX + keyIgar, any()) } returns null
 
         assertThatThrownBy { xsrfGenerator.sjekkXsrfToken(request) }
             .isInstanceOf(XsrfException::class.java)

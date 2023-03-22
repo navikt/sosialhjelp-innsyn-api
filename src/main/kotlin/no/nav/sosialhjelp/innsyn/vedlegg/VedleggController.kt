@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
-import javax.servlet.http.HttpServletRequest
 
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
 @RestController
@@ -99,7 +99,7 @@ class VedleggController(
                 it.innsendelsesfrist,
                 it.hendelsetype,
                 it.hendelsereferanse,
-                it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result.name) }
+                it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result) }
             )
         }
 

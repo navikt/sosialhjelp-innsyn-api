@@ -37,7 +37,7 @@ class TokendingsServiceImpl internal constructor(
 
     override suspend fun exchangeToken(subject: String, rawToken: String, audience: String): String {
         redisService.get(TOKENDINGS_CACHE_KEY_PREFIX + "$audience$subject", (String::class.java))
-            ?.let { return (it as String) }
+            ?.let { return it }
 
         val token = rawToken.replace("Bearer ", "")
         val jwt = createSignedAssertion(clientConfig.tokendingsClientId, tokendingsWebClient.wellKnown.tokenEndpoint, privateRsaKey)

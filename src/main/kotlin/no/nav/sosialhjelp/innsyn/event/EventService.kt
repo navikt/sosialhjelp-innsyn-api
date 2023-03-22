@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.event
 
-import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
@@ -40,7 +39,6 @@ class EventService(
     private val innsynService: InnsynService,
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
-    private val unleashClient: Unleash,
 ) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
@@ -173,7 +171,7 @@ class EventService(
             is JsonForelopigSvar -> apply(hendelse, clientProperties)
             is JsonUtbetaling -> apply(hendelse)
             is JsonVilkar -> apply(hendelse)
-            is JsonDokumentasjonkrav -> apply(hendelse, unleashClient)
+            is JsonDokumentasjonkrav -> apply(hendelse)
             is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }

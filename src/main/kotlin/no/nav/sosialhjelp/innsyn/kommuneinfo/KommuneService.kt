@@ -31,7 +31,7 @@ class KommuneService(
     }
 
     private fun hentFraCache(kommunenummer: String) =
-        redisService.get(cacheKey(kommunenummer), KommuneInfo::class.java) as KommuneInfo?
+        redisService.get(cacheKey(kommunenummer), KommuneInfo::class.java)
 
     private fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {

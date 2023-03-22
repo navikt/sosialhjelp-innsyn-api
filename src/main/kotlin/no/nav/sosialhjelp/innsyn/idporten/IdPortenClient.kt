@@ -161,9 +161,9 @@ class IdPortenClient(
         val accessToken: AccessToken = successResponse.tokens.accessToken
         val maybeUpdatedRefreshToken = successResponse.tokens.refreshToken
 
-        redisService.put("$ACCESS_TOKEN_CACHE_PREFIX$loginId", accessToken.value.toByteArray())
+        redisService.put("$ACCESS_TOKEN_CACHE_PREFIX$loginId", accessToken.value.toByteArray(), idPortenProperties.tokenTimeout)
         if (maybeUpdatedRefreshToken.value != refreshTokenString) {
-            redisService.put("$REFRESH_TOKEN_CACHE_PREFIX$loginId", maybeUpdatedRefreshToken.value.toByteArray(), 600)
+            redisService.put("$REFRESH_TOKEN_CACHE_PREFIX$loginId", maybeUpdatedRefreshToken.value.toByteArray(), idPortenProperties.sessionTimeout)
         }
 
         return accessToken.value

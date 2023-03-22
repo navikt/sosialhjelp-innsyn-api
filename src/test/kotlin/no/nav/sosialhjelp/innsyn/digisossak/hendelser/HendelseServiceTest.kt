@@ -9,6 +9,7 @@ import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Sak
@@ -29,7 +30,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
-import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 internal class HendelseServiceTest {
 
@@ -160,7 +160,6 @@ internal class HendelseServiceTest {
         assertThat(hendelser[1].hendelseType).contains(HendelseTekstType.ANTALL_SENDTE_VEDLEGG.name)
         assertThat(hendelser[1].tidspunkt).isEqualTo(tidspunkt5.toString())
         assertThat(hendelser[1].tekstArgument).isEqualTo("2")
-
     }
 
     @Test

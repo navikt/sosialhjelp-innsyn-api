@@ -9,6 +9,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 internal class DokumentasjonEtterspurtTest {
 
@@ -288,7 +288,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.historikk).hasSize(5)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.DOKUMENTASJONKRAV)
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.ETTERSPOR_IKKE_MER_DOKUMENTASJON)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
     }
 

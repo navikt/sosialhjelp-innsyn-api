@@ -237,7 +237,7 @@ class OppgaveService(
             return false
         }
 
-        return model.historikk.none { hendelse -> hendelse.hendelseType == HendelseTekstType.SOKNAD_SEND_TIL_KONTOR}
+        return model.historikk.none { hendelse -> hendelse.hendelseType == HendelseTekstType.SOKNAD_SEND_TIL_KONTOR }
     }
 
     companion object {

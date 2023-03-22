@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService.Companion.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -38,8 +39,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
-import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 internal class EventServiceTest {
 
@@ -170,7 +169,7 @@ internal class EventServiceTest {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_UNDER_BEHANDLING)
-            assertThat(hendelse.tekstArgument).isEqualTo(tittel_1.replaceFirstChar { it.titlecase(Locale.getDefault()) })
+            assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
         }
 
         @Test
@@ -285,7 +284,7 @@ internal class EventServiceTest {
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET)
-            assertThat(hendelse.tekstArgument).isNull() // eller DEFAULT_SAKSTITTEL
+            assertThat(hendelse.tekstArgument).isEqualTo(DEFAULT_SAK_TITTEL) // eller DEFAULT_SAKSTITTEL
             assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
         }
 
@@ -437,7 +436,7 @@ internal class EventServiceTest {
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD)
+            assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SAK)
             assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
         }
 

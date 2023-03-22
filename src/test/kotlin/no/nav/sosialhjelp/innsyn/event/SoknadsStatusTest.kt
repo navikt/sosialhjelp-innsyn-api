@@ -225,7 +225,7 @@ internal class SoknadsStatusTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.KAN_IKKE_VISE_STATUS_SOKNAD)
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_BEHANDLES_IKKE)
     }
 
     @Test

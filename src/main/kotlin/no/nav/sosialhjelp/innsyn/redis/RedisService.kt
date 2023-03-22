@@ -21,6 +21,7 @@ interface RedisService {
     val defaultTimeToLiveSeconds: Long
     fun <T : Any> get(key: String, requestedClass: Class<out T>): T?
     fun put(key: String, value: ByteArray, timeToLiveSeconds: Long = defaultTimeToLiveSeconds)
+    fun delete(key: String)
 
     companion object {
         fun <T : Any> pakkUtRedisData(bytes: ByteArray?, requestedClass: Class<out T>, key: String, log: Logger): T? =
@@ -43,6 +44,7 @@ interface RedisService {
                     null
                 }
             } else {
+                log.debug("Fant ikke key=${key.maskerFnr}")
                 null
             }
 
@@ -84,6 +86,15 @@ class RedisServiceImpl(
         }
     }
 
+    override fun delete(key: String) {
+        val delete = redisStore.delete(key)
+        if (!delete) {
+            log.warn("Cache delete feilet eller fikk timeout")
+        } else {
+            log.debug("Cache delete OK ${key.maskerFnr}")
+        }
+    }
+
     companion object {
         private val log by logger()
     }
@@ -109,7 +120,16 @@ class RedisServiceMock : RedisService {
 
     override fun put(key: String, value: ByteArray, timeToLiveSeconds: Long) {
         mockMap[key] = value
+        log.debug("redis set key=$key, value=$value")
         expiryMap[key] = LocalDateTime.now().plusSeconds(timeToLiveSeconds)
+    }
+
+    override fun delete(key: String) {
+        if (mockMap.containsKey(key)) {
+            mockMap.remove(key)
+            log.debug("Slettet key=${key.maskerFnr}")
+        }
+        expiryMap.remove(key)
     }
 
     companion object {

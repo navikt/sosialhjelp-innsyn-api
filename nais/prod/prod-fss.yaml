@@ -58,7 +58,7 @@ spec:
       value: "https://svarut.ks.no"
     - name: NORG_URL
       value: "https://norg2.intern.nav.no/norg2/api/v1"
-    - name: AZUREAD_LOGINURL
+    - name: INNSYN_LOGINURL
       value: "https://loginservice.nav.no/login"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "180"

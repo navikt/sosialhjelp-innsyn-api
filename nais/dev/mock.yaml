@@ -54,7 +54,7 @@ spec:
       value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/fiks/dokumentlager"
     - name: FIKS_SVAR_UT_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks/svarut"
-    - name: AZUREAD_LOGINURL
+    - name: INNSYN_LOGINURL
       value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt/login"
     - name: NORG_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/norg_endpoint_url"

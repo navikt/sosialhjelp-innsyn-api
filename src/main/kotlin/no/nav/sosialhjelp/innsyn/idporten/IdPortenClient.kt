@@ -170,8 +170,10 @@ class IdPortenClient(
     }
 
     fun getEndSessionRedirectUri(loginId: String?): URI {
+        val endSessionEndpointURI = URI(idPortenProperties.wellKnown.endSessionEndpoint)
+
         if (loginId == null) {
-            log.info("Ingen sesjonsId funnet - redirecter til /endsession uten id_token_hint og post_logout_redirect_uri")
+            log.info("Ingen loginId funnet - redirecter til /endsession uten id_token_hint og post_logout_redirect_uri")
             return LogoutRequest(endSessionEndpointURI).toURI()
         }
 
@@ -202,8 +204,6 @@ class IdPortenClient(
     } else {
         RSAKey.parse(idPortenProperties.clientJwk)
     }
-
-    private val endSessionEndpointURI get() = URI(idPortenProperties.wellKnown.endSessionEndpoint)
 
     companion object {
         private val log by logger()

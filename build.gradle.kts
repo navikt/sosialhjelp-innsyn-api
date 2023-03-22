@@ -7,23 +7,23 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.4"
-    const val springBoot = "3.0.3"
+    const val springBoot = "3.0.4"
     const val sosialhjelpCommon = "1.20230209.0920-45d9782"
-    const val logback = "1.2.11"
-    const val logstash = "7.2"
+    const val logback = "1.4.6"
+    const val logstash = "7.3"
     const val filformat = "1.2023.02.09-08.34-aad9baa612d3"
-    const val micrometerRegistry = "1.10.3"
+    const val micrometerRegistry = "1.10.5"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "3.0.4"
-    const val jackson = "2.14.1"
+    const val tokenValidation = "3.0.8"
+    const val jackson = "2.14.2"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.11.0"
     const val fileUpload = "1.4"
-    const val tika = "2.4.1"
+    const val tika = "2.7.0"
     const val pdfBox = "2.0.27"
     const val fiksKryptering = "1.3.1"
-    const val lettuce = "6.2.2.RELEASE"
+    const val lettuce = "6.2.3.RELEASE"
     const val jempbox = "1.8.17"
     const val unleash = "4.4.1"
     const val springdoc = "2.0.2"
@@ -33,9 +33,9 @@ object Versions {
     const val snakeyaml = "2.0"
     const val commonsFileupload = "1.5"
 
-    const val javaJwt = "4.2.2"
-    const val jwksRsa = "0.21.3"
-    const val nimbusJoseJwt = "9.30.1"
+    const val javaJwt = "4.3.0"
+    const val jwksRsa = "0.22.0"
+    const val nimbusJoseJwt = "9.31"
 
     const val ktlint = "0.45.2"
 
@@ -51,15 +51,15 @@ object Versions {
     //    Test only
     const val junit = "4.13.2"
     const val mockk = "1.13.4"
-    const val springmockk = "3.1.1"
+    const val springmockk = "4.0.2"
 }
 
 plugins {
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.spring") version "1.8.10"
-    id("org.springframework.boot") version "3.0.3"
-    id("com.github.ben-manes.versions") version "0.45.0" // ./gradlew dependencyUpdates
-    id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
+    id("org.springframework.boot") version "3.0.4"
+    id("com.github.ben-manes.versions") version "0.46.0" // ./gradlew dependencyUpdates
+    id("org.jlleitschuh.gradle.ktlint") version "11.3.1"
 }
 
 java {

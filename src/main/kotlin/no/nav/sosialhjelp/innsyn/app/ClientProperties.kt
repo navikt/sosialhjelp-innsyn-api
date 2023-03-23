@@ -33,4 +33,6 @@ class ClientProperties {
 
     lateinit var soknadApiUrl: String
     lateinit var soknadApiAudience: String
+
+    lateinit var kommuneServiceUrl: String
 }

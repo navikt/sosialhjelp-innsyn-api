@@ -98,7 +98,7 @@ class SaksOversiktIntegrasjonstest {
         val soknad = JsonSoknad()
 
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
-        every { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
+        every { kommuneService.hentKommune(any(), any()) } returns IntegrasjonstestStubber.defaultKommune
         every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
         every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
         every { norgClient.hentNavEnhet(any()) } returns navEnhet

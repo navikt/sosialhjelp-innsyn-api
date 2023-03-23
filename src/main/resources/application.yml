@@ -64,6 +64,7 @@ client:
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL}
   soknad_api_audience: ${SOKNAD_API_AUDIENCE}
+  kommune_service_url: ${KOMMUNE_SERVICE_URL}
 
 
 #Maskinporten

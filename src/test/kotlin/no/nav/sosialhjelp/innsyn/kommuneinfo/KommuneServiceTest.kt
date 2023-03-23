@@ -7,7 +7,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.kommuneinfo.dto.KommuneDto
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -74,27 +73,26 @@ internal class KommuneServiceTest {
     }
 
     @Test
-    internal fun `hentKommuneInfo skal hente fra cache`() {
-        val kommuneInfo = KommuneInfo(
+    internal fun `hentKommune skal hente fra cache`() {
+        val kommuneDto = KommuneDto(
             kommunenummer = kommuneNr,
+            kommunenavn = "navn",
             kanMottaSoknader = false,
             kanOppdatereStatus = true,
             harMidlertidigDeaktivertMottak = false,
             harMidlertidigDeaktivertOppdateringer = false,
-            kontaktpersoner = null,
-            harNksTilgang = true,
             behandlingsansvarlig = null
         )
 
-        every { kommuneInfoClient.getKommuneInfo(any()) } returns kommuneInfo
-        val firstResult = service.hentKommuneInfo("123", "token")
-        assertThat(firstResult).isEqualTo(kommuneInfo)
+        every { kommuneServiceClient.getKommuneDto(any()) } returns kommuneDto
+        val firstResult = service.hentKommune("123", "token")
+        assertThat(firstResult).isEqualTo(kommuneDto.toDomain())
         verify(exactly = 1) { redisService.get<Any>(any(), any()) }
         verify(exactly = 1) { redisService.put(any(), any(), any()) }
 
-        every { redisService.get<Any>(any(), any()) } returns kommuneInfo
-        val secondResult = service.hentKommuneInfo("123", "token")
-        assertThat(secondResult).isEqualTo(kommuneInfo)
+        every { redisService.get<Any>(any(), any()) } returns kommuneDto
+        val secondResult = service.hentKommune("123", "token")
+        assertThat(secondResult).isEqualTo(kommuneDto.toDomain())
         verify(exactly = 2) { redisService.get<Any>(any(), any()) }
         verify(exactly = 1) { redisService.put(any(), any(), any()) }
     }

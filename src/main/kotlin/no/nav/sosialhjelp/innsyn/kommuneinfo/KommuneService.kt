@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.kommuneinfo.domain.Kommune
+import no.nav.sosialhjelp.innsyn.kommuneinfo.dto.KommuneDto
 import no.nav.sosialhjelp.innsyn.redis.KOMMUNE_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -14,22 +15,9 @@ import org.springframework.stereotype.Component
 @Component
 class KommuneService(
     private val fiksClient: FiksClient,
-    private val kommuneInfoClient: KommuneInfoClient,
     private val kommuneServiceClient: KommuneServiceClient,
     private val redisService: RedisService
 ) {
-
-//    fun hentKommuneInfo(fiksDigisosId: String, token: String): KommuneInfo? {
-//        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-//        val kommunenummer: String = digisosSak.kommunenummer
-//
-//        if (kommunenummer.isBlank()) {
-//            log.warn("Forsøkte å hente kommuneStatus, men JsonSoknad.mottaker.kommunenummer er tom i soknad.json")
-//            throw RuntimeException("KommuneStatus kan ikke hentes fordi DigisosSak mangler kommunenummer")
-//        }
-//
-//        return hentFraCache(kommunenummer) ?: hentKommuneInfoFraFiks(kommunenummer)
-//    }
 
     fun hentKommune(fiksDigisosId: String, token: String): Kommune? {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
@@ -49,12 +37,14 @@ class KommuneService(
     }
 
     private fun hentFraCache(kommunenummer: String) =
-        redisService.get(cacheKey(kommunenummer), Kommune::class.java)
+        redisService.get(cacheKey(kommunenummer), KommuneDto::class.java)
+            ?.toDomain()
 
     private fun hentFraServer(kommunenummer: String): Kommune? {
         return try {
-            kommuneServiceClient.getKommuneDto(kommunenummer)?.toDomain()
+            kommuneServiceClient.getKommuneDto(kommunenummer)
                 ?.also { redisService.put(cacheKey(kommunenummer), objectMapper.writeValueAsBytes(it)) }
+                ?.toDomain()
         } catch (e: FiksClientException) {
             null
         } catch (e: FiksServerException) {

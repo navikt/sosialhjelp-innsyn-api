@@ -17,10 +17,9 @@ import org.junit.jupiter.api.Test
 internal class KommuneServiceTest {
 
     private val fiksClient: FiksClient = mockk()
-    private val kommuneInfoClient: KommuneInfoClient = mockk()
     private val kommuneServiceClient: KommuneServiceClient = mockk()
     private val redisService: RedisService = mockk()
-    private val service = KommuneService(fiksClient, kommuneInfoClient, kommuneServiceClient, redisService)
+    private val service = KommuneService(fiksClient, kommuneServiceClient, redisService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val kommuneNr = "1234"

@@ -21,12 +21,10 @@ class IntegrasjonstestStubber {
 
         val defaultKommune = Kommune(
             kommunenummer = "1001",
-            kommunenavn = "Tester",
             kanMottaSoknader = true,
             kanOppdatereStatus = true,
             harMidlertidigDeaktivertMottak = false,
             harMidlertidigDeaktivertOppdateringer = false,
-            behandlingsansvarlig = "Tester",
         )
     }
 }

@@ -42,12 +42,10 @@ internal class KommuneServiceTest {
     internal fun `innsyn er deaktivert`() {
         every { kommuneServiceClient.getKommuneDto(any()) } returns KommuneDto(
             kommunenummer = kommuneNr,
-            kommunenavn = "kommunenavn",
             kanMottaSoknader = false,
             kanOppdatereStatus = false,
             harMidlertidigDeaktivertMottak = false,
             harMidlertidigDeaktivertOppdateringer = false,
-            behandlingsansvarlig = null
         )
 
         val svar = service.erInnsynDeaktivertForKommune("123", "token")
@@ -59,12 +57,10 @@ internal class KommuneServiceTest {
     internal fun `innsyn er aktivert`() {
         every { kommuneServiceClient.getKommuneDto(any()) } returns KommuneDto(
             kommunenummer = kommuneNr,
-            kommunenavn = "kommunenavn",
             kanMottaSoknader = false,
             kanOppdatereStatus = true,
             harMidlertidigDeaktivertMottak = false,
             harMidlertidigDeaktivertOppdateringer = false,
-            behandlingsansvarlig = null
         )
 
         val svar = service.erInnsynDeaktivertForKommune("123", "token")
@@ -76,12 +72,10 @@ internal class KommuneServiceTest {
     internal fun `hentKommune skal hente fra cache`() {
         val kommuneDto = KommuneDto(
             kommunenummer = kommuneNr,
-            kommunenavn = "navn",
             kanMottaSoknader = false,
             kanOppdatereStatus = true,
             harMidlertidigDeaktivertMottak = false,
             harMidlertidigDeaktivertOppdateringer = false,
-            behandlingsansvarlig = null
         )
 
         every { kommuneServiceClient.getKommuneDto(any()) } returns kommuneDto

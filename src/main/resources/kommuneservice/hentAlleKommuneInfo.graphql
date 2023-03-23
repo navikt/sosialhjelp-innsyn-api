@@ -1,6 +1,6 @@
 query{
     kommuner {
-        kommunenavn
+        kommunenummer
         kanMottaSoknader
         kanOppdatereStatus
     }

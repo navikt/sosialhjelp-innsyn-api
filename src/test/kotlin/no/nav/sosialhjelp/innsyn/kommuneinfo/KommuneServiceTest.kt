@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.kommuneinfo.dto.KommuneDto
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -18,8 +19,9 @@ internal class KommuneServiceTest {
 
     private val fiksClient: FiksClient = mockk()
     private val kommuneInfoClient: KommuneInfoClient = mockk()
+    private val kommuneServiceClient: KommuneServiceClient = mockk()
     private val redisService: RedisService = mockk()
-    private val service = KommuneService(fiksClient, kommuneInfoClient, redisService)
+    private val service = KommuneService(fiksClient, kommuneInfoClient, kommuneServiceClient, redisService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val kommuneNr = "1234"
@@ -39,14 +41,13 @@ internal class KommuneServiceTest {
 
     @Test
     internal fun `innsyn er deaktivert`() {
-        every { kommuneInfoClient.getKommuneInfo(any()) } returns KommuneInfo(
+        every { kommuneServiceClient.getKommuneDto(any()) } returns KommuneDto(
             kommunenummer = kommuneNr,
+            kommunenavn = "kommunenavn",
             kanMottaSoknader = false,
             kanOppdatereStatus = false,
             harMidlertidigDeaktivertMottak = false,
             harMidlertidigDeaktivertOppdateringer = false,
-            kontaktpersoner = null,
-            harNksTilgang = true,
             behandlingsansvarlig = null
         )
 
@@ -57,14 +58,13 @@ internal class KommuneServiceTest {
 
     @Test
     internal fun `innsyn er aktivert`() {
-        every { kommuneInfoClient.getKommuneInfo(any()) } returns KommuneInfo(
+        every { kommuneServiceClient.getKommuneDto(any()) } returns KommuneDto(
             kommunenummer = kommuneNr,
+            kommunenavn = "kommunenavn",
             kanMottaSoknader = false,
             kanOppdatereStatus = true,
             harMidlertidigDeaktivertMottak = false,
             harMidlertidigDeaktivertOppdateringer = false,
-            kontaktpersoner = null,
-            harNksTilgang = true,
             behandlingsansvarlig = null
         )
 

@@ -1,0 +1,11 @@
+query($kommunenummer: String!){
+    kommune(kommunenummer: $kommunenummer) {
+        kommunenummer
+        kommunenavn
+        kanMottaSoknader
+        kanOppdatereStatus
+        harMidlertidigDeaktivertMottak
+        harMidlertidigDeaktivertOppdateringer
+        behandlingsansvarlig
+    }
+}

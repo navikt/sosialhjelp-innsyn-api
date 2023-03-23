@@ -74,7 +74,7 @@ internal class SaksStatusIntegrasjonsTest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
         every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) } returns soknad
         every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
-        every { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
+        every { kommuneService.hentKommune(any(), any()) } returns IntegrasjonstestStubber.defaultKommune
         every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
         every { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"

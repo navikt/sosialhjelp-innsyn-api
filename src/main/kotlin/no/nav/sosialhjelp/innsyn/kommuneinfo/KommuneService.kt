@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.kommuneinfo.domain.Kommune
 import no.nav.sosialhjelp.innsyn.redis.KOMMUNEINFO_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component
 class KommuneService(
     private val fiksClient: FiksClient,
     private val kommuneInfoClient: KommuneInfoClient,
+    private val kommuneServiceClient: KommuneServiceClient,
     private val redisService: RedisService
 ) {
 
@@ -28,6 +30,19 @@ class KommuneService(
         }
 
         return hentFraCache(kommunenummer) ?: hentKommuneInfoFraFiks(kommunenummer)
+    }
+
+    fun hentKommune(fiksDigisosId: String, token: String): Kommune? {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val kommunenummer: String = digisosSak.kommunenummer
+
+        // todo caching
+        return kommuneServiceClient.getKommuneDto(kommunenummer)?.toDomain()
+    }
+
+    fun erInnsynDeaktivertForKommune(fiksDigisosId: String, token: String): Boolean {
+        val kommune = hentKommune(fiksDigisosId, token)
+        return kommune == null || !kommune.kanOppdatereStatus
     }
 
     private fun hentFraCache(kommunenummer: String) =
@@ -44,11 +59,6 @@ class KommuneService(
         } catch (e: FiksException) {
             null
         }
-    }
-
-    fun erInnsynDeaktivertForKommune(fiksDigisosId: String, token: String): Boolean {
-        val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
-        return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
     }
 
     private fun cacheKey(kommunenummer: String): String = KOMMUNEINFO_CACHE_KEY_PREFIX + kommunenummer

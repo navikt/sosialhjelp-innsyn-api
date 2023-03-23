@@ -1,0 +1,7 @@
+query{
+    kommuner {
+        kommunenavn
+        kanMottaSoknader
+        kanOppdatereStatus
+    }
+}

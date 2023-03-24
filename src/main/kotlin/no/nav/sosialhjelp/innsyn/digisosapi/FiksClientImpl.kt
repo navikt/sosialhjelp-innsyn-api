@@ -208,6 +208,18 @@ class FiksClientImpl(
         log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCode})")
     }
 
+    override fun ping() {
+        fiksWebClient.get()
+            .uri("/ping")
+            .retrieve()
+            .bodyToMono<String>()
+            .onErrorMap(WebClientResponseException::class.java) {
+                log.warn("Ping mot Fiks feilet ${it.statusCode}", it)
+                RuntimeException(it.message, it)
+            }
+            .block()
+    }
+
     private fun erPapirsoknad(digisosSak: DigisosSak): Boolean {
         return digisosSak.ettersendtInfoNAV?.ettersendelser?.isEmpty() != false && digisosSak.originalSoknadNAV == null
     }

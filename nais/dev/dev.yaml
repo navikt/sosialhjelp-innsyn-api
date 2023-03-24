@@ -112,6 +112,8 @@ spec:
       value: "https://sosialhjelp-soknad-api.dev-fss-pub.nais.io/sosialhjelp/soknad-api"
     - name: SOKNAD_API_AUDIENCE
       value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
+    - name: KOMMUNE_SERVICE_URL
+      value: "http://sosialhjelp-kommune-service/graphql"
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: "https://ver2.maskinporten.no/.well-known/oauth-authorization-server"
     - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI

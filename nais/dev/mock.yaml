@@ -74,3 +74,5 @@ spec:
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON,Testsystemet;1.0.0"
     - name: SOKNAD_API_URL
       value: "http://sosialhjelp-soknad-api-mock/sosialhjelp/soknad-api"
+    - name: KOMMUNE_SERVICE_URL
+      value: "http://sosialhjelp-kommune-service-mock/graphql"

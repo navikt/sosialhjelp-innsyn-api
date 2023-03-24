@@ -88,3 +88,5 @@ spec:
       value: "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api"
     - name: SOKNAD_API_AUDIENCE
       value: "prod-fss:teamdigisos:sosialhjelp-soknad-api"
+    - name: KOMMUNE_SERVICE_URL
+      value: "https://sosialhjelp-kommune-service.intern.nav.no/graphql"

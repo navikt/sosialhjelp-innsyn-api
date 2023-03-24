@@ -63,8 +63,8 @@ internal class RedisServiceTest {
     internal fun `store gir riktig type - kommunedto`() {
         every { redisStore.get(any()) } returns ok_kommunedto_response.encodeToByteArray()
 
-        val digisosSak = service.get("key", KommuneDto::class.java)
-        assertThat(digisosSak).isNull()
+        val kommuneDto = service.get("key", KommuneDto::class.java)
+        assertThat(kommuneDto).isNotNull
     }
 
     @Test

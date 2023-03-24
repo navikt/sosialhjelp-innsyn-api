@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 class KommuneService(
     private val fiksClient: FiksClient,
-    private val kommuneServiceClient: KommuneServiceClient,
+    private val kommuneClient: KommuneClient,
     private val redisService: RedisService
 ) {
 
@@ -42,7 +42,7 @@ class KommuneService(
 
     private fun hentFraServer(kommunenummer: String): Kommune? {
         return try {
-            kommuneServiceClient.getKommuneDto(kommunenummer)
+            kommuneClient.getKommuneDto(kommunenummer)
                 ?.also { redisService.put(cacheKey(kommunenummer), objectMapper.writeValueAsBytes(it)) }
                 ?.toDomain()
         } catch (e: FiksClientException) {

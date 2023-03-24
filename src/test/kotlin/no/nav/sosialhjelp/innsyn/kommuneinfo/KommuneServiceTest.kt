@@ -17,9 +17,9 @@ import org.junit.jupiter.api.Test
 internal class KommuneServiceTest {
 
     private val fiksClient: FiksClient = mockk()
-    private val kommuneServiceClient: KommuneServiceClient = mockk()
+    private val kommuneClient: KommuneClient = mockk()
     private val redisService: RedisService = mockk()
-    private val service = KommuneService(fiksClient, kommuneServiceClient, redisService)
+    private val service = KommuneService(fiksClient, kommuneClient, redisService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val kommuneNr = "1234"
@@ -39,7 +39,7 @@ internal class KommuneServiceTest {
 
     @Test
     internal fun `innsyn er deaktivert`() {
-        every { kommuneServiceClient.getKommuneDto(any()) } returns KommuneDto(
+        every { kommuneClient.getKommuneDto(any()) } returns KommuneDto(
             kommunenummer = kommuneNr,
             kanMottaSoknader = false,
             kanOppdatereStatus = false,
@@ -54,7 +54,7 @@ internal class KommuneServiceTest {
 
     @Test
     internal fun `innsyn er aktivert`() {
-        every { kommuneServiceClient.getKommuneDto(any()) } returns KommuneDto(
+        every { kommuneClient.getKommuneDto(any()) } returns KommuneDto(
             kommunenummer = kommuneNr,
             kanMottaSoknader = false,
             kanOppdatereStatus = true,
@@ -77,7 +77,7 @@ internal class KommuneServiceTest {
             harMidlertidigDeaktivertOppdateringer = false,
         )
 
-        every { kommuneServiceClient.getKommuneDto(any()) } returns kommuneDto
+        every { kommuneClient.getKommuneDto(any()) } returns kommuneDto
         val firstResult = service.hentKommune("123", "token")
         assertThat(firstResult).isEqualTo(kommuneDto.toDomain())
         verify(exactly = 1) { redisService.get<Any>(any(), any()) }

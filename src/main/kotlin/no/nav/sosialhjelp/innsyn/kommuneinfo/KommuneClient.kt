@@ -15,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
 @Component
-class KommuneServiceClient(
+class KommuneClient(
     clientProperties: ClientProperties,
     webClientBuilder: WebClient.Builder,
 ) {

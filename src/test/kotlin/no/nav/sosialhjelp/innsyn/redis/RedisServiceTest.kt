@@ -5,7 +5,8 @@ import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.kommuneinfo.ok_kommuneinfo_response
+import no.nav.sosialhjelp.innsyn.kommuneinfo.dto.KommuneDto
+import no.nav.sosialhjelp.innsyn.kommuneinfo.ok_kommunedto_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -52,9 +53,17 @@ internal class RedisServiceTest {
 
     @Test
     internal fun `store gir feil type`() {
-        every { redisStore.get(any()) } returns ok_kommuneinfo_response.encodeToByteArray()
+        every { redisStore.get(any()) } returns ok_kommunedto_response.encodeToByteArray()
 
         val digisosSak = service.get("key", DigisosSak::class.java)
+        assertThat(digisosSak).isNull()
+    }
+
+    @Test
+    internal fun `store gir riktig type - kommunedto`() {
+        every { redisStore.get(any()) } returns ok_kommunedto_response.encodeToByteArray()
+
+        val digisosSak = service.get("key", KommuneDto::class.java)
         assertThat(digisosSak).isNull()
     }
 

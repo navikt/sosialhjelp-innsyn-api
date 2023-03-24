@@ -26,7 +26,6 @@ class KommuneController(
     fun hentKommuneInfo(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<KommuneResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
-//        val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
         val kommune: Kommune? = kommuneService.hentKommune(fiksDigisosId, token)
 
         return ResponseEntity.ok().body(

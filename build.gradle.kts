@@ -7,11 +7,11 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.4"
-    const val springBoot = "3.0.4"
+    const val springBoot = "3.0.5"
     const val sosialhjelpCommon = "1.20230209.0920-45d9782"
     const val logback = "1.4.6"
     const val logstash = "7.3"
-    const val filformat = "1.2023.02.09-08.34-aad9baa612d3"
+    const val filformat = "1.2023.03.24-10.07-daf891c8a58d"
     const val micrometerRegistry = "1.10.5"
     const val prometheus = "0.16.0"
     const val tokenValidation = "3.0.8"
@@ -27,7 +27,7 @@ object Versions {
     const val jempbox = "1.8.17"
     const val unleash = "4.4.1"
     const val springdoc = "2.0.2"
-    const val jsonSmart = "2.4.8"
+    const val jsonSmart = "2.4.9"
     const val gson = "2.10"
     const val log4j = "2.19.0"
     const val snakeyaml = "2.0"
@@ -57,7 +57,7 @@ object Versions {
 plugins {
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.spring") version "1.8.10"
-    id("org.springframework.boot") version "3.0.4"
+    id("org.springframework.boot") version "3.0.5"
     id("com.github.ben-manes.versions") version "0.46.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "11.3.1"
 }

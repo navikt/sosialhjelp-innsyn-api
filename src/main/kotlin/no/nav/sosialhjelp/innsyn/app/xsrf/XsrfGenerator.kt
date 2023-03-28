@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app.xsrf
 
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.innsyn.app.exceptions.XsrfException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -13,7 +14,6 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import javax.servlet.http.HttpServletRequest
 
 /**
  * Klasse som genererer og sjekker xsrf token som sendes inn
@@ -25,7 +25,7 @@ class XsrfGenerator(
 
     fun generateXsrfToken(date: LocalDateTime = LocalDateTime.now()): String {
         val fnr = SubjectHandlerUtils.getUserIdFromToken()
-        redisService.get(redisKey(fnr, date), String::class.java)?.let { return it as String }
+        redisService.get(redisKey(fnr, date), String::class.java)?.let { return it }
         try {
             val xsrf = fnr + UUID.randomUUID().toString()
             val hmac = Mac.getInstance("HmacSHA256")
@@ -47,7 +47,7 @@ class XsrfGenerator(
     }
 
     private fun hentFraRedis(redisKey: String): String? {
-        return redisService.get(XSRF_KEY_PREFIX + redisKey, String::class.java) as String?
+        return redisService.get(XSRF_KEY_PREFIX + redisKey, String::class.java)
     }
 
     fun sjekkXsrfToken(request: HttpServletRequest) {

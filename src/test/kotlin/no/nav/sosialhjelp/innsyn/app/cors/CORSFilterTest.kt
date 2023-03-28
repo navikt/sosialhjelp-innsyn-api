@@ -1,8 +1,10 @@
 package no.nav.sosialhjelp.innsyn.app.cors
 
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -35,9 +37,9 @@ internal class CORSFilterTest {
 
     @Test
     internal fun `unknown origin should not set cors headers`() {
-        val request = MockHttpServletRequest()
-        request.requestURI = "requestURI"
-        request.addHeader("origin", unknownOrigin)
+        val request: HttpServletRequest = mockk()
+        every { request.requestURI } returns "requestURI"
+        every { request.getHeader("Origin") } returns unknownOrigin
 
         val response = MockHttpServletResponse()
 

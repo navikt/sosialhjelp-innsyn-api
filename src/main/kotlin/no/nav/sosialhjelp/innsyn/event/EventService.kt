@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.event
 
-import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
@@ -40,7 +39,6 @@ class EventService(
     private val innsynService: InnsynService,
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
-    private val unleashClient: Unleash,
 ) {
 
     fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
@@ -173,7 +171,7 @@ class EventService(
             is JsonForelopigSvar -> apply(hendelse, clientProperties)
             is JsonUtbetaling -> apply(hendelse)
             is JsonVilkar -> apply(hendelse)
-            is JsonDokumentasjonkrav -> apply(hendelse, unleashClient)
+            is JsonDokumentasjonkrav -> apply(hendelse)
             is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
         }
@@ -189,6 +187,22 @@ class EventService(
          */
         private val hendelseComparator = compareBy<JsonHendelse> { it.hendelsestidspunkt }
             .thenComparator { a, b -> compareHendelseByType(a.type, b.type) }
+            .thenComparator { a, b ->
+                if (a is JsonSoknadsStatus && b is JsonSoknadsStatus) {
+                    mottattBeforeUnderBehandling(a, b)
+                } else {
+                    0
+                }
+            }
+
+        private fun mottattBeforeUnderBehandling(a: JsonSoknadsStatus, b: JsonSoknadsStatus): Int {
+            if (a.status == JsonSoknadsStatus.Status.MOTTATT && b.status == JsonSoknadsStatus.Status.UNDER_BEHANDLING) {
+                return -1
+            } else if (b.status == JsonSoknadsStatus.Status.MOTTATT && a.status == JsonSoknadsStatus.Status.UNDER_BEHANDLING) {
+                return 1
+            }
+            return 0
+        }
 
         private fun compareHendelseByType(a: JsonHendelse.Type, b: JsonHendelse.Type): Int {
             if (a == JsonHendelse.Type.UTBETALING && (b == JsonHendelse.Type.VILKAR || b == JsonHendelse.Type.DOKUMENTASJONKRAV)) {

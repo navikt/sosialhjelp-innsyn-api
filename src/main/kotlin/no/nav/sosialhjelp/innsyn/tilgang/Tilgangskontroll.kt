@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.innsyn.tilgang.pdl.isKode6Or7
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import java.util.Locale
 
@@ -24,11 +25,14 @@ interface Tilgangskontroll {
 @Component
 class TilgangskontrollService(
     @Value("\${login_api_idporten_clientid}") private val loginApiClientId: String,
+    private val environment: Environment,
     private val pdlClient: PdlClient
 ) : Tilgangskontroll {
 
     override fun sjekkTilgang(token: String) {
-        if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
+        if (!environment.activeProfiles.contains("idporten")) {
+            if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
+        }
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)
     }
 

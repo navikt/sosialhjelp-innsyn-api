@@ -16,4 +16,5 @@ data class OppgaveElement(
     val tilleggsinformasjon: String?,
     val hendelsetype: JsonVedlegg.HendelseType?,
     val hendelsereferanse: String?,
+    val id: String
 )

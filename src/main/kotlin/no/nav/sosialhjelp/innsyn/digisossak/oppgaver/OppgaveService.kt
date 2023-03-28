@@ -13,6 +13,7 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class OppgaveService(
@@ -45,6 +46,7 @@ class OppgaveService(
                             it.tilleggsinfo,
                             it.hendelsetype,
                             it.hendelsereferanse,
+                            UUID.randomUUID().toString()
                         )
                     }
                 )

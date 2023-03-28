@@ -19,7 +19,7 @@ private val log = LoggerFactory.getLogger(JsonVedtakFattet::class.java.name)
 fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
 
     val utfallString = hendelse.utfall?.name
-    val utfall = if (utfallString == null) null else UtfallVedtak.valueOf(utfallString)
+    val utfall = utfallString?.let { UtfallVedtak.valueOf(it) }
     val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)
 
     val vedtakFattet = Vedtak(utfall, vedtaksfilUrl, hendelse.hendelsestidspunkt.toLocalDateTime().toLocalDate())

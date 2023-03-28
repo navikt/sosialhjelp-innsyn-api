@@ -75,7 +75,7 @@ class PdlClientImpl(
             return pdlPersonResponse?.data
                 .also { it?.let { lagreTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
-            log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
+            log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
             throw PdlException(e.message ?: "Ukjent PdlException")
         }
     }
@@ -99,7 +99,7 @@ class PdlClientImpl(
             return pdlIdenterResponse?.data?.hentIdenter
                 .also { it?.let { lagreIdenterTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
-            log.error("PDL - noe feilet, status=${e.rawStatusCode} ${e.statusText}", e)
+            log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
             throw PdlException(e.message ?: "Ukjent PdlException")
         }
     }

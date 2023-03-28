@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.app.mdc
 
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.CALL_ID
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.DIGISOS_ID
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.clearMDC
@@ -9,9 +12,6 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class MDCFilter : OncePerRequestFilter() {

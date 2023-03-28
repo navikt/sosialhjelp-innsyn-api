@@ -1,9 +1,7 @@
 package no.nav.sosialhjelp.innsyn.event
 
-import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.DOKUMENTASJONKRAV_ENABLED
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HistorikkType
@@ -16,7 +14,7 @@ import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(JsonDokumentasjonkrav::class.java.name)
 
-fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: Unleash) {
+fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
     val dokumentasjonkrav = Dokumentasjonkrav(
         dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
         hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
@@ -45,11 +43,9 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
     union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav) }
 
-    if (unleashClient.isEnabled(DOKUMENTASJONKRAV_ENABLED, false)) {
-        val beskrivelse = "Dokumentasjonskravene dine er oppdatert, les mer i vedtaket."
-        log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav. Beskrivelse: $beskrivelse")
-        historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.DOKUMENTASJONSKRAV))
-    }
+    val beskrivelse = "Dine oppgaver er oppdatert, les mer i vedtaket."
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav. Beskrivelse: $beskrivelse")
+    historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.DOKUMENTASJONSKRAV))
 }
 
 private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav: Dokumentasjonkrav) {

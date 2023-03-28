@@ -27,7 +27,7 @@ object Versions {
     const val jempbox = "1.8.17"
     const val unleash = "4.4.1"
     const val springdoc = "2.0.2"
-    const val jsonSmart = "2.4.9"
+    const val jsonSmart = "2.4.10"
     const val gson = "2.10"
     const val log4j = "2.19.0"
     const val snakeyaml = "2.0"

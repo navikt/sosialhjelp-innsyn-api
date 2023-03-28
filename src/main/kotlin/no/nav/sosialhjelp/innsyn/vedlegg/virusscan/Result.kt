@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 
 enum class Result {
-    FOUND, OK
+    FOUND, OK, ERROR
 }
 
 data class ScanResult(

@@ -50,13 +50,14 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: "api.fiks.test.ks.no"
-        - host: "test.svarut.ks.no"
-        - host: "minside.fiks.test.ks.no"
-        - host: "pdl-api.dev-fss-pub.nais.io"
-        - host: "sosialhjelp-soknad-api.dev-fss-pub.nais.io"
-        - host: "oidc-ver2.difi.no"
-        - host: "unleash.nais.io"
+        - host: api.fiks.test.ks.no
+        - host: test.svarut.ks.no
+        - host: minside.fiks.test.ks.no
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: norg2.dev-fss-pub.nais.io
+        - host: sosialhjelp-soknad-api.dev-fss-pub.nais.io
+        - host: oidc-ver2.difi.no
+        - host: unleash.nais.io
       rules:
         - application: sosialhjelp-innsyn-api-redis
         - application: sosialhjelp-soknad-api-dev

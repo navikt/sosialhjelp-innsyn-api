@@ -48,11 +48,11 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
     - name: METADATA_URL
-      value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/well-known/selvbetjening"
+      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/selvbetjening"
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
-      value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/fiks/dokumentlager"
+      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks/dokumentlager"
     - name: FIKS_SVAR_UT_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks/svarut"
     - name: INNSYN_LOGINURL

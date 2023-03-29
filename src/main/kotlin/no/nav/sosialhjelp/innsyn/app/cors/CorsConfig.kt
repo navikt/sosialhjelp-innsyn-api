@@ -13,8 +13,6 @@ class CorsConfig {
     fun addCorsConfig(): WebMvcConfigurer {
         return object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
-                val allowedOrigins =
-                    if (MiljoUtils.isRunningInProd()) ALLOWED_ORIGINS_PROD else ALLOWED_ORIGINS_NON_PROD
                 registry.addMapping("/**")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedOriginPatterns(*allowedOrigins)
@@ -34,6 +32,8 @@ class CorsConfig {
     }
 
     companion object {
+        private val allowedOrigins get() = if (MiljoUtils.isRunningInProd()) ALLOWED_ORIGINS_PROD else ALLOWED_ORIGINS_NON_PROD
+
         private val ALLOWED_ORIGINS_PROD = arrayOf(
             "https://tjenester.nav.no",
             "https://www.nav.no"

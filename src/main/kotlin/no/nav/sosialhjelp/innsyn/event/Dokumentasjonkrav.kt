@@ -51,12 +51,16 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
 private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav: Dokumentasjonkrav) {
     if (any { it.referanse == dokumentasjonkrav.referanse }) {
         filter { it.referanse == dokumentasjonkrav.referanse }
-            .forEach { it.oppdaterFelter(dokumentasjonkrav.beskrivelse) }
+            .forEach { it.oppdaterFelter(dokumentasjonkrav) }
     } else {
         this.add(dokumentasjonkrav)
     }
 }
 
-private fun Dokumentasjonkrav.oppdaterFelter(beskrivelse: String?) {
-    this.beskrivelse = beskrivelse
+private fun Dokumentasjonkrav.oppdaterFelter(dokumentasjonkrav: Dokumentasjonkrav) {
+    this.tittel = dokumentasjonkrav.tittel
+    this.beskrivelse = dokumentasjonkrav.beskrivelse
+    this.status = dokumentasjonkrav.status
+    this.utbetalingsReferanse = dokumentasjonkrav.utbetalingsReferanse
+    this.frist = dokumentasjonkrav.frist
 }

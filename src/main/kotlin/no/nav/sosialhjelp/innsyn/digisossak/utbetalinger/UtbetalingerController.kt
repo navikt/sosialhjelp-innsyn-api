@@ -38,6 +38,35 @@ class UtbetalingerController(
             throw e
         }
     }
+    @GetMapping("/kommende")
+    fun hentKommendeUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<KommendeUtbetalingerResponse>> {
+        tilgangskontroll.sjekkTilgang(token)
+
+        try {
+            return ResponseEntity.ok().body(utbetalingerService.hentKommendeUtbetalinger(token))
+        } catch (e: FiksClientException) {
+            if (e.status == HttpStatus.FORBIDDEN.value()) {
+                log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            }
+            throw e
+        }
+    }
+
+    @GetMapping("/utbetalte")
+    fun hentUtbetalteUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<UtbetalteUtbetalingerResponse>> {
+        tilgangskontroll.sjekkTilgang(token)
+
+        try {
+            return ResponseEntity.ok().body(utbetalingerService.hentUgrupperteUtbetalteUtbetalinger(token))
+        } catch (e: FiksClientException) {
+            if (e.status == HttpStatus.FORBIDDEN.value()) {
+                log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+            }
+            throw e
+        }
+    }
 
     @GetMapping("/{fiksDigisosId}/utbetalinger")
     fun hentUtbetalingerForSak(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<UtbetalingerResponse>> {

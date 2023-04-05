@@ -52,7 +52,7 @@ class UtbetalingerService(
         return toUtbetalingerResponse(alleUtbetalinger)
     }
 
-    fun hentUgrupperteUtbetalteUtbetalinger(token: String): List<UtbetalteUtbetalingerResponse> {
+    fun hentUgrupperteUtbetalteUtbetalinger(token: String): List<KommendeOgUtbetalteUtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
         if (digisosSaker.isEmpty()) {
@@ -73,7 +73,7 @@ class UtbetalingerService(
         return toUtbetalteUtbetalingerResponse(alleUtbetalinger)
     }
 
-    fun hentKommendeUtbetalinger(token: String): List<KommendeUtbetalingerResponse> {
+    fun hentKommendeUtbetalinger(token: String): List<KommendeOgUtbetalteUtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
         if (digisosSaker.isEmpty()) {
@@ -98,7 +98,7 @@ class UtbetalingerService(
         .filter { it.utbetalingsdato?.isAfter(LocalDate.now()) ?: false || it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString() }
         .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
         .map { (key, value) ->
-            KommendeUtbetalingerResponse(
+            KommendeOgUtbetalteUtbetalingerResponse(
                 ar = key.year,
                 maned = monthToString(key.monthValue),
                 utbetalinger = value.sortedByDescending { it.utbetalingsdato }
@@ -110,7 +110,7 @@ class UtbetalingerService(
         .filter { (it.utbetalingsdato?.compareTo(LocalDate.now()) ?: 1) <= 0 || it.status == UtbetalingsStatus.UTBETALT.toString() }
         .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
         .map { (key, value) ->
-            UtbetalteUtbetalingerResponse(
+            KommendeOgUtbetalteUtbetalingerResponse(
                 ar = key.year,
                 maned = monthToString(key.monthValue),
                 utbetalinger = value.sortedByDescending { it.utbetalingsdato }

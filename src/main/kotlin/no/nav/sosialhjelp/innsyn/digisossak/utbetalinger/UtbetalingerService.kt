@@ -88,14 +88,14 @@ class UtbetalingerService(
                 .filter { it.isNewerThanMonths(15) }
                 .flatMapParallel {
                     setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it) { status -> (status == UtbetalingsStatus.PLANLAGT_UTBETALING || (status == UtbetalingsStatus.STOPPET )) }
+                    manedsutbetalinger(token, it) { status -> (status == UtbetalingsStatus.PLANLAGT_UTBETALING || (status == UtbetalingsStatus.STOPPET)) }
                 }
         }
         return toKommendeUtbetalingerResponse(alleUtbetalinger)
     }
     private fun toKommendeUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) = manedUtbetalinger
         .sortedByDescending { it.utbetalingsdato }
-        .filter { it.utbetalingsdato?.isAfter(LocalDate.now()) ?: false || it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString()  }
+        .filter { it.utbetalingsdato?.isAfter(LocalDate.now()) ?: false || it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString() }
         .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
         .map { (key, value) ->
             KommendeUtbetalingerResponse(
@@ -107,7 +107,7 @@ class UtbetalingerService(
 
     private fun toUtbetalteUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) = manedUtbetalinger
         .sortedByDescending { it.utbetalingsdato }
-        .filter { (it.utbetalingsdato?.compareTo(LocalDate.now()) ?: 1) <= 0  || it.status == UtbetalingsStatus.UTBETALT.toString()  }
+        .filter { (it.utbetalingsdato?.compareTo(LocalDate.now()) ?: 1) <= 0 || it.status == UtbetalingsStatus.UTBETALT.toString() }
         .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
         .map { (key, value) ->
             UtbetalteUtbetalingerResponse(

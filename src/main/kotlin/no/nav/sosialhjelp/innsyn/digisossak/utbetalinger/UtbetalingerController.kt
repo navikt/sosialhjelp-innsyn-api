@@ -58,7 +58,7 @@ class UtbetalingerController(
         tilgangskontroll.sjekkTilgang(token)
 
         try {
-            return ResponseEntity.ok().body(utbetalingerService.hentUgrupperteUtbetalteUtbetalinger(token))
+            return ResponseEntity.ok().body(utbetalingerService.hentTidligereUtbetalinger(token))
         } catch (e: FiksClientException) {
             if (e.status == HttpStatus.FORBIDDEN.value()) {
                 log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)

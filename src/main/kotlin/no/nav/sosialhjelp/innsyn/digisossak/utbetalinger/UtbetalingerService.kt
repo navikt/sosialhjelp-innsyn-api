@@ -52,7 +52,7 @@ class UtbetalingerService(
         return toUtbetalingerResponse(alleUtbetalinger)
     }
 
-    fun hentUgrupperteUtbetalteUtbetalinger(token: String): List<KommendeOgUtbetalteUtbetalingerResponse> {
+    fun hentTidligereUtbetalinger(token: String): List<KommendeOgUtbetalteUtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
         if (digisosSaker.isEmpty()) {
@@ -70,7 +70,7 @@ class UtbetalingerService(
                     manedsutbetalinger(token, it) { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
                 }
         }
-        return toUtbetalteUtbetalingerResponse(alleUtbetalinger)
+        return toTidligereUtbetalingerResponse(alleUtbetalinger)
     }
 
     fun hentKommendeUtbetalinger(token: String): List<KommendeOgUtbetalteUtbetalingerResponse> {
@@ -88,34 +88,50 @@ class UtbetalingerService(
                 .filter { it.isNewerThanMonths(15) }
                 .flatMapParallel {
                     setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it) { status -> (status == UtbetalingsStatus.PLANLAGT_UTBETALING || (status == UtbetalingsStatus.STOPPET)) }
+                    manedsutbetalinger(token, it) { status -> (status !== UtbetalingsStatus.ANNULLERT ) }
                 }
         }
         return toKommendeUtbetalingerResponse(alleUtbetalinger)
     }
-    private fun toKommendeUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) = manedUtbetalinger
-        .sortedByDescending { it.utbetalingsdato }
-        .filter { it.utbetalingsdato?.isAfter(LocalDate.now()) ?: false || it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString() }
-        .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
-        .map { (key, value) ->
-            KommendeOgUtbetalteUtbetalingerResponse(
-                ar = key.year,
-                maned = monthToString(key.monthValue),
-                utbetalinger = value.sortedByDescending { it.utbetalingsdato }
-            )
-        }
+    private fun toKommendeUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>): List<KommendeOgUtbetalteUtbetalingerResponse> {
+        val now = LocalDate.now()
+        val yearMonth = YearMonth.of(now.year, now.month)
+        val foresteIMnd = foersteIManeden(yearMonth);
+        val kommende = manedUtbetalinger
+            .sortedBy { it.utbetalingsdato }
+            .filter { it.utbetalingsdato?.isAfter(foresteIMnd) ?: false || it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString()}
+            .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+            .map { (key, value) ->
+                KommendeOgUtbetalteUtbetalingerResponse(
+                    ar = key.year,
+                    maned = monthToString(key.monthValue),
+                    utbetalinger = value.sortedBy { it.utbetalingsdato }
+                )
+            }
 
-    private fun toUtbetalteUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) = manedUtbetalinger
-        .sortedByDescending { it.utbetalingsdato }
-        .filter { (it.utbetalingsdato?.compareTo(LocalDate.now()) ?: 1) <= 0 || it.status == UtbetalingsStatus.UTBETALT.toString() }
-        .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
-        .map { (key, value) ->
-            KommendeOgUtbetalteUtbetalingerResponse(
-                ar = key.year,
-                maned = monthToString(key.monthValue),
-                utbetalinger = value.sortedByDescending { it.utbetalingsdato }
-            )
-        }
+        return kommende
+    }
+
+    private fun toTidligereUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>): List<KommendeOgUtbetalteUtbetalingerResponse> {
+        val now = LocalDate.now()
+        val yearMonth = YearMonth.of(now.year, now.month)
+        val foresteIMnd = foersteIManeden(yearMonth);
+        val tidligere = manedUtbetalinger
+            .sortedByDescending { it.utbetalingsdato }
+            .filter { it.utbetalingsdato?.isBefore(foresteIMnd) ?: false && it.status == UtbetalingsStatus.UTBETALT.toString()}
+            .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+            .map { (key, value) ->
+                KommendeOgUtbetalteUtbetalingerResponse(
+                    ar = key.year,
+                    maned = monthToString(key.monthValue),
+                    utbetalinger = value.sortedByDescending { it.utbetalingsdato }
+                )
+            }
+
+        return tidligere
+    }
+
+
 
     private fun toUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) = manedUtbetalinger
         .sortedByDescending { it.utbetalingsdato }

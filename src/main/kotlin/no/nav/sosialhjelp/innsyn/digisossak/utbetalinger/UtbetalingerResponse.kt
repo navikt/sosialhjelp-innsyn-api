@@ -10,7 +10,7 @@ data class UtbetalingerResponse(
     val foersteIManeden: LocalDate,
     val utbetalinger: List<ManedUtbetaling>
 )
-data class KommendeOgUtbetalteUtbetalingerResponse(
+data class NyeOgTidligereUtbetalingerResponse(
     val utbetalinger: List<ManedUtbetaling>,
     val ar: Int,
     val maned: String

@@ -38,12 +38,12 @@ class UtbetalingerController(
             throw e
         }
     }
-    @GetMapping("/kommende")
-    fun hentKommendeUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<KommendeOgUtbetalteUtbetalingerResponse>> {
+    @GetMapping("/nye")
+    fun hentNyeUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {
-            return ResponseEntity.ok().body(utbetalingerService.hentKommendeUtbetalinger(token))
+            return ResponseEntity.ok().body(utbetalingerService.hentNyeUtbetalinger(token))
         } catch (e: FiksClientException) {
             if (e.status == HttpStatus.FORBIDDEN.value()) {
                 log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
@@ -54,7 +54,7 @@ class UtbetalingerController(
     }
 
     @GetMapping("/utbetalte")
-    fun hentUtbetalteUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<KommendeOgUtbetalteUtbetalingerResponse>> {
+    fun hentUtbetalteUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {

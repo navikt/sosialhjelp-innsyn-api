@@ -53,8 +53,8 @@ class UtbetalingerController(
         }
     }
 
-    @GetMapping("/utbetalte")
-    fun hentUtbetalteUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
+    @GetMapping("/tidligere")
+    fun hentTidligereUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {

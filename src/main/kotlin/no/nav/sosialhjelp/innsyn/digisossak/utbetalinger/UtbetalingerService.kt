@@ -119,7 +119,7 @@ class UtbetalingerService(
         val foresteIMnd = foersteIManeden(yearMonth)
         val nye = manedUtbetalinger
             .sortedBy { it.utbetalingsdato }
-            .filter { it.utbetalingsdato?.isAfter(foresteIMnd) ?: false || it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString() }
+            .filter { it.utbetalingsdato?.isAfter(foresteIMnd) ?: false || it.utbetalingsdato?.isEqual(foresteIMnd) ?: false || it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString() }
             .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
             .map { (key, value) ->
                 NyeOgTidligereUtbetalingerResponse(

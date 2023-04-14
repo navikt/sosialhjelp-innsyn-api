@@ -26,9 +26,11 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
-
+import java.time.format.TextStyle
+import java.util.Locale
 internal class UtbetalingerServiceTest {
     private val eventService: EventService = mockk()
     private val fiksClient: FiksClient = mockk()
@@ -576,5 +578,202 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.PLANLAGT_UTBETALING.name)
         assertThat(response[1].utbetalinger).hasSize(1)
         assertThat(response[1].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT.name)
+    }
+
+    @Test
+    fun `Hent tidlige utbetalinger skal returnere utbetalinger fra forrige måned med status UTBETALT`() {
+        val thisYearMonth: YearMonth = YearMonth.from(LocalDateTime.now().toLocalDate())
+        val datoDenneManed = thisYearMonth.atDay(1)
+        val datoForrigeManed = LocalDate.now().minusMonths(1)
+        val datoNesteManed = LocalDate.now().plusMonths(1)
+
+        val fellesUtbetaling = Utbetaling(
+            referanse = "Sak1",
+            status = UtbetalingsStatus.UTBETALT,
+            belop = BigDecimal.TEN,
+            beskrivelse = null,
+            forfallsDato = LocalDate.of(2000, 1, 1),
+            utbetalingsDato = LocalDate.of(2000, 1, 1),
+            stoppetDato = null,
+            fom = null,
+            tom = null,
+            mottaker = null,
+            kontonummer = null,
+            utbetalingsmetode = "utbetalingsmetode",
+            annenMottaker = false,
+            vilkar = mutableListOf(),
+            dokumentasjonkrav = mutableListOf(),
+            datoHendelse = LocalDateTime.now()
+        )
+        val model = InternalDigisosSoker()
+        model.utbetalinger = mutableListOf(
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoNesteManed,
+            ),
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoForrigeManed,
+            ),
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoDenneManed,
+            ),
+            fellesUtbetaling.copy(
+                status = UtbetalingsStatus.ANNULLERT,
+                utbetalingsDato = datoDenneManed,
+            ),
+
+        )
+
+        coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val responseNye: List<NyeOgTidligereUtbetalingerResponse> = service.hentNyeUtbetalinger(token)
+        val responseTidligere: List<NyeOgTidligereUtbetalingerResponse> = service.hentTidligereUtbetalinger(token)
+
+        assertThat(responseNye).isNotEmpty
+        assertThat(responseNye).hasSize(2)
+        assertThat(responseTidligere).isNotEmpty
+        assertThat(responseTidligere).hasSize(1)
+
+        // forrige månedes utbetaling
+        assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year)
+        assertThat(responseTidligere[0].maned).isEqualToIgnoringCase(
+            thisYearMonth.month.minus(1).getDisplayName(
+                TextStyle.FULL,
+                Locale.forLanguageTag("no-NO")
+            )
+        )
+        assertThat(responseTidligere[0].utbetalinger).hasSize(1)
+        assertThat(responseTidligere[0].utbetalinger[0].utbetalingsdato).isEqualTo(datoForrigeManed)
+    }
+    @Test
+    fun `Hent nye utbetalinger skal returnere alle utbetalinger med status PLANLAGT_UTBETALING uansett dato`() {
+        val thisYearMonth: YearMonth = YearMonth.from(LocalDateTime.now().toLocalDate())
+        val datoDenneManed = thisYearMonth.atDay(1)
+        val datoForrigeManed = LocalDate.now().minusMonths(1)
+        val datoNesteManed = LocalDate.now().plusMonths(1)
+
+        var fellesUtbetaling = Utbetaling(
+            referanse = "Sak1",
+            status = UtbetalingsStatus.PLANLAGT_UTBETALING,
+            belop = BigDecimal.TEN,
+            beskrivelse = null,
+            forfallsDato = LocalDate.of(2000, 1, 1),
+            utbetalingsDato = LocalDate.of(2000, 1, 1),
+            stoppetDato = null,
+            fom = null,
+            tom = null,
+            mottaker = null,
+            kontonummer = null,
+            utbetalingsmetode = "utbetalingsmetode",
+            annenMottaker = false,
+            vilkar = mutableListOf(),
+            dokumentasjonkrav = mutableListOf(),
+            datoHendelse = LocalDateTime.now()
+        )
+        val model = InternalDigisosSoker()
+        model.utbetalinger = mutableListOf(
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoNesteManed,
+            ),
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoForrigeManed,
+            ),
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoDenneManed,
+            ),
+
+        )
+
+        coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val responseNye: List<NyeOgTidligereUtbetalingerResponse> = service.hentNyeUtbetalinger(token)
+        val responseTidligere: List<NyeOgTidligereUtbetalingerResponse> = service.hentTidligereUtbetalinger(token)
+
+        assertThat(responseNye).isNotEmpty
+        assertThat(responseNye).hasSize(3)
+        assertThat(responseTidligere).isEmpty()
+    }
+    @Test
+    fun `Hent nye og hent tidligere utbetalinger skal returnere utbetalinger med STATUS stoppet basert på dato`() {
+        val thisYearMonth: YearMonth = YearMonth.from(LocalDateTime.now().toLocalDate())
+        val datoDenneManed = thisYearMonth.atDay(1)
+        val datoForrigeManed = LocalDate.now().minusMonths(1)
+        val datoNesteManed = LocalDate.now().plusMonths(1)
+
+        var fellesUtbetaling = Utbetaling(
+            referanse = "Sak1",
+            status = UtbetalingsStatus.STOPPET,
+            belop = BigDecimal.TEN,
+            beskrivelse = null,
+            forfallsDato = LocalDate.of(2000, 1, 1),
+            utbetalingsDato = LocalDate.of(2000, 1, 1),
+            stoppetDato = null,
+            fom = null,
+            tom = null,
+            mottaker = null,
+            kontonummer = null,
+            utbetalingsmetode = "utbetalingsmetode",
+            annenMottaker = false,
+            vilkar = mutableListOf(),
+            dokumentasjonkrav = mutableListOf(),
+            datoHendelse = LocalDateTime.now()
+        )
+        val model = InternalDigisosSoker()
+        model.utbetalinger = mutableListOf(
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoNesteManed,
+            ),
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoForrigeManed,
+            ),
+            fellesUtbetaling.copy(
+                utbetalingsDato = datoDenneManed,
+            ),
+
+        )
+
+        coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
+        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+
+        val responseNye: List<NyeOgTidligereUtbetalingerResponse> = service.hentNyeUtbetalinger(token)
+        val responseTidligere: List<NyeOgTidligereUtbetalingerResponse> = service.hentTidligereUtbetalinger(token)
+
+        assertThat(responseNye).isNotEmpty
+        assertThat(responseNye).hasSize(2)
+        // denne månedens utbetaling
+        assertThat(responseNye[0].ar).isEqualTo(thisYearMonth.year)
+        assertThat(responseNye[0].maned).isEqualToIgnoringCase(
+            thisYearMonth.month.getDisplayName(
+                TextStyle.FULL,
+                Locale.forLanguageTag("no-NO")
+            )
+        )
+        assertThat(responseNye[0].utbetalinger).hasSize(1)
+        assertThat(responseNye[0].utbetalinger[0].utbetalingsdato).isEqualTo(datoDenneManed)
+        // neste månedes utbetaling
+        assertThat(responseNye[1].ar).isEqualTo(thisYearMonth.year)
+        assertThat(responseNye[1].maned).isEqualToIgnoringCase(
+            thisYearMonth.month.plus(1).getDisplayName(
+                TextStyle.FULL,
+                Locale.forLanguageTag("no-NO")
+            )
+        )
+        assertThat(responseNye[1].utbetalinger).hasSize(1)
+        assertThat(responseNye[1].utbetalinger[0].utbetalingsdato).isEqualTo(datoNesteManed)
+
+        assertThat(responseTidligere).isNotEmpty
+        assertThat(responseTidligere).hasSize(1)
+
+        // forrige månedes utbetaling
+        assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year)
+        assertThat(responseTidligere[0].maned).isEqualToIgnoringCase(
+            thisYearMonth.month.minus(1).getDisplayName(
+                TextStyle.FULL,
+                Locale.forLanguageTag("no-NO")
+            )
+        )
+        assertThat(responseTidligere[0].utbetalinger).hasSize(1)
+        assertThat(responseTidligere[0].utbetalinger[0].utbetalingsdato).isEqualTo(datoForrigeManed)
     }
 }

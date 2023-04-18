@@ -28,7 +28,8 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: "unleash.nais.io"
+        - host: unleash.nais.io
+        - host: digisos.ekstern.dev.nav.no
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-soknad-api-mock
@@ -47,14 +48,14 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
     - name: METADATA_URL
-      value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/well-known/selvbetjening"
+      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/selvbetjening"
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
-      value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt-api/fiks/dokumentlager"
+      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks/dokumentlager"
     - name: FIKS_SVAR_UT_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks/svarut"
-    - name: AZUREAD_LOGINURL
+    - name: INNSYN_LOGINURL
       value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt/login"
     - name: NORG_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/norg_endpoint_url"

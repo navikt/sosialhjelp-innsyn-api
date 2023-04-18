@@ -4,6 +4,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.innsyn.app.exceptions.XsrfException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import javax.servlet.http.HttpServletRequest
 
 internal class XsrfGeneratorTest {
     private val redisService: RedisService = mockk()

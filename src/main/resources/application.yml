@@ -3,12 +3,17 @@ spring:
     banner-mode: 'off'
   application:
     name: "sosialhjelp-innsyn-api"
-  redis:
-    host: ${REDIS_HOST}
-    port: 6379
-    password: ${REDIS_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+      password: ${REDIS_PASSWORD}
   session:
     store-type: redis
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 150MB
 
 server:
   servlet:
@@ -20,7 +25,7 @@ server:
         secure: true
         max-age: 30M
         http-only: true
-  max-http-header-size: 16KB
+  max-http-request-header-size: 16KB
   shutdown: graceful
 
 
@@ -73,7 +78,8 @@ no.nav.security.jwt:
     discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
     validation:
       optional-claims: aud,nbf
-azuread.loginurl: ${AZUREAD_LOGINURL}
+
+innsyn.loginurl: ${INNSYN_LOGINURL}
 
 login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID}
 

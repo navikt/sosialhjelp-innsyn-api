@@ -7,7 +7,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
@@ -46,9 +45,8 @@ internal class EventServiceTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
-    private val unleashClient: Unleash = mockk()
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, unleashClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()

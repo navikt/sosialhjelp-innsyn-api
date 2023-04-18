@@ -7,50 +7,59 @@ group = "no.nav.sosialhjelp"
 
 object Versions {
     const val coroutines = "1.6.4"
-    const val springBoot = "2.7.7"
+    const val springBoot = "3.0.5"
     const val sosialhjelpCommon = "1.20230209.0920-45d9782"
-    const val logback = "1.2.11"
-    const val logstash = "7.2"
-    const val filformat = "1.2023.02.09-08.34-aad9baa612d3"
-    const val micrometerRegistry = "1.10.3"
+    const val logback = "1.4.6"
+    const val logstash = "7.3"
+    const val filformat = "1.2023.03.24-10.07-daf891c8a58d"
+    const val micrometerRegistry = "1.10.5"
     const val prometheus = "0.16.0"
-    const val tokenValidation = "2.1.9"
-    const val jackson = "2.14.1"
+    const val tokenValidation = "3.0.8"
+    const val jackson = "2.14.2"
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.11.0"
     const val fileUpload = "1.4"
-    const val tika = "2.4.1"
+    const val tika = "2.7.0"
     const val pdfBox = "2.0.27"
     const val fiksKryptering = "1.3.1"
-    const val lettuce = "6.2.2.RELEASE"
+    const val lettuce = "6.2.3.RELEASE"
     const val jempbox = "1.8.17"
     const val unleash = "4.4.1"
-    const val springdoc = "1.6.14"
-    const val jsonSmart = "2.4.8"
+    const val springdoc = "2.0.2"
+    const val jsonSmart = "2.4.10"
     const val gson = "2.10"
     const val log4j = "2.19.0"
-    const val snakeyaml = "1.33"
+    const val snakeyaml = "2.0"
     const val commonsFileupload = "1.5"
 
-    const val javaJwt = "4.2.2"
-    const val jwksRsa = "0.21.3"
-    const val nimbusJoseJwt = "9.30.1"
+    const val javaJwt = "4.3.0"
+    const val jwksRsa = "0.22.0"
+    const val nimbusJoseJwt = "9.31"
 
     const val ktlint = "0.45.2"
+
+    const val jakartaActivationApi = "2.1.0"
+    const val jakartaAnnotationApi = "2.1.1"
+    const val jakartaXmlBindApi = "4.0.0"
+    const val jakartaWebsocketApi = "2.1.0"
+    const val jakartaWebsocketClientApi = "2.1.0"
+    const val jakartaTransactionApi = "2.0.1"
+    const val jakartaServletApi = "5.0.0"
+    const val jakartaValidationApi = "3.0.2"
 
     //    Test only
     const val junit = "4.13.2"
     const val mockk = "1.13.4"
-    const val springmockk = "3.1.1"
+    const val springmockk = "4.0.2"
 }
 
 plugins {
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.spring") version "1.8.10"
-    id("org.springframework.boot") version "2.7.7"
-    id("com.github.ben-manes.versions") version "0.45.0" // ./gradlew dependencyUpdates
-    id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
+    id("org.springframework.boot") version "3.0.5"
+    id("com.github.ben-manes.versions") version "0.46.0" // ./gradlew dependencyUpdates
+    id("org.jlleitschuh.gradle.ktlint") version "11.3.1"
 }
 
 java {
@@ -63,12 +72,12 @@ ktlint {
 }
 
 configurations {
-    "implementation" {
+    implementation {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
         exclude(group = "javax.activation", module = "activation")
         exclude(group = "javax.validation", module = "validation-api")
     }
-    "testImplementation" {
+    testImplementation {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
         exclude(group = "org.hamcrest", module = "hamcrest-library")
         exclude(group = "org.hamcrest", module = "hamcrest-core")
@@ -123,8 +132,8 @@ dependencies {
     implementation("no.nav.security:token-validation-spring:${Versions.tokenValidation}")
 
 //    Springdoc
-    implementation("org.springdoc:springdoc-openapi-ui:${Versions.springdoc}")
-    implementation("org.springdoc:springdoc-openapi-kotlin:${Versions.springdoc}")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${Versions.springdoc}")
+    implementation("org.springdoc:springdoc-openapi-starter-common:${Versions.springdoc}")
 
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")
@@ -142,6 +151,12 @@ dependencies {
     implementation("org.apache.tika:tika-core:${Versions.tika}")
     implementation("org.apache.pdfbox:preflight:${Versions.pdfBox}")
     implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
+    implementation("javax.activation:javax.activation-api:1.2.0") {
+        because("pdfbox 2.x.x trenger javax.activation pakker. Kan fjernes når pdfbox 3.x.x er tilgjengelig")
+    }
+    implementation("javax.xml.bind:jaxb-api:2.3.1") {
+        because("pdfbox 2.x.x trenger javax.xml.bind pakker. Kan fjernes når pdfbox 3.x.x er tilgjengelig")
+    }
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")
@@ -167,11 +182,23 @@ dependencies {
         }
 
         implementation("org.yaml:snakeyaml:${Versions.snakeyaml}") {
-            because("Snyk ønsker 1.31 eller høyere")
+            because("https://security.snyk.io/vuln/SNYK-JAVA-ORGYAML-3152153")
         }
 
         implementation("commons-fileupload:commons-fileupload:${Versions.commonsFileupload}") {
             because("https://security.snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-3326457")
+        }
+
+        // spring boot 3.0.0 -> jakarta
+        implementation("jakarta.activation:jakarta.activation-api:${Versions.jakartaActivationApi}")
+        implementation("jakarta.annotation:jakarta.annotation-api:${Versions.jakartaAnnotationApi}")
+        implementation("jakarta.validation:jakarta.validation-api:${Versions.jakartaValidationApi}")
+        implementation("jakarta.xml.bind:jakarta.xml.bind-api:${Versions.jakartaXmlBindApi}")
+        implementation("jakarta.websocket:jakarta.websocket-api:${Versions.jakartaWebsocketApi}")
+        implementation("jakarta.websocket:jakarta.websocket-client-api:${Versions.jakartaWebsocketClientApi}")
+        implementation("jakarta.transaction:jakarta.transaction-api:${Versions.jakartaTransactionApi}")
+        implementation("jakarta.servlet:jakarta.servlet-api") {
+            version { strictly(Versions.jakartaServletApi) }
         }
 
         testImplementation("junit:junit:${Versions.junit}") {

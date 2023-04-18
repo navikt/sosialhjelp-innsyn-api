@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.event
 
-import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(JsonDokumentasjonkrav::class.java.name)
 
-fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: Unleash) {
+fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
     val dokumentasjonkrav = Dokumentasjonkrav(
         dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
         hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
@@ -52,12 +51,16 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav, unleashClient: U
 private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav: Dokumentasjonkrav) {
     if (any { it.referanse == dokumentasjonkrav.referanse }) {
         filter { it.referanse == dokumentasjonkrav.referanse }
-            .forEach { it.oppdaterFelter(dokumentasjonkrav.beskrivelse) }
+            .forEach { it.oppdaterFelter(dokumentasjonkrav) }
     } else {
         this.add(dokumentasjonkrav)
     }
 }
 
-private fun Dokumentasjonkrav.oppdaterFelter(beskrivelse: String?) {
-    this.beskrivelse = beskrivelse
+private fun Dokumentasjonkrav.oppdaterFelter(dokumentasjonkrav: Dokumentasjonkrav) {
+    this.tittel = dokumentasjonkrav.tittel
+    this.beskrivelse = dokumentasjonkrav.beskrivelse
+    this.status = dokumentasjonkrav.status
+    this.utbetalingsReferanse = dokumentasjonkrav.utbetalingsReferanse
+    this.frist = dokumentasjonkrav.frist
 }

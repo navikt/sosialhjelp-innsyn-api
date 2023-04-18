@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.event
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.finn.unleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -25,9 +24,8 @@ internal class TildeltNavKontorTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
-    private val unleashClient: Unleash = mockk()
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, unleashClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()

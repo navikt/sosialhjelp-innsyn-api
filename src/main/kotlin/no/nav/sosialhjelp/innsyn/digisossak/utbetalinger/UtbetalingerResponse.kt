@@ -11,7 +11,7 @@ data class UtbetalingerResponse(
     val utbetalinger: List<ManedUtbetaling>
 )
 data class NyeOgTidligereUtbetalingerResponse(
-    val utbetalinger: List<ManedUtbetaling>,
+    val utbetalingerForManed: List<ManedUtbetaling>,
     val ar: Int,
     val maned: String
 )

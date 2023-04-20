@@ -106,7 +106,7 @@ class UtbetalingerService(
                 NyeOgTidligereUtbetalingerResponse(
                     ar = key.year,
                     maned = monthToString(key.monthValue),
-                    utbetalinger = value.sortedByDescending { it.utbetalingsdato }
+                    utbetalingerForManed = value.sortedByDescending { it.utbetalingsdato }
                 )
             }
 
@@ -125,7 +125,7 @@ class UtbetalingerService(
                 NyeOgTidligereUtbetalingerResponse(
                     ar = key.year,
                     maned = monthToString(key.monthValue),
-                    utbetalinger = value.sortedBy { it.utbetalingsdato }
+                    utbetalingerForManed = value.sortedBy { it.utbetalingsdato }
                 )
             }
 

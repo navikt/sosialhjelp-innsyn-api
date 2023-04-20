@@ -642,8 +642,8 @@ internal class UtbetalingerServiceTest {
                 Locale.forLanguageTag("no-NO")
             )
         )
-        assertThat(responseTidligere[0].utbetalinger).hasSize(1)
-        assertThat(responseTidligere[0].utbetalinger[0].utbetalingsdato).isEqualTo(datoForrigeManed)
+        assertThat(responseTidligere[0].utbetalingerForManed).hasSize(1)
+        assertThat(responseTidligere[0].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoForrigeManed)
     }
     @Test
     fun `Hent nye utbetalinger skal returnere alle utbetalinger med status PLANLAGT_UTBETALING uansett dato`() {
@@ -749,8 +749,8 @@ internal class UtbetalingerServiceTest {
                 Locale.forLanguageTag("no-NO")
             )
         )
-        assertThat(responseNye[0].utbetalinger).hasSize(1)
-        assertThat(responseNye[0].utbetalinger[0].utbetalingsdato).isEqualTo(datoDenneManed)
+        assertThat(responseNye[0].utbetalingerForManed).hasSize(1)
+        assertThat(responseNye[0].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoDenneManed)
         // neste månedes utbetaling
         assertThat(responseNye[1].ar).isEqualTo(thisYearMonth.year)
         assertThat(responseNye[1].maned).isEqualToIgnoringCase(
@@ -759,8 +759,8 @@ internal class UtbetalingerServiceTest {
                 Locale.forLanguageTag("no-NO")
             )
         )
-        assertThat(responseNye[1].utbetalinger).hasSize(1)
-        assertThat(responseNye[1].utbetalinger[0].utbetalingsdato).isEqualTo(datoNesteManed)
+        assertThat(responseNye[1].utbetalingerForManed).hasSize(1)
+        assertThat(responseNye[1].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoNesteManed)
 
         assertThat(responseTidligere).isNotEmpty
         assertThat(responseTidligere).hasSize(1)
@@ -773,7 +773,7 @@ internal class UtbetalingerServiceTest {
                 Locale.forLanguageTag("no-NO")
             )
         )
-        assertThat(responseTidligere[0].utbetalinger).hasSize(1)
-        assertThat(responseTidligere[0].utbetalinger[0].utbetalingsdato).isEqualTo(datoForrigeManed)
+        assertThat(responseTidligere[0].utbetalingerForManed).hasSize(1)
+        assertThat(responseTidligere[0].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoForrigeManed)
     }
 }

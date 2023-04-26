@@ -58,6 +58,7 @@ spec:
         - host: sosialhjelp-soknad-api.dev-fss-pub.nais.io
         - host: oidc-ver2.difi.no
         - host: unleash.nais.io
+        - host: digisos.intern.dev.nav.no
       rules:
         - application: sosialhjelp-innsyn-api-redis
         - application: sosialhjelp-soknad-api-dev

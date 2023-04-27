@@ -71,7 +71,7 @@ class HendelseService(
 
     private fun InternalDigisosSoker.leggTilHendelserForUtbetalinger() {
         utbetalinger
-            .filter { it.status == UtbetalingsStatus.UTBETALT }
+            .filter { it.status != UtbetalingsStatus.ANNULLERT }
             .groupBy { it.datoHendelse.rundNedTilNaermeste5Minutt() }
             .forEach { (_, grupperteVilkar) ->
                 historikk.add(

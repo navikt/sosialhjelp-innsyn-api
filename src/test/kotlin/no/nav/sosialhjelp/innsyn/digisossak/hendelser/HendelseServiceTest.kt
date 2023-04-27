@@ -318,7 +318,7 @@ internal class HendelseServiceTest {
     }
 
     @Test
-    internal fun `hendelser for utbetalinger - utbetalinger med annen status enn UTBETALT blir filtrert bort`() {
+    internal fun `hendelser for utbetalinger - utbetalinger med annen status enn ANNULERT blir filtrert bort`() {
         val model = InternalDigisosSoker()
 
         val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
@@ -357,7 +357,7 @@ internal class HendelseServiceTest {
                 utbetalingsmetode = "utbetalingsmetode",
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf(),
-                datoHendelse = time
+                datoHendelse = time.plusMinutes(10)
             ),
             Utbetaling(
                 referanse = "utbetalref",
@@ -375,7 +375,7 @@ internal class HendelseServiceTest {
                 utbetalingsmetode = "utbetalingsmetode",
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf(),
-                datoHendelse = time
+                datoHendelse = time.plusMinutes(20)
             ),
             Utbetaling(
                 referanse = "utbetalref",
@@ -393,7 +393,7 @@ internal class HendelseServiceTest {
                 utbetalingsmetode = "utbetalingsmetode",
                 vilkar = mutableListOf(),
                 dokumentasjonkrav = mutableListOf(),
-                datoHendelse = time.plusMinutes(10)
+                datoHendelse = time.plusMinutes(30)
             )
         )
 
@@ -402,7 +402,9 @@ internal class HendelseServiceTest {
 
         val hendelser = service.hentHendelser("123", "Token")
 
-        assertThat(hendelser).hasSize(1)
-        assertThat(hendelser[0].tidspunkt).isEqualTo(time.plusMinutes(10).toString())
+        assertThat(hendelser).hasSize(3)
+        assertThat(hendelser[0].tidspunkt).isEqualTo(time.toString())
+        assertThat(hendelser[1].tidspunkt).isEqualTo(time.plusMinutes(20).toString())
+        assertThat(hendelser[2].tidspunkt).isEqualTo(time.plusMinutes(30).toString())
     }
 }

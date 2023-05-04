@@ -36,7 +36,7 @@ spec:
         - name: "ks:fiks"
   ingresses:
     - "https://sosialhjelp-innsyn-api.dev-fss-pub.nais.io/sosialhjelp/innsyn-api"
-    - "https://sosialhjelp-innsyn-api.dev.intern.nav.no/sosialhjelp/innsyn-api"
+    - "https://sosialhjelp-innsyn-api.intern.dev.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
       cpu: 500m
@@ -59,9 +59,9 @@ spec:
     - name: FIKS_SVAR_UT_ENDPOINT_URL
       value: "https://test.svarut.ks.no"
     - name: NORG_URL
-      value: "https://norg2.dev.intern.nav.no/norg2/api/v1"
+      value: "https://norg2.intern.dev.nav.no/norg2/api/v1"
     - name: INNSYN_LOGINURL
-      value: "https://loginservice.dev.nav.no/login"
+      value: "https://loginservice.intern.dev.nav.no/login"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "10"
     - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS
@@ -71,7 +71,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: "dev-fss,log-kibana"
     - name: PDL_ENDPOINT_URL
-      value: "https://pdl-api.dev.intern.nav.no/graphql"
+      value: "https://pdl-api.intern.dev.nav.no/graphql"
     - name: PDL_AUDIENCE
       value: "dev-fss:pdl:pdl-api"
     - name: UNLEASH_API_URL

@@ -36,7 +36,7 @@ spec:
         - name: "ks:fiks"
   ingresses:
     - "https://sosialhjelp-innsyn-api.dev-fss-pub.nais.io/sosialhjelp/innsyn-api"
-    - "https://sosialhjelp-innsyn-api.intern.dev.nav.no/sosialhjelp/innsyn-api"
+    - "https://sosialhjelp-innsyn-api.dev.intern.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
       cpu: 500m

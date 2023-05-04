@@ -71,7 +71,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: "dev-fss,log-kibana"
     - name: PDL_ENDPOINT_URL
-      value: "https://pdl-api.intern.dev.nav.no/graphql"
+      value: "https://pdl-api.dev.intern.nav.no/graphql"
     - name: PDL_AUDIENCE
       value: "dev-fss:pdl:pdl-api"
     - name: UNLEASH_API_URL

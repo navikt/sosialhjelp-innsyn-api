@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
@@ -59,6 +60,24 @@ class FiksClientImpl(
         val sak = when {
             useCache -> hentDigisosSakFraCache(digisosId) ?: hentDigisosSakFraFiks(digisosId, token)
             else -> hentDigisosSakFraFiks(digisosId, token)
+        }
+        tilgangskontroll.verifyDigisosSakIsForCorrectUser(sak)
+        return sak
+    }
+
+    override fun hentDigisosSakMedFnr(digisosId: String, token: String, useCache: Boolean, fnr: String): DigisosSak {
+        val sak = when {
+            useCache -> hentDigisosSakFraCache(digisosId) ?: hentDigisosSakFraFiks(digisosId, token)
+            else -> hentDigisosSakFraFiks(digisosId, token)
+        }
+
+        // TODO henting av fnr og sammeligning benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
+        val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
+        // TODO fjerne før prod
+        log.info("FNR inn: $fnr, FNR fra kontekst: $fnr2")
+
+        if (fnr2 != fnr) {
+            log.error("Fødselsnr i kontekst har blitt endret - FiksClient.hentDigisosSak")
         }
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(sak)
         return sak

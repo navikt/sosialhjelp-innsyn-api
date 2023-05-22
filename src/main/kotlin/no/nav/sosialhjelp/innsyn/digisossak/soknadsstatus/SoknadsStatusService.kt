@@ -32,8 +32,6 @@ class SoknadsStatusService(
 
         // TODO henting av fnr og sammeligning benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
         val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
-        // TODO fjerne før prod
-        log.info("FNR inn: $fnr, FNR fra kontekst: $fnr2")
 
         if (fnr2 != fnr) {
             log.error("Fødselsnr i kontekst har blitt endret - SoknadsstatusService.hentsSoknadStatus")

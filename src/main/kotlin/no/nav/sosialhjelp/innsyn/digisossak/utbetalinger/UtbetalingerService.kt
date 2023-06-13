@@ -52,7 +52,8 @@ class UtbetalingerService(
         return toUtbetalingerResponse(alleUtbetalinger)
     }
 
-    fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
+
+    private fun hentUtbetalinger(token: String, statusFilter: (status: UtbetalingsStatus) -> Boolean): List<ManedUtbetaling> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 
         if (digisosSaker.isEmpty()) {
@@ -62,36 +63,24 @@ class UtbetalingerService(
 
         val requestAttributes = RequestContextHolder.getRequestAttributes()
 
-        val alleUtbetalinger = runBlocking(Dispatchers.IO + MDCContext()) {
+        return runBlocking(Dispatchers.IO + MDCContext()) {
             digisosSaker
                 .filter { it.isNewerThanMonths(15) }
                 .flatMapParallel {
                     setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it) { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
+                    manedsutbetalinger(token, it, statusFilter)
                 }
         }
-        return toTidligereUtbetalingerResponse(alleUtbetalinger)
+    }
+
+    fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
+        val utbetalinger = hentUtbetalinger(token) { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
+        return toTidligereUtbetalingerResponse(utbetalinger)
     }
 
     fun hentNyeUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
-
-        if (digisosSaker.isEmpty()) {
-            log.info("Fant ingen søknader for bruker")
-            return emptyList()
-        }
-
-        val requestAttributes = RequestContextHolder.getRequestAttributes()
-
-        val alleUtbetalinger = runBlocking(Dispatchers.IO + MDCContext()) {
-            digisosSaker
-                .filter { it.isNewerThanMonths(15) }
-                .flatMapParallel {
-                    setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it) { status -> (status !== UtbetalingsStatus.ANNULLERT) }
-                }
-        }
-        return toNyeUtbetalingerResponse(alleUtbetalinger)
+        val utbetalinger = hentUtbetalinger(token) { status -> (status !== UtbetalingsStatus.ANNULLERT) }
+        return toNyeUtbetalingerResponse(utbetalinger)
     }
 
     private fun toTidligereUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>): List<NyeOgTidligereUtbetalingerResponse> {

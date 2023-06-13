@@ -52,7 +52,6 @@ class UtbetalingerService(
         return toUtbetalingerResponse(alleUtbetalinger)
     }
 
-
     private fun hentUtbetalinger(token: String, statusFilter: (status: UtbetalingsStatus) -> Boolean): List<ManedUtbetaling> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
 

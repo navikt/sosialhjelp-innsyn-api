@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -36,7 +37,8 @@ class SoknadsStatusController(
         tilgangskontroll.sjekkTilgang(token)
 
         response.addCookie(xsrfCookie())
-        val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)
+        val fnr = SubjectHandlerUtils.getUserIdFromToken()
+        val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token, fnr)
         return ResponseEntity.ok().body(
             SoknadsStatusResponse(
                 status = utvidetSoknadsStatus.status,

@@ -34,7 +34,7 @@ spec:
       consumes:
         - name: "ks:fiks"
   idporten:
-    enabled: true # endre for å ta i bruk idporten-client
+    enabled: false # endre for å ta i bruk idporten-client
     sidecar:
       enabled: true
     accessTokenLifetime: 3600 #default

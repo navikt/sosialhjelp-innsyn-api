@@ -16,7 +16,7 @@ import java.util.Collections
 import java.util.Enumeration
 
 /**
- * Beriker innkommende request med Authorization header, hvis vi har data for login_id i Redis.
+ * Beriker innnye request med Authorization header, hvis vi har data for login_id i Redis.
  * Filteret må ha høyere Order enn JwtTokenValidationFilter fra token-validation rammeverket. Se application-idporten.yaml
  */
 @Profile("idporten")

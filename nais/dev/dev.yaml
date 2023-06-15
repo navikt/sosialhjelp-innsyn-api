@@ -34,6 +34,8 @@ spec:
       consumes:
         - name: "ks:fiks"
   idporten:
+    sidecar:
+      autoLogin: true
     enabled: true # endre for å ta i bruk idporten-client
     accessTokenLifetime: 3600 #default
     clientURI: https://www.nav.no #default

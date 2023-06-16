@@ -35,8 +35,6 @@ spec:
         - name: "ks:fiks"
   idporten:
     enabled: false # endre for å ta i bruk idporten-client
-    sidecar:
-      enabled: true
     accessTokenLifetime: 3600 #default
     clientURI: https://www.nav.no #default
     frontchannelLogoutPath: /oauth2/logout

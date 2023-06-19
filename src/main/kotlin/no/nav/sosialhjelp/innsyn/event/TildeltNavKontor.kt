@@ -36,7 +36,7 @@ fun InternalDigisosSoker.apply(
         null
     }
 
-    soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet NAV-kontor") // flytt denne teksten ut i frontend?
+    soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet NAV-kontor")
 
     val isFirstTimeTildeltNavKontor = historikk.none { it.type == HistorikkType.TILDELT_NAV_KONTOR }
     // Ikke si at søknaden er videresendt hvis søknaden er en papirsøknad (originalSoknadNAV == null)

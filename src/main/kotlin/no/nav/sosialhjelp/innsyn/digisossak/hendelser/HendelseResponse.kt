@@ -4,6 +4,7 @@ import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 
 data class HendelseResponse(
     val tidspunkt: String,
-    val beskrivelse: String,
-    val filUrl: UrlResponse?
+    val hendelseType: String,
+    val filUrl: UrlResponse?,
+    val tekstArgument: String?
 )

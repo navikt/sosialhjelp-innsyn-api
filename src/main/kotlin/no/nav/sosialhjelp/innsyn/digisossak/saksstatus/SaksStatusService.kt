@@ -62,6 +62,6 @@ class SaksStatusService(
     companion object {
         private val log by logger()
 
-        const val DEFAULT_SAK_TITTEL: String = "Økonomisk sosialhjelp"
+        const val DEFAULT_SAK_TITTEL: String = "Økonomisk sosialhjelp" // todo
     }
 }

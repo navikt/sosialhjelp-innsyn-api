@@ -8,6 +8,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -89,7 +90,7 @@ internal class DokumentasjonEtterspurtTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
-        assertThat(hendelse.tittel).contains("Vi trenger flere opplysninger")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON)
         assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
     }
 
@@ -176,7 +177,7 @@ internal class DokumentasjonEtterspurtTest {
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_2.toLocalDateTime())
-        assertThat(hendelse.tittel).contains("Søknaden er under behandling")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_UNDER_BEHANDLING)
         assertThat(hendelse.url).isNull()
     }
 
@@ -285,7 +286,7 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.historikk).hasSize(5)
 
         val hendelse = model.historikk.last()
-        assertThat(hendelse.tittel).isEqualTo("Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg.")
+        assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.ETTERSPOR_IKKE_MER_DOKUMENTASJON)
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
     }
 

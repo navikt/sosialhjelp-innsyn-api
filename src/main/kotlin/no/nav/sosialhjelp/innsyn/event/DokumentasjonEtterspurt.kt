@@ -4,6 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtte
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -37,15 +38,13 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
         log.warn("Dokumentasjon etterspurt etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")
     }
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {
-        val beskrivelse = "Vi trenger flere opplysninger til søknaden din."
         val url = hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
-        log.info("Hendelse: Dokumentasjon etterspurt. $beskrivelse")
-        historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, url)))
+        log.info("Hendelse: Dokumentasjon etterspurt. Vi trenger flere opplysninger til søknaden din.")
+        historikk.add(Hendelse(HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, url)))
     }
 
     if (prevSize > 0 && oppgaver.size == 0 && status != SoknadsStatus.FERDIGBEHANDLET && status != SoknadsStatus.BEHANDLES_IKKE) {
-        val beskrivelse = "Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg."
-        log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjon etterspurt. $beskrivelse")
-        historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), null))
+        log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjon etterspurt. Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg.")
+        historikk.add(Hendelse(HendelseTekstType.ETTERSPOR_IKKE_MER_DOKUMENTASJON, hendelse.hendelsestidspunkt.toLocalDateTime(), null))
     }
 }

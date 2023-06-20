@@ -4,6 +4,7 @@ import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -39,7 +40,7 @@ class HendelseService(
 
         val responseList = model.historikk
             .sortedBy { it.tidspunkt }
-            .map { HendelseResponse(it.tidspunkt.toString(), it.tittel, it.url) }
+            .map { HendelseResponse(it.tidspunkt.toString(), it.hendelseType.name, it.url, it.tekstArgument) }
         log.info("Hentet historikk med ${responseList.size} hendelser")
         return responseList
     }
@@ -52,7 +53,7 @@ class HendelseService(
             .forEach { (tidspunkt, samtidigOpplastedeVedlegg) ->
                 val antallVedleggForTidspunkt = samtidigOpplastedeVedlegg.sumOf { it.dokumentInfoList.size }
                 historikk.add(
-                    Hendelse("Du har sendt $antallVedleggForTidspunkt vedlegg til NAV.", tidspunkt)
+                    Hendelse(HendelseTekstType.ANTALL_SENDTE_VEDLEGG, tidspunkt, tekstArgument = "$antallVedleggForTidspunkt")
                 )
             }
     }
@@ -64,7 +65,7 @@ class HendelseService(
             .groupBy { it.datoSistEndret.rundNedTilNaermeste5Minutt() }
             .forEach { (_, grupperteVilkar) ->
                 historikk.add(
-                    Hendelse("Vilkårene dine er oppdatert, les vedtaket for mer detaljer.", grupperteVilkar[0].datoSistEndret)
+                    Hendelse(HendelseTekstType.VILKAR_OPPDATERT, grupperteVilkar[0].datoSistEndret)
                 )
             }
     }
@@ -75,7 +76,7 @@ class HendelseService(
             .groupBy { it.datoHendelse.rundNedTilNaermeste5Minutt() }
             .forEach { (_, grupperteVilkar) ->
                 historikk.add(
-                    Hendelse("Dine utbetalinger har blitt oppdatert.", grupperteVilkar[0].datoHendelse)
+                    Hendelse(HendelseTekstType.UTBETALINGER_OPPDATERT, grupperteVilkar[0].datoHendelse)
                 )
             }
     }

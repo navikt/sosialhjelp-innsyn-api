@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.event
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.HistorikkType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
@@ -32,20 +33,29 @@ fun InternalDigisosSoker.apply(
     val destinasjon = try {
         norgClient.hentNavEnhet(hendelse.navKontor).navn
     } catch (e: NorgException) {
-        "et annet NAV-kontor"
+        null
     }
-    soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon)
+
+    soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet NAV-kontor")
 
     val isFirstTimeTildeltNavKontor = historikk.none { it.type == HistorikkType.TILDELT_NAV_KONTOR }
     // Ikke si at søknaden er videresendt hvis søknaden er en papirsøknad (originalSoknadNAV == null)
     // og det er første gang den er tildelt et nav-kontor
-    val beskrivelse =
+    val hendelseTekstType =
         if (isPapirSoknad && isFirstTimeTildeltNavKontor) {
-            "Din søknad er mottatt ved $destinasjon"
+            if (destinasjon != null) {
+                HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD_MED_NORG_ENHET
+            } else {
+                HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD_UTEN_NORG_ENHET
+            }
         } else {
-            "Søknaden med vedlegg er videresendt og mottatt ved $destinasjon. Videresendingen vil ikke påvirke saksbehandlingstiden."
+            if (destinasjon != null) {
+                HendelseTekstType.SOKNAD_VIDERESENDT_MED_NORG_ENHET
+            } else {
+                HendelseTekstType.SOKNAD_VIDERESENDT_UTEN_NORG_ENHET
+            }
         }
 
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Tildelt Navkontor. Beskrivelse: $beskrivelse")
-    historikk.add(Hendelse(beskrivelse, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.TILDELT_NAV_KONTOR))
+    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Tildelt Navkontor. Beskrivelse: ${hendelseTekstType.name}")
+    historikk.add(Hendelse(hendelseTekstType, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.TILDELT_NAV_KONTOR, tekstArgument = destinasjon))
 }

@@ -52,6 +52,74 @@ class UtbetalingerService(
         return toUtbetalingerResponse(alleUtbetalinger)
     }
 
+    private fun hentUtbetalinger(token: String, statusFilter: (status: UtbetalingsStatus) -> Boolean): List<ManedUtbetaling> {
+        val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
+
+        if (digisosSaker.isEmpty()) {
+            log.info("Fant ingen søknader for bruker")
+            return emptyList()
+        }
+
+        val requestAttributes = RequestContextHolder.getRequestAttributes()
+
+        return runBlocking(Dispatchers.IO + MDCContext()) {
+            digisosSaker
+                .filter { it.isNewerThanMonths(15) }
+                .flatMapParallel {
+                    setRequestAttributes(requestAttributes)
+                    manedsutbetalinger(token, it, statusFilter)
+                }
+        }
+    }
+
+    fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
+        val utbetalinger = hentUtbetalinger(token) { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
+        return toTidligereUtbetalingerResponse(utbetalinger)
+    }
+
+    fun hentNyeUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
+        val utbetalinger = hentUtbetalinger(token) { status -> (status !== UtbetalingsStatus.ANNULLERT) }
+        return toNyeUtbetalingerResponse(utbetalinger)
+    }
+
+    private fun toTidligereUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>): List<NyeOgTidligereUtbetalingerResponse> {
+        val now = LocalDate.now()
+        val yearMonth = YearMonth.of(now.year, now.month)
+        val foresteIMnd = foersteIManeden(yearMonth)
+        val tidligere = manedUtbetalinger
+            .sortedByDescending { it.utbetalingsdato }
+            .filter { it.utbetalingsdato?.isBefore(foresteIMnd) ?: false }
+            .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+            .map { (key, value) ->
+                NyeOgTidligereUtbetalingerResponse(
+                    ar = key.year,
+                    maned = monthToString(key.monthValue),
+                    utbetalingerForManed = value.sortedByDescending { it.utbetalingsdato }
+                )
+            }
+
+        return tidligere
+    }
+
+    private fun toNyeUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>): List<NyeOgTidligereUtbetalingerResponse> {
+        val now = LocalDate.now()
+        val yearMonth = YearMonth.of(now.year, now.month)
+        val foresteIMnd = foersteIManeden(yearMonth)
+        val nye = manedUtbetalinger
+            .sortedBy { it.utbetalingsdato }
+            .filter { it.utbetalingsdato?.isAfter(foresteIMnd) ?: false || it.utbetalingsdato?.isEqual(foresteIMnd) ?: false || it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString() }
+            .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+            .map { (key, value) ->
+                NyeOgTidligereUtbetalingerResponse(
+                    ar = key.year,
+                    maned = monthToString(key.monthValue),
+                    utbetalingerForManed = value.sortedBy { it.utbetalingsdato }
+                )
+            }
+
+        return nye
+    }
+
     private fun toUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) = manedUtbetalinger
         .sortedByDescending { it.utbetalingsdato }
         .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }

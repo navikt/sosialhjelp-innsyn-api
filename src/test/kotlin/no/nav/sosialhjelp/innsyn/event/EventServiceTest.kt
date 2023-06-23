@@ -516,7 +516,7 @@ internal class EventServiceTest {
         assertThat(hendelse).isNotNull
         assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR)
         assertThat(hendelse.tekstArgument).isEqualTo("The Office")
-        assertThat(hendelse.url?.linkTekst).isEqualTo("Vis søknaden")
+        assertThat(hendelse.url?.linkTekst).isEqualTo(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR_LENKETEKST)
     }
 
     @Test

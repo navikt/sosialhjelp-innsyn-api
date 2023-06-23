@@ -3,10 +3,10 @@ package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.event.VIS_SOKNADEN
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -41,7 +41,7 @@ class SoknadsStatusService(
             status = status,
             tidspunktSendt = model.tidspunktSendt,
             navKontor = model.soknadsmottaker?.navEnhetsnavn?.takeIf { erInnsynDeaktivertForKommune },
-            soknadUrl = dokumentlagerId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
+            soknadUrl = dokumentlagerId?.let { UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, hentDokumentlagerUrl(clientProperties, it)) }
                 .takeIf { erInnsynDeaktivertForKommune }
         )
     }

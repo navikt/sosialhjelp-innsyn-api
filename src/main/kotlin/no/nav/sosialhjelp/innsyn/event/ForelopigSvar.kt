@@ -23,7 +23,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: Cl
             HendelseTekstType.BREV_OM_SAKSBEANDLINGSTID,
             hendelse.hendelsestidspunkt.toLocalDateTime(),
             UrlResponse(
-                VIS_BREVET,
+                HendelseTekstType.VIS_BREVET_LENKETEKST,
                 hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
             )
         )

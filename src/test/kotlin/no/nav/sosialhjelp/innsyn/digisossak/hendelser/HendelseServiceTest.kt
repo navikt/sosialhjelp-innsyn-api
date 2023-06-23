@@ -19,7 +19,6 @@ import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.event.VIS_BREVET
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
@@ -77,7 +76,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Skal returnere respons med 1 hendelse`() {
         val model = InternalDigisosSoker()
-        model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)))
+        model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt, UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, url)))
 
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -95,9 +94,9 @@ internal class HendelseServiceTest {
         val model = InternalDigisosSoker()
         model.historikk.addAll(
             listOf(
-                Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt, UrlResponse(VIS_BREVET, url)),
-                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN, tidspunkt_mottatt, UrlResponse(VIS_BREVET, url2)),
-                Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, tidspunkt3, UrlResponse(VIS_BREVET, url3))
+                Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt, UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, url)),
+                Hendelse(HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN, tidspunkt_mottatt, UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, url2)),
+                Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, tidspunkt3, UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, url3))
             )
         )
 

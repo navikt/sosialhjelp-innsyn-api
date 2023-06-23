@@ -12,6 +12,7 @@ import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 
 @Component
 class SoknadsStatusService(
@@ -41,7 +42,7 @@ class SoknadsStatusService(
             status = status,
             tidspunktSendt = model.tidspunktSendt,
             navKontor = model.soknadsmottaker?.navEnhetsnavn?.takeIf { erInnsynDeaktivertForKommune },
-            soknadUrl = dokumentlagerId?.let { UrlResponse(VIS_SOKNADEN, hentDokumentlagerUrl(clientProperties, it)) }
+            soknadUrl = dokumentlagerId?.let { UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, hentDokumentlagerUrl(clientProperties, it)) }
                 .takeIf { erInnsynDeaktivertForKommune }
         )
     }

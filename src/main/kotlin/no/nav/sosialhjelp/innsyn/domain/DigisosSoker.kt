@@ -136,7 +136,7 @@ data class Hendelse(
 )
 
 data class UrlResponse(
-    val linkTekst: String,
+    val linkTekst: HendelseTekstType,
     val link: String
 )
 
@@ -194,5 +194,7 @@ enum class HendelseTekstType {
     BREV_OM_SAKSBEANDLINGSTID,
     ETTERSPOR_MER_DOKUMENTASJON,
     ETTERSPOR_IKKE_MER_DOKUMENTASJON,
-    DOKUMENTASJONKRAV
+    DOKUMENTASJONKRAV,
+    SOKNAD_SEND_TIL_KONTOR_LENKETEKST,
+    VIS_BREVET_LENKETEKST
 }

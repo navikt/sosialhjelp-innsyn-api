@@ -40,7 +40,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonEtterspurt, clientProp
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {
         val url = hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
         log.info("Hendelse: Dokumentasjon etterspurt. Vi trenger flere opplysninger til søknaden din.")
-        historikk.add(Hendelse(HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(VIS_BREVET, url)))
+        historikk.add(Hendelse(HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, url)))
     }
 
     if (prevSize > 0 && oppgaver.size == 0 && status != SoknadsStatus.FERDIGBEHANDLET && status != SoknadsStatus.BEHANDLES_IKKE) {

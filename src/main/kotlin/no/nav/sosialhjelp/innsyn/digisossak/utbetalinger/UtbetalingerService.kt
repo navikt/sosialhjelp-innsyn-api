@@ -205,6 +205,6 @@ class UtbetalingerService(
     companion object {
         private val log by logger()
 
-        const val UTBETALING_DEFAULT_TITTEL = "Utbetaling"
+        const val UTBETALING_DEFAULT_TITTEL = "default_utbetaling_tittel"
     }
 }

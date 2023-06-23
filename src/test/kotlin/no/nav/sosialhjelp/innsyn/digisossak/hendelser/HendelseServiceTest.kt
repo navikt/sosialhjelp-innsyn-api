@@ -19,7 +19,6 @@ import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.event.HendelseTekstType.VIS_BREVET_LENKETEKST
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat

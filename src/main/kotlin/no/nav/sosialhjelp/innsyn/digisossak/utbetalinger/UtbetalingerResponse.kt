@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 data class UtbetalingerResponse(
     val ar: Int,
-    val maned: String,
+    val maned: Int,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val foersteIManeden: LocalDate,
     val utbetalinger: List<ManedUtbetaling>
@@ -13,7 +13,7 @@ data class UtbetalingerResponse(
 data class NyeOgTidligereUtbetalingerResponse(
     val utbetalingerForManed: List<ManedUtbetaling>,
     val ar: Int,
-    val maned: String
+    val maned: Int
 )
 
 data class ManedUtbetaling(

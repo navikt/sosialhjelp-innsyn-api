@@ -29,8 +29,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import java.time.format.TextStyle
-import java.util.Locale
 internal class UtbetalingerServiceTest {
     private val eventService: EventService = mockk()
     private val fiksClient: FiksClient = mockk()
@@ -195,7 +193,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isNotEmpty
         assertThat(response).hasSize(1)
         assertThat(response[0].ar).isEqualTo(2019)
-        assertThat(response[0].maned).isEqualToIgnoringCase("august")
+        assertThat(response[0].maned).isEqualTo(8)
         assertThat(response[0].foersteIManeden).isEqualTo(LocalDate.of(2019, 8, 1))
         assertThat(response[0].utbetalinger).hasSize(1)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Nødhjelp")
@@ -225,7 +223,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isNotNull
         assertThat(response).hasSize(1)
         assertThat(response[0].ar).isEqualTo(2019)
-        assertThat(response[0].maned).isEqualToIgnoringCase("august")
+        assertThat(response[0].maned).isEqualTo(8)
         assertThat(response[0].foersteIManeden).isEqualTo(LocalDate.of(2019, 8, 1))
         assertThat(response[0].utbetalinger).hasSize(2)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Tannlege")
@@ -254,7 +252,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).isNotNull
         assertThat(response).hasSize(2)
         assertThat(response[0].ar).isEqualTo(2019)
-        assertThat(response[0].maned).isEqualToIgnoringCase("september")
+        assertThat(response[0].maned).isEqualTo(9)
         assertThat(response[0].foersteIManeden).isEqualTo(LocalDate.of(2019, 9, 1))
         assertThat(response[0].utbetalinger).hasSize(1)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Tannlege")
@@ -263,7 +261,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-09-12")
 
         assertThat(response[1].ar).isEqualTo(2019)
-        assertThat(response[1].maned).isEqualToIgnoringCase("august")
+        assertThat(response[1].maned).isEqualTo(8)
         assertThat(response[1].foersteIManeden).isEqualTo(LocalDate.of(2019, 8, 1))
         assertThat(response[1].utbetalinger).hasSize(1)
         assertThat(response[1].utbetalinger[0].tittel).isEqualTo("Nødhjelp")
@@ -386,7 +384,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response).hasSize(2)
 
         assertThat(response[0].ar).isEqualTo(2019)
-        assertThat(response[0].maned).isEqualToIgnoringCase("september")
+        assertThat(response[0].maned).isEqualTo(9)
         assertThat(response[0].foersteIManeden).isEqualTo(LocalDate.of(2019, 9, 1))
         assertThat(response[0].utbetalinger).hasSize(1)
         assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Barnehage og SFO")
@@ -395,7 +393,7 @@ internal class UtbetalingerServiceTest {
         assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-09-12")
 
         assertThat(response[1].ar).isEqualTo(2019)
-        assertThat(response[1].maned).isEqualToIgnoringCase("august")
+        assertThat(response[1].maned).isEqualTo(8)
         assertThat(response[1].foersteIManeden).isEqualTo(LocalDate.of(2019, 8, 1))
         assertThat(response[1].utbetalinger).hasSize(1)
         assertThat(response[1].utbetalinger[0].tittel).isEqualTo("Nødhjelp")
@@ -636,11 +634,8 @@ internal class UtbetalingerServiceTest {
 
         // forrige månedes utbetaling
         assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year)
-        assertThat(responseTidligere[0].maned).isEqualToIgnoringCase(
-            thisYearMonth.month.minus(1).getDisplayName(
-                TextStyle.FULL,
-                Locale.forLanguageTag("no-NO")
-            )
+        assertThat(responseTidligere[0].maned).isEqualTo(
+            thisYearMonth.month.minus(1).value
         )
         assertThat(responseTidligere[0].utbetalingerForManed).hasSize(1)
         assertThat(responseTidligere[0].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoForrigeManed)
@@ -743,21 +738,15 @@ internal class UtbetalingerServiceTest {
         assertThat(responseNye).hasSize(2)
         // denne månedens utbetaling
         assertThat(responseNye[0].ar).isEqualTo(thisYearMonth.year)
-        assertThat(responseNye[0].maned).isEqualToIgnoringCase(
-            thisYearMonth.month.getDisplayName(
-                TextStyle.FULL,
-                Locale.forLanguageTag("no-NO")
-            )
+        assertThat(responseNye[0].maned).isEqualTo(
+            thisYearMonth.month.value
         )
         assertThat(responseNye[0].utbetalingerForManed).hasSize(1)
         assertThat(responseNye[0].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoDenneManed)
         // neste månedes utbetaling
         assertThat(responseNye[1].ar).isEqualTo(thisYearMonth.year)
-        assertThat(responseNye[1].maned).isEqualToIgnoringCase(
-            thisYearMonth.month.plus(1).getDisplayName(
-                TextStyle.FULL,
-                Locale.forLanguageTag("no-NO")
-            )
+        assertThat(responseNye[1].maned).isEqualTo(
+            thisYearMonth.month.plus(1).value
         )
         assertThat(responseNye[1].utbetalingerForManed).hasSize(1)
         assertThat(responseNye[1].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoNesteManed)
@@ -767,11 +756,8 @@ internal class UtbetalingerServiceTest {
 
         // forrige månedes utbetaling
         assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year)
-        assertThat(responseTidligere[0].maned).isEqualToIgnoringCase(
-            thisYearMonth.month.minus(1).getDisplayName(
-                TextStyle.FULL,
-                Locale.forLanguageTag("no-NO")
-            )
+        assertThat(responseTidligere[0].maned).isEqualTo(
+            thisYearMonth.month.minus(1).value
         )
         assertThat(responseTidligere[0].utbetalingerForManed).hasSize(1)
         assertThat(responseTidligere[0].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoForrigeManed)

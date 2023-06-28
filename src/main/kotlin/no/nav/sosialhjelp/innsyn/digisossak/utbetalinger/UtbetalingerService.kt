@@ -15,10 +15,8 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
-import java.text.DateFormatSymbols
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.Locale
 
 @Component
 class UtbetalingerService(
@@ -93,7 +91,7 @@ class UtbetalingerService(
             .map { (key, value) ->
                 NyeOgTidligereUtbetalingerResponse(
                     ar = key.year,
-                    maned = monthToString(key.monthValue),
+                    maned = key.monthValue,
                     utbetalingerForManed = value.sortedByDescending { it.utbetalingsdato }
                 )
             }
@@ -112,7 +110,7 @@ class UtbetalingerService(
             .map { (key, value) ->
                 NyeOgTidligereUtbetalingerResponse(
                     ar = key.year,
-                    maned = monthToString(key.monthValue),
+                    maned = key.monthValue,
                     utbetalingerForManed = value.sortedBy { it.utbetalingsdato }
                 )
             }
@@ -126,7 +124,7 @@ class UtbetalingerService(
         .map { (key, value) ->
             UtbetalingerResponse(
                 ar = key.year,
-                maned = monthToString(key.monthValue),
+                maned = key.monthValue,
                 foersteIManeden = foersteIManeden(key),
                 utbetalinger = value.sortedByDescending { it.utbetalingsdato }
             )
@@ -185,8 +183,6 @@ class UtbetalingerService(
     }
 
     private fun foersteIManeden(key: YearMonth) = LocalDate.of(key.year, key.month, 1)
-
-    private fun monthToString(month: Int) = DateFormatSymbols(Locale.forLanguageTag("no-NO")).months[month - 1]
 
     private fun Utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(kommunenummer: String) {
         when {

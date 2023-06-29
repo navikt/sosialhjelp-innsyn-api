@@ -142,7 +142,7 @@ internal class SaksOversiktControllerTest {
         assertThat(response2.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(sak2).isNotNull
         assertThat(sak2?.soknadTittel).contains("Livsopphold", "Strøm")
-        assertThat(sak2?.status).isEqualTo("UNDER BEHANDLING")
+        assertThat(sak2?.status).isEqualTo("UNDER_BEHANDLING")
         assertThat(sak2?.antallNyeOppgaver).isEqualTo(3)
     }
 

@@ -7,7 +7,6 @@ import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
-import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
@@ -61,18 +60,10 @@ class SaksOversiktController(
         val saksDetaljerResponse = SaksDetaljerResponse(
             sak.fiksDigisosId,
             hentNavn(model),
-            mapStatus(model.status),
+            model.status.name,
             antallOppgaver
         )
         return ResponseEntity.ok().body(saksDetaljerResponse)
-    }
-
-    private fun mapStatus(status: SoknadsStatus): String {
-        return if (status == SoknadsStatus.BEHANDLES_IKKE) {
-            SoknadsStatus.FERDIGBEHANDLET.name
-        } else {
-            status.name.replace('_', ' ')
-        }
     }
 
     private fun hentNavn(model: InternalDigisosSoker): String {

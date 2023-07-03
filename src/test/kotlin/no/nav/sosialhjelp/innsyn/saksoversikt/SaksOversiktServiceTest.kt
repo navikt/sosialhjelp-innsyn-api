@@ -53,11 +53,11 @@ internal class SaksOversiktServiceTest {
 
         assertThat(alleSaker).hasSize(2)
         assertThat(alleSaker[0].fiksDigisosId).isEqualTo("123")
-        assertThat(alleSaker[0].soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
+        assertThat(alleSaker[0].soknadTittel).isEqualTo("saker.default_tittel")
         assertThat(alleSaker[0].kilde).isEqualTo(KILDE_INNSYN_API)
         assertThat(alleSaker[0].url).isNull()
         assertThat(alleSaker[1].fiksDigisosId).isEqualTo("456")
-        assertThat(alleSaker[1].soknadTittel).isEqualTo("Søknad om økonomisk sosialhjelp")
+        assertThat(alleSaker[1].soknadTittel).isEqualTo("saker.default_tittel")
         assertThat(alleSaker[1].kilde).isEqualTo(KILDE_INNSYN_API)
         assertThat(alleSaker[1].url).isNull()
     }

@@ -5,6 +5,8 @@ on:
       - '**'      # Build all branches
     tags-ignore:
       - '**'      # Don't build any tags
+    branches-ignore:
+      - 'dependabot/**'
   workflow_dispatch:
 
 jobs:

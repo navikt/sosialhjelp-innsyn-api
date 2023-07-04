@@ -30,7 +30,7 @@ class SaksOversiktService(
             .map {
                 SaksListeResponse(
                     fiksDigisosId = it.fiksDigisosId,
-                    soknadTittel = "Søknad om økonomisk sosialhjelp",
+                    soknadTittel = "saker.default_tittel",
                     sistOppdatert = unixTimestampToDate(it.sistEndret),
                     kilde = KILDE_INNSYN_API,
                     url = null

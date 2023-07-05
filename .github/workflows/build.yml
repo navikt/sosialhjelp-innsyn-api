@@ -2,10 +2,10 @@ name: Build image
 on:
   push:
     branches:
-      - '**'      # Build all branches
+      - 'master'      # Bygger kun master
     tags-ignore:
-      - '**'      # Don't build any tags
-  workflow_dispatch:
+      - '**'          # Don't build any tags
+  workflow_dispatch:  # Alle andre brancher bygges av dispatch
 
 jobs:
   build:

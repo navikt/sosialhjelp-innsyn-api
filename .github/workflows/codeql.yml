@@ -1,5 +1,11 @@
-name: PR
-on: [pull_request]
+name: Code Analysis and Dependency Submission
+
+on:
+  push:
+    branches:
+      - master
+  schedule: ## Kjører kl. 05:00 mandag -> fredag (schedule kjører bare for Default branch)
+    - cron: '0 5 * * 1-5'
 
 jobs:
   analyze_code:

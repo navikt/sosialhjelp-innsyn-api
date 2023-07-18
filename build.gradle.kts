@@ -19,7 +19,7 @@ object Versions {
     const val guava = "31.1-jre"
     const val commonsCodec = "1.14"
     const val commonsIo = "2.11.0"
-    const val fileUpload = "1.4"
+    const val fileUpload = "1.5"
     const val tika = "2.7.0"
     const val pdfBox = "2.0.27"
     const val fiksKryptering = "1.3.1"
@@ -31,7 +31,6 @@ object Versions {
     const val gson = "2.10"
     const val log4j = "2.19.0"
     const val snakeyaml = "2.0"
-    const val commonsFileupload = "1.5"
 
     const val javaJwt = "4.3.0"
     const val jwksRsa = "0.22.0"
@@ -183,10 +182,6 @@ dependencies {
 
         implementation("org.yaml:snakeyaml:${Versions.snakeyaml}") {
             because("https://security.snyk.io/vuln/SNYK-JAVA-ORGYAML-3152153")
-        }
-
-        implementation("commons-fileupload:commons-fileupload:${Versions.commonsFileupload}") {
-            because("https://security.snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-3326457")
         }
 
         // spring boot 3.0.0 -> jakarta

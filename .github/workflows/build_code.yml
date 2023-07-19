@@ -10,9 +10,6 @@ on:
 jobs:
   build:
     name: Build kotlin
-#    permissions:
-#      packages: write
-#      contents: write
     runs-on: ubuntu-latest
     env:
       ORG_GRADLE_PROJECT_githubUser: x-access-token

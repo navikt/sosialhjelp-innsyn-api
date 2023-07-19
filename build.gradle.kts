@@ -11,7 +11,7 @@ object Versions {
     const val sosialhjelpCommon = "1.20230209.0920-45d9782"
     const val logback = "1.4.6"
     const val logstash = "7.3"
-    const val filformat = "1.2023.03.24-10.07-daf891c8a58d"
+    const val filformat = "1.2023.06.21-14.54-583dfcc41d77"
     const val micrometerRegistry = "1.10.5"
     const val prometheus = "0.16.0"
     const val tokenValidation = "3.0.8"
@@ -37,6 +37,8 @@ object Versions {
     const val nimbusJoseJwt = "9.31"
 
     const val ktlint = "0.45.2"
+    const val bouncycastle = "1.74"
+    const val netty = "4.1.94.Final"
 
     const val jakartaActivationApi = "2.1.0"
     const val jakartaAnnotationApi = "2.1.1"
@@ -194,6 +196,13 @@ dependencies {
         implementation("jakarta.transaction:jakarta.transaction-api:${Versions.jakartaTransactionApi}")
         implementation("jakarta.servlet:jakarta.servlet-api") {
             version { strictly(Versions.jakartaServletApi) }
+        }
+        implementation("org.bouncycastle:bcprov-jdk18on") {
+            version { strictly(Versions.bouncycastle) }
+            because("https://github.com/advisories/GHSA-hr8g-6v94-x4m9")
+        }
+        implementation("io.netty:netty-handler:${Versions.netty}") {
+            because("https://github.com/advisories/GHSA-6mjq-h674-j845")
         }
 
         testImplementation("junit:junit:${Versions.junit}") {

@@ -58,7 +58,7 @@ object Versions {
 plugins {
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.spring") version "1.8.10"
-    id("org.springframework.boot") version "3.0.5"
+    id("org.springframework.boot") version "3.1.2"
     id("com.github.ben-manes.versions") version "0.46.0" // ./gradlew dependencyUpdates
     id("org.jlleitschuh.gradle.ktlint") version "11.3.1"
 }

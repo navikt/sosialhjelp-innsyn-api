@@ -25,7 +25,7 @@ Interne henvendelser kan sendes via Slack i kanalen #team_digisos.
 Gjøres via Github Actions, se: https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_dev.yml
 
 ## Oppsett av nytt prosjekt
-Dette prosjektet bygger og deployer vha Github Actions
+Dette prosjektet bygger og deployer vha Github Actions.
 
 ### Github package registry
 - Docker image pushes til github package registry, eks [https://github.com/navikt/sosialhjelp-innsyn-api/packages/](https://github.com/navikt/sosialhjelp-innsyn-api/packages/)

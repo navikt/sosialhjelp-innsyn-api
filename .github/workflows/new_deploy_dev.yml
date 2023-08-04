@@ -24,9 +24,9 @@ jobs:
         id: set-cluster-name
         run: |
           if [[ ${{ github.event.inputs.config-file-name }} = 'dev-fss' ]]; then
-            echo "CLUSTER_NAME=dev-fss" >> $GITHUB_OUTPUT
+            echo "cluster-name=dev-fss" >> $GITHUB_OUTPUT
           else
-            echo "CLUSTER_NAME=dev-gcp" >> $GITHUB_OUTPUT
+            echo "cluster-name=dev-gcp" >> $GITHUB_OUTPUT
           fi
           echo "Deployer til ${cluster-name}"
 

@@ -18,17 +18,17 @@ jobs:
     name: 'Sett cluster basert på config-file'
     runs-on: ubuntu-latest
     outputs:
-      cluster-name: ${{ steps.set-cluster.name.outputs.cluster-name }}
+      cluster-name: ${{ steps.set-cluster-name.outputs.cluster-name }}
     steps:
       - name: Sett cluster basert på config-file
         id: set-cluster-name
         run: |
           if [[ ${{ github.event.inputs.config-file-name }} = 'dev-fss' ]]; then
-            echo "cluster-name=dev-fss" >> $GITHUB_OUTPUT
+            echo "CLUSTER_NAME=dev-fss" >> $GITHUB_OUTPUT
           else
-            echo "cluster-name=dev-gcp" >> $GITHUB_OUTPUT
+            echo "CLUSTER_NAME=dev-gcp" >> $GITHUB_OUTPUT
           fi
-          echo "Deployer til $cluster-name"
+          echo "Deployer til ${cluster-name}"
 
   deploy-to-dev:
     name: 'Deploy to dev'

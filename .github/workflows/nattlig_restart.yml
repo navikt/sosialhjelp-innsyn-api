@@ -1,5 +1,6 @@
 name: Nattlig restart i testmiljøer
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 2 * * *'
 

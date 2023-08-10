@@ -31,12 +31,12 @@ jobs:
           echo "Deployer til ${cluster-name}"
 
   deploy-to-dev:
-    name: 'Deploy to dev'
+    name: 'Build for Deploy and Deploy to Dev'
     needs: set-cluster
     permissions:
       packages: write
       contents: write
-    uses: navikt/sosialhjelp-ci/.github/workflows/new_deploy_app.yml@v2
+    uses: navikt/sosialhjelp-ci/.github/workflows/deploy_app.yml@v2
     with:
       cluster-name: ${{ needs.set-cluster.outputs.cluster-name }}
       resource-name: ${{ inputs.config-file-name }}

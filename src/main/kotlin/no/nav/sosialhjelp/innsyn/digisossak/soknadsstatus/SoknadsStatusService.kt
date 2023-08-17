@@ -30,11 +30,15 @@ class SoknadsStatusService(
         val erInnsynDeaktivertForKommune = kommuneService.erInnsynDeaktivertForKommune(fiksDigisosId, token)
         val dokumentlagerId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 
-        // TODO henting av fnr og sammeligning benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
+        // TODO henting av fnr og sammeligning samt sammenligning av digisosId benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
         val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
 
         if (fnr2 != fnr) {
             log.error("Fødselsnr i kontekst har blitt endret - SoknadsstatusService.hentsSoknadStatus")
+        }
+
+        if (fiksDigisosId != model.fiksDigisosId){
+            log.error("Intern model inneholder en annen digisosID en det som ble sendt inn")
         }
 
         return UtvidetSoknadsStatus(

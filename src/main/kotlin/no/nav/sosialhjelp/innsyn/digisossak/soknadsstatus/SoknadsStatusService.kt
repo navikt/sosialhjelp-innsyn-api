@@ -38,14 +38,19 @@ class SoknadsStatusService(
         }
 
         if (fiksDigisosId != model.fiksDigisosId) {
-            log.error("Intern model inneholder en annen digisosID en det som ble sendt inn")
+            log.error("Intern model inneholder en annen digisosID en det som ble sendt inn. Intern model har digisosId: ${model.fiksDigisosId} og digisosID: $fiksDigisosId ble sendt inn")
         }
 
         return UtvidetSoknadsStatus(
             status = status,
             tidspunktSendt = model.tidspunktSendt,
             navKontor = model.soknadsmottaker?.navEnhetsnavn?.takeIf { erInnsynDeaktivertForKommune },
-            soknadUrl = dokumentlagerId?.let { UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, hentDokumentlagerUrl(clientProperties, it)) }
+            soknadUrl = dokumentlagerId?.let {
+                UrlResponse(
+                    HendelseTekstType.VIS_BREVET_LENKETEKST,
+                    hentDokumentlagerUrl(clientProperties, it)
+                )
+            }
                 .takeIf { erInnsynDeaktivertForKommune }
         )
     }

@@ -47,14 +47,15 @@ class FiksClientImpl(
 ) : FiksClient {
     private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
 
-    private val fiksRetry = retryBackoffSpec(maxAttempts = retryMaxAttempts, initialWaitIntervalMillis = retryInitialDelay)
-        .onRetryExhaustedThrow { _, retrySignal ->
-            throw FiksServerException(
-                status = SERVICE_UNAVAILABLE.value(),
-                message = "Fiks - retry har nådd max antall forsøk (=$retryMaxAttempts)",
-                cause = retrySignal.failure()
-            )
-        }
+    private val fiksRetry =
+        retryBackoffSpec(maxAttempts = retryMaxAttempts, initialWaitIntervalMillis = retryInitialDelay)
+            .onRetryExhaustedThrow { _, retrySignal ->
+                throw FiksServerException(
+                    status = SERVICE_UNAVAILABLE.value(),
+                    message = "Fiks - retry har nådd max antall forsøk (=$retryMaxAttempts)",
+                    cause = retrySignal.failure()
+                )
+            }
 
     override fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak {
         val sak = when {
@@ -81,8 +82,13 @@ class FiksClientImpl(
         return sak
     }
 
-    private fun hentDigisosSakFraCache(digisosId: String): DigisosSak? =
-        redisService.get(digisosId, DigisosSak::class.java)
+    private fun hentDigisosSakFraCache(digisosId: String): DigisosSak? {
+        val digisosSak = redisService.get(digisosId, DigisosSak::class.java)
+        if (digisosSak?.fiksDigisosId != digisosId)
+            log.error("Redis cache er korrupt, sak inneholder feil digisosId")
+
+        return digisosSak
+    }
 
     private fun hentDigisosSakFraFiks(digisosId: String, token: String): DigisosSak {
         log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
@@ -208,18 +214,24 @@ class FiksClientImpl(
             .toEntity<String>()
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 if (e.statusCode.value() == 400 && filErAlleredeLastetOpp(e, digisosId)) {
-                    val feilmeldingAlleredeFinnes = "Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}"
+                    val feilmeldingAlleredeFinnes =
+                        "Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}"
                     log.warn(feilmeldingAlleredeFinnes, e)
                     FiksClientFileExistsException(feilmeldingAlleredeFinnes, e)
                 } else {
-                    val feilmelding = "Fiks - Opplasting av ettersendelse til digisosId=$digisosId feilet - ${messageUtenFnr(e)}"
+                    val feilmelding =
+                        "Fiks - Opplasting av ettersendelse til digisosId=$digisosId feilet - ${messageUtenFnr(e)}"
                     when {
                         e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
                         else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                     }
                 }
             }
-            .block() ?: throw FiksClientException(500, "responseEntity er null selv om request ikke har kastet exception", null)
+            .block() ?: throw FiksClientException(
+            500,
+            "responseEntity er null selv om request ikke har kastet exception",
+            null
+        )
 
         opplastingsteller.increment()
         log.info("Sendte ettersendelse til kommune $kommunenummer i Fiks, fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCode})")

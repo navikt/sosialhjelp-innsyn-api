@@ -37,7 +37,8 @@ class SoknadsStatusService(
             log.error("Fødselsnr i kontekst har blitt endret - SoknadsstatusService.hentsSoknadStatus")
         }
 
-        if (fiksDigisosId != model.fiksDigisosId) {
+        val modelFiksDigisosId = model.fiksDigisosId
+        if (modelFiksDigisosId != null && fiksDigisosId != modelFiksDigisosId) {
             log.error("Intern model inneholder en annen digisosID en det som ble sendt inn. Intern model har digisosId: ${model.fiksDigisosId} og digisosID: $fiksDigisosId ble sendt inn")
         }
 

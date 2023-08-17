@@ -85,7 +85,7 @@ class FiksClientImpl(
     private fun hentDigisosSakFraCache(digisosId: String): DigisosSak? {
         val digisosSak = redisService.get(digisosId, DigisosSak::class.java)
         if (digisosSak?.fiksDigisosId != digisosId)
-            log.error("Redis cache er korrupt, sak inneholder feil digisosId")
+            log.error("Redis cache er korrupt, sak inneholder feil digisosId. Redis har digisosId ${digisosSak?.fiksDigisosId} og det ble gjort oppslag på digisosId: $digisosId ")
 
         return digisosSak
     }

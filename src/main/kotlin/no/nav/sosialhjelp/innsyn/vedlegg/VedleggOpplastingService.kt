@@ -15,7 +15,8 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
-import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.Loader
+import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
@@ -38,7 +39,7 @@ class VedleggOpplastingService(
     private val redisService: RedisService,
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
     private val dokumentlagerClient: DokumentlagerClient,
-    private val unleash: Unleash
+    private val unleash: Unleash,
 ) {
 
     fun sendVedleggTilFiks(digisosId: String, files: List<MultipartFile>, metadata: MutableList<OpplastetVedleggMetadata>, token: String): List<OppgaveValidering> {
@@ -330,7 +331,7 @@ class VedleggOpplastingService(
 
     private fun checkIfPdfIsValid(data: InputStream): ValidationValues {
         try {
-            PDDocument.load(data)
+            Loader.loadPDF(RandomAccessReadBuffer(data))
                 .use { document ->
                     if (document.isEncrypted) {
                         return ValidationValues.PDF_IS_ENCRYPTED
@@ -378,7 +379,7 @@ class OppgaveValidering(
     val innsendelsesfrist: LocalDate?,
     val hendelsetype: JsonVedlegg.HendelseType?,
     val hendelsereferanse: String?,
-    val filer: MutableList<FilValidering>
+    val filer: MutableList<FilValidering>,
 )
 
 class FilValidering(val filename: String?, val status: ValidationResult)
@@ -398,5 +399,5 @@ data class FilForOpplasting(
     val filnavn: String?,
     val mimetype: String?,
     val storrelse: Long,
-    val fil: InputStream
+    val fil: InputStream,
 )

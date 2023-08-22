@@ -21,7 +21,7 @@ object Versions {
     const val commonsIo = "2.11.0"
     const val fileUpload = "1.5"
     const val tika = "2.7.0"
-    const val pdfBox = "2.0.27"
+    const val pdfBox = "3.0.0"
     const val fiksKryptering = "1.3.1"
     const val lettuce = "6.2.3.RELEASE"
     const val jempbox = "1.8.17"
@@ -152,12 +152,6 @@ dependencies {
     implementation("org.apache.tika:tika-core:${Versions.tika}")
     implementation("org.apache.pdfbox:preflight:${Versions.pdfBox}")
     implementation("org.apache.pdfbox:jempbox:${Versions.jempbox}")
-    implementation("javax.activation:javax.activation-api:1.2.0") {
-        because("pdfbox 2.x.x trenger javax.activation pakker. Kan fjernes når pdfbox 3.x.x er tilgjengelig")
-    }
-    implementation("javax.xml.bind:jaxb-api:2.3.1") {
-        because("pdfbox 2.x.x trenger javax.xml.bind pakker. Kan fjernes når pdfbox 3.x.x er tilgjengelig")
-    }
 
 //    Test
     testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.springBoot}")

@@ -6,6 +6,7 @@ import java.security.SecureRandom
 object MDCUtils {
 
     const val CALL_ID = "callId"
+    const val LOGIN_ID = "loginId"
     const val DIGISOS_ID = "digisosId"
     const val PATH = "path"
     const val USER_AGENT = "userAgent"
@@ -27,6 +28,7 @@ object MDCUtils {
         MDC.remove(PATH)
         MDC.remove(USER_AGENT)
         MDC.remove(REFERER)
+        MDC.remove(LOGIN_ID)
     }
 
     fun generateCallId(): String {

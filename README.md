@@ -8,7 +8,7 @@ Backend-app som skal gi innsyn i egen sosialhjelp sak.
 Spørsmål knyttet til koden eller teamet kan stilles til teamdigisos@nav.no.
 
 ### For NAV-ansatte
-Interne henvendelser kan sendes via Slack i kanalen #team_digisos.
+Interne henvendelser kan sendes via slack i kanalen #team_digisos.
 
 ## Teknologi
 * Kotlin

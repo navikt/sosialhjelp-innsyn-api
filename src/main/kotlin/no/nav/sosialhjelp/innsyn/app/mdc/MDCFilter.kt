@@ -38,9 +38,7 @@ class MDCFilter : OncePerRequestFilter() {
     }
 
     private fun addLoginId(request: HttpServletRequest) {
-        request.cookies?.firstOrNull { it.name == IdPortenController.LOGIN_ID_COOKIE }?.value?.let { put(LOGIN_ID, it) } ?: put(
-            LOGIN_ID, "har ingen login id"
-        )
+        request.cookies?.firstOrNull { it.name == IdPortenController.LOGIN_ID_COOKIE }?.value?.let { put(LOGIN_ID, it) }
     }
 
     private fun addCallId(request: HttpServletRequest) {

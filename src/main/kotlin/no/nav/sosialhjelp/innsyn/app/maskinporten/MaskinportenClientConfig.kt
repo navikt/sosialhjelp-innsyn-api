@@ -46,10 +46,10 @@ class MaskinportenClientConfig(
 
     private val wellknown: WellKnown
         get() = maskinportenWebClient.get()
-            .uri(wellKnownUrl)
+            .uri(wellKnownUrl).also { log.info("Henter well known fra: $wellKnownUrl") }
             .retrieve()
             .bodyToMono<WellKnown>()
-            .doOnSuccess { log.info("Hentet WellKnown for Maskinporten") }
+            .doOnSuccess { log.info("Hentet WellKnown for Maskinporten. Fikk issuer: ${it.issuer} og endpoint: ${it.token_endpoint}") }
             .doOnError { log.warn("Feil ved henting av WellKnown for Maskinporten", it) }
             .block() ?: throw RuntimeException("Feil ved henting av WellKnown for Maskinporten")
 

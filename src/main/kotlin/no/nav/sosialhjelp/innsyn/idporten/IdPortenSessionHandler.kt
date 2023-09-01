@@ -44,7 +44,7 @@ class IdPortenSessionHandler(
     fun getToken(request: HttpServletRequest): String? {
         val loginId = request.cookies?.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
         if (loginId != null) {
-            log.info("Henter token for loginId er: $loginId")
+            log.info("Henter token for loginId: $loginId")
             val accessToken = redisService.get("$ACCESS_TOKEN_CACHE_PREFIX$loginId", String::class.java)
             return accessToken ?: getAccessTokenFromRefreshToken(loginId)
         }

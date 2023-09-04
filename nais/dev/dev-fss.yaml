@@ -61,7 +61,7 @@ spec:
     - name: NORG_URL
       value: "https://norg2.dev.intern.nav.no/norg2/api/v1"
     - name: INNSYN_LOGINURL
-      value: "https://loginservice.dev.nav.no/login"
+      value: "https://login.ekstern.dev.nav.no/oauth2/login"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "10"
     - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS

@@ -78,6 +78,7 @@ spec:
     - secret: redis-password-innsyn-api
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
+    - secret: my-application-unleash-api-token
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "idporten, log-kibana"

@@ -51,6 +51,7 @@ spec:
     - secret: xsrf-secret
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
+    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       external:

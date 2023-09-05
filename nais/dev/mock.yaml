@@ -45,6 +45,7 @@ spec:
       memory: 512Mi
   envFrom:
     - configmap: loginservice-idporten
+    - secret: my-application-unleash-api-token
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"

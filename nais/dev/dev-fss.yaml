@@ -51,6 +51,10 @@ spec:
     - secret: xsrf-secret
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
+  accessPolicy:
+    outbound:
+      external:
+        - host: teamdigisos-unleash-api.nav.cloud.nais.io
   env:
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "https://api.fiks.test.ks.no"

@@ -79,7 +79,7 @@ class IdPortenClient(
             .scope(Scope("openid", "profile", "ks:fiks"))
             .state(state)
             .customParameter("nonce", nonce.value)
-            .customParameter("acr_values", "Level4")
+            .customParameter("acr_values", "idporten-loa-high")
             .codeChallenge(codeVerifier, CodeChallengeMethod.S256)
             .redirectionURI(URI(idPortenProperties.redirectUri))
             .endpointURI(URI(idPortenProperties.wellKnown.authorizationEndpoint))

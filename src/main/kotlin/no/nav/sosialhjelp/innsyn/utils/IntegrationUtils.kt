@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.utils
 
 object IntegrationUtils {
     const val SELVBETJENING = "selvbetjening"
-    const val ACR_LEVEL4 = "acr=Level4"
+    const val ACR_LEVEL4 = "acr=idporten-loa-high"
 
     const val HEADER_INTEGRASJON_ID = "IntegrasjonId"
     const val HEADER_INTEGRASJON_PASSORD = "IntegrasjonPassord"

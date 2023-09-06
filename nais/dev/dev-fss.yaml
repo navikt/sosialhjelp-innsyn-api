@@ -83,7 +83,7 @@ spec:
     - name: CLAMAV_URL
       value: "http://clamav.nais-system.svc.nais.local/scan"
     - name: LOGIN_API_IDPORTEN_CLIENTID
-      value: "1c3631f4-dbf2-4c12-bdc4-156cbd53c625"
+      value: "9664fbe4-a807-4914-95f4-12146085d23c"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
     - name: SOKNAD_API_URL

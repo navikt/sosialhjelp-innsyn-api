@@ -14,7 +14,7 @@ class MockOauth2ServerUtils(private val mockOauth2Server: MockOAuth2Server) {
             issuerId = "selvbetjening",
             subject = "selvbetjening",
             claims = mapOf(
-                "acr" to "Level4"
+                "acr" to "idporten-loa-high"
             )
         ).serialize()
     }

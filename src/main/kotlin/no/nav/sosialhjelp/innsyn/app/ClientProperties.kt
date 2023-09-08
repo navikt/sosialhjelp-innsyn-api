@@ -22,8 +22,8 @@ class ClientProperties {
     lateinit var pdlEndpointUrl: String
     lateinit var pdlAudience: String
 
-    lateinit var unleashUrl: String
-    lateinit var unleashInstanceId: String
+    lateinit var unleash_server_api_url: String
+    lateinit var unleash_server_api_token: String
 
     lateinit var tokendingsUrl: String
     lateinit var tokendingsClientId: String

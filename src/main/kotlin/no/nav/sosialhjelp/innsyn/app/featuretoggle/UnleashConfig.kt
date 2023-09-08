@@ -20,7 +20,7 @@ class UnleashConfig(
     fun unleashClient(): Unleash {
         return DefaultUnleash(
             config(),
-            ByInstanceIdStrategy(clientProperties.unleashInstanceId)
+            ByInstanceIdStrategy(clientProperties.unleash_server_api_url)
         )
     }
 

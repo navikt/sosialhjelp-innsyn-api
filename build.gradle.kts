@@ -25,7 +25,7 @@ object Versions {
     const val fiksKryptering = "1.3.1"
     const val lettuce = "6.2.3.RELEASE"
     const val jempbox = "1.8.17"
-    const val unleash = "4.4.1"
+    const val unleash = "8.3.0"
     const val springdoc = "2.0.2"
     const val jsonSmart = "2.4.10"
     const val gson = "2.10"
@@ -139,8 +139,8 @@ dependencies {
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")
 
-//    Unleash
-    implementation("no.finn.unleash:unleash-client-java:${Versions.unleash}")
+    // Unleash
+    implementation("io.getunleash:unleash-client-java:${Versions.unleash}")
 
 //    Redis
     implementation("io.lettuce:lettuce-core:${Versions.lettuce}")

@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.digisosapi.test
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -25,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile
  *  Endepunkter som kun tilbys for sosialhjelp-fagsystem-mock -> kun tilgjengelig i preprod, ved lokal kjøring og i mock
  */
 @Profile("!prod-fss")
-@ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4])
+@ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4, ACR_IDPORTEN_LOA_HIGH], combineWithOr = true)
 @RestController
 @RequestMapping("/api/v1/digisosapi")
 class DigisosApiTestController(

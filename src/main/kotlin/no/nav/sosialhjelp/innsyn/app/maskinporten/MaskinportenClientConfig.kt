@@ -49,7 +49,7 @@ class MaskinportenClientConfig(
             .uri(wellKnownUrl)
             .retrieve()
             .bodyToMono<WellKnown>()
-            .doOnSuccess { log.info("Hentet WellKnown for Maskinporten") }
+            .doOnSuccess { log.info("Hentet WellKnown for Maskinporten.") }
             .doOnError { log.warn("Feil ved henting av WellKnown for Maskinporten", it) }
             .block() ?: throw RuntimeException("Feil ved henting av WellKnown for Maskinporten")
 

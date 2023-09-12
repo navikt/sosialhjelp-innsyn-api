@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import no.finn.unleash.Unleash
+import io.getunleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon

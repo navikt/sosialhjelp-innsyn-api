@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app.featuretoggle.strategy
 
-import no.finn.unleash.strategy.Strategy
+import io.getunleash.strategy.Strategy
 
 class ByInstanceIdStrategy(
     private val currentInstanceId: String

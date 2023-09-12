@@ -1,9 +1,9 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
+import io.getunleash.Unleash
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED

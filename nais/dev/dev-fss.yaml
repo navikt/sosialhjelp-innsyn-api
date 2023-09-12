@@ -79,9 +79,9 @@ spec:
       value: "https://pdl-api.dev.intern.nav.no/graphql"
     - name: PDL_AUDIENCE
       value: "dev-fss:pdl:pdl-api"
-    - name: UNLEASH_API_URL
-      value: "https://unleash.nais.io/api"
     - name: UNLEASH_INSTANCE_ID
+      value: "sosialhjelp-innsyn-api"
+    - name: UNLEASH_ENV
       value: "dev-fss"
     - name: SWAGGER_ENABLED
       value: "true"

@@ -1,16 +1,13 @@
 package no.nav.sosialhjelp.innsyn.app.featuretoggle
 
-import no.finn.unleash.DefaultUnleash
-import no.finn.unleash.FakeUnleash
-import no.finn.unleash.Unleash
-import no.finn.unleash.util.UnleashConfig
+import io.getunleash.DefaultUnleash
+import io.getunleash.Unleash
+import io.getunleash.util.UnleashConfig
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.strategy.ByInstanceIdStrategy
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 
-@Profile("!local")
 @Configuration
 class UnleashConfig(
     private val clientProperties: ClientProperties
@@ -18,25 +15,18 @@ class UnleashConfig(
 
     @Bean
     fun unleashClient(): Unleash {
+        val byInstanceIdStrategy = ByInstanceIdStrategy(clientProperties.unleash_env)
+        val config = UnleashConfig.builder()
+            .appName(clientProperties.unleash_instance_id)
+            .environment(clientProperties.unleash_env)
+            .instanceId(clientProperties.unleash_instance_id + "_" + clientProperties.unleash_env)
+            .unleashAPI("${clientProperties.unleash_server_api_url}/api")
+            .apiKey(clientProperties.unleash_server_api_token)
+            .build()
+
         return DefaultUnleash(
-            config(),
-            ByInstanceIdStrategy(clientProperties.unleash_server_api_url)
+            config,
+            byInstanceIdStrategy
         )
-    }
-
-    private fun config() = UnleashConfig.builder()
-        .appName("sosialhjelp-innsyn-api")
-        .instanceId(clientProperties.unleashInstanceId)
-        .unleashAPI(clientProperties.unleashUrl)
-        .build()
-}
-
-@Profile("local")
-@Configuration
-class UnleashMockConfig {
-
-    @Bean
-    fun unleashClient(): Unleash {
-        return FakeUnleash()
     }
 }

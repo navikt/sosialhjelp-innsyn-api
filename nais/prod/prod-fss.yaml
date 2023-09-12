@@ -77,6 +77,10 @@ spec:
       value: "https://pdl-api.intern.nav.no/graphql"
     - name: PDL_AUDIENCE
       value: "prod-fss:pdl:pdl-api"
+    - name: UNLEASH_INSTANCE_ID
+      value: "sosialhjelp-innsyn-api"
+    - name: UNLEASH_ENV
+      value: "prod-fss"
     - name: SWAGGER_ENABLED
       value: "false"
     - name: CLAMAV_URL

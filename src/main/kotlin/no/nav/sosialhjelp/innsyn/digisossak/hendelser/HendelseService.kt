@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
-import no.finn.unleash.Unleash
+import io.getunleash.Unleash
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse

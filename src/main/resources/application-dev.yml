@@ -1,0 +1,6 @@
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: ${TOKEN_X_WELL_KNOWN_URL}
+    accepted_audience: ${TOKEN_X_CLIENT_ID}
+    validation:
+      optional-claims: aud,nbf

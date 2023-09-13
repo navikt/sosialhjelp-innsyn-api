@@ -119,6 +119,8 @@ spec:
     - name: SOKNAD_API_AUDIENCE
       value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
     - name: MASKINPORTEN_WELL_KNOWN_URL
-      value: "https://ver2.maskinporten.no/.well-known/oauth-authorization-server"
+      value: "https://test.maskinporten.no/.well-known/oauth-authorization-server"
     - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI
       value: "https://www.dev.nav.no/no/utlogget"
+    - name: LOGIN_API_IDPORTEN_CLIENTID
+      value: "9664fbe4-a807-4914-95f4-12146085d23c"

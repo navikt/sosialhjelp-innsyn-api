@@ -30,7 +30,8 @@ class TilgangskontrollService(
 ) : Tilgangskontroll {
 
     override fun sjekkTilgang(token: String) {
-        if (!environment.activeProfiles.contains("idporten")) {
+        // Skal matche login-api client id. Gjelder ikke i dev-gcp (wonderwall)
+        if (!environment.activeProfiles.contains("dev")) {
             if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         }
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)

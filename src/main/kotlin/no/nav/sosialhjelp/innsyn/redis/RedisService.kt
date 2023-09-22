@@ -51,7 +51,7 @@ interface RedisService {
          */
         private fun valider(obj: Any?) {
             when {
-                obj is DigisosSak && obj.sokerFnr != getUserIdFromToken() -> throw DigisosSakTilhorerAnnenBrukerException("DigisosSak tilhører annen bruker")
+                obj is DigisosSak && obj.sokerFnr != getUserIdFromToken() -> throw DigisosSakTilhorerAnnenBrukerException("DigisosSak i cache tilhører annen bruker enn brukeren fra token")
                 obj is JsonDigisosSoker && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonDigisosSoker har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
                 obj is JsonSoknad && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonSoknad har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
                 obj is JsonVedleggSpesifikasjon && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonVedleggSpesifikasjon har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")

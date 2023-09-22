@@ -65,6 +65,6 @@ internal class RedisServiceTest {
         every { mockSubjectHandler.getUserIdFromToken() } returns "not this user"
         every { redisStore.get(any()) } returns ok_digisossak_response.encodeToByteArray()
 
-        assertThatThrownBy { service.get("key", DigisosSak::class.java) }.isInstanceOf(DigisosSakTilhorerAnnenBrukerException::class.java).hasMessage("DigisosSak tilhører annen bruker")
+        assertThatThrownBy { service.get("key", DigisosSak::class.java) }.isInstanceOf(DigisosSakTilhorerAnnenBrukerException::class.java).hasMessage("DigisosSak i cache tilhører annen bruker enn brukeren fra token")
     }
 }

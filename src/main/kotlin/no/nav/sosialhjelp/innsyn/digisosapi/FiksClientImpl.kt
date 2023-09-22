@@ -105,7 +105,10 @@ class FiksClientImpl(
                 when {
                     // Returnerer 403 til frondend for 404, siden det ser ut til at de fleste 404 er mismatch
                     // mellom fiksDigisosId og fnr hos Fiks (altså ikke brukers sak).
-                    e.statusCode == HttpStatus.NOT_FOUND -> FiksClientException(HttpStatus.FORBIDDEN.value(), feilmelding, e)
+                    e.statusCode == HttpStatus.NOT_FOUND -> FiksClientException(
+                        HttpStatus.FORBIDDEN.value(),
+                        "Det er mulig sak ikke tilhører bruker. $feilmelding", e
+                    )
                     e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
                     else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                 }

@@ -6,7 +6,6 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
-import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
@@ -104,7 +103,9 @@ class FiksClientImpl(
             .onErrorMap(WebClientResponseException::class.java) { e ->
                 val feilmelding = "Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}"
                 when {
-                    e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(feilmelding, e)
+                    // Returnerer 403 til frondend for 404, siden det ser ut til at de fleste 404 er mismatch
+                    // mellom fiksDigisosId og fnr hos Fiks (altså ikke brukers sak).
+                    e.statusCode == HttpStatus.NOT_FOUND -> FiksClientException(HttpStatus.FORBIDDEN.value(), feilmelding, e)
                     e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
                     else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                 }

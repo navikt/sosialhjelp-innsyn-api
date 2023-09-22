@@ -39,9 +39,6 @@ interface RedisService {
                 } catch (e: IOException) {
                     log.warn("Fant key=${key.maskerFnr} i cache, men value var ikke ${requestedClass.simpleName}")
                     null
-                } catch (e: DigisosSakTilhorerAnnenBrukerException) {
-                    log.warn("DigisosSak i cache tilhører en annen bruker enn brukeren fra token.")
-                    null
                 }
             } else {
                 log.debug("Fant ikke key=${key.maskerFnr}")

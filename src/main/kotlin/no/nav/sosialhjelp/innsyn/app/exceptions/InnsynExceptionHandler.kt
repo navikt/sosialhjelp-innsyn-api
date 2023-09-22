@@ -111,6 +111,13 @@ class InnsynExceptionHandler(
         return ResponseEntity(error, HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(DigisosSakTilhorerAnnenBrukerException::class)
+    fun handleDigisosSakTilhorerAnnenBrukerException(e: DigisosSakTilhorerAnnenBrukerException): ResponseEntity<FrontendErrorMessage> {
+        log.error("DigisosSak tilhører en annen bruker", e)
+        val error = FrontendErrorMessage(TILGANG_ERROR, "Fnr til innlogget bruker stemmer ikke overens med fnr i saken")
+        return ResponseEntity(error, HttpStatus.FORBIDDEN)
+    }
+
     @ExceptionHandler(NedlastingFilnavnMismatchException::class)
     fun handleNedlastingFilnavnMismatchError(e: NedlastingFilnavnMismatchException): ResponseEntity<FrontendErrorMessage> {
         log.error("Det er mismatch mellom nedlastede filer og metadata", e)

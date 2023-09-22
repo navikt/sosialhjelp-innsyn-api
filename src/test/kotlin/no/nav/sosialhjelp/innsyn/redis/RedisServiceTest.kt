@@ -3,11 +3,13 @@ package no.nav.sosialhjelp.innsyn.redis
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.innsyn.app.exceptions.DigisosSakTilhorerAnnenBrukerException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.kommuneinfo.ok_kommuneinfo_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -59,12 +61,10 @@ internal class RedisServiceTest {
     }
 
     @Test
-    internal fun `digisosSak tilhorer annen bruker gir null`() {
+    internal fun `digisosSak tilhorer annen bruker gir exception`() {
         every { mockSubjectHandler.getUserIdFromToken() } returns "not this user"
         every { redisStore.get(any()) } returns ok_digisossak_response.encodeToByteArray()
 
-        val digisosSak = service.get("key", DigisosSak::class.java)
-
-        assertThat(digisosSak).isNull()
+        assertThatThrownBy { service.get("key", DigisosSak::class.java) }.isInstanceOf(DigisosSakTilhorerAnnenBrukerException::class.java).hasMessage("DigisosSak tilhører annen bruker")
     }
 }

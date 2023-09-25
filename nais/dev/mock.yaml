@@ -33,6 +33,10 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-soknad-api-mock
+    inbound:
+      rules:
+        - application: sosialhjelp-innsyn-mock
+        - application: sosialhjelp-mock-alt-api-mock
   ingresses:
     - "https://sosialhjelp-innsyn-api-mock.ekstern.dev.nav.no/sosialhjelp/innsyn-api"
   resources:

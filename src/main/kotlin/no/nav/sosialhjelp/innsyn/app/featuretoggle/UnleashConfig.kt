@@ -1,14 +1,16 @@
 package no.nav.sosialhjelp.innsyn.app.featuretoggle
 
 import io.getunleash.DefaultUnleash
+import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
 import io.getunleash.util.UnleashConfig
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.strategy.ByInstanceIdStrategy
 import org.springframework.context.annotation.Bean
-import org.springframework.stereotype.Component
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 
-@Component
+@Configuration
 class UnleashConfig(
     private val clientProperties: ClientProperties
 ) {
@@ -28,5 +30,15 @@ class UnleashConfig(
             config,
             byInstanceIdStrategy
         )
+    }
+}
+
+@Profile("local")
+@Configuration
+class UnleashMockConfig {
+
+    @Bean
+    fun unleashClient(): Unleash {
+        return FakeUnleash()
     }
 }

@@ -30,6 +30,8 @@ spec:
       external:
         - host: unleash.nais.io
         - host: digisos.ekstern.dev.nav.no
+        - host: test.maskinporten.no
+        - host: api.fiks.test.ks.no
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-soknad-api-mock
@@ -45,8 +47,16 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: "ks:fiks"
   envFrom:
     - configmap: loginservice-idporten
+    - secret: innsyn-api-fiks-io-integrasjonspassord
+  filesFrom:
+    - secret: innyn-api-fiks-io-private-key
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
@@ -72,7 +82,7 @@ spec:
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/tokenx"
     - name: TOKEN_X_CLIENT_ID
       value: "dev-gcp:teamdigisos:sosialhjelp-innsyn-api-mock"
-    - name: MASKINPORTEN_WELL_KNOWN_URL
+    - name: MOCK_ALT_MASKINPORTEN_WELL_KNOWN_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/maskinporten"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON,Testsystemet;1.0.0"

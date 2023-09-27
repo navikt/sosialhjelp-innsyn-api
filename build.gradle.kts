@@ -165,10 +165,6 @@ dependencies {
             because("Snyk ønsker 2.4.5 eller høyere. Transitiv avhengighet dratt inn av com.nimbusds:oauth2-oidc-sdk@9.3.3 har sårbarhet.")
         }
 
-        implementation("com.google.code.gson:gson:${Versions.gson}") {
-            because("Snyk ønsker 2.8.9 eller høyere. Transitiv avhengighet dratt inn av unleash-client-java.")
-        }
-
         implementation("org.apache.logging.log4j:log4j-api:${Versions.log4j}") {
             because("0-day exploit i version 2.0.0-2.14.1")
         }

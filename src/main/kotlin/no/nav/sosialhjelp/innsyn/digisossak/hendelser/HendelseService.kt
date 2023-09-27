@@ -35,6 +35,7 @@ class HendelseService(
         model.leggTilHendelserForUtbetalinger()
 
         if (unleashClient.isEnabled(VILKAR_ENABLED, false)) {
+            log.info("UNLEASH TOGGLE ER ENABLED")
             model.leggTilHendelserForVilkar()
         }
 

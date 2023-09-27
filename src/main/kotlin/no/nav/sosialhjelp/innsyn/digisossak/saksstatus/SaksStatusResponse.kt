@@ -8,11 +8,12 @@ data class SaksStatusResponse(
     val tittel: String,
     val status: SaksStatus?,
     val skalViseVedtakInfoPanel: Boolean,
-    val vedtaksfilUrlList: List<VedtaksfilUrl>?
+    val vedtaksfilUrlList: List<FilUrl>?,
 )
 
-data class VedtaksfilUrl(
+data class FilUrl(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val dato: LocalDate?,
-    val vedtaksfilUrl: String
+    val url: String,
+    val id: String,
 )

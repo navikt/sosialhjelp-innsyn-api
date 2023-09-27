@@ -31,13 +31,16 @@ object Versions {
     const val gson = "2.10"
     const val log4j = "2.19.0"
     const val snakeyaml = "2.0"
+    const val fiksIO = "3.3.2"
+    const val googleCloudLibraries = "26.14.0"
+    const val googleCloudSecretmanager = "2.10.0"
 
     const val javaJwt = "4.3.0"
     const val jwksRsa = "0.22.0"
     const val nimbusJoseJwt = "9.31"
 
     const val ktlint = "0.45.2"
-    const val bouncycastle = "1.74"
+    const val bouncycastle = "1.76"
     const val netty = "4.1.94.Final"
 
     const val jakartaActivationApi = "2.1.0"
@@ -125,6 +128,13 @@ dependencies {
 
 //    Filformat
     implementation("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:${Versions.filformat}")
+
+//  Fiks IO
+    implementation("no.ks.fiks:fiks-io-klient-java:${Versions.fiksIO}")
+
+    // Google secret manager
+    implementation(platform("com.google.cloud:libraries-bom:${Versions.googleCloudLibraries}"))
+    implementation("com.google.cloud:google-cloud-secretmanager:${Versions.googleCloudSecretmanager}")
 
 //    Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jackson}")

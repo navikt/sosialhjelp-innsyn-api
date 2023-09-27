@@ -21,7 +21,7 @@ import java.time.YearMonth
 @Component
 class UtbetalingerService(
     private val eventService: EventService,
-    private val fiksClient: FiksClient
+    private val fiksClient: FiksClient,
 ) {
 
     fun hentUtbetalingerForSak(fiksDigisosId: String, token: String): List<UtbetalingerResponse> {
@@ -189,9 +189,11 @@ class UtbetalingerService(
             status == UtbetalingsStatus.UTBETALT && utbetalingsDato == null -> {
                 log.info("Utbetaling ($referanse) med status=${UtbetalingsStatus.UTBETALT} har ikke utbetalingsDato. Kommune=$kommunenummer")
             }
+
             status == UtbetalingsStatus.PLANLAGT_UTBETALING && forfallsDato == null -> {
                 log.info("Utbetaling ($referanse) med status=${UtbetalingsStatus.PLANLAGT_UTBETALING} har ikke forfallsDato. Kommune=$kommunenummer")
             }
+
             status == UtbetalingsStatus.STOPPET && (forfallsDato == null || utbetalingsDato == null) -> {
                 log.info("Utbetaling ($referanse) med status=${UtbetalingsStatus.STOPPET} mangler forfallsDato eller utbetalingsDato. Kommune=$kommunenummer")
             }

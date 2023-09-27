@@ -6,6 +6,7 @@ import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
@@ -24,6 +25,7 @@ interface DokumentlagerClient {
 @Component
 class DokumentlagerClientImpl(
     private val fiksWebClient: WebClient,
+    @Qualifier("maskinportenClient")
     private val maskinportenClient: MaskinportenClient
 ) : DokumentlagerClient {
 

@@ -25,6 +25,12 @@ maskinporten_scopes: scopes
 maskinporten_well_known_url: http://localhost:${mock-oauth2-server.port}/maskinporten/.well-known/openid-configuration
 maskinporten_client_jwk: generateRSA
 
+#Maskinporten
+special_maskinporten_clientid: clientid
+special_maskinporten_scopes: scopes
+special_maskinporten_well_known_url: http://localhost:${mock-oauth2-server.port}/maskinporten/.well-known/openid-configuration
+special_maskinporten_client_jwk: generateRSA
+
 idporten_well_known_url: http://localhost:${mock-oauth2-server.port}/idporten/.well-known/openid-configuration
 idporten_clientid: sosialhjelp-innsyn-api
 idporten_client_jwk: generateRSA

@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
-import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService.Companion.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -28,6 +27,7 @@ internal class SaksStatusServiceTest {
     private val tittel = "tittel"
     private val referanse = "referanse"
     private val vedtaksfilUrl = "url"
+    private val id = "id"
 
     private val mockDigisosSak: DigisosSak = mockk()
 
@@ -84,7 +84,8 @@ internal class SaksStatusServiceTest {
                     Vedtak(
                         utfall = UtfallVedtak.INNVILGET,
                         vedtaksFilUrl = vedtaksfilUrl,
-                        dato = LocalDate.now()
+                        dato = LocalDate.now(),
+                        id = ""
                     )
                 ),
                 utbetalinger = mutableListOf()
@@ -100,7 +101,7 @@ internal class SaksStatusServiceTest {
         assertThat(response[0].status).isEqualTo(SaksStatus.FERDIGBEHANDLET)
         assertThat(response[0].tittel).isEqualTo(tittel)
         assertThat(response[0].vedtaksfilUrlList).hasSize(1)
-        assertThat(response[0].vedtaksfilUrlList?.get(0)?.vedtaksfilUrl).isEqualTo(vedtaksfilUrl)
+        assertThat(response[0].vedtaksfilUrlList?.get(0)?.url).isEqualTo(vedtaksfilUrl)
     }
 
     @Test
@@ -115,7 +116,8 @@ internal class SaksStatusServiceTest {
                     Vedtak(
                         utfall = UtfallVedtak.INNVILGET,
                         vedtaksFilUrl = vedtaksfilUrl,
-                        dato = LocalDate.now()
+                        dato = LocalDate.now(),
+                        id = id
                     )
                 ),
                 utbetalinger = mutableListOf()
@@ -131,7 +133,7 @@ internal class SaksStatusServiceTest {
         assertThat(response[0].status).isEqualTo(SaksStatus.FERDIGBEHANDLET)
         assertThat(response[0].tittel).isEqualTo(DEFAULT_SAK_TITTEL)
         assertThat(response[0].vedtaksfilUrlList).hasSize(1)
-        assertThat(response[0].vedtaksfilUrlList?.get(0)?.vedtaksfilUrl).isEqualTo(vedtaksfilUrl)
+        assertThat(response[0].vedtaksfilUrlList?.get(0)?.url).isEqualTo(vedtaksfilUrl)
     }
 
     @Test
@@ -147,12 +149,14 @@ internal class SaksStatusServiceTest {
                         Vedtak(
                             utfall = UtfallVedtak.INNVILGET,
                             vedtaksFilUrl = vedtaksfilUrl,
-                            dato = LocalDate.now()
+                            dato = LocalDate.now(),
+                            id = id,
                         ),
                         Vedtak(
                             utfall = UtfallVedtak.INNVILGET,
                             vedtaksFilUrl = vedtaksfilUrl,
-                            dato = LocalDate.now()
+                            dato = LocalDate.now(),
+                            id = id,
                         )
                     ),
                     utbetalinger = mutableListOf()
@@ -186,27 +190,32 @@ internal class SaksStatusServiceTest {
         val vedtak1 = Vedtak(
             utfall = UtfallVedtak.INNVILGET,
             vedtaksFilUrl = "en link til noe",
-            dato = null
+            dato = null,
+            id = id,
         )
         val vedtak2 = Vedtak(
             utfall = UtfallVedtak.DELVIS_INNVILGET,
             vedtaksFilUrl = "en link til noe",
-            dato = null
+            dato = null,
+            id = id,
         )
         val vedtak3 = Vedtak(
             utfall = UtfallVedtak.AVVIST,
             vedtaksFilUrl = "en link til noe",
-            dato = null
+            dato = null,
+            id = id,
         )
         val vedtak4 = Vedtak(
             utfall = UtfallVedtak.AVSLATT,
             vedtaksFilUrl = "en link til noe",
-            dato = null
+            dato = null,
+            id = id,
         )
         val vedtak5 = Vedtak(
             utfall = null,
             vedtaksFilUrl = "en link til noe",
-            dato = null
+            dato = null,
+            id = id,
         )
         val sakSomSkalGiTrue = Sak(
             "ref1",
@@ -223,7 +232,19 @@ internal class SaksStatusServiceTest {
             utbetalinger = mutableListOf()
         )
 
-        assertThat(service.getSkalViseVedtakInfoPanel(sakSomSkalGiTrue)).isEqualTo(true)
-        assertThat(service.getSkalViseVedtakInfoPanel(sakSomSkalGiFalse)).isEqualTo(false)
+        val digisosSak1 = DigisosSak("id1", "", "", "", 1L, null, null, null, null)
+        every {
+            fiksClient.hentDigisosSak("id1", "token", true)
+        } returns digisosSak1
+        val digisosSak2 = DigisosSak("id2", "", "", "", 1L, null, null, null, null)
+        every {
+            fiksClient.hentDigisosSak("id2", "token", true)
+        } returns digisosSak2
+
+        every { eventService.createModel(digisosSak1, "token") } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiTrue))
+        every { eventService.createModel(digisosSak2, "token") } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiFalse))
+
+        assertThat(service.hentSaksStatuser("id1", "token").first().skalViseVedtakInfoPanel).isEqualTo(true)
+        assertThat(service.hentSaksStatuser("id2", "token").first().skalViseVedtakInfoPanel).isEqualTo(false)
     }
 }

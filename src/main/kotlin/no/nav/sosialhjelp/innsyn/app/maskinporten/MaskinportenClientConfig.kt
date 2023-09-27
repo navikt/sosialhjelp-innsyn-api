@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
@@ -12,22 +13,19 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.netty.http.client.HttpClient
 
-@Configuration
-class MaskinportenClientConfig(
-    @Value("\${maskinporten_clientid}") private val clientId: String,
-    @Value("\${maskinporten_scopes}") private val scopes: String,
-    @Value("\${maskinporten_well_known_url}") private val wellKnownUrl: String,
-    @Value("\${maskinporten_client_jwk}") private val clientJwk: String,
+sealed class MaskinportenClientConfig(
+    clientId: String,
+    scopes: String,
+    private val wellKnownUrl: String,
+    clientJwk: String,
     webClientBuilder: WebClient.Builder,
     proxiedHttpClient: HttpClient,
 ) {
 
-    @Bean
-    fun maskinportenClient(): MaskinportenClient {
-        return MaskinportenClient(maskinportenWebClient, maskinportenProperties, wellknown)
-    }
+    protected val log by logger()
+    abstract fun maskinportenClient(): MaskinportenClient
 
-    private val maskinportenWebClient: WebClient =
+    protected val maskinportenWebClient: WebClient =
         webClientBuilder
             .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
             .codecs {
@@ -37,14 +35,14 @@ class MaskinportenClientConfig(
             }
             .build()
 
-    private val maskinportenProperties = MaskinportenProperties(
+    protected val maskinportenProperties = MaskinportenProperties(
         clientId = clientId,
         clientJwk = clientJwk,
         scope = scopes,
         wellKnownUrl = wellKnownUrl
     )
 
-    private val wellknown: WellKnown
+    protected val wellknown: WellKnown
         get() = maskinportenWebClient.get()
             .uri(wellKnownUrl)
             .retrieve()
@@ -52,9 +50,56 @@ class MaskinportenClientConfig(
             .doOnSuccess { log.info("Hentet WellKnown for Maskinporten.") }
             .doOnError { log.warn("Feil ved henting av WellKnown for Maskinporten", it) }
             .block() ?: throw RuntimeException("Feil ved henting av WellKnown for Maskinporten")
+}
 
-    companion object {
-        private val log by logger()
+@Configuration
+class MaskinportenClientConfigImpl(
+    @Value("\${maskinporten_clientid}") private val clientId: String,
+    @Value("\${maskinporten_scopes}") private val scopes: String,
+    @Value("\${maskinporten_well_known_url}") private val wellKnownUrl: String,
+    @Value("\${maskinporten_client_jwk}") private val clientJwk: String,
+    webClientBuilder: WebClient.Builder,
+    proxiedHttpClient: HttpClient,
+) : MaskinportenClientConfig(clientId, scopes, wellKnownUrl, clientJwk, webClientBuilder, proxiedHttpClient) {
+    @Bean("maskinportenClient")
+    override fun maskinportenClient(): MaskinportenClient {
+        log.info(
+            """Setter opp "vanlig" maskinportenklient med 
+      | {
+      |   maskinporten_clientid: $clientId,
+      |   maskinporten_scopes: $scopes,
+      |   maskinporten_well_known_url: $wellKnownUrl,
+      |   maskinporten_client_jwk: $clientJwk
+      | }
+            """.trimMargin()
+        )
+        return MaskinportenClient(maskinportenWebClient, maskinportenProperties, wellknown)
+    }
+}
+
+@Configuration
+@Profile("!local")
+class SpecialMaskinportenClientConfig(
+    @Value("\${special_maskinporten_clientid}") private val clientId: String,
+    @Value("\${special_maskinporten_scopes}") private val scopes: String,
+    @Value("\${special_maskinporten_well_known_url}") private val wellKnownUrl: String,
+    @Value("\${special_maskinporten_client_jwk}") private val clientJwk: String,
+    webClientBuilder: WebClient.Builder,
+    proxiedHttpClient: HttpClient,
+) : MaskinportenClientConfig(clientId, scopes, wellKnownUrl, clientJwk, webClientBuilder, proxiedHttpClient) {
+    @Bean("specialMaskinportenClient")
+    override fun maskinportenClient(): MaskinportenClient {
+        log.info(
+            """Setter opp "special" maskinportenklient med 
+      | {
+      |   maskinporten_clientid: $clientId,
+      |   maskinporten_scopes: $scopes,
+      |   maskinporten_well_known_url: $wellKnownUrl,
+      |   maskinporten_client_jwk: $clientJwk
+      | }
+            """.trimMargin()
+        )
+        return MaskinportenClient(maskinportenWebClient, maskinportenProperties, wellknown)
     }
 }
 

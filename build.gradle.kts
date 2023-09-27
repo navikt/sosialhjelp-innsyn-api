@@ -31,6 +31,7 @@ object Versions {
     const val gson = "2.10"
     const val log4j = "2.19.0"
     const val snakeyaml = "2.0"
+    const val fiksIO = "3.2.2"
 
     const val javaJwt = "4.3.0"
     const val jwksRsa = "0.22.0"
@@ -125,6 +126,9 @@ dependencies {
 
 //    Filformat
     implementation("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:${Versions.filformat}")
+
+//  Fiks IO
+    implementation("no.ks.fiks:fiks-io-klient-java:${Versions.fiksIO}")
 
 //    Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jackson}")

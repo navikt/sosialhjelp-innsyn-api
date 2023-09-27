@@ -15,7 +15,6 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_TEMA
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.TEMA_KOM
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -29,7 +28,6 @@ interface PdlClient {
     fun ping()
 }
 
-@Profile("!local")
 @Component
 class PdlClientImpl(
     private val pdlWebClient: WebClient,

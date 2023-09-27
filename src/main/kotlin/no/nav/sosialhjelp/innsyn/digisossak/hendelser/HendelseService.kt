@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
 import io.getunleash.Unleash
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -33,10 +32,7 @@ class HendelseService(
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
         model.leggTilHendelserForUtbetalinger()
-
-        if (unleashClient.isEnabled(VILKAR_ENABLED, false)) {
-            model.leggTilHendelserForVilkar()
-        }
+        model.leggTilHendelserForVilkar()
 
         val responseList = model.historikk
             .sortedBy { it.tidspunkt }

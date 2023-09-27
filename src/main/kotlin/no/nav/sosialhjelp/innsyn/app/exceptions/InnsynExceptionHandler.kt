@@ -47,7 +47,7 @@ class InnsynExceptionHandler(
 
     @ExceptionHandler(FiksNotFoundException::class)
     fun handleFiksNotFoundError(e: FiksNotFoundException): ResponseEntity<FrontendErrorMessage> {
-        log.error(e.message, e)
+        log.warn(e.message, e)
         val error = FrontendErrorMessage(FIKS_ERROR, "DigisosSak finnes ikke")
         return ResponseEntity(error, HttpStatus.NOT_FOUND)
     }
@@ -136,7 +136,7 @@ class InnsynExceptionHandler(
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
         }
-        log.info("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl. Feilmelding: ${ex.message}")
+        log.error("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl", ex)
         return createUnauthorizedWithLoginUrlResponse(innsynLoginUrl)
     }
 

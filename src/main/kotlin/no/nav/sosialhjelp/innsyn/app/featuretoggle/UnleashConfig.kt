@@ -6,9 +6,9 @@ import io.getunleash.util.UnleashConfig
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.strategy.ByInstanceIdStrategy
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Component
 
-@Configuration
+@Component
 class UnleashConfig(
     private val clientProperties: ClientProperties
 ) {

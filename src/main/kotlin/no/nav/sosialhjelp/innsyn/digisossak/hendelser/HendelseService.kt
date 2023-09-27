@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
-import io.getunleash.Unleash
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -21,8 +19,7 @@ import kotlin.math.floor
 class HendelseService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
-    private val fiksClient: FiksClient,
-    private val unleashClient: Unleash
+    private val fiksClient: FiksClient
 ) {
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
@@ -33,11 +30,7 @@ class HendelseService(
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
         model.leggTilHendelserForUtbetalinger()
-
-        if (unleashClient.isEnabled(VILKAR_ENABLED, false)) {
-            log.info("UNLEASH TOGGLE ER ENABLED")
-            model.leggTilHendelserForVilkar()
-        }
+        model.leggTilHendelserForVilkar()
 
         val responseList = model.historikk
             .sortedBy { it.tidspunkt }

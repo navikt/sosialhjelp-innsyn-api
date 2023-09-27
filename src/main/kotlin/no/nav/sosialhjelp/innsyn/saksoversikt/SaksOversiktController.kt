@@ -4,7 +4,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
-import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
@@ -69,7 +69,7 @@ class SaksOversiktController(
 
     private fun hentNavn(model: InternalDigisosSoker): String {
         return model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString {
-            it.tittel ?: SaksStatusService.DEFAULT_SAK_TITTEL
+            it.tittel ?: DEFAULT_SAK_TITTEL
         }
     }
 

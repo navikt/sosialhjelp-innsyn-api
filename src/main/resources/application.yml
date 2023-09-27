@@ -69,10 +69,15 @@ client:
 
 
 #Maskinporten
-maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
-maskinporten_scopes: ${MASKINPORTEN_SCOPES}
-maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
-maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
+#maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
+#maskinporten_scopes: ${MASKINPORTEN_SCOPES}
+#maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
+#maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
+
+special_maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
+special_maskinporten_scopes: ${MASKINPORTEN_SCOPES}
+special_maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
+special_maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
 
 #Token-validering
 no.nav.security.jwt:

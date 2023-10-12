@@ -37,7 +37,7 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
   ingresses:
-    - "https://sosialhjelp-innsyn-api-mock.ekstern.dev.nav.no/sosialhjelp/innsyn-api"
+    - "https://digisos.ekstern.dev.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
       cpu: 500m

@@ -30,8 +30,6 @@ class HendelseService(
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
         model.leggTilHendelserForUtbetalinger()
-        model.leggTilHendelserForVilkar()
-
         val responseList = model.historikk
             .sortedBy { it.tidspunkt }
             .map { HendelseResponse(it.tidspunkt.toString(), it.hendelseType.name, it.url, it.tekstArgument) }
@@ -48,18 +46,6 @@ class HendelseService(
                 val antallVedleggForTidspunkt = samtidigOpplastedeVedlegg.sumOf { it.dokumentInfoList.size }
                 historikk.add(
                     Hendelse(HendelseTekstType.ANTALL_SENDTE_VEDLEGG, tidspunkt, tekstArgument = "$antallVedleggForTidspunkt")
-                )
-            }
-    }
-
-    private fun InternalDigisosSoker.leggTilHendelserForVilkar() {
-        saker
-            .flatMap { it.utbetalinger }
-            .flatMap { it.vilkar }
-            .groupBy { it.datoSistEndret.rundNedTilNaermeste5Minutt() }
-            .forEach { (_, grupperteVilkar) ->
-                historikk.add(
-                    Hendelse(HendelseTekstType.VILKAR_OPPDATERT, grupperteVilkar[0].datoSistEndret)
                 )
             }
     }

@@ -6,7 +6,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.OpplastingFilnavnMismatchException
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.LOGGE_MISMATCH_FILNAVN
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
@@ -219,10 +218,6 @@ class VedleggOpplastingService(
 
         val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
         if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
-            if (unleash.isEnabled(LOGGE_MISMATCH_FILNAVN, false)) {
-                log.error("Filnavn som ga mismatch: ${getMismatchFilnavnListsAsString(filnavnMetadata, filnavnMultipart)}")
-            }
-
             throw OpplastingFilnavnMismatchException(
                 "Antall filnavn som matcher i metadata og files (size $nofFilenameMatchInMetadataAndFiles) stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
                     "Strukturen til metadata: ${getMetadataAsString(metadata)}",

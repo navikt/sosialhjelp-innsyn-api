@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
-import no.finn.unleash.Unleash
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -21,8 +19,7 @@ import kotlin.math.floor
 class HendelseService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
-    private val fiksClient: FiksClient,
-    private val unleashClient: Unleash
+    private val fiksClient: FiksClient
 ) {
 
     fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
@@ -33,11 +30,6 @@ class HendelseService(
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
         model.leggTilHendelserForUtbetalinger()
-
-        if (unleashClient.isEnabled(VILKAR_ENABLED, false)) {
-            model.leggTilHendelserForVilkar()
-        }
-
         val responseList = model.historikk
             .sortedBy { it.tidspunkt }
             .map { HendelseResponse(it.tidspunkt.toString(), it.hendelseType.name, it.url, it.tekstArgument) }
@@ -54,18 +46,6 @@ class HendelseService(
                 val antallVedleggForTidspunkt = samtidigOpplastedeVedlegg.sumOf { it.dokumentInfoList.size }
                 historikk.add(
                     Hendelse(HendelseTekstType.ANTALL_SENDTE_VEDLEGG, tidspunkt, tekstArgument = "$antallVedleggForTidspunkt")
-                )
-            }
-    }
-
-    private fun InternalDigisosSoker.leggTilHendelserForVilkar() {
-        saker
-            .flatMap { it.utbetalinger }
-            .flatMap { it.vilkar }
-            .groupBy { it.datoSistEndret.rundNedTilNaermeste5Minutt() }
-            .forEach { (_, grupperteVilkar) ->
-                historikk.add(
-                    Hendelse(HendelseTekstType.VILKAR_OPPDATERT, grupperteVilkar[0].datoSistEndret)
                 )
             }
     }

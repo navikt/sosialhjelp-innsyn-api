@@ -10,8 +10,10 @@ client:
   fiks_integrasjonpassord_kommune: "pwdcom"
   pdl_endpoint_url: 'http://localhost:56666'
   pdl_audience: 'dummyAudience'
-  unleash_url: "http://localhost:58888"
   unleash_instance_id: "local"
+  unleash_env: "local"
+  unleash_server_api_url: "http://localhost:58888"
+  unleash_server_api_token: "localtoken"
   tokendings_url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
   tokendings_private_jwk: generateRSA
   soknad_api_url: "http://localhost:59999"

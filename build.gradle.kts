@@ -25,10 +25,9 @@ object Versions {
     const val fiksKryptering = "1.3.1"
     const val lettuce = "6.2.3.RELEASE"
     const val jempbox = "1.8.17"
-    const val unleash = "4.4.1"
+    const val unleash = "8.3.0"
     const val springdoc = "2.0.2"
     const val jsonSmart = "2.4.10"
-    const val gson = "2.10"
     const val log4j = "2.19.0"
     const val snakeyaml = "2.0"
 
@@ -139,8 +138,8 @@ dependencies {
 //    Fiks-kryptering
     implementation("no.ks.fiks:kryptering:${Versions.fiksKryptering}")
 
-//    Unleash
-    implementation("no.finn.unleash:unleash-client-java:${Versions.unleash}")
+    // Unleash
+    implementation("io.getunleash:unleash-client-java:${Versions.unleash}")
 
 //    Redis
     implementation("io.lettuce:lettuce-core:${Versions.lettuce}")
@@ -163,10 +162,6 @@ dependencies {
     constraints {
         implementation("net.minidev:json-smart:${Versions.jsonSmart}") {
             because("Snyk ønsker 2.4.5 eller høyere. Transitiv avhengighet dratt inn av com.nimbusds:oauth2-oidc-sdk@9.3.3 har sårbarhet.")
-        }
-
-        implementation("com.google.code.gson:gson:${Versions.gson}") {
-            because("Snyk ønsker 2.8.9 eller høyere. Transitiv avhengighet dratt inn av unleash-client-java.")
         }
 
         implementation("org.apache.logging.log4j:log4j-api:${Versions.log4j}") {

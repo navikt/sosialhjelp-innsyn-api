@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
-import no.finn.unleash.Unleash
+import io.getunleash.Unleash
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService

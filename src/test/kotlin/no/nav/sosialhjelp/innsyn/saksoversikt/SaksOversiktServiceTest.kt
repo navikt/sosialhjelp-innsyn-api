@@ -1,8 +1,8 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
+import io.getunleash.Unleash
 import io.mockk.every
 import io.mockk.mockk
-import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient

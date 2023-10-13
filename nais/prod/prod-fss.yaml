@@ -49,6 +49,11 @@ spec:
     - secret: redis-password-innsyn-api
     - secret: xsrf-secret
     - secret: fiks-integrasjon-secret
+    - secret: sosialhjelp-innsyn-api-unleash-api-token
+  accessPolicy:
+    outbound:
+      external:
+        - host: teamdigisos-unleash-api.nav.cloud.nais.io
   env:
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "https://api.fiks.ks.no"
@@ -72,9 +77,9 @@ spec:
       value: "https://pdl-api.intern.nav.no/graphql"
     - name: PDL_AUDIENCE
       value: "prod-fss:pdl:pdl-api"
-    - name: UNLEASH_API_URL
-      value: "https://unleash.nais.io/api"
     - name: UNLEASH_INSTANCE_ID
+      value: "sosialhjelp-innsyn-api"
+    - name: UNLEASH_ENV
       value: "prod-fss"
     - name: SWAGGER_ENABLED
       value: "false"

@@ -3,21 +3,15 @@ package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.finn.unleash.Unleash
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.VILKAR_ENABLED
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
-import no.nav.sosialhjelp.innsyn.domain.Sak
-import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
-import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
@@ -35,8 +29,7 @@ internal class HendelseServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
-    private val unleashClient: Unleash = mockk()
-    private val service = HendelseService(eventService, vedleggService, fiksClient, unleashClient)
+    private val service = HendelseService(eventService, vedleggService, fiksClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
 
@@ -70,7 +63,6 @@ internal class HendelseServiceTest {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
-        every { unleashClient.isEnabled(VILKAR_ENABLED, false) } returns true
     }
 
     @Test
@@ -193,57 +185,6 @@ internal class HendelseServiceTest {
         val hendelser = service.hentHendelser("123", "Token")
 
         assertThat(hendelser).hasSize(2)
-    }
-
-    @Test
-    internal fun `hendelser for vilkar - grupper vilkar`() {
-        val model = InternalDigisosSoker()
-
-        val time = LocalDateTime.of(2020, 3, 1, 12, 30, 1)
-        model.saker = mutableListOf(
-            Sak(
-                referanse = "saksref",
-                saksStatus = SaksStatus.UNDER_BEHANDLING,
-                tittel = "tittel",
-                vedtak = mutableListOf(),
-                utbetalinger = mutableListOf(
-                    Utbetaling(
-                        referanse = "utbetalref",
-                        status = UtbetalingsStatus.UTBETALT,
-                        belop = BigDecimal.valueOf(1337.0),
-                        beskrivelse = "beskrivelse",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.now(),
-                        stoppetDato = null,
-                        fom = null,
-                        tom = null,
-                        mottaker = "mottaker",
-                        annenMottaker = false,
-                        kontonummer = "kontonummer",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        vilkar = mutableListOf(
-                            Vilkar("ref1", "tittel", "beskrivelse", Oppgavestatus.RELEVANT, null, time, time),
-                            Vilkar("ref2", "tittel", "beskrivelse2", Oppgavestatus.RELEVANT, null, time, time.plusSeconds(28)),
-                            Vilkar("ref3", "tittel", "beskrivelse3", Oppgavestatus.RELEVANT, null, time, time.plusMinutes(5))
-                        ),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = time
-                    )
-                )
-            )
-        )
-
-        every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
-
-        val hendelser = service.hentHendelser("123", "Token")
-
-        assertThat(hendelser).hasSize(2)
-        val first = hendelser[0]
-        assertThat(first.tidspunkt).isEqualTo(time.toString())
-
-        val second = hendelser[1]
-        assertThat(second.tidspunkt).isEqualTo(time.plusMinutes(5).toString())
     }
 
     @Test

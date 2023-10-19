@@ -52,9 +52,14 @@ spec:
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token
-    - secret: innsyn-api-fiks-io-integrasjonspassord
+    - secret: fiks-io-integrasjonspassord
   filesFrom:
     - secret: innsyn-api-fiks-io-private-key
+  vault:
+    enabled: true
+    paths:
+      - kvPath: "/secret/virksomhetssertifikat/preprod/shared"
+        mountPath: "/var/run/secrets/nais.io/virksomhetssertifikat"
   accessPolicy:
     outbound:
       external:

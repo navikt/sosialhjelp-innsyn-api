@@ -24,7 +24,7 @@ data class DigisosKeyStoreCredentials(
 )
 
 @Configuration
-@Profile("!local&!test")
+@Profile("dev-fss|prod-fss")
 class FiksIoVirksomhetssertifikatConfig(
     @Value("\${fiks-io.virksomhetssertifikat.passwordProjectId}")
     private val passwordProjectId: String,
@@ -44,24 +44,30 @@ class FiksIoVirksomhetssertifikatConfig(
 
     @Bean
     fun virksomhetssertifikatConfig(): VirksomhetssertifikatKonfigurasjon {
-        val (sertifikat, password) = SecretManagerServiceClient.create().use { client ->
+        val (certificateResponse, passwordResponse) = SecretManagerServiceClient.create().use { client ->
             val passwordResponse = client.accessSecretVersionResponse(passwordProjectId, passwordSecretId, passwordSecretVersion)
             val certificateResponse = client.accessSecretVersionResponse(projectId, secretId, versionId)
 
             Pair(certificateResponse.payload, passwordResponse.payload)
         }
-        val passwordThingy = objectMapper.readValue<DigisosKeyStoreCredentials>(password.data.toByteArray())
-        val jceksKeyStore = KeyStore.getInstance("jceks")
-        val passwordAsCharArray = passwordThingy.password.toCharArray()
-        jceksKeyStore.load(sertifikat.data.newInput(), passwordAsCharArray)
-        val jksKeyStore = KeyStore.getInstance("JKS")
+        val password = objectMapper.readValue<DigisosKeyStoreCredentials>(passwordResponse.data.toByteArray())
+        val passwordAsCharArray = password.password.toCharArray()
         val passwordProtection = PasswordProtection(passwordAsCharArray)
+
+        // Sertifikatet har jceks-format
+        val jceksKeyStore = KeyStore.getInstance("jceks")
+        jceksKeyStore.load(certificateResponse.data.newInput(), passwordAsCharArray)
+
+        // Fiks IO signerer pakkene med sertifikatet, men støtter bare JKS.
+        val jksKeyStore = KeyStore.getInstance("JKS")
+        jksKeyStore.load(null, passwordAsCharArray)
+
+        // Vi må kopiere innholdet i jceks keyStoren til JKS keyStoren
         for (alias in jceksKeyStore.aliases()) {
-          val entry = jceksKeyStore.getEntry(alias, passwordProtection)
-          jksKeyStore.load(null, passwordAsCharArray)
-          jksKeyStore.setEntry(alias, entry, passwordProtection)
+            val entry = jceksKeyStore.getEntry(alias, passwordProtection)
+            jksKeyStore.setEntry(alias, entry, passwordProtection)
         }
-        return VirksomhetssertifikatKonfigurasjon.builder().keyStore(jksKeyStore).keyStorePassword(passwordThingy.password).keyAlias(passwordThingy.alias).keyPassword(passwordThingy.password).build()
+        return VirksomhetssertifikatKonfigurasjon.builder().keyStore(jksKeyStore).keyStorePassword(password.password).keyAlias(password.alias).keyPassword(password.password).build()
     }
 
     private fun SecretManagerServiceClient.accessSecretVersionResponse(projectId: String, secretId: String, secretVersion: String): AccessSecretVersionResponse {

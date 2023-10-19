@@ -5,25 +5,30 @@ import no.ks.fiks.io.client.FiksIOKlientFactory
 import no.ks.fiks.io.client.konfigurasjon.FiksIOKonfigurasjon
 import no.nav.sosialhjelp.innsyn.app.maskinporten.MaskinportenClient
 import no.nav.sosialhjelp.innsyn.utils.logger
-import org.springframework.beans.factory.annotation.Qualifier
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.core5.http.HttpHost
+import org.apache.hc.core5.util.TimeValue
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+import java.time.Duration
 
 @Configuration
-@Profile("!local&!test")
+@Profile("prod-fss|dev-fss")
 class FiksIOKlientConfig(
+    @Value("\${HTTPS_PROXY}")
+    private val proxyUrl: String,
     private val fiksIOKonfigurasjon: FiksIOKonfigurasjon,
-    @Qualifier("specialMaskinportenClient")
     private val maskinportenClient: MaskinportenClient,
 ) {
     private val log by logger()
 
     @Bean
     fun fiksIOKlient(): FiksIOKlient {
-        val fiksIOKlientFactory = FiksIOKlientFactory(fiksIOKonfigurasjon).apply {
+        val httpClient = HttpClientBuilder.create().setProxy(HttpHost.create(proxyUrl)).evictIdleConnections(TimeValue.of(Duration.ofMinutes(1L))).build()
+        val fiksIOKlientFactory = FiksIOKlientFactory(fiksIOKonfigurasjon, null, httpClient).apply {
             setMaskinportenAccessTokenSupplier {
-                log.info("Henter maskinporten token for fiks io (klage)")
                 maskinportenClient.getToken()
             }
         }

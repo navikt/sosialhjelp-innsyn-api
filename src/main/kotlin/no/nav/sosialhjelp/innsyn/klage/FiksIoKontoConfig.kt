@@ -14,7 +14,7 @@ import java.security.spec.PKCS8EncodedKeySpec
 import java.util.UUID
 
 @Configuration
-@Profile("!local&!test")
+@Profile("dev-fss|prod-fss")
 class FiksIoKontoConfig(
     @Value("\${fiks-io.private-key-path}")
     private val privateKeyPath: String,
@@ -30,7 +30,7 @@ class FiksIoKontoConfig(
         val key = Files.readAllBytes(Paths.get(privateKeyPath))
         val keySpec = PKCS8EncodedKeySpec(key)
         val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpec)
-        log.info("Setter opp fiks io konto. Kontoid: $kontoId")
+        log.info("Setter opp fiks io konto")
         return KontoKonfigurasjon.builder().kontoId(kontoId).privatNokkel(privateKey).build()
     }
 }

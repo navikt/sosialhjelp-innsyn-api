@@ -69,15 +69,10 @@ client:
 
 
 #Maskinporten
-#maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
-#maskinporten_scopes: ${MASKINPORTEN_SCOPES}
-#maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
-#maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
-
-special_maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
-special_maskinporten_scopes: ${MASKINPORTEN_SCOPES}
-special_maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
-special_maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
+maskinporten_clientid: ${MASKINPORTEN_CLIENT_ID}
+maskinporten_scopes: ${MASKINPORTEN_SCOPES}
+maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL}
+maskinporten_client_jwk: ${MASKINPORTEN_CLIENT_JWK}
 
 #Token-validering
 no.nav.security.jwt:
@@ -101,3 +96,16 @@ innsyn:
 
 retry_fiks_max_attempts: 5
 retry_fiks_initial_delay: 100 # initial delay in ms
+
+fiks-io:
+  integrasjonspassord: ${INNSYN_API_FIKS_IO_INTEGRASJONSPASSORD}
+  integrasjonsid: ${FIKS_IO_INTEGRASJONSID}
+  private-key-path: "/var/run/secrets/key.der"
+  kontoId: ${FIKS_IO_KONTO_ID}
+  virksomhetssertifikat:
+    projectId: ${VIRKSOMHETSSERTIFIKAT_PROJECT_ID}
+    secretId: ${VIRKSOMHETSSERTIFIKAT_SECRET_ID}
+    secretVersion: ${VIRKSOMHETSSERTIFIKAT_VERSION}
+    passwordProjectId: ${VIRKSOMHETSSERTIFIKAT_PASSWORD_PROJECT_ID}
+    passwordSecretId: ${VIRKSOMHETSSERTIFIKAT_PASSWORD_SECRET_ID}
+    passwordSecretVersion: ${VIRKSOMHETSSERTIFIKAT_PASSWORD_SECRET_VERSION}

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Profile
 import java.util.UUID
 
 @Configuration
-@Profile("!local&!test")
+@Profile("dev-fss|prod-fss")
 class FiksIOConfig(
     private val kontoKonfigurasjon: KontoKonfigurasjon,
     private val virksomhetssertifikatKonfigurasjon: VirksomhetssertifikatKonfigurasjon,
@@ -24,7 +24,7 @@ class FiksIOConfig(
 ) {
 
     @Bean
-    @Profile("!prod")
+    @Profile("dev-fss")
     fun fiksIOTestConfig(): FiksIOKonfigurasjon {
         val integrasjonId = UUID.fromString(integrasjonId)
 
@@ -36,7 +36,7 @@ class FiksIOConfig(
     }
 
     @Bean
-    @Profile("prod")
+    @Profile("prod-fss")
     fun fiksIOProdConfig(): FiksIOKonfigurasjon {
         val integrasjonId = UUID.fromString(integrasjonId)
 

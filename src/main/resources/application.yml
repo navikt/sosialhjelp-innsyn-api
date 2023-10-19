@@ -98,7 +98,7 @@ retry_fiks_max_attempts: 5
 retry_fiks_initial_delay: 100 # initial delay in ms
 
 fiks-io:
-  integrasjonspassord: ${INNSYN_API_FIKS_IO_INTEGRASJONSPASSORD}
+  integrasjonspassord: ${FIKS_IO_INTEGRASJONSPASSORD}
   integrasjonsid: ${FIKS_IO_INTEGRASJONSID}
   private-key-path: "/var/run/secrets/key.der"
   kontoId: ${FIKS_IO_KONTO_ID}

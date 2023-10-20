@@ -102,10 +102,4 @@ fiks-io:
   integrasjonsid: ${FIKS_IO_INTEGRASJONSID}
   private-key-path: "/var/run/secrets/key.der"
   kontoId: ${FIKS_IO_KONTO_ID}
-  virksomhetssertifikat:
-    projectId: ${VIRKSOMHETSSERTIFIKAT_PROJECT_ID}
-    secretId: ${VIRKSOMHETSSERTIFIKAT_SECRET_ID}
-    secretVersion: ${VIRKSOMHETSSERTIFIKAT_VERSION}
-    passwordProjectId: ${VIRKSOMHETSSERTIFIKAT_PASSWORD_PROJECT_ID}
-    passwordSecretId: ${VIRKSOMHETSSERTIFIKAT_PASSWORD_SECRET_ID}
-    passwordSecretVersion: ${VIRKSOMHETSSERTIFIKAT_PASSWORD_SECRET_VERSION}
+  virksomhetssertifikatPath: ${VIRKSERT_PATH}

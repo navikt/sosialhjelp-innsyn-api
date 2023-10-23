@@ -13,7 +13,6 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
@@ -32,7 +31,6 @@ import org.springframework.web.reactive.function.client.bodyToMono
 class DigisosApiTestClientImpl(
     private val fiksWebClient: WebClient,
     private val digisosApiTestWebClient: WebClient,
-    @Qualifier("maskinportenClient")
     private val maskinportenClient: MaskinportenClient,
     private val fiksClientImpl: FiksClientImpl,
 ) : DigisosApiTestClient {

@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.kommuneinfo
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
-import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
@@ -20,7 +20,7 @@ import java.util.Date
 @RequestMapping("/api/v1/innsyn")
 class KommuneController(
     private val kommuneService: KommuneService,
-    private val tilgangskontroll: Tilgangskontroll,
+    private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/kommune")
     fun hentKommuneInfo(

@@ -13,24 +13,14 @@ import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import java.util.Locale
 
-interface Tilgangskontroll {
-    fun sjekkTilgang(token: String)
-
-    fun hentTilgang(
-        ident: String,
-        token: String,
-    ): Tilgang
-
-    fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak)
-}
-
 @Component
 class TilgangskontrollService(
     @Value("\${login_api_idporten_clientid}") private val loginApiClientId: String,
     private val environment: Environment,
     private val pdlClient: PdlClient,
-) : Tilgangskontroll {
-    override fun sjekkTilgang(token: String) {
+) {
+
+    fun sjekkTilgang(token: String) {
         if (!environment.activeProfiles.contains("idporten")) {
             if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         }
@@ -47,7 +37,7 @@ class TilgangskontrollService(
         }
     }
 
-    override fun hentTilgang(
+    fun hentTilgang(
         ident: String,
         token: String,
     ): Tilgang {
@@ -67,7 +57,7 @@ class TilgangskontrollService(
         }
     }
 
-    override fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
+    fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
         val gyldigeIdenter = pdlClient.hentIdenter(SubjectHandlerUtils.getUserIdFromToken(), SubjectHandlerUtils.getToken())
         if (gyldigeIdenter?.contains(digisosSak.sokerFnr) != true) {
             throw TilgangskontrollException("digisosSak hører ikke til rett person")

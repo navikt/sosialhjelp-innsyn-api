@@ -25,7 +25,7 @@ class MaskinportenClientConfig(
     @Bean
     fun maskinportenClient(): MaskinportenClient = MaskinportenClient(maskinportenWebClient, maskinportenProperties, wellknown)
 
-    protected val maskinportenWebClient: WebClient =
+    private val maskinportenWebClient: WebClient =
         webClientBuilder
             .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
             .codecs {
@@ -35,7 +35,7 @@ class MaskinportenClientConfig(
             }
             .build()
 
-    protected val maskinportenProperties =
+    private val maskinportenProperties =
         MaskinportenProperties(
             clientId = clientId,
             clientJwk = clientJwk,
@@ -43,7 +43,7 @@ class MaskinportenClientConfig(
             wellKnownUrl = wellKnownUrl,
         )
 
-    protected val wellknown: WellKnown
+    private val wellknown: WellKnown
         get() =
             maskinportenWebClient.get()
                 .uri(wellKnownUrl)

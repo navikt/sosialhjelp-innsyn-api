@@ -30,8 +30,6 @@ object Versions {
     const val LOG4J = "2.19.0"
     const val SNAKEYAML = "2.0"
     const val fiksIO = "3.3.2"
-    const val googleCloudLibraries = "26.14.0"
-    const val googleCloudSecretmanager = "2.10.0"
 
     const val JAVA_JWT = "4.4.0"
     const val JWKS_RSA = "0.22.1"
@@ -104,10 +102,6 @@ dependencies {
 
 //  Fiks IO
     implementation("no.ks.fiks:fiks-io-klient-java:${Versions.fiksIO}")
-
-    // Google secret manager
-    implementation(platform("com.google.cloud:libraries-bom:${Versions.googleCloudLibraries}"))
-    implementation("com.google.cloud:google-cloud-secretmanager:${Versions.googleCloudSecretmanager}")
 
 //    Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.JACKSON}")

@@ -23,7 +23,7 @@ import no.ks.fiks.io.client.model.MottattMelding
 import no.ks.fiks.io.client.model.SendtMelding
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
-import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
@@ -76,7 +76,7 @@ class KlageServiceImpl(
     private val fiksIOClient: FiksIOKlient,
     private val fiksClient: FiksClient,
     private val norgClient: NorgClient,
-    private val tilgangskontroll: Tilgangskontroll,
+    private val tilgangskontroll: TilgangskontrollService,
 ) : KlageService {
 
     private val log by logger()

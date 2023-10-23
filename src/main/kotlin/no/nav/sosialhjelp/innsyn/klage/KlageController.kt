@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.FilUrl
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,6 +21,7 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
+@ConditionalOnBean(KlageService::class)
 @ProtectedWithClaims(issuer = IntegrationUtils.SELVBETJENING, claimMap = [IntegrationUtils.ACR_LEVEL4, IntegrationUtils.ACR_IDPORTEN_LOA_HIGH], combineWithOr = true)
 class KlageController(
     private val klageService: KlageService,

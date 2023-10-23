@@ -26,6 +26,7 @@ import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -70,6 +71,7 @@ class KlageServiceLocalImpl(
 
 @Service
 @Profile("dev-fss|prod-fss")
+@ConditionalOnBean(FiksIOKlient::class)
 class KlageServiceImpl(
     private val fiksIOClient: FiksIOKlient,
     private val fiksClient: FiksClient,

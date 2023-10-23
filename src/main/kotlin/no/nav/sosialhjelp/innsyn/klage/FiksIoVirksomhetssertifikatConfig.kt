@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.ks.fiks.io.client.konfigurasjon.VirksomhetssertifikatKonfigurasjon
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -20,6 +21,7 @@ data class DigisosKeyStoreCredentials(
 
 @Configuration
 @Profile("dev-fss|prod-fss")
+@ConditionalOnProperty("virksomhetssertikatPath")
 class FiksIoVirksomhetssertifikatConfig(
     @Value("\$virksomhetssertifikatPath")
     private val virksomhetssertifikatPath: String,

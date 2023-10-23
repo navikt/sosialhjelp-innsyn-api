@@ -4,6 +4,7 @@ import no.ks.fiks.io.client.konfigurasjon.KontoKonfigurasjon
 import no.ks.fiks.io.client.model.KontoId
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -15,10 +16,11 @@ import java.util.UUID
 
 @Configuration
 @Profile("dev-fss|prod-fss")
+@ConditionalOnProperty("fiks-io.private-key-path", "fiks-io.kontoid")
 class FiksIoKontoConfig(
-    @Value("\${fiks-io.private-key-path}")
+    @Value("\${fiks-io.private-key-path:}")
     private val privateKeyPath: String,
-    @Value("\${fiks-io.kontoId}")
+    @Value("\${fiks-io.kontoId:}")
     private val kontoId: String,
 
 ) {

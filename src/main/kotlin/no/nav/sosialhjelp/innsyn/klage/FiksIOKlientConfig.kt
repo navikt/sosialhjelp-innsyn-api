@@ -9,6 +9,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.HttpHost
 import org.apache.hc.core5.util.TimeValue
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -16,6 +17,7 @@ import java.time.Duration
 
 @Configuration
 @Profile("prod-fss|dev-fss")
+@ConditionalOnBean(FiksIOKonfigurasjon::class)
 class FiksIOKlientConfig(
     @Value("\${HTTPS_PROXY}")
     private val proxyUrl: String,

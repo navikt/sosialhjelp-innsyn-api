@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 internal class SoknadsStatusServiceTest {
-
     private val eventService: EventService = mockk()
     private val fiksClient: FiksClient = mockk()
     private val kommuneService: KommuneService = mockk()

@@ -11,5 +11,5 @@ data class VilkarResponse(
     val tittel: String?,
     val beskrivelse: String?,
     val status: Oppgavestatus,
-    val utbetalingsReferanse: List<String>?
+    val utbetalingsReferanse: List<String>?,
 )

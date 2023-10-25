@@ -5,11 +5,19 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 
 interface FiksClient {
-
-    fun hentDigisosSak(digisosId: String, token: String, useCache: Boolean): DigisosSak
+    fun hentDigisosSak(
+        digisosId: String,
+        token: String,
+        useCache: Boolean,
+    ): DigisosSak
 
     // TODO fjernes når feilsøking er gjennomført
-    fun hentDigisosSakMedFnr(digisosId: String, token: String, useCache: Boolean, fnr: String): DigisosSak
+    fun hentDigisosSakMedFnr(
+        digisosId: String,
+        token: String,
+        useCache: Boolean,
+        fnr: String,
+    ): DigisosSak
 
     fun hentAlleDigisosSaker(token: String): List<DigisosSak>
 
@@ -17,7 +25,7 @@ interface FiksClient {
         files: List<FilForOpplasting>,
         vedleggJson: JsonVedleggSpesifikasjon,
         digisosId: String,
-        token: String
+        token: String,
     )
 
     fun <T : Any> hentDokument(
@@ -25,6 +33,6 @@ interface FiksClient {
         dokumentlagerId: String,
         requestedClass: Class<out T>,
         token: String,
-        cacheKey: String = dokumentlagerId
+        cacheKey: String = dokumentlagerId,
     ): T
 }

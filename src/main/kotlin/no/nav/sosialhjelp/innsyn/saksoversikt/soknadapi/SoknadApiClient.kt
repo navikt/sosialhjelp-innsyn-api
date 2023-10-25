@@ -20,14 +20,14 @@ import org.springframework.web.reactive.function.client.bodyToMono
 class SoknadApiClient(
     private val clientProperties: ClientProperties,
     private val tokendingsService: TokendingsService,
-    webClientBuilder: WebClient.Builder
+    webClientBuilder: WebClient.Builder,
 ) {
-
-    private val soknadApiWebClient = webClientBuilder
-        .clientConnector(HttpClientUtil.getUnproxiedReactorClientHttpConnector())
-        .baseUrl(clientProperties.soknadApiUrl)
-        .filter(mdcExchangeFilter)
-        .build()
+    private val soknadApiWebClient =
+        webClientBuilder
+            .clientConnector(HttpClientUtil.getUnproxiedReactorClientHttpConnector())
+            .baseUrl(clientProperties.soknadApiUrl)
+            .filter(mdcExchangeFilter)
+            .build()
 
     fun getSvarUtSoknader(token: String): List<SaksListeResponse> {
         return soknadApiWebClient.get()
@@ -40,7 +40,8 @@ class SoknadApiClient(
             .block() ?: emptyList()
     }
 
-    private fun tokenXtoken(token: String) = runBlocking {
-        tokendingsService.exchangeToken(getUserIdFromToken(), token, clientProperties.soknadApiAudience)
-    }
+    private fun tokenXtoken(token: String) =
+        runBlocking {
+            tokendingsService.exchangeToken(getUserIdFromToken(), token, clientProperties.soknadApiAudience)
+        }
 }

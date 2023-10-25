@@ -8,16 +8,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
-import org.apache.commons.io.IOUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import java.nio.charset.StandardCharsets
 
 @Configuration
 class PdlIntegrationTestConfig {
-
     /**
      * overskriver pdlHentPersonConsumer for itester
      */
@@ -29,24 +26,27 @@ class PdlIntegrationTestConfig {
 }
 
 class HentPDLClientMock : PdlClient {
+    val mapper: ObjectMapper =
+        jacksonObjectMapper()
+            .registerKotlinModule()
+            .registerModule(JavaTimeModule())
+            .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 
-    val mapper: ObjectMapper = jacksonObjectMapper()
-        .registerKotlinModule()
-        .registerModule(JavaTimeModule())
-        .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-
-    override fun hentPerson(ident: String, token: String): PdlHentPerson {
+    override fun hentPerson(
+        ident: String,
+        token: String,
+    ): PdlHentPerson {
         val resourceAsStream = ClassLoader.getSystemResourceAsStream("pdl/pdlPersonResponse.json")
 
         assertThat(resourceAsStream).isNotNull
-        val jsonString = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8)
 
-        val pdlPersonResponse = mapper.readValue<PdlHentPerson>(jsonString)
-
-        return pdlPersonResponse
+        return mapper.readValue<PdlHentPerson>(resourceAsStream!!)
     }
 
-    override fun hentIdenter(ident: String, token: String): List<String> {
+    override fun hentIdenter(
+        ident: String,
+        token: String,
+    ): List<String> {
 //      ikke i bruk
         return emptyList()
     }

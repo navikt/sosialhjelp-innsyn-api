@@ -16,17 +16,18 @@ import org.slf4j.LoggerFactory
 private val log = LoggerFactory.getLogger(JsonDokumentasjonkrav::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
-    val dokumentasjonkrav = Dokumentasjonkrav(
-        dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
-        hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-        referanse = hendelse.dokumentasjonkravreferanse,
-        tittel = hendelse.tittel,
-        beskrivelse = hendelse.beskrivelse,
-        status = Oppgavestatus.valueOf(hendelse.status.value()),
-        datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
-        frist = hendelse.frist?.toLocalDateTime()?.toLocalDate(),
-        utbetalingsReferanse = hendelse.utbetalingsreferanse
-    )
+    val dokumentasjonkrav =
+        Dokumentasjonkrav(
+            dokumentasjonkravId = sha256(hendelse.frist?.toLocalDateTime()?.toLocalDate().toString()),
+            hendelsetype = JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+            referanse = hendelse.dokumentasjonkravreferanse,
+            tittel = hendelse.tittel,
+            beskrivelse = hendelse.beskrivelse,
+            status = Oppgavestatus.valueOf(hendelse.status.value()),
+            datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
+            frist = hendelse.frist?.toLocalDateTime()?.toLocalDate(),
+            utbetalingsReferanse = hendelse.utbetalingsreferanse,
+        )
 
     this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav)
 
@@ -44,8 +45,17 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
     union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav) }
 
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav. Beskrivelse: Dine oppgaver er oppdatert, les mer i vedtaket.")
-    historikk.add(Hendelse(HendelseTekstType.DOKUMENTASJONKRAV, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.DOKUMENTASJONSKRAV))
+    log.info(
+        "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav." +
+            " Beskrivelse: Dine oppgaver er oppdatert, les mer i vedtaket.",
+    )
+    historikk.add(
+        Hendelse(
+            HendelseTekstType.DOKUMENTASJONKRAV,
+            hendelse.hendelsestidspunkt.toLocalDateTime(),
+            type = HistorikkType.DOKUMENTASJONSKRAV,
+        ),
+    )
 }
 
 private fun MutableList<Dokumentasjonkrav>.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav: Dokumentasjonkrav) {

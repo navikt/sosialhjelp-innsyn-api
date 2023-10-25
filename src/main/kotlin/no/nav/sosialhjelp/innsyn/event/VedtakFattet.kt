@@ -17,8 +17,10 @@ import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(JsonVedtakFattet::class.java.name)
 
-fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: ClientProperties) {
-
+fun InternalDigisosSoker.apply(
+    hendelse: JsonVedtakFattet,
+    clientProperties: ClientProperties,
+) {
     val utfallString = hendelse.utfall?.name
     val utfall = utfallString?.let { UtfallVedtak.valueOf(it) }
     val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)
@@ -29,21 +31,35 @@ fun InternalDigisosSoker.apply(hendelse: JsonVedtakFattet, clientProperties: Cli
 
     if (sakForReferanse == null) {
         // Opprett ny Sak
-        sakForReferanse = Sak(
-            referanse = hendelse.saksreferanse ?: "default",
-            saksStatus = SaksStatus.UNDER_BEHANDLING,
-            tittel = DEFAULT_SAK_TITTEL,
-            vedtak = mutableListOf(),
-            utbetalinger = mutableListOf()
-        )
+        sakForReferanse =
+            Sak(
+                referanse = hendelse.saksreferanse ?: "default",
+                saksStatus = SaksStatus.UNDER_BEHANDLING,
+                tittel = DEFAULT_SAK_TITTEL,
+                vedtak = mutableListOf(),
+                utbetalinger = mutableListOf(),
+            )
         saker.add(sakForReferanse)
     }
     sakForReferanse.vedtak.add(vedtakFattet)
 
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Vedtak fattet. <skjult tittel> er ferdigbehandlet")
     if (sakForReferanse.tittel != null) {
-        historikk.add(Hendelse(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, vedtaksfilUrl), tekstArgument = sakForReferanse.tittel))
+        historikk.add(
+            Hendelse(
+                HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL,
+                hendelse.hendelsestidspunkt.toLocalDateTime(),
+                UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, vedtaksfilUrl),
+                tekstArgument = sakForReferanse.tittel,
+            ),
+        )
     } else {
-        historikk.add(Hendelse(HendelseTekstType.SAK_FERDIGBEHANDLET_UTEN_TITTEL, hendelse.hendelsestidspunkt.toLocalDateTime(), UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, vedtaksfilUrl)))
+        historikk.add(
+            Hendelse(
+                HendelseTekstType.SAK_FERDIGBEHANDLET_UTEN_TITTEL,
+                hendelse.hendelsestidspunkt.toLocalDateTime(),
+                UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, vedtaksfilUrl),
+            ),
+        )
     }
 }

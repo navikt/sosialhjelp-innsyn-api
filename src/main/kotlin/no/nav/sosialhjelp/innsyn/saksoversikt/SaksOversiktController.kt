@@ -33,23 +33,28 @@ class SaksOversiktController(
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: Tilgangskontroll,
 ) {
-
     @GetMapping("/saker")
-    fun hentAlleSaker(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<SaksListeResponse>> {
+    fun hentAlleSaker(
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+    ): ResponseEntity<List<SaksListeResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
-        val alleSaker = try {
-            saksOversiktService.hentAlleSaker(token)
-        } catch (e: FiksException) {
-            return ResponseEntity.status(503).build()
-        }
+        val alleSaker =
+            try {
+                saksOversiktService.hentAlleSaker(token)
+            } catch (e: FiksException) {
+                return ResponseEntity.status(503).build()
+            }
 
         log.info("Hentet alle (${alleSaker.size}) søknader for bruker, fra DigisosApi og fra SvarUt (via soknad-api).")
         return ResponseEntity.ok().body(alleSaker)
     }
 
     @GetMapping("/saksDetaljer")
-    fun hentSaksDetaljer(@RequestParam id: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<SaksDetaljerResponse> {
+    fun hentSaksDetaljer(
+        @RequestParam id: String,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+    ): ResponseEntity<SaksDetaljerResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
         if (id.isEmpty()) {
@@ -57,13 +62,16 @@ class SaksOversiktController(
         }
         val sak = fiksClient.hentDigisosSak(id, token, true)
         val model = eventService.createSaksoversiktModel(sak, token)
-        val antallOppgaver = hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) + hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
-        val saksDetaljerResponse = SaksDetaljerResponse(
-            sak.fiksDigisosId,
-            hentNavn(model),
-            model.status.name,
-            antallOppgaver
-        )
+        val antallOppgaver =
+            hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +
+                hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
+        val saksDetaljerResponse =
+            SaksDetaljerResponse(
+                sak.fiksDigisosId,
+                hentNavn(model),
+                model.status.name,
+                antallOppgaver,
+            )
         return ResponseEntity.ok().body(saksDetaljerResponse)
     }
 
@@ -73,11 +81,18 @@ class SaksOversiktController(
         }
     }
 
-    private fun hentAntallNyeVilkarOgDokumentasjonkrav(model: InternalDigisosSoker, fiksDigisosId: String, token: String): Int {
+    private fun hentAntallNyeVilkarOgDokumentasjonkrav(
+        model: InternalDigisosSoker,
+        fiksDigisosId: String,
+        token: String,
+    ): Int {
         // Alle vilkår og dokumentasjonskrav fjernes hvis alle utbetalinger har status utbetalt/annullert og er forbigått utbetalingsperioden med 21 dager
-        val filterUtbetalinger = model.utbetalinger
-            .filter { utbetaling -> utbetaling.status == UtbetalingsStatus.UTBETALT || utbetaling.status == UtbetalingsStatus.ANNULLERT }
-            .filter { utbetaling -> utbetaling.tom?.isBefore(LocalDate.now().minusDays(21)) ?: false }
+        val filterUtbetalinger =
+            model.utbetalinger
+                .filter { utbetaling ->
+                    utbetaling.status == UtbetalingsStatus.UTBETALT || utbetaling.status == UtbetalingsStatus.ANNULLERT
+                }
+                .filter { utbetaling -> utbetaling.tom?.isBefore(LocalDate.now().minusDays(21)) ?: false }
 
         return when {
             model.utbetalinger.size > 0 && model.utbetalinger.size == filterUtbetalinger.size -> 0
@@ -85,19 +100,33 @@ class SaksOversiktController(
         }
     }
 
-    private fun hentAntallNyeOppgaver(model: InternalDigisosSoker, fiksDigisosId: String, token: String): Int {
+    private fun hentAntallNyeOppgaver(
+        model: InternalDigisosSoker,
+        fiksDigisosId: String,
+        token: String,
+    ): Int {
         return when {
             model.oppgaver.isEmpty() -> 0
             else -> oppgaveService.hentOppgaver(fiksDigisosId, token).sumOf { it.oppgaveElementer.size }
         }
     }
-    private fun hentAntallNyeVilkar(model: InternalDigisosSoker, fiksDigisosId: String, token: String): Int {
+
+    private fun hentAntallNyeVilkar(
+        model: InternalDigisosSoker,
+        fiksDigisosId: String,
+        token: String,
+    ): Int {
         return when {
             model.vilkar.isEmpty() -> 0
             else -> oppgaveService.getVilkar(fiksDigisosId, token).size
         }
     }
-    private fun hentAntallNyeDokumentasjonkrav(model: InternalDigisosSoker, fiksDigisosId: String, token: String): Int {
+
+    private fun hentAntallNyeDokumentasjonkrav(
+        model: InternalDigisosSoker,
+        fiksDigisosId: String,
+        token: String,
+    ): Int {
         return when {
             model.dokumentasjonkrav.isEmpty() -> 0
             else -> oppgaveService.getDokumentasjonkrav(fiksDigisosId, token).sumOf { it.dokumentasjonkravElementer.size }

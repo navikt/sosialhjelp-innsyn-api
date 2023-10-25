@@ -24,7 +24,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 internal class DokumentasjonEtterspurtTest {
-
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
@@ -70,8 +69,8 @@ internal class DokumentasjonEtterspurtTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -83,15 +82,15 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.historikk).hasSize(4)
 
         val oppgave = model.oppgaver.last()
-        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
-        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+        assertThat(oppgave.tittel).isEqualTo(DOKUMENTTYPE)
+        assertThat(oppgave.tilleggsinfo).isEqualTo(TILLEGGSINFO)
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
         assertThat(oppgave.erFraInnsyn).isEqualTo(true)
 
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
         assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON)
-        assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+        assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
     }
 
     @Test
@@ -104,8 +103,8 @@ internal class DokumentasjonEtterspurtTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -117,8 +116,8 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.historikk).hasSize(3)
 
         val oppgave = model.oppgaver.last()
-        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
-        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+        assertThat(oppgave.tittel).isEqualTo(DOKUMENTTYPE)
+        assertThat(oppgave.tilleggsinfo).isEqualTo(TILLEGGSINFO)
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
         assertThat(oppgave.erFraInnsyn).isEqualTo(true)
     }
@@ -133,8 +132,8 @@ internal class DokumentasjonEtterspurtTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -155,11 +154,21 @@ internal class DokumentasjonEtterspurtTest {
                 .withHendelser(
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                        SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2)
-                    )
+                        SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
+            listOf(
+                InternalVedlegg(
+                    vedleggKrevesDokumenttype,
+                    vedleggKrevesTilleggsinfo,
+                    null,
+                    null,
+                    mutableListOf(),
+                    unixToLocalDateTime(tidspunkt_soknad),
+                    null,
+                ),
+            )
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -194,8 +203,8 @@ internal class DokumentasjonEtterspurtTest {
                     hendelseReferanse,
                     mutableListOf(),
                     unixToLocalDateTime(tidspunkt_soknad),
-                    null
-                )
+                    null,
+                ),
             )
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -218,8 +227,8 @@ internal class DokumentasjonEtterspurtTest {
                     null,
                     mutableListOf(),
                     unixToLocalDateTime(tidspunkt_soknad),
-                    null
-                )
+                    null,
+                ),
             )
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -239,11 +248,21 @@ internal class DokumentasjonEtterspurtTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
+            listOf(
+                InternalVedlegg(
+                    vedleggKrevesDokumenttype,
+                    vedleggKrevesTilleggsinfo,
+                    null,
+                    null,
+                    mutableListOf(),
+                    unixToLocalDateTime(tidspunkt_soknad),
+                    null,
+                ),
+            )
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -254,8 +273,8 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.historikk).hasSize(4)
 
         val oppgave = model.oppgaver.last()
-        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
-        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+        assertThat(oppgave.tittel).isEqualTo(DOKUMENTTYPE)
+        assertThat(oppgave.tilleggsinfo).isEqualTo(TILLEGGSINFO)
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
         assertThat(oppgave.erFraInnsyn).isEqualTo(true)
     }
@@ -271,11 +290,21 @@ internal class DokumentasjonEtterspurtTest {
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                         DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
-                        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
-                    )
+                        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
+            listOf(
+                InternalVedlegg(
+                    vedleggKrevesDokumenttype,
+                    vedleggKrevesTilleggsinfo,
+                    null,
+                    null,
+                    mutableListOf(),
+                    unixToLocalDateTime(tidspunkt_soknad),
+                    null,
+                ),
+            )
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -301,11 +330,21 @@ internal class DokumentasjonEtterspurtTest {
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_2),
                         DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
-                        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
-                    )
+                        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
+            listOf(
+                InternalVedlegg(
+                    vedleggKrevesDokumenttype,
+                    vedleggKrevesTilleggsinfo,
+                    null,
+                    null,
+                    mutableListOf(),
+                    unixToLocalDateTime(tidspunkt_soknad),
+                    null,
+                ),
+            )
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -330,11 +369,21 @@ internal class DokumentasjonEtterspurtTest {
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_BEHANDLES_IKKE.withHendelsestidspunkt(tidspunkt_2),
                         DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
-                        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4)
-                    )
+                        DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
-            listOf(InternalVedlegg(vedleggKrevesDokumenttype, vedleggKrevesTilleggsinfo, null, null, mutableListOf(), unixToLocalDateTime(tidspunkt_soknad), null))
+            listOf(
+                InternalVedlegg(
+                    vedleggKrevesDokumenttype,
+                    vedleggKrevesTilleggsinfo,
+                    null,
+                    null,
+                    mutableListOf(),
+                    unixToLocalDateTime(tidspunkt_soknad),
+                    null,
+                ),
+            )
 
         val model = service.createModel(mockDigisosSak, "token")
 
@@ -365,8 +414,8 @@ internal class DokumentasjonEtterspurtTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunktMottatt),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunktUnderBehandling),
-                        DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunktDokumentasjonEtterspurt)
-                    )
+                        DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunktDokumentasjonEtterspurt),
+                    ),
                 )
 
         val model = service.createModel(mockDigisosSak, "token")
@@ -375,8 +424,8 @@ internal class DokumentasjonEtterspurtTest {
         assertThat(model.oppgaver).hasSize(1)
 
         val oppgave = model.oppgaver.last()
-        assertThat(oppgave.tittel).isEqualTo(dokumenttype)
-        assertThat(oppgave.tilleggsinfo).isEqualTo(tilleggsinfo)
+        assertThat(oppgave.tittel).isEqualTo(DOKUMENTTYPE)
+        assertThat(oppgave.tilleggsinfo).isEqualTo(TILLEGGSINFO)
         assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
         assertThat(oppgave.erFraInnsyn).isEqualTo(true)
     }

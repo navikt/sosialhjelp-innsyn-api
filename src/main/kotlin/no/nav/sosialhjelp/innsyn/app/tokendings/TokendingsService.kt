@@ -17,7 +17,11 @@ import java.util.Date
 import java.util.UUID
 
 interface TokendingsService {
-    suspend fun exchangeToken(subject: String, rawToken: String, audience: String): String
+    suspend fun exchangeToken(
+        subject: String,
+        rawToken: String,
+        audience: String,
+    ): String
 }
 
 @Service
@@ -27,15 +31,19 @@ class TokendingsServiceImpl internal constructor(
     private val redisService: RedisService,
     private val clientConfig: ClientProperties,
 ) : TokendingsService {
+    private val privateRsaKey: RSAKey =
+        if (clientConfig.tokendingsPrivateJwk == "generateRSA") {
+            if (isRunningInProd()) throw RuntimeException("Generation of RSA keys is not allowed in prod.")
+            RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyID(UUID.randomUUID().toString()).generate()
+        } else {
+            RSAKey.parse(clientConfig.tokendingsPrivateJwk)
+        }
 
-    private val privateRsaKey: RSAKey = if (clientConfig.tokendingsPrivateJwk == "generateRSA") {
-        if (isRunningInProd()) throw RuntimeException("Generation of RSA keys is not allowed in prod.")
-        RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyID(UUID.randomUUID().toString()).generate()
-    } else {
-        RSAKey.parse(clientConfig.tokendingsPrivateJwk)
-    }
-
-    override suspend fun exchangeToken(subject: String, rawToken: String, audience: String): String {
+    override suspend fun exchangeToken(
+        subject: String,
+        rawToken: String,
+        audience: String,
+    ): String {
         redisService.get(TOKENDINGS_CACHE_KEY_PREFIX + "$audience$subject", (String::class.java))
             ?.let { return it }
 
@@ -51,7 +59,10 @@ class TokendingsServiceImpl internal constructor(
         }
     }
 
-    private fun lagreTilCache(key: String, onBehalfToken: String) {
+    private fun lagreTilCache(
+        key: String,
+        onBehalfToken: String,
+    ) {
         redisService.put(TOKENDINGS_CACHE_KEY_PREFIX + key, onBehalfToken.toByteArray(), 30)
     }
 
@@ -60,7 +71,11 @@ class TokendingsServiceImpl internal constructor(
     }
 }
 
-fun createSignedAssertion(clientId: String, audience: String, rsaKey: RSAKey): String {
+fun createSignedAssertion(
+    clientId: String,
+    audience: String,
+    rsaKey: RSAKey,
+): String {
     val now = Instant.now()
     return JWT.create()
         .withSubject(clientId)

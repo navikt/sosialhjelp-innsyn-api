@@ -19,7 +19,6 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @ActiveProfiles(profiles = ["idporten", "mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
 class FrontChannelLogoutIntegrasjonsTest {
-
     @Autowired
     private lateinit var webClient: WebTestClient
 

@@ -22,7 +22,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 internal class NorgClientImplTest {
-
     private val mockWebServer = MockWebServer()
     private val webClient: WebClient = WebClient.create(mockWebServer.url("/").toString())
     private val redisService: RedisService = mockk()
@@ -67,7 +66,7 @@ internal class NorgClientImplTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_navenhet)
+                .setBody(ok_navenhet),
         )
 
         val result2 = norgClient.hentNavEnhet(enhetsnr)
@@ -84,14 +83,14 @@ internal class NorgClientImplTest {
 
         mockWebServer.enqueue(
             MockResponse()
-                .setResponseCode(500)
+                .setResponseCode(500),
         )
 
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_navenhet)
+                .setBody(ok_navenhet),
         )
 
         val result2 = norgClient.hentNavEnhet(enhetsnr)

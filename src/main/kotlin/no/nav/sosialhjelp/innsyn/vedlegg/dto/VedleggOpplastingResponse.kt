@@ -4,5 +4,5 @@ import no.nav.sosialhjelp.innsyn.vedlegg.ValidationValues
 
 data class VedleggOpplastingResponse(
     val filnavn: String?,
-    val status: ValidationValues
+    val status: ValidationValues,
 )

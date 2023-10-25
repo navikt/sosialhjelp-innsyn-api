@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingTest {
-
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
@@ -64,8 +63,8 @@ internal class UtbetalingTest {
                         SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
                         SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_5),
-                        UTBETALING.withHendelsestidspunkt(tidspunkt_6)
-                    )
+                        UTBETALING.withHendelsestidspunkt(tidspunkt_6),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -76,14 +75,15 @@ internal class UtbetalingTest {
         assertThat(model.saker).hasSize(1)
         assertThat(model.historikk).hasSize(6)
 
-        assertThat(model.saker[0].tittel).isEqualTo(tittel_1) // tittel for sak fra saksstatus-hendelse
+        // tittel for sak fra saksstatus-hendelse
+        assertThat(model.saker[0].tittel).isEqualTo(TITTEL_1)
 
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
-        assertThat(utbetaling.referanse).isEqualTo(utbetaling_ref_1)
+        assertThat(utbetaling.referanse).isEqualTo(UTBETALING_REF_1)
         assertThat(utbetaling.status).isEqualTo(UtbetalingsStatus.UTBETALT)
         assertThat(utbetaling.belop).isEqualTo("1234.56")
-        assertThat(utbetaling.beskrivelse).isEqualTo(tittel_1)
+        assertThat(utbetaling.beskrivelse).isEqualTo(TITTEL_1)
         assertThat(utbetaling.forfallsDato).isEqualTo("2019-12-31")
         assertThat(utbetaling.utbetalingsDato).isEqualTo("2019-12-24")
         assertThat(utbetaling.fom).isEqualTo("2019-12-01")
@@ -105,8 +105,8 @@ internal class UtbetalingTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        UTBETALING_BANKOVERFORING.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        UTBETALING_BANKOVERFORING.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -129,8 +129,8 @@ internal class UtbetalingTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 

@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class PdlConfig(
-    private val clientProperties: ClientProperties
+    private val clientProperties: ClientProperties,
 ) {
     @Bean
     fun pdlWebClient(webClientBuilder: WebClient.Builder): WebClient =
@@ -22,8 +22,8 @@ class PdlConfig(
                 ReactorClientHttpConnector(
                     unproxiedHttpClient()
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
-                        .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(30)) }
-                )
+                        .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(30)) },
+                ),
             )
             .filter(mdcExchangeFilter)
             .build()

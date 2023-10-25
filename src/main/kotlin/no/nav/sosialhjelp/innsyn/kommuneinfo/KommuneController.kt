@@ -20,11 +20,13 @@ import java.util.Date
 @RequestMapping("/api/v1/innsyn")
 class KommuneController(
     private val kommuneService: KommuneService,
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: Tilgangskontroll,
 ) {
-
     @GetMapping("/{fiksDigisosId}/kommune")
-    fun hentKommuneInfo(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<KommuneResponse> {
+    fun hentKommuneInfo(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<KommuneResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
         val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
@@ -36,8 +38,8 @@ class KommuneController(
                 erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
                 erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak,
                 tidspunkt = Date(),
-                kommunenummer = kommuneInfo?.kommunenummer
-            )
+                kommunenummer = kommuneInfo?.kommunenummer,
+            ),
         )
     }
 }

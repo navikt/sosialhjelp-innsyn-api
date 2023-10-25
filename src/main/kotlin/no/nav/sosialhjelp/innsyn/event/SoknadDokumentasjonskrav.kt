@@ -9,22 +9,28 @@ import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 
-fun InternalDigisosSoker.applySoknadKrav(digisosSak: DigisosSak, vedleggService: VedleggService, timestampSendt: Long, token: String) {
+fun InternalDigisosSoker.applySoknadKrav(
+    digisosSak: DigisosSak,
+    vedleggService: VedleggService,
+    timestampSendt: Long,
+    token: String,
+) {
     val vedleggKreves = vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak, token)
 
-    oppgaver = vedleggKreves
-        .filterNot { it.type == "annet" && it.tilleggsinfo == "annet" }
-        .map {
-            Oppgave(
-                sha256(timestampSendt.toString()),
-                it.type,
-                it.tilleggsinfo,
-                JsonVedlegg.HendelseType.SOKNAD,
-                it.hendelseReferanse,
-                null,
-                unixToLocalDateTime(timestampSendt),
-                false
-            )
-        }
-        .toMutableList()
+    oppgaver =
+        vedleggKreves
+            .filterNot { it.type == "annet" && it.tilleggsinfo == "annet" }
+            .map {
+                Oppgave(
+                    sha256(timestampSendt.toString()),
+                    it.type,
+                    it.tilleggsinfo,
+                    JsonVedlegg.HendelseType.SOKNAD,
+                    it.hendelseReferanse,
+                    null,
+                    unixToLocalDateTime(timestampSendt),
+                    false,
+                )
+            }
+            .toMutableList()
 }

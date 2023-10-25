@@ -7,6 +7,5 @@ import kotlin.properties.Delegates
 @Component
 @ConfigurationProperties(prefix = "innsyn.cache")
 class CacheProperties {
-
     var timeToLiveSeconds: Long by Delegates.notNull()
 }

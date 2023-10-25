@@ -12,7 +12,6 @@ import java.io.FileOutputStream
 import java.util.Collections
 
 class EttersendelsePdfGeneratorTest {
-
     private val ident = "11111111111"
 
     private val ettersendelsePdfGenerator = EttersendelsePdfGenerator()

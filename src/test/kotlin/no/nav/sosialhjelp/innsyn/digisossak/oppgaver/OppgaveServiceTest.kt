@@ -28,7 +28,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class OppgaveServiceTest {
-
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
@@ -127,8 +126,8 @@ internal class OppgaveServiceTest {
                 Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
                 Oppgave("oppgaveId2", type3, tillegg3, null, null, frist3, tidspunktForKrav, true),
                 Oppgave("oppgaveId3", type4, tillegg4, null, null, frist4, tidspunktForKrav, true),
-                Oppgave("oppgaveId4", type2, tillegg2, null, null, frist2, tidspunktForKrav, true)
-            )
+                Oppgave("oppgaveId4", type2, tillegg2, null, null, frist2, tidspunktForKrav, true),
+            ),
         )
 
         every { eventService.createModel(any(), any()) } returns model
@@ -166,17 +165,18 @@ internal class OppgaveServiceTest {
             listOf(
                 Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
                 Oppgave("oppgaveId2", type2, null, null, null, frist2, tidspunktForKrav, true),
-                Oppgave("oppgaveId3", type3, tillegg3, null, null, frist3, tidspunktForKrav, true)
-            )
+                Oppgave("oppgaveId3", type3, tillegg3, null, null, frist3, tidspunktForKrav, true),
+            ),
         )
 
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
-            InternalVedlegg(type, tillegg, null, null, mutableListOf(), tidspunktEtterKrav, null),
-            InternalVedlegg(type2, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
-            InternalVedlegg(type3, tillegg3, null, null, mutableListOf(), tidspunktFoerKrav, null),
-            InternalVedlegg(type3, null, null, null, mutableListOf(), tidspunktEtterKrav, null)
-        )
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns
+            listOf(
+                InternalVedlegg(type, tillegg, null, null, mutableListOf(), tidspunktEtterKrav, null),
+                InternalVedlegg(type2, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
+                InternalVedlegg(type3, tillegg3, null, null, mutableListOf(), tidspunktFoerKrav, null),
+                InternalVedlegg(type3, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
+            )
 
         val responseList = service.hentOppgaver("123", token)
 
@@ -212,8 +212,8 @@ internal class OppgaveServiceTest {
             listOf(
                 Vilkar("vilkar1", tittel, "mer vilkarer1", Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
                 Vilkar("vilkar2", null, beskrivelse, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
-                Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now())
-            )
+                Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
 
@@ -236,7 +236,7 @@ internal class OppgaveServiceTest {
             listOf(
                 Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, null, LocalDateTime.now(), LocalDateTime.now()),
                 Vilkar("vilkar2", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
-            )
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
 
@@ -262,7 +262,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.ANNULLERT,
                     null,
                     LocalDateTime.now(),
-                    LocalDate.now()
+                    LocalDate.now(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -273,7 +273,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.LEVERT_TIDLIGERE,
                     null,
                     LocalDateTime.now(),
-                    LocalDate.now()
+                    LocalDate.now(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -284,9 +284,9 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    LocalDate.now()
-                )
-            )
+                    LocalDate.now(),
+                ),
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -313,7 +313,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    LocalDate.now()
+                    LocalDate.now(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -324,7 +324,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    LocalDate.now()
+                    LocalDate.now(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -335,7 +335,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    LocalDate.now()
+                    LocalDate.now(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -346,9 +346,9 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    LocalDate.now()
-                )
-            )
+                    LocalDate.now(),
+                ),
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -378,7 +378,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.OPPFYLT,
                     null,
                     LocalDateTime.now(),
-                    LocalDate.now()
+                    LocalDate.now(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -401,8 +401,8 @@ internal class OppgaveServiceTest {
                     null,
                     LocalDateTime.now(),
                     LocalDate.now(),
-                )
-            )
+                ),
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -423,8 +423,7 @@ internal class OppgaveServiceTest {
                 Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now()),
                 Vilkar("vilkar2", "tittel", null, Oppgavestatus.IKKE_OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now()),
                 Vilkar("vilkar3", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
-
-            )
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -452,7 +451,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    frist2.toLocalDate()
+                    frist2.toLocalDate(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -463,7 +462,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    frist2.toLocalDate()
+                    frist2.toLocalDate(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -474,7 +473,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    frist.toLocalDate()
+                    frist.toLocalDate(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -485,9 +484,9 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    frist3.toLocalDate()
+                    frist3.toLocalDate(),
                 ),
-            )
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -524,7 +523,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    frist.toLocalDate()
+                    frist.toLocalDate(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -535,7 +534,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    null
+                    null,
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -546,7 +545,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    frist2.toLocalDate()
+                    frist2.toLocalDate(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -557,9 +556,9 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    null
+                    null,
                 ),
-            )
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -589,7 +588,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    frist.toLocalDate()
+                    frist.toLocalDate(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId2,
@@ -600,7 +599,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    null
+                    null,
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId,
@@ -611,7 +610,7 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    frist2.toLocalDate()
+                    frist2.toLocalDate(),
                 ),
                 Dokumentasjonkrav(
                     dokumentasjonkravId2,
@@ -622,9 +621,9 @@ internal class OppgaveServiceTest {
                     Oppgavestatus.RELEVANT,
                     null,
                     LocalDateTime.now(),
-                    null
+                    null,
                 ),
-            )
+            ),
         )
         every { eventService.createModel(any(), any()) } returns model
         every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
@@ -643,23 +642,33 @@ internal class OppgaveServiceTest {
     @Test
     fun `should return true if vedlegg for dokumentasjonkrav already uploaded`() {
         val model = InternalDigisosSoker()
-        model.dokumentasjonkrav = mutableListOf(
-            Dokumentasjonkrav(
-                dokumentasjonkravId,
-                JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                "dokumentasjonkrav1",
-                "tittel",
-                null,
-                Oppgavestatus.RELEVANT,
-                null,
-                LocalDateTime.now(),
-                LocalDate.now()
+        model.dokumentasjonkrav =
+            mutableListOf(
+                Dokumentasjonkrav(
+                    dokumentasjonkravId,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    "tittel",
+                    null,
+                    Oppgavestatus.RELEVANT,
+                    null,
+                    LocalDateTime.now(),
+                    LocalDate.now(),
+                ),
             )
-        )
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns listOf(
-            InternalVedlegg(dokumenttype, null, JsonVedlegg.HendelseType.DOKUMENTASJONKRAV, "dokumentasjonkrav1", mutableListOf(dok), tidspunkt, null)
-        )
+        every { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns
+            listOf(
+                InternalVedlegg(
+                    dokumenttype,
+                    null,
+                    JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
+                    "dokumentasjonkrav1",
+                    mutableListOf(dok),
+                    tidspunkt,
+                    null,
+                ),
+            )
 
         val response = service.getHarLevertDokumentasjonkrav("123", token)
 
@@ -684,6 +693,7 @@ internal class OppgaveServiceTest {
     }
 
     @Test
+    @Suppress("ktlint:standard:max-line-length")
     fun `should return false if fagsystemversjon is older client properties versjons or if fagsystem name is not configured for that version`() {
         val model = InternalDigisosSoker()
         model.fagsystem = Fagsystem("mock-alt", "0.0.3:0")
@@ -705,7 +715,9 @@ internal class OppgaveServiceTest {
         val model = InternalDigisosSoker()
         model.fagsystem = Fagsystem("mock-alt", "1.0.1:MOCKVERSJON")
         every { eventService.createModel(any(), any()) } returns model
-        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("ugyldigFormatertFagsystemConfig--0.1.1", "mock-alt;1.0.0:MOCKVERSJON")
+        every {
+            clientProperties.vilkarDokkravFagsystemVersjoner
+        } returns listOf("ugyldigFormatertFagsystemConfig--0.1.1", "mock-alt;1.0.0:MOCKVERSJON")
 
         val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
 

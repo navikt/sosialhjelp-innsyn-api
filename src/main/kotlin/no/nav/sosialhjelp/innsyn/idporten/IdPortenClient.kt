@@ -58,23 +58,28 @@ class IdPortenClient(
     private val idPortenProperties: IdPortenProperties,
     private val redisService: RedisService,
 ) {
-
-    fun getAuthorizeUri(loginId: String, redirectPath: String?): URI {
+    fun getAuthorizeUri(
+        loginId: String,
+        redirectPath: String?,
+    ): URI {
         redirectPath?.let { redisService.put("$LOGIN_REDIRECT_CACHE_PREFIX$loginId", it.toByteArray(), idPortenProperties.loginTimeout) }
-        val state = State().also {
-            redisService.put("$STATE_CACHE_PREFIX$loginId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
-        }
-        val nonce = Nonce().also {
-            redisService.put("$NONCE_CACHE_PREFIX$loginId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
-        }
+        val state =
+            State().also {
+                redisService.put("$STATE_CACHE_PREFIX$loginId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
+            }
+        val nonce =
+            Nonce().also {
+                redisService.put("$NONCE_CACHE_PREFIX$loginId", objectMapper.writeValueAsBytes(it), idPortenProperties.loginTimeout)
+            }
 
-        val codeVerifier = CodeVerifier().also {
-            redisService.put("$CODE_VERIFIER_CACHE_PREFIX$loginId", it.value.toByteArray(), idPortenProperties.loginTimeout)
-        }
+        val codeVerifier =
+            CodeVerifier().also {
+                redisService.put("$CODE_VERIFIER_CACHE_PREFIX$loginId", it.value.toByteArray(), idPortenProperties.loginTimeout)
+            }
 
         return AuthorizationRequest.Builder(
             ResponseType(ResponseType.Value.CODE),
-            ClientID(idPortenProperties.clientId)
+            ClientID(idPortenProperties.clientId),
         )
             .scope(Scope("openid", "profile", "ks:fiks"))
             .state(state)
@@ -87,23 +92,29 @@ class IdPortenClient(
             .toURI()
     }
 
-    fun getToken(authorizationCode: AuthorizationCode?, loginId: String) {
-        val codeVerifierValue = redisService.get("$CODE_VERIFIER_CACHE_PREFIX$loginId", String::class.java)
-            ?: throw TilgangskontrollException("No code_verifier found on loginId")
+    fun getToken(
+        authorizationCode: AuthorizationCode?,
+        loginId: String,
+    ) {
+        val codeVerifierValue =
+            redisService.get("$CODE_VERIFIER_CACHE_PREFIX$loginId", String::class.java)
+                ?: throw TilgangskontrollException("No code_verifier found on loginId")
 
-        val authorizationCodeGrant = AuthorizationCodeGrant(
-            authorizationCode,
-            URI(idPortenProperties.redirectUri),
-            CodeVerifier(codeVerifierValue)
-        )
+        val authorizationCodeGrant =
+            AuthorizationCodeGrant(
+                authorizationCode,
+                URI(idPortenProperties.redirectUri),
+                CodeVerifier(codeVerifierValue),
+            )
         val clientAuth = PrivateKeyJWT(SignedJWT.parse(clientAssertion))
 
-        val tokenRequest = TokenRequest(
-            URI(idPortenProperties.wellKnown.tokenEndpoint),
-            clientAuth,
-            authorizationCodeGrant,
-            Scope("openid", "profile", "ks:fiks")
-        )
+        val tokenRequest =
+            TokenRequest(
+                URI(idPortenProperties.wellKnown.tokenEndpoint),
+                clientAuth,
+                authorizationCodeGrant,
+                Scope("openid", "profile", "ks:fiks"),
+            )
 
         val httpResponse: HTTPResponse = tokenRequest.toHTTPRequest().send()
         val tokenResponse = objectMapper.readValue<TokenResponse>(httpResponse.content)
@@ -112,17 +123,19 @@ class IdPortenClient(
         val keySource = JWKSourceBuilder.create<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri)).build()
         val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, keySource)
 
-        val storedNonce = redisService.get("$NONCE_CACHE_PREFIX$loginId", Nonce::class.java)
-            ?: throw TilgangskontrollException("No nonce found on loginId")
+        val storedNonce =
+            redisService.get("$NONCE_CACHE_PREFIX$loginId", Nonce::class.java)
+                ?: throw TilgangskontrollException("No nonce found on loginId")
 
         jwtProcessor.jwsKeySelector = keySelector
-        jwtProcessor.jwtClaimsSetVerifier = DefaultJWTClaimsVerifier(
-            JWTClaimsSet.Builder()
-                .issuer(idPortenProperties.wellKnown.issuer)
-                .claim("nonce", storedNonce.value)
-                .build(),
-            setOf("sid", "nonce")
-        )
+        jwtProcessor.jwtClaimsSetVerifier =
+            DefaultJWTClaimsVerifier(
+                JWTClaimsSet.Builder()
+                    .issuer(idPortenProperties.wellKnown.issuer)
+                    .claim("nonce", storedNonce.value)
+                    .build(),
+                setOf("sid", "nonce"),
+            )
         val claimsSet = jwtProcessor.process(tokenResponse.idToken, null)
 
         // Kan hende denne sjekken er overflødig
@@ -137,7 +150,10 @@ class IdPortenClient(
         redisService.put("$ID_TOKEN_CACHE_PREFIX$loginId", tokenResponse.idToken.toByteArray(), idPortenProperties.sessionTimeout)
     }
 
-    fun getAccessTokenFromRefreshToken(refreshTokenString: String, loginId: String): String? {
+    fun getAccessTokenFromRefreshToken(
+        refreshTokenString: String,
+        loginId: String,
+    ): String? {
         val refreshToken = RefreshToken(refreshTokenString)
         val refreshTokenGrant: AuthorizationGrant = RefreshTokenGrant(refreshToken)
         val clientAuth = PrivateKeyJWT(SignedJWT.parse(clientAssertion))
@@ -163,7 +179,11 @@ class IdPortenClient(
 
         redisService.put("$ACCESS_TOKEN_CACHE_PREFIX$loginId", accessToken.value.toByteArray(), idPortenProperties.tokenTimeout)
         if (maybeUpdatedRefreshToken.value != refreshTokenString) {
-            redisService.put("$REFRESH_TOKEN_CACHE_PREFIX$loginId", maybeUpdatedRefreshToken.value.toByteArray(), idPortenProperties.sessionTimeout)
+            redisService.put(
+                "$REFRESH_TOKEN_CACHE_PREFIX$loginId",
+                maybeUpdatedRefreshToken.value.toByteArray(),
+                idPortenProperties.sessionTimeout,
+            )
         }
 
         return accessToken.value
@@ -183,27 +203,31 @@ class IdPortenClient(
             return LogoutRequest(endSessionEndpointURI).toURI()
         }
 
-        val logoutRequest = LogoutRequest(
-            endSessionEndpointURI,
-            SignedJWT.parse(idToken),
-            URI(idPortenProperties.postLogoutRedirectUri),
-            null // State er optional.
-        )
+        val logoutRequest =
+            LogoutRequest(
+                endSessionEndpointURI,
+                SignedJWT.parse(idToken),
+                URI(idPortenProperties.postLogoutRedirectUri),
+                // State er optional.
+                null,
+            )
         return logoutRequest.toURI()
     }
 
-    private val clientAssertion get() = createSignedAssertion(
-        clientId = idPortenProperties.clientId,
-        audience = idPortenProperties.wellKnown.issuer,
-        rsaKey = privateRsaKey
-    )
+    private val clientAssertion get() =
+        createSignedAssertion(
+            clientId = idPortenProperties.clientId,
+            audience = idPortenProperties.wellKnown.issuer,
+            rsaKey = privateRsaKey,
+        )
 
-    private val privateRsaKey: RSAKey = if (idPortenProperties.clientJwk == "generateRSA") {
-        if (MiljoUtils.isRunningInProd()) throw RuntimeException("Generation of RSA keys is not allowed in prod.")
-        RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyID(UUID.randomUUID().toString()).generate()
-    } else {
-        RSAKey.parse(idPortenProperties.clientJwk)
-    }
+    private val privateRsaKey: RSAKey =
+        if (idPortenProperties.clientJwk == "generateRSA") {
+            if (MiljoUtils.isRunningInProd()) throw RuntimeException("Generation of RSA keys is not allowed in prod.")
+            RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyID(UUID.randomUUID().toString()).generate()
+        } else {
+            RSAKey.parse(idPortenProperties.clientJwk)
+        }
 
     companion object {
         private val log by logger()

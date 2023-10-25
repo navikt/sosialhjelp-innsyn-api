@@ -6,7 +6,6 @@ import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.utils.sha256
-import org.apache.commons.codec.binary.Base64
 import org.springframework.stereotype.Component
 import java.security.NoSuchAlgorithmException
 import java.time.LocalDateTime
@@ -14,6 +13,8 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * Klasse som genererer og sjekker xsrf token som sendes inn
@@ -22,7 +23,7 @@ import javax.crypto.spec.SecretKeySpec
 class XsrfGenerator(
     private val redisService: RedisService,
 ) {
-
+    @OptIn(ExperimentalEncodingApi::class)
     fun generateXsrfToken(date: LocalDateTime = LocalDateTime.now()): String {
         val fnr = SubjectHandlerUtils.getUserIdFromToken()
         redisService.get(redisKey(fnr, date), String::class.java)?.let { return it }
@@ -31,18 +32,24 @@ class XsrfGenerator(
             val hmac = Mac.getInstance("HmacSHA256")
             val secretKey = SecretKeySpec(SECRET.toByteArray(), "HmacSHA256")
             hmac.init(secretKey)
-            return Base64.encodeBase64URLSafeString(hmac.doFinal(xsrf.toByteArray()))
+            return Base64.UrlSafe.encode(hmac.doFinal(xsrf.toByteArray()))
                 .also { lagreTilRedis(redisKey(fnr, date), it) }
         } catch (e: NoSuchAlgorithmException) {
             throw IllegalArgumentException("Kunne ikke generere token: ", e)
         }
     }
 
-    private fun hentXsrfToken(id: String, date: LocalDateTime = LocalDateTime.now()): String? {
+    private fun hentXsrfToken(
+        id: String,
+        date: LocalDateTime = LocalDateTime.now(),
+    ): String? {
         return hentFraRedis(redisKey(id, date))
     }
 
-    private fun lagreTilRedis(redisKey: String, xsrfString: String) {
+    private fun lagreTilRedis(
+        redisKey: String,
+        xsrfString: String,
+    ) {
         redisService.put(XSRF_KEY_PREFIX + redisKey, xsrfString.toByteArray(), 8 * 60L * 60L)
     }
 
@@ -67,7 +74,9 @@ class XsrfGenerator(
         private val SECRET = System.getenv("XSRF_SECRET") ?: "hemmelig"
         private val redisDatoFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 
-        fun redisKey(token: String, date: LocalDateTime) =
-            sha256(token + redisDatoFormatter.format(date))
+        fun redisKey(
+            token: String,
+            date: LocalDateTime,
+        ) = sha256(token + redisDatoFormatter.format(date))
     }
 }

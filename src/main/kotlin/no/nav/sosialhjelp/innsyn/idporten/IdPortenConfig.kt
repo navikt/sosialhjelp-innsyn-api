@@ -24,7 +24,6 @@ class IdPortenConfig(
     webClientBuilder: WebClient.Builder,
     proxiedHttpClient: HttpClient,
 ) {
-
     @Bean
     fun idPortenProperties(): IdPortenProperties {
         return IdPortenProperties(
@@ -35,7 +34,7 @@ class IdPortenConfig(
             postLogoutRedirectUri = postLogoutRedirectUri,
             loginTimeout = loginTimeout,
             sessionTimeout = sessionTimeout,
-            tokenTimeout = tokenTimeout
+            tokenTimeout = tokenTimeout,
         )
     }
 
@@ -45,13 +44,14 @@ class IdPortenConfig(
             .build()
 
     private val wellknown: IdPortenWellKnown
-        get() = idportenWebClient.get()
-            .uri(wellKnownUrl)
-            .retrieve()
-            .bodyToMono<IdPortenWellKnown>()
-            .doOnSuccess { log.info("Hentet WellKnown for ID-porten") }
-            .doOnError { log.warn("Feil ved henting av WellKnown for ID-porten", it) }
-            .block() ?: throw RuntimeException("Feil ved henting av WellKnown for ID-porten")
+        get() =
+            idportenWebClient.get()
+                .uri(wellKnownUrl)
+                .retrieve()
+                .bodyToMono<IdPortenWellKnown>()
+                .doOnSuccess { log.info("Hentet WellKnown for ID-porten") }
+                .doOnError { log.warn("Feil ved henting av WellKnown for ID-porten", it) }
+                .block() ?: throw RuntimeException("Feil ved henting av WellKnown for ID-porten")
 
     companion object {
         private val log by logger()

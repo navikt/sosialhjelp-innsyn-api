@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.env.Environment
 
 internal class TilgangskontrollServiceTest {
-
     private val pdlClientMock: PdlClient = mockk()
     private val environment: Environment = mockk()
     private val service = TilgangskontrollService("clientId", environment, pdlClientMock)

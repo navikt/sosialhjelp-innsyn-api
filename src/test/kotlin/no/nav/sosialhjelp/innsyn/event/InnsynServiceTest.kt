@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class InnsynServiceTest {
-
     private val fiksClient: FiksClient = mockk()
     private val kommuneService: KommuneService = mockk()
     private val service = InnsynService(fiksClient, kommuneService)
@@ -41,7 +40,7 @@ internal class InnsynServiceTest {
     fun `Skal hente innsyn data`() {
         val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
 
-        every { fiksClient.hentDokument<JsonDigisosSoker>(any(), any(), JsonDigisosSoker::class.java, "token", any()) } returns mockJsonDigisosSoker
+        every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, "token", any()) } returns mockJsonDigisosSoker
 
         val jsonDigisosSoker: JsonDigisosSoker? = service.hentJsonDigisosSoker(digisosSak, "token")
 

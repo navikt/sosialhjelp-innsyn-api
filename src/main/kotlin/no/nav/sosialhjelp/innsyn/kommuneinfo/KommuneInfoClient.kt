@@ -29,9 +29,8 @@ class KommuneInfoClient(
     private val maskinportenClient: MaskinportenClient,
     clientProperties: ClientProperties,
     webClientBuilder: WebClient.Builder,
-    proxiedHttpClient: HttpClient
+    proxiedHttpClient: HttpClient,
 ) {
-
     fun getAll(): List<KommuneInfo> {
         return kommuneInfoWebClient.get()
             .uri(PATH_ALLE_KOMMUNEINFO)

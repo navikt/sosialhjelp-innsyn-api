@@ -35,7 +35,6 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
 class SaksOversiktItest {
-
     @Autowired
     private lateinit var webClient: WebTestClient
 
@@ -65,7 +64,6 @@ class SaksOversiktItest {
 
     @Test
     fun `skal hente liste med saker`() {
-
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
 
@@ -84,7 +82,6 @@ class SaksOversiktItest {
 
     @Test
     fun `skal hente saksdetaljer for sak`() {
-
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
         val soknad = JsonSoknad()
@@ -112,7 +109,6 @@ class SaksOversiktItest {
 
     @Test
     fun `skal returnere bad request dersom id requestparameter ikke er lagt til for saksDetaljer endepunkt`() {
-
         webClient
             .get()
             .uri("/api/v1/innsyn/saksDetaljer")

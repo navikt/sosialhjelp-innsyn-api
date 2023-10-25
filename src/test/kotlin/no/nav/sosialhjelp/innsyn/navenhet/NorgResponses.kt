@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
-val ok_navenhet = """
+val ok_navenhet =
+    """
     {
       "enhetId": 100000000,
       "navn": "NAV Eiganes og Tasta",
@@ -20,4 +21,4 @@ val ok_navenhet = """
       "kanalstrategi": "kanalstrategi",
       "orgNrTilKommunaltNavKontor": "11111111"
     }
-""".trimIndent()
+    """.trimIndent()

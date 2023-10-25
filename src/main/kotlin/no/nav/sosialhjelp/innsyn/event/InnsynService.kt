@@ -13,28 +13,46 @@ class InnsynService(
     private val fiksClient: FiksClient,
     private val kommuneService: KommuneService,
 ) {
-
-    fun hentJsonDigisosSoker(digisosSak: DigisosSak, token: String): JsonDigisosSoker? {
+    fun hentJsonDigisosSoker(
+        digisosSak: DigisosSak,
+        token: String,
+    ): JsonDigisosSoker? {
         val metadataId = digisosSak.digisosSoker?.metadata
         val sistOppdatert = digisosSak.digisosSoker?.timestampSistOppdatert
         return when {
-            kommuneService.erInnsynDeaktivertForKommune(digisosSak.fiksDigisosId, token) -> log.debug("Kommune har deaktivert innsyn -> henter ikke innsynsdata").let { null }
-            metadataId != null && sistOppdatert != null -> fiksClient.hentDokument(
+            kommuneService.erInnsynDeaktivertForKommune(
                 digisosSak.fiksDigisosId,
-                metadataId,
-                JsonDigisosSoker::class.java,
                 token,
-                "${metadataId}_$sistOppdatert"
-            )
+            ) ->
+                log.debug("Kommune har deaktivert innsyn -> henter ikke innsynsdata").let {
+                    null
+                }
+            metadataId != null && sistOppdatert != null ->
+                fiksClient.hentDokument(
+                    digisosSak.fiksDigisosId,
+                    metadataId,
+                    JsonDigisosSoker::class.java,
+                    token,
+                    "${metadataId}_$sistOppdatert",
+                )
 
             else -> null
         }
     }
 
-    fun hentOriginalSoknad(digisosSak: DigisosSak, token: String): JsonSoknad? {
+    fun hentOriginalSoknad(
+        digisosSak: DigisosSak,
+        token: String,
+    ): JsonSoknad? {
         val originalMetadataId = digisosSak.originalSoknadNAV?.metadata
         return when {
-            originalMetadataId != null -> fiksClient.hentDokument(digisosSak.fiksDigisosId, originalMetadataId, JsonSoknad::class.java, token)
+            originalMetadataId != null ->
+                fiksClient.hentDokument(
+                    digisosSak.fiksDigisosId,
+                    originalMetadataId,
+                    JsonSoknad::class.java,
+                    token,
+                )
             else -> null
         }
     }

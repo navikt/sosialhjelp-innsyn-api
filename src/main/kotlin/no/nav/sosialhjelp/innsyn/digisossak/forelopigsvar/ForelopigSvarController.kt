@@ -18,10 +18,13 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/innsyn")
 class ForelopigSvarController(
     private val forelopigSvarService: ForelopigSvarService,
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: Tilgangskontroll,
 ) {
     @GetMapping("/{fiksDigisosId}/forelopigSvar")
-    fun hentForelopigSvarStatus(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<ForelopigSvarResponse> {
+    fun hentForelopigSvarStatus(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+    ): ResponseEntity<ForelopigSvarResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
         val forelopigSvarResponse: ForelopigSvarResponse = forelopigSvarService.hentForelopigSvar(fiksDigisosId, token)

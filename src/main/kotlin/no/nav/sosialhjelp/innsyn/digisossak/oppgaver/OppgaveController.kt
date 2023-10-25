@@ -19,11 +19,13 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/innsyn")
 class OppgaveController(
     private val oppgaveService: OppgaveService,
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: Tilgangskontroll,
 ) {
-
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = ["application/json;charset=UTF-8"])
-    fun getOppgaver(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+    fun getOppgaver(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<OppgaveResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
@@ -34,7 +36,11 @@ class OppgaveController(
     }
 
     @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}", produces = ["application/json;charset=UTF-8"])
-    fun getOppgaveMedId(@PathVariable fiksDigisosId: String, @PathVariable oppgaveId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<OppgaveResponse>> {
+    fun getOppgaveMedId(
+        @PathVariable fiksDigisosId: String,
+        @PathVariable oppgaveId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<OppgaveResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, token, oppgaveId)
@@ -45,7 +51,10 @@ class OppgaveController(
     }
 
     @GetMapping("/{fiksDigisosId}/vilkar", produces = ["application/json;charset=UTF-8"])
-    fun getVilkar(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<VilkarResponse>> {
+    fun getVilkar(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<VilkarResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         val vilkar = oppgaveService.getVilkar(fiksDigisosId, token)
@@ -56,7 +65,10 @@ class OppgaveController(
     }
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
-    fun getDokumentasjonkrav(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
+    fun getDokumentasjonkrav(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<DokumentasjonkravResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
@@ -67,7 +79,11 @@ class OppgaveController(
     }
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{dokumentasjonkravId}", produces = ["application/json;charset=UTF-8"])
-    fun getDokumentasjonkravMedId(@PathVariable fiksDigisosId: String, @PathVariable dokumentasjonkravId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<DokumentasjonkravResponse>> {
+    fun getDokumentasjonkravMedId(
+        @PathVariable fiksDigisosId: String,
+        @PathVariable dokumentasjonkravId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<DokumentasjonkravResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId, token)
@@ -78,7 +94,10 @@ class OppgaveController(
     }
 
     @GetMapping("/{fiksDigisosId}/harLeverteDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
-    fun getHarLevertDokumentasjonkrav(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+    fun getHarLevertDokumentasjonkrav(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang(token)
 
         val harLevertTidligere = oppgaveService.getHarLevertDokumentasjonkrav(fiksDigisosId, token)
@@ -86,7 +105,10 @@ class OppgaveController(
     }
 
     @GetMapping("/{fiksDigisosId}/fagsystemHarDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
-    fun getfagsystemHarDokumentasjonkrav(@PathVariable fiksDigisosId: String, @RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+    fun getfagsystemHarDokumentasjonkrav(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang(token)
 
         val fagsystemHarDokumentasjonkrav = oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId, token)

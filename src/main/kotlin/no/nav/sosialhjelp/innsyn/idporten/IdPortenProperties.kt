@@ -8,5 +8,5 @@ data class IdPortenProperties(
     val postLogoutRedirectUri: String,
     val loginTimeout: Long,
     val sessionTimeout: Long,
-    val tokenTimeout: Long
+    val tokenTimeout: Long,
 )

@@ -38,7 +38,7 @@ enum class TikaFileType {
     JPEG,
     PNG,
     PDF,
-    UNKNOWN
+    UNKNOWN,
 }
 
 fun splitFileName(fileName: String): FileNameSplit {
@@ -57,13 +57,14 @@ class FileNameSplit(val name: String, val extension: String)
 fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVedlegg> {
     val kombinertListe = ArrayList<InternalVedlegg>()
     alleVedlegg.forEach {
-        val funnet = kombinertListe.firstOrNull { kombinert ->
-            (
-                areDatesWithinOneMinute(it.tidspunktLastetOpp, kombinert.tidspunktLastetOpp) &&
-                    kombinert.type == it.type &&
-                    kombinert.tilleggsinfo == it.tilleggsinfo
+        val funnet =
+            kombinertListe.firstOrNull { kombinert ->
+                (
+                    areDatesWithinOneMinute(it.tidspunktLastetOpp, kombinert.tidspunktLastetOpp) &&
+                        kombinert.type == it.type &&
+                        kombinert.tilleggsinfo == it.tilleggsinfo
                 )
-        }
+            }
         if (funnet != null) {
             funnet.dokumentInfoList.addAll(it.dokumentInfoList)
         } else {
@@ -73,7 +74,10 @@ fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVe
     return kombinertListe
 }
 
-fun areDatesWithinOneMinute(firstDate: LocalDateTime?, secondDate: LocalDateTime?): Boolean {
+fun areDatesWithinOneMinute(
+    firstDate: LocalDateTime?,
+    secondDate: LocalDateTime?,
+): Boolean {
     return (firstDate == null && secondDate == null) ||
         ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
 }

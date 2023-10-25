@@ -24,29 +24,29 @@ interface DokumentlagerClient {
 @Component
 class DokumentlagerClientImpl(
     private val fiksWebClient: WebClient,
-    private val maskinportenClient: MaskinportenClient
+    private val maskinportenClient: MaskinportenClient,
 ) : DokumentlagerClient {
-
     private var cachedPublicKey: X509Certificate? = null
 
     override fun getDokumentlagerPublicKeyX509Certificate(): X509Certificate {
         cachedPublicKey?.let { return it }
 
-        val publicKey = fiksWebClient.get()
-            .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
-            .accept(APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-            .retrieve()
-            .bodyToMono<ByteArray>()
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - getDokumentlagerPublicKey feilet - ${e.statusCode} ${e.statusText}", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
-                    else -> FiksServerException(e.statusCode.value(), e.message, e)
+        val publicKey =
+            fiksWebClient.get()
+                .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
+                .accept(APPLICATION_JSON)
+                .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                .retrieve()
+                .bodyToMono<ByteArray>()
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - getDokumentlagerPublicKey feilet - ${e.statusCode} ${e.statusText}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
+                        else -> FiksServerException(e.statusCode.value(), e.message, e)
+                    }
                 }
-            }
-            .block()
-            ?: throw BadStateException("Ingen feil, men heller ingen publicKey")
+                .block()
+                ?: throw BadStateException("Ingen feil, men heller ingen publicKey")
 
         log.info("Hentet public key for dokumentlager")
 

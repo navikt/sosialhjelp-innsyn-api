@@ -8,9 +8,8 @@ import org.springframework.stereotype.Component
 @Component
 class SoknadMedInnsynService(
     private val fiksClient: FiksClient,
-    private val kommuneService: KommuneService
+    private val kommuneService: KommuneService,
 ) {
-
     fun harSoknaderMedInnsyn(token: String): Boolean {
         return fiksClient.hentAlleDigisosSaker(token)
             .filter { it.isNewerThanMonths(15) }

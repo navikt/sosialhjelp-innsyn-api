@@ -8,12 +8,13 @@ data class UtbetalingerResponse(
     val maned: Int,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val foersteIManeden: LocalDate,
-    val utbetalinger: List<ManedUtbetaling>
+    val utbetalinger: List<ManedUtbetaling>,
 )
+
 data class NyeOgTidligereUtbetalingerResponse(
     val utbetalingerForManed: List<ManedUtbetaling>,
     val ar: Int,
-    val maned: Int
+    val maned: Int,
 )
 
 data class ManedUtbetaling(

@@ -53,6 +53,7 @@ client:
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/soknad-api}
   soknad_api_audience: dummyAudience
+  klage_enabled: ${KLAGE_ENABLED:true}
 
 #Maskinporten
 maskinporten_clientid: maskinporten_clientid

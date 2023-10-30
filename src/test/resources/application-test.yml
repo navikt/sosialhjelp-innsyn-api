@@ -19,6 +19,7 @@ client:
   tokendings_private_jwk: generateRSA
   soknad_api_url: "http://localhost:59999"
   soknad_api_audience: "dummyAudience"
+  klage_enabled: "false"
 
 #Maskinporten
 maskinporten_clientid: clientid

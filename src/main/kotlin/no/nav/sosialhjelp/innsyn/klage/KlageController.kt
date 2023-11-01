@@ -40,7 +40,8 @@ class KlageController(
             KlageDto(
                 FilUrl(dato = LocalDate.now(), url = it.filRef.toDokumentLagerUrl(), id = it.filRef),
                 status = it.status,
-                nyttVedtakUrl = FilUrl(LocalDate.now(), it.vedtakRef.first().toDokumentLagerUrl(), it.vedtakRef.first())
+                nyttVedtakUrl = FilUrl(LocalDate.now(), it.vedtakRef.first().toDokumentLagerUrl(), it.vedtakRef.first()),
+                paaklagetVedtakRefs = it.vedtakRef
             )
         }
         return ResponseEntity.ok(klageDtos)
@@ -63,4 +64,4 @@ class KlageController(
     }
 }
 
-data class KlageDto(val klageUrl: FilUrl, val status: KlageStatus, val nyttVedtakUrl: FilUrl? = null)
+data class KlageDto(val klageUrl: FilUrl, val status: KlageStatus, val nyttVedtakUrl: FilUrl? = null, val paaklagetVedtakRefs: List<String>)

@@ -17,7 +17,9 @@ class SaksStatusService(
 ) {
     private val log by logger()
 
-    fun hentSaksStatuser(fiksDigisosId: String, token: String,
+    fun hentSaksStatuser(
+        fiksDigisosId: String,
+        token: String,
     ): List<SaksStatusResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
@@ -33,15 +35,17 @@ class SaksStatusService(
     }
 
     private fun mapToResponse(sak: Sak): SaksStatusResponse {
-        val saksStatus = if (sak.vedtak.isEmpty()) {
+        val saksStatus =
+            if (sak.vedtak.isEmpty()) {
                 sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
-        } else {
-            SaksStatus.FERDIGBEHANDLET
-        }
-        val vedtakfilUrlList = sak.vedtak.map {
-            log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
-            FilUrl(it.dato, it.vedtaksFilUrl, it.id)
-        }.ifEmpty { null }
+            } else {
+                SaksStatus.FERDIGBEHANDLET
+            }
+        val vedtakfilUrlList =
+            sak.vedtak.map {
+                log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
+                FilUrl(it.dato, it.vedtaksFilUrl, it.id)
+            }.ifEmpty { null }
         val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak)
         return SaksStatusResponse(sak.tittel ?: DEFAULT_SAK_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList)
     }

@@ -26,19 +26,22 @@ class FiksIoVirksomhetssertifikatConfig(
     @Value("\$virksomhetssertifikatPath")
     private val virksomhetssertifikatPath: String,
 ) {
-
     @Bean
     fun virksomhetssertifikatConfig(): VirksomhetssertifikatKonfigurasjon {
-        val sertifikat = Files.readString(Path.of("$virksomhetssertifikatPath/key.p12.b64")).let {
-            Base64.getDecoder().decode(it)
-        }
-        val password = Files.readAllBytes(Path.of("$virksomhetssertifikatPath/credentials.json")).let {
-            objectMapper.readValue<DigisosKeyStoreCredentials>(it)
-        }
+        val sertifikat =
+            Files.readString(Path.of("$virksomhetssertifikatPath/key.p12.b64")).let {
+                Base64.getDecoder().decode(it)
+            }
+        val password =
+            Files.readAllBytes(Path.of("$virksomhetssertifikatPath/credentials.json")).let {
+                objectMapper.readValue<DigisosKeyStoreCredentials>(it)
+            }
 
         val keyStore = KeyStore.getInstance("pkcs12")
         keyStore.load(sertifikat.inputStream(), password.password.toCharArray())
 
-        return VirksomhetssertifikatKonfigurasjon.builder().keyStore(keyStore).keyStorePassword(password.password).keyAlias(password.alias).keyPassword(password.password).build()
+        return VirksomhetssertifikatKonfigurasjon.builder().keyStore(
+            keyStore,
+        ).keyStorePassword(password.password).keyAlias(password.alias).keyPassword(password.password).build()
     }
 }

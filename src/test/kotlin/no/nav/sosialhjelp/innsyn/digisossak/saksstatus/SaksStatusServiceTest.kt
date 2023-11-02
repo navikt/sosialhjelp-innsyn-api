@@ -86,8 +86,8 @@ internal class SaksStatusServiceTest {
                             utfall = UtfallVedtak.INNVILGET,
                             vedtaksFilUrl = vedtaksfilUrl,
                             dato = LocalDate.now(),
-                        id = ""
-                    ),
+                            id = "",
+                        ),
                     ),
                 utbetalinger = mutableListOf(),
             ),
@@ -119,8 +119,8 @@ internal class SaksStatusServiceTest {
                             utfall = UtfallVedtak.INNVILGET,
                             vedtaksFilUrl = vedtaksfilUrl,
                             dato = LocalDate.now(),
-                        id = id
-                    ),
+                            id = id,
+                        ),
                     ),
                 utbetalinger = mutableListOf(),
             ),
@@ -147,20 +147,21 @@ internal class SaksStatusServiceTest {
                     referanse = referanse,
                     saksStatus = SaksStatus.UNDER_BEHANDLING,
                     tittel = tittel,
-                    vedtak = mutableListOf(
-                        Vedtak(
-                            utfall = UtfallVedtak.INNVILGET,
-                            vedtaksFilUrl = vedtaksfilUrl,
-                            dato = LocalDate.now(),
-                            id = id,
+                    vedtak =
+                        mutableListOf(
+                            Vedtak(
+                                utfall = UtfallVedtak.INNVILGET,
+                                vedtaksFilUrl = vedtaksfilUrl,
+                                dato = LocalDate.now(),
+                                id = id,
+                            ),
+                            Vedtak(
+                                utfall = UtfallVedtak.INNVILGET,
+                                vedtaksFilUrl = vedtaksfilUrl,
+                                dato = LocalDate.now(),
+                                id = id,
+                            ),
                         ),
-                        Vedtak(
-                            utfall = UtfallVedtak.INNVILGET,
-                            vedtaksFilUrl = vedtaksfilUrl,
-                            dato = LocalDate.now(),
-                            id = id,
-                        ),
-                    ),
                     utbetalinger = mutableListOf(),
                 ),
                 Sak(
@@ -188,51 +189,57 @@ internal class SaksStatusServiceTest {
 
     @Test
     fun `teste at getSkalViseVedtakInfoPanel gir riktig svar`() {
-
-        val vedtak1 = Vedtak(
-            utfall = UtfallVedtak.INNVILGET,
-            vedtaksFilUrl = "en link til noe",
-            dato = null,
-            id = id,
-        )
-        val vedtak2 = Vedtak(
-            utfall = UtfallVedtak.DELVIS_INNVILGET,
-            vedtaksFilUrl = "en link til noe",
-            dato = null,
-            id = id,
-        )
-        val vedtak3 = Vedtak(
-            utfall = UtfallVedtak.AVVIST,
-            vedtaksFilUrl = "en link til noe",
-            dato = null,
-            id = id,
-        )
-        val vedtak4 = Vedtak(
-            utfall = UtfallVedtak.AVSLATT,
-            vedtaksFilUrl = "en link til noe",
-            dato = null,
-            id = id,
-        )
-        val vedtak5 = Vedtak(
-            utfall = null,
-            vedtaksFilUrl = "en link til noe",
-            dato = null,
-            id = id,
-        )
-        val sakSomSkalGiTrue = Sak(
-            "ref1",
-            SaksStatus.FERDIGBEHANDLET,
-            "Tittel på sak",
-            vedtak = mutableListOf(vedtak1, vedtak2),
-            utbetalinger = mutableListOf()
-        )
-        val sakSomSkalGiFalse = Sak(
-            "ref1",
-            SaksStatus.FERDIGBEHANDLET,
-            "Tittel på sak",
-            vedtak = mutableListOf(vedtak1, vedtak2, vedtak3, vedtak4, vedtak5),
-            utbetalinger = mutableListOf()
-        )
+        val vedtak1 =
+            Vedtak(
+                utfall = UtfallVedtak.INNVILGET,
+                vedtaksFilUrl = "en link til noe",
+                dato = null,
+                id = id,
+            )
+        val vedtak2 =
+            Vedtak(
+                utfall = UtfallVedtak.DELVIS_INNVILGET,
+                vedtaksFilUrl = "en link til noe",
+                dato = null,
+                id = id,
+            )
+        val vedtak3 =
+            Vedtak(
+                utfall = UtfallVedtak.AVVIST,
+                vedtaksFilUrl = "en link til noe",
+                dato = null,
+                id = id,
+            )
+        val vedtak4 =
+            Vedtak(
+                utfall = UtfallVedtak.AVSLATT,
+                vedtaksFilUrl = "en link til noe",
+                dato = null,
+                id = id,
+            )
+        val vedtak5 =
+            Vedtak(
+                utfall = null,
+                vedtaksFilUrl = "en link til noe",
+                dato = null,
+                id = id,
+            )
+        val sakSomSkalGiTrue =
+            Sak(
+                "ref1",
+                SaksStatus.FERDIGBEHANDLET,
+                "Tittel på sak",
+                vedtak = mutableListOf(vedtak1, vedtak2),
+                utbetalinger = mutableListOf(),
+            )
+        val sakSomSkalGiFalse =
+            Sak(
+                "ref1",
+                SaksStatus.FERDIGBEHANDLET,
+                "Tittel på sak",
+                vedtak = mutableListOf(vedtak1, vedtak2, vedtak3, vedtak4, vedtak5),
+                utbetalinger = mutableListOf(),
+            )
 
         val digisosSak1 = DigisosSak("id1", "", "", "", 1L, null, null, null, null)
         every {

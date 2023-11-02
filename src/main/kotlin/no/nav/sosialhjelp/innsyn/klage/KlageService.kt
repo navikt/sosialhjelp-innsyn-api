@@ -38,9 +38,16 @@ import java.lang.IllegalStateException
 import kotlin.jvm.optionals.getOrNull
 
 interface KlageService {
-    fun sendKlage(fiksDigisosId: String, klage: InputKlage, token: String)
+    fun sendKlage(
+        fiksDigisosId: String,
+        klage: InputKlage,
+        token: String,
+    )
 
-    fun hentKlager(fiksDigisosId: String, token: String): List<Klage>
+    fun hentKlager(
+        fiksDigisosId: String,
+        token: String,
+    ): List<Klage>
 }
 
 @Service
@@ -49,12 +56,15 @@ class KlageServiceLocalImpl(
     @Value("\${client.fiks_klage_endpoint_url}")
     klageUrl: String,
 ) : KlageService {
-
     private val log by logger()
 
     private val webClient = WebClient.create(klageUrl)
 
-    override fun sendKlage(fiksDigisosId: String, klage: InputKlage, token: String) = runBlocking {
+    override fun sendKlage(
+        fiksDigisosId: String,
+        klage: InputKlage,
+        token: String,
+    ) = runBlocking {
         val response = webClient.post().uri("/$fiksDigisosId/klage").bodyValue(klage).retrieve().awaitBodilessEntity()
         if (!response.statusCode.is2xxSuccessful) {
             log.error("Fikk ikke 2xx fra mock-alt-api i sending av klage. Status=${response.statusCode.value()}")
@@ -62,12 +72,19 @@ class KlageServiceLocalImpl(
         }
     }
 
-    override fun hentKlager(fiksDigisosId: String, token: String): List<Klage> = runBlocking {
-        webClient.get().uri("/$fiksDigisosId/klage").retrieve().onStatus({ !it.is2xxSuccessful }, {
-            log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
-            Mono.error { IllegalStateException("Feil ved henting av klager") }
-        }).awaitBody()
-    }
+    override fun hentKlager(
+        fiksDigisosId: String,
+        token: String,
+    ): List<Klage> =
+        runBlocking {
+            webClient.get().uri("/$fiksDigisosId/klage").retrieve().onStatus(
+                { !it.is2xxSuccessful },
+                {
+                    log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
+                    Mono.error { IllegalStateException("Feil ved henting av klager") }
+                },
+            ).awaitBody()
+        }
 }
 
 @Service
@@ -80,32 +97,43 @@ class KlageServiceImpl(
     private val norgClient: NorgClient,
     private val tilgangskontroll: TilgangskontrollService,
 ) : KlageService {
-
     private val log by logger()
 
-    override fun sendKlage(fiksDigisosId: String, klage: InputKlage, token: String) {
+    override fun sendKlage(
+        fiksDigisosId: String,
+        klage: InputKlage,
+        token: String,
+    ) {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val enhetsNr = digisosSak.tilleggsinformasjon?.enhetsnummer ?: error("Sak mangler enhetsnummer")
         val konto = fiksIOClient.hentKonto(enhetsNr, "no.nav.sosialhjelp.klage.v1")
 
         konto?.let {
-            fiksIOClient.send(MeldingRequest.builder().mottakerKontoId(it.kontoId).meldingType("no.nav.sosialhjelp.klage.v1.send").build(), klage.toKlageFil(), "klage.txt")
+            fiksIOClient.send(
+                MeldingRequest.builder().mottakerKontoId(it.kontoId).meldingType("no.nav.sosialhjelp.klage.v1.send").build(),
+                klage.toKlageFil(),
+                "klage.txt",
+            )
         } ?: error("Fant ikke konto å sende klage til")
     }
 
     // TODO: Hvilket format skal vi sende på?
     private fun InputKlage.toKlageFil() = this.toString().byteInputStream()
 
-    override fun hentKlager(fiksDigisosId: String, token: String): List<Klage> {
+    override fun hentKlager(
+        fiksDigisosId: String,
+        token: String,
+    ): List<Klage> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val enhetsNr = digisosSak.tilleggsinformasjon?.enhetsnummer ?: error("Sak mangler enhetsnummer")
         val konto = fiksIOClient.hentKonto(enhetsNr, "no.nav.sosialhjelp.klage.v1.hent")
 
-        val sendtMelding = konto?.let {
-            fiksIOClient.send(MeldingRequest.builder().mottakerKontoId(it.kontoId).build(), fiksDigisosId, "???")
-        } ?: error("Kunne ikke sende til Fiks IO")
+        val sendtMelding =
+            konto?.let {
+                fiksIOClient.send(MeldingRequest.builder().mottakerKontoId(it.kontoId).build(), fiksDigisosId, "???")
+            } ?: error("Kunne ikke sende til Fiks IO")
 
         return runBlocking {
             withTimeout(5000) {
@@ -114,26 +142,32 @@ class KlageServiceImpl(
         }
     }
 
-    private fun FiksIOKlient.hentKonto(enhetsNr: String, protokoll: String): Konto? {
-
+    private fun FiksIOKlient.hentKonto(
+        enhetsNr: String,
+        protokoll: String,
+    ): Konto? {
         /* Manuelt oppslag av testkommunes konto
         return Konto.builder().kontoId(KontoId(UUID.fromString("37ef64de-aa0e-4f10-97ef-3799030f1440"))).kontoNavn("Nav testkommune klagekonto")
             .fiksOrgId(FiksOrgId(UUID.fromString("11415cd1-e26d-499a-8421-751457dfcbd5"))).fiksOrgNavn("Nav testkommune").build()
-        */
-        val navEnhetId = enhetsNr.let {
-            log.info("Henter nav-enhet med nummer $it for sending/mottak av klage")
-            norgClient.hentNavEnhet(it)
-        }.let {
-            log.info("Bruker nav-enhet ${it.navn} med id ${it.enhetId} for sending/mottak av klage")
-            Identifikator(IdentifikatorType.NAVENHET_ID, it.enhetId.toString())
-        }
+         */
+        val navEnhetId =
+            enhetsNr.let {
+                log.info("Henter nav-enhet med nummer $it for sending/mottak av klage")
+                norgClient.hentNavEnhet(it)
+            }.let {
+                log.info("Bruker nav-enhet ${it.navn} med id ${it.enhetId} for sending/mottak av klage")
+                Identifikator(IdentifikatorType.NAVENHET_ID, it.enhetId.toString())
+            }
 
         val lookupRequest = LookupRequest.builder().identifikator(navEnhetId).sikkerhetsNiva(4).meldingsprotokoll(protokoll).build()
         val fiksIoKonto = lookup(lookupRequest)
         return fiksIoKonto.getOrNull()
     }
 
-    private fun waitForResult(fiksIOKlient: FiksIOKlient, sendtMelding: SendtMelding) = callbackFlow {
+    private fun waitForResult(
+        fiksIOKlient: FiksIOKlient,
+        sendtMelding: SendtMelding,
+    ) = callbackFlow {
         val callback = { mottattMelding: MottattMelding, svarSender: SvarSender ->
             if (mottattMelding.svarPaMelding == sendtMelding.meldingId) {
                 val klage: Klage = mottattMelding.dekryptertZipStream.use { ObjectMapper().readValue<Klage>(String(it.readBytes())) }
@@ -161,12 +195,23 @@ class KlageServiceImpl(
 
 data class InputKlage(val fiksDigisosId: String, val klageTekst: String, val vedtaksIds: List<String>)
 
-data class Klage(val fiksDigisosId: String, val filRef: String, val vedtakRef: List<String>, val status: KlageStatus, val utfall: KlageUtfall?)
+data class Klage(
+    val fiksDigisosId: String,
+    val filRef: String,
+    val vedtakRef: List<String>,
+    val status: KlageStatus,
+    val utfall: KlageUtfall?,
+)
 
 enum class KlageStatus {
-    SENDT, MOTTATT, UNDER_BEHANDLING, FERDIG_BEHANDLET, HOS_STATSFORVALTER
+    SENDT,
+    MOTTATT,
+    UNDER_BEHANDLING,
+    FERDIG_BEHANDLET,
+    HOS_STATSFORVALTER,
 }
 
 enum class KlageUtfall {
-    NYTT_VEDTAK, AVVIST,
+    NYTT_VEDTAK,
+    AVVIST,
 }

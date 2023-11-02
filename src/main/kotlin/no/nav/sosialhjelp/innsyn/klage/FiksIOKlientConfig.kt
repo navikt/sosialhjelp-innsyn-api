@@ -28,12 +28,16 @@ class FiksIOKlientConfig(
 
     @Bean
     fun fiksIOKlient(): FiksIOKlient {
-        val httpClient = HttpClientBuilder.create().setProxy(HttpHost.create(proxyUrl)).evictIdleConnections(TimeValue.of(Duration.ofMinutes(1L))).build()
-        val fiksIOKlientFactory = FiksIOKlientFactory(fiksIOKonfigurasjon, null, httpClient).apply {
-            setMaskinportenAccessTokenSupplier {
-                maskinportenClient.getToken()
+        val httpClient =
+            HttpClientBuilder.create().setProxy(
+                HttpHost.create(proxyUrl),
+            ).evictIdleConnections(TimeValue.of(Duration.ofMinutes(1L))).build()
+        val fiksIOKlientFactory =
+            FiksIOKlientFactory(fiksIOKonfigurasjon, null, httpClient).apply {
+                setMaskinportenAccessTokenSupplier {
+                    maskinportenClient.getToken()
+                }
             }
-        }
 
         return fiksIOKlientFactory.runCatching { build() }.onFailure {
             log.error("Fikk ikke satt opp fiks IO-klient", it)

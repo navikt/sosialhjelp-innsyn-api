@@ -29,7 +29,7 @@ object Versions {
     const val JSON_SMART = "2.4.10"
     const val LOG4J = "2.19.0"
     const val SNAKEYAML = "2.0"
-    const val fiksIO = "3.3.2"
+    const val FIKS_IO = "3.3.2"
 
     const val JAVA_JWT = "4.4.0"
     const val JWKS_RSA = "0.22.1"
@@ -101,7 +101,7 @@ dependencies {
     implementation("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:${Versions.FILFORMAT}")
 
 //  Fiks IO
-    implementation("no.ks.fiks:fiks-io-klient-java:${Versions.fiksIO}")
+    implementation("no.ks.fiks:fiks-io-klient-java:${Versions.FIKS_IO}")
 
 //    Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.JACKSON}")

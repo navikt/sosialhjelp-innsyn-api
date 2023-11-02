@@ -50,7 +50,6 @@ class KommuneInfoClient(
     }
 
     fun getKommuneInfo(kommunenummer: String): KommuneInfo {
-
         return kommuneInfoWebClient.get()
             .uri(PATH_KOMMUNEINFO, kommunenummer)
             .accept(MediaType.APPLICATION_JSON)

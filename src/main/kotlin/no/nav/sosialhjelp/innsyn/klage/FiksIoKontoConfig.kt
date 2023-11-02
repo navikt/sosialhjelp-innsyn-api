@@ -22,7 +22,6 @@ class FiksIoKontoConfig(
     private val privateKeyPath: String,
     @Value("\${fiks-io.kontoId:}")
     private val kontoId: String,
-
 ) {
     private val log by logger()
 

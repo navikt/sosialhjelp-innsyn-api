@@ -24,18 +24,18 @@ class FiksIOConfig(
     private val integrasjonId: String,
     @Value("\${MASKINPORTEN_CLIENT_ID}")
     private val maskinportenClientId: String,
-
 ) {
-
     @Bean
     @Profile("dev-fss")
     fun fiksIOTestConfig(): FiksIOKonfigurasjon {
         val integrasjonId = UUID.fromString(integrasjonId)
 
         return FiksIOKonfigurasjon.defaultTestConfiguration(
-            maskinportenClientId, integrasjonId, integrasjonspassord,
+            maskinportenClientId,
+            integrasjonId,
+            integrasjonspassord,
             kontoKonfigurasjon,
-            virksomhetssertifikatKonfigurasjon
+            virksomhetssertifikatKonfigurasjon,
         )
     }
 
@@ -45,9 +45,11 @@ class FiksIOConfig(
         val integrasjonId = UUID.fromString(integrasjonId)
 
         return FiksIOKonfigurasjon.defaultProdConfiguration(
-            maskinportenClientId, integrasjonId, integrasjonspassord,
+            maskinportenClientId,
+            integrasjonId,
+            integrasjonspassord,
             kontoKonfigurasjon,
-            virksomhetssertifikatKonfigurasjon
+            virksomhetssertifikatKonfigurasjon,
         )
     }
 }

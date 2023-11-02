@@ -19,7 +19,6 @@ class TilgangskontrollService(
     private val environment: Environment,
     private val pdlClient: PdlClient,
 ) {
-
     fun sjekkTilgang(token: String) {
         if (!environment.activeProfiles.contains("idporten")) {
             if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")

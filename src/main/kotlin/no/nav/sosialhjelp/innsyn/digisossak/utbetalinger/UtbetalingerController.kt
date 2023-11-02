@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController
 class UtbetalingerController(
     private val utbetalingerService: UtbetalingerService,
     private val tilgangskontroll: TilgangskontrollService,
-    private val tilgangskontroll: Tilgangskontroll,
 ) {
     @GetMapping("/utbetalinger")
     fun hentUtbetalinger(

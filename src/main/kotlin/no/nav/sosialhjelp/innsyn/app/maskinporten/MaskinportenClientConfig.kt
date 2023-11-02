@@ -11,6 +11,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.netty.http.client.HttpClient
+
 @Configuration
 class MaskinportenClientConfig(
     @Value("\${maskinporten_clientid}") private val clientId: String,

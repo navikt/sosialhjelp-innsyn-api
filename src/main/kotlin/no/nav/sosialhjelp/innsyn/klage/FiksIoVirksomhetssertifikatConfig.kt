@@ -21,7 +21,7 @@ data class DigisosKeyStoreCredentials(
 
 @Configuration
 @Profile("dev-fss|prod-fss")
-@ConditionalOnProperty("virksomhetssertikatPath")
+@ConditionalOnProperty(name = ["klageEnabled"], havingValue = "true")
 class FiksIoVirksomhetssertifikatConfig(
     @Value("\$virksomhetssertifikatPath")
     private val virksomhetssertifikatPath: String,

@@ -16,7 +16,7 @@ import java.util.UUID
 
 @Configuration
 @Profile("dev-fss|prod-fss")
-@ConditionalOnProperty("fiks-io.private-key-path", "fiks-io.kontoid")
+@ConditionalOnProperty(name = ["klageEnabled"], havingValue = "true")
 class FiksIoKontoConfig(
     @Value("\${fiks-io.private-key-path:}")
     private val privateKeyPath: String,

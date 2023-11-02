@@ -21,25 +21,38 @@ class DigisosApiTestServiceImpl(
     private val digisosApiTestClient: DigisosApiTestClient,
     private val krypteringService: KrypteringService,
     private val virusScanner: VirusScanner,
-    private val dokumentlagerClient: DokumentlagerClient
+    private val dokumentlagerClient: DokumentlagerClient,
 ) : DigisosApiTestService {
-
-    override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
+    override fun oppdaterDigisosSak(
+        fiksDigisosId: String?,
+        digisosApiWrapper: DigisosApiWrapper,
+    ): String? {
         return digisosApiTestClient.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
     }
 
-    override fun lastOppFil(fiksDigisosId: String, file: MultipartFile): String {
+    override fun lastOppFil(
+        fiksDigisosId: String,
+        file: MultipartFile,
+    ): String {
         virusScanner.scan(file.name, file.bytes)
 
         val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(1))
-        val inputStream = krypteringService.krypter(file.inputStream, krypteringFutureList, dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate())
+        val inputStream =
+            krypteringService.krypter(
+                file.inputStream,
+                krypteringFutureList,
+                dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
+            )
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         val fiksIder = digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
         waitForFutures(krypteringFutureList)
         return fiksIder[0]
     }
 
-    override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
+    override fun hentInnsynsfil(
+        fiksDigisosId: String,
+        token: String,
+    ): String? {
         return digisosApiTestClient.hentInnsynsfil(fiksDigisosId, token)
     }
 

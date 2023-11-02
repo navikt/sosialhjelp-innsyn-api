@@ -11,5 +11,5 @@ data class OppgaveOpplastingResponse(
     val innsendelsesfrist: LocalDate?,
     val hendelsetype: JsonVedlegg.HendelseType?,
     val hendelsereferanse: String?,
-    val filer: List<VedleggOpplastingResponse>
+    val filer: List<VedleggOpplastingResponse>,
 )

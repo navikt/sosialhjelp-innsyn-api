@@ -19,10 +19,12 @@ import kotlin.math.floor
 class HendelseService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
-    private val fiksClient: FiksClient
+    private val fiksClient: FiksClient,
 ) {
-
-    fun hentHendelser(fiksDigisosId: String, token: String): List<HendelseResponse> {
+    fun hentHendelser(
+        fiksDigisosId: String,
+        token: String,
+    ): List<HendelseResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
 
@@ -30,14 +32,18 @@ class HendelseService(
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
         model.leggTilHendelserForUtbetalinger()
-        val responseList = model.historikk
-            .sortedBy { it.tidspunkt }
-            .map { HendelseResponse(it.tidspunkt.toString(), it.hendelseType.name, it.url, it.tekstArgument) }
+        val responseList =
+            model.historikk
+                .sortedBy { it.tidspunkt }
+                .map { HendelseResponse(it.tidspunkt.toString(), it.hendelseType.name, it.url, it.tekstArgument) }
         log.info("Hentet historikk med ${responseList.size} hendelser")
         return responseList
     }
 
-    private fun InternalDigisosSoker.leggTilHendelserForOpplastinger(timestampSoknadSendt: Long, vedlegg: List<InternalVedlegg>) {
+    private fun InternalDigisosSoker.leggTilHendelserForOpplastinger(
+        timestampSoknadSendt: Long,
+        vedlegg: List<InternalVedlegg>,
+    ) {
         vedlegg
             .filter { it.tidspunktLastetOpp.isAfter(unixToLocalDateTime(timestampSoknadSendt)) }
             .filter { it.dokumentInfoList.isNotEmpty() }
@@ -45,7 +51,7 @@ class HendelseService(
             .forEach { (tidspunkt, samtidigOpplastedeVedlegg) ->
                 val antallVedleggForTidspunkt = samtidigOpplastedeVedlegg.sumOf { it.dokumentInfoList.size }
                 historikk.add(
-                    Hendelse(HendelseTekstType.ANTALL_SENDTE_VEDLEGG, tidspunkt, tekstArgument = "$antallVedleggForTidspunkt")
+                    Hendelse(HendelseTekstType.ANTALL_SENDTE_VEDLEGG, tidspunkt, tekstArgument = "$antallVedleggForTidspunkt"),
                 )
             }
     }
@@ -56,7 +62,7 @@ class HendelseService(
             .groupBy { it.datoHendelse.rundNedTilNaermeste5Minutt() }
             .forEach { (_, grupperteVilkar) ->
                 historikk.add(
-                    Hendelse(HendelseTekstType.UTBETALINGER_OPPDATERT, grupperteVilkar[0].datoHendelse)
+                    Hendelse(HendelseTekstType.UTBETALINGER_OPPDATERT, grupperteVilkar[0].datoHendelse),
                 )
             }
     }

@@ -13,7 +13,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 internal class VirusScannerTest {
-
     private val mockWebServer = MockWebServer()
     private val webClient: WebClient = WebClient.create(mockWebServer.url("/").toString())
 
@@ -52,9 +51,9 @@ internal class VirusScannerTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(
                     objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.FOUND), ScanResult("test", Result.FOUND))
-                    )
-                )
+                        listOf(ScanResult("test", Result.FOUND), ScanResult("test", Result.FOUND)),
+                    ),
+                ),
         )
 
         assertThatCode { virusScanner.scan(filnavn, data) }
@@ -71,9 +70,9 @@ internal class VirusScannerTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(
                     objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.OK))
-                    )
-                )
+                        listOf(ScanResult("test", Result.OK)),
+                    ),
+                ),
         )
         assertThatCode { virusScanner.scan(filnavn, data) }
             .doesNotThrowAnyException()
@@ -89,9 +88,9 @@ internal class VirusScannerTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(
                     objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.FOUND))
-                    )
-                )
+                        listOf(ScanResult("test", Result.FOUND)),
+                    ),
+                ),
         )
         assertThatExceptionOfType(VirusScanException::class.java)
             .isThrownBy { virusScanner.scan(filnavn, data) }
@@ -107,9 +106,9 @@ internal class VirusScannerTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(
                     objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.ERROR))
-                    )
-                )
+                        listOf(ScanResult("test", Result.ERROR)),
+                    ),
+                ),
         )
         assertThatExceptionOfType(VirusScanException::class.java)
             .isThrownBy { virusScanner.scan(filnavn, data) }
@@ -121,7 +120,7 @@ internal class VirusScannerTest {
 
         mockWebServer.enqueue(
             MockResponse()
-                .setResponseCode(500)
+                .setResponseCode(500),
         )
 
         mockWebServer.enqueue(
@@ -130,9 +129,9 @@ internal class VirusScannerTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(
                     objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.OK))
-                    )
-                )
+                        listOf(ScanResult("test", Result.OK)),
+                    ),
+                ),
         )
 
         assertThatCode { virusScanner.scan(filnavn, data) }

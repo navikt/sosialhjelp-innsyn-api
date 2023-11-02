@@ -34,10 +34,12 @@ class DigisosApiTestClientImpl(
     private val maskinportenClient: MaskinportenClient,
     private val fiksClientImpl: FiksClientImpl,
 ) : DigisosApiTestClient {
-
     private val testbrukerNatalie = System.getenv("TESTBRUKER_NATALIE") ?: "11111111111"
 
-    override fun oppdaterDigisosSak(fiksDigisosId: String?, digisosApiWrapper: DigisosApiWrapper): String? {
+    override fun oppdaterDigisosSak(
+        fiksDigisosId: String?,
+        digisosApiWrapper: DigisosApiWrapper,
+    ): String? {
         var id = fiksDigisosId
         if (fiksDigisosId == null || fiksDigisosId == "001" || fiksDigisosId == "002" || fiksDigisosId == "003") {
             id = opprettDigisosSak()
@@ -63,51 +65,62 @@ class DigisosApiTestClientImpl(
     }
 
     // Brukes for å laste opp Pdf-er fra test-fagsystem i q-miljø
-    override fun lastOppNyeFilerTilFiks(files: List<FilForOpplasting>, soknadId: String): List<String> {
+    override fun lastOppNyeFilerTilFiks(
+        files: List<FilForOpplasting>,
+        soknadId: String,
+    ): List<String> {
         val body = LinkedMultiValueMap<String, Any>()
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
-            body.add("vedleggSpesifikasjon:$fileId", fiksClientImpl.createHttpEntityOfString(fiksClientImpl.serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"))
+            body.add(
+                "vedleggSpesifikasjon:$fileId",
+                fiksClientImpl.createHttpEntityOfString(fiksClientImpl.serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"),
+            )
             body.add("dokument:$fileId", fiksClientImpl.createHttpEntityOfFile(file, "dokument:$fileId"))
         }
 
-        val opplastingResponseList = digisosApiTestWebClient.post()
-            .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
-            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(BodyInserters.fromMultipartData(body))
-            .retrieve()
-            .bodyToMono<List<FilOpplastingResponse>>()
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
-                    else -> FiksServerException(e.statusCode.value(), e.message, e)
-                }
-            }
-            .block()
-            ?: throw BadStateException("Ingen feil, men heller ingen opplastingResponseList")
-        log.info("Filer sendt til Fiks")
-        return opplastingResponseList.map { it.dokumentlagerDokumentId }
-    }
-
-    override fun hentInnsynsfil(fiksDigisosId: String, token: String): String? {
-        try {
-            val soknad = fiksWebClient.get()
-                .uri("/digisos/api/v1/soknader/$fiksDigisosId")
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AUTHORIZATION, token)
+        val opplastingResponseList =
+            digisosApiTestWebClient.post()
+                .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
+                .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(body))
                 .retrieve()
-                .bodyToMono(DigisosSak::class.java)
+                .bodyToMono<List<FilOpplastingResponse>>()
                 .onErrorMap(WebClientResponseException::class.java) { e ->
-                    log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
+                    log.warn("Fiks - Opplasting av filer feilet - ${e.statusCode} ${e.statusText}", e)
                     when {
                         e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
                         else -> FiksServerException(e.statusCode.value(), e.message, e)
                     }
                 }
                 .block()
-                ?: throw BadStateException("Ingen feil, men heller ingen soknad")
+                ?: throw BadStateException("Ingen feil, men heller ingen opplastingResponseList")
+        log.info("Filer sendt til Fiks")
+        return opplastingResponseList.map { it.dokumentlagerDokumentId }
+    }
+
+    override fun hentInnsynsfil(
+        fiksDigisosId: String,
+        token: String,
+    ): String? {
+        try {
+            val soknad =
+                fiksWebClient.get()
+                    .uri("/digisos/api/v1/soknader/$fiksDigisosId")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(AUTHORIZATION, token)
+                    .retrieve()
+                    .bodyToMono(DigisosSak::class.java)
+                    .onErrorMap(WebClientResponseException::class.java) { e ->
+                        log.warn("Fiks - Nedlasting av søknad feilet - ${e.statusCode} ${e.statusText}", e)
+                        when {
+                            e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
+                            else -> FiksServerException(e.statusCode.value(), e.message, e)
+                        }
+                    }
+                    .block()
+                    ?: throw BadStateException("Ingen feil, men heller ingen soknad")
             val digisosSoker = soknad.digisosSoker ?: throw BadStateException("Soknad mangler digisosSoker")
             return fiksWebClient.get()
                 .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${digisosSoker.metadata}")
@@ -129,20 +142,21 @@ class DigisosApiTestClientImpl(
     }
 
     fun opprettDigisosSak(): String? {
-        val response = digisosApiTestWebClient.post()
-            .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
-            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-            .body(BodyInserters.fromValue(""))
-            .retrieve()
-            .bodyToMono<String>()
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
-                    else -> FiksServerException(e.statusCode.value(), e.message, e)
+        val response =
+            digisosApiTestWebClient.post()
+                .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
+                .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                .body(BodyInserters.fromValue(""))
+                .retrieve()
+                .bodyToMono<String>()
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Fiks - opprettDigisosSak feilet - ${e.statusCode} ${e.statusText}", e)
+                    when {
+                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
+                        else -> FiksServerException(e.statusCode.value(), e.message, e)
+                    }
                 }
-            }
-            .block()
+                .block()
         log.info("Opprettet sak hos Fiks. Digisosid: $response")
         return response?.replace("\"", "")
     }

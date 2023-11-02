@@ -25,8 +25,11 @@ class WebConfig {
 }
 
 class TrailingSlashRedirectFilter : Filter {
-
-    override fun doFilter(request: ServletRequest, response: ServletResponse?, chain: FilterChain) {
+    override fun doFilter(
+        request: ServletRequest,
+        response: ServletResponse?,
+        chain: FilterChain,
+    ) {
         val httpRequest = request as HttpServletRequest
         val path = httpRequest.requestURI
         if (path.endsWith("/")) {
@@ -39,7 +42,9 @@ class TrailingSlashRedirectFilter : Filter {
     }
 }
 
-private class CustomHttpServletRequestWrapper(request: HttpServletRequest?, private val newPath: String) : HttpServletRequestWrapper(request) {
+private class CustomHttpServletRequestWrapper(request: HttpServletRequest?, private val newPath: String) : HttpServletRequestWrapper(
+    request,
+) {
     override fun getRequestURI(): String {
         return newPath
     }

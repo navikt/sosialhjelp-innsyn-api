@@ -15,10 +15,12 @@ import org.springframework.stereotype.Component
 class KommuneService(
     private val fiksClient: FiksClient,
     private val kommuneInfoClient: KommuneInfoClient,
-    private val redisService: RedisService
+    private val redisService: RedisService,
 ) {
-
-    fun hentKommuneInfo(fiksDigisosId: String, token: String): KommuneInfo? {
+    fun hentKommuneInfo(
+        fiksDigisosId: String,
+        token: String,
+    ): KommuneInfo? {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val kommunenummer: String = digisosSak.kommunenummer
 
@@ -30,8 +32,7 @@ class KommuneService(
         return hentFraCache(kommunenummer) ?: hentKommuneInfoFraFiks(kommunenummer)
     }
 
-    private fun hentFraCache(kommunenummer: String) =
-        redisService.get(cacheKey(kommunenummer), KommuneInfo::class.java)
+    private fun hentFraCache(kommunenummer: String) = redisService.get(cacheKey(kommunenummer), KommuneInfo::class.java)
 
     private fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {
@@ -46,7 +47,10 @@ class KommuneService(
         }
     }
 
-    fun erInnsynDeaktivertForKommune(fiksDigisosId: String, token: String): Boolean {
+    fun erInnsynDeaktivertForKommune(
+        fiksDigisosId: String,
+        token: String,
+    ): Boolean {
         val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
         return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
     }

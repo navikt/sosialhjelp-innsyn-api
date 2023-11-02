@@ -25,9 +25,8 @@ class IdPortenController(
     private val idPortenClient: IdPortenClient,
     private val idPortenProperties: IdPortenProperties,
     private val redisService: RedisService,
-    private val idPortenSessionHandler: IdPortenSessionHandler
+    private val idPortenSessionHandler: IdPortenSessionHandler,
 ) {
-
     @Unprotected
     @GetMapping("/oauth2/login")
     fun login(
@@ -45,10 +44,12 @@ class IdPortenController(
         val redirectUri = request.requestURL.append('?').append(request.queryString).toString()
         val response = AuthorizationResponse.parse(URI(redirectUri))
 
-        val loginId = request.cookies?.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
-            ?: throw TilgangskontrollException("No login_id found from cookie")
-        val state = redisService.get("$STATE_CACHE_PREFIX$loginId", State::class.java)
-            ?: throw TilgangskontrollException("No state found on loginId")
+        val loginId =
+            request.cookies?.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
+                ?: throw TilgangskontrollException("No login_id found from cookie")
+        val state =
+            redisService.get("$STATE_CACHE_PREFIX$loginId", State::class.java)
+                ?: throw TilgangskontrollException("No state found on loginId")
 
         // Check the returned state parameter, must match the original
         if (state != response.state) {
@@ -93,12 +94,20 @@ class IdPortenController(
         return nonCacheableRedirectResponseEntity(endSessionRedirectUrl.toString())
     }
 
-    private fun nonCacheableRedirectResponseEntity(redirectLocation: String, loginId: String? = null): ResponseEntity<String> {
+    private fun nonCacheableRedirectResponseEntity(
+        redirectLocation: String,
+        loginId: String? = null,
+    ): ResponseEntity<String> {
         val headers = HttpHeaders()
         headers.add(HttpHeaders.CACHE_CONTROL, "no-store, no-cache")
         headers.add(HttpHeaders.PRAGMA, "no-cache")
         headers.add(HttpHeaders.LOCATION, redirectLocation)
-        loginId?.let { headers.add(HttpHeaders.SET_COOKIE, "$LOGIN_ID_COOKIE=$it; Max-Age=${idPortenProperties.sessionTimeout}; Path=/sosialhjelp; Secure; HttpOnly; SameSite=None") }
+        loginId?.let {
+            headers.add(
+                HttpHeaders.SET_COOKIE,
+                "$LOGIN_ID_COOKIE=$it; Max-Age=${idPortenProperties.sessionTimeout}; Path=/sosialhjelp; Secure; HttpOnly; SameSite=None",
+            )
+        }
         return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build()
     }
 

@@ -18,19 +18,20 @@ import reactor.netty.http.client.HttpClient
 class DigisosApiTestConfig(
     private val clientProperties: ClientProperties,
 ) {
-
     @Bean
-    fun digisosApiTestWebClient(webClientBuilder: WebClient.Builder, proxiedHttpClient: HttpClient) =
-        webClientBuilder
-            .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
-            .baseUrl(clientProperties.fiksDigisosEndpointUrl)
-            .codecs {
-                it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
-                it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
-                it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
-            }
-            .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
-            .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
-            .filter(mdcExchangeFilter)
-            .build()
+    fun digisosApiTestWebClient(
+        webClientBuilder: WebClient.Builder,
+        proxiedHttpClient: HttpClient,
+    ) = webClientBuilder
+        .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
+        .baseUrl(clientProperties.fiksDigisosEndpointUrl)
+        .codecs {
+            it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
+            it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
+            it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
+        }
+        .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
+        .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
+        .filter(mdcExchangeFilter)
+        .build()
 }

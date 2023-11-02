@@ -8,20 +8,23 @@ import org.springframework.web.reactive.function.client.WebClient
 
 class TokendingsWebClient(
     val webClient: WebClient,
-    val wellKnown: WellKnown
+    val wellKnown: WellKnown,
 )
 
 @Configuration
 class TokendingsClientConfig(
-    private val clientProperties: ClientProperties
+    private val clientProperties: ClientProperties,
 ) {
     @Bean
     fun tokendingsWebClient(webClientBuilder: WebClient.Builder): TokendingsWebClient {
         val wellKnown = downloadWellKnown(clientProperties.tokendingsUrl)
-        log.info("TokendingsClient: Lastet ned well known fra: ${clientProperties.tokendingsUrl} bruker token endpoint: ${wellKnown.tokenEndpoint}")
+        log.info(
+            "TokendingsClient: Lastet ned well known fra: ${clientProperties.tokendingsUrl}." +
+                " bruker token endpoint: ${wellKnown.tokenEndpoint}",
+        )
         return TokendingsWebClient(
             buildWebClient(webClientBuilder, wellKnown.tokenEndpoint, applicationFormUrlencodedHeaders()),
-            wellKnown
+            wellKnown,
         )
     }
 

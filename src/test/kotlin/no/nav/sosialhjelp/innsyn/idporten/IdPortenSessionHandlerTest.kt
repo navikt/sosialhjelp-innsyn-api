@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class IdPortenSessionHandlerTest {
-
     private val redisService: RedisService = mockk()
     private val idPortenClient: IdPortenClient = mockk()
 

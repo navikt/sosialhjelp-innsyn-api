@@ -35,7 +35,6 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 @ExtendWith(MockKExtension::class)
 internal class SaksStatusIntegrasjonsTest {
-
     @Autowired
     lateinit var mockLogin: MockOauth2ServerUtils
 
@@ -66,7 +65,6 @@ internal class SaksStatusIntegrasjonsTest {
 
     @Test
     fun `Skal hente saksstatus for fiksDigisoID`() {
-
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soknad = JsonSoknad()
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)

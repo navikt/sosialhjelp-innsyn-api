@@ -24,8 +24,16 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 
 interface PdlClient {
-    fun hentPerson(ident: String, token: String): PdlHentPerson?
-    fun hentIdenter(ident: String, token: String): List<String>?
+    fun hentPerson(
+        ident: String,
+        token: String,
+    ): PdlHentPerson?
+
+    fun hentIdenter(
+        ident: String,
+        token: String,
+    ): List<String>?
+
     fun ping()
 }
 
@@ -37,38 +45,47 @@ class PdlClientImpl(
     private val tokendingsService: TokendingsService,
     private val redisService: RedisService,
 ) : PdlClient {
+    private val pdlRetry =
+        RetryUtils.retryBackoffSpec({ it is WebClientResponseException })
+            .onRetryExhaustedThrow { spec, retrySignal ->
+                throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
+            }
 
-    private val pdlRetry = RetryUtils.retryBackoffSpec({ it is WebClientResponseException })
-        .onRetryExhaustedThrow { spec, retrySignal ->
-            throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
-        }
-
-    override fun hentPerson(ident: String, token: String): PdlHentPerson? {
+    override fun hentPerson(
+        ident: String,
+        token: String,
+    ): PdlHentPerson? {
         return hentFraCache(ident) ?: hentFraPdl(ident, token)
     }
 
-    override fun hentIdenter(ident: String, token: String): List<String> {
+    override fun hentIdenter(
+        ident: String,
+        token: String,
+    ): List<String> {
         redisService.get(PDL_IDENTER_CACHE_KEY_PREFIX + ident, PdlIdenter::class.java)
             ?.let { pdlIdenter -> return pdlIdenter.identer.map { it.ident } }
         return hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
     }
 
-    private fun hentFraCache(ident: String): PdlHentPerson? =
-        redisService.get(cacheKey(ident), PdlHentPerson::class.java)
+    private fun hentFraCache(ident: String): PdlHentPerson? = redisService.get(cacheKey(ident), PdlHentPerson::class.java)
 
-    private fun hentFraPdl(ident: String, token: String): PdlHentPerson? {
+    private fun hentFraPdl(
+        ident: String,
+        token: String,
+    ): PdlHentPerson? {
         val query = getHentPersonResource().replace("[\n\r]", "")
         try {
-            val pdlPersonResponse = pdlWebClient.post()
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                .header(HEADER_TEMA, TEMA_KOM)
-                .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
-                .bodyValue(PdlRequest(query, Variables(ident)))
-                .retrieve()
-                .bodyToMono<PdlPersonResponse>()
-                .retryWhen(pdlRetry)
-                .block()
+            val pdlPersonResponse =
+                pdlWebClient.post()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                    .header(HEADER_TEMA, TEMA_KOM)
+                    .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                    .bodyValue(PdlRequest(query, Variables(ident)))
+                    .retrieve()
+                    .bodyToMono<PdlPersonResponse>()
+                    .retryWhen(pdlRetry)
+                    .block()
 
             checkForPdlApiErrors(pdlPersonResponse)
 
@@ -80,19 +97,23 @@ class PdlClientImpl(
         }
     }
 
-    private fun hentIdenterFraPdl(ident: String, token: String): PdlIdenter? {
+    private fun hentIdenterFraPdl(
+        ident: String,
+        token: String,
+    ): PdlIdenter? {
         val query = getHentIdenterResource().replace("[\n\r]", "")
         try {
-            val pdlIdenterResponse = pdlWebClient.post()
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                .header(HEADER_TEMA, TEMA_KOM)
-                .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
-                .bodyValue(PdlRequest(query, Variables(ident)))
-                .retrieve()
-                .bodyToMono<PdlIdenterResponse>()
-                .retryWhen(pdlRetry)
-                .block()
+            val pdlIdenterResponse =
+                pdlWebClient.post()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                    .header(HEADER_TEMA, TEMA_KOM)
+                    .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                    .bodyValue(PdlRequest(query, Variables(ident)))
+                    .retrieve()
+                    .bodyToMono<PdlIdenterResponse>()
+                    .retryWhen(pdlRetry)
+                    .block()
 
             checkForPdlApiErrors(pdlIdenterResponse)
 
@@ -104,7 +125,10 @@ class PdlClientImpl(
         }
     }
 
-    private fun tokenXtoken(ident: String, token: String) = runBlocking {
+    private fun tokenXtoken(
+        ident: String,
+        token: String,
+    ) = runBlocking {
         tokendingsService.exchangeToken(ident, token, clientProperties.pdlAudience)
     }
 
@@ -119,7 +143,9 @@ class PdlClientImpl(
     }
 
     private fun getHentPersonResource() = getResourceAsString("/pdl/hentPerson.graphql")
+
     private fun getHentIdenterResource() = getResourceAsString("/pdl/hentIdenter.graphql")
+
     private fun getResourceAsString(path: String) =
         this::class.java.getResource(path)?.readText()
             ?: throw RuntimeException("Klarte ikke å hente PDL query resurs: $path")
@@ -129,19 +155,24 @@ class PdlClientImpl(
     }
 
     private fun handleErrors(errors: List<PdlError>) {
-        val errorString = errors
-            .map { it.message + "(feilkode: " + it.extensions.code + ")" }
-            .joinToString(prefix = "Error i respons fra pdl-api: ") { it }
+        val errorString =
+            errors
+                .map { it.message + "(feilkode: " + it.extensions.code + ")" }
+                .joinToString(prefix = "Error i respons fra pdl-api: ") { it }
         throw PdlException(errorString)
     }
 
     private fun cacheKey(ident: String): String = ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX + ident
 
-    private fun lagreTilCache(ident: String, pdlHentPerson: PdlHentPerson) =
-        redisService.put(cacheKey(ident), objectMapper.writeValueAsBytes(pdlHentPerson))
+    private fun lagreTilCache(
+        ident: String,
+        pdlHentPerson: PdlHentPerson,
+    ) = redisService.put(cacheKey(ident), objectMapper.writeValueAsBytes(pdlHentPerson))
 
-    private fun lagreIdenterTilCache(ident: String, pdlIdenter: PdlIdenter) =
-        redisService.put(PDL_IDENTER_CACHE_KEY_PREFIX + ident, objectMapper.writeValueAsBytes(pdlIdenter))
+    private fun lagreIdenterTilCache(
+        ident: String,
+        pdlIdenter: PdlIdenter,
+    ) = redisService.put(PDL_IDENTER_CACHE_KEY_PREFIX + ident, objectMapper.writeValueAsBytes(pdlIdenter))
 
     companion object {
         private val log by logger()

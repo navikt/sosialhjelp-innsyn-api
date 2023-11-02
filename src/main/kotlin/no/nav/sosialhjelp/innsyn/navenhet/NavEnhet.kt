@@ -7,5 +7,5 @@ data class NavEnhet(
     val status: String,
     val antallRessurser: Int,
     val aktiveringsdato: String,
-    val nedleggelsesdato: String?
+    val nedleggelsesdato: String?,
 )

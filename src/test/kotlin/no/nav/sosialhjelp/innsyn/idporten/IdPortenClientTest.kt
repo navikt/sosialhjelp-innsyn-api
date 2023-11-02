@@ -23,22 +23,24 @@ internal class IdPortenClientTest {
 
     private val issuer = "issuer"
 
-    private val idPortenProperties = IdPortenProperties(
-        wellKnown = IdPortenWellKnown(
-            issuer = issuer,
-            authorizationEndpoint = server.authorizationEndpointUrl(issuer).toString(),
-            tokenEndpoint = server.tokenEndpointUrl(issuer).toString(),
-            jwksUri = server.jwksUrl(issuer).toString(),
-            endSessionEndpoint = server.endSessionEndpointUrl(issuer).toString()
-        ),
-        redirectUri = "redirect.com",
-        clientId = "clientId",
-        clientJwk = keyGenerator.generateKey(issuer).toString(),
-        postLogoutRedirectUri = "postLogout.com",
-        loginTimeout = 5L,
-        sessionTimeout = 10L,
-        tokenTimeout = 5L
-    )
+    private val idPortenProperties =
+        IdPortenProperties(
+            wellKnown =
+                IdPortenWellKnown(
+                    issuer = issuer,
+                    authorizationEndpoint = server.authorizationEndpointUrl(issuer).toString(),
+                    tokenEndpoint = server.tokenEndpointUrl(issuer).toString(),
+                    jwksUri = server.jwksUrl(issuer).toString(),
+                    endSessionEndpoint = server.endSessionEndpointUrl(issuer).toString(),
+                ),
+            redirectUri = "redirect.com",
+            clientId = "clientId",
+            clientJwk = keyGenerator.generateKey(issuer).toString(),
+            postLogoutRedirectUri = "postLogout.com",
+            loginTimeout = 5L,
+            sessionTimeout = 10L,
+            tokenTimeout = 5L,
+        )
 
     private val redisService: RedisService = mockk()
 

@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 
 internal class SaksOversiktControllerTest {
-
     private val saksOversiktService: SaksOversiktService = mockk()
     private val fiksClient: FiksClient = mockk()
     private val eventService: EventService = mockk()
@@ -80,7 +79,9 @@ internal class SaksOversiktControllerTest {
         every { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
         every { oppgaveService.getVilkar("123", any()) } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
         every { oppgaveService.getVilkar("456", any()) } returns listOf(vilkarResponseMock) // 1 oppgave
-        every { oppgaveService.getDokumentasjonkrav("123", any()) } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
+        every {
+            oppgaveService.getDokumentasjonkrav("123", any())
+        } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
         every { oppgaveService.getDokumentasjonkrav("456", any()) } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
     }
 

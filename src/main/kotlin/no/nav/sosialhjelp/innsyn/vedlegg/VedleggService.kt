@@ -20,15 +20,22 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 class VedleggService(
     private val fiksClient: FiksClient,
 ) {
-
-    fun hentAlleOpplastedeVedlegg(digisosSak: DigisosSak, model: InternalDigisosSoker, token: String): List<InternalVedlegg> {
+    fun hentAlleOpplastedeVedlegg(
+        digisosSak: DigisosSak,
+        model: InternalDigisosSoker,
+        token: String,
+    ): List<InternalVedlegg> {
         val soknadVedlegg = hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, digisosSak, token)
         val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak, model, token)
 
         return soknadVedlegg.plus(ettersendteVedlegg)
     }
 
-    fun hentSoknadVedleggMedStatus(status: String, digisosSak: DigisosSak, token: String): List<InternalVedlegg> {
+    fun hentSoknadVedleggMedStatus(
+        status: String,
+        digisosSak: DigisosSak,
+        token: String,
+    ): List<InternalVedlegg> {
         val originalSoknadNAV = digisosSak.originalSoknadNAV ?: return emptyList()
         val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, originalSoknadNAV.vedleggMetadata, token)
 
@@ -36,70 +43,84 @@ class VedleggService(
             return emptyList()
         }
 
-        val alleVedlegg = jsonVedleggSpesifikasjon.vedlegg
-            .filter { vedlegg -> vedlegg.status == status }
-            .map { vedlegg ->
-                InternalVedlegg(
-                    vedlegg.type,
-                    vedlegg.tilleggsinfo,
-                    vedlegg.hendelseType,
-                    vedlegg.hendelseReferanse,
-                    matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer).toMutableList(),
-                    unixToLocalDateTime(originalSoknadNAV.timestampSendt),
-                    null
-                )
-            }
+        val alleVedlegg =
+            jsonVedleggSpesifikasjon.vedlegg
+                .filter { vedlegg -> vedlegg.status == status }
+                .map { vedlegg ->
+                    InternalVedlegg(
+                        vedlegg.type,
+                        vedlegg.tilleggsinfo,
+                        vedlegg.hendelseType,
+                        vedlegg.hendelseReferanse,
+                        matchDokumentInfoAndJsonFiler(originalSoknadNAV.vedlegg, vedlegg.filer).toMutableList(),
+                        unixToLocalDateTime(originalSoknadNAV.timestampSendt),
+                        null,
+                    )
+                }
         return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
-    fun hentEttersendteVedlegg(digisosSak: DigisosSak, model: InternalDigisosSoker, token: String): List<InternalVedlegg> {
-        val alleVedlegg = digisosSak.ettersendtInfoNAV
-            ?.ettersendelser
-            ?.flatMap { ettersendelse ->
-                var filIndex = 0
-                val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, ettersendelse.vedleggMetadata, token)
-                jsonVedleggSpesifikasjon.vedlegg
-                    .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
-                    .map { vedlegg ->
-                        val currentFilIndex = filIndex
-                        filIndex += vedlegg.filer.size
-                        val filtrerteEttersendelsesVedlegg = ettersendelse.vedlegg
-                            .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
-                        val dokumentInfoList: MutableList<DokumentInfo>
-                        if (filIndex > filtrerteEttersendelsesVedlegg.size) {
-                            log.error(
-                                "Det er mismatch mellom nedlastede filer og metadata. " +
-                                    "Det er flere filer enn vi har Metadata! " +
-                                    "Filer: $filIndex Metadata: ${filtrerteEttersendelsesVedlegg.size}"
-                            )
-                            dokumentInfoList = vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }.toMutableList()
-                        } else {
-                            dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex).toMutableList()
+    fun hentEttersendteVedlegg(
+        digisosSak: DigisosSak,
+        model: InternalDigisosSoker,
+        token: String,
+    ): List<InternalVedlegg> {
+        val alleVedlegg =
+            digisosSak.ettersendtInfoNAV
+                ?.ettersendelser
+                ?.flatMap { ettersendelse ->
+                    var filIndex = 0
+                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, ettersendelse.vedleggMetadata, token)
+                    jsonVedleggSpesifikasjon.vedlegg
+                        .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                        .map { vedlegg ->
+                            val currentFilIndex = filIndex
+                            filIndex += vedlegg.filer.size
+                            val filtrerteEttersendelsesVedlegg =
+                                ettersendelse.vedlegg
+                                    .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
+                            val dokumentInfoList: MutableList<DokumentInfo>
+                            if (filIndex > filtrerteEttersendelsesVedlegg.size) {
+                                log.error(
+                                    "Det er mismatch mellom nedlastede filer og metadata. " +
+                                        "Det er flere filer enn vi har Metadata! " +
+                                        "Filer: $filIndex Metadata: ${filtrerteEttersendelsesVedlegg.size}",
+                                )
+                                dokumentInfoList = vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }.toMutableList()
+                            } else {
+                                dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex).toMutableList()
 
-                            if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
+                                if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
+                                    throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
+                                }
                             }
+                            InternalVedlegg(
+                                vedlegg.type,
+                                vedlegg.tilleggsinfo,
+                                vedlegg.hendelseType,
+                                vedlegg.hendelseReferanse,
+                                dokumentInfoList,
+                                unixToLocalDateTime(ettersendelse.timestampSendt),
+                                hentInnsendelsesfristFraOppgave(model, vedlegg),
+                            )
                         }
-                        InternalVedlegg(
-                            vedlegg.type,
-                            vedlegg.tilleggsinfo,
-                            vedlegg.hendelseType,
-                            vedlegg.hendelseReferanse,
-                            dokumentInfoList,
-                            unixToLocalDateTime(ettersendelse.timestampSendt),
-                            hentInnsendelsesfristFraOppgave(model, vedlegg)
-                        )
-                    }
-            } ?: emptyList()
+                } ?: emptyList()
 
         return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
-    private fun hentVedleggSpesifikasjon(digisosSak: DigisosSak, dokumentlagerId: String, token: String): JsonVedleggSpesifikasjon {
+    private fun hentVedleggSpesifikasjon(
+        digisosSak: DigisosSak,
+        dokumentlagerId: String,
+        token: String,
+    ): JsonVedleggSpesifikasjon {
         return fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token)
     }
 
-    private fun matchDokumentInfoAndJsonFiler(dokumentInfoList: List<DokumentInfo>, jsonFiler: List<JsonFiler>): List<DokumentInfo> {
+    private fun matchDokumentInfoAndJsonFiler(
+        dokumentInfoList: List<DokumentInfo>,
+        jsonFiler: List<JsonFiler>,
+    ): List<DokumentInfo> {
         return jsonFiler
             .flatMap { fil ->
                 dokumentInfoList
@@ -107,12 +128,23 @@ class VedleggService(
             }
     }
 
-    private fun filenamesMatchInDokumentInfoAndFiles(dokumentInfoList: List<DokumentInfo>, files: List<JsonFiler>): Boolean {
+    private fun filenamesMatchInDokumentInfoAndFiles(
+        dokumentInfoList: List<DokumentInfo>,
+        files: List<JsonFiler>,
+    ): Boolean {
         return dokumentInfoList.size == files.size &&
-            dokumentInfoList.filterIndexed { idx, it -> sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn) }.size == dokumentInfoList.size
+            dokumentInfoList.filterIndexed {
+                    idx,
+                    it,
+                ->
+                sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn)
+            }.size == dokumentInfoList.size
     }
 
-    private fun hentInnsendelsesfristFraOppgave(model: InternalDigisosSoker, vedlegg: JsonVedlegg): LocalDateTime? {
+    private fun hentInnsendelsesfristFraOppgave(
+        model: InternalDigisosSoker,
+        vedlegg: JsonVedlegg,
+    ): LocalDateTime? {
         return model.oppgaver
             .sortedByDescending { it.innsendelsesfrist }
             .firstOrNull { it.tittel == vedlegg.type && it.tilleggsinfo == vedlegg.tilleggsinfo }

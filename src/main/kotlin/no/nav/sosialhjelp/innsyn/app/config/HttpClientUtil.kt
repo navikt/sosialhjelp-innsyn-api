@@ -7,15 +7,15 @@ import reactor.netty.transport.ProxyProvider
 import java.net.URL
 
 object HttpClientUtil {
-
     fun proxiedHttpClient(proxyUrl: String): HttpClient {
         val uri = URL(proxyUrl)
 
-        val httpClient: HttpClient = HttpClient.create()
-            .resolver(DefaultAddressResolverGroup.INSTANCE)
-            .proxy { proxy ->
-                proxy.type(ProxyProvider.Proxy.HTTP).host(uri.host).port(uri.port)
-            }
+        val httpClient: HttpClient =
+            HttpClient.create()
+                .resolver(DefaultAddressResolverGroup.INSTANCE)
+                .proxy { proxy ->
+                    proxy.type(ProxyProvider.Proxy.HTTP).host(uri.host).port(uri.port)
+                }
         return httpClient
     }
 
@@ -24,7 +24,8 @@ object HttpClientUtil {
         return ReactorClientHttpConnector(httpClient)
     }
 
-    fun unproxiedHttpClient() = HttpClient
-        .newConnection()
-        .resolver(DefaultAddressResolverGroup.INSTANCE)
+    fun unproxiedHttpClient() =
+        HttpClient
+            .newConnection()
+            .resolver(DefaultAddressResolverGroup.INSTANCE)
 }

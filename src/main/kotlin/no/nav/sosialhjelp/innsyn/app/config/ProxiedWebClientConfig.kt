@@ -11,7 +11,6 @@ import reactor.netty.http.client.HttpClient
 @Profile("(prod-fss|dev-fss)")
 @Configuration
 class ProxiedHttpClientConfig {
-
     @Value("\${HTTPS_PROXY}")
     private lateinit var proxyUrl: String
 
@@ -22,7 +21,6 @@ class ProxiedHttpClientConfig {
 @Profile("!(prod-fss|dev-fss)")
 @Configuration
 class MockProxiedHttpClientConfig {
-
     @Bean
     fun proxiedHttpClient(): HttpClient = unproxiedHttpClient()
 }

@@ -7,7 +7,7 @@ data class Logg(
     val lineNumber: String,
     val columnNumber: String,
     val url: String,
-    val userAgent: String
+    val userAgent: String,
 ) {
     fun melding(): String {
         var useragentWithoutSpaceAndComma = ""
@@ -15,6 +15,7 @@ data class Logg(
             val useragentWithoutSpace = userAgent.replace(" ".toRegex(), "_")
             useragentWithoutSpaceAndComma = useragentWithoutSpace.replace(",".toRegex(), "_")
         }
-        return "jsmessagehash=${message.hashCode()}, fileUrl=$jsFileUrl:$lineNumber:$columnNumber, url=$url, userAgent=$useragentWithoutSpaceAndComma, melding: $message"
+        return "jsmessagehash=${message.hashCode()}, fileUrl=$jsFileUrl:$lineNumber:$columnNumber, url=$url, " +
+            "userAgent=$useragentWithoutSpaceAndComma, melding: $message"
     }
 }

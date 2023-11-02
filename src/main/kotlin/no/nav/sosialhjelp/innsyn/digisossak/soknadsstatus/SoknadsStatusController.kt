@@ -27,13 +27,12 @@ class SoknadsStatusController(
     private val tilgangskontroll: Tilgangskontroll,
     private val xsrfGenerator: XsrfGenerator,
 ) {
-
     @GetMapping("{fiksDigisosId}/soknadsStatus")
     fun hentSoknadsStatus(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
         response: HttpServletResponse,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<SoknadsStatusResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
@@ -46,8 +45,8 @@ class SoknadsStatusController(
                 tidspunktSendt = utvidetSoknadsStatus.tidspunktSendt,
                 soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
                 navKontor = utvidetSoknadsStatus.navKontor,
-                filUrl = utvidetSoknadsStatus.soknadUrl
-            )
+                filUrl = utvidetSoknadsStatus.soknadUrl,
+            ),
         )
     }
 

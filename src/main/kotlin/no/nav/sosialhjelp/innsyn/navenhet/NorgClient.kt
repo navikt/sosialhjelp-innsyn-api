@@ -26,11 +26,11 @@ class NorgClientImpl(
     private val norgWebClient: WebClient,
     private val redisService: RedisService,
 ) : NorgClient {
-
-    private val norgRetry = retryBackoffSpec()
-        .onRetryExhaustedThrow { spec, retrySignal ->
-            throw NorgException("Norg - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
-        }
+    private val norgRetry =
+        retryBackoffSpec()
+            .onRetryExhaustedThrow { spec, retrySignal ->
+                throw NorgException("Norg - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
+            }
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
         return hentFraCache(enhetsnr) ?: hentFraNorg(enhetsnr)
@@ -38,19 +38,20 @@ class NorgClientImpl(
 
     private fun hentFraNorg(enhetsnr: String): NavEnhet {
         log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
-        val navEnhet: NavEnhet = norgWebClient.get()
-            .uri("/enhet/{enhetsnr}", enhetsnr)
-            .accept(MediaType.APPLICATION_JSON)
-            .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-            .retrieve()
-            .bodyToMono<NavEnhet>()
-            .retryWhen(norgRetry)
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
-                NorgException(e.message, e)
-            }
-            .block()
-            ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
+        val navEnhet: NavEnhet =
+            norgWebClient.get()
+                .uri("/enhet/{enhetsnr}", enhetsnr)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                .retrieve()
+                .bodyToMono<NavEnhet>()
+                .retryWhen(norgRetry)
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
+                    NorgException(e.message, e)
+                }
+                .block()
+                ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
 
         log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
 
@@ -58,14 +59,16 @@ class NorgClientImpl(
             .also { lagreTilCache(enhetsnr, it) }
     }
 
-    private fun hentFraCache(enhetsnr: String): NavEnhet? =
-        redisService.get(cacheKey(enhetsnr), NavEnhet::class.java)
+    private fun hentFraCache(enhetsnr: String): NavEnhet? = redisService.get(cacheKey(enhetsnr), NavEnhet::class.java)
 
-    private fun lagreTilCache(enhetsnr: String, navEnhet: NavEnhet) {
+    private fun lagreTilCache(
+        enhetsnr: String,
+        navEnhet: NavEnhet,
+    ) {
         redisService.put(
             cacheKey(enhetsnr),
             objectMapper.writeValueAsBytes(navEnhet),
-            NAVENHET_CACHE_TIMETOLIVE_SECONDS
+            NAVENHET_CACHE_TIMETOLIVE_SECONDS,
         )
     }
 
@@ -81,22 +84,22 @@ class NorgClientImpl(
 @Profile("local")
 @Component
 class NorgClientLocal : NorgClient {
-
     private val innsynMap = mutableMapOf<String, NavEnhet>()
 
     override fun hentNavEnhet(enhetsnr: String): NavEnhet {
         return innsynMap.getOrElse(
-            enhetsnr
+            enhetsnr,
         ) {
-            val default = NavEnhet(
-                enhetId = 100000367,
-                navn = "NAV Longyearbyen",
-                enhetNr = enhetsnr,
-                antallRessurser = 20,
-                status = "AKTIV",
-                aktiveringsdato = "1982-04-21",
-                nedleggelsesdato = "null"
-            )
+            val default =
+                NavEnhet(
+                    enhetId = 100000367,
+                    navn = "NAV Longyearbyen",
+                    enhetNr = enhetsnr,
+                    antallRessurser = 20,
+                    status = "AKTIV",
+                    aktiveringsdato = "1982-04-21",
+                    nedleggelsesdato = "null",
+                )
             innsynMap[enhetsnr] = default
             default
         }

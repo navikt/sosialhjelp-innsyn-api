@@ -9,20 +9,24 @@ import org.springframework.stereotype.Component
 
 interface SubjectHandler {
     fun getUserIdFromToken(): String
+
     fun getToken(): String
+
     fun getClientId(): String
 }
 
 @Component
 class AzureAdSubjectHandlerImpl(
-    private val tokenValidationContextHolder: TokenValidationContextHolder
+    private val tokenValidationContextHolder: TokenValidationContextHolder,
 ) : SubjectHandler {
-
     private val tokenValidationContext: TokenValidationContext
         get() {
             val tokenValidationContext = tokenValidationContextHolder.tokenValidationContext
             if (tokenValidationContext == null) {
-                log.error("Could not find TokenValidationContext. Possibly no token in request and request was not captured by JwtToken-validation filters.")
+                log.error(
+                    "Could not find TokenValidationContext. " +
+                        "Possibly no token in request and request was not captured by JwtToken-validation filters.",
+                )
                 throw JwtTokenValidatorException("Could not find TokenValidationContext. Possibly no token in request.")
             }
             return tokenValidationContext
@@ -51,7 +55,6 @@ class AzureAdSubjectHandlerImpl(
 }
 
 class StaticSubjectHandlerImpl : SubjectHandler {
-
     companion object {
         private const val DEFAULT_USER = "11111111111"
         private const val DEFAULT_TOKEN = "token"

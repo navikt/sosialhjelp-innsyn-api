@@ -11,10 +11,12 @@ import org.springframework.stereotype.Component
 @Component
 class SaksStatusService(
     private val eventService: EventService,
-    private val fiksClient: FiksClient
+    private val fiksClient: FiksClient,
 ) {
-
-    fun hentSaksStatuser(fiksDigisosId: String, token: String): List<SaksStatusResponse> {
+    fun hentSaksStatuser(
+        fiksDigisosId: String,
+        token: String,
+    ): List<SaksStatusResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
 
@@ -30,13 +32,15 @@ class SaksStatusService(
 
     private fun mapToResponse(sak: Sak): SaksStatusResponse {
         val saksStatus = hentStatusNavn(sak)
-        val vedtakfilUrlList = when {
-            sak.vedtak.isEmpty() -> null
-            else -> sak.vedtak.map {
-                log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
-                VedtaksfilUrl(it.dato, it.vedtaksFilUrl)
+        val vedtakfilUrlList =
+            when {
+                sak.vedtak.isEmpty() -> null
+                else ->
+                    sak.vedtak.map {
+                        log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
+                        VedtaksfilUrl(it.dato, it.vedtaksFilUrl)
+                    }
             }
-        }
         val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak)
         return SaksStatusResponse(sak.tittel ?: DEFAULT_SAK_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList)
     }
@@ -48,16 +52,8 @@ class SaksStatusService(
         }
     }
 
-    fun getSkalViseVedtakInfoPanel(sak: Sak): Boolean {
-        var sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget = false
-        for (vedtak in sak.vedtak) {
-            when {
-                vedtak.utfall == UtfallVedtak.DELVIS_INNVILGET || vedtak.utfall == UtfallVedtak.INNVILGET -> sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget = true
-                vedtak.utfall == UtfallVedtak.AVSLATT || vedtak.utfall == UtfallVedtak.AVVIST -> sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget = false
-            }
-        }
-        return sakHarVedtakslisteMedGjeldendeVedtakInnvilgetEllerDelvisInnvilget
-    }
+    fun getSkalViseVedtakInfoPanel(sak: Sak): Boolean =
+        sak.vedtak.lastOrNull()?.let { it.utfall in listOf(UtfallVedtak.DELVIS_INNVILGET, UtfallVedtak.INNVILGET) } ?: false
 
     companion object {
         private val log by logger()

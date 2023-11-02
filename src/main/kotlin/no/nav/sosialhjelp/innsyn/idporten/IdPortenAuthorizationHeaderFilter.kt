@@ -23,10 +23,13 @@ import java.util.Enumeration
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class IdPortenAuthorizationHeaderFilter(
-    private val idPortenSessionHandler: IdPortenSessionHandler
+    private val idPortenSessionHandler: IdPortenSessionHandler,
 ) : Filter {
-
-    override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
+    override fun doFilter(
+        request: ServletRequest,
+        response: ServletResponse,
+        chain: FilterChain,
+    ) {
         if (request is HttpServletRequest) {
             val accessToken = idPortenSessionHandler.getToken(request)
             if (accessToken != null) {
@@ -42,14 +45,16 @@ class IdPortenAuthorizationHeaderFilter(
     private class MutableHttpServletRequest(
         request: HttpServletRequest,
     ) : HttpServletRequestWrapper(request) {
-
         private val customHeaders: MutableMap<String, String>
 
         init {
             customHeaders = hashMapOf()
         }
 
-        fun putHeader(name: String, value: String) {
+        fun putHeader(
+            name: String,
+            value: String,
+        ) {
             customHeaders[name] = value
         }
 

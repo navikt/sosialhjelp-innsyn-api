@@ -8,8 +8,10 @@ import java.time.LocalDateTime
 
 @Component
 class EttersendelsePdfGenerator {
-
-    fun generate(metadata: MutableList<OpplastetVedleggMetadata>, fodselsnummer: String): ByteArray {
+    fun generate(
+        metadata: MutableList<OpplastetVedleggMetadata>,
+        fodselsnummer: String,
+    ): ByteArray {
         return try {
             PDDocument().use { document ->
                 val pdf = PdfGenerator(document)

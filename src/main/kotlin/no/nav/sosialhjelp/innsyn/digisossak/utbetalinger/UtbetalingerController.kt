@@ -21,11 +21,13 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/innsyn")
 class UtbetalingerController(
     private val utbetalingerService: UtbetalingerService,
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: Tilgangskontroll,
 ) {
-
     @GetMapping("/utbetalinger")
-    fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
+    fun hentUtbetalinger(
+        @RequestHeader(value = AUTHORIZATION) token: String,
+        @RequestParam(defaultValue = "3") month: Int,
+    ): ResponseEntity<List<UtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {
@@ -38,8 +40,11 @@ class UtbetalingerController(
             throw e
         }
     }
+
     @GetMapping("/nye")
-    fun hentNyeUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
+    fun hentNyeUtbetalinger(
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {
@@ -54,7 +59,9 @@ class UtbetalingerController(
     }
 
     @GetMapping("/tidligere")
-    fun hentTidligereUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
+    fun hentTidligereUtbetalinger(
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {

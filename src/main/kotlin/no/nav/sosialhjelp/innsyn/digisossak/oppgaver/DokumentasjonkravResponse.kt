@@ -9,16 +9,17 @@ data class DokumentasjonkravResponse(
     val dokumentasjonkravElementer: List<DokumentasjonkravElement>,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val frist: LocalDate?,
-    val dokumentasjonkravId: String
+    val dokumentasjonkravId: String,
 )
 
 data class DokumentasjonkravElement(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val hendelsetidspunkt: LocalDate,
     val hendelsetype: JsonVedlegg.HendelseType?,
-    val dokumentasjonkravReferanse: String, // hendelsereferanse
+    // hendelsereferanse
+    val dokumentasjonkravReferanse: String,
     val tittel: String?,
     val beskrivelse: String?,
     val status: Oppgavestatus,
-    val utbetalingsReferanse: List<String>?
+    val utbetalingsReferanse: List<String>?,
 )

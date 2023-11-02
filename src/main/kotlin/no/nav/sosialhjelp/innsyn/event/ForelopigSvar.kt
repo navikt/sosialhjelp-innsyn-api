@@ -13,19 +13,23 @@ import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(JsonForelopigSvar::class.java.name)
 
-fun InternalDigisosSoker.apply(hendelse: JsonForelopigSvar, clientProperties: ClientProperties) {
-
+fun InternalDigisosSoker.apply(
+    hendelse: JsonForelopigSvar,
+    clientProperties: ClientProperties,
+) {
     forelopigSvar = ForelopigSvar(true, hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse))
 
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Forelopig svar. Du har fått et brev om saksbehandlingstiden for søknaden din.")
+    log.info(
+        "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Forelopig svar. Du har fått et brev om saksbehandlingstiden for søknaden din.",
+    )
     historikk.add(
         Hendelse(
             HendelseTekstType.BREV_OM_SAKSBEANDLINGSTID,
             hendelse.hendelsestidspunkt.toLocalDateTime(),
             UrlResponse(
                 HendelseTekstType.VIS_BREVET_LENKETEKST,
-                hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
-            )
-        )
+                hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse),
+            ),
+        ),
     )
 }

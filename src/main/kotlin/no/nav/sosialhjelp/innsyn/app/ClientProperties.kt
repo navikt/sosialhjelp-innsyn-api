@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties(prefix = "client")
 class ClientProperties {
-
     lateinit var fiksDigisosEndpointUrl: String
     lateinit var fiksDokumentlagerEndpointUrl: String
     lateinit var fiksSvarUtEndpointUrl: String
@@ -22,10 +21,10 @@ class ClientProperties {
     lateinit var pdlEndpointUrl: String
     lateinit var pdlAudience: String
 
-    lateinit var unleash_instance_id: String
-    lateinit var unleash_env: String
-    lateinit var unleash_server_api_url: String
-    lateinit var unleash_server_api_token: String
+    lateinit var unleashInstanceId: String
+    lateinit var unleashEnv: String
+    lateinit var unleashServerApiUrl: String
+    lateinit var unleashServerApiToken: String
 
     lateinit var tokendingsUrl: String
     lateinit var tokendingsClientId: String

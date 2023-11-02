@@ -19,12 +19,27 @@ import java.time.LocalDateTime
 
 interface RedisService {
     val defaultTimeToLiveSeconds: Long
-    fun <T : Any> get(key: String, requestedClass: Class<out T>): T?
-    fun put(key: String, value: ByteArray, timeToLiveSeconds: Long = defaultTimeToLiveSeconds)
+
+    fun <T : Any> get(
+        key: String,
+        requestedClass: Class<out T>,
+    ): T?
+
+    fun put(
+        key: String,
+        value: ByteArray,
+        timeToLiveSeconds: Long = defaultTimeToLiveSeconds,
+    )
+
     fun delete(key: String)
 
     companion object {
-        fun <T : Any> pakkUtRedisData(bytes: ByteArray?, requestedClass: Class<out T>, key: String, log: Logger): T? =
+        fun <T : Any> pakkUtRedisData(
+            bytes: ByteArray?,
+            requestedClass: Class<out T>,
+            key: String,
+            log: Logger,
+        ): T? =
             if (bytes != null) {
                 try {
                     if (requestedClass == String::class.java) {
@@ -54,10 +69,18 @@ interface RedisService {
          */
         private fun valider(obj: Any?) {
             when {
-                obj is DigisosSak && obj.sokerFnr != getUserIdFromToken() -> throw DigisosSakTilhorerAnnenBrukerException("DigisosSak tilhører annen bruker")
-                obj is JsonDigisosSoker && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonDigisosSoker har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
-                obj is JsonSoknad && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonSoknad har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
-                obj is JsonVedleggSpesifikasjon && obj.additionalProperties.isNotEmpty() -> throw IOException("JsonVedleggSpesifikasjon har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk")
+                obj is DigisosSak && obj.sokerFnr != getUserIdFromToken() -> throw DigisosSakTilhorerAnnenBrukerException(
+                    "DigisosSak tilhører annen bruker",
+                )
+                obj is JsonDigisosSoker && obj.additionalProperties.isNotEmpty() -> throw IOException(
+                    "JsonDigisosSoker har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk",
+                )
+                obj is JsonSoknad && obj.additionalProperties.isNotEmpty() -> throw IOException(
+                    "JsonSoknad har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk",
+                )
+                obj is JsonVedleggSpesifikasjon && obj.additionalProperties.isNotEmpty() -> throw IOException(
+                    "JsonVedleggSpesifikasjon har ukjente properties - må tilhøre ett annet objekt. Cache-value tas ikke i bruk",
+                )
             }
         }
     }
@@ -67,17 +90,23 @@ interface RedisService {
 @Component
 class RedisServiceImpl(
     private val redisStore: RedisStore,
-    cacheProperties: CacheProperties
+    cacheProperties: CacheProperties,
 ) : RedisService {
-
     override val defaultTimeToLiveSeconds = cacheProperties.timeToLiveSeconds
 
-    override fun <T : Any> get(key: String, requestedClass: Class<out T>): T? {
+    override fun <T : Any> get(
+        key: String,
+        requestedClass: Class<out T>,
+    ): T? {
         val get: ByteArray? = redisStore.get(key) // Redis har konfigurert timout for disse.
         return pakkUtRedisData(get, requestedClass, key, log)
     }
 
-    override fun put(key: String, value: ByteArray, timeToLiveSeconds: Long) {
+    override fun put(
+        key: String,
+        value: ByteArray,
+        timeToLiveSeconds: Long,
+    ) {
         val set = redisStore.set(key, value, timeToLiveSeconds)
         if (set == null) {
             log.warn("Cache put feilet eller fikk timeout")
@@ -107,7 +136,10 @@ class RedisServiceMock : RedisService {
     val mockMap = HashMap<String, ByteArray>()
     val expiryMap = HashMap<String, LocalDateTime>()
 
-    override fun <T : Any> get(key: String, requestedClass: Class<out T>): T? {
+    override fun <T : Any> get(
+        key: String,
+        requestedClass: Class<out T>,
+    ): T? {
         val get: ByteArray? = mockMap[key]
         if (get != null) {
             val expiryTime = expiryMap[key]
@@ -118,7 +150,11 @@ class RedisServiceMock : RedisService {
         return pakkUtRedisData(get, requestedClass, key, log)
     }
 
-    override fun put(key: String, value: ByteArray, timeToLiveSeconds: Long) {
+    override fun put(
+        key: String,
+        value: ByteArray,
+        timeToLiveSeconds: Long,
+    ) {
         mockMap[key] = value
         log.debug("redis set key=$key, value=$value")
         expiryMap[key] = LocalDateTime.now().plusSeconds(timeToLiveSeconds)

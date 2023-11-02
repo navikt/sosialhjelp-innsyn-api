@@ -10,5 +10,5 @@ data class VedleggResponse(
     val type: String,
     val tilleggsinfo: String?,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    val datoLagtTil: LocalDateTime
+    val datoLagtTil: LocalDateTime,
 )

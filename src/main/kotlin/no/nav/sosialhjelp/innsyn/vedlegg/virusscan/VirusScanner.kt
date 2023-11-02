@@ -14,12 +14,14 @@ import org.springframework.web.reactive.function.client.bodyToMono
 @Component
 class VirusScanner(
     private val virusScanWebClient: WebClient,
-    @Value("\${innsyn.vedlegg.virusscan.enabled}") val enabled: Boolean
+    @Value("\${innsyn.vedlegg.virusscan.enabled}") val enabled: Boolean,
 ) {
-
     private val virusScanRetry = RetryUtils.retryBackoffSpec()
 
-    fun scan(filnavn: String?, data: ByteArray) {
+    fun scan(
+        filnavn: String?,
+        data: ByteArray,
+    ) {
         if (enabled && isInfected(filnavn, data)) {
             throw VirusScanException("Fant virus i fil forsøkt opplastet", null)
         } else if (!enabled) {
@@ -27,20 +29,24 @@ class VirusScanner(
         }
     }
 
-    private fun isInfected(filnavn: String?, data: ByteArray): Boolean {
+    private fun isInfected(
+        filnavn: String?,
+        data: ByteArray,
+    ): Boolean {
         try {
             if (!isRunningInProd() && filnavn != null && filnavn.startsWith("virustest")) {
                 return true
             }
             log.info("Scanner ${data.size} bytes for virus")
 
-            val scanResults: List<ScanResult> = virusScanWebClient.put()
-                .body(BodyInserters.fromValue(data))
-                .retrieve()
-                .bodyToMono<List<ScanResult>>()
-                .retryWhen(virusScanRetry)
-                .block()
-                ?: throw BadStateException("scanResult er null")
+            val scanResults: List<ScanResult> =
+                virusScanWebClient.put()
+                    .body(BodyInserters.fromValue(data))
+                    .retrieve()
+                    .bodyToMono<List<ScanResult>>()
+                    .retryWhen(virusScanRetry)
+                    .block()
+                    ?: throw BadStateException("scanResult er null")
 
             if (scanResults.size != 1) {
                 log.warn("Virusscan returnerte uventet respons med lengde ${scanResults.size}, forventet lengde er 1.")

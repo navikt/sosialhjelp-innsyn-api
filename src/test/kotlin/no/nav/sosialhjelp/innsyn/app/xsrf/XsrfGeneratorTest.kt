@@ -46,7 +46,7 @@ internal class XsrfGeneratorTest {
         every { redisService.put(any(), any(), any()) } just Runs
 
         val generatedToken = xsrfGenerator.generateXsrfToken(idag)
-        assertThat(generatedToken).hasSize(43)
+        assertThat(generatedToken).hasSize(44)
     }
 
     @Test
@@ -56,9 +56,9 @@ internal class XsrfGeneratorTest {
         every { redisService.put(any(), any(), any()) } just Runs
 
         val generatedToken1 = xsrfGenerator.generateXsrfToken(idag)
-        assertThat(generatedToken1).hasSize(43)
+        assertThat(generatedToken1).hasSize(44)
         val generatedToken2 = xsrfGenerator.generateXsrfToken(idag)
-        assertThat(generatedToken2).hasSize(43)
+        assertThat(generatedToken2).hasSize(44)
         assertThat(generatedToken1).isNotEqualTo(generatedToken2)
     }
 

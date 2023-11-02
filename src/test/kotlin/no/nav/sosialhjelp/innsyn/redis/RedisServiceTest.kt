@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class RedisServiceTest {
-
     private val redisStore: RedisStore = mockk()
     private val cacheProperties: CacheProperties = mockk(relaxed = true)
 

@@ -5,7 +5,6 @@ import no.nav.sosialhjelp.innsyn.app.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.utils.logger
 
 object SubjectHandlerUtils {
-
     private val log by logger()
     private var subjectHandlerService: SubjectHandler = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
 

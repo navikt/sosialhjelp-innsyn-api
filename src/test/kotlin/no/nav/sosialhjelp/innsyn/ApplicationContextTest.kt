@@ -7,7 +7,6 @@ import org.springframework.test.context.ActiveProfiles
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test"])
 class ApplicationContextTest {
-
     @Test
     fun `app skal starte`() {
     }

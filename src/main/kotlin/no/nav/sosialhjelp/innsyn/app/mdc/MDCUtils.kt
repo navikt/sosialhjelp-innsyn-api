@@ -4,7 +4,6 @@ import org.slf4j.MDC
 import java.security.SecureRandom
 
 object MDCUtils {
-
     const val CALL_ID = "callId"
     const val DIGISOS_ID = "digisosId"
     const val PATH = "path"
@@ -17,7 +16,10 @@ object MDCUtils {
         return MDC.get(key)
     }
 
-    fun put(key: String, value: String) {
+    fun put(
+        key: String,
+        value: String,
+    ) {
         MDC.put(key, value)
     }
 

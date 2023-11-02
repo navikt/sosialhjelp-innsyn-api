@@ -33,15 +33,29 @@ import kotlin.reflect.full.companionObject
 
 const val COUNTER_SUFFIX_LENGTH = 4
 
-fun hentUrlFraFilreferanse(clientProperties: ClientProperties, filreferanse: JsonFilreferanse): String {
+fun hentUrlFraFilreferanse(
+    clientProperties: ClientProperties,
+    filreferanse: JsonFilreferanse,
+): String {
     return when (filreferanse) {
-        is JsonDokumentlagerFilreferanse -> clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/${filreferanse.id}?inline=true"
-        is JsonSvarUtFilreferanse -> clientProperties.fiksSvarUtEndpointUrl + "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
-        else -> throw RuntimeException("Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse")
+        is JsonDokumentlagerFilreferanse ->
+            clientProperties.fiksDokumentlagerEndpointUrl +
+                "/dokumentlager/nedlasting/niva4/${filreferanse.id}?inline=true"
+
+        is JsonSvarUtFilreferanse ->
+            clientProperties.fiksSvarUtEndpointUrl +
+                "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
+
+        else -> throw RuntimeException(
+            "Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse",
+        )
     }
 }
 
-fun hentDokumentlagerUrl(clientProperties: ClientProperties, dokumentlagerId: String): String {
+fun hentDokumentlagerUrl(
+    clientProperties: ClientProperties,
+    dokumentlagerId: String,
+): String {
     return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/$dokumentlagerId?inline=true"
 }
 
@@ -76,10 +90,11 @@ fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long {
  * HVIS digisosSak ikke har originalSøknad (dvs papirsøknad) -> bruk digisosId, legg på "0000" og inkrementer
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
-    val previousId: String = digisosSak.ettersendtInfoNAV?.ettersendelser
-        ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
-        ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
-        ?: digisosSak.fiksDigisosId.plus("0000")
+    val previousId: String =
+        digisosSak.ettersendtInfoNAV?.ettersendelser
+            ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
+            ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
+            ?: digisosSak.fiksDigisosId.plus("0000")
 
     val nesteSuffix = lagIdSuffix(previousId)
     return (previousId.dropLast(COUNTER_SUFFIX_LENGTH).plus(nesteSuffix))
@@ -110,8 +125,7 @@ fun messageUtenFnr(e: WebClientResponseException): String {
     return "$message - $fiksErrorMessage"
 }
 
-fun toFiksErrorMessageUtenFnr(e: WebClientResponseException) =
-    e.toFiksErrorMessage()?.feilmeldingUtenFnr ?: ""
+fun toFiksErrorMessageUtenFnr(e: WebClientResponseException) = e.toFiksErrorMessage()?.feilmeldingUtenFnr ?: ""
 
 private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessage? {
     return try {
@@ -127,7 +141,10 @@ val String.maskerFnr: String
 val ErrorMessage.feilmeldingUtenFnr: String?
     get() = this.message?.maskerFnr
 
-fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableFuture<Void> {
+fun runAsyncWithMDC(
+    runnable: Runnable,
+    executor: ExecutorService,
+): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()
     return CompletableFuture.runAsync(
         {
@@ -138,14 +155,15 @@ fun runAsyncWithMDC(runnable: Runnable, executor: ExecutorService): CompletableF
                 MDCUtils.clearMDC()
             }
         },
-        executor
+        executor,
     )
 }
 
-suspend fun <A, B> Iterable<A>.flatMapParallel(f: suspend (A) -> List<B>): List<B> = coroutineScope {
-    map {
-        async {
-            f(it)
-        }
-    }.awaitAll().flatten()
-}
+suspend fun <A, B> Iterable<A>.flatMapParallel(f: suspend (A) -> List<B>): List<B> =
+    coroutineScope {
+        map {
+            async {
+                f(it)
+            }
+        }.awaitAll().flatten()
+    }

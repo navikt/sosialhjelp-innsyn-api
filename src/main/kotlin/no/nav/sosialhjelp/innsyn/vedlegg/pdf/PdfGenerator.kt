@@ -50,9 +50,9 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         pdfaid.about = ""
         metadata.importXMPMetadata(xmp.asByteArray())
 
-        oi.info = sRGB_IEC61966_2_1
-        oi.outputCondition = sRGB_IEC61966_2_1
-        oi.outputConditionIdentifier = sRGB_IEC61966_2_1
+        oi.info = S_RGB_IEC61966_2_1
+        oi.outputCondition = S_RGB_IEC61966_2_1
+        oi.outputConditionIdentifier = S_RGB_IEC61966_2_1
         oi.registryName = "http://www.color.org"
         cat.addOutputIntent(oi)
 
@@ -93,7 +93,12 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         addParagraph(text, fontPlain, FONT_PLAIN_SIZE, MARGIN)
     }
 
-    private fun addParagraph(text: String, font: PDFont, fontSize: Float, margin: Float) {
+    private fun addParagraph(
+        text: String,
+        font: PDFont,
+        fontSize: Float,
+        margin: Float,
+    ) {
         val lines: List<String> = parseLines(text, font, fontSize)
         currentStream.setFont(font, fontSize)
         currentStream.beginText()
@@ -121,24 +126,25 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         text: String,
         font: PDFont,
         fontSize: Float,
-        leadingPercentage: Float
+        leadingPercentage: Float,
     ) {
         val lines: List<String> = parseLines(text, font, fontSize)
         currentStream.beginText()
         currentStream.setFont(font, fontSize)
         var prevX = 0f
         for (i in lines.indices) {
-            prevX = if (i == 0) {
-                val lineWidth = font.getStringWidth(lines[i]) / 1000 * fontSize
-                val startX = (MEDIA_BOX.width - lineWidth) / 2
-                currentStream.newLineAtOffset(startX, y)
-                startX
-            } else {
-                val lineWidth = font.getStringWidth(lines[i]) / 1000 * fontSize
-                val startX = (MEDIA_BOX.width - lineWidth) / 2
-                currentStream.newLineAtOffset(startX - prevX, -leadingPercentage * fontSize)
-                startX
-            }
+            prevX =
+                if (i == 0) {
+                    val lineWidth = font.getStringWidth(lines[i]) / 1000 * fontSize
+                    val startX = (MEDIA_BOX.width - lineWidth) / 2
+                    currentStream.newLineAtOffset(startX, y)
+                    startX
+                } else {
+                    val lineWidth = font.getStringWidth(lines[i]) / 1000 * fontSize
+                    val startX = (MEDIA_BOX.width - lineWidth) / 2
+                    currentStream.newLineAtOffset(startX - prevX, -leadingPercentage * fontSize)
+                    startX
+                }
             currentStream.showText(lines[i])
         }
         currentStream.endText()
@@ -152,7 +158,11 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
         currentStream = PDPageContentStream(document, currentPage)
     }
 
-    private fun parseLines(inputText: String, font: PDFont, fontSize: Float): List<String> {
+    private fun parseLines(
+        inputText: String,
+        font: PDFont,
+        fontSize: Float,
+    ): List<String> {
         var text: String? = inputText
         val lines: MutableList<String> = ArrayList()
         var lastSpace = -1
@@ -189,7 +199,8 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
             val classPathResource = ClassPathResource("/pdf/nav-logo_alphaless.jpg")
             val inputStream = classPathResource.inputStream
             return StreamUtils.copyToByteArray(inputStream)
-        } catch (e: IOException) { // FIXME: Handle it
+        } catch (e: IOException) {
+            // FIXME: Handle it
             e.printStackTrace()
         }
         return ByteArray(0)
@@ -204,7 +215,7 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
 
         private const val LEADING_PERCENTAGE = 1.5F
 
-        private const val sRGB_IEC61966_2_1 = "sRGB IEC61966-2.1"
+        private const val S_RGB_IEC61966_2_1 = "sRGB IEC61966-2.1"
 
         private val WIDTH_OF_CONTENT_COLUMN = PDPage(PDRectangle.A4).mediaBox.width - (MARGIN * 2)
         private val MEDIA_BOX = PDPage(PDRectangle.A4).mediaBox

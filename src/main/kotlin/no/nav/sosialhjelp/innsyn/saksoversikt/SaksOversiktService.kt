@@ -25,17 +25,18 @@ class SaksOversiktService(
 
     private fun hentAlleDigisosSakerFraFiks(token: String): List<SaksListeResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
-        val responseList = digisosSaker
-            .filterNot { it.originalSoknadNAV == null && it.digisosSoker == null } // Ikke returner "tomme" søknader som som regel er feilregistreringer
-            .map {
-                SaksListeResponse(
-                    fiksDigisosId = it.fiksDigisosId,
-                    soknadTittel = "saker.default_tittel",
-                    sistOppdatert = unixTimestampToDate(it.sistEndret),
-                    kilde = KILDE_INNSYN_API,
-                    url = null
-                )
-            }
+        val responseList =
+            digisosSaker
+                .filterNot { it.originalSoknadNAV == null && it.digisosSoker == null } // Ikke returner "tomme" søknader som som regel er feilregistreringer
+                .map {
+                    SaksListeResponse(
+                        fiksDigisosId = it.fiksDigisosId,
+                        soknadTittel = "saker.default_tittel",
+                        sistOppdatert = unixTimestampToDate(it.sistEndret),
+                        kilde = KILDE_INNSYN_API,
+                        url = null,
+                    )
+                }
 
         // flyttet fra SaksOversiktController inn hit.
         if (unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false) &&
@@ -45,7 +46,9 @@ class SaksOversiktService(
             if (oppgaveService.sakHarStatusMottattOgIkkeHattSendt(digisosSaker[0].fiksDigisosId, token)) {
                 log.info("Kommune med kommunenummer ${digisosSaker[0].kommunenummer} har aktivert innsyn i papirsøknader")
             } else {
-                log.info("Kommune med kommunenummer ${digisosSaker[0].kommunenummer} har fagsystemversjon som støtter innsyn i papirsøknader")
+                log.info(
+                    "Kommune med kommunenummer ${digisosSaker[0].kommunenummer} har fagsystemversjon som støtter innsyn i papirsøknader",
+                )
             }
         }
 

@@ -45,14 +45,13 @@ class VedleggController(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
-
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
         @RequestParam("files") files: MutableList<MultipartFile>,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
         log.info("Forsøker å starter ettersendelse")
         tilgangskontroll.sjekkTilgang(token)
@@ -66,7 +65,10 @@ class VedleggController(
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
-    fun hentVedlegg(@PathVariable fiksDigisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<List<VedleggResponse>> {
+    fun hentVedlegg(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+    ): ResponseEntity<List<VedleggResponse>> {
         tilgangskontroll.sjekkTilgang(token)
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
@@ -76,19 +78,20 @@ class VedleggController(
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }
         // mapper til en flat liste av VedleggResponse
-        val vedleggResponses = internalVedleggList
-            .flatMap {
-                it.dokumentInfoList.map { dokumentInfo ->
-                    VedleggResponse(
-                        removeUUIDFromFilename(dokumentInfo.filnavn),
-                        dokumentInfo.storrelse,
-                        hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
-                        it.type,
-                        it.tilleggsinfo,
-                        it.tidspunktLastetOpp
-                    )
+        val vedleggResponses =
+            internalVedleggList
+                .flatMap {
+                    it.dokumentInfoList.map { dokumentInfo ->
+                        VedleggResponse(
+                            removeUUIDFromFilename(dokumentInfo.filnavn),
+                            dokumentInfo.storrelse,
+                            hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
+                            it.type,
+                            it.tilleggsinfo,
+                            it.tidspunktLastetOpp,
+                        )
+                    }
                 }
-            }
         return ResponseEntity.ok(vedleggResponses.distinct())
     }
 
@@ -100,7 +103,7 @@ class VedleggController(
                 it.innsendelsesfrist,
                 it.hendelsetype,
                 it.hendelsereferanse,
-                it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result) }
+                it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result) },
             )
         }
 
@@ -111,8 +114,9 @@ class VedleggController(
     }
 
     private fun getMetadataAndRemoveFromFileList(files: MutableList<MultipartFile>): MutableList<OpplastetVedleggMetadata> {
-        val metadataJson = files.firstOrNull { it.originalFilename == "metadata.json" }
-            ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.size}")
+        val metadataJson =
+            files.firstOrNull { it.originalFilename == "metadata.json" }
+                ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.size}")
         files.removeIf { it.originalFilename == "metadata.json" }
         return objectMapper.readValue(metadataJson.bytes)
     }
@@ -142,9 +146,9 @@ data class OpplastetVedleggMetadata(
     val hendelsereferanse: String?,
     val filer: MutableList<OpplastetFil>,
     @JsonFormat(pattern = "yyyy-MM-dd")
-    val innsendelsesfrist: LocalDate?
+    val innsendelsesfrist: LocalDate?,
 )
 
 data class OpplastetFil(
-    var filnavn: String
+    var filnavn: String,
 )

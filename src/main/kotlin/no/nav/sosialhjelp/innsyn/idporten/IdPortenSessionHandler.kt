@@ -18,9 +18,8 @@ import org.springframework.stereotype.Component
 @Component
 class IdPortenSessionHandler(
     private val redisService: RedisService,
-    private val idPortenClient: IdPortenClient
+    private val idPortenClient: IdPortenClient,
 ) {
-
     fun clearSession(sid: String) {
         val loginId = redisService.get("$SESSION_ID_CACHE_PREFIX$sid", String::class.java)
         if (loginId != null) {

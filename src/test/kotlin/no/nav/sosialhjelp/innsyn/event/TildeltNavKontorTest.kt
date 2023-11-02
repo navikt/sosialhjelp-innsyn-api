@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class TildeltNavKontorTest {
-
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
@@ -59,7 +58,7 @@ internal class TildeltNavKontorTest {
 
     @Test
     fun `tildeltNavKontor skal hente navenhets navn fra Norg`() {
-        every { norgClient.hentNavEnhet(navKontor) } returns mockNavEnhet
+        every { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
         every { mockNavEnhet.navn } returns enhetNavn
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
@@ -68,8 +67,8 @@ internal class TildeltNavKontorTest {
                 .withHendelser(
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2)
-                    )
+                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -86,7 +85,7 @@ internal class TildeltNavKontorTest {
 
     @Test
     fun `tildeltNavKontor skal gi generell melding hvis NorgClient kaster FiksException`() {
-        every { norgClient.hentNavEnhet(navKontor) } throws NorgException("noe feilet", null)
+        every { norgClient.hentNavEnhet(NAVKONTOR) } throws NorgException("noe feilet", null)
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
                 .withAvsender(avsender)
@@ -94,8 +93,8 @@ internal class TildeltNavKontorTest {
                 .withHendelser(
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2)
-                    )
+                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -111,8 +110,8 @@ internal class TildeltNavKontorTest {
 
     @Test
     fun `tildeltNavKontor til samme navKontor som soknad ble sendt til - gir ingen hendelse`() {
-        every { mockJsonSoknad.mottaker.enhetsnummer } returns navKontor
-        every { norgClient.hentNavEnhet(navKontor) } returns mockNavEnhet
+        every { mockJsonSoknad.mottaker.enhetsnummer } returns NAVKONTOR
+        every { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
         every { mockNavEnhet.navn } returns enhetNavn
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
@@ -121,8 +120,8 @@ internal class TildeltNavKontorTest {
                 .withHendelser(
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2)
-                    )
+                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -138,7 +137,7 @@ internal class TildeltNavKontorTest {
 
     @Test
     fun `flere identiske tildeltNavKontor-hendelser skal kun gi en hendelse i historikk`() {
-        every { norgClient.hentNavEnhet(navKontor) } returns mockNavEnhet
+        every { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
         every { mockNavEnhet.navn } returns enhetNavn
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
             JsonDigisosSoker()
@@ -148,8 +147,8 @@ internal class TildeltNavKontorTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
-                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -165,8 +164,8 @@ internal class TildeltNavKontorTest {
 
     @Test
     fun `tildeltNavKontor til ulike kontor gir like mange hendelser`() {
-        every { norgClient.hentNavEnhet(navKontor) } returns mockNavEnhet
-        every { norgClient.hentNavEnhet(navKontor2) } returns mockNavEnhet2
+        every { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
+        every { norgClient.hentNavEnhet(NAVKONTOR2) } returns mockNavEnhet2
         every { mockNavEnhet.navn } returns enhetNavn
         every { mockNavEnhet2.navn } returns enhetNavn2
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
@@ -177,8 +176,8 @@ internal class TildeltNavKontorTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
-                        TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -195,7 +194,7 @@ internal class TildeltNavKontorTest {
 
     @Test
     fun `forste gang en papirSoknad faar tildeltNavKontor skal hendelsen ikke nevne videresendt`() {
-        every { norgClient.hentNavEnhet(navKontor) } returns mockNavEnhet
+        every { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
         every { mockNavEnhet.navn } returns enhetNavn
         every { mockDigisosSak.originalSoknadNAV } returns null
         every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
@@ -206,7 +205,7 @@ internal class TildeltNavKontorTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
-                    )
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -223,8 +222,8 @@ internal class TildeltNavKontorTest {
 
     @Test
     fun `andre gang en papirSoknad faar tildeltNavKontor skal hendelsen vise videresendt`() {
-        every { norgClient.hentNavEnhet(navKontor) } returns mockNavEnhet
-        every { norgClient.hentNavEnhet(navKontor2) } returns mockNavEnhet2
+        every { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
+        every { norgClient.hentNavEnhet(NAVKONTOR2) } returns mockNavEnhet2
         every { mockNavEnhet.navn } returns enhetNavn
         every { mockNavEnhet2.navn } returns enhetNavn2
         every { mockDigisosSak.originalSoknadNAV } returns null
@@ -237,7 +236,7 @@ internal class TildeltNavKontorTest {
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
                         TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(tidspunkt_3),
-                    )
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 

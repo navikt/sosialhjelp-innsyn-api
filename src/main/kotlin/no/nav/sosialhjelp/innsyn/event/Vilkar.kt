@@ -11,18 +11,18 @@ import org.slf4j.LoggerFactory
 private val log = LoggerFactory.getLogger(JsonVilkar::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
-
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Vilkar. Status: ${hendelse.status?.name ?: "null"}")
 
-    val vilkar = Vilkar(
-        referanse = hendelse.vilkarreferanse,
-        tittel = hendelse.tittel,
-        beskrivelse = hendelse.beskrivelse,
-        status = Oppgavestatus.valueOf(hendelse.status.value()),
-        datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
-        datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime(),
-        utbetalingsReferanse = hendelse.utbetalingsreferanse
-    )
+    val vilkar =
+        Vilkar(
+            referanse = hendelse.vilkarreferanse,
+            tittel = hendelse.tittel,
+            beskrivelse = hendelse.beskrivelse,
+            status = Oppgavestatus.valueOf(hendelse.status.value()),
+            datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
+            datoSistEndret = hendelse.hendelsestidspunkt.toLocalDateTime(),
+            utbetalingsReferanse = hendelse.utbetalingsreferanse,
+        )
 
     this.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar)
 
@@ -62,7 +62,10 @@ private fun InternalDigisosSoker.fjernFraUtbetalingerSomIkkeLengreErReferertTilI
     }
 }
 
-private fun MutableList<Vilkar>.oppdaterEllerLeggTilVilkar(hendelse: JsonVilkar, vilkar: Vilkar) {
+private fun MutableList<Vilkar>.oppdaterEllerLeggTilVilkar(
+    hendelse: JsonVilkar,
+    vilkar: Vilkar,
+) {
     if (any { it.referanse == hendelse.vilkarreferanse }) {
         filter { it.referanse == hendelse.vilkarreferanse }
             .forEach { it.oppdaterFelter(hendelse) }

@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 
 internal class VedleggControllerTest {
-
     private val vedleggOpplastingService: VedleggOpplastingService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
@@ -42,7 +41,15 @@ internal class VedleggControllerTest {
     private val model: InternalDigisosSoker = mockk()
 
     private val controller =
-        VedleggController(vedleggOpplastingService, vedleggService, clientProperties, tilgangskontroll, xsrfGenerator, eventService, fiksClient)
+        VedleggController(
+            vedleggOpplastingService,
+            vedleggService,
+            clientProperties,
+            tilgangskontroll,
+            xsrfGenerator,
+            eventService,
+            fiksClient,
+        )
 
     private val id = "123"
 
@@ -82,17 +89,18 @@ internal class VedleggControllerTest {
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() {
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns listOf(
-            InternalVedlegg(
-                dokumenttype,
-                tilleggsinfo,
-                null,
-                null,
-                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
-                LocalDateTime.now(),
-                null
+        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
+            listOf(
+                InternalVedlegg(
+                    dokumenttype,
+                    tilleggsinfo,
+                    null,
+                    null,
+                    mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
+                    LocalDateTime.now(),
+                    null,
+                ),
             )
-        )
 
         val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
 
@@ -116,26 +124,27 @@ internal class VedleggControllerTest {
         val now = LocalDateTime.now()
         every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
         every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns listOf(
-            InternalVedlegg(
-                dokumenttype,
-                null,
-                null,
-                null,
-                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                now,
-                null
-            ),
-            InternalVedlegg(
-                dokumenttype,
-                null,
-                null,
-                null,
-                mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                now,
-                null
+        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
+            listOf(
+                InternalVedlegg(
+                    dokumenttype,
+                    null,
+                    null,
+                    null,
+                    mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                    now,
+                    null,
+                ),
+                InternalVedlegg(
+                    dokumenttype,
+                    null,
+                    null,
+                    null,
+                    mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                    now,
+                    null,
+                ),
             )
-        )
 
         val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
 
@@ -152,10 +161,11 @@ internal class VedleggControllerTest {
 
     @Test
     fun `kaster exception dersom input til sendVedlegg ikke inneholder metadata-json`() {
-        val files = mutableListOf<MultipartFile>(
-            MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-            MockMultipartFile("files", "test2.png", null, ByteArray(0))
-        )
+        val files =
+            mutableListOf<MultipartFile>(
+                MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+                MockMultipartFile("files", "test2.png", null, ByteArray(0)),
+            )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie())
         every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
@@ -167,10 +177,11 @@ internal class VedleggControllerTest {
     @Test
     fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() {
         every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
-        val files = mutableListOf<MultipartFile>(
-            MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
-            MockMultipartFile("files", "test.jpg", null, ByteArray(0))
-        )
+        val files =
+            mutableListOf<MultipartFile>(
+                MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+            )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf(xsrfCookie())
         every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
@@ -181,10 +192,11 @@ internal class VedleggControllerTest {
     @Test
     fun `skal kaste exception dersom token mangler`() {
         every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
-        val files = mutableListOf<MultipartFile>(
-            MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
-            MockMultipartFile("files", "test.jpg", null, ByteArray(0))
-        )
+        val files =
+            mutableListOf<MultipartFile>(
+                MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+            )
         val request: HttpServletRequest = mockk()
         every { request.cookies } returns arrayOf()
         every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()

@@ -13,7 +13,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 internal class SoknadMedInnsynServiceTest {
-
     private val fiksClient: FiksClient = mockk()
     private val kommuneService: KommuneService = mockk()
     private val soknadMedInnsynService = SoknadMedInnsynService(fiksClient, kommuneService)

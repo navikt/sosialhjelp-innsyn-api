@@ -12,8 +12,11 @@ import java.math.BigDecimal
 private val log = LoggerFactory.getLogger(JsonUtbetaling::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
-
-    if (hendelse.utbetalingsdato == null) log.debug("utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.")
+    if (hendelse.utbetalingsdato == null) {
+        log.debug(
+            "utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.",
+        )
+    }
     if (hendelse.fom == null) log.info("utbetalingens start-periode (fom) er null")
     if (hendelse.tom == null) log.info("utbetalingens slutt-periode (tom) er null")
     if (hendelse.status == null) log.info("utbetalingsstatus er null")
@@ -22,31 +25,38 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Utbetaling. Status: ${hendelse.status?.name ?: "null"}")
 
     val gammelUtbetaling = utbetalinger.firstOrNull { it.referanse == hendelse.utbetalingsreferanse }
-    val utbetaling = Utbetaling(
-        referanse = hendelse.utbetalingsreferanse,
-        status = UtbetalingsStatus.valueOf(
-            hendelse.status?.value()
-                ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value()
-        ),
-        belop = BigDecimal.valueOf(hendelse.belop ?: 0.0),
-        beskrivelse = hendelse.beskrivelse,
-        forfallsDato = hendelse.forfallsdato?.toLocalDate(),
-        utbetalingsDato = hendelse.utbetalingsdato?.toLocalDate(),
-        stoppetDato = if (hendelse.status == JsonUtbetaling.Status.STOPPET)
-            hendelse.hendelsestidspunkt.toLocalDateTime().toLocalDate() else gammelUtbetaling?.stoppetDato,
-        fom = hendelse.fom?.toLocalDate(),
-        tom = hendelse.tom?.toLocalDate(),
-        mottaker = hendelse.mottaker,
-        annenMottaker = isAnnenMottaker(hendelse),
-        kontonummer = hendelse.kontonummer.takeUnless { isAnnenMottaker(hendelse) },
-        utbetalingsmetode = hendelse.utbetalingsmetode,
-        vilkar = mutableListOf(),
-        dokumentasjonkrav = mutableListOf(),
-        datoHendelse = hendelse.hendelsestidspunkt.toLocalDateTime()
-    )
+    val utbetaling =
+        Utbetaling(
+            referanse = hendelse.utbetalingsreferanse,
+            status =
+                UtbetalingsStatus.valueOf(
+                    hendelse.status?.value()
+                        ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value(),
+                ),
+            belop = BigDecimal.valueOf(hendelse.belop ?: 0.0),
+            beskrivelse = hendelse.beskrivelse,
+            forfallsDato = hendelse.forfallsdato?.toLocalDate(),
+            utbetalingsDato = hendelse.utbetalingsdato?.toLocalDate(),
+            stoppetDato =
+                if (hendelse.status == JsonUtbetaling.Status.STOPPET) {
+                    hendelse.hendelsestidspunkt.toLocalDateTime().toLocalDate()
+                } else {
+                    gammelUtbetaling?.stoppetDato
+                },
+            fom = hendelse.fom?.toLocalDate(),
+            tom = hendelse.tom?.toLocalDate(),
+            mottaker = hendelse.mottaker,
+            annenMottaker = isAnnenMottaker(hendelse),
+            kontonummer = hendelse.kontonummer.takeUnless { isAnnenMottaker(hendelse) },
+            utbetalingsmetode = hendelse.utbetalingsmetode,
+            vilkar = mutableListOf(),
+            dokumentasjonkrav = mutableListOf(),
+            datoHendelse = hendelse.hendelsestidspunkt.toLocalDateTime(),
+        )
 
-    val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.saksreferanse }
-        ?: saker.firstOrNull { it.referanse == "default" }
+    val sakForReferanse =
+        saker.firstOrNull { it.referanse == hendelse.saksreferanse }
+            ?: saker.firstOrNull { it.referanse == "default" }
 
     sakForReferanse?.utbetalinger?.removeIf { t -> t.referanse == utbetaling.referanse }
     sakForReferanse?.utbetalinger?.add(utbetaling)
@@ -54,5 +64,4 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     utbetalinger.add(utbetaling)
 }
 
-private fun isAnnenMottaker(hendelse: JsonUtbetaling) =
-    hendelse.annenMottaker == null || hendelse.annenMottaker
+private fun isAnnenMottaker(hendelse: JsonUtbetaling) = hendelse.annenMottaker == null || hendelse.annenMottaker

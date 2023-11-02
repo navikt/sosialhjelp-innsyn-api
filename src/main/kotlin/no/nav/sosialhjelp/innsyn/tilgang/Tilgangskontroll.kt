@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.tilgang
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
@@ -10,30 +9,17 @@ import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPerson
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.isKode6Or7
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import java.util.Locale
 
-interface Tilgangskontroll {
-    fun sjekkTilgang(token: String)
-
-    fun hentTilgang(
-        ident: String,
-        token: String,
-    ): Tilgang
-
-    fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak)
-}
-
-@Profile("!local")
 @Component
 class TilgangskontrollService(
     @Value("\${login_api_idporten_clientid}") private val loginApiClientId: String,
     private val environment: Environment,
     private val pdlClient: PdlClient,
-) : Tilgangskontroll {
-    override fun sjekkTilgang(token: String) {
+) {
+    fun sjekkTilgang(token: String) {
         if (!environment.activeProfiles.contains("idporten")) {
             if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         }
@@ -50,7 +36,7 @@ class TilgangskontrollService(
         }
     }
 
-    override fun hentTilgang(
+    fun hentTilgang(
         ident: String,
         token: String,
     ): Tilgang {
@@ -70,7 +56,7 @@ class TilgangskontrollService(
         }
     }
 
-    override fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
+    fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
         val gyldigeIdenter = pdlClient.hentIdenter(SubjectHandlerUtils.getUserIdFromToken(), SubjectHandlerUtils.getToken())
         if (gyldigeIdenter?.contains(digisosSak.sokerFnr) != true) {
             throw TilgangskontrollException("digisosSak hører ikke til rett person")
@@ -90,30 +76,6 @@ class TilgangskontrollService(
 
     companion object {
         private val log by logger()
-    }
-}
-
-@Profile("local")
-@Component
-class TilgangskontrollLocal : Tilgangskontroll {
-    override fun sjekkTilgang(token: String) {
-        // no-op
-    }
-
-    override fun hentTilgang(
-        ident: String,
-        token: String,
-    ): Tilgang {
-        return Tilgang(
-            harTilgang = true,
-            fornavn = "mockperson",
-        )
-    }
-
-    override fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
-        if (digisosSak.sokerFnr != SubjectHandlerUtils.getUserIdFromToken()) {
-            throw BadStateException("digisosSak hører ikke til rett person")
-        }
     }
 }
 

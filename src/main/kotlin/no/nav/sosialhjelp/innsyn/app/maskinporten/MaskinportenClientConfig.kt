@@ -21,10 +21,10 @@ class MaskinportenClientConfig(
     webClientBuilder: WebClient.Builder,
     proxiedHttpClient: HttpClient,
 ) {
+    protected val log by logger()
+
     @Bean
-    fun maskinportenClient(): MaskinportenClient {
-        return MaskinportenClient(maskinportenWebClient, maskinportenProperties, wellknown)
-    }
+    fun maskinportenClient(): MaskinportenClient = MaskinportenClient(maskinportenWebClient, maskinportenProperties, wellknown)
 
     private val maskinportenWebClient: WebClient =
         webClientBuilder
@@ -53,10 +53,6 @@ class MaskinportenClientConfig(
                 .doOnSuccess { log.info("Hentet WellKnown for Maskinporten.") }
                 .doOnError { log.warn("Feil ved henting av WellKnown for Maskinporten", it) }
                 .block() ?: throw RuntimeException("Feil ved henting av WellKnown for Maskinporten")
-
-    companion object {
-        private val log by logger()
-    }
 }
 
 data class WellKnown(

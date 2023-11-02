@@ -16,7 +16,7 @@ import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
@@ -33,7 +33,7 @@ internal class VedleggControllerTest {
     private val vedleggOpplastingService: VedleggOpplastingService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
-    private val tilgangskontroll: Tilgangskontroll = mockk()
+    private val tilgangskontroll: TilgangskontrollService = mockk()
     private val xsrfGenerator: XsrfGenerator = mockk()
     private val eventService: EventService = mockk()
     private val fiksClient: FiksClient = mockk()

@@ -9,7 +9,6 @@ import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -20,7 +19,6 @@ interface NorgClient {
     fun hentNavEnhet(enhetsnr: String): NavEnhet
 }
 
-@Profile("!local")
 @Component
 class NorgClientImpl(
     private val norgWebClient: WebClient,
@@ -78,30 +76,5 @@ class NorgClientImpl(
         private val log by logger()
 
         private const val NAVENHET_CACHE_TIMETOLIVE_SECONDS: Long = 60 * 60 // 1 time
-    }
-}
-
-@Profile("local")
-@Component
-class NorgClientLocal : NorgClient {
-    private val innsynMap = mutableMapOf<String, NavEnhet>()
-
-    override fun hentNavEnhet(enhetsnr: String): NavEnhet {
-        return innsynMap.getOrElse(
-            enhetsnr,
-        ) {
-            val default =
-                NavEnhet(
-                    enhetId = 100000367,
-                    navn = "NAV Longyearbyen",
-                    enhetNr = enhetsnr,
-                    antallRessurser = 20,
-                    status = "AKTIV",
-                    aktiveringsdato = "1982-04-21",
-                    nedleggelsesdato = "null",
-                )
-            innsynMap[enhetsnr] = default
-            default
-        }
     }
 }

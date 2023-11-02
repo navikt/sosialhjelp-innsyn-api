@@ -58,6 +58,7 @@ data class Sak(
 )
 
 data class Vedtak(
+    val id: String,
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,
     var dato: LocalDate?,

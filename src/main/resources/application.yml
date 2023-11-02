@@ -66,6 +66,7 @@ client:
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL}
   soknad_api_audience: ${SOKNAD_API_AUDIENCE}
+  klage_enabled: ${KLAGE_ENABLED}
 
 
 #Maskinporten
@@ -96,3 +97,10 @@ innsyn:
 
 retry_fiks_max_attempts: 5
 retry_fiks_initial_delay: 100 # initial delay in ms
+
+fiks-io:
+  integrasjonspassord: ${FIKS_IO_INTEGRASJONSPASSORD:}
+  integrasjonsid: ${FIKS_IO_INTEGRASJONSID:}
+  private-key-path: "/var/run/secrets/key.der"
+  kontoId: ${FIKS_IO_KONTO_ID:}
+  virksomhetssertifikatPath: ${VIRKSERT_PATH:}

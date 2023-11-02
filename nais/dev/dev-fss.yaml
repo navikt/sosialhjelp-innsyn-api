@@ -52,6 +52,14 @@ spec:
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token
+    - secret: fiks-io-integrasjonspassord
+  filesFrom:
+    - secret: fiks-io-private-key
+  vault:
+    enabled: true
+    paths:
+      - kvPath: "/secret/virksomhetssertifikat/preprod/shared"
+        mountPath: "/var/run/secrets/nais.io/virksomhetssertifikat"
   accessPolicy:
     outbound:
       external:
@@ -97,3 +105,11 @@ spec:
       value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: "https://test.maskinporten.no/.well-known/oauth-authorization-server"
+    - name: FIKS_IO_INTEGRASJONSID
+      value: "6839eedd-8007-432b-a24d-67bd845f6369"
+    - name: FIKS_IO_KONTO_ID
+      value: 46bbe668-3468-45fa-9bd1-67b5469b7361
+    - name: VIRKSERT_PATH
+      value: "/var/run/secrets/nais.io/virksomhetssertifikat"
+    - name: KLAGE_ENABLED
+      value: "false"

@@ -56,7 +56,13 @@ fun InternalDigisosSoker.apply(
             }
         }
 
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Tildelt Navkontor. Beskrivelse: ${hendelseTekstType.name}")
+    log.info(
+        "Hendelse: " +
+            "Tidspunkt: ${hendelse.hendelsestidspunkt} " +
+            "Tildelt Navkontor. " +
+            "Beskrivelse: ${hendelseTekstType.name} " +
+            "NavEnhetsnavn: ${soknadsmottaker!!.navEnhetsnavn}}",
+    )
     historikk.add(
         Hendelse(
             hendelseTekstType,

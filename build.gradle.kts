@@ -46,7 +46,7 @@ object Versions {
 }
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.20"
     kotlin("plugin.spring") version "1.9.10"
     id("org.springframework.boot") version "3.1.5"
     id("com.github.ben-manes.versions") version "0.49.0" // ./gradlew dependencyUpdates

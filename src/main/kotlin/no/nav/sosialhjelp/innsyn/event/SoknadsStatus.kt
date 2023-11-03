@@ -48,7 +48,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
         }
 
     log.info(
-        "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Søknadsstatus: ${hendelse.status} Tittel: ${hendelseMedTittel.hendelseType}",
+        "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} " +
+            "Søknadsstatus: ${hendelse.status} " +
+            "Tittel: ${hendelseMedTittel.hendelseType} " +
+            "NavEnhetsnavn: ${hendelseMedTittel.tekstArgument ?: ""}",
     )
     historikk.add(hendelseMedTittel)
 }

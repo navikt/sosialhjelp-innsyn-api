@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -30,22 +32,19 @@ class DigisosApiTestServiceImpl(
         return digisosApiTestClient.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
     }
 
-    override fun lastOppFil(
+    override suspend fun lastOppFil(
         fiksDigisosId: String,
         file: MultipartFile,
     ): String {
         virusScanner.scan(file.name, file.bytes)
 
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(1))
         val inputStream =
             krypteringService.krypter(
                 file.inputStream,
-                krypteringFutureList,
                 dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
             )
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         val fiksIder = digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
-        waitForFutures(krypteringFutureList)
         return fiksIder[0]
     }
 
@@ -54,20 +53,5 @@ class DigisosApiTestServiceImpl(
         token: String,
     ): String? {
         return digisosApiTestClient.hentInnsynsfil(fiksDigisosId, token)
-    }
-
-    private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
-        val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
-        try {
-            allFutures.get(300, TimeUnit.SECONDS)
-        } catch (e: CompletionException) {
-            throw IllegalStateException(e.cause)
-        } catch (e: ExecutionException) {
-            throw IllegalStateException(e)
-        } catch (e: TimeoutException) {
-            throw IllegalStateException(e)
-        } catch (e: InterruptedException) {
-            throw IllegalStateException(e)
-        }
     }
 }

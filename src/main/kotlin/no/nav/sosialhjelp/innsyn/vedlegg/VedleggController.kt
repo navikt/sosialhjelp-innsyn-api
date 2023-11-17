@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
@@ -23,6 +24,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
+import java.util.UUID
 
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4, ACR_IDPORTEN_LOA_HIGH], combineWithOr = true)
 @RestController
@@ -57,11 +60,56 @@ class VedleggController(
         tilgangskontroll.sjekkTilgang(token)
         xsrfGenerator.sjekkXsrfToken(request)
 
+        // Hent fra mellomlagring
+        // Valider ?
+        //
         val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
         validateFileListNotEmpty(files)
 
-        val oppgaveValideringList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+        val oppgaveValideringList = runBlocking {
+            vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+        }
         return ResponseEntity.ok(mapToResponse(oppgaveValideringList))
+    }
+
+    @PostMapping("/{fiksDigisosId}/vedlegg/mellomlager")
+    fun mellomlagreVedlegg(
+        @PathVariable fiksDigisosId: String,
+        @RequestParam("files") files: List<MultipartFile>,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+        request: HttpServletRequest,
+    ): ResponseEntity<Unit> {
+        log.info("Forsøker å mellomlagre ettersendelse")
+        tilgangskontroll.sjekkTilgang(token)
+        xsrfGenerator.sjekkXsrfToken(request)
+        // Valider filer
+        // Krypter
+        // Last opp til mellomlagring
+
+        vedleggService.mellomlagre(fiksDigisosId, files)
+        return ResponseEntity.ok(Unit)
+    }
+
+    @DeleteMapping("/{fiksDigisosId}/vedlegg/mellomlager/{uuid}")
+    fun slettMellomlagretVedlegg(
+        @PathVariable fiksDigisosId: String,
+        @PathVariable uuid: UUID,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+        request: HttpServletRequest,
+    ) {
+
+    }
+
+    @GetMapping("/{fiksDigisosId}/vedlegg/mellomlager")
+    fun getMellomLagredeVedlegg(
+        @PathVariable fiksDigisosId: String,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+        request: HttpServletRequest,
+    ): ResponseEntity<Unit> {
+        tilgangskontroll.sjekkTilgang(token)
+
+        vedleggService.hentMellomLagrede(fiksDigisosId)
+        return ResponseEntity.ok(Unit)
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])

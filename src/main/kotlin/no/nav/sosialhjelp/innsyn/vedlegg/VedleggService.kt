@@ -1,5 +1,11 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -8,9 +14,15 @@ import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.exceptions.NedlastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.mellomlager.FilMetadata
+import no.nav.sosialhjelp.innsyn.mellomlager.FilOpplasting
+import no.nav.sosialhjelp.innsyn.mellomlager.MellomlagringService
+import no.nav.sosialhjelp.innsyn.utils.MDCAwareCoroutine
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.stereotype.Component
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 
 const val LASTET_OPP_STATUS = "LastetOpp"
@@ -19,6 +31,8 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 @Component
 class VedleggService(
     private val fiksClient: FiksClient,
+    private val mellomlagringService: MellomlagringService,
+    private val virusScanner: VirusScanner,
 ) {
     fun hentAlleOpplastedeVedlegg(
         digisosSak: DigisosSak,
@@ -29,6 +43,25 @@ class VedleggService(
         val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak, model, token)
 
         return soknadVedlegg.plus(ettersendteVedlegg)
+    }
+
+    fun mellomlagre(fiksDigisosId: String, files: List<MultipartFile>) {
+        val filerForOpplasting =
+            files.map { FilOpplasting(FilMetadata(it.originalFilename ?: "", it.contentType ?: "", it.size), it.inputStream) }
+                .onEach { virusScanner.scan(it.metadata.filnavn, it.data.readAllBytes()) }
+
+        runBlocking(Dispatchers.IO + MDCAwareCoroutine()) {
+            filerForOpplasting.map {
+                launch {
+                    mellomlagringService.lastOppVedlegg(fiksDigisosId, it)
+                }
+            }.joinAll()
+        }
+
+    }
+
+    fun hentMellomLagrede(fiksDigisosId: String): List<InternalVedlegg> {
+        return mellomlagringService.getMellomLagredeVedlegg(fiksDigisosId)
     }
 
     fun hentSoknadVedleggMedStatus(

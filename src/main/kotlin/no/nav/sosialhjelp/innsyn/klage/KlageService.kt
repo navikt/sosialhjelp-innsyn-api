@@ -10,7 +10,6 @@ import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.SvarSender
@@ -22,6 +21,11 @@ import no.ks.fiks.io.client.model.MeldingRequest
 import no.ks.fiks.io.client.model.MottattMelding
 import no.ks.fiks.io.client.model.SendtMelding
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.FilUrl
+import no.nav.sosialhjelp.innsyn.klage.repository.KlageUtkast
+import no.nav.sosialhjelp.innsyn.klage.repository.KlageJson
+import no.nav.sosialhjelp.innsyn.klage.repository.KlageUtkastRepository
+import no.nav.sosialhjelp.innsyn.mellomlager.MellomlagringService
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -35,19 +39,40 @@ import org.springframework.web.reactive.function.client.awaitBodilessEntity
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.core.publisher.Mono
 import java.lang.IllegalStateException
+import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
-interface KlageService {
-    fun sendKlage(
+sealed class KlageService(
+    private val mellomlagringService: MellomlagringService,
+    protected val klageUtkastRepository: KlageUtkastRepository,
+) {
+    abstract suspend fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
         token: String,
     )
 
-    fun hentKlager(
+    abstract suspend fun hentKlager(
         fiksDigisosId: String,
         token: String,
     ): List<Klage>
+
+    suspend fun hentKlage(
+        uuid: UUID,
+    ): Klage {
+        return klageUtkastRepository.findById(uuid) ?: error("hekkan")
+    }
+
+    suspend fun opprettKlage(fiksDigisosId: String): KlageUtkast {
+        return klageUtkastRepository.save(KlageUtkast(fiksDigisosId = fiksDigisosId))
+    }
+
+    suspend fun oppdaterKlage(uuid: UUID, fiksDigisosId: String, klage: InputKlage) {
+        val prevKlage = klageUtkastRepository.findById(uuid)
+        val updated =
+            KlageUtkast(uuid, fiksDigisosId, KlageJson(klage.klageTekst, klage.vedtaksIds, prevKlage?.klage?.vedleggRefs ?: emptyList()))
+        klageUtkastRepository.save(updated)
+    }
 }
 
 @Service
@@ -55,16 +80,18 @@ interface KlageService {
 class KlageServiceLocalImpl(
     @Value("\${client.fiks_klage_endpoint_url}")
     klageUrl: String,
-) : KlageService {
+    mellomlagringService: MellomlagringService,
+    klageUtkastRepository: KlageUtkastRepository,
+) : KlageService(mellomlagringService, klageUtkastRepository) {
     private val log by logger()
 
     private val webClient = WebClient.create(klageUrl)
 
-    override fun sendKlage(
+    override suspend fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
         token: String,
-    ) = runBlocking {
+    ) {
         val response = webClient.post().uri("/$fiksDigisosId/klage").bodyValue(klage).retrieve().awaitBodilessEntity()
         if (!response.statusCode.is2xxSuccessful) {
             log.error("Fikk ikke 2xx fra mock-alt-api i sending av klage. Status=${response.statusCode.value()}")
@@ -72,19 +99,19 @@ class KlageServiceLocalImpl(
         }
     }
 
-    override fun hentKlager(
+    override suspend fun hentKlager(
         fiksDigisosId: String,
         token: String,
-    ): List<Klage> =
-        runBlocking {
-            webClient.get().uri("/$fiksDigisosId/klage").retrieve().onStatus(
-                { !it.is2xxSuccessful },
-                {
-                    log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
-                    Mono.error { IllegalStateException("Feil ved henting av klager") }
-                },
-            ).awaitBody()
-        }
+    ): List<Klage> {
+//        val utkast = repos
+        return webClient.get().uri("/$fiksDigisosId/klage").retrieve().onStatus(
+            { !it.is2xxSuccessful },
+            {
+                log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
+                Mono.error { IllegalStateException("Feil ved henting av klager") }
+            },
+        ).awaitBody()
+    }
 }
 
 @Service
@@ -96,10 +123,12 @@ class KlageServiceImpl(
     private val fiksClient: FiksClient,
     private val norgClient: NorgClient,
     private val tilgangskontroll: TilgangskontrollService,
-) : KlageService {
+    mellomlagringService: MellomlagringService,
+    klageUtkastRepository: KlageUtkastRepository,
+) : KlageService(mellomlagringService, klageUtkastRepository) {
     private val log by logger()
 
-    override fun sendKlage(
+    override suspend fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
         token: String,
@@ -121,7 +150,7 @@ class KlageServiceImpl(
     // TODO: Hvilket format skal vi sende på?
     private fun InputKlage.toKlageFil() = this.toString().byteInputStream()
 
-    override fun hentKlager(
+    override suspend fun hentKlager(
         fiksDigisosId: String,
         token: String,
     ): List<Klage> {
@@ -135,11 +164,9 @@ class KlageServiceImpl(
                 fiksIOClient.send(MeldingRequest.builder().mottakerKontoId(it.kontoId).build(), fiksDigisosId, "???")
             } ?: error("Kunne ikke sende til Fiks IO")
 
-        return runBlocking {
-            withTimeout(5000) {
-                waitForResult(fiksIOClient, sendtMelding)
-            }.catch { e -> log.error("Fikk feil i henting av klager", e) }.toList()
-        }
+        return withTimeout(5000) {
+            waitForResult(fiksIOClient, sendtMelding)
+        }.catch { e -> log.error("Fikk feil i henting av klager", e) }.toList()
     }
 
     private fun FiksIOKlient.hentKonto(
@@ -193,15 +220,20 @@ class KlageServiceImpl(
     }
 }
 
-data class InputKlage(val fiksDigisosId: String, val klageTekst: String, val vedtaksIds: List<String>)
+sealed class Klage(val uuid: UUID, val fiksDigisosId: String) {
+    abstract fun toDto(): KlageDto
+}
 
-data class Klage(
-    val fiksDigisosId: String,
+class SendtKlage(
     val filRef: String,
     val vedtakRef: List<String>,
     val status: KlageStatus,
     val utfall: KlageUtfall?,
-)
+    uuid: UUID,
+    fiksDigisosId: String,
+) : Klage(uuid, fiksDigisosId) {
+
+}
 
 enum class KlageStatus {
     SENDT,

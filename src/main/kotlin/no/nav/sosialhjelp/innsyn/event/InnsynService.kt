@@ -13,6 +13,7 @@ class InnsynService(
     private val fiksClient: FiksClient,
     private val kommuneService: KommuneService,
 ) {
+
     fun hentJsonDigisosSoker(
         digisosSak: DigisosSak,
         token: String,

@@ -9,7 +9,7 @@ interface DigisosApiTestService {
         digisosApiWrapper: DigisosApiWrapper,
     ): String?
 
-    fun lastOppFil(
+    suspend fun lastOppFil(
         fiksDigisosId: String,
         file: MultipartFile,
     ): String

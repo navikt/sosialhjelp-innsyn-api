@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.utils
 
+import kotlinx.coroutines.ThreadContextElement
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -29,6 +30,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
+import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.full.companionObject
 
 const val COUNTER_SUFFIX_LENGTH = 4
@@ -140,6 +142,23 @@ val String.maskerFnr: String
 
 val ErrorMessage.feilmeldingUtenFnr: String?
     get() = this.message?.maskerFnr
+
+class MDCAwareCoroutine: ThreadContextElement<Map<String, String>> {
+    companion object Key : CoroutineContext.Key<MDCAwareCoroutine>
+
+    override val key = Key
+
+    override fun updateThreadContext(context: CoroutineContext): Map<String, String> {
+        val previousContextMap = MDC.getCopyOfContextMap()
+        MDC.setContextMap(previousContextMap)
+        return previousContextMap
+    }
+
+    override fun restoreThreadContext(context: CoroutineContext, oldState: Map<String, String>) {
+        MDC.setContextMap(oldState)
+    }
+
+}
 
 fun runAsyncWithMDC(
     runnable: Runnable,

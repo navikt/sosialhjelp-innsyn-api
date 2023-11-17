@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.mellomlager.FilOpplasting
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
@@ -289,50 +290,17 @@ class FiksClientImpl(
         files: List<FilForOpplasting>,
     ): LinkedMultiValueMap<String, Any> {
         val body = LinkedMultiValueMap<String, Any>()
-        body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
+        body.add("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add(
                 "vedleggSpesifikasjon:$fileId",
-                createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"),
+                serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
-            body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
+            body.add("dokument:$fileId", file.toHttpEntity("dokument:$fileId"))
         }
         return body
-    }
-
-    fun createHttpEntityOfString(
-        body: String,
-        name: String,
-    ): HttpEntity<Any> {
-        return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
-    }
-
-    fun createHttpEntityOfFile(
-        file: FilForOpplasting,
-        name: String,
-    ): HttpEntity<Any> {
-        return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
-    }
-
-    private fun createHttpEntity(
-        body: Any,
-        name: String,
-        filename: String?,
-        contentType: String,
-    ): HttpEntity<Any> {
-        val headerMap = LinkedMultiValueMap<String, String>()
-        val builder: ContentDisposition.Builder =
-            ContentDisposition
-                .builder("form-data")
-                .name(name)
-        val contentDisposition: ContentDisposition =
-            if (filename == null) builder.build() else builder.filename(filename).build()
-
-        headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-        headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
-        return HttpEntity(body, headerMap)
     }
 
     fun serialiser(metadata: Any): String {
@@ -355,3 +323,39 @@ data class VedleggMetadata(
     val mimetype: String?,
     val storrelse: Long,
 )
+
+private fun Any.toHttpEntity(
+    name: String,
+    filename: String?,
+    contentType: String,
+): HttpEntity<Any> {
+    val headerMap = LinkedMultiValueMap<String, String>()
+    val builder: ContentDisposition.Builder =
+        ContentDisposition
+            .builder("form-data")
+            .name(name)
+    val contentDisposition: ContentDisposition =
+        if (filename == null) builder.build() else builder.filename(filename).build()
+
+    headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+    headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
+    return HttpEntity(this, headerMap)
+}
+
+fun FilForOpplasting.toHttpEntity(
+    name: String,
+): HttpEntity<Any> {
+    return InputStreamResource(this.fil).toHttpEntity(name, this.filnavn, "application/octet-stream")
+}
+
+fun FilOpplasting.toHttpEntity(
+    name: String,
+): HttpEntity<Any> {
+    return InputStreamResource(this.data).toHttpEntity(name, this.metadata.filnavn, "application/octet-stream")
+}
+
+fun String.toHttpEntity(
+    name: String,
+): HttpEntity<Any> {
+    return this.toHttpEntity(name, null, "text/plain;charset=UTF-8")
+}

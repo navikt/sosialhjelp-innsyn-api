@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.klage
+package no.nav.sosialhjelp.innsyn.klage.fiksio
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.ks.fiks.io.client.konfigurasjon.VirksomhetssertifikatKonfigurasjon

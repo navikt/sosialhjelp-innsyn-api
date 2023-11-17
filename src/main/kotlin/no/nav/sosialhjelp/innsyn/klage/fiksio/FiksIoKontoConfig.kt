@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.klage
+package no.nav.sosialhjelp.innsyn.klage.fiksio
 
 import no.ks.fiks.io.client.konfigurasjon.KontoKonfigurasjon
 import no.ks.fiks.io.client.model.KontoId

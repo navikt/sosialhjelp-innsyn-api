@@ -78,6 +78,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.SPRING_BOOT}")
     implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.SPRING_BOOT}")
     implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.SPRING_BOOT}")
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc:${Versions.SPRING_BOOT}")
+    implementation("org.postgresql:r2dbc-postgresql")
 
 //    Sosialhjelp-common
     implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.SOSIALHJELP_COMMON}")

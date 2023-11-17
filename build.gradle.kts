@@ -14,7 +14,7 @@ object Versions {
     const val FILFORMAT = "1.2023.09.05-13.49-b12f0a7b2b4a"
     const val MICROMETER_REGISTRY = "1.11.5"
     const val PROMETHEUS = "0.16.0"
-    const val TOKEN_VALIDATION = "3.0.8"
+    const val TOKEN_VALIDATION = "3.1.8"
     const val JACKSON = "2.15.3"
     const val COMMONS_CODEC = "1.16.0"
     const val COMMONS_IO = "2.14.0"
@@ -29,7 +29,7 @@ object Versions {
     const val JSON_SMART = "2.4.10"
     const val LOG4J = "2.19.0"
     const val SNAKEYAML = "2.0"
-    const val FIKS_IO = "3.3.2"
+    const val FIKS_IO = "3.3.3"
 
     const val JAVA_JWT = "4.4.0"
     const val JWKS_RSA = "0.22.1"
@@ -135,6 +135,7 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:${Versions.SPRING_MOCKK}")
     testImplementation("io.mockk:mockk:${Versions.MOCKK}")
     testImplementation("no.nav.security:token-validation-spring-test:${Versions.TOKEN_VALIDATION}")
+    testImplementation("junit:junit:${Versions.JUNIT}")
 }
 
 // override spring managed dependencies

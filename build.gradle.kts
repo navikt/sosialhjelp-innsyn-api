@@ -14,7 +14,7 @@ object Versions {
     const val FILFORMAT = "1.2023.09.05-13.49-b12f0a7b2b4a"
     const val MICROMETER_REGISTRY = "1.11.5"
     const val PROMETHEUS = "0.16.0"
-    const val TOKEN_VALIDATION = "3.0.8"
+    const val TOKEN_VALIDATION = "3.1.8"
     const val JACKSON = "2.15.3"
     const val COMMONS_CODEC = "1.16.0"
     const val COMMONS_IO = "2.14.0"

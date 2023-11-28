@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 
 class IdPortenAuthorizationHeaderFilterTest {
-
     private val idPortenSessionHandler: IdPortenSessionHandler = mockk()
     private val idPortenAuthorizationHeaderFilter = IdPortenAuthorizationHeaderFilter(idPortenSessionHandler)
 
@@ -50,7 +49,10 @@ class IdPortenAuthorizationHeaderFilterTest {
     class AuthorizationHeaderCapturingMockFilterChain : FilterChain {
         private var authHeader: String? = null
 
-        override fun doFilter(request: ServletRequest, response: ServletResponse) {
+        override fun doFilter(
+            request: ServletRequest,
+            response: ServletResponse,
+        ) {
             val httpServletRequest = request as HttpServletRequest
             authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION)
         }

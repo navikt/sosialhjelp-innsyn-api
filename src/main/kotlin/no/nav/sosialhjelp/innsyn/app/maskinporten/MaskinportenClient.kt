@@ -17,7 +17,7 @@ import java.util.Date
 class MaskinportenClient(
     private val maskinportenWebClient: WebClient,
     maskinportenProperties: MaskinportenProperties,
-    private val wellKnown: WellKnown
+    private val wellKnown: WellKnown,
 ) {
     private var cachedToken: SignedJWT? = null
 
@@ -32,25 +32,27 @@ class MaskinportenClient(
     }
 
     private fun getTokenFraMaskinporten(): String {
-        val response = maskinportenWebClient.post()
-            .uri(wellKnown.token_endpoint)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(BodyInserters.fromFormData(params))
-            .retrieve()
-            .bodyToMono<MaskinportenResponse>()
-            .doOnSuccess { log.info("Hentet token fra Maskinporten") }
-            .doOnError { log.warn("Noe feilet ved henting av token fra Maskinporten", it) }
-            .block() ?: throw RuntimeException("Noe feilet ved henting av token fra Maskinporten")
+        val response =
+            maskinportenWebClient.post()
+                .uri(wellKnown.token_endpoint)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(params))
+                .retrieve()
+                .bodyToMono<MaskinportenResponse>()
+                .doOnSuccess { log.info("Hentet token fra Maskinporten") }
+                .doOnError { log.warn("Noe feilet ved henting av token fra Maskinporten", it) }
+                .block() ?: throw RuntimeException("Noe feilet ved henting av token fra Maskinporten")
 
         return response.access_token
             .also { cachedToken = SignedJWT.parse(it) }
     }
 
     private val params: MultiValueMap<String, String>
-        get() = LinkedMultiValueMap<String, String>().apply {
-            add("grant_type", GRANT_TYPE)
-            add("assertion", tokenGenerator.getJwt())
-        }
+        get() =
+            LinkedMultiValueMap<String, String>().apply {
+                add("grant_type", GRANT_TYPE)
+                add("assertion", tokenGenerator.getJwt())
+            }
 
     companion object {
         private val log by logger()

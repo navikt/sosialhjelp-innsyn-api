@@ -8,6 +8,7 @@ client:
   fiks_integrasjonid_kommune: "idkom"
   fiks_integrasjonpassord: "pwd"
   fiks_integrasjonpassord_kommune: "pwdcom"
+  fiks_klage_endpoint_url: http://localhost:123123/klage
   pdl_endpoint_url: 'http://localhost:56666'
   pdl_audience: 'dummyAudience'
   unleash_instance_id: "local"
@@ -18,6 +19,7 @@ client:
   tokendings_private_jwk: generateRSA
   soknad_api_url: "http://localhost:59999"
   soknad_api_audience: "dummyAudience"
+  klage_enabled: "false"
 
 #Maskinporten
 maskinporten_clientid: clientid

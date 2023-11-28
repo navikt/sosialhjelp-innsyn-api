@@ -20,8 +20,11 @@ class SoknadsStatusService(
     private val kommuneService: KommuneService,
     private val clientProperties: ClientProperties,
 ) {
-
-    fun hentSoknadsStatus(fiksDigisosId: String, token: String, fnr: String): UtvidetSoknadsStatus {
+    fun hentSoknadsStatus(
+        fiksDigisosId: String,
+        token: String,
+        fnr: String,
+    ): UtvidetSoknadsStatus {
         val digisosSak = fiksClient.hentDigisosSakMedFnr(fiksDigisosId, token, true, fnr)
         val model = eventService.createModel(digisosSak, token)
         val status = model.status
@@ -39,20 +42,24 @@ class SoknadsStatusService(
 
         val modelFiksDigisosId = model.fiksDigisosId
         if (modelFiksDigisosId != null && fiksDigisosId != modelFiksDigisosId) {
-            log.error("Intern model inneholder en annen digisosID en det som ble sendt inn. Intern model har digisosId: ${model.fiksDigisosId} og digisosID: $fiksDigisosId ble sendt inn")
+            log.error(
+                "Intern model inneholder en annen digisosID en det som ble sendt inn. Intern model har digisosId: ${model.fiksDigisosId}" +
+                    " og digisosID: $fiksDigisosId ble sendt inn",
+            )
         }
 
         return UtvidetSoknadsStatus(
             status = status,
             tidspunktSendt = model.tidspunktSendt,
             navKontor = model.soknadsmottaker?.navEnhetsnavn?.takeIf { erInnsynDeaktivertForKommune },
-            soknadUrl = dokumentlagerId?.let {
-                UrlResponse(
-                    HendelseTekstType.VIS_BREVET_LENKETEKST,
-                    hentDokumentlagerUrl(clientProperties, it)
-                )
-            }
-                .takeIf { erInnsynDeaktivertForKommune }
+            soknadUrl =
+                dokumentlagerId?.let {
+                    UrlResponse(
+                        HendelseTekstType.VIS_BREVET_LENKETEKST,
+                        hentDokumentlagerUrl(clientProperties, it),
+                    )
+                }
+                    .takeIf { erInnsynDeaktivertForKommune },
         )
     }
 
@@ -60,7 +67,7 @@ class SoknadsStatusService(
         val status: SoknadsStatus,
         val tidspunktSendt: LocalDateTime?,
         val navKontor: String?,
-        val soknadUrl: UrlResponse?
+        val soknadUrl: UrlResponse?,
     )
 
     companion object {

@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
-import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
@@ -21,11 +21,13 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/innsyn")
 class UtbetalingerController(
     private val utbetalingerService: UtbetalingerService,
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: TilgangskontrollService,
 ) {
-
     @GetMapping("/utbetalinger")
-    fun hentUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String, @RequestParam(defaultValue = "3") month: Int): ResponseEntity<List<UtbetalingerResponse>> {
+    fun hentUtbetalinger(
+        @RequestHeader(value = AUTHORIZATION) token: String,
+        @RequestParam(defaultValue = "3") month: Int,
+    ): ResponseEntity<List<UtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {
@@ -38,8 +40,11 @@ class UtbetalingerController(
             throw e
         }
     }
+
     @GetMapping("/nye")
-    fun hentNyeUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
+    fun hentNyeUtbetalinger(
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {
@@ -54,7 +59,9 @@ class UtbetalingerController(
     }
 
     @GetMapping("/tidligere")
-    fun hentTidligereUtbetalinger(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
+    fun hentTidligereUtbetalinger(
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
         tilgangskontroll.sjekkTilgang(token)
 
         try {

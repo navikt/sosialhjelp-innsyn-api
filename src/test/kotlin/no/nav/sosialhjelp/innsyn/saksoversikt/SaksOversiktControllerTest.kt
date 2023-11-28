@@ -24,7 +24,7 @@ import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.MOTTATT
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -32,12 +32,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 
 internal class SaksOversiktControllerTest {
-
     private val saksOversiktService: SaksOversiktService = mockk()
     private val fiksClient: FiksClient = mockk()
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
-    private val tilgangskontroll: Tilgangskontroll = mockk()
+    private val tilgangskontroll: TilgangskontrollService = mockk()
 
     private val controller = SaksOversiktController(saksOversiktService, fiksClient, eventService, oppgaveService, tilgangskontroll)
 
@@ -80,7 +79,9 @@ internal class SaksOversiktControllerTest {
         every { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
         every { oppgaveService.getVilkar("123", any()) } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
         every { oppgaveService.getVilkar("456", any()) } returns listOf(vilkarResponseMock) // 1 oppgave
-        every { oppgaveService.getDokumentasjonkrav("123", any()) } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
+        every {
+            oppgaveService.getDokumentasjonkrav("123", any())
+        } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
         every { oppgaveService.getDokumentasjonkrav("456", any()) } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
     }
 

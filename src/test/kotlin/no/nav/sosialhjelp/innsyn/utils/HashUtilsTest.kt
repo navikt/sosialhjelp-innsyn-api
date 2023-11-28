@@ -4,10 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class HashUtilsTest {
-
     @Test
     fun `similar input creates different output hash`() {
-
         val input1 = "123"
         val input2 = "124"
 

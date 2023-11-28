@@ -30,11 +30,13 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/api/v1/digisosapi")
 class DigisosApiTestController(
-    private val digisosApiTestService: DigisosApiTestService
+    private val digisosApiTestService: DigisosApiTestService,
 ) {
-
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
-    fun oppdaterDigisosSak(fiksDigisosId: String?, @RequestBody body: String): ResponseEntity<String> {
+    fun oppdaterDigisosSak(
+        fiksDigisosId: String?,
+        @RequestBody body: String,
+    ): ResponseEntity<String> {
         val json = objectMapper.writeValueAsString(objectMapper.readTree(body).at("/sak/soker"))
         JsonSosialhjelpValidator.ensureValidInnsyn(json)
 
@@ -47,14 +49,20 @@ class DigisosApiTestController(
     }
 
     @PostMapping("/{fiksDigisosId}/filOpplasting", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun filOpplasting(@PathVariable fiksDigisosId: String, @RequestParam("file") file: MultipartFile): ResponseEntity<String> {
+    fun filOpplasting(
+        @PathVariable fiksDigisosId: String,
+        @RequestParam("file") file: MultipartFile,
+    ): ResponseEntity<String> {
         val dokumentlagerId = digisosApiTestService.lastOppFil(fiksDigisosId, file)
 
         return ResponseEntity.ok(dokumentlagerId)
     }
 
     @GetMapping("/{digisosId}/innsynsfil")
-    fun getInnsynsfil(@PathVariable digisosId: String, @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?): ResponseEntity<ByteArray> {
+    fun getInnsynsfil(
+        @PathVariable digisosId: String,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?,
+    ): ResponseEntity<ByteArray> {
         val innsynsfil = digisosApiTestService.hentInnsynsfil(digisosId, token ?: "") ?: return ResponseEntity.noContent().build()
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
     }

@@ -18,7 +18,6 @@ fun InternalDigisosSoker.apply(
     norgClient: NorgClient,
     isPapirSoknad: Boolean,
 ) {
-
     if (hendelse.navKontor == tildeltNavKontor) {
         return
     }
@@ -30,11 +29,12 @@ fun InternalDigisosSoker.apply(
 
     tildeltNavKontor = hendelse.navKontor
 
-    val destinasjon = try {
-        norgClient.hentNavEnhet(hendelse.navKontor).navn
-    } catch (e: NorgException) {
-        null
-    }
+    val destinasjon =
+        try {
+            norgClient.hentNavEnhet(hendelse.navKontor).navn
+        } catch (e: NorgException) {
+            null
+        }
 
     soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet NAV-kontor")
 
@@ -56,6 +56,19 @@ fun InternalDigisosSoker.apply(
             }
         }
 
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Tildelt Navkontor. Beskrivelse: ${hendelseTekstType.name}")
-    historikk.add(Hendelse(hendelseTekstType, hendelse.hendelsestidspunkt.toLocalDateTime(), type = HistorikkType.TILDELT_NAV_KONTOR, tekstArgument = destinasjon))
+    log.info(
+        "Hendelse: " +
+            "Tidspunkt: ${hendelse.hendelsestidspunkt} " +
+            "Tildelt Navkontor. " +
+            "Beskrivelse: ${hendelseTekstType.name} " +
+            "NavEnhetsnavn: ${soknadsmottaker!!.navEnhetsnavn}}",
+    )
+    historikk.add(
+        Hendelse(
+            hendelseTekstType,
+            hendelse.hendelsestidspunkt.toLocalDateTime(),
+            type = HistorikkType.TILDELT_NAV_KONTOR,
+            tekstArgument = destinasjon,
+        ),
+    )
 }

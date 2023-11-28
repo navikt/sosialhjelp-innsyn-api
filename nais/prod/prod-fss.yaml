@@ -93,3 +93,9 @@ spec:
       value: "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api"
     - name: SOKNAD_API_AUDIENCE
       value: "prod-fss:teamdigisos:sosialhjelp-soknad-api"
+    - name: FIKS_IO_INTEGRASJONSID
+      value: "6839eedd-8007-432b-a24d-67bd845f6369"
+    - name: FIKS_IO_KONTO_ID
+      value: 46bbe668-3468-45fa-9bd1-67b5469b7361
+    - name: KLAGE_ENABLED
+      value: "false"

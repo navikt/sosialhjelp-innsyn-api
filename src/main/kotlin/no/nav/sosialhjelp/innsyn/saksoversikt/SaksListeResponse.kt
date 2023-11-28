@@ -9,5 +9,5 @@ data class SaksListeResponse(
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     val sistOppdatert: Date,
     val kilde: String,
-    val url: String?
+    val url: String?,
 )

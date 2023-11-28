@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class UtilsTest {
-
     private val mockDigisosSak: DigisosSak = mockk()
 
     private val ettersendelse: Ettersendelse = mockk()

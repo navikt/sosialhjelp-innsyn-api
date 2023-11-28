@@ -26,7 +26,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 class InnsynExceptionHandler(
     @Value("\${innsyn.loginurl}") private val innsynLoginUrl: String,
 ) : ResponseEntityExceptionHandler() {
-
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<FrontendErrorMessage> {
         log.error(e.message, e)
@@ -38,7 +37,7 @@ class InnsynExceptionHandler(
         e: HttpMessageNotReadableException,
         headers: HttpHeaders,
         status: HttpStatusCode,
-        request: WebRequest
+        request: WebRequest,
     ): ResponseEntity<Any> {
         log.error(e.message, e)
         val error = FrontendErrorMessage(UNEXPECTED_ERROR, e.message)
@@ -128,7 +127,7 @@ class InnsynExceptionHandler(
     @ExceptionHandler(value = [JwtTokenUnauthorizedException::class, JwtTokenMissingException::class])
     fun handleAzureAdValidationExceptions(
         ex: RuntimeException,
-        request: WebRequest
+        request: WebRequest,
     ): ResponseEntity<FrontendErrorMessage> {
         if (ex.message?.contains("Server misconfigured") == true) {
             log.error(ex.message)
@@ -143,7 +142,7 @@ class InnsynExceptionHandler(
     @ExceptionHandler(value = [MetaDataNotAvailableException::class, IssuerConfigurationException::class])
     fun handleTokenValidationConfigurationExceptions(
         ex: RuntimeException,
-        request: WebRequest
+        request: WebRequest,
     ): ResponseEntity<FrontendErrorMessage> {
         log.error("Klarer ikke hente metadata fra discoveryurl eller problemer ved konfigurering av issuer. Feilmelding: ${ex.message}")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -159,8 +158,8 @@ class InnsynExceptionHandler(
                     "azuread_authentication_error",
                     "azuread_authentication_error",
                     "Autentiseringsfeil",
-                    loginUrl
-                )
+                    loginUrl,
+                ),
             )
     }
 

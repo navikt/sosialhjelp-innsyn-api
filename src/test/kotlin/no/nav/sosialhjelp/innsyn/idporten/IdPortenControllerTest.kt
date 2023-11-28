@@ -20,18 +20,18 @@ import org.springframework.http.HttpStatus
 import java.net.URI
 
 class IdPortenControllerTest {
-
     private val idPortenClient: IdPortenClient = mockk()
     private val idPortenProperties: IdPortenProperties = mockk(relaxed = true)
     private val redisService: RedisService = mockk()
     private val idPortenSessionHandler: IdPortenSessionHandler = mockk()
 
-    private val idPortenController = IdPortenController(
-        idPortenClient = idPortenClient,
-        idPortenProperties = idPortenProperties,
-        redisService = redisService,
-        idPortenSessionHandler = idPortenSessionHandler
-    )
+    private val idPortenController =
+        IdPortenController(
+            idPortenClient = idPortenClient,
+            idPortenProperties = idPortenProperties,
+            redisService = redisService,
+            idPortenSessionHandler = idPortenSessionHandler,
+        )
 
     @Test
     fun `request mangler loginId-cookie - kaster TilgangskontrollException`() {

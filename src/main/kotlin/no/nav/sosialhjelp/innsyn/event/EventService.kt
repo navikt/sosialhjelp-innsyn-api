@@ -41,8 +41,10 @@ class EventService(
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
 ) {
-
-    fun createModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
+    fun createModel(
+        digisosSak: DigisosSak,
+        token: String,
+    ): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak, token)
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
@@ -66,9 +68,11 @@ class EventService(
                     Hendelse(
                         HendelseTekstType.SOKNAD_SEND_TIL_KONTOR,
                         unixToLocalDateTime(originalSoknadNAV.timestampSendt),
-                        dokumentlagerDokumentId?.let { UrlResponse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR_LENKETEKST, hentDokumentlagerUrl(clientProperties, it)) },
+                        dokumentlagerDokumentId?.let {
+                            UrlResponse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR_LENKETEKST, hentDokumentlagerUrl(clientProperties, it))
+                        },
                         tekstArgument = stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn),
-                    )
+                    ),
                 )
             }
         }
@@ -107,13 +111,16 @@ class EventService(
                             "\"status\": \"${utbetaling.status.name}\", " +
                             "\"tilbakevirkende\": \"$tilbakevirkende\", \"overdueDays\": \"$overdueDays\", " +
                             "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${forfallsDato}\", " +
-                            "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}"
+                            "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}",
                     )
                 }
             }
     }
 
-    fun setTidspunktSendtIfNotZero(model: InternalDigisosSoker, timestampSendt: Long) {
+    fun setTidspunktSendtIfNotZero(
+        model: InternalDigisosSoker,
+        timestampSendt: Long,
+    ) {
         if (timestampSendt == 0L) {
             log.error("Søknadens timestampSendt er 0")
         } else {
@@ -121,7 +128,10 @@ class EventService(
         }
     }
 
-    fun createSaksoversiktModel(digisosSak: DigisosSak, token: String): InternalDigisosSoker {
+    fun createSaksoversiktModel(
+        digisosSak: DigisosSak,
+        token: String,
+    ): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
 
@@ -137,25 +147,38 @@ class EventService(
         return model
     }
 
-    private fun applyHendelserOgSoknadKrav(jsonDigisosSoker: JsonDigisosSoker?, model: InternalDigisosSoker, digisosSak: DigisosSak, token: String) {
+    private fun applyHendelserOgSoknadKrav(
+        jsonDigisosSoker: JsonDigisosSoker?,
+        model: InternalDigisosSoker,
+        digisosSak: DigisosSak,
+        token: String,
+    ) {
         jsonDigisosSoker?.hendelser
             ?.sortedWith(hendelseComparator)
             ?.forEach { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
 
-        val ingenDokumentasjonskravFraInnsyn = jsonDigisosSoker?.hendelser
-            ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
-            ?.isEmpty() ?: true
+        val ingenDokumentasjonskravFraInnsyn =
+            jsonDigisosSoker?.hendelser
+                ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
+                ?.isEmpty() ?: true
 
         val originalSoknadNAV = digisosSak.originalSoknadNAV
-        if (originalSoknadNAV != null && ingenDokumentasjonskravFraInnsyn && soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)) {
+        if (originalSoknadNAV != null &&
+            ingenDokumentasjonskravFraInnsyn &&
+            soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)
+        ) {
             model.applySoknadKrav(digisosSak, vedleggService, originalSoknadNAV.timestampSendt, token)
         }
     }
 
-    fun hentAlleUtbetalinger(token: String, digisosSak: DigisosSak): InternalDigisosSoker {
+    fun hentAlleUtbetalinger(
+        token: String,
+        digisosSak: DigisosSak,
+    ): InternalDigisosSoker {
         val model = InternalDigisosSoker()
-        val jsonDigisosSoker: JsonDigisosSoker = innsynService.hentJsonDigisosSoker(digisosSak, token)
-            ?: return model
+        val jsonDigisosSoker: JsonDigisosSoker =
+            innsynService.hentJsonDigisosSoker(digisosSak, token)
+                ?: return model
         jsonDigisosSoker.hendelser
             .filterIsInstance<JsonUtbetaling>()
             .sortedBy { it.hendelsestidspunkt }
@@ -163,7 +186,10 @@ class EventService(
         return model
     }
 
-    private fun InternalDigisosSoker.applyHendelse(hendelse: JsonHendelse, isPapirSoknad: Boolean) {
+    private fun InternalDigisosSoker.applyHendelse(
+        hendelse: JsonHendelse,
+        isPapirSoknad: Boolean,
+    ) {
         when (hendelse) {
             is JsonSoknadsStatus -> apply(hendelse)
             is JsonTildeltNavKontor -> apply(hendelse, norgClient, isPapirSoknad)
@@ -187,17 +213,21 @@ class EventService(
          * Hvis to hendelser har identisk hendelsestidspunkt, og én er Utbetaling og den andre er Vilkår eller Dokumentasjonkrav  -> sorter Utbetaling før Vilkår/Dokumentasjonkrav.
          * Dette gjør at vi kan knytte Vilkår/Dokumentasjonkrav til Utbetalingen.
          */
-        private val hendelseComparator = compareBy<JsonHendelse> { it.hendelsestidspunkt }
-            .thenComparator { a, b -> compareHendelseByType(a.type, b.type) }
-            .thenComparator { a, b ->
-                if (a is JsonSoknadsStatus && b is JsonSoknadsStatus) {
-                    mottattBeforeUnderBehandling(a, b)
-                } else {
-                    0
+        private val hendelseComparator =
+            compareBy<JsonHendelse> { it.hendelsestidspunkt }
+                .thenComparator { a, b -> compareHendelseByType(a.type, b.type) }
+                .thenComparator { a, b ->
+                    if (a is JsonSoknadsStatus && b is JsonSoknadsStatus) {
+                        mottattBeforeUnderBehandling(a, b)
+                    } else {
+                        0
+                    }
                 }
-            }
 
-        private fun mottattBeforeUnderBehandling(a: JsonSoknadsStatus, b: JsonSoknadsStatus): Int {
+        private fun mottattBeforeUnderBehandling(
+            a: JsonSoknadsStatus,
+            b: JsonSoknadsStatus,
+        ): Int {
             if (a.status == JsonSoknadsStatus.Status.MOTTATT && b.status == JsonSoknadsStatus.Status.UNDER_BEHANDLING) {
                 return -1
             } else if (b.status == JsonSoknadsStatus.Status.MOTTATT && a.status == JsonSoknadsStatus.Status.UNDER_BEHANDLING) {
@@ -206,7 +236,10 @@ class EventService(
             return 0
         }
 
-        private fun compareHendelseByType(a: JsonHendelse.Type, b: JsonHendelse.Type): Int {
+        private fun compareHendelseByType(
+            a: JsonHendelse.Type,
+            b: JsonHendelse.Type,
+        ): Int {
             if (a == JsonHendelse.Type.UTBETALING && (b == JsonHendelse.Type.VILKAR || b == JsonHendelse.Type.DOKUMENTASJONKRAV)) {
                 return -1
             } else if (b == JsonHendelse.Type.UTBETALING && (a == JsonHendelse.Type.VILKAR || a == JsonHendelse.Type.DOKUMENTASJONKRAV)) {

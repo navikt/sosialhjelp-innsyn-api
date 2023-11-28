@@ -9,9 +9,8 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class VirusScanConfig(
-    @Value("\${innsyn.vedlegg.virusscan.url}") private val clamAvUrl: String
+    @Value("\${innsyn.vedlegg.virusscan.url}") private val clamAvUrl: String,
 ) {
-
     @Bean
     fun virusScanWebClient(webClientBuilder: WebClient.Builder) =
         webClientBuilder

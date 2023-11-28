@@ -58,6 +58,7 @@ data class Sak(
 )
 
 data class Vedtak(
+    val id: String,
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,
     var dato: LocalDate?,
@@ -97,10 +98,11 @@ sealed class Oppgavehendelse {
         return Pair(tittel, beskrivelse)
     }
 
-    fun getOppgaveStatus(): Oppgavestatus = when (status) {
-        Oppgavestatus.OPPFYLT, Oppgavestatus.IKKE_OPPFYLT -> Oppgavestatus.RELEVANT
-        else -> status
-    }
+    fun getOppgaveStatus(): Oppgavestatus =
+        when (status) {
+            Oppgavestatus.OPPFYLT, Oppgavestatus.IKKE_OPPFYLT -> Oppgavestatus.RELEVANT
+            else -> status
+        }
 
     fun isEmpty(): Boolean = tittel.isNullOrBlank() && beskrivelse.isNullOrBlank()
 }
@@ -112,13 +114,14 @@ data class Vilkar(
     override var status: Oppgavestatus,
     override var utbetalingsReferanse: List<String>?,
     var datoLagtTil: LocalDateTime,
-    var datoSistEndret: LocalDateTime
+    var datoSistEndret: LocalDateTime,
 ) : Oppgavehendelse()
 
 data class Dokumentasjonkrav(
     val dokumentasjonkravId: String,
     val hendelsetype: JsonVedlegg.HendelseType?,
-    override var referanse: String, // hendelsereferanse
+    // hendelsereferanse
+    override var referanse: String,
     override var tittel: String?,
     override var beskrivelse: String?,
     override var status: Oppgavestatus,
@@ -132,41 +135,60 @@ data class Hendelse(
     val tidspunkt: LocalDateTime,
     val url: UrlResponse? = null,
     val type: HistorikkType? = null,
-    val tekstArgument: String? = null
+    val tekstArgument: String? = null,
 )
 
 data class UrlResponse(
     val linkTekst: HendelseTekstType,
-    val link: String
+    val link: String,
 )
 
 data class ForelopigSvar(
     val harMottattForelopigSvar: Boolean,
-    val link: String?
+    val link: String?,
 )
 
 enum class SoknadsStatus {
-    SENDT, MOTTATT, UNDER_BEHANDLING, FERDIGBEHANDLET, BEHANDLES_IKKE
+    SENDT,
+    MOTTATT,
+    UNDER_BEHANDLING,
+    FERDIGBEHANDLET,
+    BEHANDLES_IKKE,
 }
 
 enum class SaksStatus {
-    UNDER_BEHANDLING, IKKE_INNSYN, FERDIGBEHANDLET, BEHANDLES_IKKE, FEILREGISTRERT
+    UNDER_BEHANDLING,
+    IKKE_INNSYN,
+    FERDIGBEHANDLET,
+    BEHANDLES_IKKE,
+    FEILREGISTRERT,
 }
 
 enum class UtbetalingsStatus {
-    PLANLAGT_UTBETALING, UTBETALT, STOPPET, ANNULLERT
+    PLANLAGT_UTBETALING,
+    UTBETALT,
+    STOPPET,
+    ANNULLERT,
 }
 
 enum class UtfallVedtak {
-    INNVILGET, DELVIS_INNVILGET, AVSLATT, AVVIST
+    INNVILGET,
+    DELVIS_INNVILGET,
+    AVSLATT,
+    AVVIST,
 }
 
 enum class Oppgavestatus {
-    RELEVANT, ANNULLERT, OPPFYLT, IKKE_OPPFYLT, LEVERT_TIDLIGERE
+    RELEVANT,
+    ANNULLERT,
+    OPPFYLT,
+    IKKE_OPPFYLT,
+    LEVERT_TIDLIGERE,
 }
 
 enum class HistorikkType {
-    TILDELT_NAV_KONTOR, DOKUMENTASJONSKRAV
+    TILDELT_NAV_KONTOR,
+    DOKUMENTASJONSKRAV,
 }
 
 enum class HendelseTekstType {
@@ -195,5 +217,5 @@ enum class HendelseTekstType {
     ETTERSPOR_IKKE_MER_DOKUMENTASJON,
     DOKUMENTASJONKRAV,
     SOKNAD_SEND_TIL_KONTOR_LENKETEKST,
-    VIS_BREVET_LENKETEKST
+    VIS_BREVET_LENKETEKST,
 }

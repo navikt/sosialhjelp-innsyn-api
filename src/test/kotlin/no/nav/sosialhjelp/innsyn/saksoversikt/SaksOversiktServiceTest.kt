@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test
 import java.util.Date
 
 internal class SaksOversiktServiceTest {
-
     private val fiksClient: FiksClient = mockk()
     private val soknadApiClient: SoknadApiClient = mockk()
     private val unleashClient: Unleash = mockk()
@@ -65,15 +64,16 @@ internal class SaksOversiktServiceTest {
     @Test
     internal fun `skal hente SaksListeResponse fra SoknadApiClient`() {
         every { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
-        every { soknadApiClient.getSvarUtSoknader(any()) } returns listOf(
-            SaksListeResponse(
-                fiksDigisosId = null,
-                soknadTittel = "Tittel",
-                sistOppdatert = Date(),
-                kilde = KILDE_SOKNAD_API,
-                url = "someUrl"
+        every { soknadApiClient.getSvarUtSoknader(any()) } returns
+            listOf(
+                SaksListeResponse(
+                    fiksDigisosId = null,
+                    soknadTittel = "Tittel",
+                    sistOppdatert = Date(),
+                    kilde = KILDE_SOKNAD_API,
+                    url = "someUrl",
+                ),
             )
-        )
 
         val alleSaker = saksOversiktService.hentAlleSaker("token")
 

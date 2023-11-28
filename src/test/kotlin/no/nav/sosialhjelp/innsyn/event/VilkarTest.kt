@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class VilkarTest {
-
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
@@ -64,8 +63,8 @@ internal class VilkarTest {
                         SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
                         UTBETALING.withHendelsestidspunkt(tidspunkt_5),
-                        VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
-                    )
+                        VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -79,7 +78,7 @@ internal class VilkarTest {
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
         assertThat(utbetaling.vilkar).hasSize(1)
-        assertThat(utbetaling.vilkar[0].referanse).isEqualTo(vilkar_ref_1)
+        assertThat(utbetaling.vilkar[0].referanse).isEqualTo(VILKAR_REF_1)
         assertThat(utbetaling.vilkar[0].beskrivelse).isEqualTo("beskrivelse")
         assertThat(utbetaling.vilkar[0].getOppgaveStatus()).isEqualTo(Oppgavestatus.RELEVANT)
     }
@@ -94,8 +93,8 @@ internal class VilkarTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -120,8 +119,8 @@ internal class VilkarTest {
                         SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
                         VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                        UTBETALING.withHendelsestidspunkt(tidspunkt_6)
-                    )
+                        UTBETALING.withHendelsestidspunkt(tidspunkt_6),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -148,8 +147,8 @@ internal class VilkarTest {
                         SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
                         VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                        UTBETALING.withHendelsestidspunkt(tidspunkt_5)
-                    )
+                        UTBETALING.withHendelsestidspunkt(tidspunkt_5),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -163,6 +162,6 @@ internal class VilkarTest {
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
         assertThat(utbetaling.vilkar).hasSize(1)
-        assertThat(utbetaling.vilkar[0].referanse).isEqualTo(vilkar_ref_1)
+        assertThat(utbetaling.vilkar[0].referanse).isEqualTo(VILKAR_REF_1)
     }
 }

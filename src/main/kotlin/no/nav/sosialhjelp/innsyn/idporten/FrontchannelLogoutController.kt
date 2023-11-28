@@ -14,7 +14,6 @@ class FrontchannelLogoutController(
     private val idPortenProperties: IdPortenProperties,
     private val idPortenSessionHandler: IdPortenSessionHandler,
 ) {
-
     /**
      * Front-channel logouts are logouts initiated by other ID-porten clients
      */

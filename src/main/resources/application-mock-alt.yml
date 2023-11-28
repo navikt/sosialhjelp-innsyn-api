@@ -34,6 +34,7 @@ login_api_idporten_clientid: clientId
 
 client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/fiks}
+  fiks_klage_endpoint_url: ${FIKS_KLAGE_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/klage}
   fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/fiks/dokumentlager}
   fiks_svar_ut_endpoint_url: ${FIKS_SVAR_UT_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/fiks/svarut}
   fiks_integrasjonid: id1
@@ -52,7 +53,7 @@ client:
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/soknad-api}
   soknad_api_audience: dummyAudience
-
+  klage_enabled: ${KLAGE_ENABLED:true}
 
 #Maskinporten
 maskinporten_clientid: maskinporten_clientid

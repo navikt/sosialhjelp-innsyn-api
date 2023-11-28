@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class SoknadMedInnsynController(
-    private val tilgangskontroll: Tilgangskontroll,
-    private val soknadMedInnsynService: SoknadMedInnsynService
+    private val tilgangskontroll: TilgangskontrollService,
+    private val soknadMedInnsynService: SoknadMedInnsynService,
 ) {
-
     @GetMapping("/harSoknaderMedInnsyn", produces = ["application/json;charset=UTF-8"])
-    fun harSoknaderMedInnsyn(@RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String): ResponseEntity<Boolean> {
+    fun harSoknaderMedInnsyn(
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+    ): ResponseEntity<Boolean> {
         tilgangskontroll.sjekkTilgang(token)
         return ResponseEntity.ok(soknadMedInnsynService.harSoknaderMedInnsyn(token))
     }

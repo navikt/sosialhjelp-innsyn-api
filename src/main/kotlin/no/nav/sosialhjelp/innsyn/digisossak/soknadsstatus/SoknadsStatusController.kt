@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
-import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
@@ -24,16 +24,15 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/innsyn/")
 class SoknadsStatusController(
     private val soknadsStatusService: SoknadsStatusService,
-    private val tilgangskontroll: Tilgangskontroll,
+    private val tilgangskontroll: TilgangskontrollService,
     private val xsrfGenerator: XsrfGenerator,
 ) {
-
     @GetMapping("{fiksDigisosId}/soknadsStatus")
     fun hentSoknadsStatus(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
         response: HttpServletResponse,
-        request: HttpServletRequest
+        request: HttpServletRequest,
     ): ResponseEntity<SoknadsStatusResponse> {
         tilgangskontroll.sjekkTilgang(token)
 
@@ -46,8 +45,8 @@ class SoknadsStatusController(
                 tidspunktSendt = utvidetSoknadsStatus.tidspunktSendt,
                 soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
                 navKontor = utvidetSoknadsStatus.navKontor,
-                filUrl = utvidetSoknadsStatus.soknadUrl
-            )
+                filUrl = utvidetSoknadsStatus.soknadUrl,
+            ),
         )
     }
 

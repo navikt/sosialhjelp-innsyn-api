@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/info")
 class InfoController {
-
     private val klientlogger = LoggerFactory.getLogger("klientlogger")
 
     @PostMapping("/logg")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun postKlientlogg(@RequestBody logg: Logg) {
+    fun postKlientlogg(
+        @RequestBody logg: Logg,
+    ) {
         when (logg.level) {
             "INFO" -> klientlogger.info(logg.melding())
             "WARN" -> klientlogger.warn(logg.melding())

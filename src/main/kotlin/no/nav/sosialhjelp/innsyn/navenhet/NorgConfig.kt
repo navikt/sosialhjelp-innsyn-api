@@ -11,7 +11,6 @@ import org.springframework.web.reactive.function.client.WebClient
 class NorgConfig(
     private val clientProperties: ClientProperties,
 ) {
-
     @Bean
     fun norgWebClient(webClientBuilder: WebClient.Builder): WebClient =
         webClientBuilder

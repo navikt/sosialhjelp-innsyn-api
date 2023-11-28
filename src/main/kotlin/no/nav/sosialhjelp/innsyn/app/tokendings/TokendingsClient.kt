@@ -11,8 +11,11 @@ import org.springframework.web.reactive.function.client.awaitBody
 internal class TokendingsClient(
     private val tokendingsWebClient: TokendingsWebClient,
 ) {
-
-    suspend fun exchangeToken(subjectToken: String, clientAssertion: String, audience: String): TokendingsResponse {
+    suspend fun exchangeToken(
+        subjectToken: String,
+        clientAssertion: String,
+        audience: String,
+    ): TokendingsResponse {
         return withContext(Dispatchers.IO) {
             val params = LinkedMultiValueMap<String, String>()
             params.add("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange")

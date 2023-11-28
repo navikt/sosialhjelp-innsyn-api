@@ -12,7 +12,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.SaksStatusService.Companion.DEFAULT_SAK_TITTEL
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -40,7 +40,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 internal class EventServiceTest {
-
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
@@ -80,32 +79,32 @@ internal class EventServiceTest {
         resetHendelser()
     }
 
-/* Test-caser:
- [x] ingen innsyn, ingen sendt soknad
- [x] ingen innsyn, sendt soknad -> status SENDT
- [x] status mottatt
- [x] status under behandling
- [x] status ferdigbehandlet
- [x] saksStatus uten vedtakFattet
- [x] saksStatus før vedtakFattet
- [x] vedtakFattet uten saksStatus
- [x] vedtakFattet før saksStatus
- [x] saksStatus med 2 vedtakFattet
- [x] dokumentasjonEtterspurt
- [x] dokumentasjonEtterspurt med tom dokumentliste
- [x] ingen dokumentasjonEtterspurt-hendelser
- [x] forelopigSvar
- [ ] forelopigSvar - flere caser?
- [x] utbetaling
- [?] utbetaling - flere caser?
- [x] dokumentasjonkrav
- [x] vilkår
- [x] tildeltNavKontor - OK response fra Norg
- [x] tildeltNavKontor - generell melding ved Norg-feil
- [ ] rammevedtak
- ...
- [ ] komplett case
-*/
+    /* Test-caser:
+     [x] ingen innsyn, ingen sendt soknad
+     [x] ingen innsyn, sendt soknad -> status SENDT
+     [x] status mottatt
+     [x] status under behandling
+     [x] status ferdigbehandlet
+     [x] saksStatus uten vedtakFattet
+     [x] saksStatus før vedtakFattet
+     [x] vedtakFattet uten saksStatus
+     [x] vedtakFattet før saksStatus
+     [x] saksStatus med 2 vedtakFattet
+     [x] dokumentasjonEtterspurt
+     [x] dokumentasjonEtterspurt med tom dokumentliste
+     [x] ingen dokumentasjonEtterspurt-hendelser
+     [x] forelopigSvar
+     [ ] forelopigSvar - flere caser?
+     [x] utbetaling
+     [?] utbetaling - flere caser?
+     [x] dokumentasjonkrav
+     [x] vilkår
+     [x] tildeltNavKontor - OK response fra Norg
+     [x] tildeltNavKontor - generell melding ved Norg-feil
+     [ ] rammevedtak
+     ...
+     [ ] komplett case
+     */
 
     @Test
     fun `ingen innsyn OG ingen soknad, men med sendTidspunkt`() {
@@ -134,7 +133,6 @@ internal class EventServiceTest {
 
     @Nested
     inner class SaksStatusVedtakFattet {
-
         @Test
         fun `saksStatus UTEN vedtakFattet`() {
             every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
@@ -145,8 +143,8 @@ internal class EventServiceTest {
                         listOf(
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3)
-                        )
+                            SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -159,15 +157,15 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
+            assertThat(sak.tittel).isEqualTo(TITTEL_1)
             assertThat(sak.vedtak).isEmpty()
             assertThat(sak.utbetalinger).isEmpty()
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_UNDER_BEHANDLING_MED_TITTEL)
-            assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
+            assertThat(hendelse.tekstArgument).isEqualTo(TITTEL_1)
         }
 
         @Test
@@ -180,8 +178,8 @@ internal class EventServiceTest {
                         listOf(
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.withHendelsestidspunkt(tidspunkt_3)
-                        )
+                            SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.withHendelsestidspunkt(tidspunkt_3),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -194,7 +192,7 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
             assertThat(sak.tittel).isNull()
             assertThat(sak.vedtak).isEmpty()
             assertThat(sak.utbetalinger).isEmpty()
@@ -216,8 +214,8 @@ internal class EventServiceTest {
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                             SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
-                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4)
-                        )
+                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -230,20 +228,20 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
+            assertThat(sak.tittel).isEqualTo(TITTEL_1)
             assertThat(sak.vedtak).hasSize(1)
             assertThat(sak.utbetalinger).isEmpty()
 
             val vedtak = sak.vedtak.last()
             assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL)
-            assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
-            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(hendelse.tekstArgument).isEqualTo(TITTEL_1)
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
         }
 
         @Test
@@ -256,8 +254,8 @@ internal class EventServiceTest {
                         listOf(
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3)
-                        )
+                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -270,20 +268,20 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
             assertThat(sak.tittel).isEqualTo(DEFAULT_SAK_TITTEL)
             assertThat(sak.vedtak).hasSize(1)
             assertThat(sak.utbetalinger).isEmpty()
 
             val vedtak = sak.vedtak.last()
             assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL)
             assertThat(hendelse.tekstArgument).isEqualTo(DEFAULT_SAK_TITTEL) // eller DEFAULT_SAKSTITTEL
-            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
         }
 
         @Test
@@ -297,8 +295,8 @@ internal class EventServiceTest {
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                             SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                            SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_4)
-                        )
+                            SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_4),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -311,20 +309,20 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
             assertThat(sak.tittel)
-                .isEqualTo(tittel_1)
+                .isEqualTo(TITTEL_1)
                 .isNotEqualTo(DEFAULT_SAK_TITTEL)
             assertThat(sak.vedtak).hasSize(1)
 
             val vedtak = sak.vedtak.last()
             assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL)
-            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
         }
 
         @Test
@@ -339,8 +337,8 @@ internal class EventServiceTest {
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                             SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
                             SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
-                            SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5)
-                        )
+                            SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -353,17 +351,17 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
+            assertThat(sak.tittel).isEqualTo(TITTEL_1)
             assertThat(sak.vedtak).hasSize(2)
 
             val vedtak = sak.vedtak[0]
             assertThat(vedtak.utfall).isEqualTo(UtfallVedtak.INNVILGET)
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
 
             val vedtak2 = sak.vedtak[1]
             assertThat(vedtak2.utfall).isEqualTo(UtfallVedtak.AVSLATT)
-            assertThat(vedtak2.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_2")
+            assertThat(vedtak2.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_2")
         }
 
         @Test
@@ -377,8 +375,8 @@ internal class EventServiceTest {
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                             SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.withHendelsestidspunkt(tidspunkt_3),
-                            SAK1_VEDTAK_FATTET_UTEN_UTFALL.withHendelsestidspunkt(tidspunkt_4)
-                        )
+                            SAK1_VEDTAK_FATTET_UTEN_UTFALL.withHendelsestidspunkt(tidspunkt_4),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -391,18 +389,18 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.UNDER_BEHANDLING)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
             assertThat(sak.tittel).isNull()
             assertThat(sak.vedtak).hasSize(1)
 
             val vedtak = sak.vedtak[0]
             assertThat(vedtak.utfall).isNull()
-            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(vedtak.vedtaksFilUrl).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_FERDIGBEHANDLET_UTEN_TITTEL)
-            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$dokumentlagerId_1")
+            assertThat(hendelse.url?.link).contains("/dokumentlager/nedlasting/niva4/$DOKUMENTLAGERID_1")
         }
 
         @Test
@@ -415,8 +413,8 @@ internal class EventServiceTest {
                         listOf(
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(tidspunkt_3)
-                        )
+                            SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(tidspunkt_3),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -429,13 +427,13 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.IKKE_INNSYN)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
+            assertThat(sak.tittel).isEqualTo(TITTEL_1)
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SAK_KAN_IKKE_VISE_STATUS_MED_TITTEL)
-            assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
+            assertThat(hendelse.tekstArgument).isEqualTo(TITTEL_1)
         }
 
         @Test
@@ -449,8 +447,8 @@ internal class EventServiceTest {
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                             SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
-                            SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(tidspunkt_4)
-                        )
+                            SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(tidspunkt_4),
+                        ),
                     )
             every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -463,13 +461,13 @@ internal class EventServiceTest {
 
             val sak = model.saker.last()
             assertThat(sak.saksStatus).isEqualTo(SaksStatus.IKKE_INNSYN)
-            assertThat(sak.referanse).isEqualTo(referanse_1)
-            assertThat(sak.tittel).isEqualTo(tittel_1)
+            assertThat(sak.referanse).isEqualTo(REFERANSE_1)
+            assertThat(sak.tittel).isEqualTo(TITTEL_1)
 
             val hendelse = model.historikk.last()
             assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
             assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.SOKNAD_KAN_IKKE_VISE_STATUS_MED_TITTEL)
-            assertThat(hendelse.tekstArgument).isEqualTo(tittel_1)
+            assertThat(hendelse.tekstArgument).isEqualTo(TITTEL_1)
         }
     }
 
@@ -483,8 +481,8 @@ internal class EventServiceTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        FORELOPIGSVAR.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        FORELOPIGSVAR.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -498,7 +496,7 @@ internal class EventServiceTest {
         val hendelse = model.historikk.last()
         assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
         assertThat(hendelse.hendelseType).isEqualTo(HendelseTekstType.BREV_OM_SAKSBEANDLINGSTID)
-        assertThat(hendelse.url?.link).contains("/forsendelse/$svarUtId/$svarUtNr")
+        assertThat(hendelse.url?.link).contains("/forsendelse/$SVARUTID/$SVAR_UT_NR")
     }
 
     @Test
@@ -545,20 +543,21 @@ internal class EventServiceTest {
                 .withVersion("123")
                 .withHendelser(
                     listOf(
-                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
-                    )
+                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                    ),
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns listOf(
-            InternalVedlegg(
-                type = "statsborgerskap",
-                tilleggsinfo = "dokumentasjon",
-                null,
-                null,
-                dokumentInfoList = mutableListOf(),
-                tidspunktLastetOpp = LocalDateTime.now(),
-                null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
+            listOf(
+                InternalVedlegg(
+                    type = "statsborgerskap",
+                    tilleggsinfo = "dokumentasjon",
+                    null,
+                    null,
+                    dokumentInfoList = mutableListOf(),
+                    tidspunktLastetOpp = LocalDateTime.now(),
+                    null,
+                ),
             )
-        )
 
         val model = service.createModel(mockDigisosSak, "token")
         assertThat(model).isNotNull
@@ -581,20 +580,21 @@ internal class EventServiceTest {
                 .withVersion("123")
                 .withHendelser(
                     listOf(
-                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1)
-                    )
+                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                    ),
                 )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns listOf(
-            InternalVedlegg(
-                type = "statsborgerskap",
-                tilleggsinfo = "dokumentasjon",
-                null,
-                null,
-                dokumentInfoList = mutableListOf(),
-                tidspunktLastetOpp = LocalDateTime.now(),
-                null
+        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
+            listOf(
+                InternalVedlegg(
+                    type = "statsborgerskap",
+                    tilleggsinfo = "dokumentasjon",
+                    null,
+                    null,
+                    dokumentInfoList = mutableListOf(),
+                    tidspunktLastetOpp = LocalDateTime.now(),
+                    null,
+                ),
             )
-        )
 
         val model = service.createModel(mockDigisosSak, "token")
         assertThat(model).isNotNull
@@ -619,7 +619,12 @@ internal class EventServiceTest {
 
     @Test
     fun `skal ikke logge nar vi ikke har gamle utbetalinger`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp", LocalDate.now(), null, null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp", LocalDate.now(),
+                null, null, null, null, null, false, null,
+                null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
 
@@ -630,17 +635,28 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge selv nar vi har gamel utbetaling som er utbetalt i tide`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(2), LocalDate.now().minusDays(2), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                LocalDate.now().minusDays(
+                    2,
+                ),
+                LocalDate.now().minusDays(
+                    2,
+                ),
+                null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
-        val nyUtbetalingHendelse = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.UTBETALT)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(20).toString())
-            .withUtbetalingsdato(LocalDate.now().toString())
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.UTBETALT)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(20).toString())
+                .withUtbetalingsdato(LocalDate.now().toString())
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -652,17 +668,29 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge selv nar vi har gamel utbetaling som er stoppet i tide`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.STOPPET, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(2), null, LocalDate.now().minusDays(2), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.STOPPET, BigDecimal.TEN, "Nødhjelp",
+                LocalDate.now().minusDays(
+                    2,
+                ),
+                null,
+                LocalDate.now().minusDays(
+                    2,
+                ),
+                null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
-        val nyUtbetalingHendelse = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.UTBETALT)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(20).toString())
-            .withUtbetalingsdato(LocalDate.now().toString())
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.UTBETALT)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(20).toString())
+                .withUtbetalingsdato(LocalDate.now().toString())
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -674,17 +702,25 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge selv nar vi har gamel forfallsdato som er utbetalt samtidig som event er opprettet`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                LocalDate.now().minusDays(
+                    20,
+                ),
+                LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
-        val nyUtbetalingHendelse = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.UTBETALT)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(20).toString())
-            .withUtbetalingsdato(LocalDate.now().toString())
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.UTBETALT)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(20).toString())
+                .withUtbetalingsdato(LocalDate.now().toString())
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -696,25 +732,34 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge selv nar vi har gamel forfallsdato som er utbetalt fort nok etter at event er opprettet`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                LocalDate.now().minusDays(
+                    20,
+                ),
+                LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
-        val nyUtbetalingHendelse1 = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(20).toString())
-            .withUtbetalingsdato(null)
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(1).format(DateTimeFormatter.ISO_DATE_TIME))
-        val nyUtbetalingHendelse2 = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.UTBETALT)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(20).toString())
-            .withUtbetalingsdato(LocalDate.now().toString())
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse1 =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(20).toString())
+                .withUtbetalingsdato(null)
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(1).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse2 =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.UTBETALT)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(20).toString())
+                .withUtbetalingsdato(LocalDate.now().toString())
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -726,17 +771,25 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge nar vi har gamel utbetaling som ikke er utbetalt`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(2), null, null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp",
+                LocalDate.now().minusDays(
+                    2,
+                ),
+                null, null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
-        val nyUtbetalingHendelse = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.UTBETALT)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(2).toString())
-            .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.UTBETALT)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(2).toString())
+                .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -750,25 +803,37 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge nar vi har gamel utbetaling som er utbetalt for sent`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(4), LocalDate.now().minusDays(2), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                LocalDate.now().minusDays(
+                    4,
+                ),
+                LocalDate.now().minusDays(
+                    2,
+                ),
+                null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
-        val nyUtbetalingHendelse1 = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(4).toString())
-            .withUtbetalingsdato(null)
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
-        val nyUtbetalingHendelse2 = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.UTBETALT)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(4).toString())
-            .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse1 =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(4).toString())
+                .withUtbetalingsdato(null)
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse2 =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.UTBETALT)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(4).toString())
+                .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -782,25 +847,38 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge nar vi har gamel utbetaling som er stoppet for sent`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.STOPPET, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(4), null, LocalDate.now().minusDays(2), null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.STOPPET, BigDecimal.TEN, "Nødhjelp",
+                LocalDate.now().minusDays(
+                    4,
+                ),
+                null,
+                LocalDate.now().minusDays(
+                    2,
+                ),
+                null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
-        val nyUtbetalingHendelse1 = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(4).toString())
-            .withUtbetalingsdato(null)
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
-        val nyUtbetalingHendelse2 = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.STOPPET)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(4).toString())
-            .withUtbetalingsdato(null)
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse1 =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(4).toString())
+                .withUtbetalingsdato(null)
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse2 =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.STOPPET)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(4).toString())
+                .withUtbetalingsdato(null)
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -814,25 +892,34 @@ internal class EventServiceTest {
 
     @Test
     fun `skal logge nar vi har gamel forfallsdato som ikke er utbetalt fort nok etter at event er opprettet`() {
-        val nyUtbetaling = Utbetaling("referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp", LocalDate.now().minusDays(20), LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now())
+        val nyUtbetaling =
+            Utbetaling(
+                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                LocalDate.now().minusDays(
+                    20,
+                ),
+                LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+            )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
-        val nyUtbetalingHendelse1 = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(20).toString())
-            .withUtbetalingsdato(null)
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
-        val nyUtbetalingHendelse2 = JsonUtbetaling()
-            .withUtbetalingsreferanse("referanse")
-            .withStatus(JsonUtbetaling.Status.UTBETALT)
-            .withBelop(10.0)
-            .withBeskrivelse("Nødhjelp")
-            .withForfallsdato(LocalDate.now().minusDays(20).toString())
-            .withUtbetalingsdato(LocalDate.now().toString())
-            .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse1 =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(20).toString())
+                .withUtbetalingsdato(null)
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
+        val nyUtbetalingHendelse2 =
+            JsonUtbetaling()
+                .withUtbetalingsreferanse("referanse")
+                .withStatus(JsonUtbetaling.Status.UTBETALT)
+                .withBelop(10.0)
+                .withBeskrivelse("Nødhjelp")
+                .withForfallsdato(LocalDate.now().minusDays(20).toString())
+                .withUtbetalingsdato(LocalDate.now().toString())
+                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs

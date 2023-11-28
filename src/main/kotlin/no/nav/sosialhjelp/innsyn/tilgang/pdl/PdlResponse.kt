@@ -6,37 +6,37 @@ interface PdlResponse {
 
 data class PdlPersonResponse(
     override val errors: List<PdlError>?,
-    val data: PdlHentPerson?
+    val data: PdlHentPerson?,
 ) : PdlResponse
 
 data class PdlIdenterResponse(
     override val errors: List<PdlError>?,
-    val data: PdlHentIdenter?
+    val data: PdlHentIdenter?,
 ) : PdlResponse
 
 data class PdlError(
     val message: String,
     val locations: List<PdlErrorLocation>,
     val path: List<String>?,
-    val extensions: PdlErrorExtension
+    val extensions: PdlErrorExtension,
 )
 
 data class PdlErrorLocation(
     val line: Int?,
-    val column: Int?
+    val column: Int?,
 )
 
 data class PdlErrorExtension(
     val code: String?,
-    val classification: String
+    val classification: String,
 )
 
 data class PdlHentIdenter(
-    val hentIdenter: PdlIdenter?
+    val hentIdenter: PdlIdenter?,
 )
 
 data class PdlIdenter(
-    val identer: List<PdlIdent>
+    val identer: List<PdlIdent>,
 )
 
 data class PdlIdent(
@@ -44,27 +44,27 @@ data class PdlIdent(
 )
 
 data class PdlHentPerson(
-    val hentPerson: PdlPerson?
+    val hentPerson: PdlPerson?,
 )
 
 data class PdlPerson(
     val adressebeskyttelse: List<Adressebeskyttelse>,
-    val navn: List<PdlNavn>
+    val navn: List<PdlNavn>,
 )
 
 data class PdlNavn(
-    val fornavn: String?
+    val fornavn: String?,
 )
 
 data class Adressebeskyttelse(
-    val gradering: Gradering
+    val gradering: Gradering,
 )
 
 enum class Gradering {
     STRENGT_FORTROLIG_UTLAND, // kode 6 (utland)
     STRENGT_FORTROLIG, // kode 6
     FORTROLIG, // kode 7
-    UGRADERT
+    UGRADERT,
 }
 
 fun PdlPerson.isKode6Or7(): Boolean {

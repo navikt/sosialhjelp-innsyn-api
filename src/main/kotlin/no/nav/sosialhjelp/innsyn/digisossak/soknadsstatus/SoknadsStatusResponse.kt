@@ -11,5 +11,5 @@ data class SoknadsStatusResponse(
     val tidspunktSendt: LocalDateTime?,
     val soknadsalderIMinutter: Long?,
     val navKontor: String?,
-    val filUrl: UrlResponse?
+    val filUrl: UrlResponse?,
 )

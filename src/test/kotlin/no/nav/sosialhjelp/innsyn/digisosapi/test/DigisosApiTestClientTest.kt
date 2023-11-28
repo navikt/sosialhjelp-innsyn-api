@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.client.WebClient
 
 internal class DigisosApiTestClientTest {
-
     private val mockWebServer = MockWebServer()
 
     @AfterEach
@@ -38,7 +37,7 @@ internal class DigisosApiTestClientTest {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(202)
-                .setBody("ok")
+                .setBody("ok"),
         )
 
         val jsonDigisosSoker =

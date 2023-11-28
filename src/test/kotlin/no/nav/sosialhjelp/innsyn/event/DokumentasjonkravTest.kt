@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class DokumentasjonkravTest {
-
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
@@ -68,8 +67,8 @@ internal class DokumentasjonkravTest {
                         SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
                         UTBETALING.withHendelsestidspunkt(tidspunkt_5),
-                        DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
-                    )
+                        DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -83,7 +82,7 @@ internal class DokumentasjonkravTest {
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
         assertThat(utbetaling.dokumentasjonkrav).hasSize(1)
-        assertThat(utbetaling.dokumentasjonkrav[0].referanse).isEqualTo(dokumentasjonkrav_ref_1)
+        assertThat(utbetaling.dokumentasjonkrav[0].referanse).isEqualTo(DOKUMENTASJONKRAV_REF_1)
         assertThat(utbetaling.dokumentasjonkrav[0].beskrivelse).isEqualTo("beskrivelse")
         assertThat(utbetaling.dokumentasjonkrav[0].getOppgaveStatus()).isEqualTo(Oppgavestatus.RELEVANT)
 
@@ -102,8 +101,8 @@ internal class DokumentasjonkravTest {
                     listOf(
                         SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_3)
-                    )
+                        DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_3),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -130,8 +129,8 @@ internal class DokumentasjonkravTest {
                         SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3),
                         UTBETALING.withHendelsestidspunkt(tidspunkt_4),
-                        DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5)
-                    )
+                        DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -160,8 +159,8 @@ internal class DokumentasjonkravTest {
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3),
                         UTBETALING.withHendelsestidspunkt(tidspunkt_4),
                         DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                        DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6)
-                    )
+                        DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -190,8 +189,8 @@ internal class DokumentasjonkravTest {
                         SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
                         DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                        UTBETALING.withHendelsestidspunkt(tidspunkt_6)
-                    )
+                        UTBETALING.withHendelsestidspunkt(tidspunkt_6),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -219,8 +218,8 @@ internal class DokumentasjonkravTest {
                         SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
                         SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
                         DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                        UTBETALING.withHendelsestidspunkt(tidspunkt_5)
-                    )
+                        UTBETALING.withHendelsestidspunkt(tidspunkt_5),
+                    ),
                 )
         every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
@@ -233,6 +232,6 @@ internal class DokumentasjonkravTest {
         assertThat(model.saker[0].utbetalinger).hasSize(1)
         val utbetaling = model.saker[0].utbetalinger[0]
         assertThat(utbetaling.dokumentasjonkrav).hasSize(1)
-        assertThat(utbetaling.dokumentasjonkrav[0].referanse).isEqualTo(dokumentasjonkrav_ref_1)
+        assertThat(utbetaling.dokumentasjonkrav[0].referanse).isEqualTo(DOKUMENTASJONKRAV_REF_1)
     }
 }

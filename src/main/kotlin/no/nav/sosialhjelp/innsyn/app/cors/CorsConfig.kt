@@ -8,7 +8,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class CorsConfig {
-
     @Bean
     fun addCorsConfig(): WebMvcConfigurer {
         return object : WebMvcConfigurer {
@@ -23,7 +22,7 @@ class CorsConfig {
                         "X-XSRF-TOKEN",
                         "XSRF-TOKEN-INNSYN-API",
                         "Authorization",
-                        "Nav-Call-Id"
+                        "Nav-Call-Id",
                     )
                     .allowCredentials(true)
                     .maxAge(3600L)
@@ -34,10 +33,11 @@ class CorsConfig {
     companion object {
         private val allowedOrigins get() = if (MiljoUtils.isRunningInProd()) ALLOWED_ORIGINS_PROD else ALLOWED_ORIGINS_NON_PROD
 
-        private val ALLOWED_ORIGINS_PROD = arrayOf(
-            "https://tjenester.nav.no",
-            "https://www.nav.no"
-        )
+        private val ALLOWED_ORIGINS_PROD =
+            arrayOf(
+                "https://tjenester.nav.no",
+                "https://www.nav.no",
+            )
 
         private val ALLOWED_ORIGINS_NON_PROD = arrayOf("*")
     }

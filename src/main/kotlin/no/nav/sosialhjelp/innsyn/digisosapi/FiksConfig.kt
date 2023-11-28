@@ -15,11 +15,13 @@ import reactor.netty.http.client.HttpClient
 
 @Configuration
 class FiksConfig(
-    private val clientProperties: ClientProperties
+    private val clientProperties: ClientProperties,
 ) {
-
     @Bean
-    fun fiksWebClient(webClientBuilder: WebClient.Builder, proxiedHttpClient: HttpClient): WebClient =
+    fun fiksWebClient(
+        webClientBuilder: WebClient.Builder,
+        proxiedHttpClient: HttpClient,
+    ): WebClient =
         webClientBuilder
             .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)

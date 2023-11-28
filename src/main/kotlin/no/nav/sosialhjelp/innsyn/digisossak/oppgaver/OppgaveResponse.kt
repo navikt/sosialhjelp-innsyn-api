@@ -8,7 +8,7 @@ data class OppgaveResponse(
     val oppgaveId: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val innsendelsesfrist: LocalDate?,
-    val oppgaveElementer: List<OppgaveElement>
+    val oppgaveElementer: List<OppgaveElement>,
 )
 
 data class OppgaveElement(
@@ -16,5 +16,5 @@ data class OppgaveElement(
     val tilleggsinformasjon: String?,
     val hendelsetype: JsonVedlegg.HendelseType?,
     val hendelsereferanse: String?,
-    val erFraInnsyn: Boolean
+    val erFraInnsyn: Boolean,
 )

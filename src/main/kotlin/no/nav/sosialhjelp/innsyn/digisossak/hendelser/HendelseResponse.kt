@@ -6,5 +6,5 @@ data class HendelseResponse(
     val tidspunkt: String,
     val hendelseType: String,
     val filUrl: UrlResponse?,
-    val tekstArgument: String?
+    val tekstArgument: String?,
 )

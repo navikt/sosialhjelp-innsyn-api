@@ -18,11 +18,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class TilgangController(
-    private val tilgangskontroll: Tilgangskontroll
+    private val tilgangskontroll: TilgangskontrollService,
 ) {
-
     @GetMapping("/tilgang")
-    fun harTilgang(@RequestHeader(value = AUTHORIZATION) token: String): ResponseEntity<TilgangResponse> {
+    fun harTilgang(
+        @RequestHeader(value = AUTHORIZATION) token: String,
+    ): ResponseEntity<TilgangResponse> {
         return try {
             val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
             ResponseEntity.ok().body(TilgangResponse(tilgang.harTilgang, tilgang.fornavn))
@@ -34,7 +35,7 @@ class TilgangController(
 
     data class TilgangResponse(
         val harTilgang: Boolean,
-        val fornavn: String
+        val fornavn: String,
     )
 
     companion object {

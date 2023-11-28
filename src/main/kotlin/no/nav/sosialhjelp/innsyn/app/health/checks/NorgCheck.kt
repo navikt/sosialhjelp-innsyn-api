@@ -14,17 +14,17 @@ import org.springframework.web.reactive.function.client.bodyToMono
 @Component
 class NorgCheck(
     webClientBuilder: WebClient.Builder,
-    clientProperties: ClientProperties
+    clientProperties: ClientProperties,
 ) : DependencyCheck {
-
     override val type = DependencyType.REST
     override val name = "Norg"
     override val address = clientProperties.norgUrl
     override val importance = Importance.WARNING
 
-    private val norgWebClient = webClientBuilder
-        .clientConnector(HttpClientUtil.getUnproxiedReactorClientHttpConnector())
-        .build()
+    private val norgWebClient =
+        webClientBuilder
+            .clientConnector(HttpClientUtil.getUnproxiedReactorClientHttpConnector())
+            .build()
 
     override fun doCheck() {
         norgWebClient.get()

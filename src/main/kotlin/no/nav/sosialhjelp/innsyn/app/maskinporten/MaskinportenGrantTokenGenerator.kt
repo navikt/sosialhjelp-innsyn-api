@@ -16,19 +16,19 @@ import java.util.UUID
 
 class MaskinportenGrantTokenGenerator(
     private val maskinportenProperties: MaskinportenProperties,
-    private val issuer: String
+    private val issuer: String,
 ) {
-
     /**
      * Generer privateRsaKey hvis maskinporten_clientJwk == generateRSA, og appen ikke kjører i prod.
      * Dvs at rsaKey genereres i ved lokal kjøring, i test eller mot mock-alt.
      */
-    private val privateRsaKey = if (maskinportenProperties.clientJwk == "generateRSA") {
-        if (MiljoUtils.isRunningInProd()) throw IllegalStateException("Generation of RSA keys is not allowed in prod")
-        RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyID(UUID.randomUUID().toString()).generate()
-    } else {
-        RSAKey.parse(maskinportenProperties.clientJwk)
-    }
+    private val privateRsaKey =
+        if (maskinportenProperties.clientJwk == "generateRSA") {
+            if (MiljoUtils.isRunningInProd()) throw IllegalStateException("Generation of RSA keys is not allowed in prod")
+            RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyID(UUID.randomUUID().toString()).generate()
+        } else {
+            RSAKey.parse(maskinportenProperties.clientJwk)
+        }
 
     fun getJwt(): String {
         return SignedJWT(signatureHeader, createJwtClaimSet(issuer))
@@ -48,10 +48,11 @@ class MaskinportenGrantTokenGenerator(
     }
 
     private val signatureHeader
-        get() = JWSHeader.Builder(JWSAlgorithm.RS256)
-            .keyID(privateRsaKey.keyID)
-            .type(JOSEObjectType.JWT)
-            .build()
+        get() =
+            JWSHeader.Builder(JWSAlgorithm.RS256)
+                .keyID(privateRsaKey.keyID)
+                .type(JOSEObjectType.JWT)
+                .build()
 
     companion object {
         private const val SCOPE_CLAIM = "scope"

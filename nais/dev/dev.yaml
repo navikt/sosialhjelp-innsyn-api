@@ -120,3 +120,5 @@ spec:
       value: "https://ver2.maskinporten.no/.well-known/oauth-authorization-server"
     - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI
       value: "https://www.dev.nav.no/no/utlogget"
+    - name: KLAGE_ENABLED
+      value: "false"

@@ -9,5 +9,5 @@ data class WellKnown(
     @JsonProperty("token_endpoint")
     val tokenEndpoint: String,
     @JsonProperty("jwks_uri")
-    val jwksUri: String
+    val jwksUri: String,
 )

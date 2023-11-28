@@ -17,7 +17,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
-import no.nav.sosialhjelp.innsyn.tilgang.Tilgangskontroll
+import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
@@ -41,14 +41,13 @@ import org.springframework.web.reactive.function.client.toEntity
 import java.io.InputStream
 
 internal class FiksClientTest {
-
     private val mockWebServer = MockWebServer()
     private val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
 
     private val redisService: RedisService = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val krypteringService: KrypteringService = mockk()
-    private val tilgangskontroll: Tilgangskontroll = mockk()
+    private val tilgangskontroll: TilgangskontrollService = mockk()
     private val meterRegistry: MeterRegistry = mockk()
     private val counterMock: Counter = mockk()
     private lateinit var fiksClient: FiksClientImpl
@@ -82,7 +81,7 @@ internal class FiksClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_digisossak_response)
+                .setBody(ok_digisossak_response),
         )
 
         val result = fiksClient.hentDigisosSak(id, "Token", false)
@@ -108,7 +107,7 @@ internal class FiksClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_digisossak_response)
+                .setBody(ok_digisossak_response),
         )
 
         val result1 = fiksClient.hentDigisosSak(id, "Token", true)
@@ -133,7 +132,7 @@ internal class FiksClientTest {
         repeat(3) {
             mockWebServer.enqueue(
                 MockResponse()
-                    .setResponseCode(500)
+                    .setResponseCode(500),
             )
         }
 
@@ -147,7 +146,7 @@ internal class FiksClientTest {
         repeat(3) {
             mockWebServer.enqueue(
                 MockResponse()
-                    .setResponseCode(500)
+                    .setResponseCode(500),
             )
         }
 
@@ -160,7 +159,7 @@ internal class FiksClientTest {
     fun `GET alle DigisosSaker skal ikke bruke retry hvis Fiks gir 4xx-feil`() {
         mockWebServer.enqueue(
             MockResponse()
-                .setResponseCode(400)
+                .setResponseCode(400),
         )
 
         assertThatExceptionOfType(FiksClientException::class.java).isThrownBy { fiksClient.hentAlleDigisosSaker("Token") }
@@ -176,7 +175,7 @@ internal class FiksClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(listOf(digisosSakOk, digisosSakOk)))
+                .setBody(objectMapper.writeValueAsString(listOf(digisosSakOk, digisosSakOk))),
         )
 
         val result = fiksClient.hentAlleDigisosSaker("Token")
@@ -191,7 +190,7 @@ internal class FiksClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_minimal_jsondigisossoker_response)
+                .setBody(ok_minimal_jsondigisossoker_response),
         )
 
         val result = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
@@ -217,7 +216,7 @@ internal class FiksClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_minimal_jsondigisossoker_response)
+                .setBody(ok_minimal_jsondigisossoker_response),
         )
 
         val result1 = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
@@ -246,7 +245,7 @@ internal class FiksClientTest {
             MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_minimal_jsondigisossoker_response)
+                .setBody(ok_minimal_jsondigisossoker_response),
         )
 
         val result2 = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
@@ -270,10 +269,11 @@ internal class FiksClientTest {
         every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
         every { krypteringService.krypter(any(), any(), any()) } returns fil1
 
-        val files = listOf(
-            FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-            FilForOpplasting("filnavn1", "image/jpg", 1L, fil2)
-        )
+        val files =
+            listOf(
+                FilForOpplasting("filnavn0", "image/png", 1L, fil1),
+                FilForOpplasting("filnavn1", "image/jpg", 1L, fil2),
+            )
 
         every {
             webClient.get()
@@ -304,7 +304,7 @@ internal class FiksClientTest {
                 files,
                 JsonVedleggSpesifikasjon(),
                 id,
-                "token"
+                "token",
             )
         }.doesNotThrowAnyException()
     }
@@ -316,10 +316,11 @@ internal class FiksClientTest {
         every { fil1.readAllBytes() } returns "test-fil".toByteArray()
         every { fil2.readAllBytes() } returns "div".toByteArray()
 
-        val files = listOf(
-            FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-            FilForOpplasting("filnavn1", "image/jpg", 1L, fil2)
-        )
+        val files =
+            listOf(
+                FilForOpplasting("filnavn0", "image/png", 1L, fil1),
+                FilForOpplasting("filnavn1", "image/jpg", 1L, fil2),
+            )
         val body = fiksClient.createBodyForUpload(JsonVedleggSpesifikasjon(), files)
 
         assertThat(body.size == 5)

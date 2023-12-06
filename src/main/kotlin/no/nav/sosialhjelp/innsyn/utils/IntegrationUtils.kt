@@ -15,6 +15,8 @@ object IntegrationUtils {
 
     const val HEADER_CALL_ID = "Nav-Call-Id"
     const val HEADER_TEMA = "Tema"
+    const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
 
+    const val BEHANDLINGSNUMMER_INNSYN = "B478"
     const val TEMA_KOM = "KOM"
 }

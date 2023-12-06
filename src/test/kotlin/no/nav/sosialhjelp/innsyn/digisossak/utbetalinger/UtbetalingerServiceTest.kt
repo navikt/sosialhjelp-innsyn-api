@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -779,7 +780,11 @@ internal class UtbetalingerServiceTest {
         assertThat(responseTidligere).hasSize(1)
 
         // forrige månedes utbetaling
-        assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year)
+        if (thisYearMonth.month == Month.JANUARY) {
+            assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year - 1)
+        } else {
+            assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year)
+        }
         assertThat(responseTidligere[0].maned).isEqualTo(
             thisYearMonth.month.minus(1).value,
         )
@@ -894,7 +899,11 @@ internal class UtbetalingerServiceTest {
         assertThat(responseNye[0].utbetalingerForManed).hasSize(1)
         assertThat(responseNye[0].utbetalingerForManed[0].utbetalingsdato).isEqualTo(datoDenneManed)
         // neste månedes utbetaling
-        assertThat(responseNye[1].ar).isEqualTo(thisYearMonth.year)
+        if (thisYearMonth.month == Month.DECEMBER) {
+            assertThat(responseNye[1].ar).isEqualTo(thisYearMonth.year + 1)
+        } else {
+            assertThat(responseNye[1].ar).isEqualTo(thisYearMonth.year)
+        }
         assertThat(responseNye[1].maned).isEqualTo(
             thisYearMonth.month.plus(1).value,
         )

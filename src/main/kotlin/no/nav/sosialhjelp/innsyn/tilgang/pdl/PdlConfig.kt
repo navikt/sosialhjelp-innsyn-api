@@ -27,7 +27,6 @@ class PdlConfig(
                 ),
             )
             .filter(mdcExchangeFilter)
-            .defaultHeader(IntegrationUtils.HEADER_TEMA, IntegrationUtils.TEMA_KOM)
             .defaultHeader(IntegrationUtils.HEADER_BEHANDLINGSNUMMER, IntegrationUtils.BEHANDLINGSNUMMER_INNSYN)
             .build()
 }

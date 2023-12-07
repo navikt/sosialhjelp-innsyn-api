@@ -64,7 +64,7 @@ spec:
     - name: NORG_URL
       value: "https://norg2.intern.nav.no/norg2/api/v1"
     - name: INNSYN_LOGINURL
-      value: "https://loginservice.nav.no/login"
+      value: "https://login.nav.no/oauth2/login"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "180"
     - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS
@@ -86,7 +86,7 @@ spec:
     - name: CLAMAV_URL
       value: "http://clamav.nais-system.svc.nais.local/scan"
     - name: LOGIN_API_IDPORTEN_CLIENTID
-      value: "bd520e59-6e01-4669-a7c8-f68fa2cac362"
+      value: "71ec2f14-7952-4f67-bb29-58d4309a836c"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16"
     - name: SOKNAD_API_URL

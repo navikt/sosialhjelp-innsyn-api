@@ -5,52 +5,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.sosialhjelp"
 
-object Versions {
-    const val COROUTINES = "1.7.3"
-    const val SPRING_BOOT = "3.1.5"
-    const val SOSIALHJELP_COMMON = "1.20231004.1011-d57fe70"
-    const val LOGBACK = "1.4.11"
-    const val LOGSTASH = "7.4"
-    const val FILFORMAT = "1.2023.09.05-13.49-b12f0a7b2b4a"
-    const val MICROMETER_REGISTRY = "1.11.5"
-    const val PROMETHEUS = "0.16.0"
-    const val TOKEN_VALIDATION = "3.0.8"
-    const val JACKSON = "2.15.3"
-    const val COMMONS_CODEC = "1.16.0"
-    const val COMMONS_IO = "2.14.0"
-    const val FILE_UPLOAD = "1.5"
-    const val TIKA = "2.9.1"
-    const val PDF_BOX = "3.0.0"
-    const val FIKS_KRYPTERING = "2.0.2"
-    const val LETTUCE = "6.2.6.RELEASE"
-    const val JEMP_BOX = "1.8.17"
-    const val UNLEASH = "8.4.0"
-    const val SPRINGDOC = "2.2.0"
-    const val JSON_SMART = "2.4.10"
-    const val LOG4J = "2.19.0"
-    const val SNAKEYAML = "2.0"
-    const val FIKS_IO = "3.3.2"
-
-    const val JAVA_JWT = "4.4.0"
-    const val JWKS_RSA = "0.22.1"
-    const val NIMBUS_JOSE_JWT = "9.37"
-
-    const val KTLINT = "1.0.1"
-    const val BOUNCYCASTLE = "1.76"
-    const val NETTY = "4.1.94.Final"
-
-    //    Test only
-    const val JUNIT = "4.13.2"
-    const val MOCKK = "1.13.8"
-    const val SPRING_MOCKK = "4.0.2"
-}
-
 plugins {
-    kotlin("jvm") version "1.9.20"
-    kotlin("plugin.spring") version "1.9.20"
-    id("org.springframework.boot") version "3.1.5"
-    id("com.github.ben-manes.versions") version "0.49.0" // ./gradlew dependencyUpdates
-    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.plugin.spring)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.versions)
+    alias(libs.plugins.ktlint)
 }
 
 java {
@@ -59,86 +19,71 @@ java {
 }
 
 ktlint {
-    this.version.set(Versions.KTLINT)
+    this.version.set(libs.versions.ktlint)
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-//    Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.COROUTINES}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${Versions.COROUTINES}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${Versions.COROUTINES}")
-
-//    Spring
-    implementation("org.springframework.boot:spring-boot-starter-web:${Versions.SPRING_BOOT}")
-    implementation("org.springframework.boot:spring-boot-starter-webflux:${Versions.SPRING_BOOT}")
-    implementation("org.springframework.boot:spring-boot-starter-actuator:${Versions.SPRING_BOOT}")
-    implementation("org.springframework.boot:spring-boot-starter-logging:${Versions.SPRING_BOOT}")
-    implementation("org.springframework.boot:spring-boot-starter-validation:${Versions.SPRING_BOOT}")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis:${Versions.SPRING_BOOT}")
+    implementation(libs.bundles.coroutines)
+    implementation(libs.bundles.spring.boot)
 
 //    Sosialhjelp-common
-    implementation("no.nav.sosialhjelp:sosialhjelp-common-selftest:${Versions.SOSIALHJELP_COMMON}")
-    implementation("no.nav.sosialhjelp:sosialhjelp-common-api:${Versions.SOSIALHJELP_COMMON}")
+    implementation(libs.bundles.sosialhjelp.common)
 
 //    tokendings
-    implementation("com.auth0:java-jwt:${Versions.JAVA_JWT}")
-    implementation("com.auth0:jwks-rsa:${Versions.JWKS_RSA}")
-    implementation("com.nimbusds:nimbus-jose-jwt:${Versions.NIMBUS_JOSE_JWT}")
+    implementation(libs.auth0.java.jwt)
+    implementation(libs.auth0.jwks.rsa)
+    implementation(libs.nimbus.jose.jwt)
 
 //    Micrometer/Prometheus
-    implementation("io.micrometer:micrometer-registry-prometheus:${Versions.MICROMETER_REGISTRY}")
-    implementation("io.prometheus:simpleclient_common:${Versions.PROMETHEUS}")
-    implementation("io.prometheus:simpleclient_hotspot:${Versions.PROMETHEUS}")
+    implementation(libs.bundles.prometheus)
 
 //    Logging
-    implementation("ch.qos.logback:logback-classic:${Versions.LOGBACK}")
-    implementation("net.logstash.logback:logstash-logback-encoder:${Versions.LOGSTASH}")
+    implementation(libs.bundles.logging)
 
 //    Filformat
-    implementation("no.nav.sbl.dialogarena:soknadsosialhjelp-filformat:${Versions.FILFORMAT}")
+
+    implementation(libs.sosialhjelp.filformat)
 
 //  Fiks IO
-    implementation("no.ks.fiks:fiks-io-klient-java:${Versions.FIKS_IO}")
+    implementation(libs.fiks.io)
 
 //    Jackson
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.JACKSON}")
+    implementation(libs.jackson.module.kotlin)
 
 //    Token-validering
-    implementation("no.nav.security:token-validation-spring:${Versions.TOKEN_VALIDATION}")
+    implementation(libs.token.validation.spring)
 
 //    Springdoc
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${Versions.SPRINGDOC}")
-    implementation("org.springdoc:springdoc-openapi-starter-common:${Versions.SPRINGDOC}")
+    implementation(libs.springdoc.openapi.starter.common)
+    implementation(libs.springdoc.openapi.starter.webmvc.ui)
 
 //    Fiks-kryptering
-    implementation("no.ks.fiks:kryptering:${Versions.FIKS_KRYPTERING}")
+    implementation(libs.fiks.kryptering)
 
     // Unleash
-    implementation("io.getunleash:unleash-client-java:${Versions.UNLEASH}")
+    implementation(libs.unleash)
 
 //    Redis
-    implementation("io.lettuce:lettuce-core:${Versions.LETTUCE}")
+    implementation(libs.lettuce.core)
 
 //    Div
-    implementation("commons-codec:commons-codec:${Versions.COMMONS_CODEC}")
-    implementation("commons-io:commons-io:${Versions.COMMONS_IO}")
-    implementation("commons-fileupload:commons-fileupload:${Versions.FILE_UPLOAD}")
-    implementation("org.apache.tika:tika-core:${Versions.TIKA}")
-    implementation("org.apache.pdfbox:preflight:${Versions.PDF_BOX}")
-    implementation("org.apache.pdfbox:jempbox:${Versions.JEMP_BOX}")
+    implementation(libs.bundles.commons)
+    implementation(libs.apache.tika)
+    implementation(libs.apache.pdfbox.preflight)
+    implementation(libs.apache.pdfbox.jempbox)
 
 //    Test
-    testImplementation("org.springframework.boot:spring-boot-starter-test:${Versions.SPRING_BOOT}")
-    testImplementation("com.ninja-squad:springmockk:${Versions.SPRING_MOCKK}")
-    testImplementation("io.mockk:mockk:${Versions.MOCKK}")
-    testImplementation("no.nav.security:token-validation-spring-test:${Versions.TOKEN_VALIDATION}")
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.springmockk)
+    testImplementation(libs.mockk)
+    testImplementation(libs.token.validation.spring.test)
 }
 
 // override spring managed dependencies
-extra["json-smart.version"] = Versions.JSON_SMART
+extra["json-smart.version"] = libs.versions.json.smart
 
 val githubUser: String by project
 val githubPassword: String by project

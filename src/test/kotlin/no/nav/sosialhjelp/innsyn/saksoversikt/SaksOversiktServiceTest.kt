@@ -72,6 +72,7 @@ internal class SaksOversiktServiceTest {
                     sistOppdatert = Date(),
                     kilde = KILDE_SOKNAD_API,
                     url = "someUrl",
+                    kommunenummer = "",
                 ),
             )
 

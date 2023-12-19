@@ -42,6 +42,7 @@ class SoknadsStatusController(
         return ResponseEntity.ok().body(
             SoknadsStatusResponse(
                 status = utvidetSoknadsStatus.status,
+                kommunenummer = utvidetSoknadsStatus.kommunenummer,
                 tidspunktSendt = utvidetSoknadsStatus.tidspunktSendt,
                 soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
                 navKontor = utvidetSoknadsStatus.navKontor,

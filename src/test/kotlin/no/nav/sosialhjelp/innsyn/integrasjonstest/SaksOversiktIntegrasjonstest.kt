@@ -70,7 +70,7 @@ class SaksOversiktIntegrasjonstest {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
 
-        val svarUtSoknadInfo = SaksListeResponse(null, "tittel", Date(), KILDE_SOKNAD_API, "someUrl")
+        val svarUtSoknadInfo = SaksListeResponse(null, "tittel", Date(), KILDE_SOKNAD_API, "someUrl", kommunenummer = "1507")
         every { soknadApiClient.getSvarUtSoknader(any()) } returns listOf(svarUtSoknadInfo)
 
         webClient

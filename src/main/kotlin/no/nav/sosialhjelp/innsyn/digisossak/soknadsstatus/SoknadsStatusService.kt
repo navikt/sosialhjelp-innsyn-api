@@ -60,6 +60,7 @@ class SoknadsStatusService(
                     )
                 }
                     .takeIf { erInnsynDeaktivertForKommune },
+            digisosSak.kommunenummer,
         )
     }
 
@@ -68,6 +69,7 @@ class SoknadsStatusService(
         val tidspunktSendt: LocalDateTime?,
         val navKontor: String?,
         val soknadUrl: UrlResponse?,
+        val kommunenummer: String,
     )
 
     companion object {

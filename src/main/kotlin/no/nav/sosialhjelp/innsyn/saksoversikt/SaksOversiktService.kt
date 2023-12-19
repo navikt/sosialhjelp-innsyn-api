@@ -35,6 +35,7 @@ class SaksOversiktService(
                         sistOppdatert = unixTimestampToDate(it.sistEndret),
                         kilde = KILDE_INNSYN_API,
                         url = null,
+                        kommunenummer = it.kommunenummer,
                     )
                 }
 

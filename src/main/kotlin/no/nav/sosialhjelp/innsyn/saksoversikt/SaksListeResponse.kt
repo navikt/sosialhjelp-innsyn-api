@@ -10,4 +10,5 @@ data class SaksListeResponse(
     val sistOppdatert: Date,
     val kilde: String,
     val url: String?,
+    val kommunenummer: String,
 )

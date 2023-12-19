@@ -232,7 +232,7 @@ class FiksClientImpl(
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         // 07847398714 bruker for ettersendelse testing - sendt til 3002, prøv 0301 Oslo
         val kommunenummer: String
-        if (digisosId == "07847398714") {
+        if (digisosSak.sokerFnr == "07847398714") {
             kommunenummer = "0301"
         } else {
             kommunenummer = digisosSak.kommunenummer

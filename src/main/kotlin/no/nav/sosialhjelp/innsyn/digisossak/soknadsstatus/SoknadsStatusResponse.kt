@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 data class SoknadsStatusResponse(
     val status: SoknadsStatus,
-    val kommunenummer: String,
+    val kommunenummer: String?,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     val tidspunktSendt: LocalDateTime?,
     val soknadsalderIMinutter: Long?,

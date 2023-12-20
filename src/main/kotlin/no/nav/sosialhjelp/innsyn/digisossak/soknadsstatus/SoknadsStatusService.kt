@@ -69,7 +69,7 @@ class SoknadsStatusService(
         val tidspunktSendt: LocalDateTime?,
         val navKontor: String?,
         val soknadUrl: UrlResponse?,
-        val kommunenummer: String,
+        val kommunenummer: String?,
     )
 
     companion object {

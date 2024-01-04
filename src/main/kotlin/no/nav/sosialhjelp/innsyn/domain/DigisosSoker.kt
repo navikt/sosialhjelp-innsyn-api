@@ -34,8 +34,8 @@ data class Forvaltningsbrev(
 )
 
 data class Soknadsmottaker(
-    val navEnhetsnummer: String,
-    val navEnhetsnavn: String,
+    val navEnhetsnummer: String?,
+    val navEnhetsnavn: String?,
 )
 
 data class Oppgave(

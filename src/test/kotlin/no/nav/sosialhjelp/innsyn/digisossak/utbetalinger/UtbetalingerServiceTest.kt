@@ -914,7 +914,11 @@ internal class UtbetalingerServiceTest {
         assertThat(responseTidligere).hasSize(1)
 
         // forrige månedes utbetaling
-        assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year)
+        if (thisYearMonth.month == Month.JANUARY) {
+            assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year - 1)
+        } else {
+            assertThat(responseTidligere[0].ar).isEqualTo(thisYearMonth.year)
+        }
         assertThat(responseTidligere[0].maned).isEqualTo(
             thisYearMonth.month.minus(1).value,
         )

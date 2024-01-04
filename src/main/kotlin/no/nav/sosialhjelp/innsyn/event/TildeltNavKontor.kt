@@ -61,7 +61,7 @@ fun InternalDigisosSoker.apply(
             "Tidspunkt: ${hendelse.hendelsestidspunkt} " +
             "Tildelt Navkontor. " +
             "Beskrivelse: ${hendelseTekstType.name} " +
-            "NavEnhetsnavn: ${soknadsmottaker!!.navEnhetsnavn}}",
+            "NavEnhetsnavn: ${soknadsmottaker?.navEnhetsnavn}}",
     )
     historikk.add(
         Hendelse(

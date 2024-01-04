@@ -251,8 +251,8 @@ class EventService(
         private fun soknadSendtForMindreEnn30DagerSiden(timestampSendt: Long) =
             unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
 
-        fun stripEnhetsnavnForKommune(navEnhetsnavn: String): String {
-            return navEnhetsnavn.replace(" kommune", "")
+        fun stripEnhetsnavnForKommune(navEnhetsnavn: String?): String? {
+            return navEnhetsnavn?.replace(" kommune", "")
         }
     }
 }

@@ -47,6 +47,23 @@ class EventService(
     ): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak, token)
+
+        // Infologging fra kommunesplitting av Ålesund
+        if (jsonSoknad?.mottaker?.enhetsnummer == null) {
+            log.info(
+                """Enhetsnummer=null: 
+                | Hva vet vi:
+                | enhetsnummer: null -> mismatch mellom norg og Fiks mellom 8 og 9 den 2. januar 2024
+                | kommunenummer satt i søknaden: ${jsonSoknad?.mottaker?.kommunenummer}
+                | sakstatus: ${jsonDigisosSoker?.hendelser?.filterIsInstance<JsonSoknadsStatus>()?.filter { it.status == JsonSoknadsStatus.Status.MOTTATT }}
+                | ${
+                    jsonDigisosSoker?.hendelser?.filterIsInstance<JsonTildeltNavKontor>()?.map {
+                        "Tildelt navkontor: ${it.navKontor} på tidspunkt: ${it.hendelsestidspunkt}"
+                    } ?: emptyList()
+                }
+            """.trimMargin(),
+            )
+        }
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
         val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 
@@ -96,7 +113,7 @@ class EventService(
                 if (forfallsDato != null) {
                     val eventListe = mutableListOf<String>()
                     var opprettelsesdato = LocalDate.now()
-                    jsonDigisosSoker?.hendelser?.filterIsInstance(JsonUtbetaling::class.java)
+                    jsonDigisosSoker?.hendelser?.filterIsInstance<JsonUtbetaling>()
                         ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
                         ?.forEach {
                             eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")

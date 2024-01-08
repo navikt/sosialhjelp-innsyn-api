@@ -61,7 +61,7 @@ class EventService(
                         "Tildelt navkontor: ${it.navKontor} på tidspunkt: ${it.hendelsestidspunkt}"
                     } ?: emptyList()
                 }
-            """.trimMargin(),
+                """.trimMargin(),
             )
         }
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV

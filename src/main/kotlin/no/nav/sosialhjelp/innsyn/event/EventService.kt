@@ -49,7 +49,7 @@ class EventService(
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak, token)
 
         // Infologging fra kommunesplitting av Ålesund
-        if (jsonSoknad != null && jsonSoknad.mottaker?.enhetsnummer == null) {
+        if (jsonSoknad != null && jsonSoknad.mottaker?.enhetsnummer == null && jsonSoknad.mottaker?.kommunenummer == "1507") {
             log.info(
                 """Enhetsnummer=null: 
                 | Hva vet vi:

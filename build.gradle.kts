@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.sosialhjelp"
 
 plugins {
+    `jvm-test-suite`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.plugin.spring)
     alias(libs.plugins.spring.boot)
@@ -14,8 +15,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 ktlint {
@@ -117,7 +118,29 @@ tasks.withType<DependencyUpdatesTask> {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+        jvmTarget = "21"
+    }
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+
+            targets {
+                all {
+                    testTask.configure {
+                        testLogging {
+                            events = setOf(TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+                            exceptionFormat = TestExceptionFormat.FULL
+                            showCauses = true
+                            showExceptions = true
+                            showStackTraces = true
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

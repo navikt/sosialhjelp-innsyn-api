@@ -117,7 +117,7 @@ class IdPortenClient(
             )
 
         val httpResponse: HTTPResponse = tokenRequest.toHTTPRequest().send()
-        val tokenResponse = objectMapper.readValue<TokenResponse>(httpResponse.content)
+        val tokenResponse = objectMapper.readValue<TokenResponse>(httpResponse.body)
 
         val jwtProcessor = DefaultJWTProcessor<SecurityContext>()
         val keySource = JWKSourceBuilder.create<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri)).build()

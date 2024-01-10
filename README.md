@@ -12,14 +12,14 @@ Interne henvendelser kan sendes via slack i kanalen #team_digisos.
 
 ## Teknologi
 * Kotlin
-* JDK 17
+* JDK 21
 * Gradle
 * Spring-boot
 * navikt/token-support
 * Redis (cache)
 
 ### Krav
-- JDK 17
+- JDK 21
 
 ### Manuell deploy til dev
 Gjøres via Github Actions, se: https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_dev.yml

@@ -4,11 +4,11 @@ import io.netty.resolver.DefaultAddressResolverGroup
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import reactor.netty.http.client.HttpClient
 import reactor.netty.transport.ProxyProvider
-import java.net.URL
+import java.net.URI
 
 object HttpClientUtil {
     fun proxiedHttpClient(proxyUrl: String): HttpClient {
-        val uri = URL(proxyUrl)
+        val uri = URI.create(proxyUrl)
 
         val httpClient: HttpClient =
             HttpClient.create()

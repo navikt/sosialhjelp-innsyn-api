@@ -17,20 +17,11 @@ interface SubjectHandler {
 
 @Component
 class AzureAdSubjectHandlerImpl(
-    private val tokenValidationContextHolder: TokenValidationContextHolder,
+    tokenValidationContextHolder: TokenValidationContextHolder,
 ) : SubjectHandler {
-    private val tokenValidationContext: TokenValidationContext
-        get() {
-            val tokenValidationContext = tokenValidationContextHolder.tokenValidationContext
-            if (tokenValidationContext == null) {
-                log.error(
-                    "Could not find TokenValidationContext. " +
-                        "Possibly no token in request and request was not captured by JwtToken-validation filters.",
-                )
-                throw JwtTokenValidatorException("Could not find TokenValidationContext. Possibly no token in request.")
-            }
-            return tokenValidationContext
-        }
+    private val log by logger()
+
+    private val tokenValidationContext: TokenValidationContext = tokenValidationContextHolder.getTokenValidationContext()
 
     override fun getUserIdFromToken(): String {
         val pid: String? = tokenValidationContext.getClaims(SELVBETJENING).getStringClaim(PID)
@@ -39,7 +30,13 @@ class AzureAdSubjectHandlerImpl(
     }
 
     override fun getToken(): String {
-        return tokenValidationContext.getJwtToken(SELVBETJENING).tokenAsString
+        return tokenValidationContext.getJwtToken(SELVBETJENING)?.encodedToken ?: run {
+            log.error(
+                "Could not find TokenValidationContext. " +
+                    "Possibly no token in request and request was not captured by JwtToken-validation filters.",
+            )
+            throw JwtTokenValidatorException("Could not find TokenValidationContext. Possibly no token in request.")
+        }
     }
 
     override fun getClientId(): String {
@@ -50,7 +47,6 @@ class AzureAdSubjectHandlerImpl(
         private const val PID = "pid"
         private const val CLIENT_ID = "client_id"
         private const val DEFAULT_CLIENT_ID = "clientId"
-        private val log by logger()
     }
 }
 

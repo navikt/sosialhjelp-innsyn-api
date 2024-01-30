@@ -17,10 +17,10 @@ spec:
   resources: # you need to monitor the resource usage yourself
     limits:
       cpu: 100m
-      memory: 128Mi
+      memory: 512Mi
     requests:
-      cpu: 2m
-      memory: 128Mi
+      cpu: 20m
+      memory: 256Mi
   accessPolicy: # for GCP
     inbound:
       rules:

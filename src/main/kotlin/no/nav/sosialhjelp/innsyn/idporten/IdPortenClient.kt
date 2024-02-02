@@ -49,7 +49,6 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.net.URI
-import java.net.URL
 import java.util.UUID
 
 @Profile("idporten")
@@ -120,7 +119,7 @@ class IdPortenClient(
         val tokenResponse = objectMapper.readValue<TokenResponse>(httpResponse.body)
 
         val jwtProcessor = DefaultJWTProcessor<SecurityContext>()
-        val keySource = JWKSourceBuilder.create<SecurityContext>(URL(idPortenProperties.wellKnown.jwksUri)).build()
+        val keySource = JWKSourceBuilder.create<SecurityContext>(URI.create(idPortenProperties.wellKnown.jwksUri).toURL()).build()
         val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, keySource)
 
         val storedNonce =

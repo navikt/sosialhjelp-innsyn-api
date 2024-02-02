@@ -8,12 +8,6 @@ import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
-import java.util.Collections
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletionException
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 @Profile("!prod-fss")
 @Component
@@ -30,23 +24,19 @@ class DigisosApiTestServiceImpl(
         return digisosApiTestClient.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
     }
 
-    override fun lastOppFil(
+    override suspend fun lastOppFil(
         fiksDigisosId: String,
         file: MultipartFile,
     ): String {
         virusScanner.scan(file.name, file.bytes)
 
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(1))
         val inputStream =
             krypteringService.krypter(
                 file.inputStream,
-                krypteringFutureList,
                 dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
             )
         val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
-        val fiksIder = digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId)
-        waitForFutures(krypteringFutureList)
-        return fiksIder[0]
+        return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 
     override fun hentInnsynsfil(
@@ -54,20 +44,5 @@ class DigisosApiTestServiceImpl(
         token: String,
     ): String? {
         return digisosApiTestClient.hentInnsynsfil(fiksDigisosId, token)
-    }
-
-    private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
-        val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
-        try {
-            allFutures.get(300, TimeUnit.SECONDS)
-        } catch (e: CompletionException) {
-            throw IllegalStateException(e.cause)
-        } catch (e: ExecutionException) {
-            throw IllegalStateException(e)
-        } catch (e: TimeoutException) {
-            throw IllegalStateException(e)
-        } catch (e: InterruptedException) {
-            throw IllegalStateException(e)
-        }
     }
 }

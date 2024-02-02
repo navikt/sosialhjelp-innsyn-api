@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import io.mockk.Runs
 import io.mockk.clearMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -107,7 +108,7 @@ internal class VedleggControllerTest {
         val body = vedleggResponses.body
 
         assertThat(body).isNotNull
-        if (body != null && body.isNotEmpty()) {
+        if (!body.isNullOrEmpty()) {
             assertThat(body).hasSize(2)
             assertThat(body[0].filnavn).isEqualTo(filnavn)
             assertThat(body[0].url).contains(dokumentlagerId)
@@ -151,7 +152,7 @@ internal class VedleggControllerTest {
         val body = vedleggResponses.body
 
         assertThat(body).isNotNull
-        if (body != null && body.isNotEmpty()) {
+        if (!body.isNullOrEmpty()) {
             assertThat(body).hasSize(1)
             assertThat(body[0].filnavn).isEqualTo(filnavn)
             assertThat(body[0].url).contains(dokumentlagerId)
@@ -176,7 +177,7 @@ internal class VedleggControllerTest {
 
     @Test
     fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() {
-        every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
+        coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
         val files =
             mutableListOf<MultipartFile>(
                 MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
@@ -191,7 +192,7 @@ internal class VedleggControllerTest {
 
     @Test
     fun `skal kaste exception dersom token mangler`() {
-        every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
+        coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
         val files =
             mutableListOf<MultipartFile>(
                 MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),

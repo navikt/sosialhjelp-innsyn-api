@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 @Component
 class EttersendelsePdfGenerator {
     fun generate(
-        metadata: MutableList<OpplastetVedleggMetadata>,
+        metadata: List<OpplastetVedleggMetadata>,
         fodselsnummer: String,
     ): ByteArray {
         return try {

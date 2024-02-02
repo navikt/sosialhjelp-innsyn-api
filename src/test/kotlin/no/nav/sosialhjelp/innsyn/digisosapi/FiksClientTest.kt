@@ -5,10 +5,12 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -256,58 +258,59 @@ internal class FiksClientTest {
     }
 
     @Test // fikk ikke mockWebServer til å funke her uten å skjønner hvorfor (InputStream-relatert), så gikk for "klassisk" mockk stil
-    fun `POST ny ettersendelse`() {
-        val webClient: WebClient = mockk()
-        val clientForPost = FiksClientImpl(webClient, tilgangskontroll, redisService, 2, 5, 10, meterRegistry)
+    fun `POST ny ettersendelse`() =
+        runTest {
+            val webClient: WebClient = mockk()
+            val clientForPost = FiksClientImpl(webClient, tilgangskontroll, redisService, 2, 5, 10, meterRegistry)
 
-        val fil1: InputStream = mockk()
-        val fil2: InputStream = mockk()
-        every { fil1.readAllBytes() } returns "test-fil".toByteArray()
-        every { fil2.readAllBytes() } returns "div".toByteArray()
+            val fil1: InputStream = mockk()
+            val fil2: InputStream = mockk()
+            every { fil1.readAllBytes() } returns "test-fil".toByteArray()
+            every { fil2.readAllBytes() } returns "div".toByteArray()
 
-        val ettersendelsPdf = ByteArray(1)
-        every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
-        every { krypteringService.krypter(any(), any(), any()) } returns fil1
+            val ettersendelsPdf = ByteArray(1)
+            every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
+            coEvery { krypteringService.krypter(any(), any()) } returns fil1
 
-        val files =
-            listOf(
-                FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-                FilForOpplasting("filnavn1", "image/jpg", 1L, fil2),
-            )
+            val files =
+                listOf(
+                    FilForOpplasting("filnavn0", "image/png", 1L, fil1),
+                    FilForOpplasting("filnavn1", "image/jpg", 1L, fil2),
+                )
 
-        every {
-            webClient.get()
-                .uri(any(), any<String>())
-                .accept(any())
-                .header(any(), any())
-                .retrieve()
-                .bodyToMono<DigisosSak>()
-                .retryWhen(any())
-                .onErrorMap(WebClientResponseException::class.java, any())
-                .block()
-        } returns objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+            every {
+                webClient.get()
+                    .uri(any(), any<String>())
+                    .accept(any())
+                    .header(any(), any())
+                    .retrieve()
+                    .bodyToMono<DigisosSak>()
+                    .retryWhen(any())
+                    .onErrorMap(WebClientResponseException::class.java, any())
+                    .block()
+            } returns objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
 
-        every {
-            webClient.post()
-                .uri(any(), any<String>(), any<String>(), any<String>())
-                .header(any(), any())
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(any())
-                .retrieve()
-                .toEntity<String>()
-                .onErrorMap(WebClientResponseException::class.java, any())
-                .block()
-        } returns ResponseEntity<String>(HttpStatus.ACCEPTED)
+            every {
+                webClient.post()
+                    .uri(any(), any<String>(), any<String>(), any<String>())
+                    .header(any(), any())
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(any())
+                    .retrieve()
+                    .toEntity<String>()
+                    .onErrorMap(WebClientResponseException::class.java, any())
+                    .block()
+            } returns ResponseEntity<String>(HttpStatus.ACCEPTED)
 
-        assertThatCode {
-            clientForPost.lastOppNyEttersendelse(
-                files,
-                JsonVedleggSpesifikasjon(),
-                id,
-                "token",
-            )
-        }.doesNotThrowAnyException()
-    }
+            assertThatCode {
+                clientForPost.lastOppNyEttersendelse(
+                    files,
+                    JsonVedleggSpesifikasjon(),
+                    id,
+                    "token",
+                )
+            }.doesNotThrowAnyException()
+        }
 
     @Test
     internal fun `should produce body for upload`() {

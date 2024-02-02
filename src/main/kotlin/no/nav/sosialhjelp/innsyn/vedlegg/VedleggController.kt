@@ -3,6 +3,8 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
@@ -60,7 +62,10 @@ class VedleggController(
         val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
         validateFileListNotEmpty(files)
 
-        val oppgaveValideringList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+        val oppgaveValideringList =
+            runBlocking(MDCContext()) {
+                vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+            }
         return ResponseEntity.ok(mapToResponse(oppgaveValideringList))
     }
 

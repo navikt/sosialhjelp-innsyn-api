@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
@@ -53,7 +54,10 @@ class DigisosApiTestController(
         @PathVariable fiksDigisosId: String,
         @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<String> {
-        val dokumentlagerId = digisosApiTestService.lastOppFil(fiksDigisosId, file)
+        val dokumentlagerId =
+            runBlocking {
+                digisosApiTestService.lastOppFil(fiksDigisosId, file)
+            }
 
         return ResponseEntity.ok(dokumentlagerId)
     }

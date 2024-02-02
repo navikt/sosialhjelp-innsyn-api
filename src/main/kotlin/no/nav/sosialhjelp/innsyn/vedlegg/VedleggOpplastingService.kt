@@ -1,5 +1,9 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -21,13 +25,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 import java.io.InputStream
 import java.time.LocalDate
-import java.util.Collections
 import java.util.UUID
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletionException
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 @Component
 class VedleggOpplastingService(
@@ -38,7 +36,7 @@ class VedleggOpplastingService(
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
     private val dokumentlagerClient: DokumentlagerClient,
 ) {
-    fun sendVedleggTilFiks(
+    suspend fun sendVedleggTilFiks(
         digisosId: String,
         files: List<MultipartFile>,
         metadata: List<OpplastetVedleggMetadata>,
@@ -69,40 +67,35 @@ class VedleggOpplastingService(
         val ettersendelsePdf = createEttersendelsePdf(metadataWithoutEmpties, digisosId, token)
         filerForOpplasting.add(ettersendelsePdf)
 
-        val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(filerForOpplasting.size))
-        try {
-            val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
-            val filerForOpplastingEtterKryptering: List<FilForOpplasting> =
-                filerForOpplasting
-                    .map { file ->
-                        val inputStream = krypteringService.krypter(file.fil, krypteringFutureList, certificate)
-                        FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream)
+        val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
+        // Kjører kryptering i parallell
+        val filerForOpplastingEtterKryptering =
+            withContext(Dispatchers.IO + MDCContext()) {
+                filerForOpplasting.associateWith {
+                    async {
+                        krypteringService.krypter(it.fil, certificate)
                     }
-
-            val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
-            try {
-                fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
-            } catch (e: FiksClientFileExistsException) {
-                // ignorerer når filen allerede er lastet opp
+                }.map { (file, inputStream) ->
+                    FilForOpplasting(
+                        file.filnavn,
+                        file.mimetype,
+                        file.storrelse,
+                        inputStream.await(),
+                    )
+                }
             }
-
-            waitForFutures(krypteringFutureList)
-
-            // opppdater cache med digisossak
-            val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
-            redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
-
-            return oppgaveValideringer
-        } finally {
-            val notCancelledFutureList =
-                krypteringFutureList
-                    .filter { !it.isDone && !it.isCancelled }
-            if (notCancelledFutureList.isNotEmpty()) {
-                log.warn("Antall krypteringer som ikke er canceled var ${notCancelledFutureList.size}")
-                notCancelledFutureList
-                    .forEach { it.cancel(true) }
-            }
+        val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
+        try {
+            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
+        } catch (e: FiksClientFileExistsException) {
+            // ignorerer når filen allerede er lastet opp
         }
+
+        // opppdater cache med digisossak
+        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
+        redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
+
+        return oppgaveValideringer
     }
 
     private fun getMimetype(detectedMimetype: String) =
@@ -229,19 +222,13 @@ class VedleggOpplastingService(
     }
 
     fun renameFilenameInMetadataJson(
-        originalFilename: String?,
+        originalFilename: String,
         newFilename: String,
         metadata: List<OpplastetVedleggMetadata>,
     ) {
-        metadata.forEach { data ->
-            data.filer.forEach { file ->
-                originalFilename ?: throw BadStateException("Kan ikke rename fil når originalFilename er null")
-                if (sanitizeFileName(file.filnavn) == sanitizeFileName(originalFilename)) {
-                    file.filnavn = newFilename
-                    return
-                }
-            }
-        }
+        metadata.flatMap { it.filer }
+            .filter { sanitizeFileName(it.filnavn) == sanitizeFileName(originalFilename) }
+            .forEach { it.filnavn = newFilename }
     }
 
     fun validateFilenameMatchInMetadataAndFiles(
@@ -285,11 +272,8 @@ class VedleggOpplastingService(
         return filnavnMetadataString + filnavnMultipartString
     }
 
-    fun getMetadataAsString(metadata: List<OpplastetVedleggMetadata>): String {
-        var filstring = ""
-        metadata.forEachIndexed { index, data -> filstring += "metadata[$index].filer.size: ${data.filer.size}, " }
-        return filstring
-    }
+    fun getMetadataAsString(metadata: List<OpplastetVedleggMetadata>): String =
+        metadata.mapIndexed { index, data -> "metadata[$index].filer.size: ${data.filer.size}" }.joinToString()
 
     private fun finnFilextensionBasedOnValidationResult(
         originalFilename: String?,
@@ -411,21 +395,6 @@ class VedleggOpplastingService(
         } catch (e: IOException) {
             log.warn(ValidationValues.COULD_NOT_LOAD_DOCUMENT.name, e)
             return ValidationValues.COULD_NOT_LOAD_DOCUMENT
-        }
-    }
-
-    private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
-        val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
-        try {
-            allFutures.get(30, TimeUnit.SECONDS)
-        } catch (e: CompletionException) {
-            throw IllegalStateException(e.cause)
-        } catch (e: ExecutionException) {
-            throw IllegalStateException(e)
-        } catch (e: TimeoutException) {
-            throw IllegalStateException(e)
-        } catch (e: InterruptedException) {
-            throw IllegalStateException(e)
         }
     }
 

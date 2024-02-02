@@ -9,6 +9,7 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.digisosapi.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
+import no.nav.sosialhjelp.innsyn.digisosapi.toHttpEntity
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
@@ -74,9 +75,9 @@ class DigisosApiTestClientImpl(
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add(
                 "vedleggSpesifikasjon:$fileId",
-                fiksClientImpl.createHttpEntityOfString(fiksClientImpl.serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"),
+                fiksClientImpl.serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
-            body.add("dokument:$fileId", fiksClientImpl.createHttpEntityOfFile(file, "dokument:$fileId"))
+            body.add("dokument:$fileId", file.toHttpEntity("dokument:$fileId"))
         }
 
         val opplastingResponseList =

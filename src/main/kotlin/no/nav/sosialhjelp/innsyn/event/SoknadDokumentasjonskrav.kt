@@ -9,7 +9,7 @@ import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 
-fun InternalDigisosSoker.applySoknadKrav(
+suspend fun InternalDigisosSoker.applySoknadKrav(
     digisosSak: DigisosSak,
     vedleggService: VedleggService,
     timestampSendt: Long,

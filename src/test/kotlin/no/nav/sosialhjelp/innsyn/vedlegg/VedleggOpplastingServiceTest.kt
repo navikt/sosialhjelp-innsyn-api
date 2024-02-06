@@ -2,13 +2,13 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
-import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -36,6 +36,7 @@ import java.security.cert.X509Certificate
 import java.time.LocalDate
 import java.util.UUID
 import javax.imageio.ImageIO
+import kotlin.time.Duration.Companion.seconds
 
 internal class VedleggOpplastingServiceTest {
     private val fiksClient: FiksClient = mockk()
@@ -77,19 +78,19 @@ internal class VedleggOpplastingServiceTest {
     fun init() {
         clearAllMocks()
 
-        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
+        coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
-        every { virusScanner.scan(any(), any()) } just runs
+        coEvery { virusScanner.scan(any(), any()) } just runs
         every { redisService.put(any(), any(), any()) } just runs
         every { redisService.defaultTimeToLiveSeconds } returns 1
-        every { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate() } returns mockCertificate
+        coEvery { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate() } returns mockCertificate
     }
 
     @Test
     fun `sendVedleggTilFiks skal kalle FiksClient med gyldige filer for opplasting`() =
-        runTest {
+        runTest(timeout = 5.seconds) {
             coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
-            every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
             val ettersendelsPdf = ByteArray(1)
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
@@ -136,7 +137,7 @@ internal class VedleggOpplastingServiceTest {
 
             val filerForOpplastingSlot = slot<List<FilForOpplasting>>()
             val vedleggSpesifikasjonSlot = slot<JsonVedleggSpesifikasjon>()
-            verify(
+            coVerify(
                 exactly = 1,
             ) { fiksClient.lastOppNyEttersendelse(capture(filerForOpplastingSlot), capture(vedleggSpesifikasjonSlot), any(), any()) }
             val filerForOpplasting = filerForOpplastingSlot.captured
@@ -188,9 +189,9 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ikke alle filene blir validert ok`() =
-        runTest {
+        runTest(timeout = 5.seconds) {
             coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
-            every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
             val metadata =
                 mutableListOf(
@@ -213,7 +214,7 @@ internal class VedleggOpplastingServiceTest {
 
             val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-            verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+            coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
             assertThat(vedleggOpplastingResponseList[0].filer[0].filename == filnavn0)
             assertThat(vedleggOpplastingResponseList[0].filer[0].status.result == ValidationValues.OK)
@@ -225,7 +226,7 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis filnavn i metadata ikke matcher med filene som sendes`() =
-        runTest {
+        runTest(timeout = 5.seconds) {
             val metadata =
                 mutableListOf(
                     OpplastetVedleggMetadata(
@@ -253,9 +254,9 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal ikke gi feilmelding hvis pdf-filen er signert`() =
-        runTest {
+        runTest(timeout = 5.seconds) {
             coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
-            every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ByteArray(1)
 
             val filnavn1 = "test1.pdf"
@@ -286,7 +287,7 @@ internal class VedleggOpplastingServiceTest {
 
             val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-            verify(exactly = 1) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+            coVerify(exactly = 1) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
             assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1)
             assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.OK)
@@ -296,9 +297,9 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er passord-beskyttet`() =
-        runTest {
+        runTest(timeout = 5.seconds) {
             coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
-            every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
             val filnavn1 = "test1.pdf"
             val filtype = "application/pdf"
@@ -324,7 +325,7 @@ internal class VedleggOpplastingServiceTest {
 
             val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-            verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+            coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
             assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1)
             assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.PDF_IS_ENCRYPTED)
@@ -332,9 +333,9 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis bilde er jfif`() =
-        runTest {
+        runTest(timeout = 5.seconds) {
             coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
-            every { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
+            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
             val filnavn1 = "test1.jfif"
 
@@ -358,7 +359,7 @@ internal class VedleggOpplastingServiceTest {
 
             val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, files, metadata, "token")
 
-            verify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
+            coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
             assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1)
             assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.ILLEGAL_FILE_TYPE)
@@ -366,8 +367,8 @@ internal class VedleggOpplastingServiceTest {
 
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() =
-        runTest {
-            every { virusScanner.scan(any(), any()) } throws VirusScanException("mulig virus!", null)
+        runTest(timeout = 5.seconds) {
+            coEvery { virusScanner.scan(any(), any()) } throws VirusScanException("mulig virus!", null)
 
             val metadata =
                 mutableListOf(

@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.junit5.MockKExtension
 import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration
 import no.nav.sosialhjelp.innsyn.TestApplication
@@ -52,7 +52,7 @@ class IdPortenIntegrasjonTest {
 
     @Test
     fun `should accept both old and new acr for idporten`() {
-        every { tilgangService.hentTilgang(any(), any()) } returns Tilgang(true, "Herr Herresen")
+        coEvery { tilgangService.hentTilgang(any(), any()) } returns Tilgang(true, "Herr Herresen")
 
         var token = mockLogin.hentLevel4SelvbetjeningToken()
 

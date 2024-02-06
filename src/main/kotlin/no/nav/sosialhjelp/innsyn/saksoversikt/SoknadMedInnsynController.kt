@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.saksoversikt
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -25,7 +26,7 @@ class SoknadMedInnsynController(
     suspend fun harSoknaderMedInnsyn(
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ): ResponseEntity<Boolean> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
             ResponseEntity.ok(soknadMedInnsynService.harSoknaderMedInnsyn(token))
         }

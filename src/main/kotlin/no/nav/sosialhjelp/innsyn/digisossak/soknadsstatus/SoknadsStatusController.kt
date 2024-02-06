@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -36,7 +37,7 @@ class SoknadsStatusController(
         response: HttpServletResponse,
         request: HttpServletRequest,
     ): ResponseEntity<SoknadsStatusResponse> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             response.addCookie(xsrfCookie())

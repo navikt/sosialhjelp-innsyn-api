@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -28,7 +29,7 @@ class OppgaveController(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<OppgaveResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
@@ -45,7 +46,7 @@ class OppgaveController(
         @PathVariable oppgaveId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<OppgaveResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, token, oppgaveId)
@@ -61,7 +62,7 @@ class OppgaveController(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<VilkarResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             val vilkar = oppgaveService.getVilkar(fiksDigisosId, token)
@@ -77,7 +78,7 @@ class OppgaveController(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<DokumentasjonkravResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
@@ -94,7 +95,7 @@ class OppgaveController(
         @PathVariable dokumentasjonkravId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<DokumentasjonkravResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId, token)
@@ -110,7 +111,7 @@ class OppgaveController(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<Boolean> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             val harLevertTidligere = oppgaveService.getHarLevertDokumentasjonkrav(fiksDigisosId, token)
@@ -122,7 +123,7 @@ class OppgaveController(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<Boolean> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             val fagsystemHarDokumentasjonkrav = oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId, token)

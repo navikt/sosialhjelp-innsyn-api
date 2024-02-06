@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
+import kotlinx.coroutines.ThreadContextElement
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -14,6 +15,10 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.context.request.RequestAttributes
+import org.springframework.web.context.request.RequestContextHolder
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4, ACR_IDPORTEN_LOA_HIGH], combineWithOr = true)
 @RestController
@@ -27,10 +32,37 @@ class HendelseController(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<HendelseResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
             ResponseEntity.ok(hendelser)
         }
+}
+
+class RequestAttributesContext(
+    private val requestAttributes: RequestAttributes? = RequestContextHolder.getRequestAttributes(),
+) : ThreadContextElement<RequestAttributes?>, AbstractCoroutineContextElement(Key) {
+    companion object Key : CoroutineContext.Key<RequestAttributesContext>
+
+    override fun updateThreadContext(context: CoroutineContext): RequestAttributes? {
+        val oldState = RequestContextHolder.getRequestAttributes()
+        setCurrent(requestAttributes)
+        return oldState
+    }
+
+    override fun restoreThreadContext(
+        context: CoroutineContext,
+        oldState: RequestAttributes?,
+    ) {
+        setCurrent(oldState)
+    }
+
+    private fun setCurrent(attributes: RequestAttributes?) {
+        if (attributes == null) {
+            RequestContextHolder.resetRequestAttributes()
+        } else {
+            RequestContextHolder.setRequestAttributes(attributes)
+        }
+    }
 }

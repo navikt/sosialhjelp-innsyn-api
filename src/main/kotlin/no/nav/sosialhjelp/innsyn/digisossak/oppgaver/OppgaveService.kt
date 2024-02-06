@@ -22,7 +22,7 @@ class OppgaveService(
     private val fiksClient: FiksClient,
     private val clientProperties: ClientProperties,
 ) {
-    fun hentOppgaver(
+    suspend fun hentOppgaver(
         fiksDigisosId: String,
         token: String,
     ): List<OppgaveResponse> {
@@ -61,7 +61,7 @@ class OppgaveService(
         return oppgaveResponseList
     }
 
-    fun hentOppgaverMedOppgaveId(
+    suspend fun hentOppgaverMedOppgaveId(
         fiksDigisosId: String,
         token: String,
         oppgaveId: String,
@@ -79,7 +79,7 @@ class OppgaveService(
             .any { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
     }
 
-    fun getVilkar(
+    suspend fun getVilkar(
         fiksDigisosId: String,
         token: String,
     ): List<VilkarResponse> {
@@ -122,7 +122,7 @@ class OppgaveService(
         return vilkarResponseList
     }
 
-    fun getDokumentasjonkrav(
+    suspend fun getDokumentasjonkrav(
         fiksDigisosId: String,
         token: String,
     ): List<DokumentasjonkravResponse> {
@@ -181,7 +181,7 @@ class OppgaveService(
         return dokumentasjonkravResponseList
     }
 
-    fun getDokumentasjonkravMedId(
+    suspend fun getDokumentasjonkravMedId(
         fiksDigisosId: String,
         dokumentasjonkravId: String,
         token: String,
@@ -201,7 +201,7 @@ class OppgaveService(
             .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) }
     }
 
-    fun getHarLevertDokumentasjonkrav(
+    suspend fun getHarLevertDokumentasjonkrav(
         fiksDigisosId: String,
         token: String,
     ): Boolean {
@@ -223,7 +223,7 @@ class OppgaveService(
             .toList().isNotEmpty()
     }
 
-    fun getFagsystemHarVilkarOgDokumentasjonkrav(
+    suspend fun getFagsystemHarVilkarOgDokumentasjonkrav(
         fiksDigisosId: String,
         token: String,
     ): Boolean {
@@ -263,7 +263,7 @@ class OppgaveService(
         return avsenderVersion >= godkjentVersion
     }
 
-    fun sakHarStatusMottattOgIkkeHattSendt(
+    suspend fun sakHarStatusMottattOgIkkeHattSendt(
         fiksDigisosId: String,
         token: String,
     ): Boolean {

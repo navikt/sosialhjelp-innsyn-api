@@ -109,7 +109,7 @@ class VedleggOpplastingService(
 
     private fun harFilerMedValideringsfeil(oppgave: OppgaveValidering) = oppgave.filer.any { it.status.result != ValidationValues.OK }
 
-    fun createEttersendelsePdf(
+    suspend fun createEttersendelsePdf(
         metadata: List<OpplastetVedleggMetadata>,
         digisosId: String,
         token: String,
@@ -287,7 +287,7 @@ class VedleggOpplastingService(
         throw OpplastingFilnavnMismatchException("Finner ikke filnavnet i valideringslisten! Dette skal da ikke kunne skje.", null)
     }
 
-    fun validateFiler(
+    suspend fun validateFiler(
         files: List<MultipartFile>,
         metadataListe: List<OpplastetVedleggMetadata>,
     ): MutableList<OppgaveValidering> {
@@ -324,7 +324,7 @@ class VedleggOpplastingService(
         return oppgaveValideringer
     }
 
-    fun validateFil(file: MultipartFile): ValidationResult {
+    suspend fun validateFil(file: MultipartFile): ValidationResult {
         if (file.size > MAKS_TOTAL_FILSTORRELSE) {
             return ValidationResult(ValidationValues.FILE_TOO_LARGE)
         }

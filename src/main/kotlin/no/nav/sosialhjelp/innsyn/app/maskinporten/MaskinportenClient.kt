@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.app.maskinporten
 
 import com.nimbusds.jwt.SignedJWT
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.maskinporten.dto.MaskinportenResponse
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.MediaType
@@ -9,7 +11,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.reactive.function.client.bodyToMono
+import org.springframework.web.reactive.function.client.awaitBody
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -24,7 +26,7 @@ class MaskinportenClient(
 
     private val tokenGenerator = MaskinportenGrantTokenGenerator(maskinportenProperties, wellKnown.issuer)
 
-    fun getToken(): String {
+    suspend fun getToken(): String {
         return getTokenFraCache() ?: getTokenFraMaskinporten()
     }
 
@@ -32,27 +34,26 @@ class MaskinportenClient(
         return cachedToken?.takeUnless { isExpired(it) }?.parsedString
     }
 
-    private fun getTokenFraMaskinporten(): String {
-        val response =
-            maskinportenWebClient.post()
-                .uri(wellKnown.token_endpoint)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData(params))
-                .retrieve()
-                .bodyToMono<MaskinportenResponse>()
-                .doOnSuccess { log.info("Hentet token fra Maskinporten") }
-                .doOnError {
-                    if (it is WebClientResponseException && it.statusCode.is4xxClientError) {
-                        log.error("Fikk ${it.statusCode} fra maskinporten. Melding: ${it.responseBodyAsString}")
-                    } else {
-                        log.warn("Noe feilet ved henting av token fra Maskinporten. ", it)
-                    }
-                }
-                .block() ?: throw RuntimeException("Noe feilet ved henting av token fra Maskinporten")
+    private suspend fun getTokenFraMaskinporten(): String =
+        withContext(Dispatchers.IO) {
+            val response =
+                runCatching {
+                    maskinportenWebClient.post()
+                        .uri(wellKnown.token_endpoint)
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .body(BodyInserters.fromFormData(params))
+                        .retrieve()
+                        .awaitBody<MaskinportenResponse>()
+                }.onSuccess {
+                    log.info("Hentet token fra Maskinporten")
+                }.onFailure {
+                    log.warn("Noe feilet ved henting av token fra Maskinporten", it)
+                }.getOrThrow()
 
-        return response.access_token
-            .also { cachedToken = SignedJWT.parse(it) }
-    }
+            response.access_token.also {
+                cachedToken = SignedJWT.parse(it)
+            }
+        }
 
     private val params: MultiValueMap<String, String>
         get() =

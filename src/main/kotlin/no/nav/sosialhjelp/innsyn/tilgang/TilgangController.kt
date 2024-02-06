@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.tilgang
 
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
@@ -21,17 +23,18 @@ class TilgangController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/tilgang")
-    fun harTilgang(
+    suspend fun harTilgang(
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<TilgangResponse> {
-        return try {
-            val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
-            ResponseEntity.ok().body(TilgangResponse(tilgang.harTilgang, tilgang.fornavn))
-        } catch (e: PdlException) {
-            log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")
-            ResponseEntity.ok().body(TilgangResponse(true, ""))
+    ): ResponseEntity<TilgangResponse> =
+        withContext(MDCContext()) {
+            try {
+                val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
+                ResponseEntity.ok().body(TilgangResponse(tilgang.harTilgang, tilgang.fornavn))
+            } catch (e: PdlException) {
+                log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")
+                ResponseEntity.ok().body(TilgangResponse(true, ""))
+            }
         }
-    }
 
     data class TilgangResponse(
         val harTilgang: Boolean,

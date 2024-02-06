@@ -66,17 +66,13 @@ class UtbetalingerService(
             log.info("Fant ingen søknader for bruker")
             return emptyList()
         }
+        
+        return digisosSaker
+            .filter { it.isNewerThanMonths(15) }
+            .flatMap {
+                manedsutbetalinger(token, it, statusFilter)
+            }
 
-        val requestAttributes = RequestContextHolder.getRequestAttributes()
-
-        return runBlocking(Dispatchers.IO + MDCContext()) {
-            digisosSaker
-                .filter { it.isNewerThanMonths(15) }
-                .flatMapParallel {
-                    setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it, statusFilter)
-                }
-        }
     }
 
     fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
@@ -86,7 +82,7 @@ class UtbetalingerService(
     }
 
     fun hentNyeUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
-        val utbetalinger = hentUtbetalinger(token) { status -> (status !== UtbetalingsStatus.ANNULLERT) }
+        val utbetalinger = hentUtbetalinger(token) { status -> status != UtbetalingsStatus.ANNULLERT }
         return toNyeUtbetalingerResponse(utbetalinger)
     }
 

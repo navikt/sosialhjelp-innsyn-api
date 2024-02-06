@@ -4,7 +4,7 @@ import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import org.springframework.web.multipart.MultipartFile
 
 interface DigisosApiTestService {
-    fun oppdaterDigisosSak(
+    suspend fun oppdaterDigisosSak(
         fiksDigisosId: String?,
         digisosApiWrapper: DigisosApiWrapper,
     ): String?
@@ -14,7 +14,7 @@ interface DigisosApiTestService {
         file: MultipartFile,
     ): String
 
-    fun hentInnsynsfil(
+    suspend fun hentInnsynsfil(
         fiksDigisosId: String,
         token: String,
     ): String?

@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
@@ -34,40 +36,42 @@ class DigisosApiTestController(
     private val digisosApiTestService: DigisosApiTestService,
 ) {
     @PostMapping("/oppdaterDigisosSak", consumes = [APPLICATION_JSON_VALUE], produces = ["application/json;charset=UTF-8"])
-    fun oppdaterDigisosSak(
+    suspend fun oppdaterDigisosSak(
         fiksDigisosId: String?,
         @RequestBody body: String,
-    ): ResponseEntity<String> {
-        val json = objectMapper.writeValueAsString(objectMapper.readTree(body).at("/sak/soker"))
-        JsonSosialhjelpValidator.ensureValidInnsyn(json)
+    ): ResponseEntity<String> =
+        withContext(MDCContext()) {
+            val json = objectMapper.writeValueAsString(objectMapper.readTree(body).at("/sak/soker"))
+            JsonSosialhjelpValidator.ensureValidInnsyn(json)
 
-        val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
-        val digisosId = digisosApiTestService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
-        if (digisosId?.contains("fiksDigisosId") == true) {
-            return ResponseEntity.ok(digisosId) // Allerede wrappet i json.
+            val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
+            val digisosId = digisosApiTestService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
+            if (digisosId?.contains("fiksDigisosId") == true) {
+                ResponseEntity.ok(digisosId) // Allerede wrappet i json.
+            } else {
+                ResponseEntity.ok("{\"fiksDigisosId\":\"$digisosId\"}")
+            }
         }
-        return ResponseEntity.ok("{\"fiksDigisosId\":\"$digisosId\"}")
-    }
 
     @PostMapping("/{fiksDigisosId}/filOpplasting", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun filOpplasting(
+    suspend fun filOpplasting(
         @PathVariable fiksDigisosId: String,
         @RequestParam("file") file: MultipartFile,
-    ): ResponseEntity<String> {
-        val dokumentlagerId =
-            runBlocking {
-                digisosApiTestService.lastOppFil(fiksDigisosId, file)
-            }
+    ): ResponseEntity<String> =
+        withContext(MDCContext()) {
+            val dokumentlagerId = digisosApiTestService.lastOppFil(fiksDigisosId, file)
 
-        return ResponseEntity.ok(dokumentlagerId)
-    }
+            ResponseEntity.ok(dokumentlagerId)
+        }
 
     @GetMapping("/{digisosId}/innsynsfil")
-    fun getInnsynsfil(
+    suspend fun getInnsynsfil(
         @PathVariable digisosId: String,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?,
-    ): ResponseEntity<ByteArray> {
-        val innsynsfil = digisosApiTestService.hentInnsynsfil(digisosId, token ?: "") ?: return ResponseEntity.noContent().build()
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
-    }
+    ): ResponseEntity<ByteArray> =
+        withContext(Dispatchers.IO) {
+            val innsynsfil =
+                digisosApiTestService.hentInnsynsfil(digisosId, token ?: "") ?: return@withContext ResponseEntity.noContent().build()
+            ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
+        }
 }

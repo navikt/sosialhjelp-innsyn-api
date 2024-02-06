@@ -10,7 +10,7 @@ class ForelopigSvarService(
     private val fiksClient: FiksClient,
     private val eventService: EventService,
 ) {
-    fun hentForelopigSvar(
+    suspend fun hentForelopigSvar(
         fiksDigisosId: String,
         token: String,
     ): ForelopigSvarResponse {

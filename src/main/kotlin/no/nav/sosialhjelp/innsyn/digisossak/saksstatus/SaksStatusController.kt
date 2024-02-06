@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.saksstatus
 
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
@@ -22,16 +24,18 @@ class SaksStatusController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/saksStatus", produces = ["application/json;charset=UTF-8"])
-    fun hentSaksStatuser(
+    suspend fun hentSaksStatuser(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<SaksStatusResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<SaksStatusResponse>> =
+        withContext(MDCContext()) {
+            tilgangskontroll.sjekkTilgang(token)
 
-        val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
-        if (saksStatuser.isEmpty()) {
-            return ResponseEntity(HttpStatus.NO_CONTENT)
+            val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
+            if (saksStatuser.isEmpty()) {
+                ResponseEntity(HttpStatus.NO_CONTENT)
+            } else {
+                ResponseEntity.ok(saksStatuser)
+            }
         }
-        return ResponseEntity.ok(saksStatuser)
-    }
 }

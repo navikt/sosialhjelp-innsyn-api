@@ -1,10 +1,11 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -65,9 +66,9 @@ class SaksOversiktItest {
     @Test
     fun `skal hente liste med saker`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        every { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
+        coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
 
-        every { soknadApiClient.getSvarUtSoknader(any()) } returns emptyList()
+        coEvery { soknadApiClient.getSvarUtSoknader(any()) } returns emptyList()
 
         webClient
             .get()
@@ -77,7 +78,7 @@ class SaksOversiktItest {
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 1) { fiksClient.hentAlleDigisosSaker(any()) }
+        coVerify(exactly = 1) { fiksClient.hentAlleDigisosSaker(any()) }
     }
 
     @Test
@@ -86,13 +87,13 @@ class SaksOversiktItest {
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
         val soknad = JsonSoknad()
 
-        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
-        every { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
-        every { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
-        every { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
-        every { norgClient.hentNavEnhet(any()) } returns navEnhet
+        coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
+        coEvery { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
+        coEvery { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
+        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
+        coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
-        every { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) } returns soknad
+        coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) } returns soknad
 
         webClient
             .get()
@@ -102,9 +103,9 @@ class SaksOversiktItest {
             .exchange()
             .expectStatus().isOk
 
-        verify(exactly = 2) { fiksClient.hentDigisosSak(any(), any(), any()) }
-        verify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
-        verify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
+        coVerify(exactly = 2) { fiksClient.hentDigisosSak(any(), any(), any()) }
+        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
+        coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
     }
 
     @Test

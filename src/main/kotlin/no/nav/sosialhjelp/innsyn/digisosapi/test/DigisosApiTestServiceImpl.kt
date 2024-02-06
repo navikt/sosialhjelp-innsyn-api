@@ -17,7 +17,7 @@ class DigisosApiTestServiceImpl(
     private val virusScanner: VirusScanner,
     private val dokumentlagerClient: DokumentlagerClient,
 ) : DigisosApiTestService {
-    override fun oppdaterDigisosSak(
+    override suspend fun oppdaterDigisosSak(
         fiksDigisosId: String?,
         digisosApiWrapper: DigisosApiWrapper,
     ): String? {
@@ -39,7 +39,7 @@ class DigisosApiTestServiceImpl(
         return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 
-    override fun hentInnsynsfil(
+    override suspend fun hentInnsynsfil(
         fiksDigisosId: String,
         token: String,
     ): String? {

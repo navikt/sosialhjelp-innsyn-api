@@ -20,7 +20,7 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 class VedleggService(
     private val fiksClient: FiksClient,
 ) {
-    fun hentAlleOpplastedeVedlegg(
+    suspend fun hentAlleOpplastedeVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
         token: String,
@@ -31,7 +31,7 @@ class VedleggService(
         return soknadVedlegg.plus(ettersendteVedlegg)
     }
 
-    fun hentSoknadVedleggMedStatus(
+    suspend fun hentSoknadVedleggMedStatus(
         status: String,
         digisosSak: DigisosSak,
         token: String,
@@ -60,7 +60,7 @@ class VedleggService(
         return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
-    fun hentEttersendteVedlegg(
+    suspend fun hentEttersendteVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
         token: String,
@@ -109,7 +109,7 @@ class VedleggService(
         return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
-    private fun hentVedleggSpesifikasjon(
+    private suspend fun hentVedleggSpesifikasjon(
         digisosSak: DigisosSak,
         dokumentlagerId: String,
         token: String,

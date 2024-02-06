@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
@@ -21,13 +23,14 @@ class HendelseController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
-    fun hentHendelser(
+    suspend fun hentHendelser(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<HendelseResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<HendelseResponse>> =
+        withContext(MDCContext()) {
+            tilgangskontroll.sjekkTilgang(token)
 
-        val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
-        return ResponseEntity.ok(hendelser)
-    }
+            val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
+            ResponseEntity.ok(hendelser)
+        }
 }

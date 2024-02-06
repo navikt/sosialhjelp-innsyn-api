@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
@@ -40,7 +41,7 @@ class DigisosApiTestController(
         fiksDigisosId: String?,
         @RequestBody body: String,
     ): ResponseEntity<String> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             val json = objectMapper.writeValueAsString(objectMapper.readTree(body).at("/sak/soker"))
             JsonSosialhjelpValidator.ensureValidInnsyn(json)
 
@@ -58,7 +59,7 @@ class DigisosApiTestController(
         @PathVariable fiksDigisosId: String,
         @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<String> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             val dokumentlagerId = digisosApiTestService.lastOppFil(fiksDigisosId, file)
 
             ResponseEntity.ok(dokumentlagerId)

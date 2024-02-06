@@ -2,7 +2,6 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
-import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
@@ -26,6 +25,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -54,7 +54,7 @@ class VedleggController(
         @PathVariable fiksDigisosId: String,
         @RequestParam("files") files: MutableList<MultipartFile>,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-        request: HttpServletRequest,
+        request: ServerHttpRequest,
     ): ResponseEntity<List<OppgaveOpplastingResponse>> =
         withContext(MDCContext() + RequestAttributesContext()) {
             log.info("Forsøker å starter ettersendelse")

@@ -4,6 +4,7 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
@@ -39,10 +40,11 @@ class SaksOversiktController(
     @GetMapping("/saker")
     suspend fun hentAlleSaker(
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-    ): ResponseEntity<List<SaksListeResponse>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
+    ): ResponseEntity<List<SaksListeResponse>> {
+        log.info("Subject thingy på toppen av alt: ${SubjectHandlerUtils.getUserIdFromToken()}")
+        return withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
-
+            log.info("Subject thingy i controller: ${SubjectHandlerUtils.getUserIdFromToken()}")
             val alleSaker =
                 try {
                     saksOversiktService.hentAlleSaker(token)
@@ -53,6 +55,7 @@ class SaksOversiktController(
             log.info("Hentet alle (${alleSaker.size}) søknader for bruker, fra DigisosApi og fra SvarUt (via soknad-api).")
             ResponseEntity.ok().body(alleSaker)
         }
+    }
 
     @GetMapping("/saksDetaljer")
     suspend fun hentSaksDetaljer(

@@ -4,6 +4,9 @@ import kotlinx.coroutines.ThreadContextElement
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -34,7 +37,6 @@ class HendelseController(
     ): ResponseEntity<List<HendelseResponse>> =
         withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
-
             val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
             ResponseEntity.ok(hendelser)
         }
@@ -66,3 +68,30 @@ class RequestAttributesContext(
         }
     }
 }
+
+//class SubjectHandlerContext(
+//    private val subjectHandler: SubjectHandler = SubjectHandlerUtils.getUserIdFromToken(),
+//) : ThreadContextElement<RequestAttributes?>, AbstractCoroutineContextElement(Key) {
+//    companion object Key : CoroutineContext.Key<RequestAttributesContext>
+//
+//    override fun updateThreadContext(context: CoroutineContext): RequestAttributes? {
+//        val oldState = RequestContextHolder.getRequestAttributes()
+//        setCurrent(requestAttributes)
+//        return oldState
+//    }
+//
+//    override fun restoreThreadContext(
+//        context: CoroutineContext,
+//        oldState: RequestAttributes?,
+//    ) {
+//        setCurrent(oldState)
+//    }
+//
+//    private fun setCurrent(attributes: RequestAttributes?) {
+//        if (attributes == null) {
+//            RequestContextHolder.resetRequestAttributes()
+//        } else {
+//            RequestContextHolder.setRequestAttributes(attributes)
+//        }
+//    }
+//}

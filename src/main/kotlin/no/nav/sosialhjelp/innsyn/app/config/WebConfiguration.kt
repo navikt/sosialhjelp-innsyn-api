@@ -1,58 +1,38 @@
-import jakarta.servlet.Filter
-import jakarta.servlet.FilterChain
-import jakarta.servlet.ServletRequest
-import jakarta.servlet.ServletResponse
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletRequestWrapper
-import org.springframework.boot.web.servlet.FilterRegistrationBean
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Component
+import org.springframework.web.server.CoWebFilter
+import org.springframework.web.server.CoWebFilterChain
+import org.springframework.web.server.ServerWebExchange
+import java.net.URI
+import java.net.URISyntaxException
 
-@Configuration
-class WebConfig {
-    @Bean
-    fun trailingSlashRedirectFilter(): Filter {
-        return TrailingSlashRedirectFilter()
-    }
+@Component
+class TrailingSlashRedirectFilter : CoWebFilter() {
 
-    @Bean
-    fun trailingSlashFilter(): FilterRegistrationBean<Filter> {
-        val registrationBean = FilterRegistrationBean<Filter>()
-        registrationBean.filter = trailingSlashRedirectFilter()
-        registrationBean.addUrlPatterns("/*")
-        return registrationBean
-    }
-}
+    override suspend fun filter(exchange: ServerWebExchange, chain: CoWebFilterChain) {
 
-class TrailingSlashRedirectFilter : Filter {
-    override fun doFilter(
-        request: ServletRequest,
-        response: ServletResponse?,
-        chain: FilterChain,
-    ) {
-        val httpRequest = request as HttpServletRequest
-        val path = httpRequest.requestURI
-        if (path.endsWith("/")) {
-            val newPath = path.substring(0, path.length - 1)
-            val newRequest: HttpServletRequest = CustomHttpServletRequestWrapper(httpRequest, newPath)
-            chain.doFilter(newRequest, response)
-        } else {
-            chain.doFilter(request, response)
+        val originalUri = exchange.request.uri;
+
+        if (originalUri.path.endsWith("/")) {
+            val originalPath = originalUri.getPath();
+            val newPath = originalPath.substring(0, originalPath.length - 1); // ignore trailing slash
+            try {
+                val newUri = URI(
+                    originalUri.scheme,
+                    originalUri.getUserInfo(),
+                    originalUri.host,
+                    originalUri.port,
+                    newPath,
+                    originalUri.getQuery(),
+                    originalUri.getFragment(),
+                );
+
+                val response = exchange.response;
+                response.headers.location = newUri;
+                return
+            } catch (e: URISyntaxException) {
+                throw IllegalStateException(e.message, e);
+            }
         }
-    }
-}
-
-private class CustomHttpServletRequestWrapper(request: HttpServletRequest?, private val newPath: String) : HttpServletRequestWrapper(
-    request,
-) {
-    override fun getRequestURI(): String {
-        return newPath
-    }
-
-    override fun getRequestURL(): StringBuffer {
-        val url = StringBuffer()
-        url.append(scheme).append("://").append(serverName).append(":").append(serverPort)
-            .append(newPath)
-        return url
+        return chain.filter(exchange);
     }
 }

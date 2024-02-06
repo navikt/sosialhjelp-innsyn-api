@@ -2,7 +2,6 @@ package no.nav.sosialhjelp.innsyn.idporten
 
 import com.nimbusds.oauth2.sdk.AuthorizationResponse
 import com.nimbusds.oauth2.sdk.id.State
-import jakarta.servlet.http.HttpServletRequest
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.idporten.CachePrefixes.LOGIN_REDIRECT_CACHE_PREFIX
@@ -13,6 +12,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -30,7 +30,6 @@ class IdPortenController(
     @Unprotected
     @GetMapping("/oauth2/login")
     fun login(
-        request: HttpServletRequest,
         @RequestParam("goto") redirectPath: String?,
     ): ResponseEntity<String> {
         val loginId = UUID.randomUUID().toString()
@@ -40,12 +39,12 @@ class IdPortenController(
 
     @Unprotected
     @GetMapping("/oauth2/callback") // samme som 'redirectPath' i nais.yaml
-    fun handleCallback(request: HttpServletRequest): ResponseEntity<String> {
-        val redirectUri = request.requestURL.append('?').append(request.queryString).toString()
+    fun handleCallback(request: ServerHttpRequest): ResponseEntity<String> {
+        val redirectUri = request.uri.path + '?' + request.uri.rawQuery
         val response = AuthorizationResponse.parse(URI(redirectUri))
 
         val loginId =
-            request.cookies?.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
+            request.cookies[LOGIN_ID_COOKIE]?.joinToString()
                 ?: throw TilgangskontrollException("No login_id found from cookie")
         val state =
             redisService.get("$STATE_CACHE_PREFIX$loginId", State::class.java)
@@ -83,8 +82,8 @@ class IdPortenController(
      */
     @Unprotected
     @GetMapping("/oauth2/slo")
-    fun logout(request: HttpServletRequest): ResponseEntity<String> {
-        val loginId = request.cookies?.firstOrNull { it.name == LOGIN_ID_COOKIE }?.value
+    fun logout(request: ServerHttpRequest): ResponseEntity<String> {
+        val loginId = request.cookies[LOGIN_ID_COOKIE]?.joinToString()
 
         val endSessionRedirectUrl = idPortenClient.getEndSessionRedirectUri(loginId)
 

@@ -199,6 +199,7 @@ class FiksClientImpl(
 
     override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> =
         withContext(Dispatchers.IO) {
+            log.info("Subject thingy i IO contexten: ${SubjectHandlerUtils.getUserIdFromToken()}")
             val digisosSaker: List<DigisosSak> =
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)

@@ -1,11 +1,11 @@
 package no.nav.sosialhjelp.innsyn.app.xsrf
 
-import jakarta.servlet.http.HttpServletRequest
 import no.nav.sosialhjelp.innsyn.app.exceptions.XsrfException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.redis.XSRF_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.utils.sha256
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.stereotype.Component
 import java.security.NoSuchAlgorithmException
 import java.time.LocalDateTime
@@ -57,9 +57,9 @@ class XsrfGenerator(
         return redisService.get(XSRF_KEY_PREFIX + redisKey, String::class.java)
     }
 
-    fun sjekkXsrfToken(request: HttpServletRequest) {
+    fun sjekkXsrfToken(request: ServerHttpRequest) {
         val fnr = SubjectHandlerUtils.getUserIdFromToken()
-        val xsrfRequestString = request.getHeader("XSRF-TOKEN-INNSYN-API")
+        val xsrfRequestString = request.headers["XSRF-TOKEN-INNSYN-API"]?.first()
 
         val yesterday = LocalDateTime.now().minusDays(1)
 

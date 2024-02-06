@@ -59,7 +59,7 @@ dependencies {
 
 //    Springdoc
     implementation(libs.springdoc.openapi.starter.common)
-    implementation(libs.springdoc.openapi.starter.webmvc.ui)
+    implementation(libs.springdoc.openapi.starter.webflux.ui)
 
 //    Fiks-kryptering
     implementation(libs.fiks.kryptering)

@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -13,6 +12,7 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -66,7 +66,7 @@ class KlageController(
         @PathVariable fiksDigisosId: String,
         @RequestBody body: InputKlage,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-        request: HttpServletRequest,
+        request: ServerHttpRequest,
     ): ResponseEntity<Unit> =
         withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)

@@ -1,8 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
-import jakarta.servlet.http.Cookie
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -15,7 +12,11 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
 import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.ResponseCookie
+import org.springframework.http.ResponseCookie.ResponseCookieBuilder
 import org.springframework.http.ResponseEntity
+import org.springframework.http.server.reactive.ServerHttpRequest
+import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestHeader
@@ -34,8 +35,8 @@ class SoknadsStatusController(
     suspend fun hentSoknadsStatus(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-        response: HttpServletResponse,
-        request: HttpServletRequest,
+        response: ServerHttpResponse,
+        request: ServerHttpRequest,
     ): ResponseEntity<SoknadsStatusResponse> =
         withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
@@ -55,10 +56,7 @@ class SoknadsStatusController(
             )
         }
 
-    private fun xsrfCookie(): Cookie {
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken())
-        xsrfCookie.path = "/sosialhjelp/innsyn"
-        xsrfCookie.isHttpOnly = false
-        return xsrfCookie
-    }
+    private fun xsrfCookie(): ResponseCookie =
+        ResponseCookie.from("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken())
+            .httpOnly(false).path("/sosialhjelp/innsyn").build()
 }

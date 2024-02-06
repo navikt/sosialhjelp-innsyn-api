@@ -4,6 +4,7 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -30,7 +31,7 @@ class UtbetalingerController(
         @RequestHeader(value = AUTHORIZATION) token: String,
         @RequestParam(defaultValue = "3") month: Int,
     ): ResponseEntity<List<UtbetalingerResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             try {
@@ -49,7 +50,7 @@ class UtbetalingerController(
     suspend fun hentNyeUtbetalinger(
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             try {
@@ -68,7 +69,7 @@ class UtbetalingerController(
     suspend fun hentTidligereUtbetalinger(
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> =
-        withContext(MDCContext()) {
+        withContext(MDCContext() + RequestAttributesContext()) {
             tilgangskontroll.sjekkTilgang(token)
 
             try {

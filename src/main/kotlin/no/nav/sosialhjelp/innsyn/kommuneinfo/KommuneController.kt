@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,24 +27,26 @@ class KommuneController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/kommune")
-    suspend fun hentKommuneInfo(
+    fun hentKommuneInfo(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<KommuneResponse> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
+                val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
 
-            ResponseEntity.ok().body(
-                KommuneResponse(
-                    erInnsynDeaktivert = kommuneInfo == null || !kommuneInfo.kanOppdatereStatus,
-                    erInnsynMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertOppdateringer,
-                    erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
-                    erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak,
-                    tidspunkt = Date(),
-                    kommunenummer = kommuneInfo?.kommunenummer,
-                ),
-            )
+                ResponseEntity.ok().body(
+                    KommuneResponse(
+                        erInnsynDeaktivert = kommuneInfo == null || !kommuneInfo.kanOppdatereStatus,
+                        erInnsynMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertOppdateringer,
+                        erInnsendingEttersendelseDeaktivert = kommuneInfo == null || !kommuneInfo.kanMottaSoknader,
+                        erInnsendingEttersendelseMidlertidigDeaktivert = kommuneInfo == null || kommuneInfo.harMidlertidigDeaktivertMottak,
+                        tidspunkt = Date(),
+                        kommunenummer = kommuneInfo?.kommunenummer,
+                    ),
+                )
+            }
         }
 }

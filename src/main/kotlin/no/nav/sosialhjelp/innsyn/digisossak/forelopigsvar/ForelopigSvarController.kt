@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.forelopigsvar
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,15 +25,17 @@ class ForelopigSvarController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/forelopigSvar")
-    suspend fun hentForelopigSvarStatus(
+    fun hentForelopigSvarStatus(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ): ResponseEntity<ForelopigSvarResponse> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            val forelopigSvarResponse: ForelopigSvarResponse = forelopigSvarService.hentForelopigSvar(fiksDigisosId, token)
+                val forelopigSvarResponse: ForelopigSvarResponse = forelopigSvarService.hentForelopigSvar(fiksDigisosId, token)
 
-            ResponseEntity.ok().body(forelopigSvarResponse)
+                ResponseEntity.ok().body(forelopigSvarResponse)
+            }
         }
 }

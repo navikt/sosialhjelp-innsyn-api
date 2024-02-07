@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
 import kotlinx.coroutines.ThreadContextElement
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -8,6 +9,7 @@ import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
+import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -28,24 +30,29 @@ class HendelseController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
-    suspend fun hentHendelser(
+    fun hentHendelser(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<HendelseResponse>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
-            ResponseEntity.ok(hendelser)
+                val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
+                ResponseEntity.ok(hendelser)
+            }
         }
 }
 
 class RequestAttributesContext(
     private val requestAttributes: RequestAttributes? = RequestContextHolder.getRequestAttributes(),
 ) : ThreadContextElement<RequestAttributes?>, AbstractCoroutineContextElement(Key) {
+    private val log by logger()
+
     companion object Key : CoroutineContext.Key<RequestAttributesContext>
 
     override fun updateThreadContext(context: CoroutineContext): RequestAttributes? {
+        log.info("Oppdaterer tråd context på tråd: ${Thread.currentThread().name}")
         val oldState = RequestContextHolder.getRequestAttributes()
         setCurrent(requestAttributes)
         return oldState
@@ -55,6 +62,7 @@ class RequestAttributesContext(
         context: CoroutineContext,
         oldState: RequestAttributes?,
     ) {
+        log.info("Restorer context på tråd: ${Thread.currentThread().name} med context: $oldState")
         setCurrent(oldState)
     }
 

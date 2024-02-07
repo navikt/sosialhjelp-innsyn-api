@@ -197,8 +197,8 @@ class FiksClientImpl(
             dokument.also { lagreTilCache(cacheKey, it, dokumentTTL) }
         }
 
-    override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> =
-        withContext(Dispatchers.IO) {
+    override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
+        return withContext(Dispatchers.IO) {
             val digisosSaker: List<DigisosSak> =
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
@@ -219,6 +219,7 @@ class FiksClientImpl(
 
             digisosSaker.onEach { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
         }
+    }
 
     override suspend fun lastOppNyEttersendelse(
         files: List<FilForOpplasting>,

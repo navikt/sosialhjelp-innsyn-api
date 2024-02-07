@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
@@ -50,55 +51,59 @@ class VedleggController(
 ) {
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    suspend fun sendVedlegg(
+    fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
         @RequestParam("files") rawFiles: List<MultipartFile>,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
         request: HttpServletRequest,
     ): ResponseEntity<List<OppgaveOpplastingResponse>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            log.info("Forsøker å starter ettersendelse")
-            tilgangskontroll.sjekkTilgang(token)
-            xsrfGenerator.sjekkXsrfToken(request)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                log.info("Forsøker å starter ettersendelse")
+                tilgangskontroll.sjekkTilgang(token)
+                xsrfGenerator.sjekkXsrfToken(request)
 
-            val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
-            validateFileListNotEmpty(files)
+                val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
+                validateFileListNotEmpty(files)
 
-            val oppgaveValideringList =
-                vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
-            ResponseEntity.ok(mapToResponse(oppgaveValideringList))
+                val oppgaveValideringList =
+                    vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+                ResponseEntity.ok(mapToResponse(oppgaveValideringList))
+            }
         }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
-    suspend fun hentVedlegg(
+    fun hentVedlegg(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ): ResponseEntity<List<VedleggResponse>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
-            val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-            val model = eventService.createModel(digisosSak, token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
+                val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+                val model = eventService.createModel(digisosSak, token)
 
-            val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(digisosSak, model, token)
-            if (internalVedleggList.isEmpty()) {
-                return@withContext ResponseEntity(HttpStatus.NO_CONTENT)
-            }
-            // mapper til en flat liste av VedleggResponse
-            val vedleggResponses =
-                internalVedleggList
-                    .flatMap {
-                        it.dokumentInfoList.map { dokumentInfo ->
-                            VedleggResponse(
-                                removeUUIDFromFilename(dokumentInfo.filnavn),
-                                dokumentInfo.storrelse,
-                                hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
-                                it.type,
-                                it.tilleggsinfo,
-                                it.tidspunktLastetOpp,
-                            )
+                val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(digisosSak, model, token)
+                if (internalVedleggList.isEmpty()) {
+                    return@withContext ResponseEntity(HttpStatus.NO_CONTENT)
+                }
+                // mapper til en flat liste av VedleggResponse
+                val vedleggResponses =
+                    internalVedleggList
+                        .flatMap {
+                            it.dokumentInfoList.map { dokumentInfo ->
+                                VedleggResponse(
+                                    removeUUIDFromFilename(dokumentInfo.filnavn),
+                                    dokumentInfo.storrelse,
+                                    hentDokumentlagerUrl(clientProperties, dokumentInfo.dokumentlagerDokumentId),
+                                    it.type,
+                                    it.tilleggsinfo,
+                                    it.tidspunktLastetOpp,
+                                )
+                            }
                         }
-                    }
-            ResponseEntity.ok(vedleggResponses.distinct())
+                ResponseEntity.ok(vedleggResponses.distinct())
+            }
         }
 
     private fun mapToResponse(oppgaveValideringList: List<OppgaveValidering>) =

@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.saksstatus
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -25,18 +26,20 @@ class SaksStatusController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/saksStatus", produces = ["application/json;charset=UTF-8"])
-    suspend fun hentSaksStatuser(
+    fun hentSaksStatuser(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<SaksStatusResponse>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
-            if (saksStatuser.isEmpty()) {
-                ResponseEntity(HttpStatus.NO_CONTENT)
-            } else {
-                ResponseEntity.ok(saksStatuser)
+                val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
+                if (saksStatuser.isEmpty()) {
+                    ResponseEntity(HttpStatus.NO_CONTENT)
+                } else {
+                    ResponseEntity.ok(saksStatuser)
+                }
             }
         }
 }

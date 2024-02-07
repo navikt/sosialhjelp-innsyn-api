@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -27,59 +28,65 @@ class UtbetalingerController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/utbetalinger")
-    suspend fun hentUtbetalinger(
+    fun hentUtbetalinger(
         @RequestHeader(value = AUTHORIZATION) token: String,
         @RequestParam(defaultValue = "3") month: Int,
     ): ResponseEntity<List<UtbetalingerResponse>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            try {
-                ResponseEntity.ok().body(utbetalingerService.hentUtbetalteUtbetalinger(token, month))
-            } catch (e: FiksClientException) {
-                if (e.status == HttpStatus.FORBIDDEN.value()) {
-                    log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
-                    ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-                } else {
-                    throw e
+                try {
+                    ResponseEntity.ok().body(utbetalingerService.hentUtbetalteUtbetalinger(token, month))
+                } catch (e: FiksClientException) {
+                    if (e.status == HttpStatus.FORBIDDEN.value()) {
+                        log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
+                        ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+                    } else {
+                        throw e
+                    }
                 }
             }
         }
 
     @GetMapping("/nye")
-    suspend fun hentNyeUtbetalinger(
+    fun hentNyeUtbetalinger(
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            try {
-                ResponseEntity.ok().body(utbetalingerService.hentNyeUtbetalinger(token))
-            } catch (e: FiksClientException) {
-                if (e.status == HttpStatus.FORBIDDEN.value()) {
-                    log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
-                    ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-                } else {
-                    throw e
+                try {
+                    ResponseEntity.ok().body(utbetalingerService.hentNyeUtbetalinger(token))
+                } catch (e: FiksClientException) {
+                    if (e.status == HttpStatus.FORBIDDEN.value()) {
+                        log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
+                        ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+                    } else {
+                        throw e
+                    }
                 }
             }
         }
 
     @GetMapping("/tidligere")
-    suspend fun hentTidligereUtbetalinger(
+    fun hentTidligereUtbetalinger(
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            try {
-                ResponseEntity.ok().body(utbetalingerService.hentTidligereUtbetalinger(token))
-            } catch (e: FiksClientException) {
-                if (e.status == HttpStatus.FORBIDDEN.value()) {
-                    log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
-                    ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-                } else {
-                    throw e
+                try {
+                    ResponseEntity.ok().body(utbetalingerService.hentTidligereUtbetalinger(token))
+                } catch (e: FiksClientException) {
+                    if (e.status == HttpStatus.FORBIDDEN.value()) {
+                        log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
+                        ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+                    } else {
+                        throw e
+                    }
                 }
             }
         }

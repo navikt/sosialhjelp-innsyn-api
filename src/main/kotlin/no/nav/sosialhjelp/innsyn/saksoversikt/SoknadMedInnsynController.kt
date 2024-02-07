@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -23,11 +24,13 @@ class SoknadMedInnsynController(
     private val soknadMedInnsynService: SoknadMedInnsynService,
 ) {
     @GetMapping("/harSoknaderMedInnsyn", produces = ["application/json;charset=UTF-8"])
-    suspend fun harSoknaderMedInnsyn(
+    fun harSoknaderMedInnsyn(
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ): ResponseEntity<Boolean> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
-            ResponseEntity.ok(soknadMedInnsynService.harSoknaderMedInnsyn(token))
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
+                ResponseEntity.ok(soknadMedInnsynService.harSoknaderMedInnsyn(token))
+            }
         }
 }

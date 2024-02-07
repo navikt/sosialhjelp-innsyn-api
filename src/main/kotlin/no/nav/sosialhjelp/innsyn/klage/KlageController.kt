@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -37,43 +38,47 @@ class KlageController(
     private val clientProperties: ClientProperties,
 ) {
     @GetMapping("/{fiksDigisosId}/klage", produces = ["application/json;charset=UTF-8"])
-    suspend fun hentKlager(
+    fun hentKlager(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ): ResponseEntity<List<KlageDto>> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            val klager = klageService.hentKlager(fiksDigisosId, token)
+                val klager = klageService.hentKlager(fiksDigisosId, token)
 
-            val klageDtos =
-                klager.map {
-                    KlageDto(
-                        FilUrl(dato = LocalDate.now(), url = it.filRef.toDokumentLagerUrl(), id = it.filRef),
-                        status = it.status,
-                        nyttVedtakUrl = FilUrl(LocalDate.now(), it.vedtakRef.first().toDokumentLagerUrl(), it.vedtakRef.first()),
-                        paaklagetVedtakRefs = it.vedtakRef,
-                    )
-                }
-            ResponseEntity.ok(klageDtos)
+                val klageDtos =
+                    klager.map {
+                        KlageDto(
+                            FilUrl(dato = LocalDate.now(), url = it.filRef.toDokumentLagerUrl(), id = it.filRef),
+                            status = it.status,
+                            nyttVedtakUrl = FilUrl(LocalDate.now(), it.vedtakRef.first().toDokumentLagerUrl(), it.vedtakRef.first()),
+                            paaklagetVedtakRefs = it.vedtakRef,
+                        )
+                    }
+                ResponseEntity.ok(klageDtos)
+            }
         }
 
     private fun String.toDokumentLagerUrl() =
         clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/$this?inline=true"
 
     @PostMapping("/{fiksDigisosId}/klage", consumes = ["application/json;charset=UTF-8"])
-    suspend fun sendKlage(
+    fun sendKlage(
         @PathVariable fiksDigisosId: String,
         @RequestBody body: InputKlage,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
         request: HttpServletRequest,
     ): ResponseEntity<Unit> =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
-            xsrfGenerator.sjekkXsrfToken(request)
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
+                xsrfGenerator.sjekkXsrfToken(request)
 
-            klageService.sendKlage(fiksDigisosId, body, token)
-            ResponseEntity.ok().build()
+                klageService.sendKlage(fiksDigisosId, body, token)
+                ResponseEntity.ok().build()
+            }
         }
 }
 

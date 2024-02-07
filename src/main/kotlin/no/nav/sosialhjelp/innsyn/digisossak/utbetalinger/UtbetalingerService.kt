@@ -66,13 +66,12 @@ class UtbetalingerService(
             log.info("Fant ingen søknader for bruker")
             return emptyList()
         }
-        
+
         return digisosSaker
             .filter { it.isNewerThanMonths(15) }
             .flatMap {
                 manedsutbetalinger(token, it, statusFilter)
             }
-
     }
 
     fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {

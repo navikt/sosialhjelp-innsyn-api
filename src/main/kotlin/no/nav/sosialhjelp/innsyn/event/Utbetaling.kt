@@ -13,7 +13,7 @@ private val log = LoggerFactory.getLogger(JsonUtbetaling::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     if (hendelse.utbetalingsdato == null) {
-        log.debug(
+        log.info(
             "utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.",
         )
     }

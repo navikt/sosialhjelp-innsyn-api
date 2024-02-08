@@ -53,7 +53,6 @@ internal class VedleggOpplastingServiceTest {
             redisService,
             ettersendelsePdfGenerator,
             dokumentlagerClient,
-            unleashClient,
         )
 
     private val mockDigisosSak: DigisosSak = mockk(relaxed = true)

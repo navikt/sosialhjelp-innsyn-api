@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import io.getunleash.Unleash
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -38,12 +37,11 @@ class VedleggOpplastingService(
     private val redisService: RedisService,
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
     private val dokumentlagerClient: DokumentlagerClient,
-    private val unleash: Unleash,
 ) {
     fun sendVedleggTilFiks(
         digisosId: String,
         files: List<MultipartFile>,
-        metadata: MutableList<OpplastetVedleggMetadata>,
+        metadata: List<OpplastetVedleggMetadata>,
         token: String,
     ): List<OppgaveValidering> {
         log.info("Starter ettersendelse med ${files.size} filer.")
@@ -52,7 +50,7 @@ class VedleggOpplastingService(
         if (harOppgaverMedValideringsfeil(oppgaveValideringer)) {
             return oppgaveValideringer
         }
-        metadata.removeIf { it.filer.isEmpty() }
+        val metadataWithoutEmpties = metadata.filter { it.filer.isNotEmpty() }
 
         val valideringer = oppgaveValideringer.flatMap { it.filer }
 
@@ -62,13 +60,13 @@ class VedleggOpplastingService(
                 file.originalFilename?.let { sanitizeFileName(it) }
                     ?: throw BadStateException("Kan ikke sende fil når originalFilename er null")
             val filename = createFilename(originalFilename, valideringer)
-            renameFilenameInMetadataJson(originalFilename, filename, metadata)
+            renameFilenameInMetadataJson(originalFilename, filename, metadataWithoutEmpties)
             val detectedMimetype = detectTikaType(file.inputStream)
             filerForOpplasting.add(FilForOpplasting(filename, getMimetype(detectedMimetype), file.size, file.inputStream))
         }
 
         // Generere pdf og legge til i listen over filer som skal krypteres og lastes opp
-        val ettersendelsePdf = createEttersendelsePdf(metadata, digisosId, token)
+        val ettersendelsePdf = createEttersendelsePdf(metadataWithoutEmpties, digisosId, token)
         filerForOpplasting.add(ettersendelsePdf)
 
         val krypteringFutureList = Collections.synchronizedList(ArrayList<CompletableFuture<Void>>(filerForOpplasting.size))
@@ -81,7 +79,7 @@ class VedleggOpplastingService(
                         FilForOpplasting(file.filnavn, file.mimetype, file.storrelse, inputStream)
                     }
 
-            val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadata)
+            val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
             try {
                 fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
             } catch (e: FiksClientFileExistsException) {
@@ -119,7 +117,7 @@ class VedleggOpplastingService(
     private fun harFilerMedValideringsfeil(oppgave: OppgaveValidering) = oppgave.filer.any { it.status.result != ValidationValues.OK }
 
     fun createEttersendelsePdf(
-        metadata: MutableList<OpplastetVedleggMetadata>,
+        metadata: List<OpplastetVedleggMetadata>,
         digisosId: String,
         token: String,
     ): FilForOpplasting {
@@ -141,7 +139,7 @@ class VedleggOpplastingService(
 
     fun createJsonVedleggSpesifikasjon(
         files: List<MultipartFile>,
-        metadata: MutableList<OpplastetVedleggMetadata>,
+        metadata: List<OpplastetVedleggMetadata>,
     ): JsonVedleggSpesifikasjon {
         var filIndex = 0
         return JsonVedleggSpesifikasjon()
@@ -233,7 +231,7 @@ class VedleggOpplastingService(
     fun renameFilenameInMetadataJson(
         originalFilename: String?,
         newFilename: String,
-        metadata: MutableList<OpplastetVedleggMetadata>,
+        metadata: List<OpplastetVedleggMetadata>,
     ) {
         metadata.forEach { data ->
             data.filer.forEach { file ->
@@ -247,7 +245,7 @@ class VedleggOpplastingService(
     }
 
     fun validateFilenameMatchInMetadataAndFiles(
-        metadata: MutableList<OpplastetVedleggMetadata>,
+        metadata: List<OpplastetVedleggMetadata>,
         files: List<MultipartFile>,
     ) {
         val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> sanitizeFileName(opplastetFil.filnavn) } }
@@ -287,7 +285,7 @@ class VedleggOpplastingService(
         return filnavnMetadataString + filnavnMultipartString
     }
 
-    fun getMetadataAsString(metadata: MutableList<OpplastetVedleggMetadata>): String {
+    fun getMetadataAsString(metadata: List<OpplastetVedleggMetadata>): String {
         var filstring = ""
         metadata.forEachIndexed { index, data -> filstring += "metadata[$index].filer.size: ${data.filer.size}, " }
         return filstring
@@ -307,7 +305,7 @@ class VedleggOpplastingService(
 
     fun validateFiler(
         files: List<MultipartFile>,
-        metadataListe: MutableList<OpplastetVedleggMetadata>,
+        metadataListe: List<OpplastetVedleggMetadata>,
     ): MutableList<OppgaveValidering> {
         val oppgaveValideringer = mutableListOf<OppgaveValidering>()
         validateFilenameMatchInMetadataAndFiles(metadataListe, files)

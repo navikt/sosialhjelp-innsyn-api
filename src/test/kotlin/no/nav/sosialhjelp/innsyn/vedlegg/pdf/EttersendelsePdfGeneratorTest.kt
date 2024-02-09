@@ -50,8 +50,14 @@ class EttersendelsePdfGeneratorTest {
     }
 
     @Test
-    fun `Ingen exception ved vedleggstype som inneholder en tabular`() {
-        val metadata: List<OpplastetVedleggMetadata> = listOf(OpplastetVedleggMetadata("\tabc", null, null, null, mutableListOf(), null))
+    fun `Ingen exception ved vedleggstype som inneholder en av de ulovlige tegnene`() {
+        val metadata: List<OpplastetVedleggMetadata> =
+            listOf(
+                OpplastetVedleggMetadata("\u0009abc", null, null, null, mutableListOf(), null),
+                OpplastetVedleggMetadata("abc\uF0B7", null, null, null, mutableListOf(), null),
+                OpplastetVedleggMetadata("abc\u001F", null, null, null, mutableListOf(), null),
+                OpplastetVedleggMetadata("abc\u000D", null, null, null, mutableListOf(), null),
+            )
 
         val bytesResult = runCatching { ettersendelsePdfGenerator.generate(metadata, ident) }
 

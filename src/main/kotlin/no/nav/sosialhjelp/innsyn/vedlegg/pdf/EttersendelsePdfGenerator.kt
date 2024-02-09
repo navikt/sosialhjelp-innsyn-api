@@ -30,8 +30,7 @@ class EttersendelsePdfGenerator {
 
                 metadata.forEach { vedlegg ->
                     pdf.addBlankLine()
-                    // Replace tab-character (\t or U+0009) bacause there is no glyph for that in the font we use (SourceSansPro-Regular)
-                    pdf.addText("Type: " + vedlegg.type.replace(Regex("\\x09"), " "))
+                    pdf.addText("Type: " + vedlegg.type.replaceUnsupportedCharacters())
                     vedlegg.filer.forEach { fil ->
                         pdf.addText("Filnavn: " + fil.filnavn)
                     }
@@ -44,3 +43,13 @@ class EttersendelsePdfGenerator {
         }
     }
 }
+
+/** Replace illegal characters bacause there is no glyph for that in the font we use (SourceSansPro-Regular):
+ * - U+0009: Tab character (\t)
+ * - U+000D: Carriage return (CR)
+ * - U+F0B7: Bullet point?
+ * - U+001F: No idea
+ **/
+private fun String.replaceUnsupportedCharacters() =
+    replace(Regex("[\\x09\\x0D]"), " ")
+        .replace(Regex("[\\uF0B7\\x1F]"), "")

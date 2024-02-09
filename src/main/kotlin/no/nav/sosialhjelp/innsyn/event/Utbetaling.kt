@@ -12,11 +12,6 @@ import java.math.BigDecimal
 private val log = LoggerFactory.getLogger(JsonUtbetaling::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
-    if (hendelse.utbetalingsdato == null) {
-        log.debug(
-            "utbetalingsdato er null, selv om leverandorene har kommunisert at de alltid sender denne.",
-        )
-    }
     if (hendelse.fom == null) log.info("utbetalingens start-periode (fom) er null")
     if (hendelse.tom == null) log.info("utbetalingens slutt-periode (tom) er null")
     if (hendelse.status == null) log.info("utbetalingsstatus er null")

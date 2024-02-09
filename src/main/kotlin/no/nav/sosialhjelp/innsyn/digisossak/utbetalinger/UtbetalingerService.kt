@@ -116,20 +116,34 @@ class UtbetalingerService(
         val foresteIMnd = foersteIManeden(yearMonth)
         val nye =
             manedUtbetalinger
-                .sortedBy { it.utbetalingsdato }
+                .asSequence()
+                .sortedBy { it.utbetalingsdato ?: it.forfallsdato }
                 .filter {
                     it.utbetalingsdato?.isAfter(foresteIMnd) ?: false ||
                         it.utbetalingsdato?.isEqual(foresteIMnd) ?: false ||
                         it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString()
+                }.filter {
+                    it.utbetalingsdato != null || it.forfallsdato != null
                 }
-                .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+                .groupBy {
+                    val year =
+                        it.utbetalingsdato?.year
+                            ?: it.forfallsdato?.year
+                            ?: error("Fant ikke en dato å gruppere utbetaling på (utbetalingsdato og forfallsdato er null)")
+                    val month =
+                        it.utbetalingsdato?.month
+                            ?: it.forfallsdato?.month
+                            ?: error("Fant ikke en dato å gruppere utbetaling på (utbetalingsdato og forfallsdato er null)")
+                    YearMonth.of(year, month)
+                }
                 .map { (key, value) ->
                     NyeOgTidligereUtbetalingerResponse(
                         ar = key.year,
                         maned = key.monthValue,
-                        utbetalingerForManed = value.sortedBy { it.utbetalingsdato },
+                        utbetalingerForManed = value.sortedBy { it.utbetalingsdato ?: it.forfallsdato },
                     )
                 }
+                .toList()
 
         return nye
     }
@@ -154,7 +168,7 @@ class UtbetalingerService(
     ): List<ManedUtbetaling> {
         val model = eventService.hentAlleUtbetalinger(token, digisosSak)
         return model.utbetalinger
-            .filter { it.utbetalingsDato != null && statusFilter(it.status) }
+            .filter { statusFilter(it.status) }
             .map { utbetaling ->
                 utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(digisosSak.kommunenummer)
                 ManedUtbetaling(

@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 @Component
 class EttersendelsePdfGenerator {
     fun generate(
-        metadata: MutableList<OpplastetVedleggMetadata>,
+        metadata: List<OpplastetVedleggMetadata>,
         fodselsnummer: String,
     ): ByteArray {
         return try {
@@ -30,7 +30,8 @@ class EttersendelsePdfGenerator {
 
                 metadata.forEach { vedlegg ->
                     pdf.addBlankLine()
-                    pdf.addText("Type: " + vedlegg.type)
+                    // Replace tab-character (\t or U+0009) bacause there is no glyph for that in the font we use (SourceSansPro-Regular)
+                    pdf.addText("Type: " + vedlegg.type.replace(Regex("\\x09"), " "))
                     vedlegg.filer.forEach { fil ->
                         pdf.addText("Filnavn: " + fil.filnavn)
                     }

@@ -38,6 +38,10 @@ fun InternalDigisosSoker.apply(
             }
             .toMutableList()
 
+    oppgaver.filter { it.tittel.contains(Regex("[^a-zA-ZæøåÆØÅ\\d :]")) }.onEach {
+        log.warn("Oppgavetittel inneholder")
+    }
+
     if (status == SoknadsStatus.FERDIGBEHANDLET) {
         log.warn("Dokumentasjon etterspurt etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")
     }

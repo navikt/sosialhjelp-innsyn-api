@@ -4,6 +4,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.OpplastetVedleggMetadata
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdfwriter.compress.CompressParameters
 import org.apache.pdfbox.preflight.parser.PreflightParser
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -35,7 +36,7 @@ class EttersendelsePdfGeneratorTest {
 
     @Test
     fun `skal generere pdfA`() {
-        val metadata = Collections.emptyList<OpplastetVedleggMetadata>()
+        val metadata = emptyList<OpplastetVedleggMetadata>()
 
         val bytes = ettersendelsePdfGenerator.generate(metadata, ident)
         val file = File("pdfaTest.pdf")
@@ -46,5 +47,14 @@ class EttersendelsePdfGeneratorTest {
         val result = PreflightParser.validate(file)
 
         Assertions.assertTrue(result.isValid)
+    }
+
+    @Test
+    fun `Ingen exception ved vedleggstype som inneholder en tabular`() {
+        val metadata: List<OpplastetVedleggMetadata> = listOf(OpplastetVedleggMetadata("\tabc", null, null, null, mutableListOf(), null))
+
+        val bytesResult = runCatching { ettersendelsePdfGenerator.generate(metadata, ident) }
+
+        assertThat(bytesResult.isSuccess).isTrue()
     }
 }

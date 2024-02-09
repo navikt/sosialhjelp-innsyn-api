@@ -49,7 +49,7 @@ class VedleggController(
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
-        @RequestParam("files") files: MutableList<MultipartFile>,
+        @RequestParam("files") rawFiles: List<MultipartFile>,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
         request: HttpServletRequest,
     ): ResponseEntity<List<OppgaveOpplastingResponse>> {
@@ -57,7 +57,7 @@ class VedleggController(
         tilgangskontroll.sjekkTilgang(token)
         xsrfGenerator.sjekkXsrfToken(request)
 
-        val metadata: MutableList<OpplastetVedleggMetadata> = getMetadataAndRemoveFromFileList(files)
+        val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
         validateFileListNotEmpty(files)
 
         val oppgaveValideringList = vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
@@ -107,18 +107,17 @@ class VedleggController(
             )
         }
 
-    private fun validateFileListNotEmpty(files: MutableList<MultipartFile>) {
+    private fun validateFileListNotEmpty(files: List<MultipartFile>) {
         if (files.isEmpty()) {
             throw IllegalStateException("Ingen filer i forsendelse")
         }
     }
 
-    private fun getMetadataAndRemoveFromFileList(files: MutableList<MultipartFile>): MutableList<OpplastetVedleggMetadata> {
+    private fun getMetadataAndRemoveFromFileList(files: List<MultipartFile>): Pair<List<OpplastetVedleggMetadata>, List<MultipartFile>> {
         val metadataJson =
             files.firstOrNull { it.originalFilename == "metadata.json" }
                 ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.size}")
-        files.removeIf { it.originalFilename == "metadata.json" }
-        return objectMapper.readValue(metadataJson.bytes)
+        return Pair(objectMapper.readValue<List<OpplastetVedleggMetadata>>(metadataJson.bytes), files - metadataJson)
     }
 
     fun removeUUIDFromFilename(filename: String): String {

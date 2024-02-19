@@ -52,7 +52,6 @@ class RequestAttributesContext(
     companion object Key : CoroutineContext.Key<RequestAttributesContext>
 
     override fun updateThreadContext(context: CoroutineContext): RequestAttributes? {
-        log.info("Oppdaterer tråd context på tråd: ${Thread.currentThread().name}")
         val oldState = RequestContextHolder.getRequestAttributes()
         setCurrent(requestAttributes)
         return oldState
@@ -62,7 +61,6 @@ class RequestAttributesContext(
         context: CoroutineContext,
         oldState: RequestAttributes?,
     ) {
-        log.info("Restorer context på tråd: ${Thread.currentThread().name} med context: $oldState")
         setCurrent(oldState)
     }
 

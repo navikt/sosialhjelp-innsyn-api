@@ -29,10 +29,10 @@ class DokumentlagerClientImpl(
 ) : DokumentlagerClient {
     private var cachedPublicKey: X509Certificate? = null
 
-    override suspend fun getDokumentlagerPublicKeyX509Certificate(): X509Certificate =
-        withContext(Dispatchers.IO) {
-            cachedPublicKey?.let { return@withContext it }
+    override suspend fun getDokumentlagerPublicKeyX509Certificate(): X509Certificate {
+        cachedPublicKey?.let { return it }
 
+        return withContext(Dispatchers.IO) {
             val publicKey =
                 runCatching {
                     fiksWebClient.get()
@@ -62,6 +62,7 @@ class DokumentlagerClientImpl(
                 throw IllegalStateException(e)
             }
         }
+    }
 
     companion object {
         private val log by logger()

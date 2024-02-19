@@ -10,6 +10,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -283,7 +284,7 @@ internal class FiksClientTest {
 
             val ettersendelsPdf = ByteArray(1)
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
-            coEvery { krypteringService.krypter(any(), any()) } returns fil1
+            coEvery { krypteringService.krypter(any(), any()) } returns (fil1 to Job().also { it.complete() })
 
             val files =
                 listOf(

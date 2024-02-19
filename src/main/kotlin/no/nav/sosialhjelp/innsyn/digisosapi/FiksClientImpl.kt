@@ -14,6 +14,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
@@ -247,7 +248,7 @@ class FiksClientImpl(
         }
 
         val responseEntity =
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO + RequestAttributesContext()) {
                 fiksWebClient.post()
                     .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
                     .header(HttpHeaders.AUTHORIZATION, token)

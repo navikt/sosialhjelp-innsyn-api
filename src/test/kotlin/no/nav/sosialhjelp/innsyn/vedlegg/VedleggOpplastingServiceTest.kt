@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.slot
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -89,7 +90,9 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal kalle FiksClient med gyldige filer for opplasting`() =
         runTest(timeout = 5.seconds) {
-            coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
+            coEvery {
+                krypteringService.krypter(any(), any())
+            } returns ("some test data for my input stream".byteInputStream() to Job().also { it.complete() })
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
             val ettersendelsPdf = ByteArray(1)
@@ -190,7 +193,9 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ikke alle filene blir validert ok`() =
         runTest(timeout = 5.seconds) {
-            coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
+            coEvery {
+                krypteringService.krypter(any(), any())
+            } returns ("some test data for my input stream".byteInputStream() to Job().also { it.complete() })
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
             val metadata =
@@ -255,7 +260,9 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal ikke gi feilmelding hvis pdf-filen er signert`() =
         runTest(timeout = 5.seconds) {
-            coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
+            coEvery {
+                krypteringService.krypter(any(), any())
+            } returns ("some test data for my input stream".byteInputStream() to Job().also { it.complete() })
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ByteArray(1)
 
@@ -298,7 +305,9 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er passord-beskyttet`() =
         runTest(timeout = 5.seconds) {
-            coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
+            coEvery {
+                krypteringService.krypter(any(), any())
+            } returns ("some test data for my input stream".byteInputStream() to Job().also { it.complete() })
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
             val filnavn1 = "test1.pdf"
@@ -334,7 +343,9 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal gi feilmelding hvis bilde er jfif`() =
         runTest(timeout = 5.seconds) {
-            coEvery { krypteringService.krypter(any(), any()) } returns "some test data for my input stream".byteInputStream()
+            coEvery {
+                krypteringService.krypter(any(), any())
+            } returns ("some test data for my input stream".byteInputStream() to Job().also { it.complete() })
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) } answers { nothing }
 
             val filnavn1 = "test1.jfif"

@@ -1,9 +1,6 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.slf4j.MDCContext
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -36,7 +33,7 @@ class VedleggOpplastingService(
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
     private val dokumentlagerClient: DokumentlagerClient,
 ) {
-    suspend fun sendVedleggTilFiks(
+    fun sendVedleggTilFiks(
         digisosId: String,
         files: List<MultipartFile>,
         metadata: List<OpplastetVedleggMetadata>,
@@ -44,7 +41,7 @@ class VedleggOpplastingService(
     ): List<OppgaveValidering> {
         log.info("Starter ettersendelse med ${files.size} filer.")
 
-        val oppgaveValideringer = validateFiler(files, metadata)
+        val oppgaveValideringer = runBlocking { validateFiler(files, metadata) }
         if (harOppgaverMedValideringsfeil(oppgaveValideringer)) {
             return oppgaveValideringer
         }
@@ -64,35 +61,34 @@ class VedleggOpplastingService(
         }
 
         // Generere pdf og legge til i listen over filer som skal krypteres og lastes opp
-        val ettersendelsePdf = createEttersendelsePdf(metadataWithoutEmpties, digisosId, token)
+        val ettersendelsePdf = runBlocking { createEttersendelsePdf(metadataWithoutEmpties, digisosId, token) }
         filerForOpplasting.add(ettersendelsePdf)
 
-        val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
+        val certificate = runBlocking { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate() }
         // Kjører kryptering i parallell
         val filerForOpplastingEtterKryptering =
-            withContext(Dispatchers.IO + MDCContext()) {
-                filerForOpplasting.associateWith {
-                    async {
-                        krypteringService.krypter(it.fil, certificate)
-                    }
-                }.map { (file, inputStream) ->
-                    FilForOpplasting(
-                        file.filnavn,
-                        file.mimetype,
-                        file.storrelse,
-                        inputStream.await(),
-                    )
-                }
+            filerForOpplasting.associateWith {
+                log.info("Starter kryptering på fil ${it.filnavn}")
+                val kryptert = krypteringService.krypter(it.fil, certificate)
+                log.info("Ferdig med kryptering på fil ${it.filnavn}")
+                kryptert
+            }.map { (file, inputStream) ->
+                FilForOpplasting(
+                    file.filnavn,
+                    file.mimetype,
+                    file.storrelse,
+                    inputStream,
+                )
             }
         val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
         try {
-            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
+            runBlocking { fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token) }
         } catch (e: FiksClientFileExistsException) {
             // ignorerer når filen allerede er lastet opp
         }
 
         // opppdater cache med digisossak
-        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
+        val digisosSak = runBlocking { fiksClient.hentDigisosSak(digisosId, token, false) }
         redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
 
         return oppgaveValideringer

@@ -71,16 +71,21 @@ class VedleggOpplastingService(
         // Kjører kryptering i parallell
         val filerForOpplastingEtterKryptering =
             withContext(Dispatchers.IO + MDCContext()) {
+                log.info("Starter kryptering parallelt")
                 filerForOpplasting.associateWith {
                     async {
-                        krypteringService.krypter(it.fil, certificate)
+                        log.info("Starter kryptering på fil ${it.filnavn}")
+                        val kryptert = krypteringService.krypter(it.fil, certificate)
+                        log.info("Ferdig med kryptering på fil ${it.filnavn}")
+                        kryptert
                     }
                 }.map { (file, inputStream) ->
                     FilForOpplasting(
                         file.filnavn,
                         file.mimetype,
                         file.storrelse,
-                        inputStream.await(),
+                        inputStream.also { log.info("Venter på fil ${file.filnavn}") }.await()
+                            .also { log.info("Ferdig med å vente på fil ${file.filnavn}") },
                     )
                 }
             }

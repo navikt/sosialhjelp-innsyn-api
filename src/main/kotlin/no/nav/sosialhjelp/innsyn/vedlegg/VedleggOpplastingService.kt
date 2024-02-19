@@ -1,9 +1,5 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.slf4j.MDCContext
-import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -70,19 +66,18 @@ class VedleggOpplastingService(
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
         // Kjører kryptering i parallell
         val filerForOpplastingEtterKryptering =
-            withContext(Dispatchers.IO + MDCContext()) {
-                filerForOpplasting.associateWith {
-                    async {
-                        krypteringService.krypter(it.fil, certificate)
-                    }
-                }.map { (file, inputStream) ->
-                    FilForOpplasting(
-                        file.filnavn,
-                        file.mimetype,
-                        file.storrelse,
-                        inputStream.await(),
-                    )
-                }
+            filerForOpplasting.associateWith {
+                log.info("Starter kryptering på fil ${it.filnavn}")
+                val kryptert = krypteringService.krypter(it.fil, certificate)
+                log.info("Ferdig med kryptering på fil ${it.filnavn}")
+                kryptert
+            }.map { (file, inputStream) ->
+                FilForOpplasting(
+                    file.filnavn,
+                    file.mimetype,
+                    file.storrelse,
+                    inputStream,
+                )
             }
         val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
         try {

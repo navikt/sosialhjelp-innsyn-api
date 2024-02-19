@@ -56,21 +56,18 @@ class VedleggController(
         @RequestParam("files") rawFiles: List<MultipartFile>,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
         request: HttpServletRequest,
-    ): ResponseEntity<List<OppgaveOpplastingResponse>> =
-        runBlocking {
-            withContext(MDCContext() + RequestAttributesContext()) {
-                log.info("Forsøker å starter ettersendelse")
-                tilgangskontroll.sjekkTilgang(token)
-                xsrfGenerator.sjekkXsrfToken(request)
+    ): ResponseEntity<List<OppgaveOpplastingResponse>> {
+        log.info("Forsøker å starter ettersendelse")
+        runBlocking { tilgangskontroll.sjekkTilgang(token) }
+        xsrfGenerator.sjekkXsrfToken(request)
 
-                val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
-                validateFileListNotEmpty(files)
+        val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
+        validateFileListNotEmpty(files)
 
-                val oppgaveValideringList =
-                    vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
-                ResponseEntity.ok(mapToResponse(oppgaveValideringList))
-            }
-        }
+        val oppgaveValideringList =
+            vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+        return ResponseEntity.ok(mapToResponse(oppgaveValideringList))
+    }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
     fun hentVedlegg(

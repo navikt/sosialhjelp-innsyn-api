@@ -1,12 +1,10 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
@@ -46,12 +44,9 @@ class SaksOversiktController(
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
                 tilgangskontroll.sjekkTilgang(token)
-                log.info("thingynhanhn: ${SubjectHandlerUtils.getUserIdFromToken()}")
                 val alleSaker =
                     try {
-                        saksOversiktService.hentAlleSaker(token).also {
-                            delay(1000)
-                        }
+                        saksOversiktService.hentAlleSaker(token)
                     } catch (e: FiksException) {
                         return@withContext ResponseEntity.status(503).build()
                     }

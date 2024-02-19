@@ -18,11 +18,11 @@ interface KrypteringService {
     ): InputStream
 }
 
+private val kryptering = CMSKrypteringImpl()
+
 @Profile("!mock-alt")
 @Component
 class KrypteringServiceImpl : KrypteringService {
-    private val kryptering = CMSKrypteringImpl()
-
     private val log by logger()
 
     // Timeout etter 30 sekunder
@@ -34,14 +34,14 @@ class KrypteringServiceImpl : KrypteringService {
             val pipedInputStream = PipedInputStream()
             val pipedOutputStream = PipedOutputStream(pipedInputStream)
             pipedOutputStream.use {
-                log.debug("Starter kryptering")
+                log.info("Starter kryptering")
                 try {
                     kryptering.krypterData(it, fileInputStream, certificate, Security.getProvider("BC"))
                 } catch (e: Exception) {
                     log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 }
-                log.debug("Ferdig med kryptering")
+                log.info("Ferdig med kryptering")
             }
             pipedInputStream
         }

@@ -33,9 +33,10 @@ class DigisosApiTestServiceImpl(
         val inputStream =
             krypteringService.krypter(
                 file.inputStream,
+                mutableListOf(),
                 dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
             )
-        val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream.first))
+        val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 

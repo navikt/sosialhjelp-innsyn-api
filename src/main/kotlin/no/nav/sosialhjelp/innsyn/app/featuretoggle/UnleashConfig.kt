@@ -23,7 +23,7 @@ class UnleashConfig(
                 .appName(clientProperties.unleashInstanceId)
                 .environment(clientProperties.unleashEnv)
                 .instanceId(clientProperties.unleashInstanceId + "_" + clientProperties.unleashEnv)
-                .unleashAPI(clientProperties.unleashServerApiUrl)
+                .unleashAPI("${clientProperties.unleashServerApiUrl}/api")
                 .apiKey(clientProperties.unleashServerApiToken)
                 .build()
 

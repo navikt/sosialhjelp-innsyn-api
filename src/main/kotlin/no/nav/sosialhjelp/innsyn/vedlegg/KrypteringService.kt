@@ -1,68 +1,83 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.runAsyncWithMDC
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.io.IOException
 import java.io.InputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import java.security.Security
 import java.security.cert.X509Certificate
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 
 interface KrypteringService {
-    suspend fun krypter(
+    fun krypter(
         fileInputStream: InputStream,
+        krypteringFutureList: MutableList<CompletableFuture<Void>>,
         certificate: X509Certificate,
-    ): Pair<InputStream, Job>
+    ): InputStream
 }
-
-private val kryptering = CMSKrypteringImpl()
 
 @Profile("!mock-alt")
 @Component
 class KrypteringServiceImpl : KrypteringService {
-    private val log by logger()
+    private val executor = Executors.newFixedThreadPool(4)
+    private val kryptering = CMSKrypteringImpl()
 
-    // Timeout etter 30 sekunder
-    override suspend fun krypter(
+    override fun krypter(
         fileInputStream: InputStream,
+        krypteringFutureList: MutableList<CompletableFuture<Void>>,
         certificate: X509Certificate,
-    ): Pair<InputStream, Job> {
-        val pis = PipedInputStream()
-        val job =
-            fileInputStream.use { inputStream ->
-                val pos = PipedOutputStream(pis)
-
-                log.info("Starter kryptering")
-                withContext(Dispatchers.IO) {
-                    launch {
+    ): InputStream {
+        val pipedInputStream = PipedInputStream()
+        try {
+            val pipedOutputStream = PipedOutputStream(pipedInputStream)
+            val krypteringFuture =
+                runAsyncWithMDC(
+                    {
                         try {
-                            pos.use {
-                                kryptering.krypterData(it, inputStream, certificate, Security.getProvider("BC"))
-                            }
+                            log.debug("Starter kryptering")
+                            kryptering.krypterData(pipedOutputStream, fileInputStream, certificate, Security.getProvider("BC"))
+                            log.debug("Ferdig med kryptering")
                         } catch (e: Exception) {
                             log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)
                             throw IllegalStateException("An error occurred during encryption", e)
+                        } finally {
+                            try {
+                                log.debug("Lukker kryptering OutputStream")
+                                pipedOutputStream.close()
+                                log.debug("OutputStream for kryptering er lukket")
+                            } catch (e: IOException) {
+                                log.error("Lukking av Outputstream for kryptering feilet", e)
+                            }
                         }
-                        log.info("Ferdig med kryptering")
-                    }
-                }
-            }
+                    },
+                    executor,
+                )
+            krypteringFutureList.add(krypteringFuture)
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
+        return pipedInputStream
+    }
 
-        return pis to job
+    companion object {
+        private val log by logger()
     }
 }
 
 @Profile("mock-alt")
 @Component
 class KrypteringServiceMock : KrypteringService {
-    override suspend fun krypter(
+    override fun krypter(
         fileInputStream: InputStream,
+        krypteringFutureList: MutableList<CompletableFuture<Void>>,
         certificate: X509Certificate,
-    ): Pair<InputStream, Job> = fileInputStream to Job().also { it.complete() }
+    ): InputStream {
+        return fileInputStream
+    }
 }

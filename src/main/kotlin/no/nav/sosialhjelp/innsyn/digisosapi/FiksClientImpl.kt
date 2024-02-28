@@ -24,7 +24,7 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.io.InputStreamResource
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -325,7 +325,7 @@ class FiksClientImpl(
         file: FilForOpplasting,
         name: String,
     ): HttpEntity<Any> {
-        return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
+        return createHttpEntity(ByteArrayResource(file.fil), name, file.filnavn, "application/octet-stream")
     }
 
     private fun createHttpEntity(
@@ -387,7 +387,7 @@ private fun Any.toHttpEntity(
 }
 
 fun FilForOpplasting.toHttpEntity(name: String): HttpEntity<Any> {
-    return InputStreamResource(this.fil).toHttpEntity(name, this.filnavn, "application/octet-stream")
+    return ByteArrayResource(this.fil).toHttpEntity(name, this.filnavn, "application/octet-stream")
 }
 
 fun String.toHttpEntity(name: String): HttpEntity<Any> {

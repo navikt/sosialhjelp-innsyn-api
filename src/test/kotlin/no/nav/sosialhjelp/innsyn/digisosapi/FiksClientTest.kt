@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import java.io.InputStream
 import kotlin.time.Duration.Companion.seconds
 
 internal class FiksClientTest {
@@ -276,14 +275,12 @@ internal class FiksClientTest {
             )
             mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("true"))
 
-            val fil1: InputStream = mockk()
-            val fil2: InputStream = mockk()
-            every { fil1.readAllBytes() } returns "test-fil".toByteArray()
-            every { fil2.readAllBytes() } returns "div".toByteArray()
+            val fil1: ByteArray = "test-fil".toByteArray()
+            val fil2: ByteArray = "div".toByteArray()
 
             val ettersendelsPdf = ByteArray(1)
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
-            coEvery { krypteringService.krypter(any(), any(), any()) } returns fil1
+            coEvery { krypteringService.krypter(any(), any()) } returns fil1
 
             val files =
                 listOf(
@@ -303,10 +300,8 @@ internal class FiksClientTest {
 
     @Test
     internal fun `should produce body for upload`() {
-        val fil1: InputStream = mockk()
-        val fil2: InputStream = mockk()
-        every { fil1.readAllBytes() } returns "test-fil".toByteArray()
-        every { fil2.readAllBytes() } returns "div".toByteArray()
+        val fil1 = "test-fil".toByteArray()
+        val fil2 = "div".toByteArray()
 
         val files =
             listOf(

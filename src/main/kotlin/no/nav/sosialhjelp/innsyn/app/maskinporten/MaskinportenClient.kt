@@ -8,6 +8,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.time.Instant
 import java.time.LocalDateTime
@@ -40,7 +41,13 @@ class MaskinportenClient(
                 .retrieve()
                 .bodyToMono<MaskinportenResponse>()
                 .doOnSuccess { log.info("Hentet token fra Maskinporten") }
-                .doOnError { log.warn("Noe feilet ved henting av token fra Maskinporten", it) }
+                .doOnError {
+                    if (it is WebClientResponseException && it.statusCode.is4xxClientError) {
+                        log.error("Fikk ${it.statusCode} fra maskinporten. Melding: ${it.responseBodyAsString}")
+                    } else {
+                        log.warn("Noe feilet ved henting av token fra Maskinporten. ", it)
+                    }
+                }
                 .block() ?: throw RuntimeException("Noe feilet ved henting av token fra Maskinporten")
 
         return response.access_token

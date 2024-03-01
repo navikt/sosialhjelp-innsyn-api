@@ -141,10 +141,7 @@ val String.maskerFnr: String
 val ErrorMessage.feilmeldingUtenFnr: String?
     get() = this.message?.maskerFnr
 
-fun runAsyncWithMDC(
-    runnable: Runnable,
-    executor: ExecutorService,
-): CompletableFuture<Void> {
+fun ExecutorService.runAsyncWithMDC(runnable: Runnable): CompletableFuture<Void> {
     val previous: Map<String, String> = MDC.getCopyOfContextMap()
     return CompletableFuture.runAsync(
         {
@@ -155,7 +152,7 @@ fun runAsyncWithMDC(
                 MDCUtils.clearMDC()
             }
         },
-        executor,
+        this,
     )
 }
 

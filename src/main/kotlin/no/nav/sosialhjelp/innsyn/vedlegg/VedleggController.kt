@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.servlet.annotation.MultipartConfig
 import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
@@ -38,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4, ACR_IDPORTEN_LOA_HIGH], combineWithOr = true)
+@MultipartConfig(location = "/tmp", maxFileSize = 10 * 1024 * 1024, maxRequestSize = 150 * 1024 * 1024, fileSizeThreshold = 5 * 1024 * 1024)
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class VedleggController(

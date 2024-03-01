@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
+import kotlinx.coroutines.cancelAndJoin
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -21,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 import java.io.InputStream
 import java.time.LocalDate
-import java.util.Collections.synchronizedList
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
@@ -71,28 +71,23 @@ class VedleggOpplastingService(
 
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
         // Kjører kryptering i parallell
-        val krypteringFutureList = synchronizedList(ArrayList<CompletableFuture<Void>>(filerForOpplasting.size))
         val filerForOpplastingEtterKryptering =
-            filerForOpplasting.associateWith {
+            filerForOpplasting.associate {
                 log.info("Starter kryptering på fil ${it.filnavn}")
-                val kryptert = krypteringService.krypter(it.fil, krypteringFutureList, certificate)
+                val (kryptert, job) = krypteringService.krypter(it.fil, certificate)
                 log.info("Ferdig med kryptering på fil ${it.filnavn}")
-                kryptert
-            }.map { (file, kryptert) ->
-                FilForOpplasting(
-                    file.filnavn,
-                    file.mimetype,
-                    file.storrelse,
-                    kryptert,
-                )
+                it.copy(fil = kryptert) to job
             }
         val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
         try {
-            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering, vedleggSpesifikasjon, digisosId, token)
+            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering.keys.toList(), vedleggSpesifikasjon, digisosId, token)
         } catch (e: FiksClientFileExistsException) {
             // ignorerer når filen allerede er lastet opp
         }
-        waitForFutures(krypteringFutureList)
+        filerForOpplastingEtterKryptering.onEach { (fil, job) ->
+            job.invokeOnCompletion { fil.fil.close() }
+            job.cancelAndJoin()
+        }
 
         // opppdater cache med digisossak
         val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)

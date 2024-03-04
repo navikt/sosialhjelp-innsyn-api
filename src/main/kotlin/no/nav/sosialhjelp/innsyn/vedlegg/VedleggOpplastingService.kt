@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -23,11 +24,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.time.LocalDate
 import java.util.UUID
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletionException
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
+import kotlin.time.Duration.Companion.seconds
 
 @Component
 class VedleggOpplastingService(
@@ -71,24 +68,23 @@ class VedleggOpplastingService(
 
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
         // Kjører kryptering i parallell
-        val filerForOpplastingEtterKryptering =
-            filerForOpplasting.associate {
-                log.info("Starter kryptering på fil ${it.filnavn}")
-                val (kryptert, job) = krypteringService.krypter(it.fil, certificate)
-                log.info("Ferdig med kryptering på fil ${it.filnavn}")
-                it.copy(fil = kryptert) to job
-            }
-        val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
-        try {
-            fiksClient.lastOppNyEttersendelse(filerForOpplastingEtterKryptering.keys.toList(), vedleggSpesifikasjon, digisosId, token)
-        } catch (e: FiksClientFileExistsException) {
-            // ignorerer når filen allerede er lastet opp
-        }
-        filerForOpplastingEtterKryptering.onEach { (fil, job) ->
-            job.invokeOnCompletion { fil.fil.close() }
-            job.cancelAndJoin()
-        }
+        coroutineScope {
+            withTimeout(30.seconds) {
+                val etterKryptering =
+                    filerForOpplasting.map {
+                        val kryptert = krypteringService.krypter(it.fil, certificate, this)
+                        it.copy(fil = kryptert)
+                    }
+                val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
+                try {
+                    fiksClient.lastOppNyEttersendelse(etterKryptering.toList(), vedleggSpesifikasjon, digisosId, token)
+                } catch (e: FiksClientFileExistsException) {
+                    // ignorerer når filen allerede er lastet opp
+                }
 
+                etterKryptering.onEach { it.fil.close() }
+            }
+        }
         // opppdater cache med digisossak
         val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
         redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
@@ -393,21 +389,6 @@ class VedleggOpplastingService(
         } catch (e: IOException) {
             log.warn(ValidationValues.COULD_NOT_LOAD_DOCUMENT.name, e)
             return ValidationValues.COULD_NOT_LOAD_DOCUMENT
-        }
-    }
-
-    private fun waitForFutures(krypteringFutureList: List<CompletableFuture<Void>>) {
-        val allFutures = CompletableFuture.allOf(*krypteringFutureList.toTypedArray())
-        try {
-            allFutures.get(30, TimeUnit.SECONDS)
-        } catch (e: CompletionException) {
-            throw IllegalStateException(e.cause)
-        } catch (e: ExecutionException) {
-            throw IllegalStateException(e)
-        } catch (e: TimeoutException) {
-            throw IllegalStateException(e)
-        } catch (e: InterruptedException) {
-            throw IllegalStateException(e)
         }
     }
 

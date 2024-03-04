@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
+import kotlinx.coroutines.CoroutineScope
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -8,6 +9,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
+import kotlin.coroutines.EmptyCoroutineContext
 
 @Profile("!prod-fss")
 @Component
@@ -28,14 +30,16 @@ class DigisosApiTestServiceImpl(
         fiksDigisosId: String,
         file: MultipartFile,
     ): String {
-        virusScanner.scan(file.name, file.bytes)
+        val bytes = file.bytes
+        virusScanner.scan(file.name, bytes)
 
         val inputStream =
             krypteringService.krypter(
                 file.inputStream,
                 dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
+                CoroutineScope(EmptyCoroutineContext),
             )
-        val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream.first))
+        val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 

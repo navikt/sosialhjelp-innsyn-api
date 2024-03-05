@@ -1,6 +1,10 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -25,93 +29,119 @@ class OppgaveController(
     fun getOppgaver(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<OppgaveResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<OppgaveResponse>> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
-        if (oppgaver.isEmpty()) {
-            return ResponseEntity(HttpStatus.NO_CONTENT)
+                val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
+                if (oppgaver.isEmpty()) {
+                    ResponseEntity(HttpStatus.NO_CONTENT)
+                } else {
+                    ResponseEntity.ok(oppgaver)
+                }
+            }
         }
-        return ResponseEntity.ok(oppgaver)
-    }
 
     @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}", produces = ["application/json;charset=UTF-8"])
     fun getOppgaveMedId(
         @PathVariable fiksDigisosId: String,
         @PathVariable oppgaveId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<OppgaveResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<OppgaveResponse>> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, token, oppgaveId)
-        if (oppgaver.isEmpty()) {
-            return ResponseEntity(HttpStatus.NO_CONTENT)
+                val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, token, oppgaveId)
+                if (oppgaver.isEmpty()) {
+                    ResponseEntity(HttpStatus.NO_CONTENT)
+                } else {
+                    ResponseEntity.ok(oppgaver)
+                }
+            }
         }
-        return ResponseEntity.ok(oppgaver)
-    }
 
     @GetMapping("/{fiksDigisosId}/vilkar", produces = ["application/json;charset=UTF-8"])
     fun getVilkar(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<VilkarResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<VilkarResponse>> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val vilkar = oppgaveService.getVilkar(fiksDigisosId, token)
-        if (vilkar.isEmpty()) {
-            return ResponseEntity(HttpStatus.NO_CONTENT)
+                val vilkar = oppgaveService.getVilkar(fiksDigisosId, token)
+                if (vilkar.isEmpty()) {
+                    ResponseEntity(HttpStatus.NO_CONTENT)
+                } else {
+                    ResponseEntity.ok(vilkar)
+                }
+            }
         }
-        return ResponseEntity.ok(vilkar)
-    }
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
     fun getDokumentasjonkrav(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<DokumentasjonkravResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<DokumentasjonkravResponse>> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
-        if (dokumentasjonkrav.isEmpty()) {
-            return ResponseEntity(HttpStatus.NO_CONTENT)
+                val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
+                if (dokumentasjonkrav.isEmpty()) {
+                    ResponseEntity(HttpStatus.NO_CONTENT)
+                } else {
+                    ResponseEntity.ok(dokumentasjonkrav)
+                }
+            }
         }
-        return ResponseEntity.ok(dokumentasjonkrav)
-    }
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{dokumentasjonkravId}", produces = ["application/json;charset=UTF-8"])
     fun getDokumentasjonkravMedId(
         @PathVariable fiksDigisosId: String,
         @PathVariable dokumentasjonkravId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<DokumentasjonkravResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<DokumentasjonkravResponse>> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId, token)
-        if (dokumentasjonkrav.isEmpty()) {
-            return ResponseEntity(HttpStatus.NO_CONTENT)
+                val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId, token)
+                if (dokumentasjonkrav.isEmpty()) {
+                    ResponseEntity(HttpStatus.NO_CONTENT)
+                } else {
+                    ResponseEntity.ok(dokumentasjonkrav)
+                }
+            }
         }
-        return ResponseEntity.ok(dokumentasjonkrav)
-    }
 
     @GetMapping("/{fiksDigisosId}/harLeverteDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
     fun getHarLevertDokumentasjonkrav(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<Boolean> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<Boolean> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val harLevertTidligere = oppgaveService.getHarLevertDokumentasjonkrav(fiksDigisosId, token)
-        return ResponseEntity.ok(harLevertTidligere)
-    }
+                val harLevertTidligere = oppgaveService.getHarLevertDokumentasjonkrav(fiksDigisosId, token)
+                ResponseEntity.ok(harLevertTidligere)
+            }
+        }
 
     @GetMapping("/{fiksDigisosId}/fagsystemHarDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
     fun getfagsystemHarDokumentasjonkrav(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<Boolean> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<Boolean> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val fagsystemHarDokumentasjonkrav = oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId, token)
-        return ResponseEntity.ok(fagsystemHarDokumentasjonkrav)
-    }
+                val fagsystemHarDokumentasjonkrav = oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId, token)
+                ResponseEntity.ok(fagsystemHarDokumentasjonkrav)
+            }
+        }
 }

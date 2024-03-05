@@ -3,6 +3,9 @@ package no.nav.sosialhjelp.innsyn.digisosapi
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
@@ -11,6 +14,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
@@ -57,7 +61,7 @@ class FiksClientImpl(
                 )
             }
 
-    override fun hentDigisosSak(
+    override suspend fun hentDigisosSak(
         digisosId: String,
         token: String,
         useCache: Boolean,
@@ -71,7 +75,7 @@ class FiksClientImpl(
         return sak
     }
 
-    override fun hentDigisosSakMedFnr(
+    override suspend fun hentDigisosSakMedFnr(
         digisosId: String,
         token: String,
         useCache: Boolean,
@@ -106,34 +110,35 @@ class FiksClientImpl(
         return digisosSak
     }
 
-    private fun hentDigisosSakFraFiks(
+    private suspend fun hentDigisosSakFraFiks(
         digisosId: String,
         token: String,
-    ): DigisosSak {
-        log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
+    ): DigisosSak =
+        withContext(Dispatchers.IO) {
+            log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
 
-        val digisosSak: DigisosSak =
-            fiksWebClient.get()
-                .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
-                .accept(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .retrieve()
-                .bodyToMono<DigisosSak>()
-                .retryWhen(fiksRetry)
-                .onErrorMap(WebClientResponseException::class.java) { e ->
-                    val feilmelding = "Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}"
-                    when {
-                        e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(feilmelding, e)
-                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
-                        else -> FiksServerException(e.statusCode.value(), feilmelding, e)
+            val digisosSak: DigisosSak =
+                fiksWebClient.get()
+                    .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .retrieve()
+                    .bodyToMono<DigisosSak>()
+                    .retryWhen(fiksRetry)
+                    .onErrorMap(WebClientResponseException::class.java) { e ->
+                        val feilmelding = "Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}"
+                        when {
+                            e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(feilmelding, e)
+                            e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                            else -> FiksServerException(e.statusCode.value(), feilmelding, e)
+                        }
                     }
-                }
-                .block()
-                ?: throw BadStateException("digisosSak er null selv om request ikke har kastet exception")
+                    .awaitSingleOrNull()
+                    ?: throw BadStateException("digisosSak er null selv om request ikke har kastet exception")
 
-        log.debug("Hentet DigisosSak fra Fiks")
-        return digisosSak.also { lagreTilCache(digisosId, it) }
-    }
+            log.debug("Hentet DigisosSak fra Fiks")
+            digisosSak.also { lagreTilCache(digisosId, it) }
+        }
 
     private fun <T : Any> lagreTilCache(
         id: String,
@@ -146,7 +151,7 @@ class FiksClientImpl(
         digisosSak: DigisosSak,
     ) = redisService.put(id, objectMapper.writeValueAsBytes(digisosSak))
 
-    override fun <T : Any> hentDokument(
+    override suspend fun <T : Any> hentDokument(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,
@@ -162,60 +167,62 @@ class FiksClientImpl(
         requestedClass: Class<out T>,
     ): T? = redisService.get(key, requestedClass)
 
-    private fun <T : Any> hentDokumentFraFiks(
+    private suspend fun <T : Any> hentDokumentFraFiks(
         digisosId: String,
         dokumentlagerId: String,
         cacheKey: String,
         requestedClass: Class<out T>,
         token: String,
-    ): T {
-        log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
-        val dokument =
-            fiksWebClient.get()
-                .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
-                .accept(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .retrieve()
-                .bodyToMono(requestedClass)
-                .retryWhen(fiksRetry)
-                .onErrorMap(WebClientResponseException::class.java) { e ->
-                    val feilmelding = "Fiks - hentDokument feilet - ${messageUtenFnr(e)}"
-                    when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
-                        else -> FiksServerException(e.statusCode.value(), feilmelding, e)
+    ): T =
+        withContext(Dispatchers.IO) {
+            log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
+            val dokument =
+                fiksWebClient.get()
+                    .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .retrieve()
+                    .bodyToMono(requestedClass)
+                    .retryWhen(fiksRetry)
+                    .onErrorMap(WebClientResponseException::class.java) { e ->
+                        val feilmelding = "Fiks - hentDokument feilet - ${messageUtenFnr(e)}"
+                        when {
+                            e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                            else -> FiksServerException(e.statusCode.value(), feilmelding, e)
+                        }
                     }
-                }
-                .block()
-                ?: throw FiksClientException(500, "dokument er null selv om request ikke har kastet exception", null)
+                    .awaitSingleOrNull()
+                    ?: throw FiksClientException(500, "dokument er null selv om request ikke har kastet exception", null)
 
-        log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
-        return dokument.also { lagreTilCache(cacheKey, it, dokumentTTL) }
+            log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
+            dokument.also { lagreTilCache(cacheKey, it, dokumentTTL) }
+        }
+
+    override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
+        return withContext(Dispatchers.IO) {
+            val digisosSaker: List<DigisosSak> =
+                fiksWebClient.get()
+                    .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .retrieve()
+                    .bodyToMono<List<DigisosSak>>()
+                    .retryWhen(fiksRetry)
+                    .onErrorMap(WebClientResponseException::class.java) { e ->
+                        val feilmelding = "Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}"
+                        when {
+                            e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                            else -> FiksServerException(e.statusCode.value(), feilmelding, e)
+                        }
+                    }
+                    .awaitSingleOrNull()
+                    ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
+
+            digisosSaker.onEach { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
+        }
     }
 
-    override fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        val digisosSaker: List<DigisosSak> =
-            fiksWebClient.get()
-                .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
-                .accept(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .retrieve()
-                .bodyToMono<List<DigisosSak>>()
-                .retryWhen(fiksRetry)
-                .onErrorMap(WebClientResponseException::class.java) { e ->
-                    val feilmelding = "Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}"
-                    when {
-                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
-                        else -> FiksServerException(e.statusCode.value(), feilmelding, e)
-                    }
-                }
-                .block()
-                ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
-
-        digisosSaker.forEach { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
-        return digisosSaker
-    }
-
-    override fun lastOppNyEttersendelse(
+    override suspend fun lastOppNyEttersendelse(
         files: List<FilForOpplasting>,
         vedleggJson: JsonVedleggSpesifikasjon,
         digisosId: String,
@@ -241,33 +248,35 @@ class FiksClientImpl(
         }
 
         val responseEntity =
-            fiksWebClient.post()
-                .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(body))
-                .retrieve()
-                .toEntity<String>()
-                .onErrorMap(WebClientResponseException::class.java) { e ->
-                    if (e.statusCode.value() == 400 && filErAlleredeLastetOpp(e, digisosId)) {
-                        val feilmeldingAlleredeFinnes =
-                            "Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}"
-                        log.warn(feilmeldingAlleredeFinnes, e)
-                        FiksClientFileExistsException(feilmeldingAlleredeFinnes, e)
-                    } else {
-                        val feilmelding =
-                            "Fiks - Opplasting av ettersendelse til digisosId=$digisosId feilet - ${messageUtenFnr(e)}"
-                        when {
-                            e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
-                            else -> FiksServerException(e.statusCode.value(), feilmelding, e)
+            withContext(Dispatchers.IO + RequestAttributesContext()) {
+                fiksWebClient.post()
+                    .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
+                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(BodyInserters.fromMultipartData(body))
+                    .retrieve()
+                    .toEntity<String>()
+                    .onErrorMap(WebClientResponseException::class.java) { e ->
+                        if (e.statusCode.value() == 400 && filErAlleredeLastetOpp(e, digisosId)) {
+                            val feilmeldingAlleredeFinnes =
+                                "Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}"
+                            log.warn(feilmeldingAlleredeFinnes, e)
+                            FiksClientFileExistsException(feilmeldingAlleredeFinnes, e)
+                        } else {
+                            val feilmelding =
+                                "Fiks - Opplasting av ettersendelse til digisosId=$digisosId feilet - ${messageUtenFnr(e)}"
+                            when {
+                                e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                                else -> FiksServerException(e.statusCode.value(), feilmelding, e)
+                            }
                         }
                     }
-                }
-                .block() ?: throw FiksClientException(
-                500,
-                "responseEntity er null selv om request ikke har kastet exception",
-                null,
-            )
+                    .awaitSingleOrNull() ?: throw FiksClientException(
+                    500,
+                    "responseEntity er null selv om request ikke har kastet exception",
+                    null,
+                )
+            }
 
         opplastingsteller.increment()
         log.info(
@@ -292,15 +301,15 @@ class FiksClientImpl(
         files: List<FilForOpplasting>,
     ): LinkedMultiValueMap<String, Any> {
         val body = LinkedMultiValueMap<String, Any>()
-        body.add("vedlegg.json", createHttpEntityOfString(serialiser(vedleggJson), "vedlegg.json"))
+        body.add("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
 
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
             body.add(
                 "vedleggSpesifikasjon:$fileId",
-                createHttpEntityOfString(serialiser(vedleggMetadata), "vedleggSpesifikasjon:$fileId"),
+                serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
-            body.add("dokument:$fileId", createHttpEntityOfFile(file, "dokument:$fileId"))
+            body.add("dokument:$fileId", file.toHttpEntity("dokument:$fileId"))
         }
         return body
     }
@@ -358,3 +367,29 @@ data class VedleggMetadata(
     val mimetype: String?,
     val storrelse: Long,
 )
+
+private fun Any.toHttpEntity(
+    name: String,
+    filename: String?,
+    contentType: String,
+): HttpEntity<Any> {
+    val headerMap = LinkedMultiValueMap<String, String>()
+    val builder: ContentDisposition.Builder =
+        ContentDisposition
+            .builder("form-data")
+            .name(name)
+    val contentDisposition: ContentDisposition =
+        if (filename == null) builder.build() else builder.filename(filename).build()
+
+    headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+    headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
+    return HttpEntity(this, headerMap)
+}
+
+fun FilForOpplasting.toHttpEntity(name: String): HttpEntity<Any> {
+    return InputStreamResource(this.fil).toHttpEntity(name, this.filnavn, "application/octet-stream")
+}
+
+fun String.toHttpEntity(name: String): HttpEntity<Any> {
+    return this.toHttpEntity(name, null, "text/plain;charset=UTF-8")
+}

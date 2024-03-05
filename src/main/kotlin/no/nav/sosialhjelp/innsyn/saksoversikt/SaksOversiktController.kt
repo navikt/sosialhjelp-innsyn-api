@@ -1,12 +1,8 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.slf4j.MDCContext
-import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
-import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -40,49 +36,44 @@ class SaksOversiktController(
     @GetMapping("/saker")
     fun hentAlleSaker(
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-    ): ResponseEntity<List<SaksListeResponse>> =
-        runBlocking {
-            withContext(MDCContext() + RequestAttributesContext()) {
-                tilgangskontroll.sjekkTilgang(token)
-                val alleSaker =
-                    try {
-                        saksOversiktService.hentAlleSaker(token)
-                    } catch (e: FiksException) {
-                        return@withContext ResponseEntity.status(503).build()
-                    }
+    ): ResponseEntity<List<SaksListeResponse>> {
+        tilgangskontroll.sjekkTilgang(token)
 
-                log.info("Hentet alle (${alleSaker.size}) søknader for bruker, fra DigisosApi og fra SvarUt (via soknad-api).")
-                ResponseEntity.ok().body(alleSaker)
+        val alleSaker =
+            try {
+                saksOversiktService.hentAlleSaker(token)
+            } catch (e: FiksException) {
+                return ResponseEntity.status(503).build()
             }
-        }
+
+        log.info("Hentet alle (${alleSaker.size}) søknader for bruker, fra DigisosApi og fra SvarUt (via soknad-api).")
+        return ResponseEntity.ok().body(alleSaker)
+    }
 
     @GetMapping("/saksDetaljer")
     fun hentSaksDetaljer(
         @RequestParam id: String,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-    ): ResponseEntity<SaksDetaljerResponse> =
-        runBlocking {
-            withContext(MDCContext() + RequestAttributesContext()) {
-                tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<SaksDetaljerResponse> {
+        tilgangskontroll.sjekkTilgang(token)
 
-                if (id.isEmpty()) {
-                    return@withContext ResponseEntity.noContent().build()
-                }
-                val sak = fiksClient.hentDigisosSak(id, token, true)
-                val model = eventService.createSaksoversiktModel(sak, token)
-                val antallOppgaver =
-                    hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +
-                        hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
-                val saksDetaljerResponse =
-                    SaksDetaljerResponse(
-                        sak.fiksDigisosId,
-                        hentNavn(model),
-                        model.status.name,
-                        antallOppgaver,
-                    )
-                ResponseEntity.ok().body(saksDetaljerResponse)
-            }
+        if (id.isEmpty()) {
+            return ResponseEntity.noContent().build()
         }
+        val sak = fiksClient.hentDigisosSak(id, token, true)
+        val model = eventService.createSaksoversiktModel(sak, token)
+        val antallOppgaver =
+            hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +
+                hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
+        val saksDetaljerResponse =
+            SaksDetaljerResponse(
+                sak.fiksDigisosId,
+                hentNavn(model),
+                model.status.name,
+                antallOppgaver,
+            )
+        return ResponseEntity.ok().body(saksDetaljerResponse)
+    }
 
     private fun hentNavn(model: InternalDigisosSoker): String {
         return model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString {
@@ -90,7 +81,7 @@ class SaksOversiktController(
         }
     }
 
-    private suspend fun hentAntallNyeVilkarOgDokumentasjonkrav(
+    private fun hentAntallNyeVilkarOgDokumentasjonkrav(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: String,
@@ -109,7 +100,7 @@ class SaksOversiktController(
         }
     }
 
-    private suspend fun hentAntallNyeOppgaver(
+    private fun hentAntallNyeOppgaver(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: String,
@@ -120,7 +111,7 @@ class SaksOversiktController(
         }
     }
 
-    private suspend fun hentAntallNyeVilkar(
+    private fun hentAntallNyeVilkar(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: String,
@@ -131,7 +122,7 @@ class SaksOversiktController(
         }
     }
 
-    private suspend fun hentAntallNyeDokumentasjonkrav(
+    private fun hentAntallNyeDokumentasjonkrav(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: String,

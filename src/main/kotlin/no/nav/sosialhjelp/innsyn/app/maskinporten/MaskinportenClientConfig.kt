@@ -1,9 +1,5 @@
 package no.nav.sosialhjelp.innsyn.app.maskinporten
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.slf4j.MDCContext
-import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
@@ -13,7 +9,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.netty.http.client.HttpClient
 
 @Configuration
@@ -28,8 +24,7 @@ class MaskinportenClientConfig(
     protected val log by logger()
 
     @Bean
-    fun maskinportenClient(): MaskinportenClient =
-        runBlocking(MDCContext()) { MaskinportenClient(maskinportenWebClient, maskinportenProperties, getWellKnown()) }
+    fun maskinportenClient(): MaskinportenClient = MaskinportenClient(maskinportenWebClient, maskinportenProperties, wellknown)
 
     private val maskinportenWebClient: WebClient =
         webClientBuilder
@@ -49,19 +44,15 @@ class MaskinportenClientConfig(
             wellKnownUrl = wellKnownUrl,
         )
 
-    private suspend fun getWellKnown(): WellKnown =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                maskinportenWebClient.get()
-                    .uri(wellKnownUrl)
-                    .retrieve()
-                    .awaitBody<WellKnown>()
-            }.onSuccess {
-                log.info("Hentet WellKnown for Maskinporten.")
-            }.onFailure {
-                log.warn("Feil ved henting av WellKnown for Maskinporten", it)
-            }.getOrThrow()
-        }
+    private val wellknown: WellKnown
+        get() =
+            maskinportenWebClient.get()
+                .uri(wellKnownUrl)
+                .retrieve()
+                .bodyToMono<WellKnown>()
+                .doOnSuccess { log.info("Hentet WellKnown for Maskinporten.") }
+                .doOnError { log.warn("Feil ved henting av WellKnown for Maskinporten", it) }
+                .block() ?: throw RuntimeException("Feil ved henting av WellKnown for Maskinporten")
 }
 
 data class WellKnown(

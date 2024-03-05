@@ -17,7 +17,7 @@ class SaksStatusService(
 ) {
     private val log by logger()
 
-    suspend fun hentSaksStatuser(
+    fun hentSaksStatuser(
         fiksDigisosId: String,
         token: String,
     ): List<SaksStatusResponse> {

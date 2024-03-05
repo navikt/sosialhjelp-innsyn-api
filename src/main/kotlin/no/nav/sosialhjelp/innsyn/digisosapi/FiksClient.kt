@@ -5,30 +5,30 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 
 interface FiksClient {
-    suspend fun hentDigisosSak(
+    fun hentDigisosSak(
         digisosId: String,
         token: String,
         useCache: Boolean,
     ): DigisosSak
 
     // TODO fjernes når feilsøking er gjennomført
-    suspend fun hentDigisosSakMedFnr(
+    fun hentDigisosSakMedFnr(
         digisosId: String,
         token: String,
         useCache: Boolean,
         fnr: String,
     ): DigisosSak
 
-    suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak>
+    fun hentAlleDigisosSaker(token: String): List<DigisosSak>
 
-    suspend fun lastOppNyEttersendelse(
+    fun lastOppNyEttersendelse(
         files: List<FilForOpplasting>,
         vedleggJson: JsonVedleggSpesifikasjon,
         digisosId: String,
         token: String,
     )
 
-    suspend fun <T : Any> hentDokument(
+    fun <T : Any> hentDokument(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,

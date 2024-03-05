@@ -1,8 +1,5 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
@@ -21,7 +18,7 @@ class VirusScanner(
 ) {
     private val virusScanRetry = RetryUtils.retryBackoffSpec()
 
-    suspend fun scan(
+    fun scan(
         filnavn: String?,
         data: ByteArray,
     ) {
@@ -32,7 +29,7 @@ class VirusScanner(
         }
     }
 
-    private suspend fun isInfected(
+    private fun isInfected(
         filnavn: String?,
         data: ByteArray,
     ): Boolean {
@@ -43,15 +40,13 @@ class VirusScanner(
             log.info("Scanner ${data.size} bytes for virus")
 
             val scanResults: List<ScanResult> =
-                withContext(Dispatchers.IO) {
-                    virusScanWebClient.put()
-                        .body(BodyInserters.fromValue(data))
-                        .retrieve()
-                        .bodyToMono<List<ScanResult>>()
-                        .retryWhen(virusScanRetry)
-                        .awaitSingleOrNull()
-                        ?: throw BadStateException("scanResult er null")
-                }
+                virusScanWebClient.put()
+                    .body(BodyInserters.fromValue(data))
+                    .retrieve()
+                    .bodyToMono<List<ScanResult>>()
+                    .retryWhen(virusScanRetry)
+                    .block()
+                    ?: throw BadStateException("scanResult er null")
 
             if (scanResults.size != 1) {
                 log.warn("Virusscan returnerte uventet respons med lengde ${scanResults.size}, forventet lengde er 1.")

@@ -17,13 +17,13 @@ class SaksOversiktService(
     private val unleashClient: Unleash,
     private val oppgaveService: OppgaveService,
 ) {
-    suspend fun hentAlleSaker(token: String): List<SaksListeResponse> {
+    fun hentAlleSaker(token: String): List<SaksListeResponse> {
         return hentAlleDigisosSakerFraFiks(token).toMutableList()
             .plus(hentAlleSvarUtSoknaderFraSoknadApi(token))
             .sortedByDescending { it.sistOppdatert }
     }
 
-    private suspend fun hentAlleDigisosSakerFraFiks(token: String): List<SaksListeResponse> {
+    private fun hentAlleDigisosSakerFraFiks(token: String): List<SaksListeResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
         val responseList =
             digisosSaker
@@ -56,7 +56,7 @@ class SaksOversiktService(
         return responseList
     }
 
-    private suspend fun hentAlleSvarUtSoknaderFraSoknadApi(token: String): List<SaksListeResponse> {
+    private fun hentAlleSvarUtSoknaderFraSoknadApi(token: String): List<SaksListeResponse> {
         return soknadApiClient.getSvarUtSoknader(token)
     }
 

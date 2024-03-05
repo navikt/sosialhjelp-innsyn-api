@@ -10,8 +10,9 @@ class SoknadMedInnsynService(
     private val fiksClient: FiksClient,
     private val kommuneService: KommuneService,
 ) {
-    suspend fun harSoknaderMedInnsyn(token: String): Boolean =
-        fiksClient.hentAlleDigisosSaker(token)
+    fun harSoknaderMedInnsyn(token: String): Boolean {
+        return fiksClient.hentAlleDigisosSaker(token)
             .filter { it.isNewerThanMonths(15) }
             .any { !kommuneService.erInnsynDeaktivertForKommune(it.fiksDigisosId, token) }
+    }
 }

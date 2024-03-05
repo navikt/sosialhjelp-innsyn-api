@@ -21,7 +21,7 @@ class HendelseService(
     private val vedleggService: VedleggService,
     private val fiksClient: FiksClient,
 ) {
-    suspend fun hentHendelser(
+    fun hentHendelser(
         fiksDigisosId: String,
         token: String,
     ): List<HendelseResponse> {

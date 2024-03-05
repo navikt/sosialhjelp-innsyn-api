@@ -13,7 +13,7 @@ class InnsynService(
     private val fiksClient: FiksClient,
     private val kommuneService: KommuneService,
 ) {
-    suspend fun hentJsonDigisosSoker(
+    fun hentJsonDigisosSoker(
         digisosSak: DigisosSak,
         token: String,
     ): JsonDigisosSoker? {
@@ -40,7 +40,7 @@ class InnsynService(
         }
     }
 
-    suspend fun hentOriginalSoknad(
+    fun hentOriginalSoknad(
         digisosSak: DigisosSak,
         token: String,
     ): JsonSoknad? {

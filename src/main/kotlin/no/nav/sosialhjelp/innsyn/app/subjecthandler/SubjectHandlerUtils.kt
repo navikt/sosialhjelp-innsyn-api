@@ -6,8 +6,6 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 
 object SubjectHandlerUtils {
     private val log by logger()
-
-    @JvmStatic
     private var subjectHandlerService: SubjectHandler = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
 
     fun getUserIdFromToken(): String {

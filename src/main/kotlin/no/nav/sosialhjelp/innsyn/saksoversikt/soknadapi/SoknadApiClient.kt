@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt.soknadapi
 
+import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil
@@ -13,7 +14,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBodyOrNull
+import org.springframework.web.reactive.function.client.bodyToMono
 
 @Component
 class SoknadApiClient(
@@ -28,16 +29,19 @@ class SoknadApiClient(
             .filter(mdcExchangeFilter)
             .build()
 
-    suspend fun getSvarUtSoknader(token: String): List<SaksListeResponse> {
+    fun getSvarUtSoknader(token: String): List<SaksListeResponse> {
         return soknadApiWebClient.get()
             .uri("/soknadoversikt/soknader")
             .accept(MediaType.APPLICATION_JSON)
             .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
             .header(AUTHORIZATION, BEARER + tokenXtoken(token))
             .retrieve()
-            .awaitBodyOrNull<List<SaksListeResponse>>() ?: emptyList()
+            .bodyToMono<List<SaksListeResponse>>()
+            .block() ?: emptyList()
     }
 
-    private suspend fun tokenXtoken(token: String) =
-        tokendingsService.exchangeToken(getUserIdFromToken(), token, clientProperties.soknadApiAudience)
+    private fun tokenXtoken(token: String) =
+        runBlocking {
+            tokendingsService.exchangeToken(getUserIdFromToken(), token, clientProperties.soknadApiAudience)
+        }
 }

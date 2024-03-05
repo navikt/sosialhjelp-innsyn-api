@@ -32,7 +32,7 @@ class HentPDLClientMock : PdlClient {
             .registerModule(JavaTimeModule())
             .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 
-    override suspend fun hentPerson(
+    override fun hentPerson(
         ident: String,
         token: String,
     ): PdlHentPerson {
@@ -43,7 +43,7 @@ class HentPDLClientMock : PdlClient {
         return mapper.readValue<PdlHentPerson>(resourceAsStream!!)
     }
 
-    override suspend fun hentIdenter(
+    override fun hentIdenter(
         ident: String,
         token: String,
     ): List<String> {

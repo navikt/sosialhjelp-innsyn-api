@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
+import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.HistorikkType
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(JsonTildeltNavKontor::class.java.name)
 
-suspend fun InternalDigisosSoker.apply(
+fun InternalDigisosSoker.apply(
     hendelse: JsonTildeltNavKontor,
     norgClient: NorgClient,
     isPapirSoknad: Boolean,
@@ -29,7 +30,11 @@ suspend fun InternalDigisosSoker.apply(
     tildeltNavKontor = hendelse.navKontor
 
     val destinasjon =
-        runCatching { norgClient.hentNavEnhet(hendelse.navKontor).navn }.getOrNull()
+        try {
+            norgClient.hentNavEnhet(hendelse.navKontor).navn
+        } catch (e: NorgException) {
+            null
+        }
 
     soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet NAV-kontor")
 

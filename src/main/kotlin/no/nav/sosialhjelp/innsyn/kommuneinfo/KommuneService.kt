@@ -17,7 +17,7 @@ class KommuneService(
     private val kommuneInfoClient: KommuneInfoClient,
     private val redisService: RedisService,
 ) {
-    suspend fun hentKommuneInfo(
+    fun hentKommuneInfo(
         fiksDigisosId: String,
         token: String,
     ): KommuneInfo? {
@@ -34,7 +34,7 @@ class KommuneService(
 
     private fun hentFraCache(kommunenummer: String) = redisService.get(cacheKey(kommunenummer), KommuneInfo::class.java)
 
-    private suspend fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
+    private fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {
             kommuneInfoClient.getKommuneInfo(kommunenummer)
                 .also { redisService.put(cacheKey(kommunenummer), objectMapper.writeValueAsBytes(it)) }
@@ -47,7 +47,7 @@ class KommuneService(
         }
     }
 
-    suspend fun erInnsynDeaktivertForKommune(
+    fun erInnsynDeaktivertForKommune(
         fiksDigisosId: String,
         token: String,
     ): Boolean {

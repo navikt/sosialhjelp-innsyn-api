@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.isNewerThanMonths
@@ -20,7 +23,7 @@ class UtbetalingerService(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
-    suspend fun hentUtbetalingerForSak(
+    fun hentUtbetalingerForSak(
         fiksDigisosId: String,
         token: String,
     ): List<UtbetalingerResponse> {
@@ -28,7 +31,7 @@ class UtbetalingerService(
         return toUtbetalingerResponse(manedsutbetalinger(token, digisosSak) { true })
     }
 
-    suspend fun hentUtbetalteUtbetalinger(
+    fun hentUtbetalteUtbetalinger(
         token: String,
         months: Int,
     ): List<UtbetalingerResponse> {
@@ -42,16 +45,18 @@ class UtbetalingerService(
         val requestAttributes = RequestContextHolder.getRequestAttributes()
 
         val alleUtbetalinger =
-            digisosSaker
-                .filter { it.isNewerThanMonths(months) }
-                .flatMapParallel {
-                    setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it) { status -> status == UtbetalingsStatus.UTBETALT }
-                }
+            runBlocking(Dispatchers.IO + MDCContext()) {
+                digisosSaker
+                    .filter { it.isNewerThanMonths(months) }
+                    .flatMapParallel {
+                        setRequestAttributes(requestAttributes)
+                        manedsutbetalinger(token, it) { status -> status == UtbetalingsStatus.UTBETALT }
+                    }
+            }
         return toUtbetalingerResponse(alleUtbetalinger)
     }
 
-    private suspend fun hentUtbetalinger(
+    private fun hentUtbetalinger(
         token: String,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
     ): List<ManedUtbetaling> {
@@ -64,21 +69,23 @@ class UtbetalingerService(
 
         val requestAttributes = RequestContextHolder.getRequestAttributes()
 
-        return digisosSaker
-            .filter { it.isNewerThanMonths(15) }
-            .flatMapParallel {
-                setRequestAttributes(requestAttributes)
-                manedsutbetalinger(token, it, statusFilter)
-            }
+        return runBlocking(Dispatchers.IO + MDCContext()) {
+            digisosSaker
+                .filter { it.isNewerThanMonths(15) }
+                .flatMapParallel {
+                    setRequestAttributes(requestAttributes)
+                    manedsutbetalinger(token, it, statusFilter)
+                }
+        }
     }
 
-    suspend fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
+    fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
         val utbetalinger =
             hentUtbetalinger(token) { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
         return toTidligereUtbetalingerResponse(utbetalinger)
     }
 
-    suspend fun hentNyeUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
+    fun hentNyeUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
         val utbetalinger = hentUtbetalinger(token) { status -> (status !== UtbetalingsStatus.ANNULLERT) }
         return toNyeUtbetalingerResponse(utbetalinger)
     }
@@ -154,7 +161,7 @@ class UtbetalingerService(
                 )
             }
 
-    private suspend fun manedsutbetalinger(
+    private fun manedsutbetalinger(
         token: String,
         digisosSak: DigisosSak,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
@@ -200,7 +207,7 @@ class UtbetalingerService(
             }
     }
 
-    suspend fun utbetalingExists(
+    fun utbetalingExists(
         token: String,
         months: Int,
     ): Boolean {

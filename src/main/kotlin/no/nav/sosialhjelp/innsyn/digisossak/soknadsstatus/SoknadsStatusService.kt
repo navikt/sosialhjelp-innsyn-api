@@ -20,7 +20,7 @@ class SoknadsStatusService(
     private val kommuneService: KommuneService,
     private val clientProperties: ClientProperties,
 ) {
-    suspend fun hentSoknadsStatus(
+    fun hentSoknadsStatus(
         fiksDigisosId: String,
         token: String,
         fnr: String,

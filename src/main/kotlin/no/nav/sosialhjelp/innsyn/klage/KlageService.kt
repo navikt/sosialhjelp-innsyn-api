@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.SvarSender
@@ -37,13 +38,13 @@ import java.lang.IllegalStateException
 import kotlin.jvm.optionals.getOrNull
 
 interface KlageService {
-    suspend fun sendKlage(
+    fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
         token: String,
     )
 
-    suspend fun hentKlager(
+    fun hentKlager(
         fiksDigisosId: String,
         token: String,
     ): List<Klage>
@@ -59,11 +60,11 @@ class KlageServiceLocalImpl(
 
     private val webClient = WebClient.create(klageUrl)
 
-    override suspend fun sendKlage(
+    override fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
         token: String,
-    ) {
+    ) = runBlocking {
         val response = webClient.post().uri("/$fiksDigisosId/klage").bodyValue(klage).retrieve().awaitBodilessEntity()
         if (!response.statusCode.is2xxSuccessful) {
             log.error("Fikk ikke 2xx fra mock-alt-api i sending av klage. Status=${response.statusCode.value()}")
@@ -71,17 +72,19 @@ class KlageServiceLocalImpl(
         }
     }
 
-    override suspend fun hentKlager(
+    override fun hentKlager(
         fiksDigisosId: String,
         token: String,
     ): List<Klage> =
-        webClient.get().uri("/$fiksDigisosId/klage").retrieve().onStatus(
-            { !it.is2xxSuccessful },
-            {
-                log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
-                Mono.error { IllegalStateException("Feil ved henting av klager") }
-            },
-        ).awaitBody()
+        runBlocking {
+            webClient.get().uri("/$fiksDigisosId/klage").retrieve().onStatus(
+                { !it.is2xxSuccessful },
+                {
+                    log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
+                    Mono.error { IllegalStateException("Feil ved henting av klager") }
+                },
+            ).awaitBody()
+        }
 }
 
 @Service
@@ -96,7 +99,7 @@ class KlageServiceImpl(
 ) : KlageService {
     private val log by logger()
 
-    override suspend fun sendKlage(
+    override fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
         token: String,
@@ -118,7 +121,7 @@ class KlageServiceImpl(
     // TODO: Hvilket format skal vi sende på?
     private fun InputKlage.toKlageFil() = this.toString().byteInputStream()
 
-    override suspend fun hentKlager(
+    override fun hentKlager(
         fiksDigisosId: String,
         token: String,
     ): List<Klage> {
@@ -132,12 +135,14 @@ class KlageServiceImpl(
                 fiksIOClient.send(MeldingRequest.builder().mottakerKontoId(it.kontoId).build(), fiksDigisosId, "???")
             } ?: error("Kunne ikke sende til Fiks IO")
 
-        return withTimeout(5000) {
-            waitForResult(fiksIOClient, sendtMelding)
-        }.catch { e -> log.error("Fikk feil i henting av klager", e) }.toList()
+        return runBlocking {
+            withTimeout(5000) {
+                waitForResult(fiksIOClient, sendtMelding)
+            }.catch { e -> log.error("Fikk feil i henting av klager", e) }.toList()
+        }
     }
 
-    private suspend fun FiksIOKlient.hentKonto(
+    private fun FiksIOKlient.hentKonto(
         enhetsNr: String,
         protokoll: String,
     ): Konto? {

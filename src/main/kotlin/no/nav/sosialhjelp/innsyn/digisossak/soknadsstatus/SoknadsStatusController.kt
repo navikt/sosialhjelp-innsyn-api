@@ -3,9 +3,13 @@ package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -33,23 +37,26 @@ class SoknadsStatusController(
         @RequestHeader(value = AUTHORIZATION) token: String,
         response: HttpServletResponse,
         request: HttpServletRequest,
-    ): ResponseEntity<SoknadsStatusResponse> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<SoknadsStatusResponse> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        response.addCookie(xsrfCookie())
-        val fnr = SubjectHandlerUtils.getUserIdFromToken()
-        val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token, fnr)
-        return ResponseEntity.ok().body(
-            SoknadsStatusResponse(
-                status = utvidetSoknadsStatus.status,
-                kommunenummer = utvidetSoknadsStatus.kommunenummer,
-                tidspunktSendt = utvidetSoknadsStatus.tidspunktSendt,
-                soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
-                navKontor = utvidetSoknadsStatus.navKontor,
-                filUrl = utvidetSoknadsStatus.soknadUrl,
-            ),
-        )
-    }
+                response.addCookie(xsrfCookie())
+                val fnr = SubjectHandlerUtils.getUserIdFromToken()
+                val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token, fnr)
+                ResponseEntity.ok().body(
+                    SoknadsStatusResponse(
+                        status = utvidetSoknadsStatus.status,
+                        kommunenummer = utvidetSoknadsStatus.kommunenummer,
+                        tidspunktSendt = utvidetSoknadsStatus.tidspunktSendt,
+                        soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
+                        navKontor = utvidetSoknadsStatus.navKontor,
+                        filUrl = utvidetSoknadsStatus.soknadUrl,
+                    ),
+                )
+            }
+        }
 
     private fun xsrfCookie(): Cookie {
         val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken())

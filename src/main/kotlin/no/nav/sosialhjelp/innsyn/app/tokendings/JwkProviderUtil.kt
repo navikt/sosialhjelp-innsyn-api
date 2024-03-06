@@ -2,20 +2,24 @@ package no.nav.sosialhjelp.innsyn.app.tokendings
 
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.unproxiedHttpClient
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitBodyOrNull
 
-fun downloadWellKnown(url: String): WellKnown =
-    WebClient.create()
-        .get()
-        .uri(url)
-        .retrieve()
-        .bodyToMono(WellKnown::class.java)
-        .block()
-        ?: throw RuntimeException("Feiler under henting av well-known konfigurasjon fra $url")
+suspend fun downloadWellKnown(url: String): WellKnown =
+    withContext(Dispatchers.IO) {
+        WebClient.create()
+            .get()
+            .uri(url)
+            .retrieve()
+            .awaitBodyOrNull<WellKnown>()
+            ?: throw RuntimeException("Feiler under henting av well-known konfigurasjon fra $url")
+    }
 
 fun buildWebClient(
     webClientBuilder: WebClient.Builder,

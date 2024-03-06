@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
+import kotlin.time.Duration.Companion.seconds
 
 internal class NorgClientImplTest {
     private val mockWebServer = MockWebServer()
@@ -46,58 +48,61 @@ internal class NorgClientImplTest {
     }
 
     @Test
-    fun `skal hente fra cache`() {
-        val navEnhet = objectMapper.readValue<NavEnhet>(ok_navenhet)
-        every { redisService.get(any(), NavEnhet::class.java) } returns navEnhet
+    fun `skal hente fra cache`() =
+        runTest(timeout = 5.seconds) {
+            val navEnhet = objectMapper.readValue<NavEnhet>(ok_navenhet)
+            every { redisService.get(any(), NavEnhet::class.java) } returns navEnhet
 
-        val result2 = norgClient.hentNavEnhet(enhetsnr)
+            val result2 = norgClient.hentNavEnhet(enhetsnr)
 
-        assertThat(result2).isNotNull
+            assertThat(result2).isNotNull
 
-        verify(exactly = 1) { redisService.get<Any>(any(), any()) }
-        verify(exactly = 0) { redisService.put(any(), any(), any()) }
-    }
-
-    @Test
-    fun `skal hente fra Norg og lagre til cache hvis cache er tom`() {
-        every { redisService.get(any(), NavEnhet::class.java) } returns null
-
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_navenhet),
-        )
-
-        val result2 = norgClient.hentNavEnhet(enhetsnr)
-
-        assertThat(result2).isNotNull
-
-        verify(exactly = 1) { redisService.get<Any>(any(), any()) }
-        verify(exactly = 1) { redisService.put(any(), any(), any()) }
-    }
+            verify(exactly = 1) { redisService.get<Any>(any(), any()) }
+            verify(exactly = 0) { redisService.put(any(), any(), any()) }
+        }
 
     @Test
-    fun `skal trigge retry ved serverfeil fra Norg`() {
-        every { redisService.get(any(), NavEnhet::class.java) } returns null
+    fun `skal hente fra Norg og lagre til cache hvis cache er tom`() =
+        runTest(timeout = 5.seconds) {
+            every { redisService.get(any(), NavEnhet::class.java) } returns null
 
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(500),
-        )
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(ok_navenhet),
+            )
 
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(ok_navenhet),
-        )
+            val result2 = norgClient.hentNavEnhet(enhetsnr)
 
-        val result2 = norgClient.hentNavEnhet(enhetsnr)
+            assertThat(result2).isNotNull
 
-        assertThat(result2).isNotNull
+            verify(exactly = 1) { redisService.get<Any>(any(), any()) }
+            verify(exactly = 1) { redisService.put(any(), any(), any()) }
+        }
 
-        verify(exactly = 1) { redisService.get<Any>(any(), any()) }
-        verify(exactly = 1) { redisService.put(any(), any(), any()) }
-    }
+    @Test
+    fun `skal trigge retry ved serverfeil fra Norg`() =
+        runTest(timeout = 5.seconds) {
+            every { redisService.get(any(), NavEnhet::class.java) } returns null
+
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(500),
+            )
+
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(ok_navenhet),
+            )
+
+            val result2 = norgClient.hentNavEnhet(enhetsnr)
+
+            assertThat(result2).isNotNull
+
+            verify(exactly = 1) { redisService.get<Any>(any(), any()) }
+            verify(exactly = 1) { redisService.put(any(), any(), any()) }
+        }
 }

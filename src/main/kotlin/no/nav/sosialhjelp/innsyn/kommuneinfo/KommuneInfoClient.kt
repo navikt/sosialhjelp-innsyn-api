@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
@@ -21,7 +23,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.reactive.function.client.bodyToMono
+import org.springframework.web.reactive.function.client.awaitBody
 import reactor.netty.http.client.HttpClient
 
 @Component
@@ -31,41 +33,46 @@ class KommuneInfoClient(
     webClientBuilder: WebClient.Builder,
     proxiedHttpClient: HttpClient,
 ) {
-    fun getAll(): List<KommuneInfo> {
-        return kommuneInfoWebClient.get()
-            .uri(PATH_ALLE_KOMMUNEINFO)
-            .accept(MediaType.APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-            .retrieve()
-            .bodyToMono<List<KommuneInfo>>()
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - hentKommuneInfoForAlle feilet", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
-                    else -> FiksServerException(e.statusCode.value(), e.message, e)
+    suspend fun getAll(): List<KommuneInfo> =
+        withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                kommuneInfoWebClient.get()
+                    .uri(PATH_ALLE_KOMMUNEINFO)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                    .retrieve()
+                    .awaitBody<List<KommuneInfo>>()
+            }.onFailure {
+                log.warn("Fiks - hentKommuneInfoForAlle feilet", it)
+                if (it is WebClientResponseException) {
+                    when {
+                        it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
+                        else -> throw FiksServerException(it.statusCode.value(), it.message, it)
+                    }
                 }
-            }
-            .block()
-            ?: emptyList()
-    }
+            }.getOrNull()
+                ?: emptyList()
+        }
 
-    fun getKommuneInfo(kommunenummer: String): KommuneInfo {
-        return kommuneInfoWebClient.get()
-            .uri(PATH_KOMMUNEINFO, kommunenummer)
-            .accept(MediaType.APPLICATION_JSON)
-            .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
-            .retrieve()
-            .bodyToMono<KommuneInfo>()
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                log.warn("Fiks - hentKommuneInfoForAlle feilet", e)
-                when {
-                    e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
-                    else -> FiksServerException(e.statusCode.value(), e.message, e)
+    suspend fun getKommuneInfo(kommunenummer: String): KommuneInfo =
+        withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                kommuneInfoWebClient.get()
+                    .uri(PATH_KOMMUNEINFO, kommunenummer)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                    .retrieve()
+                    .awaitBody<KommuneInfo>()
+            }.onFailure {
+                log.warn("Fiks - hentKommuneInfoForAlle feilet for kommune=$kommunenummer", it)
+                if (it is WebClientResponseException) {
+                    when {
+                        it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
+                        else -> throw FiksServerException(it.statusCode.value(), it.message, it)
+                    }
                 }
-            }
-            .block()
-            ?: throw RuntimeException("Noe feil skjedde ved henting av KommuneInfo for kommune=$kommunenummer")
-    }
+            }.getOrThrow()
+        }
 
     private val kommuneInfoWebClient: WebClient =
         webClientBuilder

@@ -221,8 +221,11 @@ class VedleggOpplastingService(
         metadata: List<OpplastetVedleggMetadata>,
     ) {
         metadata.flatMap { it.filer }
-            .filter { sanitizeFileName(it.filnavn) == sanitizeFileName(originalFilename) }
-            .forEach { it.filnavn = newFilename }
+            .firstOrNull {
+                sanitizeFileName(it.filnavn) == sanitizeFileName(originalFilename)
+            }?.let {
+                it.filnavn = newFilename
+            }
     }
 
     fun validateFilenameMatchInMetadataAndFiles(

@@ -1,6 +1,10 @@
 package no.nav.sosialhjelp.innsyn.digisossak.forelopigsvar
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -24,11 +28,14 @@ class ForelopigSvarController(
     fun hentForelopigSvarStatus(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-    ): ResponseEntity<ForelopigSvarResponse> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<ForelopigSvarResponse> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val forelopigSvarResponse: ForelopigSvarResponse = forelopigSvarService.hentForelopigSvar(fiksDigisosId, token)
+                val forelopigSvarResponse: ForelopigSvarResponse = forelopigSvarService.hentForelopigSvar(fiksDigisosId, token)
 
-        return ResponseEntity.ok().body(forelopigSvarResponse)
-    }
+                ResponseEntity.ok().body(forelopigSvarResponse)
+            }
+        }
 }

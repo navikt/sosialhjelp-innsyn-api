@@ -1,6 +1,10 @@
 package no.nav.sosialhjelp.innsyn.digisossak.saksstatus
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -25,13 +29,17 @@ class SaksStatusController(
     fun hentSaksStatuser(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<SaksStatusResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<SaksStatusResponse>> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-        val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
-        if (saksStatuser.isEmpty()) {
-            return ResponseEntity(HttpStatus.NO_CONTENT)
+                val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
+                if (saksStatuser.isEmpty()) {
+                    ResponseEntity(HttpStatus.NO_CONTENT)
+                } else {
+                    ResponseEntity.ok(saksStatuser)
+                }
+            }
         }
-        return ResponseEntity.ok(saksStatuser)
-    }
 }

@@ -1,3 +1,5 @@
+package no.nav.sosialhjelp.innsyn.app.config
+
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest

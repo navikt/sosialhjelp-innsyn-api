@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
+import java.util.UUID
 
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4, ACR_IDPORTEN_LOA_HIGH], combineWithOr = true)
 @MultipartConfig(location = "/tmp", maxFileSize = 10 * 1024 * 1024, maxRequestSize = 150 * 1024 * 1024, fileSizeThreshold = 5 * 1024 * 1024)
@@ -66,10 +67,17 @@ class VedleggController(
                 xsrfGenerator.sjekkXsrfToken(request)
 
                 val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
-                validateFileListNotEmpty(files)
+
+                check(files.isNotEmpty()) { "Ingen filer i forsendelse" }
+
+                metadata.flatMap { it.filer }.onEach { fil ->
+                    fil.fil = files.find {
+                        it.originalFilename?.contains(fil.uuid.toString()) ?: false
+                    } ?: error("Fil i metadata var ikke i listen over filer")
+                }
 
                 val oppgaveValideringList =
-                    vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, files, metadata, token)
+                    vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, metadata, token)
                 ResponseEntity.ok(mapToResponse(oppgaveValideringList))
             }
         }
@@ -120,12 +128,6 @@ class VedleggController(
             )
         }
 
-    private fun validateFileListNotEmpty(files: List<MultipartFile>) {
-        if (files.isEmpty()) {
-            throw IllegalStateException("Ingen filer i forsendelse")
-        }
-    }
-
     private fun getMetadataAndRemoveFromFileList(files: List<MultipartFile>): Pair<List<OpplastetVedleggMetadata>, List<MultipartFile>> {
         val metadataJson =
             files.firstOrNull { it.originalFilename == "metadata.json" }
@@ -163,4 +165,8 @@ data class OpplastetVedleggMetadata(
 
 data class OpplastetFil(
     var filnavn: String,
-)
+    val uuid: UUID,
+) {
+    lateinit var fil: MultipartFile
+    lateinit var validering: FilValidering
+}

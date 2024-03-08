@@ -183,7 +183,7 @@ internal class VedleggControllerTest {
     @Test
     fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() =
         runTest(timeout = 5.seconds) {
-            coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
+            coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any()) } returns emptyList()
             val files =
                 mutableListOf<MultipartFile>(
                     MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
@@ -199,7 +199,7 @@ internal class VedleggControllerTest {
     @Test
     fun `skal kaste exception dersom token mangler`() =
         runTest(timeout = 5.seconds) {
-            coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
+            coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any()) } returns emptyList()
             val files =
                 mutableListOf<MultipartFile>(
                     MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
@@ -208,6 +208,37 @@ internal class VedleggControllerTest {
             val request: HttpServletRequest = mockk()
             every { request.cookies } returns arrayOf()
             every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
+            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+                assertThat(it.isFailure)
+                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+            }
+        }
+
+    @Test
+    fun `skal kaste exception hvis det er filer i metadata som ikke er i resten av filene`() =
+        runTest(timeout = 5.seconds) {
+            val metadata =
+                """
+            |[{
+            |    "type": "brukskonto",
+            |    "tilleggsinfo": "kontoutskrift",
+            |    "filer": [{
+            |        "filnavn": "test.jpg"
+            |    }]
+            |}]
+            |
+                """.trimMargin().toByteArray()
+
+            val request: HttpServletRequest = mockk()
+            coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
+            every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
+
+            val files =
+                mutableListOf<MultipartFile>(
+                    MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+                    MockMultipartFile("files", "roflmao.jpg", null, ByteArray(0)),
+                )
             runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)

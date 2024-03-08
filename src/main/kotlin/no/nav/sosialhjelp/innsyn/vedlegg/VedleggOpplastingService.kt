@@ -5,8 +5,6 @@ import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.app.exceptions.OpplastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
@@ -23,8 +21,9 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 import java.io.InputStream
 import java.time.LocalDate
-import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
+
+const val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10 // 10 MB
 
 @Component
 class VedleggOpplastingService(
@@ -35,49 +34,43 @@ class VedleggOpplastingService(
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
     private val dokumentlagerClient: DokumentlagerClient,
 ) {
+    private val log by logger()
+
     suspend fun sendVedleggTilFiks(
         digisosId: String,
-        files: List<MultipartFile>,
-        metadata: List<OpplastetVedleggMetadata>,
+        metadatas: List<OpplastetVedleggMetadata>,
         token: String,
     ): List<OppgaveValidering> {
-        log.info("Starter ettersendelse med ${files.size} filer.")
+        log.info("Starter ettersendelse med ${metadatas.size} filer.")
 
-        val oppgaveValideringer = validateFiler(files, metadata)
-        if (harOppgaverMedValideringsfeil(oppgaveValideringer)) {
+        val oppgaveValideringer = validateFiler(metadatas)
+        if (oppgaveValideringer.flatMap { validering -> validering.filer.map { it.status.result } }.any { it != ValidationValues.OK }) {
             return oppgaveValideringer
         }
-        val metadataWithoutEmpties = metadata.filter { it.filer.isNotEmpty() }
+        val metadataWithoutEmpties = metadatas.filter { it.filer.isNotEmpty() }
 
-        val valideringer = oppgaveValideringer.flatMap { it.filer }
-
-        val filerForOpplasting = mutableListOf<FilForOpplasting>()
-        files.forEach { file ->
-            val originalFilename =
-                file.originalFilename?.let { sanitizeFileName(it) }
-                    ?: throw BadStateException("Kan ikke sende fil når originalFilename er null")
-            val filename = createFilename(originalFilename, valideringer)
-            renameFilenameInMetadataJson(originalFilename, filename, metadataWithoutEmpties)
-            val detectedMimetype = detectTikaType(file.inputStream)
-            filerForOpplasting.add(FilForOpplasting(filename, getMimetype(detectedMimetype), file.size, file.inputStream))
-        }
-
-        // Generere pdf og legge til i listen over filer som skal krypteres og lastes opp
-        val ettersendelsePdf = createEttersendelsePdf(metadataWithoutEmpties, digisosId, token)
-        filerForOpplasting.add(ettersendelsePdf)
+        val filerForOpplasting =
+            metadatas.flatMap { metadata ->
+                metadata.filer.map { fil ->
+                    val detectedMimetype = detectTikaType(fil.fil.inputStream)
+                    val filename = createFilename(fil).also { fil.filnavn = it }
+                    FilForOpplasting(filename, getMimetype(detectedMimetype), fil.fil.size, fil.fil.inputStream)
+                }
+            } + createEttersendelsePdf(metadataWithoutEmpties, digisosId, token)
 
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
-        // Kjører kryptering i parallell
+
         coroutineScope {
+            // Kjører kryptering i parallell
             withTimeout(30.seconds) {
                 val etterKryptering =
                     filerForOpplasting.map {
                         val kryptert = krypteringService.krypter(it.fil, certificate, this)
                         it.copy(fil = kryptert)
                     }
-                val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(files, metadataWithoutEmpties)
+                val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadataWithoutEmpties)
                 try {
-                    fiksClient.lastOppNyEttersendelse(etterKryptering.toList(), vedleggSpesifikasjon, digisosId, token)
+                    fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, digisosId, token)
                 } catch (e: FiksClientFileExistsException) {
                     // ignorerer når filen allerede er lastet opp
                 }
@@ -97,11 +90,6 @@ class VedleggOpplastingService(
             "text/x-matlab" -> "application/pdf"
             else -> detectedMimetype
         }
-
-    private fun harOppgaverMedValideringsfeil(oppgaveValideringer: MutableList<OppgaveValidering>) =
-        oppgaveValideringer.any { oppgave -> harFilerMedValideringsfeil(oppgave) }
-
-    private fun harFilerMedValideringsfeil(oppgave: OppgaveValidering) = oppgave.filer.any { it.status.result != ValidationValues.OK }
 
     suspend fun createEttersendelsePdf(
         metadata: List<OpplastetVedleggMetadata>,
@@ -124,11 +112,7 @@ class VedleggOpplastingService(
         }
     }
 
-    fun createJsonVedleggSpesifikasjon(
-        files: List<MultipartFile>,
-        metadata: List<OpplastetVedleggMetadata>,
-    ): JsonVedleggSpesifikasjon {
-        var filIndex = 0
+    fun createJsonVedleggSpesifikasjon(metadata: List<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon {
         return JsonVedleggSpesifikasjon()
             .withVedlegg(
                 metadata.map {
@@ -137,7 +121,7 @@ class VedleggOpplastingService(
                         it.filer.map { fil ->
                             JsonFiler()
                                 .withFilnavn(fil.filnavn)
-                                .withSha512(getSha512FromByteArray(files[filIndex++].bytes))
+                                .withSha512(getSha512FromByteArray(fil.fil.bytes))
                         },
                     )
                 },
@@ -157,180 +141,42 @@ class VedleggOpplastingService(
             .withHendelseReferanse(metadata.hendelsereferanse)
     }
 
-    fun createFilename(
-        originalFilename: String?,
-        filValideringer: List<FilValidering>,
-    ): String {
-        if (originalFilename == null) {
-            return ""
-        }
-
-        val filenameSplit = splitFileName(originalFilename)
-        var filename = filenameSplit.name
-
-        if (filename.length > 50) {
-            filename = filename.substring(0, 50)
-        }
-
-        val uuid = UUID.randomUUID().toString()
-
-        val matchendeFiler = filValideringer.filter { it.filename == originalFilename }
-        if (matchendeFiler.size > 1) log.warn("Vi har funnet ${matchendeFiler.size} validerte filer med samme navn. Det er flere enn 1.")
-        if (matchendeFiler.isEmpty()) {
-            log.warn(
-                "0 validerte filer med samme navn. Antall filvalideringer totalt: ${filValideringer.size} Dette burde undersøkes nærmere.",
-            )
-        }
-
-        filename += "-" + uuid.split("-")[0]
-
-        filename +=
-            if (filenameSplit.extension.isNotEmpty() &&
-                isExtensionAndValidationResultInAgreement(
-                    filenameSplit.extension,
-                    matchendeFiler.first(),
-                )
-            ) {
-                filenameSplit.extension
-            } else {
-                finnFilextensionBasedOnValidationResult(originalFilename, matchendeFiler.first())
-            }
-
-        return filename
+    fun createFilename(fil: OpplastetFil): String {
+        val filenameSplit = splitFileName(sanitizeFileName(fil.filnavn))
+        return filenameSplit.name.take(50) + "-" + fil.uuid.toString().substringBefore("-") + fil.validering.status.fileType.toExt()
     }
 
-    private fun isExtensionAndValidationResultInAgreement(
-        extension: String,
-        validering: FilValidering,
-    ): Boolean {
-        if (TikaFileType.JPEG == validering.status.fileType) {
-            return ".jpeg" == extension.lowercase() || ".jpg" == extension.lowercase()
-        }
-        if (TikaFileType.PNG == validering.status.fileType) {
-            return ".png" == extension.lowercase()
-        }
-        if (TikaFileType.PDF == validering.status.fileType) {
-            return ".pdf" == extension.lowercase()
-        }
-        return false
-    }
-
-    fun renameFilenameInMetadataJson(
-        originalFilename: String,
-        newFilename: String,
-        metadata: List<OpplastetVedleggMetadata>,
-    ) {
-        metadata.flatMap { it.filer }
-            .firstOrNull {
-                sanitizeFileName(it.filnavn) == sanitizeFileName(originalFilename)
-            }?.let {
-                it.filnavn = newFilename
-            }
-    }
-
-    fun validateFilenameMatchInMetadataAndFiles(
-        metadata: List<OpplastetVedleggMetadata>,
-        files: List<MultipartFile>,
-    ) {
-        val filnavnMetadata: List<String> = metadata.flatMap { it.filer.map { opplastetFil -> sanitizeFileName(opplastetFil.filnavn) } }
-        val filnavnMultipart: List<String> = files.map { sanitizeFileName(it.originalFilename ?: "") }
-        if (filnavnMetadata.size != filnavnMultipart.size) {
-            throw OpplastingFilnavnMismatchException(
-                "FilnavnMetadata (size ${filnavnMetadata.size}) og filnavnMultipart (size ${filnavnMultipart.size}) " +
-                    "har forskjellig antall. Strukturen til metadata: ${getMetadataAsString(metadata)}",
-                null,
-            )
-        }
-
-        val nofFilenameMatchInMetadataAndFiles = filnavnMetadata.filterIndexed { idx, it -> it == filnavnMultipart[idx] }.size
-        if (nofFilenameMatchInMetadataAndFiles != filnavnMetadata.size) {
-            throw OpplastingFilnavnMismatchException(
-                "Antall filnavn som matcher i metadata og files (size $nofFilenameMatchInMetadataAndFiles)" +
-                    " stemmer ikke overens med antall filer (size ${filnavnMultipart.size}). " +
-                    "Strukturen til metadata: ${getMetadataAsString(metadata)}",
-                null,
-            )
-        }
-    }
-
-    fun getMismatchFilnavnListsAsString(
-        filnavnMetadata: List<String>,
-        filnavnMultipart: List<String>,
-    ): String {
-        var filnavnMetadataString = "\r\nFilnavnMetadata :"
-        var filnavnMultipartString = "\r\nFilnavnMultipart:"
-
-        filnavnMetadata.forEachIndexed { index, filnavn ->
-            if (filnavn != filnavnMultipart[index]) {
-                filnavnMetadataString += " $filnavn (${filnavn.length} tegn),"
-                filnavnMultipartString += " ${filnavnMultipart[index]} (${filnavnMultipart[index].length} tegn),"
-            }
-        }
-        return filnavnMetadataString + filnavnMultipartString
-    }
-
-    fun getMetadataAsString(metadata: List<OpplastetVedleggMetadata>): String =
-        metadata.mapIndexed { index, data -> "metadata[$index].filer.size: ${data.filer.size}" }.joinToString()
-
-    private fun finnFilextensionBasedOnValidationResult(
-        originalFilename: String?,
-        filValidering: FilValidering,
-    ): String {
-        if (originalFilename != null) {
-            if (filValidering.status.fileType == TikaFileType.PDF) return ".pdf"
-            if (filValidering.status.fileType == TikaFileType.JPEG) return ".jpg"
-            if (filValidering.status.fileType == TikaFileType.PNG) return ".png"
-        }
-        throw OpplastingFilnavnMismatchException("Finner ikke filnavnet i valideringslisten! Dette skal da ikke kunne skje.", null)
-    }
-
-    suspend fun validateFiler(
-        files: List<MultipartFile>,
-        metadataListe: List<OpplastetVedleggMetadata>,
-    ): MutableList<OppgaveValidering> {
-        val oppgaveValideringer = mutableListOf<OppgaveValidering>()
-        validateFilenameMatchInMetadataAndFiles(metadataListe, files)
-
-        var filesIndex = 0
-        metadataListe.forEach { metadata ->
-            val filValidering = mutableListOf<FilValidering>()
-
-            repeat(metadata.filer.size) {
-                val file = files[filesIndex]
-                val valideringstatus = validateFil(file)
-                if (valideringstatus.result != ValidationValues.OK) {
-                    log.warn(
-                        "Opplasting av fil $filesIndex av ${files.size} til ettersendelse feilet. " +
-                            "Det var ${metadataListe.size} oppgaveElement. Status: $valideringstatus",
-                    )
+    suspend fun validateFiler(metadatas: List<OpplastetVedleggMetadata>): List<OppgaveValidering> =
+        metadatas.map { metadata ->
+            val filValideringer =
+                metadata.filer.mapIndexed { index, mpf ->
+                    val valideringstatus = validateFil(mpf.fil, mpf.filnavn)
+                    if (valideringstatus.result != ValidationValues.OK) {
+                        log.warn(
+                            "Opplasting av fil $index av ${metadatas.sumOf { it.filer.size }} til ettersendelse feilet. " +
+                                "Det var ${metadatas.size} oppgaveElement. Status: $valideringstatus",
+                        )
+                    }
+                    FilValidering(sanitizeFileName(mpf.filnavn), valideringstatus).also { mpf.validering = it }
                 }
-                filValidering.add(FilValidering(file.originalFilename?.let { fileName -> sanitizeFileName(fileName) }, valideringstatus))
-                filesIndex++
+            with(metadata) {
+                OppgaveValidering(type, tilleggsinfo, innsendelsesfrist, hendelsetype, hendelsereferanse, filValideringer)
             }
-            oppgaveValideringer.add(
-                OppgaveValidering(
-                    metadata.type,
-                    metadata.tilleggsinfo,
-                    metadata.innsendelsesfrist,
-                    metadata.hendelsetype,
-                    metadata.hendelsereferanse,
-                    filValidering,
-                ),
-            )
         }
-        return oppgaveValideringer
-    }
 
-    suspend fun validateFil(file: MultipartFile): ValidationResult {
+    suspend fun validateFil(
+        file: MultipartFile,
+        filnavn: String,
+    ): ValidationResult {
         if (file.size > MAKS_TOTAL_FILSTORRELSE) {
             return ValidationResult(ValidationValues.FILE_TOO_LARGE)
         }
 
-        if (file.originalFilename == null || containsIllegalCharacters(file.originalFilename ?: "")) {
+        if (filnavn.containsIllegalCharacters()) {
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
 
-        virusScanner.scan(file.originalFilename, file.bytes)
+        virusScanner.scan(filnavn, file.bytes)
 
         val tikaMediaType = detectTikaType(file.inputStream)
         if (tikaMediaType == "text/x-matlab") {
@@ -355,7 +201,7 @@ class VedleggOpplastingService(
 
             log.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +
-                    "\r\nextension: \"${splitFileName(file.originalFilename ?: "").extension}\"," +
+                    "\r\nextension: \"${splitFileName(filnavn).extension}\"," +
                     "\r\nvalidatedFileType: ${fileType.name}," +
                     "\r\ntikaMediaType: $tikaMediaType," +
                     "\r\nmime: ${file.contentType}" +
@@ -367,8 +213,7 @@ class VedleggOpplastingService(
             return ValidationResult(checkIfPdfIsValid(file.inputStream), TikaFileType.PDF)
         }
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
-            val originalFilename = file.originalFilename ?: throw BadStateException("file mangler originalFilename")
-            val ext: String = originalFilename.substringAfterLast(".")
+            val ext: String = filnavn.substringAfterLast(".")
             if (ext.lowercase() in listOf("jfif", "pjpeg", "pjp")) {
                 log.warn("Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.")
                 return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
@@ -394,17 +239,9 @@ class VedleggOpplastingService(
             return ValidationValues.COULD_NOT_LOAD_DOCUMENT
         }
     }
-
-    companion object {
-        private val log by logger()
-
-        const val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10 // 10 MB
-
-        fun containsIllegalCharacters(filename: String): Boolean {
-            return sanitizeFileName(filename).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
-        }
-    }
 }
+
+fun String.containsIllegalCharacters(): Boolean = sanitizeFileName(this).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
 
 class OppgaveValidering(
     val type: String,
@@ -412,7 +249,7 @@ class OppgaveValidering(
     val innsendelsesfrist: LocalDate?,
     val hendelsetype: JsonVedlegg.HendelseType?,
     val hendelsereferanse: String?,
-    val filer: MutableList<FilValidering>,
+    val filer: List<FilValidering>,
 )
 
 class FilValidering(val filename: String?, val status: ValidationResult)

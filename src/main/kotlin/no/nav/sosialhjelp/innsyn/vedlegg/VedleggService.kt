@@ -20,7 +20,7 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 class VedleggService(
     private val fiksClient: FiksClient,
 ) {
-    fun hentAlleOpplastedeVedlegg(
+    suspend fun hentAlleOpplastedeVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
         token: String,
@@ -31,7 +31,7 @@ class VedleggService(
         return soknadVedlegg.plus(ettersendteVedlegg)
     }
 
-    fun hentSoknadVedleggMedStatus(
+    suspend fun hentSoknadVedleggMedStatus(
         status: String,
         digisosSak: DigisosSak,
         token: String,
@@ -60,7 +60,7 @@ class VedleggService(
         return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
-    fun hentEttersendteVedlegg(
+    suspend fun hentEttersendteVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
         token: String,
@@ -91,7 +91,9 @@ class VedleggService(
                                 dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex).toMutableList()
 
                                 if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                    throw NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
+                                    val exception =
+                                        NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
+                                    log.error("Mismatch", exception)
                                 }
                             }
                             InternalVedlegg(
@@ -109,7 +111,7 @@ class VedleggService(
         return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
-    private fun hentVedleggSpesifikasjon(
+    private suspend fun hentVedleggSpesifikasjon(
         digisosSak: DigisosSak,
         dokumentlagerId: String,
         token: String,
@@ -133,10 +135,7 @@ class VedleggService(
         files: List<JsonFiler>,
     ): Boolean {
         return dokumentInfoList.size == files.size &&
-            dokumentInfoList.filterIndexed {
-                    idx,
-                    it,
-                ->
+            dokumentInfoList.filterIndexed { idx, it ->
                 sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn)
             }.size == dokumentInfoList.size
     }

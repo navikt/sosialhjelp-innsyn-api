@@ -3,10 +3,12 @@ package no.nav.sosialhjelp.innsyn.saksoversikt
 import io.mockk.Called
 import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import kotlin.time.Duration.Companion.seconds
 
 internal class SaksOversiktControllerTest {
     private val saksOversiktService: SaksOversiktService = mockk()
@@ -62,7 +65,7 @@ internal class SaksOversiktControllerTest {
 
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { tilgangskontroll.sjekkTilgang("token") } just Runs
+        coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
 
         every { digisosSak1.fiksDigisosId } returns "123"
         every { digisosSak1.sistEndret } returns 0L
@@ -75,14 +78,14 @@ internal class SaksOversiktControllerTest {
         every { oppgaveResponseMock.oppgaveElementer } returns listOf(oppgaveElement1)
         every { dokumentasjonkravResponseMock.dokumentasjonkravElementer } returns listOf(dokumentasjonkravElement1)
 
-        every { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
-        every { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
-        every { oppgaveService.getVilkar("123", any()) } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
-        every { oppgaveService.getVilkar("456", any()) } returns listOf(vilkarResponseMock) // 1 oppgave
-        every {
+        coEvery { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
+        coEvery { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
+        coEvery { oppgaveService.getVilkar("123", any()) } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
+        coEvery { oppgaveService.getVilkar("456", any()) } returns listOf(vilkarResponseMock) // 1 oppgave
+        coEvery {
             oppgaveService.getDokumentasjonkrav("123", any())
         } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
-        every { oppgaveService.getDokumentasjonkrav("456", any()) } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
+        coEvery { oppgaveService.getDokumentasjonkrav("456", any()) } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
     }
 
     @AfterEach
@@ -91,82 +94,85 @@ internal class SaksOversiktControllerTest {
     }
 
     @Test
-    internal fun `skal returnere 503 ved FiksException`() {
-        every { saksOversiktService.hentAlleSaker(any()) } throws FiksException("message", null)
+    internal fun `skal returnere 503 ved FiksException`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { saksOversiktService.hentAlleSaker(any()) } throws FiksException("message", null)
 
-        val response = controller.hentAlleSaker("token")
+            val response = controller.hentAlleSaker("token")
 
-        assertThat(response.statusCode).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
-    }
-
-    @Test
-    fun `skal mappe fra DigisosSak til SakResponse for detaljer`() {
-        every { fiksClient.hentDigisosSak("123", "token", true) } returns digisosSak1
-        every { fiksClient.hentDigisosSak("456", "token", true) } returns digisosSak2
-        every { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
-        every { eventService.createSaksoversiktModel(digisosSak2, any()) } returns model2
-
-        every { model1.status } returns MOTTATT
-        every { model2.status } returns UNDER_BEHANDLING
-
-        every { model1.oppgaver } returns mutableListOf(mockk())
-        every { model2.oppgaver } returns mutableListOf(mockk())
-
-        every { model1.vilkar } returns mutableListOf(mockk())
-        every { model2.vilkar } returns mutableListOf(mockk())
-
-        every { model1.dokumentasjonkrav } returns mutableListOf(mockk())
-        every { model2.dokumentasjonkrav } returns mutableListOf(mockk())
-
-        every { sak1.tittel } returns "Livsopphold"
-        every { sak1.saksStatus } returns SaksStatus.UNDER_BEHANDLING
-        every { sak2.tittel } returns "Strøm"
-        every { sak2.saksStatus } returns SaksStatus.UNDER_BEHANDLING
-
-        every { model1.saker } returns mutableListOf()
-        every { model2.saker } returns mutableListOf(sak1, sak2)
-
-        every { model1.utbetalinger } returns mutableListOf()
-        every { model2.utbetalinger } returns mutableListOf()
-
-        val response1 = controller.hentSaksDetaljer("123", "token")
-        val sak1 = response1.body
-
-        assertThat(response1.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(sak1).isNotNull
-        assertThat(sak1?.soknadTittel).isEqualTo("")
-        assertThat(sak1?.antallNyeOppgaver).isEqualTo(6)
-
-        val response2 = controller.hentSaksDetaljer("456", "token")
-        val sak2 = response2.body
-
-        assertThat(response2.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(sak2).isNotNull
-        assertThat(sak2?.soknadTittel).contains("Livsopphold", "Strøm")
-        assertThat(sak2?.status).isEqualTo("UNDER_BEHANDLING")
-        assertThat(sak2?.antallNyeOppgaver).isEqualTo(3)
-    }
+            assertThat(response.statusCode).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+        }
 
     @Test
-    fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() {
-        every { fiksClient.hentDigisosSak("123", "token", true) } returns digisosSak1
-        every { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
+    fun `skal mappe fra DigisosSak til SakResponse for detaljer`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { fiksClient.hentDigisosSak("123", "token", true) } returns digisosSak1
+            coEvery { fiksClient.hentDigisosSak("456", "token", true) } returns digisosSak2
+            coEvery { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
+            coEvery { eventService.createSaksoversiktModel(digisosSak2, any()) } returns model2
 
-        every { model1.status } returns MOTTATT
-        every { model1.oppgaver } returns mutableListOf()
-        every { model1.vilkar } returns mutableListOf()
-        every { model1.dokumentasjonkrav } returns mutableListOf()
-        every { model1.saker } returns mutableListOf()
-        every { model1.utbetalinger } returns mutableListOf()
+            every { model1.status } returns MOTTATT
+            every { model2.status } returns UNDER_BEHANDLING
 
-        val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId, "token")
-        val sak = response.body
+            every { model1.oppgaver } returns mutableListOf(mockk())
+            every { model2.oppgaver } returns mutableListOf(mockk())
 
-        assertThat(sak).isNotNull
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            every { model1.vilkar } returns mutableListOf(mockk())
+            every { model2.vilkar } returns mutableListOf(mockk())
 
-        verify { oppgaveService wasNot Called }
+            every { model1.dokumentasjonkrav } returns mutableListOf(mockk())
+            every { model2.dokumentasjonkrav } returns mutableListOf(mockk())
 
-        assertThat(sak?.antallNyeOppgaver).isEqualTo(0)
-    }
+            every { sak1.tittel } returns "Livsopphold"
+            every { sak1.saksStatus } returns SaksStatus.UNDER_BEHANDLING
+            every { sak2.tittel } returns "Strøm"
+            every { sak2.saksStatus } returns SaksStatus.UNDER_BEHANDLING
+
+            every { model1.saker } returns mutableListOf()
+            every { model2.saker } returns mutableListOf(sak1, sak2)
+
+            every { model1.utbetalinger } returns mutableListOf()
+            every { model2.utbetalinger } returns mutableListOf()
+
+            val response1 = controller.hentSaksDetaljer("123", "token")
+            val sak1 = response1.body
+
+            assertThat(response1.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(sak1).isNotNull
+            assertThat(sak1?.soknadTittel).isEqualTo("")
+            assertThat(sak1?.antallNyeOppgaver).isEqualTo(6)
+
+            val response2 = controller.hentSaksDetaljer("456", "token")
+            val sak2 = response2.body
+
+            assertThat(response2.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(sak2).isNotNull
+            assertThat(sak2?.soknadTittel).contains("Livsopphold", "Strøm")
+            assertThat(sak2?.status).isEqualTo("UNDER_BEHANDLING")
+            assertThat(sak2?.antallNyeOppgaver).isEqualTo(3)
+        }
+
+    @Test
+    fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { fiksClient.hentDigisosSak("123", "token", true) } returns digisosSak1
+            coEvery { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
+
+            every { model1.status } returns MOTTATT
+            every { model1.oppgaver } returns mutableListOf()
+            every { model1.vilkar } returns mutableListOf()
+            every { model1.dokumentasjonkrav } returns mutableListOf()
+            every { model1.saker } returns mutableListOf()
+            every { model1.utbetalinger } returns mutableListOf()
+
+            val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId, "token")
+            val sak = response.body
+
+            assertThat(sak).isNotNull
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+
+            verify { oppgaveService wasNot Called }
+
+            assertThat(sak?.antallNyeOppgaver).isEqualTo(0)
+        }
 }

@@ -2,11 +2,13 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import io.mockk.Runs
 import io.mockk.clearMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
@@ -19,8 +21,6 @@ import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
+import kotlin.time.Duration.Companion.seconds
 
 internal class VedleggControllerTest {
     private val vedleggOpplastingService: VedleggOpplastingService = mockk()
@@ -76,7 +77,7 @@ internal class VedleggControllerTest {
         clearMocks(vedleggOpplastingService, vedleggService)
         SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        every { tilgangskontroll.sjekkTilgang("token") } just Runs
+        coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
         every { digisosSak.fiksDigisosId } returns "123"
     }
 
@@ -86,123 +87,163 @@ internal class VedleggControllerTest {
     }
 
     @Test
-    fun `skal mappe fra InternalVedleggList til VedleggResponseList`() {
-        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
-        every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
-            listOf(
-                InternalVedlegg(
-                    dokumenttype,
-                    tilleggsinfo,
-                    null,
-                    null,
-                    mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
-                    LocalDateTime.now(),
-                    null,
-                ),
-            )
+    fun `skal mappe fra InternalVedleggList til VedleggResponseList`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
+            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
+                listOf(
+                    InternalVedlegg(
+                        dokumenttype,
+                        tilleggsinfo,
+                        null,
+                        null,
+                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
+                        LocalDateTime.now(),
+                        null,
+                    ),
+                )
 
-        val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
+            val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
 
-        val body = vedleggResponses.body
+            val body = vedleggResponses.body
 
-        assertThat(body).isNotNull
-        if (body != null && body.isNotEmpty()) {
-            assertThat(body).hasSize(2)
-            assertThat(body[0].filnavn).isEqualTo(filnavn)
-            assertThat(body[0].url).contains(dokumentlagerId)
-            assertThat(body[0].storrelse).isEqualTo(123L)
+            assertThat(body).isNotNull
+            if (!body.isNullOrEmpty()) {
+                assertThat(body).hasSize(2)
+                assertThat(body[0].filnavn).isEqualTo(filnavn)
+                assertThat(body[0].url).contains(dokumentlagerId)
+                assertThat(body[0].storrelse).isEqualTo(123L)
 
-            assertThat(body[1].filnavn).isEqualTo(filnavn2)
-            assertThat(body[1].url).contains(dokumentlagerId2)
-            assertThat(body[1].storrelse).isEqualTo(42L)
+                assertThat(body[1].filnavn).isEqualTo(filnavn2)
+                assertThat(body[1].url).contains(dokumentlagerId2)
+                assertThat(body[1].storrelse).isEqualTo(42L)
+            }
         }
-    }
 
     @Test
-    fun `skal utelate duplikater i response`() {
-        val now = LocalDateTime.now()
-        every { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
-        every { eventService.createModel(any(), any()) } returns model
-        every { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
-            listOf(
-                InternalVedlegg(
-                    dokumenttype,
-                    null,
-                    null,
-                    null,
-                    mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                    now,
-                    null,
-                ),
-                InternalVedlegg(
-                    dokumenttype,
-                    null,
-                    null,
-                    null,
-                    mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                    now,
-                    null,
-                ),
-            )
+    fun `skal utelate duplikater i response`() =
+        runTest(timeout = 5.seconds) {
+            val now = LocalDateTime.now()
+            coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
+            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
+                listOf(
+                    InternalVedlegg(
+                        dokumenttype,
+                        null,
+                        null,
+                        null,
+                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                        now,
+                        null,
+                    ),
+                    InternalVedlegg(
+                        dokumenttype,
+                        null,
+                        null,
+                        null,
+                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                        now,
+                        null,
+                    ),
+                )
 
-        val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
+            val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
 
-        val body = vedleggResponses.body
+            val body = vedleggResponses.body
 
-        assertThat(body).isNotNull
-        if (body != null && body.isNotEmpty()) {
-            assertThat(body).hasSize(1)
-            assertThat(body[0].filnavn).isEqualTo(filnavn)
-            assertThat(body[0].url).contains(dokumentlagerId)
-            assertThat(body[0].storrelse).isEqualTo(123L)
+            assertThat(body).isNotNull
+            if (!body.isNullOrEmpty()) {
+                assertThat(body).hasSize(1)
+                assertThat(body[0].filnavn).isEqualTo(filnavn)
+                assertThat(body[0].url).contains(dokumentlagerId)
+                assertThat(body[0].storrelse).isEqualTo(123L)
+            }
         }
-    }
 
     @Test
-    fun `kaster exception dersom input til sendVedlegg ikke inneholder metadata-json`() {
-        val files =
-            mutableListOf<MultipartFile>(
-                MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-                MockMultipartFile("files", "test2.png", null, ByteArray(0)),
-            )
-        val request: HttpServletRequest = mockk()
-        every { request.cookies } returns arrayOf(xsrfCookie())
-        every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
-        every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
-        assertThatExceptionOfType(IllegalStateException::class.java)
-            .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
-    }
+    fun `kaster exception dersom input til sendVedlegg ikke inneholder metadata-json`() =
+        runTest(timeout = 5.seconds) {
+            val files =
+                mutableListOf<MultipartFile>(
+                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+                    MockMultipartFile("files", "test2.png", null, ByteArray(0)),
+                )
+            val request: HttpServletRequest = mockk()
+            every { request.cookies } returns arrayOf(xsrfCookie())
+            every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
+            every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
+            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+                assertThat(it.isFailure)
+                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+            }
+        }
 
     @Test
-    fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() {
-        every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
-        val files =
-            mutableListOf<MultipartFile>(
-                MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
-                MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-            )
-        val request: HttpServletRequest = mockk()
-        every { request.cookies } returns arrayOf(xsrfCookie())
-        every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
-        every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
-        assertThatCode { controller.sendVedlegg(id, files, "token", request) }.doesNotThrowAnyException()
-    }
+    fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any()) } returns emptyList()
+            val files =
+                mutableListOf<MultipartFile>(
+                    MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+                )
+            val request: HttpServletRequest = mockk()
+            every { request.cookies } returns arrayOf(xsrfCookie())
+            every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
+            every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
+            assertThat(runCatching { controller.sendVedlegg(id, files, "token", request) }.isSuccess)
+        }
 
     @Test
-    fun `skal kaste exception dersom token mangler`() {
-        every { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any(), any()) } returns emptyList()
-        val files =
-            mutableListOf<MultipartFile>(
-                MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
-                MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-            )
-        val request: HttpServletRequest = mockk()
-        every { request.cookies } returns arrayOf()
-        every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
-        assertThatExceptionOfType(IllegalArgumentException::class.java)
-            .isThrownBy { controller.sendVedlegg(id, files, "token", request) }
-    }
+    fun `skal kaste exception dersom token mangler`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any()) } returns emptyList()
+            val files =
+                mutableListOf<MultipartFile>(
+                    MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+                )
+            val request: HttpServletRequest = mockk()
+            every { request.cookies } returns arrayOf()
+            every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
+            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+                assertThat(it.isFailure)
+                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+            }
+        }
+
+    @Test
+    fun `skal kaste exception hvis det er filer i metadata som ikke er i resten av filene`() =
+        runTest(timeout = 5.seconds) {
+            val metadata =
+                """
+            |[{
+            |    "type": "brukskonto",
+            |    "tilleggsinfo": "kontoutskrift",
+            |    "filer": [{
+            |        "filnavn": "test.jpg"
+            |    }]
+            |}]
+            |
+                """.trimMargin().toByteArray()
+
+            val request: HttpServletRequest = mockk()
+            coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
+            every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
+
+            val files =
+                mutableListOf<MultipartFile>(
+                    MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
+                    MockMultipartFile("files", "roflmao.jpg", null, ByteArray(0)),
+                )
+            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+                assertThat(it.isFailure)
+                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+            }
+        }
 
     @Test
     fun `skal fjerne UUID fra filnavn dersom dette er satt`() {

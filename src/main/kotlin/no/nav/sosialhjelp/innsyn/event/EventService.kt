@@ -41,7 +41,7 @@ class EventService(
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
 ) {
-    fun createModel(
+    suspend fun createModel(
         digisosSak: DigisosSak,
         token: String,
     ): InternalDigisosSoker {
@@ -145,7 +145,7 @@ class EventService(
         }
     }
 
-    fun createSaksoversiktModel(
+    suspend fun createSaksoversiktModel(
         digisosSak: DigisosSak,
         token: String,
     ): InternalDigisosSoker {
@@ -164,7 +164,7 @@ class EventService(
         return model
     }
 
-    private fun applyHendelserOgSoknadKrav(
+    private suspend fun applyHendelserOgSoknadKrav(
         jsonDigisosSoker: JsonDigisosSoker?,
         model: InternalDigisosSoker,
         digisosSak: DigisosSak,
@@ -188,7 +188,7 @@ class EventService(
         }
     }
 
-    fun hentAlleUtbetalinger(
+    suspend fun hentAlleUtbetalinger(
         token: String,
         digisosSak: DigisosSak,
     ): InternalDigisosSoker {
@@ -203,7 +203,7 @@ class EventService(
         return model
     }
 
-    private fun InternalDigisosSoker.applyHendelse(
+    private suspend fun InternalDigisosSoker.applyHendelse(
         hendelse: JsonHendelse,
         isPapirSoknad: Boolean,
     ) {

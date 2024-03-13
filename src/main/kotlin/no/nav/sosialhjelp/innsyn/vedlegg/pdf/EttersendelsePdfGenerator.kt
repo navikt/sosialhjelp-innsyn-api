@@ -49,7 +49,8 @@ class EttersendelsePdfGenerator {
  * - U+000D: Carriage return (CR)
  * - U+F0B7: Bullet point?
  * - U+001F: No idea
+ * - U+000A: EOF/LF/NL
  **/
 private fun String.replaceUnsupportedCharacters() =
-    replace(Regex("[\\x09\\x0D]"), " ")
+    replace(Regex("[\\x09\\x0D\\x0A]"), " ")
         .replace(Regex("[\\uF0B7\\x1F]"), "")

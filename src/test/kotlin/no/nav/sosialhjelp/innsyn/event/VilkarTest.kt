@@ -1,8 +1,10 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -16,6 +18,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.seconds
 
 internal class VilkarTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
@@ -44,124 +47,128 @@ internal class VilkarTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        every { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
-        every { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
+        coEvery { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
+        coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
         resetHendelser()
     }
 
     @Test
-    fun `vilkar ETTER utbetaling`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
-            JsonDigisosSoker()
-                .withAvsender(avsender)
-                .withVersion("123")
-                .withHendelser(
-                    listOf(
-                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                        SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                        SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
-                        UTBETALING.withHendelsestidspunkt(tidspunkt_5),
-                        VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
-                    ),
-                )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+    fun `vilkar ETTER utbetaling`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                JsonDigisosSoker()
+                    .withAvsender(avsender)
+                    .withVersion("123")
+                    .withHendelser(
+                        listOf(
+                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
+                            UTBETALING.withHendelsestidspunkt(tidspunkt_5),
+                            VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
+                        ),
+                    )
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-        val model = service.createModel(mockDigisosSak, "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
-        assertThat(model).isNotNull
-        assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
-        assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(5)
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
+            assertThat(model.saker).hasSize(1)
+            assertThat(model.historikk).hasSize(5)
 
-        assertThat(model.saker[0].utbetalinger).hasSize(1)
-        val utbetaling = model.saker[0].utbetalinger[0]
-        assertThat(utbetaling.vilkar).hasSize(1)
-        assertThat(utbetaling.vilkar[0].referanse).isEqualTo(VILKAR_REF_1)
-        assertThat(utbetaling.vilkar[0].beskrivelse).isEqualTo("beskrivelse")
-        assertThat(utbetaling.vilkar[0].getOppgaveStatus()).isEqualTo(Oppgavestatus.RELEVANT)
-    }
-
-    @Test
-    fun `vilkar UTEN utbetaling`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
-            JsonDigisosSoker()
-                .withAvsender(avsender)
-                .withVersion("123")
-                .withHendelser(
-                    listOf(
-                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                        SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_3),
-                    ),
-                )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
-
-        val model = service.createModel(mockDigisosSak, "token")
-
-        assertThat(model).isNotNull
-        assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
-        assertThat(model.saker).hasSize(0)
-        assertThat(model.historikk).hasSize(3)
-    }
+            assertThat(model.saker[0].utbetalinger).hasSize(1)
+            val utbetaling = model.saker[0].utbetalinger[0]
+            assertThat(utbetaling.vilkar).hasSize(1)
+            assertThat(utbetaling.vilkar[0].referanse).isEqualTo(VILKAR_REF_1)
+            assertThat(utbetaling.vilkar[0].beskrivelse).isEqualTo("beskrivelse")
+            assertThat(utbetaling.vilkar[0].getOppgaveStatus()).isEqualTo(Oppgavestatus.RELEVANT)
+        }
 
     @Test
-    fun `vilkar FOR utbetaling - vilkar knyttes ikke til noen utbetaling`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
-            JsonDigisosSoker()
-                .withAvsender(avsender)
-                .withVersion("123")
-                .withHendelser(
-                    listOf(
-                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                        SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                        SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
-                        VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                        UTBETALING.withHendelsestidspunkt(tidspunkt_6),
-                    ),
-                )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+    fun `vilkar UTEN utbetaling`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                JsonDigisosSoker()
+                    .withAvsender(avsender)
+                    .withVersion("123")
+                    .withHendelser(
+                        listOf(
+                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                            VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_3),
+                        ),
+                    )
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-        val model = service.createModel(mockDigisosSak, "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
-        assertThat(model).isNotNull
-        assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(5)
-        assertThat(model.saker[0].utbetalinger).hasSize(1)
-        val utbetaling = model.saker[0].utbetalinger[0]
-        assertThat(utbetaling.vilkar).hasSize(0)
-    }
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(model.saker).hasSize(0)
+            assertThat(model.historikk).hasSize(3)
+        }
 
     @Test
-    fun `vilkar og utbetaling har samme hendelsestidspunkt`() {
-        every { innsynService.hentJsonDigisosSoker(any(), any()) } returns
-            JsonDigisosSoker()
-                .withAvsender(avsender)
-                .withVersion("123")
-                .withHendelser(
-                    listOf(
-                        SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                        SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                        SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                        SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
-                        VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                        UTBETALING.withHendelsestidspunkt(tidspunkt_5),
-                    ),
-                )
-        every { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+    fun `vilkar FOR utbetaling - vilkar knyttes ikke til noen utbetaling`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                JsonDigisosSoker()
+                    .withAvsender(avsender)
+                    .withVersion("123")
+                    .withHendelser(
+                        listOf(
+                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
+                            VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
+                            UTBETALING.withHendelsestidspunkt(tidspunkt_6),
+                        ),
+                    )
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-        val model = service.createModel(mockDigisosSak, "token")
+            val model = service.createModel(mockDigisosSak, "token")
 
-        assertThat(model).isNotNull
-        assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
-        assertThat(model.saker).hasSize(1)
-        assertThat(model.historikk).hasSize(5)
+            assertThat(model).isNotNull
+            assertThat(model.saker).hasSize(1)
+            assertThat(model.historikk).hasSize(5)
+            assertThat(model.saker[0].utbetalinger).hasSize(1)
+            val utbetaling = model.saker[0].utbetalinger[0]
+            assertThat(utbetaling.vilkar).hasSize(0)
+        }
 
-        assertThat(model.saker[0].utbetalinger).hasSize(1)
-        val utbetaling = model.saker[0].utbetalinger[0]
-        assertThat(utbetaling.vilkar).hasSize(1)
-        assertThat(utbetaling.vilkar[0].referanse).isEqualTo(VILKAR_REF_1)
-    }
+    @Test
+    fun `vilkar og utbetaling har samme hendelsestidspunkt`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                JsonDigisosSoker()
+                    .withAvsender(avsender)
+                    .withVersion("123")
+                    .withHendelser(
+                        listOf(
+                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
+                            VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
+                            UTBETALING.withHendelsestidspunkt(tidspunkt_5),
+                        ),
+                    )
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+
+            val model = service.createModel(mockDigisosSak, "token")
+
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
+            assertThat(model.saker).hasSize(1)
+            assertThat(model.historikk).hasSize(5)
+
+            assertThat(model.saker[0].utbetalinger).hasSize(1)
+            val utbetaling = model.saker[0].utbetalinger[0]
+            assertThat(utbetaling.vilkar).hasSize(1)
+            assertThat(utbetaling.vilkar[0].referanse).isEqualTo(VILKAR_REF_1)
+        }
 }

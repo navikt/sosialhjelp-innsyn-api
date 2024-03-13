@@ -39,6 +39,15 @@ enum class TikaFileType {
     PNG,
     PDF,
     UNKNOWN,
+    ;
+
+    fun toExt(): String =
+        when (this) {
+            JPEG -> ".jpg"
+            PNG -> ".png"
+            PDF -> ".pdf"
+            UNKNOWN -> error("Unknown extension")
+        }
 }
 
 fun splitFileName(fileName: String): FileNameSplit {

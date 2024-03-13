@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.slf4j.MDCContext
 import no.ks.fiks.io.client.FiksIOKlient
 import no.ks.fiks.io.client.FiksIOKlientFactory
 import no.ks.fiks.io.client.konfigurasjon.FiksIOKonfigurasjon
@@ -35,7 +37,7 @@ class FiksIOKlientConfig(
         val fiksIOKlientFactory =
             FiksIOKlientFactory(fiksIOKonfigurasjon, null, httpClient).apply {
                 setMaskinportenAccessTokenSupplier {
-                    maskinportenClient.getToken()
+                    runBlocking(MDCContext()) { maskinportenClient.getToken() }
                 }
             }
 

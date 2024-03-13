@@ -65,6 +65,9 @@ fun InternalDigisosSoker.apply(
                 hendelse.hendelsestidspunkt.toLocalDateTime(),
                 UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, vedtaksfilUrl),
                 tekstArgument = sakForReferanse.tittel,
+                saksReferanse = hendelse.saksreferanse,
+                navEnhetsNummer = "SKAL HA4",
+                kommuneNummer = "SKAL HA4",
             ),
         )
     } else {

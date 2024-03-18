@@ -9,5 +9,6 @@ data class HendelseResponse(
     val tekstArgument: String?,
     val saksReferanse: String?,
     val navEnhetsNummer: String?,
+    val navEnhetsNavn: String?,
     val kommuneNummer: String?,
 )

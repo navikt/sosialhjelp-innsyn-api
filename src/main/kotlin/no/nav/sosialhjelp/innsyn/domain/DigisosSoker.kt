@@ -136,7 +136,7 @@ data class Hendelse(
     val url: UrlResponse? = null,
     val type: HistorikkType? = null,
     val tekstArgument: String? = null,
-    val saksReferanse: String? = null,
+    val saksReferanse: String? = null
 )
 
 data class UrlResponse(

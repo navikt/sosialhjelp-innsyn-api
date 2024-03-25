@@ -27,7 +27,6 @@ class HendelseService(
     ): List<HendelseResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
         val model = eventService.createModel(digisosSak, token)
-        log.info("hentet model: ${model}")
 
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(digisosSak, model, token)
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
@@ -36,17 +35,18 @@ class HendelseService(
         val responseList =
             model.historikk
                 .sortedBy { it.tidspunkt }
-                .map { HendelseResponse(
-                    it.tidspunkt.toString(),
-                    it.hendelseType.name,
-                    it.url,
-                    it.tekstArgument,
-                    it.saksReferanse,
-                    model.soknadsmottaker?.navEnhetsnummer,
-                    model.soknadsmottaker?.navEnhetsnavn,
-                    digisosSak.kommunenummer)}
-        log.info("Hentet info i responselist ${responseList} wat dis")
-        log.info("Hentet historikk med ${responseList.size} hendelser")
+                .map {
+                    HendelseResponse(
+                        it.tidspunkt.toString(),
+                        it.hendelseType.name,
+                        it.url,
+                        it.tekstArgument,
+                        it.saksReferanse,
+                        model.soknadsmottaker?.navEnhetsnummer,
+                        model.soknadsmottaker?.navEnhetsnavn,
+                        digisosSak.kommunenummer,
+                    )
+                }
         return responseList
     }
 

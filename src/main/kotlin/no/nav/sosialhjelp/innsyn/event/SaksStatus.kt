@@ -38,7 +38,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                             hendelseType = HendelseTekstType.SOKNAD_KAN_IKKE_VISE_STATUS_MED_TITTEL,
                             hendelse.hendelsestidspunkt.toLocalDateTime(),
                             tekstArgument = sakForReferanse.tittel,
-                            saksReferanse = hendelse.referanse
+                            saksReferanse = hendelse.referanse,
                         ),
                     )
                 } else {
@@ -46,7 +46,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                         Hendelse(
                             hendelseType = HendelseTekstType.SOKNAD_KAN_IKKE_VISE_STATUS_UTEN_TITTEL,
                             hendelse.hendelsestidspunkt.toLocalDateTime(),
-                            saksReferanse = hendelse.referanse
+                            saksReferanse = hendelse.referanse,
                         ),
                     )
                 }
@@ -91,7 +91,14 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                 else -> null
             }
         if (hendelsestype != null) {
-            historikk.add(Hendelse(hendelsestype, hendelse.hendelsestidspunkt.toLocalDateTime(), tekstArgument = hendelse.tittel, saksReferanse = hendelse.referanse))
+            historikk.add(
+                Hendelse(
+                    hendelsestype,
+                    hendelse.hendelsestidspunkt.toLocalDateTime(),
+                    tekstArgument = hendelse.tittel,
+                    saksReferanse = hendelse.referanse,
+                ),
+            )
         }
     }
     log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Sakstatus: ${hendelse.status?.name ?: "null"}")

@@ -65,7 +65,7 @@ fun InternalDigisosSoker.apply(
                 hendelse.hendelsestidspunkt.toLocalDateTime(),
                 UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, vedtaksfilUrl),
                 tekstArgument = sakForReferanse.tittel,
-                saksReferanse = hendelse.saksreferanse
+                saksReferanse = hendelse.saksreferanse,
             ),
         )
     } else {
@@ -74,7 +74,7 @@ fun InternalDigisosSoker.apply(
                 HendelseTekstType.SAK_FERDIGBEHANDLET_UTEN_TITTEL,
                 hendelse.hendelsestidspunkt.toLocalDateTime(),
                 UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, vedtaksfilUrl),
-                saksReferanse = hendelse.saksreferanse
+                saksReferanse = hendelse.saksreferanse,
             ),
         )
     }

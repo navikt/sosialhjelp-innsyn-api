@@ -88,7 +88,7 @@ class EventService(
                         dokumentlagerDokumentId?.let {
                             UrlResponse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR_LENKETEKST, hentDokumentlagerUrl(clientProperties, it))
                         },
-                        tekstArgument = stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn)
+                        tekstArgument = stripEnhetsnavnForKommune(jsonSoknad.mottaker.navEnhetsnavn),
                     ),
                 )
             }

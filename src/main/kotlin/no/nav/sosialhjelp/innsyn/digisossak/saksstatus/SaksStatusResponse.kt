@@ -9,9 +9,6 @@ data class SaksStatusResponse(
     val status: SaksStatus?,
     val skalViseVedtakInfoPanel: Boolean,
     val vedtaksfilUrlList: List<FilUrl>?,
-    val saksReferanse: String,
-    val navEnhetsNummer: String,
-    val navEnhetsNavn: String,
     val kommuneNummer: String,
 )
 

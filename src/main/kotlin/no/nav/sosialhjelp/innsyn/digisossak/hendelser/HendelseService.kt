@@ -47,6 +47,7 @@ class HendelseService(
                         digisosSak.kommunenummer,
                     )
                 }
+        log.info("Hentet historikk med ${responseList.size} hendelser")
         return responseList
     }
 

@@ -7,4 +7,8 @@ data class HendelseResponse(
     val hendelseType: String,
     val filUrl: UrlResponse?,
     val tekstArgument: String?,
+    val saksReferanse: String?,
+    val navEnhetsNummer: String?,
+    val navEnhetsNavn: String?,
+    val kommuneNummer: String?,
 )

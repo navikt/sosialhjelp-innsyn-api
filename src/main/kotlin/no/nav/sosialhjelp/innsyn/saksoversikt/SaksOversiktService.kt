@@ -4,7 +4,6 @@ import io.getunleash.Unleash
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
-import no.nav.sosialhjelp.innsyn.saksoversikt.soknadapi.SoknadApiClient
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixTimestampToDate
@@ -13,13 +12,11 @@ import org.springframework.stereotype.Component
 @Component
 class SaksOversiktService(
     private val fiksClient: FiksClient,
-    private val soknadApiClient: SoknadApiClient,
     private val unleashClient: Unleash,
     private val oppgaveService: OppgaveService,
 ) {
     suspend fun hentAlleSaker(token: String): List<SaksListeResponse> {
         return hentAlleDigisosSakerFraFiks(token).toMutableList()
-            .plus(hentAlleSvarUtSoknaderFraSoknadApi(token))
             .sortedByDescending { it.sistOppdatert }
     }
 
@@ -54,10 +51,6 @@ class SaksOversiktService(
         }
 
         return responseList
-    }
-
-    private suspend fun hentAlleSvarUtSoknaderFraSoknadApi(token: String): List<SaksListeResponse> {
-        return soknadApiClient.getSvarUtSoknader(token)
     }
 
     companion object {

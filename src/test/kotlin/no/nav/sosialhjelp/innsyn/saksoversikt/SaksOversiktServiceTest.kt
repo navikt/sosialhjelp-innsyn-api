@@ -9,22 +9,18 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
-import no.nav.sosialhjelp.innsyn.saksoversikt.soknadapi.SoknadApiClient
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_SOKNAD_API
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.Date
 import kotlin.time.Duration.Companion.seconds
 
 internal class SaksOversiktServiceTest {
     private val fiksClient: FiksClient = mockk()
-    private val soknadApiClient: SoknadApiClient = mockk()
     private val unleashClient: Unleash = mockk()
     private val oppgaveService: OppgaveService = mockk()
 
-    private val saksOversiktService = SaksOversiktService(fiksClient, soknadApiClient, unleashClient, oppgaveService)
+    private val saksOversiktService = SaksOversiktService(fiksClient, unleashClient, oppgaveService)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -50,7 +46,6 @@ internal class SaksOversiktServiceTest {
     internal fun `skal mappe fra DigisosSak til SaksListeResponse`() =
         runTest(timeout = 5.seconds) {
             coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2)
-            coEvery { soknadApiClient.getSvarUtSoknader(any()) } returns emptyList()
 
             val alleSaker = saksOversiktService.hentAlleSaker("token")
 
@@ -66,36 +61,11 @@ internal class SaksOversiktServiceTest {
         }
 
     @Test
-    internal fun `skal hente SaksListeResponse fra SoknadApiClient`() =
-        runTest(timeout = 5.seconds) {
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
-            coEvery { soknadApiClient.getSvarUtSoknader(any()) } returns
-                listOf(
-                    SaksListeResponse(
-                        fiksDigisosId = null,
-                        soknadTittel = "Tittel",
-                        sistOppdatert = Date(),
-                        kilde = KILDE_SOKNAD_API,
-                        url = "someUrl",
-                        kommunenummer = "",
-                    ),
-                )
-
-            val alleSaker = saksOversiktService.hentAlleSaker("token")
-
-            assertThat(alleSaker).hasSize(1)
-            assertThat(alleSaker[0].fiksDigisosId).isNull()
-            assertThat(alleSaker[0].soknadTittel).isEqualTo("Tittel")
-            assertThat(alleSaker[0].kilde).isEqualTo(KILDE_SOKNAD_API)
-            assertThat(alleSaker[0].url).isEqualTo("someUrl")
-        }
-
-    @Test
     internal fun `ikke returner 'tomme' saker`() =
         runTest(timeout = 5.seconds) {
             val tomDigisosSak = DigisosSak("123", "123", "123", "123", 123L, null, null, null, null)
             coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(tomDigisosSak)
-            coEvery { soknadApiClient.getSvarUtSoknader(any()) } returns emptyList()
+
             val alleSaker = saksOversiktService.hentAlleSaker("token")
 
             assertThat(alleSaker).hasSize(0)

@@ -9,7 +9,6 @@ object IntegrationUtils {
     const val HEADER_INTEGRASJON_PASSORD = "IntegrasjonPassord"
 
     const val KILDE_INNSYN_API = "innsyn-api"
-    const val KILDE_SOKNAD_API = "soknad-api"
 
     const val BEARER = "Bearer "
 

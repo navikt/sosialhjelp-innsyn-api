@@ -55,14 +55,12 @@ spec:
         - host: minside.fiks.test.ks.no
         - host: pdl-api.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
-        - host: sosialhjelp-soknad-api.dev-fss-pub.nais.io
         - host: oidc-ver2.difi.no
         - host: unleash.nais.io
         - host: digisos.intern.dev.nav.no
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
       rules:
         - application: sosialhjelp-innsyn-api-redis
-        - application: sosialhjelp-soknad-api-dev
         - application: clamav
           namespace: clamav
   ingresses:
@@ -112,10 +110,6 @@ spec:
       value: "http://clamav.nais-system.svc.nais.local/scan"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
-    - name: SOKNAD_API_URL
-      value: "https://sosialhjelp-soknad-api.dev-fss-pub.nais.io/sosialhjelp/soknad-api"
-    - name: SOKNAD_API_AUDIENCE
-      value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: "https://ver2.maskinporten.no/.well-known/oauth-authorization-server"
     - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI

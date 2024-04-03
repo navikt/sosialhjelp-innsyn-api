@@ -51,7 +51,7 @@ class SaksOversiktController(
                         return@withContext ResponseEntity.status(503).build()
                     }
 
-                log.info("Hentet alle (${alleSaker.size}) søknader for bruker, fra DigisosApi og fra SvarUt (via soknad-api).")
+                log.info("Hentet alle (${alleSaker.size}) søknader for bruker fra DigisosApi (KS).")
                 ResponseEntity.ok().body(alleSaker)
             }
         }

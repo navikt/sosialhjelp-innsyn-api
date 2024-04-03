@@ -99,10 +99,6 @@ spec:
       value: "9664fbe4-a807-4914-95f4-12146085d23c"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
-    - name: SOKNAD_API_URL
-      value: "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api"
-    - name: SOKNAD_API_AUDIENCE
-      value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: "https://test.maskinporten.no/.well-known/oauth-authorization-server"
     - name: FIKS_IO_INTEGRASJONSID

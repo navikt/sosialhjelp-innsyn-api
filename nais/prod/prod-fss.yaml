@@ -39,11 +39,10 @@ spec:
     - "https://sosialhjelp-innsyn-api.intern.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
-      cpu: 500m
       memory: 4Gi
     requests:
       cpu: 100m
-      memory: 2Gi
+      memory: 1Gi
   envFrom:
     - configmap: loginservice-idporten
     - secret: redis-password-innsyn-api

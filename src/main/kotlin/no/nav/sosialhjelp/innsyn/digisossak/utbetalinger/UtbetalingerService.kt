@@ -46,7 +46,10 @@ class UtbetalingerService(
                 .filter { it.isNewerThanMonths(months) }
                 .flatMapParallel {
                     setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it) { status -> status == UtbetalingsStatus.UTBETALT }
+                    manedsutbetalinger(
+                        token,
+                        it,
+                    ) { status -> status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.PLANLAGT_UTBETALING }
                 }
         return toUtbetalingerResponse(alleUtbetalinger)
     }

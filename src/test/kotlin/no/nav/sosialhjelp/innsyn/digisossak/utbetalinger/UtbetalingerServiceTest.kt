@@ -630,7 +630,7 @@ internal class UtbetalingerServiceTest {
     }
 
     @Test
-    fun `Hent utbetalinger skal kun returnere status UTBETALT`() =
+    fun `Hent utbetalinger skal kun returnere status UTBETALT eller PLANLAGT_UTBETALING`() =
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
             model.utbetalinger =
@@ -679,9 +679,11 @@ internal class UtbetalingerServiceTest {
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 12)
 
             assertThat(response).isNotEmpty
-            assertThat(response).hasSize(1)
+            assertThat(response).hasSize(2)
             assertThat(response[0].utbetalinger).hasSize(1)
-            assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT.name)
+            assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.PLANLAGT_UTBETALING.name)
+            assertThat(response[1].utbetalinger).hasSize(1)
+            assertThat(response[1].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT.name)
         }
 
     @Test

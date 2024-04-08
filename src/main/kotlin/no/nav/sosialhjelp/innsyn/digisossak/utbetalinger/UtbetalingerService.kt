@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
 import java.time.LocalDate
+import java.time.Year
 import java.time.YearMonth
 
 @Component
@@ -20,14 +21,6 @@ class UtbetalingerService(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
-    suspend fun hentUtbetalingerForSak(
-        fiksDigisosId: String,
-        token: String,
-    ): List<UtbetalingerResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        return toUtbetalingerResponse(manedsutbetalinger(token, digisosSak) { true })
-    }
-
     suspend fun hentUtbetalteUtbetalinger(
         token: String,
         months: Int,
@@ -146,14 +139,18 @@ class UtbetalingerService(
 
     private fun toUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) =
         manedUtbetalinger
-            .sortedByDescending { it.utbetalingsdato }
-            .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+            .sortedByDescending { it.utbetalingsdato ?: it.forfallsdato }
+            .groupBy { utbetaling ->
+                utbetaling.utbetalingsdato?.let { YearMonth.of(it.year, it.month) }
+                    ?: utbetaling.forfallsdato?.let { YearMonth.of(it.year, it.month) }
+                    ?: YearMonth.of(Year.MIN_VALUE, 1)
+            }
             .map { (key, value) ->
                 UtbetalingerResponse(
                     ar = key.year,
                     maned = key.monthValue,
                     foersteIManeden = foersteIManeden(key),
-                    utbetalinger = value.sortedByDescending { it.utbetalingsdato },
+                    utbetalinger = value.sortedByDescending { it.utbetalingsdato ?: it.forfallsdato },
                 )
             }
 

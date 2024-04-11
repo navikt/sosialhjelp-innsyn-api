@@ -132,5 +132,5 @@ prometheus = [
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "11.6.1" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.0" }
 versions = {id = "com.github.ben-manes.versions", version.ref = "versions"}

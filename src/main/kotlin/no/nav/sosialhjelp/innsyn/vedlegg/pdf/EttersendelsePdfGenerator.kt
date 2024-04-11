@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 @Component
 class EttersendelsePdfGenerator {
     fun generate(
-        metadata: MutableList<OpplastetVedleggMetadata>,
+        metadata: List<OpplastetVedleggMetadata>,
         fodselsnummer: String,
     ): ByteArray {
         return try {
@@ -30,7 +30,7 @@ class EttersendelsePdfGenerator {
 
                 metadata.forEach { vedlegg ->
                     pdf.addBlankLine()
-                    pdf.addText("Type: " + vedlegg.type)
+                    pdf.addText("Type: " + vedlegg.type.replaceUnsupportedCharacters())
                     vedlegg.filer.forEach { fil ->
                         pdf.addText("Filnavn: " + fil.filnavn)
                     }
@@ -43,3 +43,14 @@ class EttersendelsePdfGenerator {
         }
     }
 }
+
+/** Replace illegal characters bacause there is no glyph for that in the font we use (SourceSansPro-Regular):
+ * - U+0009: Tab character (\t)
+ * - U+000D: Carriage return (CR)
+ * - U+F0B7: Bullet point?
+ * - U+001F: No idea
+ * - U+000A: EOF/LF/NL
+ **/
+private fun String.replaceUnsupportedCharacters() =
+    replace(Regex("[\\x09\\x0D\\x0A]"), " ")
+        .replace(Regex("[\\uF0B7\\x1F]"), "")

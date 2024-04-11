@@ -1,16 +1,17 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 
+import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.assertj.core.api.Assertions.assertThatCode
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
+import kotlin.time.Duration.Companion.seconds
 
 internal class VirusScannerTest {
     private val mockWebServer = MockWebServer()
@@ -27,114 +28,123 @@ internal class VirusScannerTest {
     }
 
     @Test
-    fun scanFile_scanningIsNotEnabled_doesNotThrowException() {
-        virusScanner = VirusScanner(webClient, enabled = false)
-        assertThatCode { virusScanner.scan(filnavn, data) }
-            .doesNotThrowAnyException()
-    }
+    fun scanFile_scanningIsNotEnabled_doesNotThrowException() =
+        runTest(timeout = 5.seconds) {
+            virusScanner = VirusScanner(webClient, enabled = false)
+            assertThat(runCatching { virusScanner.scan(filnavn, data) }.isSuccess)
+        }
 
     @Test
-    fun scanFile_filenameIsVirustest_isInfected() {
-        virusScanner = VirusScanner(webClient, enabled = true)
+    fun scanFile_filenameIsVirustest_isInfected() =
+        runTest(timeout = 5.seconds) {
+            virusScanner = VirusScanner(webClient, enabled = true)
 
-        assertThatExceptionOfType(VirusScanException::class.java)
-            .isThrownBy { virusScanner.scan("virustest", data) }
-    }
+            runCatching { virusScanner.scan("virustest", data) }.let {
+                assertThat(it.isFailure)
+                assertThat(it.exceptionOrNull()).isInstanceOf(VirusScanException::class.java)
+            }
+        }
 
     @Test
-    fun scanFile_resultatHasWrongLength_isNotInfected() {
-        virusScanner = VirusScanner(webClient, enabled = true)
+    fun scanFile_resultatHasWrongLength_isNotInfected() =
+        runTest(timeout = 5.seconds) {
+            virusScanner = VirusScanner(webClient, enabled = true)
 
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(
-                    objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.FOUND), ScanResult("test", Result.FOUND)),
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(
+                        objectMapper.writeValueAsString(
+                            listOf(ScanResult("test", Result.FOUND), ScanResult("test", Result.FOUND)),
+                        ),
                     ),
-                ),
-        )
+            )
 
-        assertThatCode { virusScanner.scan(filnavn, data) }
-            .doesNotThrowAnyException()
-    }
+            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, data) }.isSuccess)
+        }
 
     @Test
-    fun scanFile_resultatIsOK_isNotInfected() {
-        virusScanner = VirusScanner(webClient, enabled = true)
+    fun scanFile_resultatIsOK_isNotInfected() =
+        runTest(timeout = 5.seconds) {
+            virusScanner = VirusScanner(webClient, enabled = true)
 
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(
-                    objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.OK)),
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(
+                        objectMapper.writeValueAsString(
+                            listOf(ScanResult("test", Result.OK)),
+                        ),
                     ),
-                ),
-        )
-        assertThatCode { virusScanner.scan(filnavn, data) }
-            .doesNotThrowAnyException()
-    }
+            )
+            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, data) }.isSuccess)
+        }
 
     @Test
-    fun scanFile_resultatIsNotOK_isInfected() {
-        virusScanner = VirusScanner(webClient, enabled = true)
+    fun scanFile_resultatIsNotOK_isInfected() =
+        runTest(timeout = 5.seconds) {
+            virusScanner = VirusScanner(webClient, enabled = true)
 
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(
-                    objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.FOUND)),
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(
+                        objectMapper.writeValueAsString(
+                            listOf(ScanResult("test", Result.FOUND)),
+                        ),
                     ),
-                ),
-        )
-        assertThatExceptionOfType(VirusScanException::class.java)
-            .isThrownBy { virusScanner.scan(filnavn, data) }
-    }
+            )
+            runCatching { virusScanner.scan(filnavn, data) }.let {
+                assertThat(it.isFailure)
+                assertThat(it.exceptionOrNull()).isInstanceOf(VirusScanException::class.java)
+            }
+        }
 
     @Test
-    fun scanFile_resultatIsError_isInfected() {
-        virusScanner = VirusScanner(webClient, enabled = true)
+    fun scanFile_resultatIsError_isInfected() =
+        runTest(timeout = 5.seconds) {
+            virusScanner = VirusScanner(webClient, enabled = true)
 
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(
-                    objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.ERROR)),
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(
+                        objectMapper.writeValueAsString(
+                            listOf(ScanResult("test", Result.ERROR)),
+                        ),
                     ),
-                ),
-        )
-        assertThatExceptionOfType(VirusScanException::class.java)
-            .isThrownBy { virusScanner.scan(filnavn, data) }
-    }
+            )
+            kotlin.runCatching { virusScanner.scan(filnavn, data) }.let {
+                assertThat(it.isFailure)
+                assertThat(it.exceptionOrNull()).isInstanceOf(VirusScanException::class.java)
+            }
+        }
 
     @Test
-    fun `skal trigge retry ved serverfeil`() {
-        virusScanner = VirusScanner(webClient, enabled = true)
+    fun `skal trigge retry ved serverfeil`() =
+        runTest(timeout = 5.seconds) {
+            virusScanner = VirusScanner(webClient, enabled = true)
 
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(500),
-        )
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(500),
+            )
 
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(
-                    objectMapper.writeValueAsString(
-                        listOf(ScanResult("test", Result.OK)),
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(
+                        objectMapper.writeValueAsString(
+                            listOf(ScanResult("test", Result.OK)),
+                        ),
                     ),
-                ),
-        )
+            )
 
-        assertThatCode { virusScanner.scan(filnavn, data) }
-            .doesNotThrowAnyException()
-    }
+            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, data) }.isSuccess)
+        }
 }

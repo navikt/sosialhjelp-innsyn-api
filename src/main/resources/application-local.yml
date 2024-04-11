@@ -15,7 +15,6 @@ no.nav.security.jwt:
   issuer.selvbetjening:
     discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
     accepted_audience: someaudience
-    cookie_name: localhost-idtoken
 innsyn.loginurl: ${INNSYN_LOGINURL:http://localhost:8080/sosialhjelp/innsyn-api/local/cookie}
 
 login_api_idporten_clientid: clientId

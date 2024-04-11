@@ -1,8 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.slf4j.MDCContext
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.isNewerThanMonths
@@ -16,6 +13,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
 import java.time.LocalDate
+import java.time.Year
 import java.time.YearMonth
 
 @Component
@@ -23,15 +21,7 @@ class UtbetalingerService(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
-    fun hentUtbetalingerForSak(
-        fiksDigisosId: String,
-        token: String,
-    ): List<UtbetalingerResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
-        return toUtbetalingerResponse(manedsutbetalinger(token, digisosSak) { true })
-    }
-
-    fun hentUtbetalteUtbetalinger(
+    suspend fun hentUtbetalteUtbetalinger(
         token: String,
         months: Int,
     ): List<UtbetalingerResponse> {
@@ -45,18 +35,19 @@ class UtbetalingerService(
         val requestAttributes = RequestContextHolder.getRequestAttributes()
 
         val alleUtbetalinger =
-            runBlocking(Dispatchers.IO + MDCContext()) {
-                digisosSaker
-                    .filter { it.isNewerThanMonths(months) }
-                    .flatMapParallel {
-                        setRequestAttributes(requestAttributes)
-                        manedsutbetalinger(token, it) { status -> status == UtbetalingsStatus.UTBETALT }
-                    }
-            }
+            digisosSaker
+                .filter { it.isNewerThanMonths(months) }
+                .flatMapParallel {
+                    setRequestAttributes(requestAttributes)
+                    manedsutbetalinger(
+                        token,
+                        it,
+                    ) { status -> status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.PLANLAGT_UTBETALING }
+                }
         return toUtbetalingerResponse(alleUtbetalinger)
     }
 
-    private fun hentUtbetalinger(
+    private suspend fun hentUtbetalinger(
         token: String,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
     ): List<ManedUtbetaling> {
@@ -69,23 +60,21 @@ class UtbetalingerService(
 
         val requestAttributes = RequestContextHolder.getRequestAttributes()
 
-        return runBlocking(Dispatchers.IO + MDCContext()) {
-            digisosSaker
-                .filter { it.isNewerThanMonths(15) }
-                .flatMapParallel {
-                    setRequestAttributes(requestAttributes)
-                    manedsutbetalinger(token, it, statusFilter)
-                }
-        }
+        return digisosSaker
+            .filter { it.isNewerThanMonths(15) }
+            .flatMapParallel {
+                setRequestAttributes(requestAttributes)
+                manedsutbetalinger(token, it, statusFilter)
+            }
     }
 
-    fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
+    suspend fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
         val utbetalinger =
             hentUtbetalinger(token) { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
         return toTidligereUtbetalingerResponse(utbetalinger)
     }
 
-    fun hentNyeUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
+    suspend fun hentNyeUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
         val utbetalinger = hentUtbetalinger(token) { status -> (status !== UtbetalingsStatus.ANNULLERT) }
         return toNyeUtbetalingerResponse(utbetalinger)
     }
@@ -116,45 +105,63 @@ class UtbetalingerService(
         val foresteIMnd = foersteIManeden(yearMonth)
         val nye =
             manedUtbetalinger
-                .sortedBy { it.utbetalingsdato }
+                .asSequence()
+                .sortedBy { it.utbetalingsdato ?: it.forfallsdato }
                 .filter {
                     it.utbetalingsdato?.isAfter(foresteIMnd) ?: false ||
                         it.utbetalingsdato?.isEqual(foresteIMnd) ?: false ||
                         it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString()
+                }.filter {
+                    it.utbetalingsdato != null || it.forfallsdato != null
                 }
-                .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+                .groupBy {
+                    val year =
+                        it.utbetalingsdato?.year
+                            ?: it.forfallsdato?.year
+                            ?: error("Fant ikke en dato å gruppere utbetaling på (utbetalingsdato og forfallsdato er null)")
+                    val month =
+                        it.utbetalingsdato?.month
+                            ?: it.forfallsdato?.month
+                            ?: error("Fant ikke en dato å gruppere utbetaling på (utbetalingsdato og forfallsdato er null)")
+                    YearMonth.of(year, month)
+                }
                 .map { (key, value) ->
                     NyeOgTidligereUtbetalingerResponse(
                         ar = key.year,
                         maned = key.monthValue,
-                        utbetalingerForManed = value.sortedBy { it.utbetalingsdato },
+                        utbetalingerForManed = value.sortedBy { it.utbetalingsdato ?: it.forfallsdato },
                     )
                 }
+                .toList()
 
         return nye
     }
 
     private fun toUtbetalingerResponse(manedUtbetalinger: List<ManedUtbetaling>) =
         manedUtbetalinger
-            .sortedByDescending { it.utbetalingsdato }
-            .groupBy { YearMonth.of(it.utbetalingsdato!!.year, it.utbetalingsdato.month) }
+            .sortedByDescending { it.utbetalingsdato ?: it.forfallsdato }
+            .groupBy { utbetaling ->
+                utbetaling.utbetalingsdato?.let { YearMonth.of(it.year, it.month) }
+                    ?: utbetaling.forfallsdato?.let { YearMonth.of(it.year, it.month) }
+                    ?: YearMonth.of(Year.MIN_VALUE, 1)
+            }
             .map { (key, value) ->
                 UtbetalingerResponse(
                     ar = key.year,
                     maned = key.monthValue,
                     foersteIManeden = foersteIManeden(key),
-                    utbetalinger = value.sortedByDescending { it.utbetalingsdato },
+                    utbetalinger = value.sortedByDescending { it.utbetalingsdato ?: it.forfallsdato },
                 )
             }
 
-    private fun manedsutbetalinger(
+    private suspend fun manedsutbetalinger(
         token: String,
         digisosSak: DigisosSak,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
     ): List<ManedUtbetaling> {
         val model = eventService.hentAlleUtbetalinger(token, digisosSak)
         return model.utbetalinger
-            .filter { it.utbetalingsDato != null && statusFilter(it.status) }
+            .filter { statusFilter(it.status) }
             .map { utbetaling ->
                 utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(digisosSak.kommunenummer)
                 ManedUtbetaling(
@@ -193,7 +200,7 @@ class UtbetalingerService(
             }
     }
 
-    fun utbetalingExists(
+    suspend fun utbetalingExists(
         token: String,
         months: Int,
     ): Boolean {

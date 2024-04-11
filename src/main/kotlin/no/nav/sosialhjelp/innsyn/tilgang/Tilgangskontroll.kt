@@ -19,14 +19,14 @@ class TilgangskontrollService(
     private val environment: Environment,
     private val pdlClient: PdlClient,
 ) {
-    fun sjekkTilgang(token: String) {
+    suspend fun sjekkTilgang(token: String) {
         if (!environment.activeProfiles.contains("idporten")) {
             if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         }
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)
     }
 
-    fun sjekkTilgang(
+    suspend fun sjekkTilgang(
         ident: String,
         token: String,
     ) {
@@ -36,7 +36,7 @@ class TilgangskontrollService(
         }
     }
 
-    fun hentTilgang(
+    suspend fun hentTilgang(
         ident: String,
         token: String,
     ): Tilgang {
@@ -44,7 +44,7 @@ class TilgangskontrollService(
         return Tilgang(!pdlPerson.isKode6Or7(), fornavn(pdlPerson))
     }
 
-    private fun hentPerson(
+    private suspend fun hentPerson(
         ident: String,
         token: String,
     ): PdlPerson? {
@@ -56,7 +56,7 @@ class TilgangskontrollService(
         }
     }
 
-    fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
+    suspend fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
         val gyldigeIdenter = pdlClient.hentIdenter(SubjectHandlerUtils.getUserIdFromToken(), SubjectHandlerUtils.getToken())
         if (gyldigeIdenter?.contains(digisosSak.sokerFnr) != true) {
             throw TilgangskontrollException("digisosSak hører ikke til rett person")

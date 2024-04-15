@@ -10,6 +10,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
+import no.nav.sosialhjelp.innsyn.saksoversikt.BrokenSoknad
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
@@ -53,6 +54,7 @@ class SoknadsStatusController(
                         soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
                         navKontor = utvidetSoknadsStatus.navKontor,
                         filUrl = utvidetSoknadsStatus.soknadUrl,
+                        isBroken = utvidetSoknadsStatus.navEksternRefId?.let { BrokenSoknad.isBrokenSoknad(it) } ?: false,
                     ),
                 )
             }

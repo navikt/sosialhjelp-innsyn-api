@@ -33,6 +33,12 @@ class SaksOversiktService(
                         kilde = KILDE_INNSYN_API,
                         url = null,
                         kommunenummer = it.kommunenummer,
+                        isBrokenSoknad =
+                            it.originalSoknadNAV?.navEksternRefId?.let { navEksternRef ->
+                                BrokenSoknad.isBrokenSoknad(
+                                    navEksternRef,
+                                )
+                            } ?: false,
                     )
                 }
 

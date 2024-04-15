@@ -11,4 +11,5 @@ data class SaksListeResponse(
     val kilde: String,
     val url: String?,
     val kommunenummer: String?,
+    val isBrokenSoknad: Boolean,
 )

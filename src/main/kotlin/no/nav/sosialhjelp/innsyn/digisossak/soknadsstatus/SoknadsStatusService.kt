@@ -61,6 +61,7 @@ class SoknadsStatusService(
                 }
                     .takeIf { erInnsynDeaktivertForKommune },
             digisosSak.kommunenummer,
+            digisosSak.originalSoknadNAV?.navEksternRefId,
         )
     }
 
@@ -70,6 +71,7 @@ class SoknadsStatusService(
         val navKontor: String?,
         val soknadUrl: UrlResponse?,
         val kommunenummer: String?,
+        val navEksternRefId: String?,
     )
 
     companion object {

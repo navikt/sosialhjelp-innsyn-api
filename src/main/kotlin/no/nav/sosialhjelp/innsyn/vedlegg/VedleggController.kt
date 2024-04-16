@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
@@ -56,7 +56,7 @@ class VedleggController(
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
-        @RequestParam("files") rawFiles: List<MultipartFile>,
+        @RequestPart("files") rawFiles: List<MultipartFile>,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
         request: HttpServletRequest,
     ): ResponseEntity<List<OppgaveOpplastingResponse>> =

@@ -102,10 +102,19 @@ Dette er et veldig førsteutkast av hvordan jeg tenker at filene skal se ut
 ```mermaid
 classDiagram
     class KlageJson {
-        referanse til klage.pdf i dokumentlager
+        // Id på original søknad
+        +String fiksDigisosId
+        
+        // Referanse til klage.pdf i dokumentlager
         +String klageId
+        
         // Referanse til vedleggSpesifikasjon.json i dokumentlager
+        // Her kan vi sikkert gjenbruke en god del av det som funker
+        // søknasvedlegg / ettersendelser?
         +String vedleggSpesifikasjonId
+        
+        // Påklaget vedtak
+        +List~String~ vedtakIds
     }
 
     note for KlageInnsynJson "Må jobbe med navngivingen her"

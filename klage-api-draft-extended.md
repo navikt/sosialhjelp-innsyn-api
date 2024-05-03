@@ -214,7 +214,8 @@ classDiagram
 ```json
 {
     "klageId": "43ec1b22-0449-4f55-bf00-6188268da3ac",
-    "vedleggSpesifikasjonId": "3a3343a9-b7b9-4f83-b41c-ccd05239ae7d"
+    "vedleggSpesifikasjonId": "3a3343a9-b7b9-4f83-b41c-ccd05239ae7d",
+    "timestamp": "12:34:56 1.aug.2020"
 }
 ```
 
@@ -272,6 +273,7 @@ classDiagram
   Utfall *-- UtfallHendelse: has
   class Utfall {
     MEDHOLD,
+    // Ikke alle FSL vil sette denne
     DELVIS_MEDHOLD,
     OPPRETTHOLDT,
     AVVIST
@@ -294,6 +296,7 @@ classDiagram
     FORELOPIG_SVAR
   }
 
+  note for StatsforvalterUtfallHendelse "Denne er avhengig av manuelle rutiner,</br> og vil ikke alltid være riktig"
   StatsforvalterUtfallHendelse ..|> KlageHendelse: extends
   class StatsforvalterUtfallHendelse {
     +StatsforvalterUtfall utfall
@@ -322,6 +325,13 @@ classDiagram
     RELEVANT,
     LEVERT_TIDLIGERE,
     ANNULLERT
+  }
+  
+  KlageHendelse <|-- SaksfremleggHendelse: extends
+  class SaksfremleggHendelse {
+    +String saksreferanse
+    +String dokumentasjonsreferanse
+    +String kommentarfrist
   }
 ```
 

@@ -314,39 +314,6 @@ class FiksClientImpl(
         return body
     }
 
-    fun createHttpEntityOfString(
-        body: String,
-        name: String,
-    ): HttpEntity<Any> {
-        return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
-    }
-
-    fun createHttpEntityOfFile(
-        file: FilForOpplasting,
-        name: String,
-    ): HttpEntity<Any> {
-        return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
-    }
-
-    private fun createHttpEntity(
-        body: Any,
-        name: String,
-        filename: String?,
-        contentType: String,
-    ): HttpEntity<Any> {
-        val headerMap = LinkedMultiValueMap<String, String>()
-        val builder: ContentDisposition.Builder =
-            ContentDisposition
-                .builder("form-data")
-                .name(name)
-        val contentDisposition: ContentDisposition =
-            if (filename == null) builder.build() else builder.filename(filename).build()
-
-        headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-        headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
-        return HttpEntity(body, headerMap)
-    }
-
     fun serialiser(metadata: Any): String {
         try {
             return objectMapper.writeValueAsString(metadata)

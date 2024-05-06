@@ -9,6 +9,8 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.sosialhjelp.filkonvertering.service.FileConversionService
+import no.nav.sosialhjelp.filkonvertering.service.VedleggKonverteringOpplasting
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
@@ -24,10 +26,14 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.OppgaveOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.util.MultiValueMap
+import org.springframework.util.MultiValueMapAdapter
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -36,6 +42,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.reactive.function.BodyInserter
+import org.springframework.web.reactive.function.BodyInserters
 import java.time.LocalDate
 import java.util.UUID
 
@@ -45,6 +53,7 @@ import java.util.UUID
 @RequestMapping("/api/v1/innsyn")
 class VedleggController(
     private val vedleggOpplastingService: VedleggOpplastingService,
+    private val fileConverterService: FileConversionService,
     private val vedleggService: VedleggService,
     private val clientProperties: ClientProperties,
     private val tilgangskontroll: TilgangskontrollService,
@@ -52,6 +61,37 @@ class VedleggController(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
+    @PostMapping("/{fiksDigisosId}/vedlegg/konverter", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun konverterVedlegg(
+        @PathVariable fiksDigisosId: String,
+        @RequestPart("files") rawFiles: List<MultipartFile>,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+        request: HttpServletRequest,
+    ): ResponseEntity<MultiValueMap<String, HttpEntity<*>>> =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                log.info("Forsøker å konvertere vedlegg")
+                tilgangskontroll.sjekkTilgang(token)
+                xsrfGenerator.sjekkXsrfToken(request)
+
+                check(rawFiles.isNotEmpty()) { "Ingen filer sendt til konvertering" }
+
+                val opplastinger =
+                    rawFiles.map {
+                        VedleggKonverteringOpplasting(it)
+                    }.let {
+                        fileConverterService.convertFileToPdf(it)
+                    }
+                val bodyBuilder = MultipartBodyBuilder()
+                opplastinger.onEach { bodyBuilder.part(it.key.convertedName, HttpEntity(it.value.getOrThrow()), MediaType.APPLICATION_PDF) }
+                println("Har lagt til parts")
+                val body = bodyBuilder.build()
+                println("Har bygget body: ${body}")
+
+                ResponseEntity.ok().contentType(MediaType.MULTIPART_FORM_DATA).body(body)
+            }
+        }
+
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(

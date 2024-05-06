@@ -104,3 +104,6 @@ fiks-io:
   private-key-path: "/var/run/secrets/key.der"
   kontoId: ${FIKS_IO_KONTO_ID:}
   virksomhetssertifikatPath: ${VIRKSERT_PATH:}
+logging:
+  level:
+    no.nav: debug

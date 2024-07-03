@@ -26,6 +26,7 @@ class OppgaveService(
     private val meterRegistry: MeterRegistry,
 ) {
     private val oppgaveTeller = Counter.builder("oppgave_teller")
+
     suspend fun hentOppgaver(
         fiksDigisosId: String,
         token: String,

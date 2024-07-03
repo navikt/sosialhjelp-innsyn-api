@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
 import com.fasterxml.jackson.core.util.VersionUtil
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
@@ -21,7 +23,10 @@ class OppgaveService(
     private val vedleggService: VedleggService,
     private val fiksClient: FiksClient,
     private val clientProperties: ClientProperties,
+    private val meterRegistry: MeterRegistry,
 ) {
+    private val oppgaveTeller = Counter.builder("oppgave_teller")
+
     suspend fun hentOppgaver(
         fiksDigisosId: String,
         token: String,
@@ -58,6 +63,7 @@ class OppgaveService(
                 }
                 .sortedBy { it.innsendelsesfrist }
         log.info("Hentet ${oppgaveResponseList.sumOf { it.oppgaveElementer.size }} oppgaver")
+        oppgaveTeller.tag("fiksDigisosId", fiksDigisosId).register(meterRegistry).increment(oppgaveResponseList.size.toDouble())
         return oppgaveResponseList
     }
 

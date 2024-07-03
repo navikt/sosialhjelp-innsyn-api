@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
+import io.micrometer.core.instrument.MeterRegistry
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -35,7 +36,8 @@ internal class OppgaveServiceTest {
     private val vedleggService: VedleggService = mockk()
     private val fiksClient: FiksClient = mockk()
     private val clientProperties: ClientProperties = mockk()
-    private val service = OppgaveService(eventService, vedleggService, fiksClient, clientProperties)
+    private val meterRegistry: MeterRegistry = mockk(relaxed = true)
+    private val service = OppgaveService(eventService, vedleggService, fiksClient, clientProperties, meterRegistry)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockEttersendtInfoNAV: EttersendtInfoNAV = mockk()

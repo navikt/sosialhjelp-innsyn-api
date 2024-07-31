@@ -19,7 +19,7 @@ pdf_box = "3.0.2"
 fiks_kryptering = "2.0.5"
 lettuce = "6.3.2.RELEASE"
 jemp_box = "1.8.17"
-unleash = "9.2.2"
+unleash = "9.2.4"
 springdoc = "2.5.0"
 json_smart = "2.4.10"
 fiks_io = "3.3.6"
@@ -30,7 +30,7 @@ nimbus_jose_jwt = "9.37.3"
 
 ktlint = "1.0.1"
 
-mockk = "1.13.11"
+mockk = "1.13.12"
 spring_mockk = "4.0.2"
 
 [libraries]

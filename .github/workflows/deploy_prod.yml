@@ -20,6 +20,5 @@ jobs:
       cluster-name: 'prod-fss'
       resource-folder: 'prod'
       resource-name: 'prod-fss'
-      build-always: true
     secrets: inherit
 

@@ -30,53 +30,56 @@ dependencies {
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.spring.boot)
 
-//    Sosialhjelp-common
+    // Sosialhjelp-common
     implementation(libs.bundles.sosialhjelp.common)
 
-//    tokendings
+    // tokendings
     implementation(libs.auth0.java.jwt)
     implementation(libs.auth0.jwks.rsa)
     implementation(libs.nimbus.jose.jwt)
 
-//    Micrometer/Prometheus
+    // Micrometer/Prometheus
     implementation(libs.bundles.prometheus)
 
-//    Logging
+    // Logging
     implementation(libs.bundles.logging)
 
-//    Filformat
+    // Tracing
+    implementation(platform(libs.opentelemetry.bom))
+    implementation(libs.opentelemetry.api)
 
+    // Filformat
     implementation(libs.sosialhjelp.filformat)
 
-//  Fiks IO
+    // Fiks IO
     implementation(libs.fiks.io)
 
-//    Jackson
+    // Jackson
     implementation(libs.jackson.module.kotlin)
 
-//    Token-validering
+    // Token-validering
     implementation(libs.token.validation.spring)
 
-//    Springdoc
+    // Springdoc
     implementation(libs.springdoc.openapi.starter.common)
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
 
-//    Fiks-kryptering
+    // Fiks-kryptering
     implementation(libs.fiks.kryptering)
 
     // Unleash
     implementation(libs.unleash)
 
-//    Redis
+    // Redis
     implementation(libs.lettuce.core)
 
-//    Div
+    // Div
     implementation(libs.bundles.commons)
     implementation(libs.apache.tika)
     implementation(libs.apache.pdfbox.preflight)
     implementation(libs.apache.pdfbox.jempbox)
 
-//    Test
+    // Test
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.springmockk)
     testImplementation(libs.mockk)

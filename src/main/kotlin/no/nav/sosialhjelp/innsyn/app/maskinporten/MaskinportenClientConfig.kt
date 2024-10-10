@@ -38,8 +38,7 @@ class MaskinportenClientConfig(
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
                 it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
                 it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
-            }
-            .build()
+            }.build()
 
     private val maskinportenProperties =
         MaskinportenProperties(
@@ -52,7 +51,8 @@ class MaskinportenClientConfig(
     private suspend fun getWellKnown(): WellKnown =
         withContext(Dispatchers.IO) {
             runCatching {
-                maskinportenWebClient.get()
+                maskinportenWebClient
+                    .get()
                     .uri(wellKnownUrl)
                     .retrieve()
                     .awaitBody<WellKnown>()

@@ -26,6 +26,10 @@ spec:
   replicas:
     min: 2
     max: 4
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   webproxy: true
   tokenx:
     enabled: true

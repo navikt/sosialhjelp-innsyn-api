@@ -60,8 +60,7 @@ class OppgaveService(
                                 )
                             },
                     )
-                }
-                .sortedBy { it.innsendelsesfrist }
+                }.sortedBy { it.innsendelsesfrist }
         log.info("Hentet ${oppgaveResponseList.sumOf { it.oppgaveElementer.size }} oppgaver")
         oppgaveTeller.tag("fiksDigisosId", fiksDigisosId).register(meterRegistry).increment(oppgaveResponseList.size.toDouble())
         return oppgaveResponseList
@@ -71,19 +70,16 @@ class OppgaveService(
         fiksDigisosId: String,
         token: String,
         oppgaveId: String,
-    ): List<OppgaveResponse> {
-        return hentOppgaver(fiksDigisosId, token).filter { it.oppgaveId == oppgaveId }
-    }
+    ): List<OppgaveResponse> = hentOppgaver(fiksDigisosId, token).filter { it.oppgaveId == oppgaveId }
 
     private fun erAlleredeLastetOpp(
         oppgave: Oppgave,
         vedleggListe: List<InternalVedlegg>,
-    ): Boolean {
-        return vedleggListe
+    ): Boolean =
+        vedleggListe
             .filter { it.type == oppgave.tittel }
             .filter { it.tilleggsinfo == oppgave.tilleggsinfo }
             .any { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
-    }
 
     suspend fun getVilkar(
         fiksDigisosId: String,
@@ -107,10 +103,10 @@ class OppgaveService(
         val vilkarResponseList =
             model.vilkar
                 .filter {
-                    !it.isEmpty()
+                    !it
+                        .isEmpty()
                         .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på vilkår er tomt") }
-                }
-                .filter { it.status == Oppgavestatus.RELEVANT }
+                }.filter { it.status == Oppgavestatus.RELEVANT }
                 .map {
                     val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
                     VilkarResponse(
@@ -121,8 +117,7 @@ class OppgaveService(
                         it.getOppgaveStatus(),
                         it.utbetalingsReferanse,
                     )
-                }
-                .sortedBy { it.hendelsetidspunkt }
+                }.sortedBy { it.hendelsetidspunkt }
 
         log.info("Hentet ${vilkarResponseList.size} vilkar")
         return vilkarResponseList
@@ -155,10 +150,10 @@ class OppgaveService(
             model.dokumentasjonkrav
                 .asSequence()
                 .filter {
-                    !it.isEmpty()
+                    !it
+                        .isEmpty()
                         .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-                }
-                .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
+                }.filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
                 .filter { it.status == Oppgavestatus.RELEVANT }
                 .groupBy { it.frist }
                 .map { (key, value) ->
@@ -179,8 +174,7 @@ class OppgaveService(
                                 )
                             },
                     )
-                }
-                .sortedWith(compareBy(nullsLast()) { it.frist })
+                }.sortedWith(compareBy(nullsLast()) { it.frist })
                 .toList()
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
@@ -200,12 +194,11 @@ class OppgaveService(
     private fun erAlleredeLastetOpp(
         dokumentasjonkrav: Dokumentasjonkrav,
         vedleggListe: List<InternalVedlegg>,
-    ): Boolean {
-        return vedleggListe
+    ): Boolean =
+        vedleggListe
             .filter { it.type == dokumentasjonkrav.tittel }
             .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
             .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) }
-    }
 
     suspend fun getHarLevertDokumentasjonkrav(
         fiksDigisosId: String,
@@ -222,11 +215,12 @@ class OppgaveService(
 
         return model.dokumentasjonkrav
             .filter {
-                !it.isEmpty()
+                !it
+                    .isEmpty()
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-            }
-            .filter { erAlleredeLastetOpp(it, ettersendteVedlegg) }
-            .toList().isNotEmpty()
+            }.filter { erAlleredeLastetOpp(it, ettersendteVedlegg) }
+            .toList()
+            .isNotEmpty()
     }
 
     suspend fun getFagsystemHarVilkarOgDokumentasjonkrav(

@@ -36,10 +36,10 @@ internal class TildeltNavKontorTest {
     private val enhetsnr = "2317"
 
     private val mockNavEnhet: NavEnhet = mockk()
-    private val enhetNavn = "NAV Holmenkollen"
+    private val enhetNavn = "Nav Holmenkollen"
 
     private val mockNavEnhet2: NavEnhet = mockk()
-    private val enhetNavn2 = "NAV Longyearbyen"
+    private val enhetNavn2 = "Nav Longyearbyen"
 
     @BeforeEach
     fun init() {

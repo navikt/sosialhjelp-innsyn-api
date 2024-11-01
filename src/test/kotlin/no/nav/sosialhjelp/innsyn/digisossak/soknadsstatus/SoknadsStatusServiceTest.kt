@@ -33,7 +33,7 @@ internal class SoknadsStatusServiceTest {
 
     private val token = "token"
     private val dokumentlagerId = "dokumentlagerId"
-    private val navEnhet = "NAV Test"
+    private val navEnhet = "Nav Test"
 
     @BeforeEach
     fun init() {

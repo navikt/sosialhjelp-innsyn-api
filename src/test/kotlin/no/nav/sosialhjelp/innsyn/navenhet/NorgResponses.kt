@@ -4,7 +4,7 @@ val ok_navenhet =
     """
     {
       "enhetId": 100000000,
-      "navn": "NAV Eiganes og Tasta",
+      "navn": "Nav Eiganes og Tasta",
       "enhetNr": "8888",
       "antallRessurser": 1,
       "status": "Aktiv",

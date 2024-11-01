@@ -39,7 +39,7 @@ class NorgClientImpl(
 
     private suspend fun hentFraNorg(enhetsnr: String): NavEnhet =
         withContext(Dispatchers.IO) {
-            log.debug("Forsøker å hente NAV-enhet $enhetsnr fra NORG2")
+            log.debug("Forsøker å hente Nav-enhet $enhetsnr fra NORG2")
             val navEnhet: NavEnhet =
                 norgWebClient.get()
                     .uri("/enhet/{enhetsnr}", enhetsnr)
@@ -55,7 +55,7 @@ class NorgClientImpl(
                     .awaitSingleOrNull()
                     ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
 
-            log.info("Hentet NAV-enhet $enhetsnr fra NORG2")
+            log.info("Hentet Nav-enhet $enhetsnr fra NORG2")
 
             navEnhet.also { lagreTilCache(enhetsnr, it) }
         }

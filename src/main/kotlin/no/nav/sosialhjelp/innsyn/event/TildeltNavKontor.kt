@@ -31,7 +31,7 @@ suspend fun InternalDigisosSoker.apply(
     val destinasjon =
         runCatching { norgClient.hentNavEnhet(hendelse.navKontor).navn }.getOrNull()
 
-    soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet NAV-kontor")
+    soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet Nav-kontor")
 
     val isFirstTimeTildeltNavKontor = historikk.none { it.type == HistorikkType.TILDELT_NAV_KONTOR }
     // Ikke si at søknaden er videresendt hvis søknaden er en papirsøknad (originalSoknadNAV == null)

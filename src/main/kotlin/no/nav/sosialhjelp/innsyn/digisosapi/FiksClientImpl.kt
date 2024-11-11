@@ -183,7 +183,6 @@ class FiksClientImpl(
                     .header(HttpHeaders.AUTHORIZATION, token)
                     .retrieve()
                     .bodyToMono(requestedClass)
-                    .retryWhen(fiksRetry)
                     .onErrorMap(WebClientResponseException::class.java) { e ->
                         val feilmelding = "Fiks - hentDokument feilet - ${messageUtenFnr(e)}"
                         when {

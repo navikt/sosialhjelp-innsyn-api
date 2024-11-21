@@ -50,7 +50,7 @@ interface KlageService {
 }
 
 @Service
-@Profile("!prod-fss&!dev-fss")
+@Profile("!prod-fss&!dev-fss&!preprod")
 class KlageServiceLocalImpl(
     @Value("\${client.fiks_klage_endpoint_url}")
     klageUrl: String,

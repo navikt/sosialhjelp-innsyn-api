@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: sosialhjelp-innsyn-api-dev
+  name: sosialhjelp-innsyn-api
   namespace: teamdigisos
   labels:
     team: teamdigisos
@@ -11,18 +11,18 @@ spec:
   image: {{image}}
   port: 8080
   liveness:
-    path: /sosialhjelp/innsyn-api/internal/isAlive
+    path: /sosialhjelp/wonderwall-innsyn/internal/isAlive
     initialDelay: 45
     timeout: 1
     periodSeconds: 10
     failureThreshold: 10
   readiness:
-    path: /sosialhjelp/innsyn-api/internal/isReady
+    path: /sosialhjelp/wonderwall-innsyn/internal/isReady
     initialDelay: 20
     timeout: 1
   prometheus:
     enabled: true
-    path: /sosialhjelp/innsyn-api/internal/prometheus
+    path: /sosialhjelp/wonderwall-innsyn/internal/prometheus
   replicas:
     min: 1
     max: 1
@@ -33,40 +33,22 @@ spec:
     scopes:
       consumes:
         - name: "ks:fiks"
-  idporten:
-    enabled: false # endre for å ta i bruk idporten-client
-    accessTokenLifetime: 3600 #default
-    clientURI: https://www.nav.no #default
-    frontchannelLogoutPath: /oauth2/logout
-    integrationType: api_klient
-    postLogoutRedirectURIs:
-      - https://www.nav.no #default
-    redirectPath: /oauth2/callback #default
-    scopes:
-      - openid
-      - profile
-      - ks:fiks
-    sessionLifetime: 7200 #default
   accessPolicy:
     outbound:
       external:
         - host: api.fiks.test.ks.no
-        - host: test.svarut.ks.no
         - host: minside.fiks.test.ks.no
         - host: pdl-api.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
-        - host: sosialhjelp-soknad-api.dev-fss-pub.nais.io
-        - host: oidc-ver2.difi.no
         - host: unleash.nais.io
-        - host: digisos.intern.dev.nav.no
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
+        - host: test.idporten.no
       rules:
-        - application: sosialhjelp-innsyn-api-redis
-        - application: sosialhjelp-soknad-api-dev
         - application: clamav
           namespace: clamav
-  ingresses:
-    - "https://digisos.intern.dev.nav.no/sosialhjelp/innsyn-api"
+    inbound:
+      rules:
+        - application: wonderwall-innsyn
   resources:
     limits:
       cpu: 500m
@@ -74,30 +56,30 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
+  redis:
+    - instance: cache
+      access: readwrite
   envFrom:
-    - secret: redis-password-innsyn-api
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token
   env:
+    - name: IDPORTEN_WELL_KNOWN_URL
+      value: "https://test.idporten.no/.well-known/openid-configuration"
     - name: SPRING_PROFILES_ACTIVE
-      value: "idporten, log-kibana"
+      value: "log-kibana,preprod"
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "https://api.fiks.test.ks.no"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
       value: "https://minside.fiks.test.ks.no"
-    - name: FIKS_SVAR_UT_ENDPOINT_URL
-      value: "https://test.svarut.ks.no"
     - name: NORG_URL
       value: "https://norg2.dev-fss-pub.nais.io/norg2/api/v1"
     - name: INNSYN_LOGINURL
-      value: "https://digisos.intern.dev.nav.no/sosialhjelp/innsyn-api/oauth2/login"
+      value: "https://digisos.intern.dev.nav.no/sosialhjelp/wonderwall-innsyn/oauth2/login"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "10"
     - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS
       value: "3600"
-    - name: REDIS_HOST
-      value: "sosialhjelp-innsyn-api-redis.teamdigisos.svc.cluster.local"
     - name: PDL_ENDPOINT_URL
       value: "https://pdl-api.dev-fss-pub.nais.io/graphql"
     - name: PDL_AUDIENCE
@@ -112,12 +94,8 @@ spec:
       value: "http://clamav.nais-system.svc.nais.local/scan"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
-    - name: SOKNAD_API_URL
-      value: "https://sosialhjelp-soknad-api.dev-fss-pub.nais.io/sosialhjelp/soknad-api"
-    - name: SOKNAD_API_AUDIENCE
-      value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
     - name: MASKINPORTEN_WELL_KNOWN_URL
-      value: "https://ver2.maskinporten.no/.well-known/oauth-authorization-server"
+      value: "https://test.maskinporten.no/.well-known/oauth-authorization-server"
     - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI
       value: "https://www.dev.nav.no/no/utlogget"
     - name: KLAGE_ENABLED

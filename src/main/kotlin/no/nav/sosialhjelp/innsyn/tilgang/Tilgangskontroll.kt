@@ -20,7 +20,7 @@ class TilgangskontrollService(
     private val pdlClient: PdlClient,
 ) {
     suspend fun sjekkTilgang(token: String) {
-        if (!environment.activeProfiles.contains("idporten")) {
+        if (!environment.activeProfiles.contains("preprod")) {
             if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
         }
         sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)

@@ -84,7 +84,7 @@ no.nav.security.jwt:
 
 innsyn.loginurl: ${INNSYN_LOGINURL}
 
-login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID}
+login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID:dummy}
 
 innsyn:
   vedlegg:

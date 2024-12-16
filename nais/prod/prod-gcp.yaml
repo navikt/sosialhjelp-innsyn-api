@@ -61,7 +61,6 @@ spec:
       access: readwrite
   envFrom:
     - secret: fiks-integrasjon-secret
-    - secret: fiks-kommune-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token
   env:
     - name: IDPORTEN_WELL_KNOWN_URL

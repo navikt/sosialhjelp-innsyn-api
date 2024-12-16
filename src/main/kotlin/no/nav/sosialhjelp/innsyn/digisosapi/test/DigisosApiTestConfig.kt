@@ -13,7 +13,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 
-@Profile("!prod-fss")
+@Profile("!prod-fss&!prodgcp")
 @Configuration
 class DigisosApiTestConfig(
     private val clientProperties: ClientProperties,

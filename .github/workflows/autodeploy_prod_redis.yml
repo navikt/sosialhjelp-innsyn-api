@@ -12,6 +12,9 @@ on:
 
 jobs:
   deploy-redis:
+    permissions:
+      contents: read
+      id-token: write
     name: 'Deploy Redis to Dev'
     uses: navikt/sosialhjelp-ci/.github/workflows/deploy_redis.yml@v6
     secrets: inherit

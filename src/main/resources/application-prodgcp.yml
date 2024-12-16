@@ -1,0 +1,23 @@
+spring:
+  data:
+    redis:
+      password: ${REDIS_PASSWORD_CACHE:pw}
+      host: ${REDIS_HOST_CACHE}
+      username: ${REDIS_USERNAME_CACHE}
+      port: ${REDIS_PORT_CACHE}
+
+redis_host: ${REDIS_HOST_CACHE}
+redis_port: ${REDIS_PORT_CACHE}
+redis_username: ${REDIS_USERNAME_CACHE}
+redis_password: ${REDIS_PASSWORD_CACHE}
+
+server:
+  servlet:
+    context-path: '/sosialhjelp/innsyn-api'
+
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: ${IDPORTEN_WELL_KNOWN_URL}
+    validation:
+      optional-claims: aud,nbf
+

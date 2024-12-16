@@ -115,5 +115,3 @@ spec:
       value: 46bbe668-3468-45fa-9bd1-67b5469b7361
     - name: VIRKSERT_PATH
       value: "/var/run/secrets/nais.io/virksomhetssertifikat"
-    - name: KLAGE_ENABLED
-      value: "false"

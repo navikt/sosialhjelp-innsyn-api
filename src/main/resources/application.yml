@@ -81,7 +81,7 @@ no.nav.security.jwt:
     validation:
       optional-claims: aud,nbf
 
-innsyn.loginurl: ${INNSYN_LOGINURL}
+innsyn.loginurl: ${INNSYN_LOGINURL:null}
 
 login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID:dummy}
 

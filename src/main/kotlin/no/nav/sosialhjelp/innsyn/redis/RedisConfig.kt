@@ -12,10 +12,9 @@ import java.time.Duration
 
 private const val TIMEOUT_SECONDS: Long = 1
 
-@Profile("!mock-redis")
+@Profile("!mock-redis&(preprod|prodgcp)")
 @Configuration
-@EnableConfigurationProperties(RedisProperties::class)
-class RedisConfig(
+class RedisConfigGcp(
     @Value("\${redis_host}") private val host: String,
     @Value("\${redis_port}") private val port: Int,
     @Value("\${redis_password}") private val password: String,
@@ -33,13 +32,14 @@ class RedisConfig(
                 .withTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
                 .withSsl(true)
                 .build()
-        println("connecting to redis with host: $host")
-        println("connecting to redis with port: $port")
-        println("connecting to redis with username: $username")
-        println("connecting to redis with url: $redisURI")
         return RedisClient.create(redisURI)
     }
+}
 
+@Profile("!mock-redis&!(preprod|prodgcp)")
+@Configuration
+@EnableConfigurationProperties(RedisProperties::class)
+class RedisConfigFss {
     @Bean
     @Profile("!preprod&!prodgcp")
     fun redisClient(properties: RedisProperties): RedisClient {

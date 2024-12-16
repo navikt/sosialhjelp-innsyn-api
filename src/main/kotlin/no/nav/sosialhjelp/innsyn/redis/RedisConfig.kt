@@ -22,7 +22,7 @@ class RedisConfig(
     @Value("\${redis_username}") private val username: String,
 ) {
     @Bean
-    @Profile("preprod")
+    @Profile("preprod|prodgcp")
     fun redisClientPreprod(): RedisClient {
         val redisURI =
             RedisURI
@@ -41,7 +41,7 @@ class RedisConfig(
     }
 
     @Bean
-    @Profile("!preprod")
+    @Profile("!preprod&!prodgcp")
     fun redisClient(properties: RedisProperties): RedisClient {
         val redisUri =
             RedisURI.Builder.redis(properties.host, properties.port)

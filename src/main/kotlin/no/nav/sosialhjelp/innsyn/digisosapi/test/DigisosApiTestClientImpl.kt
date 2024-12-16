@@ -30,7 +30,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 /**
  * Brukes kun i dev eller ved lokal testing mot fiks-test
  */
-@Profile("!prod-fss")
+@Profile("!prod-fss&!prodgcp")
 @Component
 class DigisosApiTestClientImpl(
     private val fiksWebClient: WebClient,

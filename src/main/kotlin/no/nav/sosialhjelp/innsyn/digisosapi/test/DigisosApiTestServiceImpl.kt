@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import kotlin.coroutines.EmptyCoroutineContext
 
-@Profile("!prod-fss")
+@Profile("!prod-fss&!prodgcp")
 @Component
 class DigisosApiTestServiceImpl(
     private val digisosApiTestClient: DigisosApiTestClient,

@@ -39,13 +39,14 @@ spec:
         - host: api.fiks.test.ks.no
         - host: minside.fiks.test.ks.no
         - host: pdl-api.dev-fss-pub.nais.io
-        - host: norg2.dev-fss-pub.nais.io
         - host: unleash.nais.io
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
         - host: test.idporten.no
       rules:
         - application: clamav
           namespace: clamav
+        - application: norg2
+          namespace: org
     inbound:
       rules:
         - application: sosialhjelp-innsyn
@@ -73,7 +74,7 @@ spec:
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
       value: "https://minside.fiks.test.ks.no"
     - name: NORG_URL
-      value: "https://norg2.dev-fss-pub.nais.io/norg2/api/v1"
+      value: "http://norg2.org/norg2/api/v1"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "10"
     - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS

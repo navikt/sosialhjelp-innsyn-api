@@ -46,6 +46,8 @@ spec:
       rules:
         - application: clamav
           namespace: clamav
+        - application: norg2
+          namespace: org
     inbound:
       rules:
         - application: sosialhjelp-innsyn
@@ -72,7 +74,7 @@ spec:
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
       value: "https://minside.fiks.ks.no"
     - name: NORG_URL
-      value: "https://norg2.prod-fss-pub.nais.io/norg2/api/v1"
+      value: "http://norg2.org/norg2/api/v1"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "10"
     - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS

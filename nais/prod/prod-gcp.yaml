@@ -39,7 +39,6 @@ spec:
         - host: api.fiks.ks.no
         - host: minside.fiks.ks.no
         - host: pdl-api.prod-fss-pub.nais.io
-        - host: norg2.prod-fss-pub.nais.io
         - host: unleash.nais.io
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
         - host: idporten.no

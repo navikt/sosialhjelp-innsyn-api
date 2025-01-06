@@ -28,6 +28,10 @@ spec:
     max: 4
   tokenx:
     enabled: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   maskinporten:
     enabled: true
     scopes:

@@ -64,7 +64,7 @@ class VedleggController(
             withContext(MDCContext() + RequestAttributesContext()) {
                 log.info("Forsøker å starter ettersendelse")
                 tilgangskontroll.sjekkTilgang(token)
-                xsrfGenerator.sjekkXsrfToken(request)
+//                xsrfGenerator.sjekkXsrfToken(request)
 
                 val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
 

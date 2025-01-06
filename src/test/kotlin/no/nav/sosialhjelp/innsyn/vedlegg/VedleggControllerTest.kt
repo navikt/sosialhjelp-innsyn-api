@@ -67,7 +67,8 @@ internal class VedleggControllerTest {
     "type": "brukskonto",
     "tilleggsinfo": "kontoutskrift",
     "filer": [{
-        "filnavn": "test.jpg"
+        "filnavn": "test.jpg",
+        "uuid": "5beac991-8a6d-475f-a065-579eb7c4f424",
     }]
 }]
     """
@@ -196,6 +197,7 @@ internal class VedleggControllerTest {
             assertThat(runCatching { controller.sendVedlegg(id, files, "token", request) }.isSuccess)
         }
 
+    // TODO: Denne testen gir ikke mening. Den bare tester at en exception blir kastet, men testen selv kaster exeptionen
     @Test
     fun `skal kaste exception dersom token mangler`() =
         runTest(timeout = 5.seconds) {
@@ -207,10 +209,12 @@ internal class VedleggControllerTest {
                 )
             val request: HttpServletRequest = mockk()
             every { request.cookies } returns arrayOf()
-            every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
-            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+            // TODO: Fjerner xsrf-sjekk foreløpig
+            coEvery { tilgangskontroll.sjekkTilgang("bad token") } throws IllegalStateException()
+            // every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
+            runCatching { controller.sendVedlegg(id, files, "bad token", request) }.let {
                 assertThat(it.isFailure)
-                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
             }
         }
 
@@ -223,25 +227,28 @@ internal class VedleggControllerTest {
             |    "type": "brukskonto",
             |    "tilleggsinfo": "kontoutskrift",
             |    "filer": [{
-            |        "filnavn": "test.jpg"
+            |        "filnavn": "test.jpg",
+            |        "uuid": "5beac991-8a6d-475f-a065-579eb7c4f424"
             |    }]
             |}]
             |
-                """.trimMargin().toByteArray()
+                """.trimMargin()
 
             val request: HttpServletRequest = mockk()
             coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
-            every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
+            // TODO: Fjerna xsrf-sjekk foreløpig
+//            every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
 
             val files =
                 mutableListOf<MultipartFile>(
-                    MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
+                    MockMultipartFile("files", "metadata.json", null, metadata.toByteArray()),
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                     MockMultipartFile("files", "roflmao.jpg", null, ByteArray(0)),
                 )
             runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
                 assertThat(it.isFailure)
-                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+                assertThat(it.exceptionOrNull()?.message).contains("Fil i metadata var ikke i listen over filer")
             }
         }
 

@@ -8,7 +8,6 @@ import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.HistorikkType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
-import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import org.slf4j.LoggerFactory

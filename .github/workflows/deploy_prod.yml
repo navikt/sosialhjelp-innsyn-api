@@ -1,5 +1,6 @@
 name: 'Deploy stable'
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["Build Kotlin, Run Lint and Test"]
     branches: [master]

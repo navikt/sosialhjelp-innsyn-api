@@ -48,7 +48,7 @@ spec:
         - host: test.idporten.no
       rules:
         - application: clamav
-          namespace: clamav
+          namespace: nais-system
         - application: norg2
           namespace: org
     inbound:
@@ -94,7 +94,7 @@ spec:
     - name: SWAGGER_ENABLED
       value: "true"
     - name: CLAMAV_URL
-      value: "http://clamav.nais-system.svc.nais.local/scan"
+      value: "http://clamav.nais-system/scan"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
     - name: MASKINPORTEN_WELL_KNOWN_URL

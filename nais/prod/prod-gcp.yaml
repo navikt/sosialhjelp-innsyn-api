@@ -48,7 +48,7 @@ spec:
         - host: idporten.no
       rules:
         - application: clamav
-          namespace: clamav
+          namespace: nais-system
         - application: norg2
           namespace: org
     inbound:

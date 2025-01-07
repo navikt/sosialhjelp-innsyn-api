@@ -17,9 +17,6 @@ jobs:
           - environment: prod
             cluster: prod-gcp
             resource: prod-gcp
-          - environment: prod
-            cluster: prod-fss
-            resource: prod-fss
           - environment: dev
             cluster: dev-gcp
             resource: preprod

@@ -41,7 +41,7 @@ spec:
     outbound:
       external:
         - host: api.fiks.ks.no
-        - host: minside.fiks.ks.no
+        - host: minside.kommune.no
         - host: pdl-api.prod-fss-pub.nais.io
         - host: unleash.nais.io
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
@@ -74,7 +74,7 @@ spec:
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "https://api.fiks.ks.no"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
-      value: "https://minside.fiks.ks.no"
+      value: "https://minside.kommune.no"
     - name: NORG_URL
       value: "http://norg2.org/norg2/api/v1"
     - name: CACHE_TIME_TO_LIVE_SECONDS

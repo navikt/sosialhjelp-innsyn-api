@@ -1,18 +1,13 @@
 package no.nav.sosialhjelp.innsyn.utils
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.ErrorMessage
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.io.IOException
 import java.sql.Timestamp
@@ -27,8 +22,6 @@ import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ExecutorService
 import kotlin.reflect.full.companionObject
 
 const val COUNTER_SUFFIX_LENGTH = 4
@@ -140,27 +133,3 @@ val String.maskerFnr: String
 
 val ErrorMessage.feilmeldingUtenFnr: String?
     get() = this.message?.maskerFnr
-
-fun ExecutorService.runAsyncWithMDC(runnable: Runnable): CompletableFuture<Void> {
-    val previous: Map<String, String> = MDC.getCopyOfContextMap()
-    return CompletableFuture.runAsync(
-        {
-            MDC.setContextMap(previous)
-            try {
-                runnable.run()
-            } finally {
-                MDCUtils.clearMDC()
-            }
-        },
-        this,
-    )
-}
-
-suspend fun <A, B> Iterable<A>.flatMapParallel(f: suspend (A) -> List<B>): List<B> =
-    coroutineScope {
-        map {
-            async {
-                f(it)
-            }
-        }.awaitAll().flatten()
-    }

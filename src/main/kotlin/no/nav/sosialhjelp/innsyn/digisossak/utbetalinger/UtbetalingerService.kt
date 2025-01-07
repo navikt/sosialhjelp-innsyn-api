@@ -7,11 +7,8 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.utils.flatMapParallel
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.RequestContextHolder.setRequestAttributes
 import java.time.LocalDate
 import java.time.Year
 import java.time.YearMonth
@@ -32,13 +29,10 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val requestAttributes = RequestContextHolder.getRequestAttributes()
-
         val alleUtbetalinger =
             digisosSaker
                 .filter { it.isNewerThanMonths(months) }
-                .flatMapParallel {
-                    setRequestAttributes(requestAttributes)
+                .flatMap {
                     manedsutbetalinger(
                         token,
                         it,
@@ -58,12 +52,9 @@ class UtbetalingerService(
             return emptyList()
         }
 
-        val requestAttributes = RequestContextHolder.getRequestAttributes()
-
         return digisosSaker
             .filter { it.isNewerThanMonths(15) }
-            .flatMapParallel {
-                setRequestAttributes(requestAttributes)
+            .flatMap {
                 manedsutbetalinger(token, it, statusFilter)
             }
     }

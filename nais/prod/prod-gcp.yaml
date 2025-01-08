@@ -58,8 +58,8 @@ spec:
     limits:
       memory: 4Gi
     requests:
-      cpu: 100m
-      memory: 1Gi
+      cpu: 200m
+      memory: 1200Mi
   redis:
     - instance: cache
       access: readwrite

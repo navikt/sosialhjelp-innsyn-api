@@ -131,7 +131,8 @@ class InnsynExceptionHandler(
     ): ResponseEntity<FrontendErrorMessage> {
         if (ex.message?.contains("Server misconfigured") == true) {
             log.error(ex.message)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
         }
@@ -145,13 +146,15 @@ class InnsynExceptionHandler(
         request: WebRequest,
     ): ResponseEntity<FrontendErrorMessage> {
         log.error("Klarer ikke hente metadata fra discoveryurl eller problemer ved konfigurering av issuer. Feilmelding: ${ex.message}")
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .contentType(MediaType.APPLICATION_JSON)
             .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
     }
 
-    private fun createUnauthorizedWithLoginUrlResponse(loginUrl: String): ResponseEntity<FrontendErrorMessage> {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+    private fun createUnauthorizedWithLoginUrlResponse(loginUrl: String): ResponseEntity<FrontendErrorMessage> =
+        ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
             .contentType(MediaType.APPLICATION_JSON)
             .body(
                 FrontendUnauthorizedMessage(
@@ -161,7 +164,6 @@ class InnsynExceptionHandler(
                     loginUrl,
                 ),
             )
-    }
 
     companion object {
         private val log by logger()

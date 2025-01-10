@@ -29,19 +29,16 @@ class OppgaveController(
     fun getOppgaver(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<List<OppgaveResponse>> =
-        runBlocking {
-            withContext(MDCContext() + RequestAttributesContext()) {
-                tilgangskontroll.sjekkTilgang(token)
+    ): ResponseEntity<List<OppgaveResponse>> {
+        runBlocking { tilgangskontroll.sjekkTilgang(token) }
 
-                val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
-                if (oppgaver.isEmpty()) {
-                    ResponseEntity(HttpStatus.NO_CONTENT)
-                } else {
-                    ResponseEntity.ok(oppgaver)
-                }
-            }
+        val oppgaver = runBlocking { oppgaveService.hentOppgaver(fiksDigisosId, token) }
+        return if (oppgaver.isEmpty()) {
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } else {
+            ResponseEntity.ok(oppgaver)
         }
+    }
 
     @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}", produces = ["application/json;charset=UTF-8"])
     fun getOppgaveMedId(

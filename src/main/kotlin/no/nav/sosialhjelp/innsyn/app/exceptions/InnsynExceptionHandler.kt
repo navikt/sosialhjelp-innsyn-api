@@ -27,7 +27,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 class InnsynExceptionHandler(
     @Value("\${innsyn.loginurl}") private val innsynLoginUrl: String,
 ) : ResponseEntityExceptionHandler() {
-
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<FrontendErrorMessage> {
         log.error(e.message, e)

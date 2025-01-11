@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
@@ -26,6 +27,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 class InnsynExceptionHandler(
     @Value("\${innsyn.loginurl}") private val innsynLoginUrl: String,
 ) : ResponseEntityExceptionHandler() {
+
     @ExceptionHandler(Throwable::class)
     fun handleAll(e: Throwable): ResponseEntity<FrontendErrorMessage> {
         log.error(e.message, e)
@@ -33,6 +35,7 @@ class InnsynExceptionHandler(
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     override fun handleHttpMessageNotReadable(
         e: HttpMessageNotReadableException,
         headers: HttpHeaders,

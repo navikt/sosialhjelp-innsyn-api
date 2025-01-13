@@ -25,7 +25,7 @@ spec:
     path: /sosialhjelp/innsyn-api/internal/prometheus
   replicas:
     min: 2
-    max: 4
+    max: 5
   tokenx:
     enabled: true
   observability:
@@ -58,7 +58,7 @@ spec:
     limits:
       memory: 4Gi
     requests:
-      cpu: 87m
+      cpu: 200m
       memory: 1480Mi
   redis:
     - instance: cache

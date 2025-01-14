@@ -52,7 +52,6 @@ spec:
     - configmap: loginservice-idporten
     - secret: redis-password-innsyn-api
     - secret: testbruker-natalie
-    - secret: xsrf-secret
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token

@@ -50,7 +50,6 @@ spec:
   envFrom:
     - configmap: loginservice-idporten
     - secret: redis-password-innsyn-api
-    - secret: xsrf-secret
     - secret: fiks-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token
   accessPolicy:

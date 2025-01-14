@@ -98,13 +98,6 @@ class InnsynExceptionHandler(
         return ResponseEntity(error, HttpStatus.PAYLOAD_TOO_LARGE)
     }
 
-    @ExceptionHandler(XsrfException::class)
-    fun handleXsrfError(e: XsrfException): ResponseEntity<FrontendErrorMessage> {
-        log.warn("Feil xsrf token", e)
-        val error = FrontendErrorMessage(FILOPPLASTING_ERROR, "Klientfeil")
-        return ResponseEntity(error, HttpStatus.PAYLOAD_TOO_LARGE)
-    }
-
     @ExceptionHandler(OpplastingFilnavnMismatchException::class)
     fun handleOpplastingFilnavnMismatchError(e: OpplastingFilnavnMismatchException): ResponseEntity<FrontendErrorMessage> {
         log.error("Det er mismatch mellom opplastede filer og metadata", e)

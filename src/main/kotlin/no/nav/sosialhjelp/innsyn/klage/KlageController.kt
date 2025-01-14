@@ -6,7 +6,6 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.FilUrl
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -34,7 +33,6 @@ import java.time.LocalDate
 class KlageController(
     private val klageService: KlageService,
     private val tilgangskontroll: TilgangskontrollService,
-    private val xsrfGenerator: XsrfGenerator,
     private val clientProperties: ClientProperties,
 ) {
     @GetMapping("/{fiksDigisosId}/klage", produces = ["application/json;charset=UTF-8"])
@@ -74,7 +72,6 @@ class KlageController(
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
                 tilgangskontroll.sjekkTilgang(token)
-                xsrfGenerator.sjekkXsrfToken(request)
 
                 klageService.sendKlage(fiksDigisosId, body, token)
                 ResponseEntity.ok().build()

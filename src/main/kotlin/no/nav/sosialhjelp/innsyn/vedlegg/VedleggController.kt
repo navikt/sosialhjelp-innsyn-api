@@ -10,7 +10,6 @@ import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -48,7 +47,6 @@ class VedleggController(
     private val vedleggService: VedleggService,
     private val clientProperties: ClientProperties,
     private val tilgangskontroll: TilgangskontrollService,
-    private val xsrfGenerator: XsrfGenerator,
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
@@ -64,7 +62,6 @@ class VedleggController(
             withContext(MDCContext() + RequestAttributesContext()) {
                 log.info("Forsøker å starter ettersendelse")
                 tilgangskontroll.sjekkTilgang(token)
-//                xsrfGenerator.sjekkXsrfToken(request)
 
                 val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
 

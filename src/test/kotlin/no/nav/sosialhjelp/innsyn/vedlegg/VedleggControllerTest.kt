@@ -6,7 +6,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -14,7 +13,6 @@ import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -35,7 +33,6 @@ internal class VedleggControllerTest {
     private val vedleggService: VedleggService = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val tilgangskontroll: TilgangskontrollService = mockk()
-    private val xsrfGenerator: XsrfGenerator = mockk()
     private val eventService: EventService = mockk()
     private val fiksClient: FiksClient = mockk()
     private val digisosSak: DigisosSak = mockk()
@@ -47,7 +44,6 @@ internal class VedleggControllerTest {
             vedleggService,
             clientProperties,
             tilgangskontroll,
-            xsrfGenerator,
             eventService,
             fiksClient,
         )
@@ -172,9 +168,6 @@ internal class VedleggControllerTest {
                     MockMultipartFile("files", "test2.png", null, ByteArray(0)),
                 )
             val request: HttpServletRequest = mockk()
-            every { request.cookies } returns arrayOf(xsrfCookie())
-            every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
-            every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
             runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
@@ -191,9 +184,6 @@ internal class VedleggControllerTest {
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                 )
             val request: HttpServletRequest = mockk()
-            every { request.cookies } returns arrayOf(xsrfCookie())
-            every { xsrfGenerator.generateXsrfToken(any()) } returns "someRandomChars"
-            every { xsrfGenerator.sjekkXsrfToken(any()) } just Runs
             assertThat(runCatching { controller.sendVedlegg(id, files, "token", request) }.isSuccess)
         }
 
@@ -209,9 +199,7 @@ internal class VedleggControllerTest {
                 )
             val request: HttpServletRequest = mockk()
             every { request.cookies } returns arrayOf()
-            // TODO: Fjerner xsrf-sjekk foreløpig
             coEvery { tilgangskontroll.sjekkTilgang("bad token") } throws IllegalStateException()
-            // every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
             runCatching { controller.sendVedlegg(id, files, "bad token", request) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
@@ -236,8 +224,6 @@ internal class VedleggControllerTest {
 
             val request: HttpServletRequest = mockk()
             coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
-            // TODO: Fjerna xsrf-sjekk foreløpig
-//            every { xsrfGenerator.sjekkXsrfToken(any()) } throws IllegalArgumentException()
 
             val files =
                 mutableListOf<MultipartFile>(
@@ -276,12 +262,5 @@ internal class VedleggControllerTest {
     fun `skal handtere passe langt filnavn med strek og seks tegn`() {
         val filnavn = "filnavn_som_er_passe_langt-123456.pdf"
         assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
-    }
-
-    private fun xsrfCookie(): Cookie {
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", "someRandomChars")
-        xsrfCookie.path = "/"
-        xsrfCookie.isHttpOnly = true
-        return xsrfCookie
     }
 }

@@ -19,8 +19,6 @@ class CorsConfig {
                         "Origin",
                         "Content-Type",
                         "Accept",
-                        "X-XSRF-TOKEN",
-                        "XSRF-TOKEN-INNSYN-API",
                         "Authorization",
                         "Nav-Call-Id",
                     )

@@ -14,10 +14,6 @@ class VirusScanException(
     override val cause: Throwable?,
 ) : RuntimeException(message, cause)
 
-class XsrfException(
-    override val message: String?,
-) : RuntimeException(message)
-
 class OpplastingFilnavnMismatchException(
     override val message: String?,
     override val cause: Throwable?,

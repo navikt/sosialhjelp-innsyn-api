@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
-import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import kotlinx.coroutines.runBlocking
@@ -8,7 +7,6 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.app.xsrf.XsrfGenerator
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.saksoversikt.BrokenSoknad
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -30,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController
 class SoknadsStatusController(
     private val soknadsStatusService: SoknadsStatusService,
     private val tilgangskontroll: TilgangskontrollService,
-    private val xsrfGenerator: XsrfGenerator,
 ) {
     @GetMapping("{fiksDigisosId}/soknadsStatus")
     fun hentSoknadsStatus(
@@ -43,7 +40,6 @@ class SoknadsStatusController(
             withContext(MDCContext() + RequestAttributesContext()) {
                 tilgangskontroll.sjekkTilgang(token)
 
-                response.addCookie(xsrfCookie())
                 val fnr = SubjectHandlerUtils.getUserIdFromToken()
                 val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token, fnr)
                 ResponseEntity.ok().body(
@@ -59,11 +55,4 @@ class SoknadsStatusController(
                 )
             }
         }
-
-    private fun xsrfCookie(): Cookie {
-        val xsrfCookie = Cookie("XSRF-TOKEN-INNSYN-API", xsrfGenerator.generateXsrfToken())
-        xsrfCookie.path = "/sosialhjelp/innsyn"
-        xsrfCookie.isHttpOnly = false
-        return xsrfCookie
-    }
 }

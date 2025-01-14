@@ -11,7 +11,11 @@ redis_port: ${REDIS_PORT_CACHE}
 redis_username: ${REDIS_USERNAME_CACHE}
 redis_password: ${REDIS_PASSWORD_CACHE}
 
-nais.token.endpoint: ${NAIS_TOKEN_ENDPOINT}
+nais:
+  token:
+    endpoint: ${NAIS_TOKEN_ENDPOINT}
+    exchange:
+      endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT}
 
 server:
   servlet:

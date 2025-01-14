@@ -4,7 +4,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
-import no.nav.sosialhjelp.innsyn.app.maskinporten.MaskinportenClient
+import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.SakWrapper
@@ -30,12 +30,12 @@ internal class DigisosApiTestClientTest {
         runTest(timeout = 5.seconds) {
             val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
             val digisosApiWebClient = WebClient.create(mockWebServer.url("/").toString())
-            val maskinportenClient: MaskinportenClient = mockk()
+            val texasClient: TexasClient = mockk()
             val fiksClientImpl: FiksClientImpl = mockk()
 
-            val digisosApiTestClient = DigisosApiTestClientImpl(fiksWebClient, digisosApiWebClient, maskinportenClient, fiksClientImpl)
+            val digisosApiTestClient = DigisosApiTestClientImpl(fiksWebClient, digisosApiWebClient, texasClient, fiksClientImpl)
 
-            coEvery { maskinportenClient.getToken() } returns "Token"
+            coEvery { texasClient.getMaskinportenToken() } returns "Token"
 
             mockWebServer.enqueue(
                 MockResponse()

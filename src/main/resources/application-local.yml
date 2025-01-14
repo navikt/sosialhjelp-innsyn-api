@@ -39,10 +39,3 @@ client:
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL:soknad_api_url}
   soknad_api_audience: ${SOKNAD_API_AUDIENCE:dummyAudience}
-
-
-#Maskinporten
-maskinporten_clientid: maskinporten_clientid
-maskinporten_scopes: scopes
-maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/maskinporten${mock-alt-api-wellknown-queryparam}}
-maskinporten_client_jwk: generateRSA

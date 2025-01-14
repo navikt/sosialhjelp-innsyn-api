@@ -15,7 +15,11 @@ server:
   servlet:
     context-path: '/sosialhjelp/innsyn-api'
 
-nais.token.endpoint: ${NAIS_TOKEN_ENDPOINT}
+nais:
+  token:
+    endpoint: ${NAIS_TOKEN_ENDPOINT}
+    exchange:
+      endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT}
 
 no.nav.security.jwt:
   issuer.selvbetjening:

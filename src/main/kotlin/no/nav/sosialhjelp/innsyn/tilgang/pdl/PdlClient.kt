@@ -3,11 +3,10 @@ package no.nav.sosialhjelp.innsyn.tilgang.pdl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
-import no.nav.sosialhjelp.innsyn.app.tokendings.TokendingsService
+import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.PDL_IDENTER_CACHE_KEY_PREFIX
 import no.nav.sosialhjelp.innsyn.redis.RedisService
@@ -15,6 +14,7 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -39,9 +39,10 @@ interface PdlClient {
 @Component
 class PdlClientImpl(
     private val pdlWebClient: WebClient,
-    private val clientProperties: ClientProperties,
-    private val tokendingsService: TokendingsService,
     private val redisService: RedisService,
+    private val texasClient: TexasClient,
+    @Value("\${client.pdl_audience}")
+    private val pdlAudience: String,
 ) : PdlClient {
     private val pdlRetry =
         RetryUtils.retryBackoffSpec({ it is WebClientResponseException })
@@ -78,7 +79,7 @@ class PdlClientImpl(
                     pdlWebClient.post()
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                        .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                        .header(AUTHORIZATION, BEARER + tokenXtoken(token))
                         .bodyValue(PdlRequest(query, Variables(ident)))
                         .retrieve()
                         .bodyToMono<PdlPersonResponse>()
@@ -91,7 +92,7 @@ class PdlClientImpl(
                     .also { it?.let { lagreTilCache(ident, it) } }
             } catch (e: WebClientResponseException) {
                 log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
-                throw PdlException(e.message ?: "Ukjent PdlException")
+                throw PdlException(e.message)
             }
         }
 
@@ -105,7 +106,7 @@ class PdlClientImpl(
                 pdlWebClient.post()
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                    .header(AUTHORIZATION, BEARER + tokenXtoken(ident, token))
+                    .header(AUTHORIZATION, BEARER + tokenXtoken(token))
                     .bodyValue(PdlRequest(query, Variables(ident)))
                     .retrieve()
                     .bodyToMono<PdlIdenterResponse>()
@@ -118,14 +119,11 @@ class PdlClientImpl(
                 .also { it?.let { lagreIdenterTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
             log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
-            throw PdlException(e.message ?: "Ukjent PdlException")
+            throw PdlException(e.message)
         }
     }
 
-    private suspend fun tokenXtoken(
-        ident: String,
-        token: String,
-    ) = tokendingsService.exchangeToken(ident, token, clientProperties.pdlAudience)
+    private suspend fun tokenXtoken(token: String) = texasClient.getTokenXToken(pdlAudience, token)
 
     override fun ping() {
         pdlWebClient.options()

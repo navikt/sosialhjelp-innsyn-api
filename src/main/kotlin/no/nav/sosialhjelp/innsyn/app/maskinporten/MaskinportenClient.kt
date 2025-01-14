@@ -1,79 +1,92 @@
 package no.nav.sosialhjelp.innsyn.app.maskinporten
 
-import com.nimbusds.jwt.SignedJWT
+import com.fasterxml.jackson.annotation.JsonProperty
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
-import no.nav.sosialhjelp.innsyn.app.maskinporten.dto.MaskinportenResponse
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
-import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.http.codec.json.Jackson2JsonDecoder
+import org.springframework.http.codec.json.Jackson2JsonEncoder
+import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.util.Date
 
-class MaskinportenClient(
-    private val maskinportenWebClient: WebClient,
-    maskinportenProperties: MaskinportenProperties,
-    private val wellKnown: WellKnown,
-) {
-    private var cachedToken: SignedJWT? = null
-
-    private val tokenGenerator = MaskinportenGrantTokenGenerator(maskinportenProperties, wellKnown.issuer)
-
-    suspend fun getToken(): String {
-        return getTokenFraCache() ?: getTokenFraMaskinporten()
-    }
-
-    private fun getTokenFraCache(): String? {
-        return cachedToken?.takeUnless { isExpired(it) }?.parsedString
-    }
-
-    private suspend fun getTokenFraMaskinporten(): String =
-        withContext(Dispatchers.IO) {
-            val response =
-                runCatching {
-                    maskinportenWebClient.post()
-                        .uri(wellKnown.token_endpoint)
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .body(BodyInserters.fromFormData(params))
-                        .retrieve()
-                        .awaitBody<MaskinportenResponse>()
-                }.onSuccess {
-                    log.info("Hentet token fra Maskinporten")
-                }.onFailure {
-                    log.warn("Noe feilet ved henting av token fra Maskinporten", it)
-                }.getOrThrow()
-
-            response.access_token.also {
-                cachedToken = SignedJWT.parse(it)
-            }
-        }
-
-    private val params: MultiValueMap<String, String>
-        get() =
-            LinkedMultiValueMap<String, String>().apply {
-                add("grant_type", GRANT_TYPE)
-                add("assertion", tokenGenerator.getJwt())
-            }
-
-    companion object {
-        private val log by logger()
-
-        private const val GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer"
-        private const val TJUE_SEKUNDER: Long = 20
-
-        private fun isExpired(jwt: SignedJWT): Boolean {
-            return jwt.jwtClaimsSet?.expirationTime
-                ?.toLocalDateTime?.minusSeconds(TJUE_SEKUNDER)?.isBefore(LocalDateTime.now())
-                ?: true
-        }
-
-        private val Date.toLocalDateTime: LocalDateTime?
-            get() = Instant.ofEpochMilli(time).atZone(ZoneId.systemDefault()).toLocalDateTime()
-    }
+interface MaskinportenClient {
+    suspend fun getToken(): String
 }
+
+@Component
+class MaskinportenClientImpl(
+    texasClientBuilder: WebClient.Builder,
+    @Value("\${nais.token.endpoint}")
+    private val tokenEndpoint: String,
+) : MaskinportenClient {
+    private val log by logger()
+
+    private val texasClient =
+        texasClientBuilder.defaultHeaders {
+            it.contentType = MediaType.APPLICATION_JSON
+        }.baseUrl(tokenEndpoint).codecs {
+            it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
+            it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
+            it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
+        }.build()
+
+    override suspend fun getToken(): String =
+        withContext(Dispatchers.IO + MDCContext()) {
+            val response =
+                try {
+                    texasClient.post()
+                        .bodyValue(params)
+                        .retrieve()
+                        .awaitBody<TokenResponse.Success>()
+                        .also {
+                            log.info("Hentet token fra Maskinporten (Texas)")
+                        }
+                } catch (e: WebClientResponseException) {
+                    val error =
+                        e.getResponseBodyAs(TokenErrorResponse::class.java) ?: TokenErrorResponse(
+                            "Unknown error: ${e.responseBodyAsString}",
+                            e.message,
+                        )
+
+                    TokenResponse.Error(error, e.statusCode)
+                }
+
+            when (response) {
+                is TokenResponse.Success -> response.accessToken
+                is TokenResponse.Error -> {
+                    error("Feil ved henting av token fra Maskinporten (Texas). Statuscode: ${response.status}. Error: ${response.error}")
+                }
+            }
+        }
+
+    private val params: Map<String, String>
+        get() =
+            mapOf("identity_provider" to "maskinporten", "target" to "ks:fiks")
+}
+
+sealed class TokenResponse {
+    data class Success(
+        @JsonProperty("access_token")
+        val accessToken: String,
+        @JsonProperty("expires_in")
+        val expiresInSeconds: Int,
+    ) : TokenResponse()
+
+    data class Error(
+        val error: TokenErrorResponse,
+        val status: HttpStatusCode,
+    ) : TokenResponse()
+}
+
+data class TokenErrorResponse(
+    val error: String,
+    @JsonProperty("error_description")
+    val errorDescription: String,
+)

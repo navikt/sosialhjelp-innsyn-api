@@ -70,7 +70,7 @@ internal class SaksStatusIntegrasjonsTest {
         val soknad = JsonSoknad()
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
 
-        coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
+        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns digisosSakOk
         coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) } returns soknad
         coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
         coEvery { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
@@ -86,7 +86,7 @@ internal class SaksStatusIntegrasjonsTest {
             .exchange()
             .expectStatus().isOk
 
-        coVerify(exactly = 1) { fiksClient.hentDigisosSak(any(), any(), any()) }
+        coVerify(exactly = 1) { fiksClient.hentDigisosSak(any(), any()) }
         coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
         coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
     }

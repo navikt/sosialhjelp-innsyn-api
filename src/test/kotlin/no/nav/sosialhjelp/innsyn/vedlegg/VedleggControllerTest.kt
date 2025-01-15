@@ -86,7 +86,7 @@ internal class VedleggControllerTest {
     @Test
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() =
         runTest(timeout = 5.seconds) {
-            coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
+            coEvery { fiksClient.hentDigisosSak(any(), any()) } returns digisosSak
             coEvery { eventService.createModel(any(), any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
                 listOf(
@@ -122,7 +122,7 @@ internal class VedleggControllerTest {
     fun `skal utelate duplikater i response`() =
         runTest(timeout = 5.seconds) {
             val now = LocalDateTime.now()
-            coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSak
+            coEvery { fiksClient.hentDigisosSak(any(), any()) } returns digisosSak
             coEvery { eventService.createModel(any(), any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
                 listOf(

@@ -38,9 +38,9 @@ internal class SoknadsStatusServiceTest {
     @BeforeEach
     fun init() {
         clearAllMocks()
-        coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
+        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
         // TODO fjerne når feilsøk er ferdig
-        coEvery { fiksClient.hentDigisosSakMedFnr(any(), any(), any(), any()) } returns mockDigisosSak
+        coEvery { fiksClient.hentDigisosSakMedFnr(any(), any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns dokumentlagerId
     }
 

@@ -31,7 +31,7 @@ class OppgaveService(
         fiksDigisosId: String,
         token: String,
     ): List<OppgaveResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
         if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
             return emptyList()
@@ -85,7 +85,7 @@ class OppgaveService(
         fiksDigisosId: String,
         token: String,
     ): List<VilkarResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
         if (model.vilkar.isEmpty()) {
             return emptyList()
@@ -127,7 +127,7 @@ class OppgaveService(
         fiksDigisosId: String,
         token: String,
     ): List<DokumentasjonkravResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
         if (model.dokumentasjonkrav.isEmpty()) {
             return emptyList()
@@ -204,7 +204,7 @@ class OppgaveService(
         fiksDigisosId: String,
         token: String,
     ): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
         if (model.dokumentasjonkrav.isEmpty()) {
             return false
@@ -227,7 +227,7 @@ class OppgaveService(
         fiksDigisosId: String,
         token: String,
     ): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
         if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
             return false
@@ -267,7 +267,7 @@ class OppgaveService(
         fiksDigisosId: String,
         token: String,
     ): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
         if (model.status != SoknadsStatus.MOTTATT) {
             return false

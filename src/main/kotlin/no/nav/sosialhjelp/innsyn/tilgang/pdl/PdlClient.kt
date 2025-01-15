@@ -7,14 +7,11 @@ import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
-import no.nav.sosialhjelp.innsyn.redis.ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX
-import no.nav.sosialhjelp.innsyn.redis.PDL_IDENTER_CACHE_KEY_PREFIX
-import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -39,7 +36,6 @@ interface PdlClient {
 @Component
 class PdlClientImpl(
     private val pdlWebClient: WebClient,
-    private val redisService: RedisService,
     private val texasClient: TexasClient,
     @Value("\${client.pdl_audience}")
     private val pdlAudience: String,
@@ -50,23 +46,19 @@ class PdlClientImpl(
                 throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
             }
 
+    @Cacheable("pdlPerson", key = "#ident")
     override suspend fun hentPerson(
         ident: String,
         token: String,
     ): PdlHentPerson? {
-        return hentFraCache(ident) ?: hentFraPdl(ident, token)
+        return hentFraPdl(ident, token)
     }
 
+    @Cacheable("historiske-identer", key = "#ident")
     override suspend fun hentIdenter(
         ident: String,
         token: String,
-    ): List<String> {
-        redisService.get(PDL_IDENTER_CACHE_KEY_PREFIX + ident, PdlIdenter::class.java)
-            ?.let { pdlIdenter -> return pdlIdenter.identer.map { it.ident } }
-        return hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
-    }
-
-    private fun hentFraCache(ident: String): PdlHentPerson? = redisService.get(cacheKey(ident), PdlHentPerson::class.java)
+    ): List<String> = hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
 
     private suspend fun hentFraPdl(
         ident: String,
@@ -79,7 +71,7 @@ class PdlClientImpl(
                     pdlWebClient.post()
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                        .header(AUTHORIZATION, BEARER + tokenXtoken(token))
+                        .header(AUTHORIZATION, BEARER + tokenXtoken(token.removePrefix("Bearer ")))
                         .bodyValue(PdlRequest(query, Variables(ident)))
                         .retrieve()
                         .bodyToMono<PdlPersonResponse>()
@@ -89,7 +81,6 @@ class PdlClientImpl(
                 checkForPdlApiErrors(pdlPersonResponse)
 
                 pdlPersonResponse?.data
-                    .also { it?.let { lagreTilCache(ident, it) } }
             } catch (e: WebClientResponseException) {
                 log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
                 throw PdlException(e.message)
@@ -106,7 +97,7 @@ class PdlClientImpl(
                 pdlWebClient.post()
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                    .header(AUTHORIZATION, BEARER + tokenXtoken(token))
+                    .header(AUTHORIZATION, BEARER + tokenXtoken(token.removePrefix("Bearer ")))
                     .bodyValue(PdlRequest(query, Variables(ident)))
                     .retrieve()
                     .bodyToMono<PdlIdenterResponse>()
@@ -116,7 +107,6 @@ class PdlClientImpl(
             checkForPdlApiErrors(pdlIdenterResponse)
 
             return pdlIdenterResponse?.data?.hentIdenter
-                .also { it?.let { lagreIdenterTilCache(ident, it) } }
         } catch (e: WebClientResponseException) {
             log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
             throw PdlException(e.message)
@@ -154,18 +144,6 @@ class PdlClientImpl(
                 .joinToString(prefix = "Error i respons fra pdl-api: ") { it }
         throw PdlException(errorString)
     }
-
-    private fun cacheKey(ident: String): String = ADRESSEBESKYTTELSE_CACHE_KEY_PREFIX + ident
-
-    private fun lagreTilCache(
-        ident: String,
-        pdlHentPerson: PdlHentPerson,
-    ) = redisService.put(cacheKey(ident), objectMapper.writeValueAsBytes(pdlHentPerson))
-
-    private fun lagreIdenterTilCache(
-        ident: String,
-        pdlIdenter: PdlIdenter,
-    ) = redisService.put(PDL_IDENTER_CACHE_KEY_PREFIX + ident, objectMapper.writeValueAsBytes(pdlIdenter))
 
     companion object {
         private val log by logger()

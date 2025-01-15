@@ -87,7 +87,7 @@ class VedleggController(
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
                 tilgangskontroll.sjekkTilgang(token)
-                val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+                val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
                 val model = eventService.createModel(digisosSak, token)
 
                 val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(digisosSak, model, token)

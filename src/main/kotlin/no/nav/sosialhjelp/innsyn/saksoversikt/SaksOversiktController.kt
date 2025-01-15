@@ -68,7 +68,7 @@ class SaksOversiktController(
                 if (id.isEmpty()) {
                     return@withContext ResponseEntity.noContent().build()
                 }
-                val sak = fiksClient.hentDigisosSak(id, token, true)
+                val sak = fiksClient.hentDigisosSak(id, token)
                 val model = eventService.createSaksoversiktModel(sak, token)
                 val antallOppgaver =
                     hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +

@@ -80,7 +80,7 @@ class KlageServiceImpl(
         klage: InputKlage,
         token: String,
     ) {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val enhetsNr = digisosSak.tilleggsinformasjon?.enhetsnummer ?: error("Sak mangler enhetsnummer")
 
@@ -91,7 +91,7 @@ class KlageServiceImpl(
         fiksDigisosId: String,
         token: String,
     ): List<Klage> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val enhetsNr = digisosSak.tilleggsinformasjon?.enhetsnummer ?: error("Sak mangler enhetsnummer")
 

@@ -25,7 +25,7 @@ class HendelseService(
         fiksDigisosId: String,
         token: String,
     ): List<HendelseResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
 
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(digisosSak, model, token)

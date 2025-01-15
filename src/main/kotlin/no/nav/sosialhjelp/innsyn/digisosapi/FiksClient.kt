@@ -8,14 +8,12 @@ interface FiksClient {
     suspend fun hentDigisosSak(
         digisosId: String,
         token: String,
-        useCache: Boolean,
     ): DigisosSak
 
     // TODO fjernes når feilsøking er gjennomført
     suspend fun hentDigisosSakMedFnr(
         digisosId: String,
         token: String,
-        useCache: Boolean,
         fnr: String,
     ): DigisosSak
 

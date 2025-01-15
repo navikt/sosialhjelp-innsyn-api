@@ -5,6 +5,8 @@ spring:
       host: ${REDIS_HOST_CACHE}
       username: ${REDIS_USERNAME_CACHE}
       port: ${REDIS_PORT_CACHE}
+      ssl:
+        enabled: true
 
 redis_host: ${REDIS_HOST_CACHE}
 redis_port: ${REDIS_PORT_CACHE}

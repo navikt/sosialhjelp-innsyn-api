@@ -15,7 +15,6 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
-import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.apache.pdfbox.pdmodel.PDDocument
@@ -26,6 +25,7 @@ import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.CacheManager
 import org.springframework.mock.web.MockMultipartFile
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -39,17 +39,17 @@ internal class VedleggOpplastingServiceTest {
     private val fiksClient: FiksClient = mockk()
     private val krypteringService: KrypteringService = mockk()
     private val virusScanner: VirusScanner = mockk()
-    private val redisService: RedisService = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
     private val dokumentlagerClient: DokumentlagerClient = mockk()
+    private val cacheManager: CacheManager = mockk()
     private val service =
         VedleggOpplastingService(
             fiksClient,
             krypteringService,
             virusScanner,
-            redisService,
             ettersendelsePdfGenerator,
             dokumentlagerClient,
+            cacheManager,
         )
 
     private val mockDigisosSak: DigisosSak = mockk(relaxed = true)
@@ -78,12 +78,11 @@ internal class VedleggOpplastingServiceTest {
     fun init() {
         clearAllMocks()
 
-        coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
+        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
         coEvery { virusScanner.scan(any(), any()) } just runs
-        every { redisService.put(any(), any(), any()) } just runs
-        every { redisService.defaultTimeToLiveSeconds } returns 1
         coEvery { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate() } returns mockCertificate
+        coEvery { cacheManager.getCache(any()) } returns null
     }
 
     @Test

@@ -25,7 +25,7 @@ class SoknadsStatusService(
         token: String,
         fnr: String,
     ): UtvidetSoknadsStatus {
-        val digisosSak = fiksClient.hentDigisosSakMedFnr(fiksDigisosId, token, true, fnr)
+        val digisosSak = fiksClient.hentDigisosSakMedFnr(fiksDigisosId, token, fnr)
         val model = eventService.createModel(digisosSak, token)
         val status = model.status
 

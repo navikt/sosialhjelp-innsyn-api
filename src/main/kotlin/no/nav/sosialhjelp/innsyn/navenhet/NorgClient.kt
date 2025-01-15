@@ -7,11 +7,9 @@ import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
-import no.nav.sosialhjelp.innsyn.redis.NAVENHET_CACHE_KEY_PREFIX
-import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -25,7 +23,6 @@ interface NorgClient {
 @Component
 class NorgClientImpl(
     private val norgWebClient: WebClient,
-    private val redisService: RedisService,
 ) : NorgClient {
     private val norgRetry =
         retryBackoffSpec()
@@ -33,8 +30,9 @@ class NorgClientImpl(
                 throw NorgException("Norg - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
             }
 
+    @Cacheable("navenhet")
     override suspend fun hentNavEnhet(enhetsnr: String): NavEnhet {
-        return hentFraCache(enhetsnr) ?: hentFraNorg(enhetsnr)
+        return hentFraNorg(enhetsnr)
     }
 
     private suspend fun hentFraNorg(enhetsnr: String): NavEnhet =
@@ -55,29 +53,10 @@ class NorgClientImpl(
                     .awaitSingleOrNull()
                     ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
 
-            log.info("Hentet Nav-enhet $enhetsnr fra NORG2")
-
-            navEnhet.also { lagreTilCache(enhetsnr, it) }
+            navEnhet.also { log.info("Hentet Nav-enhet $enhetsnr fra NORG2") }
         }
-
-    private fun hentFraCache(enhetsnr: String): NavEnhet? = redisService.get(cacheKey(enhetsnr), NavEnhet::class.java)
-
-    private fun lagreTilCache(
-        enhetsnr: String,
-        navEnhet: NavEnhet,
-    ) {
-        redisService.put(
-            cacheKey(enhetsnr),
-            objectMapper.writeValueAsBytes(navEnhet),
-            NAVENHET_CACHE_TIMETOLIVE_SECONDS,
-        )
-    }
-
-    private fun cacheKey(enhetsnr: String): String = NAVENHET_CACHE_KEY_PREFIX + enhetsnr
 
     companion object {
         private val log by logger()
-
-        private const val NAVENHET_CACHE_TIMETOLIVE_SECONDS: Long = 60 * 60 // 1 time
     }
 }

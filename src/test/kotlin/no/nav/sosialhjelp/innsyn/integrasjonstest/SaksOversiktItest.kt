@@ -81,7 +81,7 @@ class SaksOversiktItest {
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
         val soknad = JsonSoknad()
 
-        coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns digisosSakOk
+        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns digisosSakOk
         coEvery { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
         coEvery { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
         coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
@@ -97,7 +97,7 @@ class SaksOversiktItest {
             .exchange()
             .expectStatus().isOk
 
-        coVerify(exactly = 2) { fiksClient.hentDigisosSak(any(), any(), any()) }
+        coVerify(exactly = 2) { fiksClient.hentDigisosSak(any(), any()) }
         coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
         coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
     }

@@ -37,7 +37,7 @@ internal class SaksStatusServiceTest {
     fun init() {
         clearMocks(eventService, fiksClient)
 
-        coEvery { fiksClient.hentDigisosSak(any(), any(), any()) } returns mockDigisosSak
+        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
     }
 
     @Test
@@ -251,11 +251,11 @@ internal class SaksStatusServiceTest {
 
             val digisosSak1 = DigisosSak("id1", "", "", "", 1L, null, null, null, null)
             coEvery {
-                fiksClient.hentDigisosSak("id1", "token", true)
+                fiksClient.hentDigisosSak("id1", "token")
             } returns digisosSak1
             val digisosSak2 = DigisosSak("id2", "", "", "", 1L, null, null, null, null)
             coEvery {
-                fiksClient.hentDigisosSak("id2", "token", true)
+                fiksClient.hentDigisosSak("id2", "token")
             } returns digisosSak2
 
             coEvery {

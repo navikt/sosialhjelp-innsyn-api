@@ -1,53 +1,50 @@
 package no.nav.sosialhjelp.innsyn.redis
 
-import io.lettuce.core.RedisClient
-import io.lettuce.core.RedisURI
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties
-import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+import org.springframework.data.redis.cache.RedisCacheConfiguration
+import org.springframework.data.redis.cache.RedisCacheManager
+import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.RedisSerializationContext
 import java.time.Duration
 
-private const val TIMEOUT_SECONDS: Long = 1
-
-@Profile("!mock-redis&(preprod|prodgcp)")
 @Configuration
-class RedisConfigGcp(
-    @Value("\${redis_host}") private val host: String,
-    @Value("\${redis_port}") private val port: Int,
-    @Value("\${redis_password}") private val password: String,
-    @Value("\${redis_username}") private val username: String,
+@Profile("!mock-redis")
+@EnableCaching
+class RedisConfig(
+    @Value("\${innsyn.cache.time_to_live_seconds}") private val defaultTTL: Long,
+    @Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long,
 ) {
     @Bean
-    @Profile("preprod|prodgcp")
-    fun redisClientPreprod(): RedisClient {
-        val redisURI =
-            RedisURI
-                .builder()
-                .withHost(host)
-                .withPort(port)
-                .withAuthentication(username, password.toCharArray())
-                .withTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .withSsl(true)
-                .build()
-        return RedisClient.create(redisURI)
+    fun cacheManager(connectionFactory: RedisConnectionFactory, objectMapper: ObjectMapper): CacheManager {
+        val valueSerializationPair = Jackson2JsonRedisSerializer(objectMapper, Any::class.java).let {
+            RedisSerializationContext.fromSerializer(it).valueSerializationPair
+        }
+        val defaults = RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(defaultTTL)).serializeValuesWith(valueSerializationPair)
+        val cacheManager =
+            RedisCacheManager.builder(connectionFactory).cacheDefaults(defaults)
+                .withCacheConfiguration("dokument", defaults.entryTtl(Duration.ofSeconds(dokumentTTL)))
+                .withCacheConfiguration("navenhet", defaults.entryTtl(Duration.ofHours(1))).build()
+        return cacheManager
     }
-}
 
-@Profile("!mock-redis&!(preprod|prodgcp)")
-@Configuration
-@EnableConfigurationProperties(RedisProperties::class)
-class RedisConfigFss {
     @Bean
-    @Profile("!preprod&!prodgcp")
-    fun redisClient(properties: RedisProperties): RedisClient {
-        val redisUri =
-            RedisURI.Builder.redis(properties.host, properties.port)
-                .withPassword(properties.password as CharSequence)
-                .build()
-
-        return RedisClient.create(redisUri)
+    fun objectMapper(): ObjectMapper {
+        return JsonSosialhjelpObjectMapper.createObjectMapper()
+            .registerKotlinModule()
+            .registerModule(JavaTimeModule())
+            .configure(SerializationFeature.INDENT_OUTPUT, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     }
 }

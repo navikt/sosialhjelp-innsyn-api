@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import java.time.LocalDate
 
@@ -8,6 +9,7 @@ data class UtbetalingerResponse(
     val ar: Int,
     val maned: Int,
     @JsonFormat(pattern = "yyyy-MM-dd")
+    @Schema(deprecated = true, description = "Bruk ar og maned")
     val foersteIManeden: LocalDate,
     val utbetalinger: List<ManedUtbetaling>,
 )

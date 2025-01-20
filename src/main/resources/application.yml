@@ -5,9 +5,9 @@ spring:
     name: "sosialhjelp-innsyn-api"
   data:
     redis:
-      host: ${REDIS_HOST}
+      host: localhost
       port: 6379
-      password: ${REDIS_PASSWORD}
+      password: pw
   session:
     store-type: redis
   servlet:

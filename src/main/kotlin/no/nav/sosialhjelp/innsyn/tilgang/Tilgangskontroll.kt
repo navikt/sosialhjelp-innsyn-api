@@ -58,7 +58,7 @@ class TilgangskontrollService(
 
     suspend fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
         val gyldigeIdenter = pdlClient.hentIdenter(SubjectHandlerUtils.getUserIdFromToken(), SubjectHandlerUtils.getToken())
-        if (gyldigeIdenter?.contains(digisosSak.sokerFnr) != true) {
+        if (!gyldigeIdenter.contains(digisosSak.sokerFnr)) {
             throw TilgangskontrollException("digisosSak hører ikke til rett person")
         }
     }

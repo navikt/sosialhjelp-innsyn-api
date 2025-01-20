@@ -21,7 +21,7 @@ class SaksStatusService(
         fiksDigisosId: String,
         token: String,
     ): List<SaksStatusResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
 
         if (model.saker.isEmpty()) {

@@ -8,14 +8,13 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
-import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
+import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
@@ -30,9 +29,9 @@ class VedleggOpplastingService(
     private val fiksClient: FiksClient,
     private val krypteringService: KrypteringService,
     private val virusScanner: VirusScanner,
-    private val redisService: RedisService,
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
     private val dokumentlagerClient: DokumentlagerClient,
+    private val cacheManager: CacheManager?,
 ) {
     private val log by logger()
 
@@ -78,9 +77,11 @@ class VedleggOpplastingService(
                 etterKryptering.onEach { it.fil.close() }
             }
         }
-        // opppdater cache med digisossak
-        val digisosSak = fiksClient.hentDigisosSak(digisosId, token, false)
-        redisService.put(digisosId, objectMapper.writeValueAsBytes(digisosSak))
+
+        // Evict cache for digisosSak
+        cacheManager?.getCache("digisosSak")?.evict(digisosId)?.also {
+            log.info("Evicted cache for digisosSak with key $digisosId")
+        }
 
         return oppgaveValideringer
     }
@@ -98,7 +99,7 @@ class VedleggOpplastingService(
     ): FilForOpplasting {
         try {
             log.info("Starter generering av ettersendelse.pdf")
-            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, token, true)
+            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, token)
             val ettersendelsePdf = ettersendelsePdfGenerator.generate(metadata, currentDigisosSak.sokerFnr)
             return FilForOpplasting(
                 "ettersendelse.pdf",

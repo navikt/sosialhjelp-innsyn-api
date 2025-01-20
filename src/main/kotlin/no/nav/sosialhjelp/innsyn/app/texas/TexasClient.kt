@@ -40,7 +40,7 @@ class TexasClient(
     private val texasWebClient =
         texasWebClientBuilder.defaultHeaders {
             it.contentType = MediaType.APPLICATION_JSON
-        }.baseUrl(tokenEndpoint).codecs {
+        }.codecs {
             it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
             it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
             it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
@@ -81,7 +81,7 @@ class TexasClient(
                         .retrieve()
                         .awaitBody<TokenResponse.Success>()
                         .also {
-                            log.info("Hentet token fra Maskinporten (Texas)")
+                            log.info("Hentet $tokenEndpointType-token fra Texas")
                         }
                 } catch (e: WebClientResponseException) {
                     val error =
@@ -96,7 +96,9 @@ class TexasClient(
             when (response) {
                 is TokenResponse.Success -> response.accessToken
                 is TokenResponse.Error -> {
-                    error("Feil ved henting av token fra Maskinporten (Texas). Statuscode: ${response.status}. Error: ${response.error}")
+                    error(
+                        "Feil ved henting av $tokenEndpointType-token fra Texas. Statuscode: ${response.status}. Error: ${response.error}",
+                    )
                 }
             }
         }

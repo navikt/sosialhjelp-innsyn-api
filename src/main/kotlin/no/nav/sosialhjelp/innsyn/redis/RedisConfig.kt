@@ -12,7 +12,7 @@ import java.time.Duration
 
 private const val TIMEOUT_SECONDS: Long = 1
 
-@Profile("!mock-redis&(preprod|prodgcp)")
+@Profile("!mock-redis&(preprod|prodgcp|dev)")
 @Configuration
 class RedisConfigGcp(
     @Value("\${redis_host}") private val host: String,
@@ -21,7 +21,7 @@ class RedisConfigGcp(
     @Value("\${redis_username}") private val username: String,
 ) {
     @Bean
-    @Profile("preprod|prodgcp")
+    @Profile("preprod|prodgcp|dev")
     fun redisClientPreprod(): RedisClient {
         val redisURI =
             RedisURI
@@ -36,12 +36,12 @@ class RedisConfigGcp(
     }
 }
 
-@Profile("!mock-redis&!(preprod|prodgcp)")
+@Profile("!mock-redis&!(preprod|prodgcp|dev)")
 @Configuration
 @EnableConfigurationProperties(RedisProperties::class)
 class RedisConfigFss {
     @Bean
-    @Profile("!preprod&!prodgcp")
+    @Profile("!preprod&!prodgcp&!dev")
     fun redisClient(properties: RedisProperties): RedisClient {
         val redisUri =
             RedisURI.Builder.redis(properties.host, properties.port)

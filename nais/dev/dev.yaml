@@ -73,7 +73,7 @@ spec:
     - name: IDPORTEN_WELL_KNOWN_URL
       value: "https://test.idporten.no/.well-known/openid-configuration"
     - name: SPRING_PROFILES_ACTIVE
-      value: "log-kibana,preprod"
+      value: "log-kibana,dev"
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "https://api.fiks.test.ks.no"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL

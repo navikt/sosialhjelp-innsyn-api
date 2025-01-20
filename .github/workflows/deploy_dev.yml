@@ -6,12 +6,13 @@ on:
       config-file-name:
         description: 'Config-fil som skal deployes'
         required: true
-        default: 'dev-fss'
+        default: 'dev'
         type: choice
         options:
           - 'mock'
           - 'preprod'
           - 'dev-fss'
+          - 'dev'
 
 jobs:
   set-cluster:

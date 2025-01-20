@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import java.time.LocalDate
 
 data class UtbetalingerResponse(
@@ -24,7 +25,7 @@ data class ManedUtbetaling(
     val utbetalingsdato: LocalDate?,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val forfallsdato: LocalDate?,
-    val status: String,
+    val status: UtbetalingsStatus,
     val fiksDigisosId: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val fom: LocalDate?,

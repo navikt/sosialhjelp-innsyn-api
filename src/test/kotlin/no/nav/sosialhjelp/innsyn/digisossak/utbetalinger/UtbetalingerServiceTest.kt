@@ -681,9 +681,9 @@ internal class UtbetalingerServiceTest {
             assertThat(response).isNotEmpty
             assertThat(response).hasSize(2)
             assertThat(response[0].utbetalinger).hasSize(1)
-            assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.PLANLAGT_UTBETALING.name)
+            assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.PLANLAGT_UTBETALING)
             assertThat(response[1].utbetalinger).hasSize(1)
-            assertThat(response[1].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT.name)
+            assertThat(response[1].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT)
         }
 
     @Test

@@ -101,7 +101,7 @@ class UtbetalingerService(
                 .filter {
                     it.utbetalingsdato?.isAfter(foresteIMnd) ?: false ||
                         it.utbetalingsdato?.isEqual(foresteIMnd) ?: false ||
-                        it.status == UtbetalingsStatus.PLANLAGT_UTBETALING.toString()
+                        it.status == UtbetalingsStatus.PLANLAGT_UTBETALING
                 }.filter {
                     it.utbetalingsdato != null || it.forfallsdato != null
                 }
@@ -160,7 +160,7 @@ class UtbetalingerService(
                     belop = utbetaling.belop.toDouble(),
                     utbetalingsdato = utbetaling.utbetalingsDato,
                     forfallsdato = utbetaling.forfallsDato,
-                    status = utbetaling.status.name,
+                    status = utbetaling.status,
                     fiksDigisosId = digisosSak.fiksDigisosId,
                     fom = utbetaling.fom,
                     tom = utbetaling.tom,

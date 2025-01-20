@@ -72,7 +72,7 @@ class TilgangskontrollService(
         if (fornavn.isEmpty()) {
             log.warn(
                 "PDL har ingen fornavn på brukeren. Dette gir ingen feil hos oss." +
-                        " Kontakt gjerne PDL-teamet, siden datakvaliteten på denne brukeren er dårlig.",
+                    " Kontakt gjerne PDL-teamet, siden datakvaliteten på denne brukeren er dårlig.",
             )
         }
         return fornavn

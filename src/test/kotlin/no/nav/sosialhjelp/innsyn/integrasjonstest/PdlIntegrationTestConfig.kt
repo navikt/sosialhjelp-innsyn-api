@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import no.nav.sosialhjelp.innsyn.tilgang.pdl.IdenterWrapper
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
@@ -47,9 +46,9 @@ class HentPDLClientMock : PdlClient {
     override suspend fun hentIdenter(
         ident: String,
         token: String,
-    ): IdenterWrapper {
+    ): List<String> {
 //      ikke i bruk
-        return IdenterWrapper(emptyList())
+        return emptyList()
     }
 
     override fun ping() {

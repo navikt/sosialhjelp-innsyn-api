@@ -38,6 +38,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
+import java.io.Serializable
 
 @Component
 class FiksClientImpl(
@@ -115,7 +116,7 @@ class FiksClientImpl(
         }
 
     @Cacheable("dokument", key = "#cacheKey")
-    override suspend fun <T : Any> hentDokument(
+    override suspend fun <T : Serializable> hentDokument(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,

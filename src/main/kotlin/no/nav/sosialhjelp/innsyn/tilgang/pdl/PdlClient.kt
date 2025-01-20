@@ -28,7 +28,7 @@ interface PdlClient {
     suspend fun hentIdenter(
         ident: String,
         token: String,
-    ): IdenterWrapper
+    ): List<String>
 
     fun ping()
 }
@@ -58,7 +58,7 @@ class PdlClientImpl(
     override suspend fun hentIdenter(
         ident: String,
         token: String,
-    ): IdenterWrapper = IdenterWrapper(hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList())
+    ): List<String> = hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
 
     private suspend fun hentFraPdl(
         ident: String,
@@ -149,5 +149,3 @@ class PdlClientImpl(
         private val log by logger()
     }
 }
-
-data class IdenterWrapper(val identer: List<String>)

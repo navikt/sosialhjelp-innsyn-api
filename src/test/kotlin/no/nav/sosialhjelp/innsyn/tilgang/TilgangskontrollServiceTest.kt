@@ -10,7 +10,6 @@ import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Adressebeskyttelse
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Gradering
-import no.nav.sosialhjelp.innsyn.tilgang.pdl.IdenterWrapper
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlNavn
@@ -189,7 +188,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `verifyDigisosSakIsForCorrectUser - ok - skal ikke kaste exception`() =
         runTest(timeout = 5.seconds) {
-            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns IdenterWrapper(listOf(ident))
+            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns listOf(ident)
 
             service.verifyDigisosSakIsForCorrectUser(digisosSak)
         }
@@ -197,7 +196,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `verifyDigisosSakIsForCorrectUser - feil person - skal kaste exception`() =
         runTest(timeout = 5.seconds) {
-            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns IdenterWrapper(listOf("fnr"))
+            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns listOf("fnr")
 
             runCatching { service.verifyDigisosSakIsForCorrectUser(digisosSak) }.let {
                 assertThat(it.isFailure)
@@ -208,7 +207,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `verifyDigisosSakIsForCorrectUser - to fnr - ok`() =
         runTest(timeout = 5.seconds) {
-            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns IdenterWrapper(listOf("fnr", ident))
+            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns listOf("fnr", ident)
 
             service.verifyDigisosSakIsForCorrectUser(digisosSak)
         }

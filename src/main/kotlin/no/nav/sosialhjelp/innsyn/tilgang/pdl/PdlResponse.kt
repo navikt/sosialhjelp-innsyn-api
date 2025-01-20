@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
+import java.io.Serializable
+
 interface PdlResponse {
     val errors: List<PdlError>?
 }
@@ -45,22 +47,22 @@ data class PdlIdent(
 
 data class PdlHentPerson(
     val hentPerson: PdlPerson?,
-)
+) : Serializable
 
 data class PdlPerson(
     val adressebeskyttelse: List<Adressebeskyttelse>,
     val navn: List<PdlNavn>,
-)
+) : Serializable
 
 data class PdlNavn(
     val fornavn: String?,
-)
+) : Serializable
 
 data class Adressebeskyttelse(
     val gradering: Gradering,
-)
+) : Serializable
 
-enum class Gradering {
+enum class Gradering : Serializable {
     STRENGT_FORTROLIG_UTLAND, // kode 6 (utland)
     STRENGT_FORTROLIG, // kode 6
     FORTROLIG, // kode 7

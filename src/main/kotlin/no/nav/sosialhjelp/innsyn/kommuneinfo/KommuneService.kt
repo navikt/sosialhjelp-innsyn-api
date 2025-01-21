@@ -7,12 +7,17 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
 
 @Component
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 class KommuneService(
     private val fiksClient: FiksClient,
     private val kommuneInfoClient: KommuneInfoClient,
+    // Injecter seg selv for å kunne bruke @Cacheable. @Scope må være satt for at den skal klare å sette en referanse til seg selv her.
+    private val self: KommuneService,
 ) {
     @Cacheable("kommuneinfo", key = "#fiksDigisosId")
     suspend fun hentKommuneInfo(
@@ -46,7 +51,7 @@ class KommuneService(
         fiksDigisosId: String,
         token: String,
     ): Boolean {
-        val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
+        val kommuneInfo = self.hentKommuneInfo(fiksDigisosId, token)
         return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
     }
 

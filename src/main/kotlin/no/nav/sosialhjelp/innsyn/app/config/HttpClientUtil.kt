@@ -6,11 +6,11 @@ import reactor.netty.http.client.HttpClient
 
 object HttpClientUtil {
     fun getReactorClientHttpConnector(): ReactorClientHttpConnector {
-        val httpClient: HttpClient = httpClient()
+        val httpClient: HttpClient = getHttpClient()
         return ReactorClientHttpConnector(httpClient)
     }
 
-    fun httpClient() =
+    fun getHttpClient() =
         HttpClient
             .newConnection()
             .resolver(DefaultAddressResolverGroup.INSTANCE)

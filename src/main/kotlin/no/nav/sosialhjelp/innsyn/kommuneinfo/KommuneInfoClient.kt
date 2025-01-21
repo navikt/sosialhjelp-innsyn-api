@@ -31,7 +31,7 @@ class KommuneInfoClient(
     private val texasClient: TexasClient,
     clientProperties: ClientProperties,
     webClientBuilder: WebClient.Builder,
-    proxiedHttpClient: HttpClient,
+    httpClient: HttpClient,
 ) {
     suspend fun getAll(): List<KommuneInfo> =
         withContext(Dispatchers.IO) {
@@ -77,7 +77,7 @@ class KommuneInfoClient(
     private val kommuneInfoWebClient: WebClient =
         webClientBuilder
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
-            .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
+            .clientConnector(ReactorClientHttpConnector(httpClient))
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
                 it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))

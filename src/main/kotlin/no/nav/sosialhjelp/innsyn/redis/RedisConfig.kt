@@ -36,7 +36,7 @@ class RedisConfig(
                 .serializeValuesWith(valueSerializationPair).serializeKeysWith(keySerializationPair)
 
         val cacheManager =
-            RedisCacheManager.builder(connectionFactory).cacheDefaults(defaults)
+            RedisCacheManager.builder(connectionFactory).enableStatistics().cacheDefaults(defaults)
                 .withCacheConfiguration("dokument", defaults.entryTtl(Duration.ofSeconds(dokumentTTL)))
                 .withCacheConfiguration("navenhet", defaults.entryTtl(Duration.ofHours(1))).build()
         return cacheManager

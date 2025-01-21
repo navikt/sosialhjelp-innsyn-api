@@ -13,7 +13,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 
-@Profile("!prod-fss&!prodgcp")
+@Profile("!prodgcp")
 @Configuration
 class DigisosApiTestConfig(
     private val clientProperties: ClientProperties,
@@ -21,9 +21,9 @@ class DigisosApiTestConfig(
     @Bean
     fun digisosApiTestWebClient(
         webClientBuilder: WebClient.Builder,
-        proxiedHttpClient: HttpClient,
+        httpClient: HttpClient,
     ) = webClientBuilder
-        .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
+        .clientConnector(ReactorClientHttpConnector(httpClient))
         .baseUrl(clientProperties.fiksDigisosEndpointUrl)
         .codecs {
             it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)

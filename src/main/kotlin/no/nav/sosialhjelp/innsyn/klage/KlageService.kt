@@ -30,7 +30,7 @@ interface KlageService {
 }
 
 @Service
-@Profile("!prod-fss&!dev-fss&!preprod&!prodgcp&!dev")
+@Profile("!preprod&!prodgcp&!dev")
 class KlageServiceLocalImpl(
     @Value("\${client.fiks_klage_endpoint_url}")
     klageUrl: String,
@@ -65,7 +65,7 @@ class KlageServiceLocalImpl(
 }
 
 @Service
-@Profile("dev-fss|prod-fss|preprod|prodgcp|dev")
+@Profile("preprod|prodgcp|dev")
 @ConditionalOnBean(FiksIOKlient::class)
 @ConditionalOnProperty(name = ["klageEnabled"], havingValue = "true")
 class KlageServiceImpl(

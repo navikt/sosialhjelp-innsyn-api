@@ -37,6 +37,7 @@ spec:
     inbound:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
+        - application: sosialhjelp-innsyn-mock
   ingresses:
     - "https://digisos.ekstern.dev.nav.no/sosialhjelp/innsyn-api"
   resources:

@@ -15,7 +15,6 @@ import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
-import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -24,6 +23,7 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
@@ -38,15 +38,14 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
+import java.io.Serializable
 
 @Component
 class FiksClientImpl(
     private val fiksWebClient: WebClient,
     private val tilgangskontroll: TilgangskontrollService,
-    private val redisService: RedisService,
     @Value("\${retry_fiks_max_attempts}") private val retryMaxAttempts: Long,
     @Value("\${retry_fiks_initial_delay}") private val retryInitialDelay: Long,
-    @Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long,
     meterRegistry: MeterRegistry,
 ) : FiksClient {
     private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
@@ -61,31 +60,21 @@ class FiksClientImpl(
                 )
             }
 
+    @Cacheable("digisosSak", key = "#digisosId")
     override suspend fun hentDigisosSak(
         digisosId: String,
         token: String,
-        useCache: Boolean,
     ): DigisosSak {
-        val sak =
-            when {
-                useCache -> hentDigisosSakFraCache(digisosId) ?: hentDigisosSakFraFiks(digisosId, token)
-                else -> hentDigisosSakFraFiks(digisosId, token)
-            }
-        tilgangskontroll.verifyDigisosSakIsForCorrectUser(sak)
-        return sak
+        return hentDigisosSakFraFiks(digisosId, token).also { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
     }
 
+    @Cacheable("digisosSak", key = "#digisosId")
     override suspend fun hentDigisosSakMedFnr(
         digisosId: String,
         token: String,
-        useCache: Boolean,
         fnr: String,
     ): DigisosSak {
-        val sak =
-            when {
-                useCache -> hentDigisosSakFraCache(digisosId) ?: hentDigisosSakFraFiks(digisosId, token)
-                else -> hentDigisosSakFraFiks(digisosId, token)
-            }
+        val sak = hentDigisosSakFraFiks(digisosId, token)
 
         // TODO henting av fnr og sammeligning benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
         val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
@@ -95,19 +84,6 @@ class FiksClientImpl(
         }
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(sak)
         return sak
-    }
-
-    private fun hentDigisosSakFraCache(digisosId: String): DigisosSak? {
-        val digisosSak = redisService.get(digisosId, DigisosSak::class.java)
-        val digisosIdRedis = digisosSak?.fiksDigisosId
-        if (digisosIdRedis != null && digisosIdRedis != digisosId) {
-            log.error(
-                "Redis cache er korrupt, sak inneholder feil digisosId. " +
-                    "Redis har digisosId $digisosIdRedis og det ble gjort oppslag på digisosId: $digisosId ",
-            )
-        }
-
-        return digisosSak
     }
 
     private suspend fun hentDigisosSakFraFiks(
@@ -136,41 +112,23 @@ class FiksClientImpl(
                     .awaitSingleOrNull()
                     ?: throw BadStateException("digisosSak er null selv om request ikke har kastet exception")
 
-            log.debug("Hentet DigisosSak fra Fiks")
-            digisosSak.also { lagreTilCache(digisosId, it) }
+            digisosSak.also { log.debug("Hentet DigisosSak fra Fiks") }
         }
 
-    private fun <T : Any> lagreTilCache(
-        id: String,
-        dokument: T,
-        ttl: Long,
-    ) = redisService.put(id, objectMapper.writeValueAsBytes(dokument), ttl)
-
-    private fun lagreTilCache(
-        id: String,
-        digisosSak: DigisosSak,
-    ) = redisService.put(id, objectMapper.writeValueAsBytes(digisosSak))
-
-    override suspend fun <T : Any> hentDokument(
+    @Cacheable("dokument", key = "#cacheKey")
+    override suspend fun <T : Serializable> hentDokument(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,
         token: String,
         cacheKey: String,
     ): T {
-        return hentDokumentFraCache(cacheKey, requestedClass)
-            ?: hentDokumentFraFiks(digisosId, dokumentlagerId, cacheKey, requestedClass, token)
+        return hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass, token)
     }
-
-    private fun <T : Any> hentDokumentFraCache(
-        key: String,
-        requestedClass: Class<out T>,
-    ): T? = redisService.get(key, requestedClass)
 
     private suspend fun <T : Any> hentDokumentFraFiks(
         digisosId: String,
         dokumentlagerId: String,
-        cacheKey: String,
         requestedClass: Class<out T>,
         token: String,
     ): T =
@@ -194,8 +152,7 @@ class FiksClientImpl(
                     .awaitSingleOrNull()
                     ?: throw FiksClientException(500, "dokument er null selv om request ikke har kastet exception", null)
 
-            log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId")
-            dokument.also { lagreTilCache(cacheKey, it, dokumentTTL) }
+            dokument.also { log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
     override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
@@ -312,39 +269,6 @@ class FiksClientImpl(
             body.add("dokument:$fileId", file.toHttpEntity("dokument:$fileId"))
         }
         return body
-    }
-
-    fun createHttpEntityOfString(
-        body: String,
-        name: String,
-    ): HttpEntity<Any> {
-        return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
-    }
-
-    fun createHttpEntityOfFile(
-        file: FilForOpplasting,
-        name: String,
-    ): HttpEntity<Any> {
-        return createHttpEntity(InputStreamResource(file.fil), name, file.filnavn, "application/octet-stream")
-    }
-
-    private fun createHttpEntity(
-        body: Any,
-        name: String,
-        filename: String?,
-        contentType: String,
-    ): HttpEntity<Any> {
-        val headerMap = LinkedMultiValueMap<String, String>()
-        val builder: ContentDisposition.Builder =
-            ContentDisposition
-                .builder("form-data")
-                .name(name)
-        val contentDisposition: ContentDisposition =
-            if (filename == null) builder.build() else builder.filename(filename).build()
-
-        headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-        headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
-        return HttpEntity(body, headerMap)
     }
 
     fun serialiser(metadata: Any): String {

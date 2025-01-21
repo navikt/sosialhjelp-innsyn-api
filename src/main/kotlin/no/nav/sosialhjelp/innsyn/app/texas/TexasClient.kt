@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.app.maskinporten
+package no.nav.sosialhjelp.innsyn.app.texas
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import kotlinx.coroutines.Dispatchers
@@ -16,37 +16,72 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
 
-interface MaskinportenClient {
-    suspend fun getToken(): String
+enum class TokenEndpointType {
+    // For kall uten sluttbrukers kontekst
+    M2M,
+
+    // For kall med sluttbrukers kontekst
+    BEHALF_OF,
+
+    // For å sjekke et token
+    INTROSPECTION,
 }
 
 @Component
-class MaskinportenClientImpl(
-    texasClientBuilder: WebClient.Builder,
+class TexasClient(
+    texasWebClientBuilder: WebClient.Builder,
     @Value("\${nais.token.endpoint}")
     private val tokenEndpoint: String,
-) : MaskinportenClient {
+    @Value("\${nais.token.exchange.endpoint}")
+    private val tokenXEndpoint: String,
+) {
     private val log by logger()
 
-    private val texasClient =
-        texasClientBuilder.defaultHeaders {
+    private val texasWebClient =
+        texasWebClientBuilder.defaultHeaders {
             it.contentType = MediaType.APPLICATION_JSON
-        }.baseUrl(tokenEndpoint).codecs {
+        }.codecs {
             it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
             it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
             it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
         }.build()
 
-    override suspend fun getToken(): String =
+    private val maskinportenParams: Map<String, String> = mapOf("identity_provider" to "maskinporten", "target" to "ks:fiks")
+
+    private fun getTokenXParams(
+        target: String,
+        userToken: String,
+    ): Map<String, String> = mapOf("identity_provider" to "tokenx", "target" to target, "user_token" to userToken)
+
+    suspend fun getMaskinportenToken() = getToken(TokenEndpointType.M2M, maskinportenParams)
+
+    suspend fun getTokenXToken(
+        target: String,
+        userToken: String,
+    ) = getToken(
+        TokenEndpointType.BEHALF_OF,
+        getTokenXParams(target, userToken),
+    )
+
+    private suspend fun getToken(
+        tokenEndpointType: TokenEndpointType,
+        params: Map<String, String>,
+    ): String =
         withContext(Dispatchers.IO + MDCContext()) {
+            val url =
+                when (tokenEndpointType) {
+                    TokenEndpointType.M2M -> tokenEndpoint
+                    TokenEndpointType.BEHALF_OF -> tokenXEndpoint
+                    TokenEndpointType.INTROSPECTION -> TODO()
+                }
             val response =
                 try {
-                    texasClient.post()
+                    texasWebClient.post().uri(url)
                         .bodyValue(params)
                         .retrieve()
                         .awaitBody<TokenResponse.Success>()
                         .also {
-                            log.info("Hentet token fra Maskinporten (Texas)")
+                            log.info("Hentet $tokenEndpointType-token fra Texas")
                         }
                 } catch (e: WebClientResponseException) {
                     val error =
@@ -61,14 +96,12 @@ class MaskinportenClientImpl(
             when (response) {
                 is TokenResponse.Success -> response.accessToken
                 is TokenResponse.Error -> {
-                    error("Feil ved henting av token fra Maskinporten (Texas). Statuscode: ${response.status}. Error: ${response.error}")
+                    error(
+                        "Feil ved henting av $tokenEndpointType-token fra Texas. Statuscode: ${response.status}. Error: ${response.error}",
+                    )
                 }
             }
         }
-
-    private val params: Map<String, String>
-        get() =
-            mapOf("identity_provider" to "maskinporten", "target" to "ks:fiks")
 }
 
 sealed class TokenResponse {
@@ -77,6 +110,8 @@ sealed class TokenResponse {
         val accessToken: String,
         @JsonProperty("expires_in")
         val expiresInSeconds: Int,
+        @JsonProperty("token_type")
+        val tokenType: String,
     ) : TokenResponse()
 
     data class Error(

@@ -15,24 +15,14 @@ client:
   unleash_env: "local"
   unleash_server_api_url: "http://localhost:58888"
   unleash_server_api_token: "localtoken"
-  tokendings_url: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
-  tokendings_private_jwk: generateRSA
   soknad_api_url: "http://localhost:59999"
   soknad_api_audience: "dummyAudience"
 
-#Maskinporten
-maskinporten_clientid: clientid
-maskinporten_scopes: scopes
-maskinporten_well_known_url: http://localhost:${mock-oauth2-server.port}/maskinporten/.well-known/openid-configuration
-maskinporten_client_jwk: generateRSA
-
-nais.token.endpoint: http://localhost:${mock-oauth2-server.port}/maskinporten/token
-
-idporten_well_known_url: http://localhost:${mock-oauth2-server.port}/idporten/.well-known/openid-configuration
-idporten_clientid: sosialhjelp-innsyn-api
-idporten_client_jwk: generateRSA
-idporten_redirect_uri: http://localhost:8080/sosialhjelp/innsyn-api/oauth2/callback
-idporten_post_logout_redirect_uri: https://www.nav.no
+nais:
+  token:
+    endpoint: http://localhost:${mock-oauth2-server.port}/maskinporten/token
+    exchange:
+      endpoint: http://localhost:${mock-oauth2-server.port}/tokenx/token
 
 innsyn:
   vedlegg:

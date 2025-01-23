@@ -157,7 +157,7 @@ class UtbetalingerService(
                 utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(digisosSak.kommunenummer)
                 ManedUtbetaling(
                     tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
-                    belop = utbetaling.belop.toDouble(),
+                    belop = utbetaling.belop,
                     utbetalingsdato = utbetaling.utbetalingsDato,
                     forfallsdato = utbetaling.forfallsDato,
                     status = utbetaling.status,

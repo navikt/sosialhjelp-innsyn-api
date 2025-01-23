@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
+import java.math.BigDecimal
 import java.time.LocalDate
 
 data class UtbetalingerResponse(
@@ -22,7 +23,7 @@ data class NyeOgTidligereUtbetalingerResponse(
 
 data class ManedUtbetaling(
     val tittel: String,
-    val belop: Double,
+    val belop: BigDecimal,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val utbetalingsdato: LocalDate?,
     @JsonFormat(pattern = "yyyy-MM-dd")

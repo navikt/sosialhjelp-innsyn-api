@@ -30,7 +30,7 @@ interface KlageService {
 }
 
 @Service
-@Profile("!prod-fss&!dev-fss&!preprod&!prodgcp")
+@Profile("!preprod&!prodgcp&!dev")
 class KlageServiceLocalImpl(
     @Value("\${client.fiks_klage_endpoint_url}")
     klageUrl: String,
@@ -65,7 +65,7 @@ class KlageServiceLocalImpl(
 }
 
 @Service
-@Profile("dev-fss|prod-fss|preprod|prodgcp")
+@Profile("preprod|prodgcp|dev")
 @ConditionalOnBean(FiksIOKlient::class)
 @ConditionalOnProperty(name = ["klageEnabled"], havingValue = "true")
 class KlageServiceImpl(
@@ -80,7 +80,7 @@ class KlageServiceImpl(
         klage: InputKlage,
         token: String,
     ) {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val enhetsNr = digisosSak.tilleggsinformasjon?.enhetsnummer ?: error("Sak mangler enhetsnummer")
 
@@ -91,7 +91,7 @@ class KlageServiceImpl(
         fiksDigisosId: String,
         token: String,
     ): List<Klage> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val enhetsNr = digisosSak.tilleggsinformasjon?.enhetsnummer ?: error("Sak mangler enhetsnummer")
 

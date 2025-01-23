@@ -7,7 +7,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.app.maskinporten.MaskinportenClient
+import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.digisosapi.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
@@ -30,12 +30,12 @@ import org.springframework.web.reactive.function.client.bodyToMono
 /**
  * Brukes kun i dev eller ved lokal testing mot fiks-test
  */
-@Profile("!prod-fss&!prodgcp")
+@Profile("!prodgcp")
 @Component
 class DigisosApiTestClientImpl(
     private val fiksWebClient: WebClient,
     private val digisosApiTestWebClient: WebClient,
-    private val maskinportenClient: MaskinportenClient,
+    private val texasClient: TexasClient,
     private val fiksClientImpl: FiksClientImpl,
 ) : DigisosApiTestClient {
     private val testbrukerNatalie = System.getenv("TESTBRUKER_NATALIE") ?: "11111111111"
@@ -53,7 +53,7 @@ class DigisosApiTestClientImpl(
 
             digisosApiTestWebClient.post()
                 .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
-                .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                 .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
                 .retrieve()
                 .bodyToMono<String>()
@@ -88,7 +88,7 @@ class DigisosApiTestClientImpl(
             withContext(Dispatchers.IO) {
                 digisosApiTestWebClient.post()
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
-                    .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(body))
                     .retrieve()
@@ -152,7 +152,7 @@ class DigisosApiTestClientImpl(
             val response =
                 digisosApiTestWebClient.post()
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
-                    .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                     .body(BodyInserters.fromValue(""))
                     .retrieve()
                     .bodyToMono<String>()

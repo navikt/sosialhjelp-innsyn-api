@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: "sosialhjelp-innsyn-api-dev"
   data:
     redis:
       password: ${REDIS_PASSWORD_CACHE:pw}

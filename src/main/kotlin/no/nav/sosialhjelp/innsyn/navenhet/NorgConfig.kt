@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.navenhet
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
-import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.getUnproxiedReactorClientHttpConnector
+import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.getReactorClientHttpConnector
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
@@ -14,7 +14,7 @@ class NorgConfig(
     @Bean
     fun norgWebClient(webClientBuilder: WebClient.Builder): WebClient =
         webClientBuilder
-            .clientConnector(getUnproxiedReactorClientHttpConnector())
+            .clientConnector(getReactorClientHttpConnector())
             .baseUrl(clientProperties.norgUrl)
             .filter(mdcExchangeFilter)
             .build()

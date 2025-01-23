@@ -5,23 +5,26 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
-import no.nav.sosialhjelp.innsyn.redis.KOMMUNEINFO_CACHE_KEY_PREFIX
-import no.nav.sosialhjelp.innsyn.redis.RedisService
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
 
 @Component
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 class KommuneService(
     private val fiksClient: FiksClient,
     private val kommuneInfoClient: KommuneInfoClient,
-    private val redisService: RedisService,
+    // Injecter seg selv for å kunne bruke @Cacheable. @Scope må være satt for at den skal klare å sette en referanse til seg selv her.
+    private val self: KommuneService,
 ) {
+    @Cacheable("kommuneinfo", key = "#fiksDigisosId")
     suspend fun hentKommuneInfo(
         fiksDigisosId: String,
         token: String,
     ): KommuneInfo? {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token, true)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val kommunenummer: String = digisosSak.kommunenummer
 
         if (kommunenummer.isBlank()) {
@@ -29,15 +32,12 @@ class KommuneService(
             throw RuntimeException("KommuneStatus kan ikke hentes fordi DigisosSak mangler kommunenummer")
         }
 
-        return hentFraCache(kommunenummer) ?: hentKommuneInfoFraFiks(kommunenummer)
+        return hentKommuneInfoFraFiks(kommunenummer)
     }
-
-    private fun hentFraCache(kommunenummer: String) = redisService.get(cacheKey(kommunenummer), KommuneInfo::class.java)
 
     private suspend fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {
             kommuneInfoClient.getKommuneInfo(kommunenummer)
-                .also { redisService.put(cacheKey(kommunenummer), objectMapper.writeValueAsBytes(it)) }
         } catch (e: FiksClientException) {
             null
         } catch (e: FiksServerException) {
@@ -51,11 +51,9 @@ class KommuneService(
         fiksDigisosId: String,
         token: String,
     ): Boolean {
-        val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
+        val kommuneInfo = self.hentKommuneInfo(fiksDigisosId, token)
         return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
     }
-
-    private fun cacheKey(kommunenummer: String): String = KOMMUNEINFO_CACHE_KEY_PREFIX + kommunenummer
 
     companion object {
         private val log by logger()

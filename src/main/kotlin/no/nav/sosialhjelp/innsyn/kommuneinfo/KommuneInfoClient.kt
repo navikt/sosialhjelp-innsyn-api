@@ -7,7 +7,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
-import no.nav.sosialhjelp.innsyn.app.maskinporten.MaskinportenClient
+import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_ALLE_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
@@ -28,10 +28,10 @@ import reactor.netty.http.client.HttpClient
 
 @Component
 class KommuneInfoClient(
-    private val maskinportenClient: MaskinportenClient,
+    private val texasClient: TexasClient,
     clientProperties: ClientProperties,
     webClientBuilder: WebClient.Builder,
-    proxiedHttpClient: HttpClient,
+    httpClient: HttpClient,
 ) {
     suspend fun getAll(): List<KommuneInfo> =
         withContext(Dispatchers.IO) {
@@ -39,7 +39,7 @@ class KommuneInfoClient(
                 kommuneInfoWebClient.get()
                     .uri(PATH_ALLE_KOMMUNEINFO)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                     .retrieve()
                     .awaitBody<List<KommuneInfo>>()
             }.onFailure {
@@ -60,7 +60,7 @@ class KommuneInfoClient(
                 kommuneInfoWebClient.get()
                     .uri(PATH_KOMMUNEINFO, kommunenummer)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION, BEARER + maskinportenClient.getToken())
+                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                     .retrieve()
                     .awaitBody<KommuneInfo>()
             }.onFailure {
@@ -77,7 +77,7 @@ class KommuneInfoClient(
     private val kommuneInfoWebClient: WebClient =
         webClientBuilder
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
-            .clientConnector(ReactorClientHttpConnector(proxiedHttpClient))
+            .clientConnector(ReactorClientHttpConnector(httpClient))
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
                 it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))

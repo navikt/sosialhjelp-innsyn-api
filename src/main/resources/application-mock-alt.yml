@@ -20,7 +20,11 @@ springdoc:
 mock-alt-api-host: ${MOCK_ALT_API_HOST:127.0.0.1}
 mock-alt-api-wellknown-queryparam: ${MOCK_ALT_API_WELLKNOWN_QUERYPARAM:}
 
-nais.token.endpoint: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/token/maskinporten}
+nais:
+  token:
+    endpoint: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/token/maskinporten}
+    exchange:
+      endpoint: ${TOKEN_X_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/token/tokenx}
 
 #Token-validering
 no.nav.security.jwt:
@@ -48,8 +52,6 @@ client:
   unleash_env: ${UNLEASH_ENV:mock}
   unleash_server_api_url: ${UNLEASH_SERVER_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/internal/unleash}
   unleash_server_api_token: ${UNLEASH_SERVER_API_TOKEN:token}
-  tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/tokenx${mock-alt-api-wellknown-queryparam}}
-  tokendings_private_jwk: generateRSA
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/soknad-api}
   soknad_api_audience: dummyAudience
@@ -59,12 +61,3 @@ maskinporten_clientid: maskinporten_clientid
 maskinporten_scopes: scopes
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/maskinporten${mock-alt-api-wellknown-queryparam}}
 maskinporten_client_jwk: generateRSA
-
-idporten_well_known_url: ${IDPORTEN_WELL_KNOWN_URL:https://test.idporten.no/.well-known/openid-configuration}
-idporten_clientid: ${IDPORTEN_CLIENT_ID:clientId}
-idporten_client_jwk: ${IDPORTEN_CLIENT_JWK:generateRSA}
-idporten_redirect_uri: ${IDPORTEN_REDIRECT_URI:https://www-q0.dev.nav.no/sosialhjelp/innsyn-api/oauth2/callback}
-idporten_post_logout_redirect_uri: ${IDPORTEN_POST_LOGOUT_REDIRECT_URI:https://www.nav.no}
-idporten_login_timeout: ${IDPORTEN_LOGIN_TIMEOUT:3600}
-idporten_session_timeout: ${IDPORTEN_SESSION_TIMEOUT:7200}
-idporten_token_timeout: ${IDPORTEN_TOKEN_TIMEOUT:3600}

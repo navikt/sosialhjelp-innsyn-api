@@ -33,7 +33,7 @@ Dette prosjektet bygger og deployer vha Github Actions.
 ### Github Actions
 - Docker image bygges ved push => `.github/workflows/build.yml`
 - Deploy til dev => `.github/workflows/deploy_dev.yml`
-- Autodeploy til prod-fss fra master => `.github/workflows/deploy_prod.yml`
+- Autodeploy til stabile miljøer (preprod, prod-gcp) fra master => `.github/workflows/deploy_prod.yml`
 
 ### Github deployment
 - Github deployments - registrer ditt github-repo [her](https://deployment.prod-sbs.nais.io/auth/form)

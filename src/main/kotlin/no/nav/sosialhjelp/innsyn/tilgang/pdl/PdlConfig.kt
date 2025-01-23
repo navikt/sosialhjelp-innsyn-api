@@ -4,7 +4,7 @@ import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
-import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.unproxiedHttpClient
+import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.getHttpClient
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -21,7 +21,7 @@ class PdlConfig(
             .baseUrl(clientProperties.pdlEndpointUrl)
             .clientConnector(
                 ReactorClientHttpConnector(
-                    unproxiedHttpClient()
+                    getHttpClient()
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
                         .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(30)) },
                 ),

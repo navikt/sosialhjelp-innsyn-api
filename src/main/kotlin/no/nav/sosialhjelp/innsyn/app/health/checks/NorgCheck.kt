@@ -27,7 +27,7 @@ class NorgCheck(
 
     private val norgWebClient =
         webClientBuilder
-            .clientConnector(HttpClientUtil.getUnproxiedReactorClientHttpConnector())
+            .clientConnector(HttpClientUtil.getReactorClientHttpConnector())
             .build()
 
     override fun doCheck(): Unit =

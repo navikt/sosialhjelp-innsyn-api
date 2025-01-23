@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
+import java.io.Serializable
+
 data class NavEnhet(
     val enhetId: Int,
     val navn: String,
@@ -8,4 +10,4 @@ data class NavEnhet(
     val antallRessurser: Int,
     val aktiveringsdato: String,
     val nedleggelsesdato: String?,
-)
+) : Serializable

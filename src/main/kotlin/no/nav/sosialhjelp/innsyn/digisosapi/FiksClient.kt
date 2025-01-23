@@ -3,19 +3,18 @@ package no.nav.sosialhjelp.innsyn.digisosapi
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import java.io.Serializable
 
 interface FiksClient {
     suspend fun hentDigisosSak(
         digisosId: String,
         token: String,
-        useCache: Boolean,
     ): DigisosSak
 
     // TODO fjernes når feilsøking er gjennomført
     suspend fun hentDigisosSakMedFnr(
         digisosId: String,
         token: String,
-        useCache: Boolean,
         fnr: String,
     ): DigisosSak
 
@@ -28,7 +27,7 @@ interface FiksClient {
         token: String,
     )
 
-    suspend fun <T : Any> hentDokument(
+    suspend fun <T : Serializable> hentDokument(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,

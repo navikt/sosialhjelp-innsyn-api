@@ -1,12 +1,13 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: sosialhjelp-innsyn-api
+  name: sosialhjelp-innsyn-api-dev
   namespace: teamdigisos
   labels:
     team: teamdigisos
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "150M"
+    texas.nais.io/enabled: "true"
 spec:
   image: {{image}}
   port: 8080
@@ -25,22 +26,35 @@ spec:
     path: /sosialhjelp/innsyn-api/internal/prometheus
   replicas:
     min: 1
-    max: 2
+    max: 1
+  tokenx:
+    enabled: true
   observability:
     autoInstrumentation:
       enabled: true
       runtime: java
-  webproxy: true
-  tokenx:
-    enabled: true
   maskinporten:
     enabled: true
     scopes:
       consumes:
         - name: "ks:fiks"
-  ingresses:
-    - "https://sosialhjelp-innsyn-api.dev-fss-pub.nais.io/sosialhjelp/innsyn-api"
-    - "https://sosialhjelp-innsyn-api.dev.intern.nav.no/sosialhjelp/innsyn-api"
+  accessPolicy:
+    outbound:
+      external:
+        - host: api.fiks.test.ks.no
+        - host: minside.fiks.test.ks.no
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: unleash.nais.io
+        - host: teamdigisos-unleash-api.nav.cloud.nais.io
+        - host: test.idporten.no
+      rules:
+        - application: clamav
+          namespace: nais-system
+        - application: norg2
+          namespace: org
+    inbound:
+      rules:
+        - application: sosialhjelp-innsyn-dev
   resources:
     limits:
       cpu: 500m
@@ -48,69 +62,43 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
+  redis:
+    - instance: cache
+      access: readwrite
   envFrom:
-    - configmap: loginservice-idporten
-    - secret: redis-password-innsyn-api
-    - secret: testbruker-natalie
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token
-    - secret: fiks-io-integrasjonspassord
-  filesFrom:
-    - secret: fiks-io-private-key
-  vault:
-    enabled: true
-    paths:
-      - kvPath: "/secret/virksomhetssertifikat/preprod/shared"
-        mountPath: "/var/run/secrets/nais.io/virksomhetssertifikat"
-  accessPolicy:
-    outbound:
-      external:
-        - host: teamdigisos-unleash-api.nav.cloud.nais.io
   env:
+    - name: IDPORTEN_WELL_KNOWN_URL
+      value: "https://test.idporten.no/.well-known/openid-configuration"
+    - name: SPRING_PROFILES_ACTIVE
+      value: "log-kibana,dev"
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "https://api.fiks.test.ks.no"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
       value: "https://minside.fiks.test.ks.no"
-    - name: FIKS_SVAR_UT_ENDPOINT_URL
-      value: "https://test.svarut.ks.no"
     - name: NORG_URL
-      value: "https://norg2.dev.intern.nav.no/norg2/api/v1"
-    - name: INNSYN_LOGINURL
-      value: "https://login.ekstern.dev.nav.no/oauth2/login"
+      value: "http://norg2.org/norg2/api/v1"
     - name: CACHE_TIME_TO_LIVE_SECONDS
       value: "10"
     - name: DOKUMENT_CACHE_TIME_TO_LIVE_SECONDS
       value: "3600"
-    - name: REDIS_HOST
-      value: "sosialhjelp-innsyn-api-redis.teamdigisos.svc.nais.local"
-    - name: SPRING_PROFILES_ACTIVE
-      value: "dev-fss,log-kibana"
     - name: PDL_ENDPOINT_URL
-      value: "https://pdl-api.dev.intern.nav.no/graphql"
+      value: "https://pdl-api.dev-fss-pub.nais.io/graphql"
     - name: PDL_AUDIENCE
       value: "dev-fss:pdl:pdl-api"
     - name: UNLEASH_INSTANCE_ID
       value: "sosialhjelp-innsyn-api"
     - name: UNLEASH_ENV
-      value: "dev-fss"
+      value: "dev"
     - name: SWAGGER_ENABLED
       value: "true"
     - name: CLAMAV_URL
-      value: "http://clamav.nais-system.svc.nais.local/scan"
-    - name: LOGIN_API_IDPORTEN_CLIENTID
-      value: "9664fbe4-a807-4914-95f4-12146085d23c"
+      value: "http://clamav.nais-system/scan"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
-    - name: SOKNAD_API_URL
-      value: "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api"
-    - name: SOKNAD_API_AUDIENCE
-      value: "dev-fss:teamdigisos:sosialhjelp-soknad-api"
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: "https://test.maskinporten.no/.well-known/oauth-authorization-server"
-    - name: FIKS_IO_INTEGRASJONSID
-      value: "6839eedd-8007-432b-a24d-67bd845f6369"
-    - name: FIKS_IO_KONTO_ID
-      value: 46bbe668-3468-45fa-9bd1-67b5469b7361
-    - name: VIRKSERT_PATH
-      value: "/var/run/secrets/nais.io/virksomhetssertifikat"
+    - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI
+      value: "https://www.dev.nav.no/no/utlogget"

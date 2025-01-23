@@ -36,6 +36,7 @@ data class ManedUtbetaling(
     val tom: LocalDate?,
     val mottaker: String?,
     val annenMottaker: Boolean,
+    @Schema(pattern = "^[0-9]{11}$")
     val kontonummer: String?,
     val utbetalingsmetode: String?,
 )

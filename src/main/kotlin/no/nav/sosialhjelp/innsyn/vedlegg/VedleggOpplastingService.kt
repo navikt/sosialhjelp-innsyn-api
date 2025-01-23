@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
@@ -148,22 +151,35 @@ class VedleggOpplastingService(
     }
 
     suspend fun validateFiler(metadatas: List<OpplastetVedleggMetadata>): List<OppgaveValidering> =
-        metadatas.map { metadata ->
-            val filValideringer =
-                metadata.filer.mapIndexed { index, mpf ->
-                    val valideringstatus = validateFil(mpf.fil, mpf.filnavn)
-                    if (valideringstatus.result != ValidationValues.OK) {
-                        log.warn(
-                            "Opplasting av fil $index av ${metadatas.sumOf { it.filer.size }} til ettersendelse feilet. " +
-                                "Det var ${metadatas.size} oppgaveElement. Status: $valideringstatus",
+        coroutineScope {
+            metadatas.map { metadata ->
+                async(Dispatchers.IO) {
+                    val filValideringer =
+                        metadata.filer.mapIndexed { index, mpf ->
+                            async(Dispatchers.IO) {
+                                val valideringstatus = validateFil(mpf.fil, mpf.filnavn)
+                                if (valideringstatus.result != ValidationValues.OK) {
+                                    log.warn(
+                                        "Opplasting av fil $index av ${metadatas.sumOf { it.filer.size }} til ettersendelse feilet. " +
+                                            "Det var ${metadatas.size} oppgaveElement. Status: $valideringstatus",
+                                    )
+                                }
+                                FilValidering(sanitizeFileName(mpf.filnavn), valideringstatus).also { mpf.validering = it }
+                            }
+                        }
+                    with(metadata) {
+                        OppgaveValidering(
+                            type,
+                            tilleggsinfo,
+                            innsendelsesfrist,
+                            hendelsetype,
+                            hendelsereferanse,
+                            filValideringer.awaitAll(),
                         )
                     }
-                    FilValidering(sanitizeFileName(mpf.filnavn), valideringstatus).also { mpf.validering = it }
                 }
-            with(metadata) {
-                OppgaveValidering(type, tilleggsinfo, innsendelsesfrist, hendelsetype, hendelsereferanse, filValideringer)
             }
-        }
+        }.awaitAll()
 
     suspend fun validateFil(
         file: MultipartFile,

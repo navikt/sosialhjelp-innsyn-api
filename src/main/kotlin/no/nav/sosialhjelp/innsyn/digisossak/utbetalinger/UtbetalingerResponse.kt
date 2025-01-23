@@ -1,12 +1,16 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import io.swagger.v3.oas.annotations.media.Schema
+import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
+import java.math.BigDecimal
 import java.time.LocalDate
 
 data class UtbetalingerResponse(
     val ar: Int,
     val maned: Int,
     @JsonFormat(pattern = "yyyy-MM-dd")
+    @Schema(deprecated = true, description = "Bruk ar og maned")
     val foersteIManeden: LocalDate,
     val utbetalinger: List<ManedUtbetaling>,
 )
@@ -19,12 +23,12 @@ data class NyeOgTidligereUtbetalingerResponse(
 
 data class ManedUtbetaling(
     val tittel: String,
-    val belop: Double,
+    val belop: BigDecimal,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val utbetalingsdato: LocalDate?,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val forfallsdato: LocalDate?,
-    val status: String,
+    val status: UtbetalingsStatus,
     val fiksDigisosId: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val fom: LocalDate?,
@@ -32,6 +36,7 @@ data class ManedUtbetaling(
     val tom: LocalDate?,
     val mottaker: String?,
     val annenMottaker: Boolean,
+    @Schema(pattern = "^[0-9]{11}$")
     val kontonummer: String?,
     val utbetalingsmetode: String?,
 )

@@ -210,7 +210,7 @@ internal class UtbetalingerServiceTest {
             assertThat(response[0].foersteIManeden).isEqualTo(LocalDate.of(2019, 8, 1))
             assertThat(response[0].utbetalinger).hasSize(1)
             assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Nødhjelp")
-            assertThat(response[0].utbetalinger[0].belop).isEqualTo(10.0)
+            assertThat(response[0].utbetalinger[0].belop).isEqualTo(BigDecimal(10))
             assertThat(response[0].utbetalinger[0].fiksDigisosId).isEqualTo(digisosId)
             assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-10")
             assertThat(response[0].utbetalinger[0].fom).isEqualTo("2019-08-01")
@@ -276,11 +276,11 @@ internal class UtbetalingerServiceTest {
             assertThat(response[0].foersteIManeden).isEqualTo(LocalDate.of(2019, 8, 1))
             assertThat(response[0].utbetalinger).hasSize(2)
             assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Tannlege")
-            assertThat(response[0].utbetalinger[0].belop).isEqualTo(10.0)
+            assertThat(response[0].utbetalinger[0].belop).isEqualTo(BigDecimal(10))
             assertThat(response[0].utbetalinger[0].fiksDigisosId).isEqualTo(digisosId)
             assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-12")
             assertThat(response[0].utbetalinger[1].tittel).isEqualTo("Nødhjelp")
-            assertThat(response[0].utbetalinger[1].belop).isEqualTo(10.0)
+            assertThat(response[0].utbetalinger[1].belop).isEqualTo(BigDecimal(10))
             assertThat(response[0].utbetalinger[1].fiksDigisosId).isEqualTo(digisosId)
             assertThat(response[0].utbetalinger[1].utbetalingsdato).isEqualTo("2019-08-10")
         }
@@ -341,7 +341,7 @@ internal class UtbetalingerServiceTest {
             assertThat(response[0].foersteIManeden).isEqualTo(LocalDate.of(2019, 9, 1))
             assertThat(response[0].utbetalinger).hasSize(1)
             assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Tannlege")
-            assertThat(response[0].utbetalinger[0].belop).isEqualTo(10.0)
+            assertThat(response[0].utbetalinger[0].belop).isEqualTo(BigDecimal(10))
             assertThat(response[0].utbetalinger[0].fiksDigisosId).isEqualTo(digisosId)
             assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-09-12")
 
@@ -350,7 +350,7 @@ internal class UtbetalingerServiceTest {
             assertThat(response[1].foersteIManeden).isEqualTo(LocalDate.of(2019, 8, 1))
             assertThat(response[1].utbetalinger).hasSize(1)
             assertThat(response[1].utbetalinger[0].tittel).isEqualTo("Nødhjelp")
-            assertThat(response[1].utbetalinger[0].belop).isEqualTo(10.0)
+            assertThat(response[1].utbetalinger[0].belop).isEqualTo(BigDecimal(10))
             assertThat(response[1].utbetalinger[0].fiksDigisosId).isEqualTo(digisosId)
             assertThat(response[1].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-10")
         }
@@ -527,7 +527,7 @@ internal class UtbetalingerServiceTest {
             assertThat(response[0].foersteIManeden).isEqualTo(LocalDate.of(2019, 9, 1))
             assertThat(response[0].utbetalinger).hasSize(1)
             assertThat(response[0].utbetalinger[0].tittel).isEqualTo("Barnehage og SFO")
-            assertThat(response[0].utbetalinger[0].belop).isEqualTo(1.0)
+            assertThat(response[0].utbetalinger[0].belop).isEqualTo(BigDecimal(1))
             assertThat(response[0].utbetalinger[0].fiksDigisosId).isEqualTo(id2)
             assertThat(response[0].utbetalinger[0].utbetalingsdato).isEqualTo("2019-09-12")
 
@@ -536,7 +536,7 @@ internal class UtbetalingerServiceTest {
             assertThat(response[1].foersteIManeden).isEqualTo(LocalDate.of(2019, 8, 1))
             assertThat(response[1].utbetalinger).hasSize(1)
             assertThat(response[1].utbetalinger[0].tittel).isEqualTo("Nødhjelp")
-            assertThat(response[1].utbetalinger[0].belop).isEqualTo(10.0)
+            assertThat(response[1].utbetalinger[0].belop).isEqualTo(BigDecimal(10))
             assertThat(response[1].utbetalinger[0].fiksDigisosId).isEqualTo(id1)
             assertThat(response[1].utbetalinger[0].utbetalingsdato).isEqualTo("2019-08-10")
         }
@@ -681,9 +681,9 @@ internal class UtbetalingerServiceTest {
             assertThat(response).isNotEmpty
             assertThat(response).hasSize(2)
             assertThat(response[0].utbetalinger).hasSize(1)
-            assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.PLANLAGT_UTBETALING.name)
+            assertThat(response[0].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.PLANLAGT_UTBETALING)
             assertThat(response[1].utbetalinger).hasSize(1)
-            assertThat(response[1].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT.name)
+            assertThat(response[1].utbetalinger[0].status).isEqualTo(UtbetalingsStatus.UTBETALT)
         }
 
     @Test

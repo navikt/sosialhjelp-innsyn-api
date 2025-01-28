@@ -16,8 +16,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class KommuneServiceTest {
     private val fiksClient: FiksClient = mockk()
     private val kommuneInfoClient: KommuneInfoClient = mockk()
-    private var kommuneService: KommuneService = mockk()
-    private val service = KommuneService(fiksClient, kommuneInfoClient, kommuneService)
+    private val service = KommuneService(fiksClient, kommuneInfoClient)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val kommuneNr = "1234"
@@ -45,9 +44,6 @@ internal class KommuneServiceTest {
                     harNksTilgang = true,
                     behandlingsansvarlig = null,
                 )
-            coEvery {
-                kommuneService.hentKommuneInfo(any(), any())
-            } returns kommuneInfoClient.getKommuneInfo(kommuneNr)
 
             val svar = service.erInnsynDeaktivertForKommune("123", "token")
 
@@ -68,9 +64,6 @@ internal class KommuneServiceTest {
                     harNksTilgang = true,
                     behandlingsansvarlig = null,
                 )
-            coEvery {
-                kommuneService.hentKommuneInfo(any(), any())
-            } returns kommuneInfoClient.getKommuneInfo(kommuneNr)
 
             val svar = service.erInnsynDeaktivertForKommune("123", "token")
 

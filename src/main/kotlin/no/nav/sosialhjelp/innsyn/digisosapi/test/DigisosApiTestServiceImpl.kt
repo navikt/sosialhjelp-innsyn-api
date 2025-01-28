@@ -30,8 +30,7 @@ class DigisosApiTestServiceImpl(
         fiksDigisosId: String,
         file: MultipartFile,
     ): String {
-        val bytes = file.bytes
-        virusScanner.scan(file.name, bytes)
+        virusScanner.scan(file.name, file)
 
         val inputStream =
             krypteringService.krypter(

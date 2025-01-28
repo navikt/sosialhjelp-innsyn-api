@@ -125,7 +125,7 @@ class VedleggOpplastingService(
                         it.filer.map { fil ->
                             JsonFiler()
                                 .withFilnavn(fil.filnavn)
-                                .withSha512(getSha512FromByteArray(fil.fil.bytes))
+                                .withSha512(getSha512FromInputStream(fil.fil.inputStream))
                         },
                     )
                 },
@@ -193,7 +193,7 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
 
-        virusScanner.scan(filnavn, file.bytes)
+        virusScanner.scan(filnavn, file)
 
         val tikaMediaType = detectTikaType(file.inputStream)
         if (tikaMediaType == "text/x-matlab") {
@@ -205,16 +205,8 @@ class VedleggOpplastingService(
         val fileType = mapToTikaFileType(tikaMediaType)
 
         if (fileType == TikaFileType.UNKNOWN) {
-            val content = String(file.bytes)
             val firstBytes =
-                content.subSequence(
-                    0,
-                    when {
-                        content.length > 8 -> 8
-                        content.isNotEmpty() -> content.length
-                        else -> 0
-                    },
-                )
+                file.inputStream.readNBytes(8)
 
             log.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +

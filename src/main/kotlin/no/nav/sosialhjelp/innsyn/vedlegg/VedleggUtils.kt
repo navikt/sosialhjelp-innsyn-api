@@ -1,29 +1,21 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import org.apache.commons.codec.binary.Hex
 import org.apache.tika.Tika
 import java.io.InputStream
-import java.io.OutputStream
-import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.text.Normalizer
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 
-fun getSha512FromInputStream(data: InputStream?): String {
-    if (data == null) {
+fun getSha512FromByteArray(bytes: ByteArray?): String {
+    if (bytes == null) {
         return ""
     }
 
     val md = MessageDigest.getInstance("SHA-512")
-
-    data.use {
-        DigestInputStream(data, md).use {
-            it.transferTo(OutputStream.nullOutputStream())
-        }
-    }
-    return Hex.encodeHexString(md.digest())
+    val digest = md.digest(bytes)
+    return digest.fold("") { str, it -> str + "%02x".format(it) }
 }
 
 fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC).trim()

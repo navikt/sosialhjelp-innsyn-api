@@ -14,7 +14,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
-import org.apache.commons.codec.binary.Hex
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
@@ -126,7 +125,7 @@ class VedleggOpplastingService(
                         it.filer.map { fil ->
                             JsonFiler()
                                 .withFilnavn(fil.filnavn)
-                                .withSha512(getSha512FromInputStream(fil.fil.inputStream))
+                                .withSha512(getSha512FromByteArray(fil.fil.bytes))
                         },
                     )
                 },
@@ -194,7 +193,7 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
 
-        virusScanner.scan(filnavn, file)
+        virusScanner.scan(filnavn, file.bytes)
 
         val tikaMediaType = detectTikaType(file.inputStream)
         if (tikaMediaType == "text/x-matlab") {
@@ -206,8 +205,16 @@ class VedleggOpplastingService(
         val fileType = mapToTikaFileType(tikaMediaType)
 
         if (fileType == TikaFileType.UNKNOWN) {
+            val content = String(file.bytes)
             val firstBytes =
-                file.inputStream.use { it.readNBytes(8) }.let { Hex.encodeHexString(it) }
+                content.subSequence(
+                    0,
+                    when {
+                        content.length > 8 -> 8
+                        content.isNotEmpty() -> content.length
+                        else -> 0
+                    },
+                )
 
             log.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +

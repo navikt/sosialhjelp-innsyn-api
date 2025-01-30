@@ -10,7 +10,6 @@ import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -24,7 +23,7 @@ class VirusScanner(
 
     suspend fun scan(
         filnavn: String?,
-        data: MultipartFile,
+        data: ByteArray,
     ) {
         if (enabled && isInfected(filnavn, data)) {
             throw VirusScanException("Fant virus i fil forsøkt opplastet", null)
@@ -35,7 +34,7 @@ class VirusScanner(
 
     private suspend fun isInfected(
         filnavn: String?,
-        data: MultipartFile,
+        data: ByteArray,
     ): Boolean {
         try {
             if (!isRunningInProd() && filnavn != null && filnavn.startsWith("virustest")) {
@@ -46,7 +45,7 @@ class VirusScanner(
             val scanResults: List<ScanResult> =
                 withContext(Dispatchers.IO) {
                     virusScanWebClient.put()
-                        .body(BodyInserters.fromResource(data.resource))
+                        .body(BodyInserters.fromValue(data))
                         .retrieve()
                         .bodyToMono<List<ScanResult>>()
                         .retryWhen(virusScanRetry)

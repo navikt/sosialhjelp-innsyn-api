@@ -10,7 +10,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.reactive.function.client.WebClient
 import kotlin.time.Duration.Companion.seconds
 
@@ -21,7 +20,7 @@ internal class VirusScannerTest {
     private lateinit var virusScanner: VirusScanner
 
     private val filnavn = "ikke-virustest"
-    private val data = MockMultipartFile("test", "rofl", "application/json", byteArrayOf())
+    private val data = byteArrayOf()
 
     @AfterEach
     internal fun tearDown() {

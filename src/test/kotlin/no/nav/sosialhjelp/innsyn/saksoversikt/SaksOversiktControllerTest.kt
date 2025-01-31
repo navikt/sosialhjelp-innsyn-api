@@ -134,22 +134,18 @@ internal class SaksOversiktControllerTest {
             every { model1.utbetalinger } returns mutableListOf()
             every { model2.utbetalinger } returns mutableListOf()
 
-            val response1 = controller.hentSaksDetaljer("123", "token")
-            val sak1 = response1.body
+            val sak1 = controller.getSaksDetaljer("123", "token")
 
-            assertThat(response1.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(sak1).isNotNull
-            assertThat(sak1?.soknadTittel).isEqualTo("")
-            assertThat(sak1?.antallNyeOppgaver).isEqualTo(6)
+            assertThat(sak1.soknadTittel).isEqualTo("")
+            assertThat(sak1.antallNyeOppgaver).isEqualTo(6)
 
-            val response2 = controller.hentSaksDetaljer("456", "token")
-            val sak2 = response2.body
+            val sak2 = controller.getSaksDetaljer("456", "token")
 
-            assertThat(response2.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(sak2).isNotNull
-            assertThat(sak2?.soknadTittel).contains("Livsopphold", "Strøm")
-            assertThat(sak2?.status).isEqualTo("UNDER_BEHANDLING")
-            assertThat(sak2?.antallNyeOppgaver).isEqualTo(3)
+            assertThat(sak2.soknadTittel).contains("Livsopphold", "Strøm")
+            assertThat(sak2.status).isEqualTo("UNDER_BEHANDLING")
+            assertThat(sak2.antallNyeOppgaver).isEqualTo(3)
         }
 
     @Test
@@ -165,14 +161,12 @@ internal class SaksOversiktControllerTest {
             every { model1.saker } returns mutableListOf()
             every { model1.utbetalinger } returns mutableListOf()
 
-            val response = controller.hentSaksDetaljer(digisosSak1.fiksDigisosId, "token")
-            val sak = response.body
+            val sak = controller.getSaksDetaljer(digisosSak1.fiksDigisosId, "token")
 
             assertThat(sak).isNotNull
-            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
             verify { oppgaveService wasNot Called }
 
-            assertThat(sak?.antallNyeOppgaver).isEqualTo(0)
+            assertThat(sak.antallNyeOppgaver).isEqualTo(0)
         }
 }

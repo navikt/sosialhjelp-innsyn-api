@@ -62,24 +62,25 @@ class SaksOversiktController(
     fun getSaksDetaljer(
         @RequestParam fiksDigisosId: String,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-    ): SaksDetaljerResponse = runBlocking {
-        withContext(MDCContext() + RequestAttributesContext()) {
-            tilgangskontroll.sjekkTilgang(token)
+    ): SaksDetaljerResponse =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                tilgangskontroll.sjekkTilgang(token)
 
-            val sak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-            val model = eventService.createSaksoversiktModel(sak, token)
-            val antallOppgaver =
-                hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +
-                    hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
+                val sak = fiksClient.hentDigisosSak(fiksDigisosId, token)
+                val model = eventService.createSaksoversiktModel(sak, token)
+                val antallOppgaver =
+                    hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +
+                        hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
 
-            return@withContext SaksDetaljerResponse(
-                sak.fiksDigisosId,
-                hentNavn(model),
-                model.status.name,
-                antallOppgaver,
-            )
+                return@withContext SaksDetaljerResponse(
+                    sak.fiksDigisosId,
+                    hentNavn(model),
+                    model.status.name,
+                    antallOppgaver,
+                )
+            }
         }
-    }
 
     @Validated
     @Deprecated("Bruk /sak/:fiksDigisosId/detaljer")

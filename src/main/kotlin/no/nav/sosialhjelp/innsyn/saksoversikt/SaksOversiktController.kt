@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
+import jakarta.validation.constraints.NotBlank
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
@@ -20,7 +21,9 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -56,39 +59,40 @@ class SaksOversiktController(
             }
         }
 
-    @GetMapping("/saksDetaljer")
-    fun hentSaksDetaljer(
-        @RequestParam id: String,
+    @GetMapping("/sak/{fiksDigisosId}/detaljer")
+    fun getSaksDetaljer(
+        @PathVariable fiksDigisosId: String,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
-    ): ResponseEntity<SaksDetaljerResponse> =
+    ): SaksDetaljerResponse =
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
                 tilgangskontroll.sjekkTilgang(token)
 
-                if (id.isEmpty()) {
-                    return@withContext ResponseEntity.noContent().build()
-                }
-                val sak = fiksClient.hentDigisosSak(id, token)
+                val sak = fiksClient.hentDigisosSak(fiksDigisosId, token)
                 val model = eventService.createSaksoversiktModel(sak, token)
                 val antallOppgaver =
                     hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +
                         hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
-                val saksDetaljerResponse =
-                    SaksDetaljerResponse(
-                        sak.fiksDigisosId,
-                        hentNavn(model),
-                        model.status.name,
-                        antallOppgaver,
-                    )
-                ResponseEntity.ok().body(saksDetaljerResponse)
+
+                SaksDetaljerResponse(
+                    sak.fiksDigisosId,
+                    hentNavn(model),
+                    model.status.name,
+                    antallOppgaver,
+                )
             }
         }
 
-    private fun hentNavn(model: InternalDigisosSoker): String {
-        return model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString {
-            it.tittel ?: DEFAULT_SAK_TITTEL
-        }
-    }
+    @Validated
+    @Deprecated("Bruk /sak/:fiksDigisosId/detaljer")
+    @GetMapping("/saksDetaljer")
+    fun hentSaksDetaljer(
+        @RequestParam @NotBlank id: String,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
+    ): SaksDetaljerResponse = getSaksDetaljer(id, token)
+
+    private fun hentNavn(model: InternalDigisosSoker): String =
+        model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString { it.tittel ?: DEFAULT_SAK_TITTEL }
 
     private suspend fun hentAntallNyeVilkarOgDokumentasjonkrav(
         model: InternalDigisosSoker,

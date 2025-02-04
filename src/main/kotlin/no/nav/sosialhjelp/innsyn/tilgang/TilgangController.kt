@@ -23,9 +23,7 @@ class TilgangController(
     @GetMapping("/tilgang")
     suspend fun harTilgang(
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): Tilgang =
-        withContext(MDCContext() + RequestAttributesContext()) {
-            val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
-            Tilgang(tilgang.harTilgang, tilgang.fornavn)
-        }
+    ): Tilgang = withContext(MDCContext() + RequestAttributesContext()) {
+        tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
+    }
 }

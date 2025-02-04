@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.tilgang
 
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -25,18 +24,16 @@ class TilgangController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/tilgang")
-    fun harTilgang(
+    suspend fun harTilgang(
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<Tilgang> =
-        runBlocking {
-            withContext(MDCContext() + RequestAttributesContext()) {
-                try {
-                    val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
-                    ResponseEntity.ok().body(Tilgang(tilgang.harTilgang, tilgang.fornavn))
-                } catch (e: PdlException) {
-                    log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")
-                    ResponseEntity.ok().body(Tilgang(true, ""))
-                }
+        withContext(MDCContext() + RequestAttributesContext()) {
+            try {
+                val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
+                ResponseEntity.ok().body(Tilgang(tilgang.harTilgang, tilgang.fornavn))
+            } catch (e: PdlException) {
+                log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")
+                ResponseEntity.ok().body(Tilgang(true, ""))
             }
         }
 

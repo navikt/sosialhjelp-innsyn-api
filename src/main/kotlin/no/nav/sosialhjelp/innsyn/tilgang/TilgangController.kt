@@ -8,9 +8,7 @@ import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
-import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
@@ -25,9 +23,9 @@ class TilgangController(
     @GetMapping("/tilgang")
     suspend fun harTilgang(
         @RequestHeader(value = AUTHORIZATION) token: String,
-    ): ResponseEntity<Tilgang> =
+    ): Tilgang =
         withContext(MDCContext() + RequestAttributesContext()) {
             val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
-            ResponseEntity.ok().body(Tilgang(tilgang.harTilgang, tilgang.fornavn))
+            Tilgang(tilgang.harTilgang, tilgang.fornavn)
         }
 }

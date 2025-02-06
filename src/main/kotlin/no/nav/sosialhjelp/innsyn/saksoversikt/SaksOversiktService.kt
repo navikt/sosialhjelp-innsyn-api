@@ -16,7 +16,7 @@ class SaksOversiktService(
     private val oppgaveService: OppgaveService,
 ) {
     suspend fun hentAlleSaker(token: String): List<SaksListeResponse> {
-        return hentAlleDigisosSakerFraFiks(token).toMutableList()
+        return hentAlleDigisosSakerFraFiks(token)
             .sortedByDescending { it.sistOppdatert }
     }
 
@@ -24,7 +24,12 @@ class SaksOversiktService(
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
         val responseList =
             digisosSaker
-                .filterNot { it.originalSoknadNAV == null && it.digisosSoker == null } // Ikke returner "tomme" søknader som som regel er feilregistreringer
+                .partition { it.originalSoknadNAV == null && it.digisosSoker == null } // Ikke returner "tomme" søknader som som regel er feilregistreringer
+                .let { (tommeSoknader, gyldigeSoknader) ->
+                    log.info("Fant ${tommeSoknader.size} tomme søknader. Ider: ${tommeSoknader.map { it.fiksDigisosId }}")
+                    log.info("Fant ${gyldigeSoknader.size} gyldige søknader. Ider: ${gyldigeSoknader.map { it.fiksDigisosId }}")
+                    gyldigeSoknader
+                }
                 .map {
                     SaksListeResponse(
                         fiksDigisosId = it.fiksDigisosId,

@@ -33,6 +33,10 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
+    logging:
+      destinations:
+        - loki
+        - elastic
   maskinporten:
     enabled: true
     scopes:

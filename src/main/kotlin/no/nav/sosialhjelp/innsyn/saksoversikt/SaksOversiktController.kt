@@ -54,7 +54,11 @@ class SaksOversiktController(
                         return@withContext ResponseEntity.status(503).build()
                     }
 
-                log.info("Hentet alle (${alleSaker.size}) søknader for bruker, fra DigisosApi og fra SvarUt (via soknad-api).")
+                if (alleSaker.isEmpty()) {
+                    log.info("Fant ingen saker for bruker")
+                } else {
+                    log.info("Hentet alle (${alleSaker.size}) søknader for bruker")
+                }
                 ResponseEntity.ok().body(alleSaker)
             }
         }

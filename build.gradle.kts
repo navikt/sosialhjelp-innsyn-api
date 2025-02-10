@@ -24,7 +24,6 @@ ktlint {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     implementation(libs.bundles.coroutines)
@@ -32,6 +31,9 @@ dependencies {
 
     // Sosialhjelp-common
     implementation(libs.bundles.sosialhjelp.common)
+
+    // Resilience4j (Retry, CircuitBreaker, ...)
+    implementation(libs.bundles.resilience4j)
 
     // tokendings
     implementation(libs.auth0.java.jwt)
@@ -116,13 +118,6 @@ fun String.isNonStable(): Boolean {
 tasks.withType<DependencyUpdatesTask> {
     rejectVersionIf {
         candidate.version.isNonStable() && !currentVersion.isNonStable()
-    }
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "21"
     }
 }
 

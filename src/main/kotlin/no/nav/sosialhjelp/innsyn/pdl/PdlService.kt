@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getToken
-import no.nav.sosialhjelp.innsyn.pdl.dto.PDLGradering.*
+import no.nav.sosialhjelp.innsyn.pdl.dto.PdlGradering.*
 import org.springframework.stereotype.Service
 
 @Service

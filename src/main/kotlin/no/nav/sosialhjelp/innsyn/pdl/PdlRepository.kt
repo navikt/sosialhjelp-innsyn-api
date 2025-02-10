@@ -1,28 +1,28 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
-import PDLPerson
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.awaitSingle
+import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Repository
 
 @Repository
 class PdlRepository (
-    private val pdlClient: PdlClientV2
+    private val pdlClient: PdlClient
 ) {
     /** Henter en person fra PDL */
     @Cacheable("pdl")
     @CircuitBreaker(name = "pdl")
-    suspend fun getPersonByPid(pid: String, token: String): PDLPerson = pdlClient
+    suspend fun getPersonByPid(pid: String, token: String): PdlPerson = pdlClient
         .buildClient(token)
         .documentName("hentPerson")
         .variable("ident", pid)
         .retrieve("hentPerson")
-        .toEntity(PDLPerson::class.java)
+        .toEntity(PdlPerson::class.java)
         .awaitSingle()
 
-    /** Henter en liste over alle identer tilknyttet en person */
+    /** Henter en liste med alle identer tilknyttet en person */
     @Cacheable("pdl")
     @CircuitBreaker(name = "pdl")
     suspend fun getPidHistoryByPid(pid: String, token: String): List<String> = pdlClient

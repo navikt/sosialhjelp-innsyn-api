@@ -125,9 +125,9 @@ class PdlClientImpl(
             .subscribe()
     }
 
-    private fun getHentPersonResource() = getResourceAsString("/pdl/hentPerson.graphql")
+    private fun getHentPersonResource() = getResourceAsString("/graphql-documents/hentPerson.graphql")
 
-    private fun getHentIdenterResource() = getResourceAsString("/pdl/hentIdenter.graphql")
+    private fun getHentIdenterResource() = getResourceAsString("/graphql-documents/hentIdenter.graphql")
 
     private fun getResourceAsString(path: String) =
         this::class.java.getResource(path)?.readText()

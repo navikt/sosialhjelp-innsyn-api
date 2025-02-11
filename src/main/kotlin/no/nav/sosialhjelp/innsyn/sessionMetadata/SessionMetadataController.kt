@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.session
+package no.nav.sosialhjelp.innsyn.sessionMetadata
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectionSelvbetjeningHigh
 @RestController
 @RequestMapping("/api/v1/innsyn")
-class SessionController(
+class SessionMetadataController(
     private val pdlService: PdlService,
 ) {
     @GetMapping("/session")
@@ -30,10 +30,9 @@ class SessionController(
     }
 
     data class SessionMetadata(
-        /** Brukers fornavn fra PDL */
+        /** Brukerens fornavn fra PDL */
         val fornavn: String,
-        /** Tjenesten er ikke tilgjengelig for brukere med adressebeskyttelse.
-         *  Dersom denne er true, må brukeren få en feilside. */
+        /** PDL oppgir at bruker har adressebeskyttelse */
         val harAdressebeskyttelse: Boolean,
     )
 }

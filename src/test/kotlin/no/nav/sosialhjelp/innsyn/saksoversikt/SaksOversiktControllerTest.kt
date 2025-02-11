@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
+import io.micrometer.core.instrument.MeterRegistry
 import io.mockk.Called
 import io.mockk.Runs
 import io.mockk.clearAllMocks
@@ -40,8 +41,10 @@ internal class SaksOversiktControllerTest {
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val tilgangskontroll: TilgangskontrollService = mockk()
+    private val meterRegistry: MeterRegistry = mockk(relaxed = true)
 
-    private val controller = SaksOversiktController(saksOversiktService, fiksClient, eventService, oppgaveService, tilgangskontroll)
+    private val controller =
+        SaksOversiktController(saksOversiktService, fiksClient, eventService, oppgaveService, tilgangskontroll, meterRegistry)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()

@@ -41,7 +41,7 @@ class SaksOversiktController(
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: TilgangskontrollService,
-    meterRegistry: MeterRegistry
+    meterRegistry: MeterRegistry,
 ) {
     private val antallSakerCounter: Counter = meterRegistry.counter("sosialhjelp.innsyn.antall_saker")
 

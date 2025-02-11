@@ -10,13 +10,13 @@ class PdlService(
 ) {
     private val begrensedeGraderinger = listOf(FORTROLIG, STRENGT_FORTROLIG, STRENGT_FORTROLIG_UTLAND)
 
-    suspend fun getAdressebeskyttelseByPid(pid: String): Boolean =
+    suspend fun getAdressebeskyttelseByIdent(ident: String): Boolean =
         pdlRepository
-            .getPersonByPid(pid, getToken())
+            .getPersonByIdent(ident, getToken())
             .adressebeskyttelse.any { begrensedeGraderinger.contains(it.gradering) }
 
-    suspend fun getFornavnByPid(pid: String): String =
+    suspend fun getFornavnByIdent(ident: String): String =
         pdlRepository
-            .getPersonByPid(pid, getToken())
+            .getPersonByIdent(ident, getToken())
             .navn.first().fornavn
 }

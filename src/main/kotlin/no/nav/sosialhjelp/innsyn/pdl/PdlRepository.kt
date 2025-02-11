@@ -14,10 +14,10 @@ class PdlRepository (
     /** Henter en person fra PDL */
     @Cacheable("pdl")
     @CircuitBreaker(name = "pdl")
-    suspend fun getPersonByPid(pid: String, token: String): PdlPerson = pdlClient
+    suspend fun getPersonByIdent(ident: String, token: String): PdlPerson = pdlClient
         .buildClient(token)
         .documentName("hentPerson")
-        .variable("ident", pid)
+        .variable("ident", ident)
         .retrieve("hentPerson")
         .toEntity(PdlPerson::class.java)
         .awaitSingle()
@@ -25,10 +25,10 @@ class PdlRepository (
     /** Henter en liste med alle identer tilknyttet en person */
     @Cacheable("pdl")
     @CircuitBreaker(name = "pdl")
-    suspend fun getPidHistoryByPid(pid: String, token: String): List<String> = pdlClient
+    suspend fun getIdentsByIdent(ident: String, token: String): List<String> = pdlClient
         .buildClient(token)
         .documentName("hentIdenter")
-        .variable("ident", pid)
+        .variable("ident", ident)
         .retrieve("hentIdenter.identer[*].ident")
         .toEntityList(String::class.java)
         .awaitLast()

@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
 import jakarta.validation.constraints.NotBlank
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
@@ -39,7 +41,10 @@ class SaksOversiktController(
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: TilgangskontrollService,
+    meterRegistry: MeterRegistry
 ) {
+    private val antallSakerCounter: Counter = meterRegistry.counter("sosialhjelp.innsyn.antall_saker")
+
     @GetMapping("/saker")
     fun hentAlleSaker(
         @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
@@ -54,6 +59,7 @@ class SaksOversiktController(
                         return@withContext ResponseEntity.status(503).build()
                     }
 
+                antallSakerCounter.increment(alleSaker.size.toDouble())
                 if (alleSaker.isEmpty()) {
                     log.info("Fant ingen saker for bruker")
                 } else {

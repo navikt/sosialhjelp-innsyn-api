@@ -94,7 +94,7 @@ class SaksOversiktIntegrasjonstest {
 
         webClient
             .get()
-            .uri("/api/v1/innsyn/saksDetaljer?id=1234")
+            .uri("/api/v1/innsyn/sak/1234/detaljer")
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
@@ -103,16 +103,5 @@ class SaksOversiktIntegrasjonstest {
         coVerify(exactly = 2) { fiksClient.hentDigisosSak(any(), any()) }
         coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
         coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
-    }
-
-    @Test
-    fun `skal returnere bad request dersom id requestparameter ikke er lagt til for saksDetaljer endepunkt`() {
-        webClient
-            .get()
-            .uri("/api/v1/innsyn/saksDetaljer")
-            .accept(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .exchange()
-            .expectStatus().isBadRequest
     }
 }

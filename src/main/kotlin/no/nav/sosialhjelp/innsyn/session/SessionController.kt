@@ -22,8 +22,8 @@ class SessionController(
         withContext(MDCContext() + RequestAttributesContext()) {
             with(getUserIdFromToken()) {
                 SessionMetadata(
-                    fornavn = pdlService.getFornavnByPid(this),
-                    harAdressebeskyttelse = pdlService.getAdressebeskyttelseByPid(this)
+                    fornavn = pdlService.getFornavnByIdent(this),
+                    harAdressebeskyttelse = pdlService.getAdressebeskyttelseByIdent(this)
                 )
             }
         }

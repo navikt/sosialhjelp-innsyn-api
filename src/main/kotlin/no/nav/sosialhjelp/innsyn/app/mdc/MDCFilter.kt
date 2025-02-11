@@ -50,12 +50,9 @@ class MDCFilter : OncePerRequestFilter() {
         ) {
             val digisosId = request.requestURI.substringAfter(INNSYN_BASE_URL).substringBefore("/")
             put(DIGISOS_ID, digisosId)
-        } else if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}saksDetaljer")) &&
-            request.parameterMap.containsKey(
-                "id",
-            )
+        } else if (request.requestURI.matches(Regex("^${INNSYN_BASE_URL}(.*)/detaljer"))
         ) {
-            val digisosId = request.getParameter("id")
+            val digisosId = request.requestURI.substringAfter("${INNSYN_BASE_URL}sak/").substringBefore("/")
             put(DIGISOS_ID, digisosId)
         }
     }

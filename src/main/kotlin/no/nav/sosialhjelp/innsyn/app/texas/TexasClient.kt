@@ -87,7 +87,7 @@ class TexasClient(
                     val error =
                         e.getResponseBodyAs(TokenErrorResponse::class.java) ?: TokenErrorResponse(
                             "Unknown error: ${e.responseBodyAsString}",
-                            e.message,
+                            e.message ?: "No message",
                         )
 
                     TokenResponse.Error(error, e.statusCode)

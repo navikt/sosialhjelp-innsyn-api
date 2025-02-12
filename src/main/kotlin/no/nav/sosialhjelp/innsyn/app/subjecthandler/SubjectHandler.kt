@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component
 interface SubjectHandler {
     fun getUserIdFromToken(): String
 
+    fun getUserIdFromTokenOrNull(): String?
+
     fun getToken(): String
 
     fun getClientId(): String
@@ -24,25 +26,25 @@ class AzureAdSubjectHandlerImpl(
     private val tokenValidationContext: TokenValidationContext
         get() = tokenValidationContextHolder.getTokenValidationContext()
 
-    override fun getUserIdFromToken(): String {
+    override fun getUserIdFromToken(): String =
+        getUserIdFromTokenOrNull() ?: throw RuntimeException("Could not find any userId for token in pid or sub claim")
+
+    override fun getUserIdFromTokenOrNull(): String? {
         val pid: String? = tokenValidationContext.getClaims(SELVBETJENING).getStringClaim(PID)
         val sub: String? = tokenValidationContext.getClaims(SELVBETJENING).subject
-        return pid ?: sub ?: throw RuntimeException("Could not find any userId for token in pid or sub claim")
+        return pid ?: sub
     }
 
-    override fun getToken(): String {
-        return tokenValidationContext.getJwtToken(SELVBETJENING)?.encodedToken ?: run {
+    override fun getToken(): String =
+        tokenValidationContext.getJwtToken(SELVBETJENING)?.encodedToken ?: run {
             log.error(
                 "Could not find TokenValidationContext. " +
                     "Possibly no token in request and request was not captured by JwtToken-validation filters.",
             )
             throw JwtTokenValidatorException("Could not find TokenValidationContext. Possibly no token in request.")
         }
-    }
 
-    override fun getClientId(): String {
-        return tokenValidationContext.getClaims(SELVBETJENING).getStringClaim(CLIENT_ID) ?: DEFAULT_CLIENT_ID
-    }
+    override fun getClientId(): String = tokenValidationContext.getClaims(SELVBETJENING).getStringClaim(CLIENT_ID) ?: DEFAULT_CLIENT_ID
 
     companion object {
         private const val PID = "pid"
@@ -60,17 +62,13 @@ class StaticSubjectHandlerImpl : SubjectHandler {
     private var user = DEFAULT_USER
     private var token = DEFAULT_TOKEN
 
-    override fun getUserIdFromToken(): String {
-        return this.user
-    }
+    override fun getUserIdFromToken(): String = this.user
 
-    override fun getToken(): String {
-        return this.token
-    }
+    override fun getUserIdFromTokenOrNull(): String = this.user
 
-    override fun getClientId(): String {
-        return "clientId"
-    }
+    override fun getToken(): String = this.token
+
+    override fun getClientId(): String = "clientId"
 
     fun setUser(user: String) {
         this.user = user

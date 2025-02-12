@@ -14,6 +14,10 @@ object SubjectHandlerUtils {
         return subjectHandlerService.getUserIdFromToken()
     }
 
+    fun getUserIdFromTokenOrNull(): String? {
+        return subjectHandlerService.getUserIdFromTokenOrNull()
+    }
+
     fun getToken(): String {
         return subjectHandlerService.getToken()
     }

@@ -19,6 +19,7 @@ import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
+import no.nav.sosialhjelp.innsyn.utils.SECURE
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
@@ -49,6 +50,7 @@ class SaksOversiktController(
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
                 tilgangskontroll.sjekkTilgang(token)
+                log.info(SECURE, "Bruker kaller /saker")
                 val alleSaker =
                     try {
                         saksOversiktService.hentAlleSaker(token)
@@ -58,8 +60,10 @@ class SaksOversiktController(
 
                 antallSakerCounter.increment(alleSaker.size.toDouble())
                 if (alleSaker.isEmpty()) {
+                    log.info(SECURE, "Fant ingen saker for bruker")
                     log.info("Fant ingen saker for bruker")
                 } else {
+                    log.info(SECURE, "Hentet alle (${alleSaker.size}) søknader for bruker")
                     log.info("Hentet alle (${alleSaker.size}) søknader for bruker")
                 }
                 ResponseEntity.ok().body(alleSaker)

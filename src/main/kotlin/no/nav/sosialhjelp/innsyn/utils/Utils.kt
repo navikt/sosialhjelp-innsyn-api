@@ -8,6 +8,8 @@ import no.nav.sosialhjelp.api.fiks.ErrorMessage
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.Marker
+import org.slf4j.MarkerFactory
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.io.IOException
 import java.sql.Timestamp
@@ -133,3 +135,5 @@ val String.maskerFnr: String
 
 val ErrorMessage.feilmeldingUtenFnr: String?
     get() = this.message?.maskerFnr
+
+val SECURE: Marker = MarkerFactory.getMarker("SECURE_LOG")

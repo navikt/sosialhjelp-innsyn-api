@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.DIGISOS_ID
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.clearMDC
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.generateCallId
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils.put
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -25,6 +26,7 @@ class MDCFilter : OncePerRequestFilter() {
         put(MDCUtils.PATH, request.requestURI)
         request.getHeader(HttpHeaders.USER_AGENT)?.let { put(MDCUtils.USER_AGENT, it) }
         request.getHeader(HttpHeaders.REFERER)?.let { put(MDCUtils.REFERER, it) }
+        SubjectHandlerUtils.getUserIdFromToken().take(6).let { put("fodselsdato", it) }
 
         try {
             filterChain.doFilter(request, response)

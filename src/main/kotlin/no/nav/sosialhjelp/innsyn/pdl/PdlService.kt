@@ -6,17 +6,17 @@ import org.springframework.stereotype.Service
 
 @Service
 class PdlService(
-    private val pdlRepository: PdlRepository,
+    private val pdlClient: PdlClient,
 ) {
     private val begrensedeGraderinger = listOf(FORTROLIG, STRENGT_FORTROLIG, STRENGT_FORTROLIG_UTLAND)
 
     suspend fun getAdressebeskyttelseByIdent(ident: String): Boolean =
-        pdlRepository
+        pdlClient
             .getPersonByIdent(ident, getToken())
             .adressebeskyttelse.any { begrensedeGraderinger.contains(it.gradering) }
 
     suspend fun getFornavnByIdent(ident: String): String =
-        pdlRepository
+        pdlClient
             .getPersonByIdent(ident, getToken())
             .navn.first().fornavn
 }

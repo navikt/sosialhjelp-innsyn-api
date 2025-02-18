@@ -53,7 +53,6 @@ resilience4j-kotlin = { module = "io.github.resilience4j:resilience4j-kotlin", v
 resilience4j-circuitbreaker = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
 resilience4j-spring-boot3 = { module = "io.github.resilience4j:resilience4j-spring-boot3", version.ref = "resilience4j" }
 
-sosialhjelp-common-selftest = { module = "no.nav.sosialhjelp:sosialhjelp-common-selftest", version.ref = "sosialhjelp_common" }
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
 
 auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "java_jwt" }
@@ -136,7 +135,6 @@ commons = [
 
 sosialhjelp-common = [
     "sosialhjelp-common-api",
-    "sosialhjelp-common-selftest",
 ]
 
 prometheus = [

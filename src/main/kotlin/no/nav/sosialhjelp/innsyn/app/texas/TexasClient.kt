@@ -81,7 +81,7 @@ class TexasClient(
                         .retrieve()
                         .awaitBody<TokenResponse.Success>()
                         .also {
-                            log.info("Hentet $tokenEndpointType-token fra Texas")
+                            log.debug("Hentet $tokenEndpointType-token fra Texas")
                         }
                 } catch (e: WebClientResponseException) {
                     val error =

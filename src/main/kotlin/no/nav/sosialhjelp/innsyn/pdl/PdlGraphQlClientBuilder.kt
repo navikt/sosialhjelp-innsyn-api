@@ -21,20 +21,21 @@ class PdlGraphQlClientBuilder(
     private val texasClient: TexasClient,
     private val clientProperties: ClientProperties,
 ) {
-    suspend fun buildClient(token: String): HttpGraphQlClient = pdlGraphClientBuilder
-        .header(HEADER_BEHANDLINGSNUMMER, BEHANDLINGSNUMMER_INNSYN)
-        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-        .header("Authorization", "Bearer ${tokenXtoken(token)}")
-        .build()
+    suspend fun buildClient(token: String): HttpGraphQlClient =
+        pdlGraphClientBuilder
+            .header(HEADER_BEHANDLINGSNUMMER, BEHANDLINGSNUMMER_INNSYN)
+            .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+            .header("Authorization", "Bearer ${tokenXtoken(token)}")
+            .build()
 
-    private suspend fun tokenXtoken(token: String) =
-        texasClient.getTokenXToken(clientProperties.pdlAudience, token)
+    private suspend fun tokenXtoken(token: String) = texasClient.getTokenXToken(clientProperties.pdlAudience, token)
 
-    private val reactiveClient = ReactorClientHttpConnector(
-        getHttpClient()
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
-            .responseTimeout(Duration.ofSeconds(30)),
-    )
+    private val reactiveClient =
+        ReactorClientHttpConnector(
+            getHttpClient()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
+                .responseTimeout(Duration.ofSeconds(30)),
+        )
 
     private val pdlGraphClientBuilder =
         HttpGraphQlClient.builder(

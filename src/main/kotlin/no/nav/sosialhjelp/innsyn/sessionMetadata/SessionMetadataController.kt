@@ -18,16 +18,17 @@ class SessionMetadataController(
     private val pdlService: PdlService,
 ) {
     @GetMapping("/session")
-    fun getSessionMetadata(): SessionMetadata = runBlocking {
-        withContext(MDCContext() + RequestAttributesContext()) {
-            with(getUserIdFromToken()) {
-                SessionMetadata(
-                    fornavn = pdlService.getFornavnByIdent(this),
-                    harAdressebeskyttelse = pdlService.getAdressebeskyttelseByIdent(this)
-                )
+    fun getSessionMetadata(): SessionMetadata =
+        runBlocking {
+            withContext(MDCContext() + RequestAttributesContext()) {
+                with(getUserIdFromToken()) {
+                    SessionMetadata(
+                        fornavn = pdlService.getFornavnByIdent(this),
+                        harAdressebeskyttelse = pdlService.getAdressebeskyttelseByIdent(this),
+                    )
+                }
             }
         }
-    }
 
     data class SessionMetadata(
         /** Brukerens fornavn fra PDL */

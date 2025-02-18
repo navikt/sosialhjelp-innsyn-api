@@ -109,7 +109,7 @@ class PdlClientImpl(
             return pdlIdenterResponse?.data?.hentIdenter
         } catch (e: WebClientResponseException) {
             log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
-            throw PdlException(e.message?:"Ukjent feil i PdlClientImpl")
+            throw PdlException(e.message ?: "Ukjent feil i PdlClientImpl")
         }
     }
 

@@ -4,5 +4,5 @@ import java.io.Serializable
 
 data class PdlPerson(
     val adressebeskyttelse: List<PdlAdressebeskyttelse>,
-    val navn: List<PdlNavn>
+    val navn: List<PdlNavn>,
 ) : Serializable

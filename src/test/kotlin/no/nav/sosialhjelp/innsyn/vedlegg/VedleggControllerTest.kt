@@ -6,13 +6,10 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -72,7 +69,6 @@ internal class VedleggControllerTest {
     @BeforeEach
     internal fun setUp() {
         clearMocks(vedleggOpplastingService, vedleggService)
-        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
         coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
         every { digisosSak.fiksDigisosId } returns "123"
@@ -80,7 +76,6 @@ internal class VedleggControllerTest {
 
     @AfterEach
     internal fun tearDown() {
-        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test
@@ -167,8 +162,7 @@ internal class VedleggControllerTest {
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                     MockMultipartFile("files", "test2.png", null, ByteArray(0)),
                 )
-            val request: HttpServletRequest = mockk()
-            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+            runCatching { controller.sendVedlegg(id, files, "token") }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
             }
@@ -183,8 +177,7 @@ internal class VedleggControllerTest {
                     MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                 )
-            val request: HttpServletRequest = mockk()
-            assertThat(runCatching { controller.sendVedlegg(id, files, "token", request) }.isSuccess)
+            assertThat(runCatching { controller.sendVedlegg(id, files, "token") }.isSuccess)
         }
 
     // TODO: Denne testen gir ikke mening. Den bare tester at en exception blir kastet, men testen selv kaster exeptionen
@@ -197,10 +190,8 @@ internal class VedleggControllerTest {
                     MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                 )
-            val request: HttpServletRequest = mockk()
-            every { request.cookies } returns arrayOf()
             coEvery { tilgangskontroll.sjekkTilgang("bad token") } throws IllegalStateException()
-            runCatching { controller.sendVedlegg(id, files, "bad token", request) }.let {
+            runCatching { controller.sendVedlegg(id, files, "bad token") }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
             }
@@ -222,7 +213,6 @@ internal class VedleggControllerTest {
             |
                 """.trimMargin()
 
-            val request: HttpServletRequest = mockk()
             coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
 
             val files =
@@ -231,7 +221,7 @@ internal class VedleggControllerTest {
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                     MockMultipartFile("files", "roflmao.jpg", null, ByteArray(0)),
                 )
-            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+            runCatching { controller.sendVedlegg(id, files, "token") }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
                 assertThat(it.exceptionOrNull()?.message).contains("Fil i metadata var ikke i listen over filer")

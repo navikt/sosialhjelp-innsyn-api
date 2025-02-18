@@ -9,7 +9,6 @@ logstash = "8.0"
 filformat = "1.2025.01.20-12.05-901742ed6fe0"
 micrometer_registry = "1.13.2"
 prometheus = "0.16.0"
-token_validation = "4.1.4"
 jackson = "2.17.2"
 commons_codec = "1.17.1"
 commons_io = "2.16.1"
@@ -23,6 +22,7 @@ unleash = "9.2.4"
 springdoc = "2.6.0"
 json_smart = "2.4.10"
 fiks_io = "3.3.6"
+token_validation = "4.1.4"
 
 java_jwt = "4.4.0"
 jwks_rsa = "0.22.1"
@@ -40,7 +40,6 @@ kotlinx-coroutines-slf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
-spring-boot-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "spring-boot" }
 spring-boot-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
 spring-boot-logging = { module = "org.springframework.boot:spring-boot-starter-logging", version.ref = "spring-boot" }
@@ -66,9 +65,7 @@ fiks-io = { module = "no.ks.fiks:fiks-io-klient-java", version.ref = "fiks_io" }
 
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 
-token-validation-spring = { module = "no.nav.security:token-validation-spring", version.ref = "token_validation" }
-
-springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+springdoc-openapi-starter-webflux-ui = { module = "org.springdoc:springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }
 springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "springdoc" }
 
 fiks-kryptering = { module = "no.ks.fiks:kryptering", version.ref = "fiks_kryptering" }
@@ -90,7 +87,6 @@ opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "spring_mockk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-token-validation-spring-test = { module = "no.nav.security:token-validation-spring-test", version.ref = "token_validation" }
 
 [bundles]
 spring-boot = [
@@ -98,7 +94,6 @@ spring-boot = [
     "spring-boot-data-redis",
     "spring-boot-logging",
     "spring-boot-validation",
-    "spring-boot-web",
     "spring-boot-webflux",
 ]
 

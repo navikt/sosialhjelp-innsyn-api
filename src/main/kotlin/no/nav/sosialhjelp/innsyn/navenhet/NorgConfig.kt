@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.getReactorClientHttpConnector
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,6 +15,5 @@ class NorgConfig(
         webClientBuilder
             .clientConnector(getReactorClientHttpConnector())
             .baseUrl(clientProperties.norgUrl)
-            .filter(mdcExchangeFilter)
             .build()
 }

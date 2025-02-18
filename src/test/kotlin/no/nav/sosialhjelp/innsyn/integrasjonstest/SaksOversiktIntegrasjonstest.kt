@@ -20,6 +20,7 @@ import no.nav.sosialhjelp.innsyn.saksoversikt.SaksListeResponse
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.testutils.MockOauth2ServerUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -57,7 +58,13 @@ class SaksOversiktIntegrasjonstest {
 
     @BeforeEach
     fun setUp() {
+        mockLogin.init()
         token = mockLogin.hentLevel4SelvbetjeningToken()
+    }
+
+    @AfterEach
+    fun cleanup() {
+        mockLogin.cleanup()
     }
 
     @Test

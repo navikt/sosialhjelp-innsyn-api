@@ -29,6 +29,8 @@ spec:
     max: 1
   tokenx:
     enabled: true
+  idporten:
+    enabled: true
   observability:
     autoInstrumentation:
       enabled: true

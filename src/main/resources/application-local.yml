@@ -18,8 +18,6 @@ no.nav.security.jwt:
       optional-claims: aud,nbf
 innsyn.loginurl: ${INNSYN_LOGINURL:http://127.0.0.1:3008/sosialhjelp/mock-alt/login}
 
-login_api_idporten_clientid: clientId
-
 client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:https://api.fiks.test.ks.no}
   fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:https://minside.fiks.test.ks.no}

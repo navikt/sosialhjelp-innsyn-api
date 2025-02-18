@@ -13,8 +13,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -77,7 +76,7 @@ class FiksClientImpl(
         val sak = hentDigisosSakFraFiks(digisosId, token)
 
         // TODO henting av fnr og sammeligning benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
-        val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
+        val fnr2 = TokenUtils.getUserIdFromToken()
 
         if (fnr2 != fnr) {
             log.error("Fødselsnr i kontekst har blitt endret - FiksClient.hentDigisosSak")
@@ -205,7 +204,7 @@ class FiksClientImpl(
         }
 
         val responseEntity =
-            withContext(Dispatchers.IO + RequestAttributesContext()) {
+            withContext(Dispatchers.IO) {
                 fiksWebClient.post()
                     .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
                     .header(HttpHeaders.AUTHORIZATION, token)

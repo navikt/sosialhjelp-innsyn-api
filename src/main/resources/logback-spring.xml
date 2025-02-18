@@ -86,6 +86,7 @@
         </appender>
 
         <logger name="no.nav.sosialhjelp.innsyn" level="DEBUG"/>
+        <logger name="no.nav.sosialhjelp.innsyn.app.config" level="TRACE"/>
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.springframework.security" level="INFO"/>
         <logger name="org.springframework.web" level="INFO"/>

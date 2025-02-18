@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -32,21 +31,6 @@ class SoknadsStatusService(
         log.info("Hentet nåværende søknadsstatus=${status.name}")
         val erInnsynDeaktivertForKommune = kommuneService.erInnsynDeaktivertForKommune(fiksDigisosId, token)
         val dokumentlagerId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
-
-        // TODO henting av fnr og sammeligning samt sammenligning av digisosId benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
-        val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
-
-        if (fnr2 != fnr) {
-            log.error("Fødselsnr i kontekst har blitt endret - SoknadsstatusService.hentsSoknadStatus")
-        }
-
-        val modelFiksDigisosId = model.fiksDigisosId
-        if (modelFiksDigisosId != null && fiksDigisosId != modelFiksDigisosId) {
-            log.error(
-                "Intern model inneholder en annen digisosID en det som ble sendt inn. Intern model har digisosId: ${model.fiksDigisosId}" +
-                    " og digisosID: $fiksDigisosId ble sendt inn",
-            )
-        }
 
         return UtvidetSoknadsStatus(
             status = status,

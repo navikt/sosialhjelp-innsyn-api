@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.app.mdc
+package no.nav.sosialhjelp.innsyn.app.config.webfilter.mdc
 
 import org.slf4j.MDC
 import java.security.SecureRandom

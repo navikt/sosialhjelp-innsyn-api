@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 
-import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.app.config.HttpClientUtil.getReactorClientHttpConnector
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -16,6 +15,5 @@ class VirusScanConfig(
         webClientBuilder
             .baseUrl(clamAvUrl)
             .clientConnector(getReactorClientHttpConnector())
-            .filter(mdcExchangeFilter)
             .build()
 }

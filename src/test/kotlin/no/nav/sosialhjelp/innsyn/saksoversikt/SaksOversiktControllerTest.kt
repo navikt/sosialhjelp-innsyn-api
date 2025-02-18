@@ -12,7 +12,6 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravElement
@@ -65,8 +64,6 @@ internal class SaksOversiktControllerTest {
     @BeforeEach
     internal fun setUp() {
         clearAllMocks()
-
-        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
         coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
 

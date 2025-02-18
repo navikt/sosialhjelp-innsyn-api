@@ -6,7 +6,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Adressebeskyttelse
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Gradering
@@ -29,17 +28,11 @@ internal class TilgangskontrollServiceTest {
 
     private val clientResponse: PdlHentPerson = mockk()
 
-    private val mockSubjectHandler: SubjectHandler = mockk()
 
     private val digisosSak: DigisosSak = mockk()
 
     @BeforeEach
     fun init() {
-        SubjectHandlerUtils.setNewSubjectHandlerImpl(mockSubjectHandler)
-
-        every { mockSubjectHandler.getUserIdFromToken() } returns ident
-        every { mockSubjectHandler.getToken() } returns "token"
-        every { mockSubjectHandler.getClientId() } returns "clientId"
         every { digisosSak.sokerFnr } returns ident
         every { environment.activeProfiles } returns arrayOf("test")
     }

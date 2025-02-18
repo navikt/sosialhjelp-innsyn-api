@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -158,7 +159,7 @@ class FiksClientImpl(
 
     override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
         log.info(SECURE, "Vi kaller /soknader/soknader hos fiks for bruker")
-        return withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO + MDCContext() + RequestAttributesContext()) {
             val digisosSaker: List<DigisosSak> =
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)

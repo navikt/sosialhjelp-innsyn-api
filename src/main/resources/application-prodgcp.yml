@@ -13,10 +13,8 @@ nais:
     endpoint: ${NAIS_TOKEN_ENDPOINT}
     exchange:
       endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT}
-
-server:
-  servlet:
-    context-path: '/sosialhjelp/innsyn-api'
+    introspection:
+      endpoint: ${NAIS_TOKEN_INTROSPECTION_ENDPOINT}
 
 no.nav.security.jwt:
   issuer.selvbetjening:

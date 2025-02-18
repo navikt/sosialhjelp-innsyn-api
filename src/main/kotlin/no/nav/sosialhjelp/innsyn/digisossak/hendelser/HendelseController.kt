@@ -1,14 +1,9 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
 import kotlinx.coroutines.ThreadContextElement
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
 import no.nav.sosialhjelp.innsyn.utils.SECURE
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -23,7 +18,7 @@ import org.springframework.web.context.request.RequestContextHolder
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
-@ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4, ACR_IDPORTEN_LOA_HIGH], combineWithOr = true)
+
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class HendelseController(
@@ -33,11 +28,10 @@ class HendelseController(
     private val log by logger()
 
     @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
-    fun hentHendelser(
+    suspend fun hentHendelser(
         @PathVariable fiksDigisosId: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<List<HendelseResponse>> =
-        runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
                 tilgangskontroll.sjekkTilgang(token)
 
@@ -46,7 +40,7 @@ class HendelseController(
                 val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
                 ResponseEntity.ok(hendelser)
             }
-        }
+
 }
 
 class RequestAttributesContext(

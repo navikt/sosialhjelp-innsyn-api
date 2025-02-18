@@ -1,41 +1,39 @@
 package no.nav.sosialhjelp.innsyn.app.subjecthandler
 
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import com.auth0.jwt.JWT
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.reactor.ReactorContext
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils.isRunningInProd
 import no.nav.sosialhjelp.innsyn.utils.logger
 
 object SubjectHandlerUtils {
     private val log by logger()
 
-    @JvmStatic
-    private var subjectHandlerService: SubjectHandler = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
-
-    fun getUserIdFromToken(): String {
-        return subjectHandlerService.getUserIdFromToken()
+    suspend fun getUserIdFromToken(): String {
+        return getUserIdFromTokenOrNull() ?: error("No userId for token")
     }
 
-    fun getUserIdFromTokenOrNull(): String? {
-        return subjectHandlerService.getUserIdFromTokenOrNull()
+    suspend fun getUserIdFromTokenOrNull(): String? {
+        val jwt = getTokenOrNull()?.let { JWT.decode(it) }
+        return jwt?.getClaim("pid")?.asString() ?: jwt?.subject
     }
 
-    fun getToken(): String {
-        return subjectHandlerService.getToken()
+    suspend fun getToken(): String {
+        return getTokenOrNull() ?: error("No token in request context")
     }
 
-    fun getClientId(): String {
-        return subjectHandlerService.getClientId()
+    private suspend fun getTokenOrNull(): String? {
+        return currentCoroutineContext()[ReactorContext]?.context?.getOrDefault<String?>("authToken", null)
     }
 
-    fun setNewSubjectHandlerImpl(subjectHandlerImpl: SubjectHandler) {
+    fun setNewSubjectHandlerImpl() {
         if (isRunningInProd()) {
             log.error("Forsøker å sette en annen SubjectHandlerImpl i prod!")
             throw RuntimeException("Forsøker å sette en annen SubjectHandlerImpl i prod!")
         } else {
-            subjectHandlerService = subjectHandlerImpl
         }
     }
 
     fun resetSubjectHandlerImpl() {
-        subjectHandlerService = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
     }
 }

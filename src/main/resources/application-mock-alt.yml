@@ -18,6 +18,8 @@ nais:
     endpoint: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/token/maskinporten}
     exchange:
       endpoint: ${TOKEN_X_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/token/tokenx}
+    introspection:
+      endpoint: ${TOKEN_X_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/introspection}
 
 #Token-validering
 no.nav.security.jwt:

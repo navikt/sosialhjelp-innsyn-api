@@ -9,7 +9,6 @@ logstash = "8.0"
 filformat = "1.2025.01.20-12.05-901742ed6fe0"
 micrometer_registry = "1.13.2"
 prometheus = "0.16.0"
-token_validation = "4.1.4"
 jackson = "2.17.2"
 commons_codec = "1.17.1"
 commons_io = "2.16.1"
@@ -22,6 +21,7 @@ unleash = "9.2.4"
 springdoc = "2.6.0"
 json_smart = "2.4.10"
 fiks_io = "3.3.6"
+token_validation = "4.1.4"
 
 java_jwt = "4.4.0"
 jwks_rsa = "0.22.1"
@@ -43,7 +43,6 @@ spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-
 spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "spring-boot" }
 spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging", version.ref = "spring-boot" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
-spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "spring-boot" }
 
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
@@ -65,9 +64,7 @@ fiks-io = { module = "no.ks.fiks:fiks-io-klient-java", version.ref = "fiks_io" }
 
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 
-token-validation-spring = { module = "no.nav.security:token-validation-spring", version.ref = "token_validation" }
-
-springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+springdoc-openapi-starter-webflux-ui = { module = "org.springdoc:springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }
 springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "springdoc" }
 
 fiks-kryptering = { module = "no.ks.fiks:kryptering", version.ref = "fiks_kryptering" }
@@ -87,7 +84,6 @@ opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "spring_mockk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-token-validation-spring-test = { module = "no.nav.security:token-validation-spring-test", version.ref = "token_validation" }
 
 [bundles]
 spring-boot = [
@@ -95,7 +91,6 @@ spring-boot = [
     "spring-boot-starter-data-redis",
     "spring-boot-starter-logging",
     "spring-boot-starter-validation",
-    "spring-boot-starter-web",
     "spring-boot-starter-webflux",
 ]
 

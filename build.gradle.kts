@@ -70,9 +70,6 @@ dependencies {
     // Unleash
     implementation(libs.unleash)
 
-    // Redis
-    implementation(libs.lettuce.core)
-
     // Div
     implementation(libs.bundles.commons)
     implementation(libs.apache.tika)

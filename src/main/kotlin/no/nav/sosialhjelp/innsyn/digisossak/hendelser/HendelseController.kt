@@ -9,6 +9,7 @@ import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
+import no.nav.sosialhjelp.innsyn.utils.SECURE
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
@@ -29,6 +30,8 @@ class HendelseController(
     private val hendelseService: HendelseService,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
+    private val log by logger()
+
     @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
     fun hentHendelser(
         @PathVariable fiksDigisosId: String,
@@ -37,6 +40,8 @@ class HendelseController(
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
                 tilgangskontroll.sjekkTilgang(token)
+
+                log.info(SECURE, "Henter hendelser for fiksDigisosId: $fiksDigisosId")
 
                 val hendelser = hendelseService.hentHendelser(fiksDigisosId, token)
                 ResponseEntity.ok(hendelser)

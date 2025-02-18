@@ -17,7 +17,6 @@ file_upload = "1.5"
 tika = "2.9.2"
 pdf_box = "3.0.2"
 fiks_kryptering = "2.0.5"
-lettuce = "6.4.0.RELEASE"
 jemp_box = "1.8.17"
 unleash = "9.2.4"
 springdoc = "2.6.0"
@@ -47,7 +46,6 @@ spring-boot-starter-validation = { module = "org.springframework.boot:spring-boo
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "spring-boot" }
 
-sosialhjelp-common-selftest = { module = "no.nav.sosialhjelp:sosialhjelp-common-selftest", version.ref = "sosialhjelp_common" }
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
 
 auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "java_jwt" }
@@ -75,8 +73,6 @@ springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-s
 fiks-kryptering = { module = "no.ks.fiks:kryptering", version.ref = "fiks_kryptering" }
 
 unleash = { module = "io.getunleash:unleash-client-java", version.ref = "unleash" }
-
-lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
 
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons_codec" }
 commons-io = { module = "commons-io:commons-io", version.ref = "commons_io" }
@@ -123,7 +119,6 @@ commons = [
 
 sosialhjelp-common = [
     "sosialhjelp-common-api",
-    "sosialhjelp-common-selftest",
 ]
 
 prometheus = [

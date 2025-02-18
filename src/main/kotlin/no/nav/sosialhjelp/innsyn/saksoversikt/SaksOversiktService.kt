@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRS
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
+import no.nav.sosialhjelp.innsyn.utils.SECURE
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixTimestampToDate
 import org.springframework.stereotype.Component
@@ -26,6 +27,8 @@ class SaksOversiktService(
             digisosSaker
                 .partition { it.originalSoknadNAV == null && it.digisosSoker == null } // Ikke returner "tomme" søknader som som regel er feilregistreringer
                 .let { (tommeSoknader, gyldigeSoknader) ->
+                    log.info(SECURE, "Fant ${tommeSoknader.size} tomme søknader. Ider: ${tommeSoknader.map { it.fiksDigisosId }}")
+                    log.info(SECURE, "Fant ${gyldigeSoknader.size} gyldige søknader. Ider: ${gyldigeSoknader.map { it.fiksDigisosId }}")
                     log.info("Fant ${tommeSoknader.size} tomme søknader. Ider: ${tommeSoknader.map { it.fiksDigisosId }}")
                     log.info("Fant ${gyldigeSoknader.size} gyldige søknader. Ider: ${gyldigeSoknader.map { it.fiksDigisosId }}")
                     gyldigeSoknader

@@ -16,6 +16,7 @@ import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.utils.SECURE
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
@@ -156,6 +157,7 @@ class FiksClientImpl(
         }
 
     override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
+        log.info(SECURE, "Vi kaller /soknader/soknader hos fiks for bruker")
         return withContext(Dispatchers.IO) {
             val digisosSaker: List<DigisosSak> =
                 fiksWebClient.get()
@@ -175,6 +177,7 @@ class FiksClientImpl(
                     .awaitSingleOrNull()
                     ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
 
+            log.info(SECURE, "Fant ${digisosSaker.size} digisosSaker hos Fiks")
             digisosSaker.onEach { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
         }
     }

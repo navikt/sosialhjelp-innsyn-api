@@ -11,13 +11,6 @@ interface FiksClient {
         token: String,
     ): DigisosSak
 
-    // TODO fjernes når feilsøking er gjennomført
-    suspend fun hentDigisosSakMedFnr(
-        digisosId: String,
-        token: String,
-        fnr: String,
-    ): DigisosSak
-
     suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak>
 
     suspend fun lastOppNyEttersendelse(

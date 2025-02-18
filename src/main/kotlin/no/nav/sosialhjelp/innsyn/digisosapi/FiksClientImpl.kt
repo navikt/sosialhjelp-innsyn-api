@@ -13,8 +13,6 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -66,24 +64,6 @@ class FiksClientImpl(
         token: String,
     ): DigisosSak {
         return hentDigisosSakFraFiks(digisosId, token).also { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
-    }
-
-    @Cacheable("digisosSak", key = "#digisosId")
-    override suspend fun hentDigisosSakMedFnr(
-        digisosId: String,
-        token: String,
-        fnr: String,
-    ): DigisosSak {
-        val sak = hentDigisosSakFraFiks(digisosId, token)
-
-        // TODO henting av fnr og sammeligning benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
-        val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
-
-        if (fnr2 != fnr) {
-            log.error("Fødselsnr i kontekst har blitt endret - FiksClient.hentDigisosSak")
-        }
-        tilgangskontroll.verifyDigisosSakIsForCorrectUser(sak)
-        return sak
     }
 
     private suspend fun hentDigisosSakFraFiks(
@@ -205,7 +185,7 @@ class FiksClientImpl(
         }
 
         val responseEntity =
-            withContext(Dispatchers.IO + RequestAttributesContext()) {
+            withContext(Dispatchers.IO) {
                 fiksWebClient.post()
                     .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
                     .header(HttpHeaders.AUTHORIZATION, token)

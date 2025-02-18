@@ -5,10 +5,8 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
-import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -70,7 +68,6 @@ class PdlClientImpl(
                 val pdlPersonResponse =
                     pdlWebClient.post()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
                         .header(AUTHORIZATION, BEARER + tokenXtoken(token.removePrefix("Bearer ")))
                         .bodyValue(PdlRequest(query, Variables(ident)))
                         .retrieve()
@@ -96,7 +93,6 @@ class PdlClientImpl(
             val pdlIdenterResponse =
                 pdlWebClient.post()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
                     .header(AUTHORIZATION, BEARER + tokenXtoken(token.removePrefix("Bearer ")))
                     .bodyValue(PdlRequest(query, Variables(ident)))
                     .retrieve()

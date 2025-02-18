@@ -57,11 +57,13 @@ internal class SaksStatusIntegrasjonsTest {
 
     @BeforeEach
     fun setUp() {
+        mockLogin.init()
         token = mockLogin.hentLevel4SelvbetjeningToken()
     }
 
     @AfterEach
     fun tearDown() {
+        mockLogin.cleanup()
     }
 
     @Test

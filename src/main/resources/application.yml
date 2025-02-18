@@ -10,21 +10,13 @@ spring:
       password: pw
   session:
     store-type: redis
-  servlet:
+  webflux:
+    base-path: '/sosialhjelp/innsyn-api'
     multipart:
-      max-file-size: 10MB
-      max-request-size: 150MB
+      max-headers-size: 16KB
+
 
 server:
-  servlet:
-    context-path: '/sosialhjelp/innsyn-api'
-    session:
-      cookie:
-        name: sosialhjelp-innsyn-id
-        path: /sosialhjelp
-        secure: true
-        max-age: 30M
-        http-only: true
   max-http-request-header-size: 16KB
   shutdown: graceful
 
@@ -82,8 +74,6 @@ no.nav.security.jwt:
       optional-claims: aud,nbf
 
 innsyn.loginurl: ${INNSYN_LOGINURL:null}
-
-login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID:dummy}
 
 innsyn:
   vedlegg:

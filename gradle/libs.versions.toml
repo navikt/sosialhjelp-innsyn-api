@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.9.22"
+kotlin = "2.1.10"
 versions = "0.51.0"
 spring-boot = "3.3.2"
 coroutines = "1.8.1"
@@ -17,7 +17,6 @@ file_upload = "1.5"
 tika = "2.9.2"
 pdf_box = "3.0.2"
 fiks_kryptering = "2.0.5"
-lettuce = "6.4.0.RELEASE"
 jemp_box = "1.8.17"
 unleash = "9.2.4"
 springdoc = "2.6.0"
@@ -40,14 +39,13 @@ kotlinx-coroutines-slf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
-spring-boot-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
-spring-boot-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "spring-boot" }
-spring-boot-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
-spring-boot-logging = { module = "org.springframework.boot:spring-boot-starter-logging", version.ref = "spring-boot" }
-spring-boot-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
-spring-boot-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "spring-boot" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
+spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "spring-boot" }
+spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging", version.ref = "spring-boot" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "spring-boot" }
 
-sosialhjelp-common-selftest = { module = "no.nav.sosialhjelp:sosialhjelp-common-selftest", version.ref = "sosialhjelp_common" }
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
 
 auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "java_jwt" }
@@ -76,8 +74,6 @@ fiks-kryptering = { module = "no.ks.fiks:kryptering", version.ref = "fiks_krypte
 
 unleash = { module = "io.getunleash:unleash-client-java", version.ref = "unleash" }
 
-lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
-
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons_codec" }
 commons-io = { module = "commons-io:commons-io", version.ref = "commons_io" }
 commons-fileupload = { module = "commons-fileupload:commons-fileupload", version.ref = "file_upload" }
@@ -95,12 +91,12 @@ token-validation-spring-test = { module = "no.nav.security:token-validation-spri
 
 [bundles]
 spring-boot = [
-    "spring-boot-actuator",
-    "spring-boot-data-redis",
-    "spring-boot-logging",
-    "spring-boot-validation",
-    "spring-boot-web",
-    "spring-boot-webflux",
+    "spring-boot-starter-actuator",
+    "spring-boot-starter-data-redis",
+    "spring-boot-starter-logging",
+    "spring-boot-starter-validation",
+    "spring-boot-starter-web",
+    "spring-boot-starter-webflux",
 ]
 
 logging = [
@@ -123,7 +119,6 @@ commons = [
 
 sosialhjelp-common = [
     "sosialhjelp-common-api",
-    "sosialhjelp-common-selftest",
 ]
 
 prometheus = [

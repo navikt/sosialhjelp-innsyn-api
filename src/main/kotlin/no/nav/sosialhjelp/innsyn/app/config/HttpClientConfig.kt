@@ -7,5 +7,5 @@ import reactor.netty.http.client.HttpClient
 @Configuration
 class HttpClientConfig {
     @Bean
-    fun unproxiedHttpClient(): HttpClient = HttpClientUtil.getHttpClient()
+    fun unproxiedHttpClient(): HttpClient = HttpClient.create()
 }

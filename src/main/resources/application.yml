@@ -35,7 +35,10 @@ management:
     web:
       base-path: "/internal"
       exposure:
-        include: info, health, metrics, prometheus
+        include: info, health, metrics, prometheus, thread-pool
+  metrics:
+    enable:
+      jvm.threads: true
 
 springdoc:
   api-docs:

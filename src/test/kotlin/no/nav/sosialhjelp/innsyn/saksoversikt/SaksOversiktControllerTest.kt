@@ -12,8 +12,6 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
@@ -66,8 +64,6 @@ internal class SaksOversiktControllerTest {
     internal fun setUp() {
         clearAllMocks()
 
-        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
-
         coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
 
         every { digisosSak1.fiksDigisosId } returns "123"
@@ -93,7 +89,6 @@ internal class SaksOversiktControllerTest {
 
     @AfterEach
     internal fun tearDown() {
-        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test

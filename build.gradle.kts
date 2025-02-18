@@ -60,12 +60,9 @@ dependencies {
     // Jackson
     implementation(libs.jackson.module.kotlin)
 
-    // Token-validering
-    implementation(libs.token.validation.spring)
-
     // Springdoc
     implementation(libs.springdoc.openapi.starter.common)
-    implementation(libs.springdoc.openapi.starter.webmvc.ui)
+    implementation(libs.springdoc.openapi.starter.webflux.ui)
 
     // Fiks-kryptering
     implementation(libs.fiks.kryptering)
@@ -83,7 +80,7 @@ dependencies {
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.springmockk)
     testImplementation(libs.mockk)
-    testImplementation(libs.token.validation.spring.test)
+    testImplementation(libs.mockwebserver)
 }
 
 // override spring managed dependencies

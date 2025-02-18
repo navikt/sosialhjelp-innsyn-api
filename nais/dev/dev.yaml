@@ -29,6 +29,10 @@ spec:
     max: 1
   tokenx:
     enabled: true
+  idporten:
+    enabled: true
+    sidecar:
+      enabled: true
   observability:
     autoInstrumentation:
       enabled: true
@@ -74,8 +78,6 @@ spec:
     - secret: fiks-kommune-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token
   env:
-    - name: IDPORTEN_WELL_KNOWN_URL
-      value: "https://test.idporten.no/.well-known/openid-configuration"
     - name: SPRING_PROFILES_ACTIVE
       value: "log-kibana,dev"
     - name: FIKS_DIGISOS_ENDPOINT_URL

@@ -47,7 +47,6 @@ spring-boot-logging = { module = "org.springframework.boot:spring-boot-starter-l
 spring-boot-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
 spring-boot-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "spring-boot" }
 
-sosialhjelp-common-selftest = { module = "no.nav.sosialhjelp:sosialhjelp-common-selftest", version.ref = "sosialhjelp_common" }
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
 
 auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "java_jwt" }
@@ -123,7 +122,6 @@ commons = [
 
 sosialhjelp-common = [
     "sosialhjelp-common-api",
-    "sosialhjelp-common-selftest",
 ]
 
 prometheus = [

@@ -22,7 +22,7 @@ class PdlGraphQlClientBuilder(
             webClientBuilder
                 .baseUrl(clientProperties.pdlEndpointUrl)
                 .filter(mdcExchangeFilter)
-                .build()
+                .build(),
         )
             .header(HEADER_BEHANDLINGSNUMMER, BEHANDLINGSNUMMER_INNSYN)
             .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
@@ -30,5 +30,4 @@ class PdlGraphQlClientBuilder(
             .build()
 
     private suspend fun tokenXtoken(token: String) = texasClient.getTokenXToken(clientProperties.pdlAudience, token)
-
 }

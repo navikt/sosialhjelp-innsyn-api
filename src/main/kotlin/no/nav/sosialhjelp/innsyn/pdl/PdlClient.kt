@@ -12,7 +12,7 @@ class PdlClient(
     private val pdlGraphQlClientBuilder: PdlGraphQlClientBuilder,
 ) {
     /** Henter en person fra PDL */
-    @Cacheable("pdl")
+    @Cacheable("pdlPerson", key = "#ident")
     @CircuitBreaker(name = "pdl")
     suspend fun getPersonByIdent(
         ident: String,
@@ -27,7 +27,7 @@ class PdlClient(
             .awaitSingle()
 
     /** Henter en liste med alle identer tilknyttet en person */
-    @Cacheable("pdl")
+    @Cacheable("pdlIdenter", key = "#ident")
     @CircuitBreaker(name = "pdl")
     suspend fun getIdentsByIdent(
         ident: String,

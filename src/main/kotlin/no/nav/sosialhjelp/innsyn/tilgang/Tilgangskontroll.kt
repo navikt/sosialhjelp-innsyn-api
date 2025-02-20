@@ -5,7 +5,7 @@ import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
-import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPerson
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPersonOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.isKode6Or7
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
@@ -51,7 +51,7 @@ class TilgangskontrollService(
     private suspend fun hentPerson(
         ident: String,
         token: String,
-    ): PdlPerson? {
+    ): PdlPersonOld? {
         return try {
             pdlClient.hentPerson(ident, token)?.hentPerson
         } catch (e: PdlException) {
@@ -67,7 +67,7 @@ class TilgangskontrollService(
         }
     }
 
-    private fun fornavn(pdlPerson: PdlPerson?): String {
+    private fun fornavn(pdlPerson: PdlPersonOld?): String {
         val fornavn = pdlPerson?.navn?.firstOrNull()?.fornavn?.lowercase()?.replaceFirstChar { it.titlecase(Locale.getDefault()) } ?: ""
         if (fornavn.isEmpty()) {
             log.warn(

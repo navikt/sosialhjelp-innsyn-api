@@ -8,16 +8,18 @@ import org.springframework.stereotype.Service
 class PdlService(
     private val pdlClient: PdlClient,
 ) {
-    private val begrensedeGraderinger =
-        listOf(PdlGradering.FORTROLIG, PdlGradering.STRENGT_FORTROLIG, PdlGradering.STRENGT_FORTROLIG_UTLAND)
-
     suspend fun getAdressebeskyttelseByIdent(ident: String): Boolean =
         pdlClient
             .getPersonByIdent(ident, getToken())
-            .adressebeskyttelse.any { begrensedeGraderinger.contains(it.gradering) }
+            .adressebeskyttelse.any { it.gradering in BEGRENSEDE_GRADERINGER }
 
     suspend fun getFornavnByIdent(ident: String): String =
         pdlClient
             .getPersonByIdent(ident, getToken())
             .navn.first().fornavn
+
+    companion object {
+        private val BEGRENSEDE_GRADERINGER =
+            setOf(PdlGradering.FORTROLIG, PdlGradering.STRENGT_FORTROLIG, PdlGradering.STRENGT_FORTROLIG_UTLAND)
+    }
 }

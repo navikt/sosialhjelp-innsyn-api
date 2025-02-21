@@ -13,13 +13,13 @@ spec:
   port: 8080
   liveness:
     path: /sosialhjelp/innsyn-api/internal/isAlive
-    initialDelay: 45
+    initialDelay: 60
     timeout: 1
     periodSeconds: 10
     failureThreshold: 10
   readiness:
     path: /sosialhjelp/innsyn-api/internal/isReady
-    initialDelay: 20
+    initialDelay: 60
     timeout: 1
   prometheus:
     enabled: true

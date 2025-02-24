@@ -11,12 +11,15 @@ class PdlService(
     suspend fun getAdressebeskyttelseByIdent(ident: String): Boolean =
         pdlClient
             .getPersonByIdent(ident, getToken())
-            .adressebeskyttelse.any { it.gradering in BEGRENSEDE_GRADERINGER }
+            .adressebeskyttelse
+            .any { it.gradering in BEGRENSEDE_GRADERINGER }
 
     suspend fun getFornavnByIdent(ident: String): String =
         pdlClient
             .getPersonByIdent(ident, getToken())
-            .navn.first().fornavn
+            .navn
+            .first()
+            .fornavn
 
     suspend fun getIdentsByIdent(ident: String): List<String> = pdlClient.getIdentsByIdent(ident, getToken())
 

@@ -18,8 +18,7 @@ class PdlService(
             .getPersonByIdent(ident, getToken())
             .navn.first().fornavn
 
-    suspend fun getIdentsByIdent(ident: String): List<String> =
-        pdlClient.getIdentsByIdent(ident, getToken())
+    suspend fun getIdentsByIdent(ident: String): List<String> = pdlClient.getIdentsByIdent(ident, getToken())
 
     companion object {
         private val BEGRENSEDE_GRADERINGER =

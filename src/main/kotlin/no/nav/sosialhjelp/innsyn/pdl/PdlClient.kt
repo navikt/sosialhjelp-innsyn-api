@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class PdlClient(
-    private val pdlGraphQlClientBuilder: PdlGraphQlClientBuilder,
+    private val pdlGraphQlClientFactory: PdlGraphQlClientFactory,
 ) {
     /** Henter en person fra PDL */
     @Cacheable("pdlPerson", key = "#ident")
@@ -18,8 +18,8 @@ class PdlClient(
         ident: String,
         token: String,
     ): PdlPerson =
-        pdlGraphQlClientBuilder
-            .buildClient(token)
+        pdlGraphQlClientFactory
+            .getClient(token)
             .documentName("hentPerson")
             .variable("ident", ident)
             .retrieve("hentPerson")
@@ -33,8 +33,8 @@ class PdlClient(
         ident: String,
         token: String,
     ): List<String> =
-        pdlGraphQlClientBuilder
-            .buildClient(token)
+        pdlGraphQlClientFactory
+            .getClient(token)
             .documentName("hentIdenter")
             .variable("ident", ident)
             .retrieve("hentIdenter.identer[*].ident")

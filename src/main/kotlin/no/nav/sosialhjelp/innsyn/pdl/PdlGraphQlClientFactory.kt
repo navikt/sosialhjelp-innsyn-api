@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEHANDLINGSNUMMER_INNSYN
@@ -12,17 +11,14 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
 @Component
-class PdlGraphQlClientBuilder(
-    private val webClientBuilder: WebClient.Builder,
+class PdlGraphQlClientFactory(
+    private val pdlWebClientBuilder: WebClient.Builder,
     private val texasClient: TexasClient,
     private val clientProperties: ClientProperties,
 ) {
-    suspend fun buildClient(token: String): HttpGraphQlClient =
-        HttpGraphQlClient.builder(
-            webClientBuilder
-                .baseUrl(clientProperties.pdlEndpointUrl)
-                .filter(mdcExchangeFilter),
-        )
+    suspend fun getClient(token: String): HttpGraphQlClient =
+        HttpGraphQlClient
+            .builder(pdlWebClientBuilder)
             .header(HEADER_BEHANDLINGSNUMMER, BEHANDLINGSNUMMER_INNSYN)
             .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
             .header("Authorization", "Bearer ${tokenXtoken(token)}")

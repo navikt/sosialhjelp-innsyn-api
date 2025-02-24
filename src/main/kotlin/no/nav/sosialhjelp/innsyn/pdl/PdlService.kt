@@ -8,20 +8,20 @@ import org.springframework.stereotype.Service
 class PdlService(
     private val pdlClient: PdlClient,
 ) {
-    suspend fun getAdressebeskyttelseByIdent(ident: String): Boolean =
+    suspend fun getAdressebeskyttelse(): Boolean =
         pdlClient
-            .getPersonByIdent(ident, getToken())
+            .getPerson(getToken())
             .adressebeskyttelse
             .any { it.gradering in BEGRENSEDE_GRADERINGER }
 
-    suspend fun getFornavnByIdent(ident: String): String =
+    suspend fun getFornavn(): String =
         pdlClient
-            .getPersonByIdent(ident, getToken())
+            .getPerson(getToken())
             .navn
             .first()
             .fornavn
 
-    suspend fun getIdentsByIdent(ident: String): List<String> = pdlClient.getIdentsByIdent(ident, getToken())
+    suspend fun getIdentsByIdent(ident: String): List<String> = pdlClient.getIdentsByIdent(getToken())
 
     companion object {
         private val BEGRENSEDE_GRADERINGER =

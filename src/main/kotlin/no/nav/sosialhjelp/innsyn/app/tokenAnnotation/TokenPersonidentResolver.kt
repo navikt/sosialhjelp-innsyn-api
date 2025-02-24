@@ -10,7 +10,7 @@ import org.springframework.web.method.support.ModelAndViewContainer
 
 @Component
 class TokenPersonidentResolver(
-    private val subjectHandler: SubjectHandler
+    private val subjectHandler: SubjectHandler,
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean =
         parameter.getParameterAnnotation(TokenPersonident::class.java) != null && parameter.parameterType == String::class.java
@@ -19,6 +19,6 @@ class TokenPersonidentResolver(
         parameter: MethodParameter,
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
-        binderFactory: WebDataBinderFactory?
+        binderFactory: WebDataBinderFactory?,
     ): String = subjectHandler.getUserIdFromToken()
 }

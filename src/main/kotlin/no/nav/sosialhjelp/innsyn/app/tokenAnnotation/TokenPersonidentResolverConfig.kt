@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class TokenPersonidentResolverConfig(
-    private val subjectHandler: SubjectHandler
+    private val subjectHandler: SubjectHandler,
 ) : WebMvcConfigurer {
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
         resolvers.add(TokenPersonidentResolver(subjectHandler))

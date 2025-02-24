@@ -1,7 +1,7 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.sosialhjelp"
 
@@ -24,6 +24,7 @@ ktlint {
 }
 
 dependencies {
+    implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
     implementation(libs.bundles.coroutines)
@@ -118,6 +119,13 @@ tasks.withType<DependencyUpdatesTask> {
     }
 }
 
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "21"
+    }
+}
+
 testing {
     suites {
         val test by getting(JvmTestSuite::class) {
@@ -148,12 +156,6 @@ tasks.withType<Test> {
         showCauses = true
         showExceptions = true
         showStackTraces = true
-    }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 

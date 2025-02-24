@@ -29,8 +29,6 @@ spec:
     max: 5
   tokenx:
     enabled: true
-  secureLogs:
-    enabled: true
   observability:
     autoInstrumentation:
       enabled: true

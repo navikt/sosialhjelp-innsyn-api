@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
     <springProfile name="log-kibana">
         <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
@@ -57,5 +56,4 @@
             <appender-ref ref="console"/>
         </root>
     </springProfile>
-
 </configuration>

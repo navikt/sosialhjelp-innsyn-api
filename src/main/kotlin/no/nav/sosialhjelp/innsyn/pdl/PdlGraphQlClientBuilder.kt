@@ -21,8 +21,7 @@ class PdlGraphQlClientBuilder(
         HttpGraphQlClient.builder(
             webClientBuilder
                 .baseUrl(clientProperties.pdlEndpointUrl)
-                .filter(mdcExchangeFilter)
-                .build(),
+                .filter(mdcExchangeFilter),
         )
             .header(HEADER_BEHANDLINGSNUMMER, BEHANDLINGSNUMMER_INNSYN)
             .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))

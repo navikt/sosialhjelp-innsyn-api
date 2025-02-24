@@ -5,8 +5,8 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
+import no.nav.sosialhjelp.innsyn.app.tokenAnnotation.TokenPersonident
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
@@ -26,12 +26,13 @@ class TilgangController(
 ) {
     @GetMapping("/tilgang")
     fun harTilgang(
+        @TokenPersonident pid: String,
         @RequestHeader(value = AUTHORIZATION) token: String,
     ): ResponseEntity<TilgangResponse> =
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
                 try {
-                    val tilgang = tilgangskontroll.hentTilgang(getUserIdFromToken(), token)
+                    val tilgang = tilgangskontroll.hentTilgang(pid, token)
                     ResponseEntity.ok().body(TilgangResponse(tilgang.harTilgang, tilgang.fornavn))
                 } catch (e: PdlException) {
                     log.warn("Pdl kastet feil, returnerer 'harTilgang=true'")

@@ -25,7 +25,7 @@ class PdlClient(
             .awaitSingle()
 
     /** Henter en liste med alle identer tilknyttet en person */
-    @Cacheable("pdlIdenter", keyGenerator = "pdlCacheKeyGenerator")
+    @Cacheable("pdlHistoriskeIdenter", keyGenerator = "pdlCacheKeyGenerator")
     @CircuitBreaker(name = "pdl")
     suspend fun getIdentsByIdent(token: String): List<String> =
         pdlGraphQlClientFactory

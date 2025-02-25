@@ -54,7 +54,7 @@ class PdlClientImpl(
         return hentFraPdl(ident, token)
     }
 
-    @Cacheable("historiske-identer", key = "#ident")
+    @Cacheable("pdlHistoriskeIdenter", key = "#ident")
     override suspend fun hentIdenter(
         ident: String,
         token: String,

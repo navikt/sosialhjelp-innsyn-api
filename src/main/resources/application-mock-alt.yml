@@ -48,3 +48,7 @@ maskinporten_clientid: maskinporten_clientid
 maskinporten_scopes: scopes
 maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/maskinporten${mock-alt-api-wellknown-queryparam}}
 maskinporten_client_jwk: generateRSA
+
+idporten:
+  issuer: ${IDPORTEN_ISSUER:http://${mock-alt-api-host}:8888/oauth2}
+  audience: ${IDPORTEN_AUDIENCE:bogus}

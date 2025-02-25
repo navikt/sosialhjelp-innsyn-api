@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 
-interface PdlClient {
+interface PdlClientOld {
     suspend fun hentPerson(
         ident: String,
         token: String,
@@ -34,12 +34,12 @@ interface PdlClient {
 }
 
 @Component
-class PdlClientImpl(
+class PdlClientOldImpl(
     private val pdlWebClient: WebClient,
     private val texasClient: TexasClient,
     @Value("\${client.pdl_audience}")
     private val pdlAudience: String,
-) : PdlClient {
+) : PdlClientOld {
     private val pdlRetry =
         RetryUtils.retryBackoffSpec({ it is WebClientResponseException })
             .onRetryExhaustedThrow { spec, retrySignal ->

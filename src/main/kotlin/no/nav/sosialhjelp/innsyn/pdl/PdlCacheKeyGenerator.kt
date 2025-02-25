@@ -5,12 +5,16 @@ import org.springframework.cache.interceptor.KeyGenerator
 import org.springframework.stereotype.Component
 import java.lang.reflect.Method
 
-/** Reeturns person ident for the given token */
+/** This method returns the person ident  */
 @Component
 class PdlCacheKeyGenerator : KeyGenerator {
     override fun generate(
         target: Any,
         method: Method,
         vararg params: Any,
-    ): Any = JWTParser.parse(params[0] as String).jwtClaimsSet.getStringClaim("pid")
+    ): Any {
+        assert(params.size == 1 && params[0] is String)
+        val token = params[0] as String
+        return JWTParser.parse(token).jwtClaimsSet.getStringClaim("pid")
+    }
 }

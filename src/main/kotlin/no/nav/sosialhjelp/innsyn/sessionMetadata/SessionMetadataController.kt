@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 class SessionMetadataController(
     private val pdlService: PdlService,
 ) {
-    @GetMapping("/session")
+    @GetMapping("/sessionMetadata")
     fun getSessionMetadata(): SessionMetadata =
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {

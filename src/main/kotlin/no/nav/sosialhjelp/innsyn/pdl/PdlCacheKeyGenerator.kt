@@ -15,6 +15,10 @@ class PdlCacheKeyGenerator : KeyGenerator {
     ): Any {
         assert(params.size == 1 && params[0] is String)
         val token = params[0] as String
-        return JWTParser.parse(token).jwtClaimsSet.getStringClaim("pid")
+        return getPersonidentFromToken(token)
+    }
+
+    companion object {
+        fun getPersonidentFromToken(token: String): String = JWTParser.parse(token).jwtClaimsSet.getStringClaim("pid")
     }
 }

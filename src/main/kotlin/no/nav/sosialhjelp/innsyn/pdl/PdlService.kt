@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class PdlService(
     private val pdlClient: PdlClient,
-    private val subjectHandler: SubjectHandler
+    private val subjectHandler: SubjectHandler,
 ) {
     suspend fun getAdressebeskyttelse(): Boolean =
         pdlClient

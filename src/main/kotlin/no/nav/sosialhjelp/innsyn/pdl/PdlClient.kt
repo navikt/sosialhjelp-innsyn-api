@@ -1,14 +1,14 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
-import com.nimbusds.jwt.JWTParser
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.awaitSingle
+import no.nav.sosialhjelp.innsyn.pdl.PdlCacheKeyGenerator.Companion.getPersonidentFromToken
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Component
 
-@Repository
+@Component
 class PdlClient(
     private val pdlGraphQlClientFactory: PdlGraphQlClientFactory,
 ) {
@@ -35,8 +35,4 @@ class PdlClient(
             .retrieve("hentIdenter.identer[*].ident")
             .toEntityList(String::class.java)
             .awaitLast()
-
-    companion object {
-        private fun getPersonidentFromToken(token: String): String = JWTParser.parse(token).jwtClaimsSet.getStringClaim("pid")
-    }
 }

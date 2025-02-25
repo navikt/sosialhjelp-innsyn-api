@@ -14,7 +14,11 @@ spring:
     base-path: '/sosialhjelp/innsyn-api'
     multipart:
       max-headers-size: 16KB
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${idporten.issuer}
 
 server:
   max-http-request-header-size: 16KB
@@ -86,3 +90,7 @@ fiks-io:
   private-key-path: "/var/run/secrets/key.der"
   kontoId: ${FIKS_IO_KONTO_ID:}
   virksomhetssertifikatPath: ${VIRKSERT_PATH:}
+
+idporten:
+  well-known-url: ${IDPORTEN_WELL_KNOWN_URL}
+  audience: ${IDPORTEN_AUDIENCE}

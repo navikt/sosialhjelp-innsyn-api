@@ -22,9 +22,6 @@ springdoc = "2.6.0"
 json_smart = "2.4.10"
 fiks_io = "3.3.6"
 
-java_jwt = "4.4.0"
-jwks_rsa = "0.22.1"
-nimbus_jose_jwt = "9.40"
 opentelemetry = "1.42.1"
 
 ktlint = "1.0.1"
@@ -44,12 +41,9 @@ spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boo
 spring-boot-starter-logging = { module = "org.springframework.boot:spring-boot-starter-logging", version.ref = "spring-boot" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
 spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "spring-boot" }
+spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server", version.ref = "spring-boot" }
 
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
-
-auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "java_jwt" }
-auth0-jwks-rsa = { module = "com.auth0:jwks-rsa", version.ref = "jwks_rsa" }
-nimbus-jose-jwt = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimbus_jose_jwt" }
 
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer_registry" }
 promotheus-simpleclient-common = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus" }
@@ -67,8 +61,8 @@ jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-
 springdoc-openapi-starter-webflux-ui = { module = "org.springdoc:springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }
 springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "springdoc" }
 
-fiks-kryptering = { module = "no.ks.fiks:kryptering", version.ref = "fiks_kryptering" }
 
+fiks-kryptering = { module = "no.ks.fiks:kryptering", version.ref = "fiks_kryptering" }
 unleash = { module = "io.getunleash:unleash-client-java", version.ref = "unleash" }
 
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons_codec" }
@@ -93,6 +87,7 @@ spring-boot = [
     "spring-boot-starter-logging",
     "spring-boot-starter-validation",
     "spring-boot-starter-webflux",
+    "spring-boot-starter-oauth2-resource-server",
 ]
 
 logging = [

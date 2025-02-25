@@ -33,11 +33,6 @@ dependencies {
     // Sosialhjelp-common
     implementation(libs.bundles.sosialhjelp.common)
 
-    // tokendings
-    implementation(libs.auth0.java.jwt)
-    implementation(libs.auth0.jwks.rsa)
-    implementation(libs.nimbus.jose.jwt)
-
     // Micrometer/Prometheus
     implementation(libs.bundles.prometheus)
 

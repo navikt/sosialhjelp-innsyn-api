@@ -15,6 +15,6 @@ class WebConfiguration(
 ) {
     @Bean
     fun webFilters(): List<WebFilter> {
-        return listOf(authWebFilter, tracingWebFilter, mdcFilter)
+        return listOf(tracingWebFilter, mdcFilter)
     }
 }

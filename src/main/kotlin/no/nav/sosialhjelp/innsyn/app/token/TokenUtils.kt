@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.app.token
 
-import com.auth0.jwt.JWT
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.reactor.ReactorContext
 
@@ -10,8 +9,7 @@ object TokenUtils {
     }
 
     suspend fun getUserIdFromTokenOrNull(): String? {
-        val jwt = getTokenOrNull()?.let { JWT.decode(it) }
-        return jwt?.getClaim("pid")?.asString() ?: jwt?.subject
+        return ""
     }
 
     suspend fun getToken(): String {

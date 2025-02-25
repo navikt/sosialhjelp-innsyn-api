@@ -28,6 +28,16 @@ server:
   max-http-request-header-size: 16KB
   shutdown: graceful
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        # Settes høyt under innkjøring, default er at 50% av requests kan feile.
+        failureRateThreshold: 75
+    instances:
+      pdl:
+        # Endre dette til true når koden er kjørt inn
+        registerHealthIndicator: false
 
 # Prometheus
 management:

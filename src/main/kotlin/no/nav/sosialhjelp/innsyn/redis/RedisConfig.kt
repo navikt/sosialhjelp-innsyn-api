@@ -32,19 +32,26 @@ class RedisConfig(
                 RedisSerializationContext.fromSerializer(it).keySerializationPair
             }
         val defaults =
-            RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(defaultTTL))
-                .serializeValuesWith(valueSerializationPair).serializeKeysWith(keySerializationPair)
+            RedisCacheConfiguration
+                .defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(defaultTTL))
+                .serializeValuesWith(valueSerializationPair)
+                .serializeKeysWith(keySerializationPair)
 
         // Må eksplisitt konfigurere opp alle caches her for å få metrics på alle
-        val cacheManager =
-            RedisCacheManager.builder(connectionFactory).enableStatistics().cacheDefaults(defaults).enableCreateOnMissingCache()
-                .withCacheConfiguration("dokument", defaults.entryTtl(Duration.ofSeconds(dokumentTTL)))
-                .withCacheConfiguration("navenhet", defaults.entryTtl(Duration.ofHours(1)))
-                .withCacheConfiguration("digisosSak", defaults)
-                .withCacheConfiguration("kommuneinfo", defaults)
-                .withCacheConfiguration("pdlPerson", defaults)
-                .withCacheConfiguration("historiske-identer", defaults)
-                .build()
-        return cacheManager
+        return RedisCacheManager
+            .builder(connectionFactory)
+            .enableStatistics()
+            .cacheDefaults(defaults)
+            .enableCreateOnMissingCache()
+            .withCacheConfiguration("dokument", defaults.entryTtl(Duration.ofSeconds(dokumentTTL)))
+            .withCacheConfiguration("navenhet", defaults.entryTtl(Duration.ofHours(1)))
+            .withCacheConfiguration("digisosSak", defaults)
+            .withCacheConfiguration("kommuneinfo", defaults)
+            .withCacheConfiguration("pdlPerson", defaults.entryTtl(Duration.ofDays(1)))
+            .withCacheConfiguration("pdlHistoriskeIdenter", defaults.entryTtl(Duration.ofDays(1)))
+            .withCacheConfiguration("pdlPersonOld", defaults.entryTtl(Duration.ofDays(1)))
+            .withCacheConfiguration("pdlHistoriskeIdenterOld", defaults.entryTtl(Duration.ofDays(1)))
+            .build()
     }
 }

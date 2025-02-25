@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 
-interface PdlClient {
+interface PdlClientOld {
     suspend fun hentPerson(
         ident: String,
         token: String,
@@ -34,19 +34,19 @@ interface PdlClient {
 }
 
 @Component
-class PdlClientImpl(
+class PdlClientOldImpl(
     private val pdlWebClient: WebClient,
     private val texasClient: TexasClient,
     @Value("\${client.pdl_audience}")
     private val pdlAudience: String,
-) : PdlClient {
+) : PdlClientOld {
     private val pdlRetry =
         RetryUtils.retryBackoffSpec({ it is WebClientResponseException })
             .onRetryExhaustedThrow { spec, retrySignal ->
                 throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
             }
 
-    @Cacheable("pdlPerson", key = "#ident")
+    @Cacheable("pdlPersonOld", key = "#ident")
     override suspend fun hentPerson(
         ident: String,
         token: String,
@@ -54,7 +54,7 @@ class PdlClientImpl(
         return hentFraPdl(ident, token)
     }
 
-    @Cacheable("historiske-identer", key = "#ident")
+    @Cacheable("pdlHistoriskeIdenterOld", key = "#ident")
     override suspend fun hentIdenter(
         ident: String,
         token: String,
@@ -125,9 +125,9 @@ class PdlClientImpl(
             .subscribe()
     }
 
-    private fun getHentPersonResource() = getResourceAsString("/pdl/hentPerson.graphql")
+    private fun getHentPersonResource() = getResourceAsString("/graphql-documents/hentPerson.graphql")
 
-    private fun getHentIdenterResource() = getResourceAsString("/pdl/hentIdenter.graphql")
+    private fun getHentIdenterResource() = getResourceAsString("/graphql-documents/hentIdenter.graphql")
 
     private fun getResourceAsString(path: String) =
         this::class.java.getResource(path)?.readText()

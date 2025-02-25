@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClientOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.context.annotation.Bean
@@ -20,12 +20,12 @@ class PdlIntegrationTestConfig {
      */
     @Primary
     @Bean
-    fun pdlClient(): PdlClient {
-        return HentPDLClientMock()
+    fun pdlClientOld(): PdlClientOld {
+        return HentPDLClientOldMock()
     }
 }
 
-class HentPDLClientMock : PdlClient {
+class HentPDLClientOldMock : PdlClientOld {
     val mapper: ObjectMapper =
         jacksonObjectMapper()
             .registerKotlinModule()

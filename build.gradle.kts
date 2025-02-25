@@ -33,6 +33,9 @@ dependencies {
     // Sosialhjelp-common
     implementation(libs.bundles.sosialhjelp.common)
 
+    // Resilience4j (Retry, CircuitBreaker, ...)
+    implementation(libs.bundles.resilience4j)
+
     // tokendings
     implementation(libs.auth0.java.jwt)
     implementation(libs.auth0.jwks.rsa)

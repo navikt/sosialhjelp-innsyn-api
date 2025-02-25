@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.tilgang.pdl
+package no.nav.sosialhjelp.innsyn.pdl
 
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
@@ -21,12 +21,12 @@ class PdlConfig(
             .baseUrl(clientProperties.pdlEndpointUrl)
             .clientConnector(
                 ReactorClientHttpConnector(
-                    HttpClient.create()
+                    HttpClient
+                        .create()
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
                         .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(30)) },
                 ),
-            )
-            .filter(mdcExchangeFilter)
+            ).filter(mdcExchangeFilter)
             .defaultHeader(IntegrationUtils.HEADER_BEHANDLINGSNUMMER, IntegrationUtils.BEHANDLINGSNUMMER_INNSYN)
             .build()
 }

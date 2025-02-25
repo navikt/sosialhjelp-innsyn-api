@@ -10,7 +10,7 @@ import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandler
 import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Adressebeskyttelse
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Gradering
-import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClientOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlNavn
 import org.assertj.core.api.Assertions.assertThat
@@ -21,9 +21,9 @@ import org.springframework.core.env.Environment
 import kotlin.time.Duration.Companion.seconds
 
 internal class TilgangskontrollServiceTest {
-    private val pdlClientMock: PdlClient = mockk()
+    private val pdlClientOldMock: PdlClientOld = mockk()
     private val environment: Environment = mockk()
-    private val service = TilgangskontrollService("clientId", environment, pdlClientMock)
+    private val service = TilgangskontrollService("clientId", environment, pdlClientOldMock)
 
     private val ident = "123"
 
@@ -52,7 +52,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `sjekkTilgang - skal ikke kaste feil hvis client returnerer null`() =
         runTest(timeout = 5.seconds) {
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns null
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns null
 
             assertThat(kotlin.runCatching { service.sjekkTilgang(ident) }.isSuccess)
         }
@@ -61,7 +61,7 @@ internal class TilgangskontrollServiceTest {
     internal fun `sjekkTilgang - skal kaste feil hvis client returnerer PdlHentPerson_pdlPerson = null`() =
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson } returns null
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(kotlin.runCatching { service.sjekkTilgang(ident) }.isSuccess)
         }
@@ -70,7 +70,7 @@ internal class TilgangskontrollServiceTest {
     internal fun `sjekkTilgang - skal ikke kaste feil hvis adressebeskyttelse-liste er tom`() =
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns emptyList()
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(kotlin.runCatching { service.sjekkTilgang(ident) }.isSuccess)
         }
@@ -79,7 +79,7 @@ internal class TilgangskontrollServiceTest {
     internal fun `sjekkTilgang - skal kaste feil hvis bruker er kode6`() =
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             runCatching { service.sjekkTilgang(ident) }.let {
                 assertThat(it.isFailure)
@@ -91,7 +91,7 @@ internal class TilgangskontrollServiceTest {
     internal fun `sjekkTilgang - skal kaste feil hvis bruker er kode7`() =
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.FORTROLIG))
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             runCatching { service.sjekkTilgang(ident) }.let {
                 assertThat(it.isFailure)
@@ -103,7 +103,7 @@ internal class TilgangskontrollServiceTest {
     internal fun `sjekkTilgang - skal kaste feil hvis bruker er kode6 utland`() =
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG_UTLAND))
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             runCatching { service.sjekkTilgang(ident) }.let {
                 assertThat(it.isFailure)
@@ -116,7 +116,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `hentTilgang - skal ikke gi tilgang hvis client returnerer null`() =
         runTest(timeout = 5.seconds) {
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns null
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns null
 
             assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
             assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
@@ -126,7 +126,7 @@ internal class TilgangskontrollServiceTest {
     internal fun `hentTilgang - skal ikke gi tilgang hvis client returnerer PdlHentPerson_pdlPerson = null`() =
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson } returns null
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
             assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
@@ -137,7 +137,7 @@ internal class TilgangskontrollServiceTest {
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns emptyList()
             every { clientResponse.hentPerson?.navn } returns null
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(service.hentTilgang(ident, "token").harTilgang).isTrue
         }
@@ -147,7 +147,7 @@ internal class TilgangskontrollServiceTest {
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
             every { clientResponse.hentPerson?.navn } returns null
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
         }
@@ -157,7 +157,7 @@ internal class TilgangskontrollServiceTest {
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
             every { clientResponse.hentPerson?.navn } returns listOf(PdlNavn("KREATIV"), PdlNavn("NATA"))
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("Kreativ")
             assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
@@ -168,7 +168,7 @@ internal class TilgangskontrollServiceTest {
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
             every { clientResponse.hentPerson?.navn } returns null
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
             assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
@@ -179,7 +179,7 @@ internal class TilgangskontrollServiceTest {
         runTest(timeout = 5.seconds) {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.FORTROLIG))
             every { clientResponse.hentPerson?.navn } returns emptyList()
-            coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
+            coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
             assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
@@ -188,7 +188,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `verifyDigisosSakIsForCorrectUser - ok - skal ikke kaste exception`() =
         runTest(timeout = 5.seconds) {
-            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns listOf(ident)
+            coEvery { pdlClientOldMock.hentIdenter(any(), any()) } returns listOf(ident)
 
             service.verifyDigisosSakIsForCorrectUser(digisosSak)
         }
@@ -196,7 +196,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `verifyDigisosSakIsForCorrectUser - feil person - skal kaste exception`() =
         runTest(timeout = 5.seconds) {
-            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns listOf("fnr")
+            coEvery { pdlClientOldMock.hentIdenter(any(), any()) } returns listOf("fnr")
 
             runCatching { service.verifyDigisosSakIsForCorrectUser(digisosSak) }.let {
                 assertThat(it.isFailure)
@@ -207,7 +207,7 @@ internal class TilgangskontrollServiceTest {
     @Test
     internal fun `verifyDigisosSakIsForCorrectUser - to fnr - ok`() =
         runTest(timeout = 5.seconds) {
-            coEvery { pdlClientMock.hentIdenter(any(), any()) } returns listOf("fnr", ident)
+            coEvery { pdlClientOldMock.hentIdenter(any(), any()) } returns listOf("fnr", ident)
 
             service.verifyDigisosSakIsForCorrectUser(digisosSak)
         }

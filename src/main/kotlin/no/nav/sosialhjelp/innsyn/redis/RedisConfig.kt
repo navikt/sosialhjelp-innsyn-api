@@ -50,6 +50,8 @@ class RedisConfig(
             .withCacheConfiguration("kommuneinfo", defaults)
             .withCacheConfiguration("pdlPerson", defaults.entryTtl(Duration.ofDays(1)))
             .withCacheConfiguration("pdlHistoriskeIdenter", defaults.entryTtl(Duration.ofDays(1)))
+            .withCacheConfiguration("pdlPersonOld", defaults.entryTtl(Duration.ofDays(1)))
+            .withCacheConfiguration("pdlHistoriskeIdenterOld", defaults.entryTtl(Duration.ofDays(1)))
             .build()
     }
 }

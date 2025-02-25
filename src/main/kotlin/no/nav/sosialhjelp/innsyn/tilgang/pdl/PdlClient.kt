@@ -46,7 +46,7 @@ class PdlClientImpl(
                 throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
             }
 
-    @Cacheable("pdlPerson", key = "#ident")
+    @Cacheable("pdlPersonOld", key = "#ident")
     override suspend fun hentPerson(
         ident: String,
         token: String,
@@ -54,7 +54,7 @@ class PdlClientImpl(
         return hentFraPdl(ident, token)
     }
 
-    @Cacheable("pdlHistoriskeIdenter", key = "#ident")
+    @Cacheable("pdlHistoriskeIdenterOld", key = "#ident")
     override suspend fun hentIdenter(
         ident: String,
         token: String,

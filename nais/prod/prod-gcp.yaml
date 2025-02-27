@@ -29,8 +29,6 @@ spec:
     max: 5
   tokenx:
     enabled: true
-  secureLogs:
-    enabled: true
   observability:
     autoInstrumentation:
       enabled: true
@@ -65,7 +63,7 @@ spec:
     limits:
       memory: 4Gi
     requests:
-      cpu: 200m
+      cpu: 500m
       memory: 1480Mi
   redis:
     - instance: cache

@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.micrometer.core.instrument.MeterRegistry
 import jakarta.servlet.annotation.MultipartConfig
 import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.runBlocking
@@ -49,7 +50,10 @@ class VedleggController(
     private val tilgangskontroll: TilgangskontrollService,
     private val eventService: EventService,
     private val fiksClient: FiksClient,
+    meterRegistry: MeterRegistry,
 ) {
+    val counter = meterRegistry.counter("vedlegg_size")
+
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun sendVedlegg(
@@ -60,6 +64,7 @@ class VedleggController(
     ): ResponseEntity<List<OppgaveOpplastingResponse>> =
         runBlocking {
             withContext(MDCContext() + RequestAttributesContext()) {
+                counter.increment(rawFiles.sumOf { it.size }.toDouble())
                 log.info("Forsøker å starter ettersendelse")
                 tilgangskontroll.sjekkTilgang(token)
 

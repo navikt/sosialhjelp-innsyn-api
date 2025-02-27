@@ -46,6 +46,7 @@ internal class VedleggControllerTest {
             tilgangskontroll,
             eventService,
             fiksClient,
+            meterRegistry = mockk(relaxed = true),
         )
 
     private val id = "123"

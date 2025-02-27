@@ -1,9 +1,12 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
@@ -111,6 +114,7 @@ class VedleggOpplastingService(
                 ettersendelsePdf.inputStream(),
             )
         } catch (e: Exception) {
+            if (e is CancellationException) currentCoroutineContext().ensureActive()
             log.error("Generering av ettersendelse.pdf feilet.", e)
             throw e
         }

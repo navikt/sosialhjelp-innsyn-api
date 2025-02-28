@@ -18,7 +18,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:8888/oauth2/jwks
+          jwk-set-uri: http://localhost:8888/mock-issuer/jwks
 server:
   max-http-request-header-size: 16KB
   shutdown: graceful

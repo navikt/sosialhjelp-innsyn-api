@@ -1,8 +1,5 @@
 package no.nav.sosialhjelp.innsyn.app.texas
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter
-import com.fasterxml.jackson.annotation.JsonAnySetter
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,8 +33,6 @@ class TexasClient(
     private val tokenEndpoint: String,
     @Value("\${nais.token.exchange.endpoint}")
     private val tokenXEndpoint: String,
-    @Value("\${nais.token.introspection.endpoint}")
-    private val tokenIntrospectionEndpoint: String,
 ) {
     private val log by logger()
 
@@ -51,8 +46,6 @@ class TexasClient(
         }.build()
 
     private val maskinportenParams: Map<String, String> = mapOf("identity_provider" to "maskinporten", "target" to "ks:fiks")
-
-    private fun getIntrospectionParams(token: String): Map<String, String> = mapOf("identity_provider" to "idporten", "token" to token)
 
     private fun getTokenXParams(
         target: String,
@@ -68,19 +61,6 @@ class TexasClient(
         TokenEndpointType.BEHALF_OF,
         getTokenXParams(target, userToken),
     )
-
-    suspend fun introspectToken(token: String): TokenIntrospectionResponse =
-        withContext(Dispatchers.IO) {
-            val url = tokenIntrospectionEndpoint
-            val params = getIntrospectionParams(token)
-            texasWebClient.post().uri(url)
-                .bodyValue(params)
-                .retrieve()
-                .awaitBody<TokenIntrospectionResponse>()
-                .also {
-                    log.debug("Hentet introspection fra Texas")
-                }
-        }
 
     private suspend fun getToken(
         tokenEndpointType: TokenEndpointType,
@@ -143,14 +123,4 @@ data class TokenErrorResponse(
     val error: String,
     @JsonProperty("error_description")
     val errorDescription: String,
-)
-
-data class TokenIntrospectionResponse(
-    val active: Boolean,
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    val error: String?,
-    val acr: String?,
-    val pid: String?,
-    @JsonAnySetter @get:JsonAnyGetter
-    val other: Map<String, Any?> = mutableMapOf(),
 )

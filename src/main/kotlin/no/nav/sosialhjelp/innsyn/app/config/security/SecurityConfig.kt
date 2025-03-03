@@ -16,9 +16,6 @@ import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders
 import org.springframework.security.web.server.SecurityWebFilterChain
-import org.springframework.security.web.server.ServerAuthenticationEntryPoint
-import reactor.core.publisher.Mono
-
 
 /**
  * Basic security resource server.
@@ -29,10 +26,10 @@ import reactor.core.publisher.Mono
 @Configuration
 @EnableWebFluxSecurity
 class SecurityConfiguration(
-//    @Value("\${idporten.issuer}")
-//    private val issuer: String,
-//    @Value("\${idporten.audience}")
-//    private val audience: String,
+    @Value("\${idporten.issuer}")
+    private val issuer: String,
+    @Value("\${idporten.audience}")
+    private val audience: String,
 ) {
     private val log by logger()
 
@@ -47,7 +44,7 @@ class SecurityConfiguration(
                 authorize
                     .pathMatchers("/internal/**")
                     .permitAll()
-                    .anyExchange().hasAuthority("SCOPE_ks:fiks")
+                    .anyExchange().authenticated()
             }.oauth2ResourceServer { resourceServer ->
                 resourceServer
                     .jwt(Customizer.withDefaults())
@@ -55,19 +52,19 @@ class SecurityConfiguration(
         return http.build()
     }
 
-//    @Bean
-//    fun jwtDecoder(): ReactiveJwtDecoder {
-//        println(issuer)
-//        val jwtDecoder = ReactiveJwtDecoders.fromOidcIssuerLocation(issuer) as NimbusReactiveJwtDecoder
-//
-//        val withAcr: OAuth2TokenValidator<Jwt> = AcrValidator()
-//        val audienceValidator: OAuth2TokenValidator<Jwt> = AudienceValidator(audience)
-//        val withAcrAndAudience: OAuth2TokenValidator<Jwt> = JwtValidators.createDefaultWithValidators(audienceValidator, withAcr)
-//
-//        jwtDecoder.setJwtValidator(withAcrAndAudience)
-//
-//        return jwtDecoder
-//    }
+    @Bean
+    fun jwtDecoder(): ReactiveJwtDecoder {
+        println(issuer)
+        val jwtDecoder = ReactiveJwtDecoders.fromOidcIssuerLocation(issuer) as NimbusReactiveJwtDecoder
+
+        val withAcr: OAuth2TokenValidator<Jwt> = AcrValidator()
+        val audienceValidator: OAuth2TokenValidator<Jwt> = AudienceValidator(audience)
+        val withAcrAndAudience: OAuth2TokenValidator<Jwt> = JwtValidators.createDefaultWithValidators(audienceValidator, withAcr)
+
+        jwtDecoder.setJwtValidator(withAcrAndAudience)
+
+        return jwtDecoder
+    }
 }
 
 class AudienceValidator(private val audience: String) : OAuth2TokenValidator<Jwt> {

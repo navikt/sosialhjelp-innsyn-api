@@ -46,10 +46,10 @@ data class PdlIdent(
 )
 
 data class PdlHentPerson(
-    val hentPerson: PdlPerson?,
+    val hentPerson: PdlPersonOld?,
 ) : Serializable
 
-data class PdlPerson(
+data class PdlPersonOld(
     val adressebeskyttelse: List<Adressebeskyttelse>,
     val navn: List<PdlNavn>,
 ) : Serializable
@@ -69,7 +69,7 @@ enum class Gradering : Serializable {
     UGRADERT,
 }
 
-fun PdlPerson.isKode6Or7(): Boolean {
+fun PdlPersonOld.isKode6Or7(): Boolean {
     return adressebeskyttelse.any {
         it.isKode6() || it.isKode7()
     }

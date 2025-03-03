@@ -1,6 +1,9 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils.isRunningInProd
@@ -66,6 +69,7 @@ class VirusScanner(
             log.warn("Fant virus med status ${scanResult.result} i fil forsøkt opplastet")
             return true
         } catch (e: Exception) {
+            if (e is CancellationException) currentCoroutineContext().ensureActive()
             log.warn("Kunne ikke scanne fil opplastet", e)
             return false
         }

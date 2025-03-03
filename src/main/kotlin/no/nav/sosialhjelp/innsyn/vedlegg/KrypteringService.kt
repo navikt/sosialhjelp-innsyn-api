@@ -1,7 +1,10 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -39,6 +42,7 @@ class KrypteringServiceImpl : KrypteringService {
                     kryptering.krypterData(pos, fileInputStream, certificate, Security.getProvider("BC"))
                     log.debug("Ferdig med kryptering")
                 } catch (e: Exception) {
+                    if (e is CancellationException) currentCoroutineContext().ensureActive()
                     log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)
                     throw IllegalStateException("An error occurred during encryption", e)
                 }

@@ -1,10 +1,9 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
-import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
@@ -48,8 +47,7 @@ class NorgClientImpl(
                     .onErrorMap(WebClientResponseException::class.java) { e ->
                         log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
                         NorgException(e.message, e)
-                    }.awaitSingleOrNull()
-                    ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
+                    }.awaitSingle()
 
             navEnhet.also { log.info("Hentet Nav-enhet $enhetsnr fra NORG2") }
         }

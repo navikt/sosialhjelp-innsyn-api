@@ -7,6 +7,7 @@ metadata:
     team: teamdigisos
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "150M"
+    texas.nais.io/enabled: "true"
 spec:
   image: {{image}}
   port: 8080
@@ -33,6 +34,13 @@ spec:
       destinations:
         - id: loki
         - id: elastic
+  tokenx:
+    enabled: true
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: "ks:fiks"
   accessPolicy:
     outbound:
       external:
@@ -56,17 +64,11 @@ spec:
       cpu: 10m
       memory: 512Mi
   envFrom:
-    - configmap: loginservice-idporten
     - secret: sosialhjelp-innsyn-api-unleash-api-token
+    - secret: idporten-sosialhjelp
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
-    - name: IDPORTEN_WELL_KNOWN_URL
-      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/selvbetjening"
-    - name: IDPORTEN_CLIENT_ID
-      value: "clientid"
-    - name: IDPORTEN_CLIENT_ID
-      value: "4"
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL

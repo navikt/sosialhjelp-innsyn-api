@@ -25,15 +25,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@ContextConfiguration(classes = [PdlIntegrationTestConfig::class])
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
+@ActiveProfiles(profiles = ["mock-redis", "test"])
 @ExtendWith(MockKExtension::class)
 internal class SaksStatusIntegrasjonsTest {
     @Autowired
@@ -67,6 +65,7 @@ internal class SaksStatusIntegrasjonsTest {
     }
 
     @Test
+    @WithMockUser("123")
     fun `Skal hente saksstatus for fiksDigisoID`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soknad = JsonSoknad()
@@ -84,7 +83,6 @@ internal class SaksStatusIntegrasjonsTest {
             .get()
             .uri("/api/v1/innsyn/1234/saksStatus")
             .accept(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
             .expectStatus().isOk
 

@@ -26,15 +26,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@ContextConfiguration(classes = [PdlIntegrationTestConfig::class])
 @SpringBootTest(classes = [TestApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
+@ActiveProfiles(profiles = ["mock-redis", "test"])
 @ExtendWith(MockKExtension::class)
 class SaksOversiktIntegrasjonstest {
     @Autowired
@@ -68,6 +66,7 @@ class SaksOversiktIntegrasjonstest {
     }
 
     @Test
+    @WithMockUser
     fun `skal hente liste med saker`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
@@ -76,7 +75,6 @@ class SaksOversiktIntegrasjonstest {
             .get()
             .uri("/api/v1/innsyn/saker")
             .accept(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
             .expectStatus().isOk
             .expectBodyList(SaksListeResponse::class.java)
@@ -86,6 +84,7 @@ class SaksOversiktIntegrasjonstest {
     }
 
     @Test
+    @WithMockUser("123")
     fun `skal hente saksdetaljer for sak`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
@@ -103,7 +102,6 @@ class SaksOversiktIntegrasjonstest {
             .get()
             .uri("/api/v1/innsyn/sak/1234/detaljer")
             .accept(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
             .expectStatus().isOk
 

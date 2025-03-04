@@ -73,6 +73,8 @@ spec:
     - secret: sosialhjelp-innsyn-api-unleash-api-token
     - secret: idporten-sosialhjelp
   env:
+    - name: IDPORTEN_URL
+      value: "https://idporten.no"
     - name: SPRING_PROFILES_ACTIVE
       value: "log-kibana,prodgcp"
     - name: FIKS_DIGISOS_ENDPOINT_URL

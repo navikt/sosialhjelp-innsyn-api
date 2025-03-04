@@ -24,3 +24,4 @@ no.nav.security.jwt:
     validation:
       optional-claims: aud,nbf
 
+fil-konvertering_url: ${GOTENBERG_URL}

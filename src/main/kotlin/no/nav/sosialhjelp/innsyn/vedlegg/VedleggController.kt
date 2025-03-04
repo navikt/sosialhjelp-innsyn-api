@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -14,14 +15,12 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.OppgaveOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
@@ -47,10 +46,10 @@ class VedleggController(
     suspend fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
         @RequestPart("files") rawFiles: List<MultipartFile>,
-        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ): List<OppgaveOpplastingResponse> {
         counter.increment(rawFiles.sumOf { it.size }.toDouble())log.info("Forsøker å starter ettersendelse")
-        tilgangskontroll.sjekkTilgang(token)
+        val token = TokenUtils.getToken()
+        tilgangskontroll.sjekkTilgang()
 
         val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
 
@@ -70,10 +69,10 @@ class VedleggController(
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
     suspend fun hentVedlegg(
         @PathVariable fiksDigisosId: String,
-        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ): ResponseEntity<List<VedleggResponse>> {
-        tilgangskontroll.sjekkTilgang(token)
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
+        val token = TokenUtils.getToken()
+        tilgangskontroll.sjekkTilgang()
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, TokenUtils.getToken())
         val model = eventService.createModel(digisosSak, token)
 
         val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(digisosSak, model, token)

@@ -4,10 +4,8 @@ import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.saksoversikt.BrokenSoknad
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
-import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -20,9 +18,9 @@ class SoknadsStatusController(
     @GetMapping("{fiksDigisosId}/soknadsStatus")
     suspend fun hentSoknadsStatus(
         @PathVariable fiksDigisosId: String,
-        @RequestHeader(value = AUTHORIZATION) token: String,
     ): SoknadsStatusResponse {
-        tilgangskontroll.sjekkTilgang(token)
+        val token = TokenUtils.getToken()
+        tilgangskontroll.sjekkTilgang()
 
         val fnr = TokenUtils.getUserIdFromToken()
         val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token, fnr)

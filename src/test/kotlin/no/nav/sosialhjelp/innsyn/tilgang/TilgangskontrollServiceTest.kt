@@ -40,7 +40,7 @@ internal class TilgangskontrollServiceTest {
         runTestWithToken {
             coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns null
 
-            assertThat(kotlin.runCatching { service.sjekkTilgang(ident) }.isSuccess)
+            assertThat(kotlin.runCatching { service.sjekkTilgang() }.isSuccess)
         }
 
     @Test
@@ -49,7 +49,7 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson } returns null
             coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
-            assertThat(kotlin.runCatching { service.sjekkTilgang(ident) }.isSuccess)
+            assertThat(kotlin.runCatching { service.sjekkTilgang() }.isSuccess)
         }
 
     @Test
@@ -58,7 +58,7 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns emptyList()
             coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
-            assertThat(kotlin.runCatching { service.sjekkTilgang(ident) }.isSuccess)
+            assertThat(kotlin.runCatching { service.sjekkTilgang() }.isSuccess)
         }
 
     @Test
@@ -67,7 +67,7 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
             coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
-            runCatching { service.sjekkTilgang(ident) }.let {
+            runCatching { service.sjekkTilgang() }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(TilgangskontrollException::class.java)
             }
@@ -79,7 +79,7 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.FORTROLIG))
             coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
-            runCatching { service.sjekkTilgang(ident) }.let {
+            runCatching { service.sjekkTilgang() }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(TilgangskontrollException::class.java)
             }
@@ -91,7 +91,7 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG_UTLAND))
             coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
-            runCatching { service.sjekkTilgang(ident) }.let {
+            runCatching { service.sjekkTilgang() }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(TilgangskontrollException::class.java)
             }

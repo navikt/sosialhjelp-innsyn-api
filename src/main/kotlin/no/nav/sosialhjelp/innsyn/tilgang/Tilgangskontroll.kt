@@ -15,8 +15,8 @@ import java.util.Locale
 class TilgangskontrollService(
     private val pdlClientOld: PdlClientOld,
 ) {
-    suspend fun sjekkTilgang(token: String) {
-        sjekkTilgang(TokenUtils.getUserIdFromToken(), token)
+    suspend fun sjekkTilgang() {
+        sjekkTilgang(TokenUtils.getUserIdFromToken(), TokenUtils.getToken())
     }
 
     suspend fun sjekkTilgang(

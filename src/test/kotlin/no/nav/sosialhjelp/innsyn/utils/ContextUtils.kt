@@ -1,18 +1,56 @@
 package no.nav.sosialhjelp.innsyn.utils
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import kotlinx.coroutines.reactor.ReactorContext
+import kotlinx.coroutines.reactor.asCoroutineContext
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import reactor.util.context.Context
+import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 fun runTestWithToken(
-    token: String = defaultAuthToken,
+    token: Jwt = defaultAuthToken,
+    timeout: Duration = 5.seconds,
     block: suspend TestScope.() -> Unit,
-) = runTest(timeout = 5.seconds, context = ReactorContext(Context.of("authToken", token)), testBody = block)
+) = runTest(
+    timeout = timeout,
+    testBody = block,
+    context =
+        ReactiveSecurityContextHolder.withAuthentication(
+            TestingAuthenticationToken(
+                token,
+                token,
+            ),
+        ).asCoroutineContext(),
+)
 
-private val defaultAuthToken: String =
-    JWT.create().withAudience("aud").withIssuer("iss").withClaim("sub", "sub").withClaim("acr", "idporten-loa-high").withClaim("pid", "123")
-        .sign(Algorithm.none())
+fun createJwt(
+    tokenValue: String = "token",
+    issuer: String = "iss",
+    subject: String = "123",
+    pid: String = "123",
+    audience: List<String> = listOf("aud"),
+    extraClaims: Map<String, String> = emptyMap(),
+): Jwt {
+    return Jwt.withTokenValue(tokenValue).headers {
+        it["alg"] = ""
+        it["typ"] = "JWT"
+        it["kid"] = "kid"
+    }.issuer("iss").audience(audience).subject(subject).claim("pid", pid)
+        .claim("acr", "idporten-loa-high")
+        .also {
+            extraClaims.map { (key, value) -> it.claim(key, value) }
+        }
+        .build()
+}
+
+private val defaultAuthToken: Jwt =
+    Jwt.withTokenValue("token").headers {
+        it["alg"] = "none"
+        it["typ"] = "JWT"
+        it["sub"] = "sub"
+        it["kid"] = "kid"
+    }.issuer("iss").audience(listOf("aud")).claim("sub", "sub").claim("pid", "123")
+        .claim("acr", "idporten-loa-high")
+        .build()

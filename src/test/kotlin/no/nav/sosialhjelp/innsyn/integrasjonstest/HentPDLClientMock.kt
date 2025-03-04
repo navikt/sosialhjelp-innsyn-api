@@ -9,23 +9,12 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClientOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Component
 
-@Configuration
-class PdlIntegrationTestConfig {
-    /**
-     * overskriver pdlHentPersonConsumer for itester
-     */
-    @Primary
-    @Bean
-    fun pdlClientOld(): PdlClientOld {
-        return HentPDLClientOldMock()
-    }
-}
-
-class HentPDLClientOldMock : PdlClientOld {
+@Component
+@Profile("test")
+class HentPDLClientMock : PdlClientOld {
     val mapper: ObjectMapper =
         jacksonObjectMapper()
             .registerKotlinModule()

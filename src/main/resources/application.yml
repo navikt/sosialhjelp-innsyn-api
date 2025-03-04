@@ -29,6 +29,14 @@ server:
   shutdown: graceful
 
 resilience4j:
+  retry:
+    configs:
+      default:
+        wait-duration: 500ms
+        max-attempts: 3
+    instances:
+      pdl:
+        base-config: default
   circuitbreaker:
     configs:
       default:

@@ -6,7 +6,6 @@ import io.github.resilience4j.retry.annotation.Retry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withContext
-import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
@@ -22,16 +21,6 @@ import org.springframework.web.reactive.function.client.bodyToMono
 class NorgClientImpl(
     private val norgWebClient: WebClient,
 ) : NorgClient {
-    private val norgRetry =
-        RetryUtils
-            .retryBackoffSpec()
-            .onRetryExhaustedThrow { spec, retrySignal ->
-                throw NorgException(
-                    "Norg - retry har nådd max antall forsøk (=${spec.maxAttempts})",
-                    retrySignal.failure(),
-                )
-            }
-
     @Cacheable("navenhet")
     @CircuitBreaker(name = "norg")
     @Retry(name = "norg")
@@ -47,7 +36,6 @@ class NorgClientImpl(
                 .header(IntegrationUtils.HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
                 .retrieve()
                 .bodyToMono<NavEnhet>()
-                .retryWhen(norgRetry)
                 .onErrorMap(WebClientResponseException::class.java) { e ->
                     log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
                     NorgException(e.message, e)

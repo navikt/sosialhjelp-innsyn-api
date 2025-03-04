@@ -1,11 +1,8 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.convert
 
 import org.apache.tika.Tika
-import org.slf4j.LoggerFactory
 
 object FileDetectionUtils {
-    private val log = LoggerFactory.getLogger(FileDetectionUtils::class.java)
-
     fun detectMimeType(bytes: ByteArray?): String {
         val mimeType = Tika().detect(bytes).lowercase()
         return if (mimeType == MimeTypes.TEXT_X_MATLAB) MimeTypes.APPLICATION_PDF else mimeType

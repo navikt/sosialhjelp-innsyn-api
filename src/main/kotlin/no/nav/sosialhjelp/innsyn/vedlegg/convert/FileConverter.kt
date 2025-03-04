@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.vedlegg.convert
 
-import java.io.ByteArrayInputStream
-import java.io.File
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.apache.commons.io.FileUtils
 import org.slf4j.MDC
@@ -23,6 +21,8 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.netty.http.client.HttpClient
+import java.io.ByteArrayInputStream
+import java.io.File
 
 interface FileConverter {
     fun toPdf(
@@ -42,7 +42,6 @@ class GotenbergClient(
     @Value("\${fil-konvertering_url}") private val baseUrl: String,
     private val webClientBuilder: WebClient.Builder,
 ) : FileConverter {
-
     private var trace = "[NA]"
     private val webClient = buildWebClient()
 

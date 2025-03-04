@@ -30,9 +30,7 @@ class NorgClientImpl(
             }
 
     @Cacheable("navenhet")
-    override suspend fun hentNavEnhet(enhetsnr: String): NavEnhet = hentFraNorg(enhetsnr)
-
-    private suspend fun hentFraNorg(enhetsnr: String): NavEnhet =
+    override suspend fun hentNavEnhet(enhetsnr: String): NavEnhet =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente Nav-enhet $enhetsnr fra NORG2")
 

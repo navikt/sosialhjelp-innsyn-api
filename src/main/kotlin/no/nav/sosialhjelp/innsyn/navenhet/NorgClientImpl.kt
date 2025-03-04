@@ -35,21 +35,20 @@ class NorgClientImpl(
     private suspend fun hentFraNorg(enhetsnr: String): NavEnhet =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente Nav-enhet $enhetsnr fra NORG2")
-            val navEnhet: NavEnhet =
-                norgWebClient
-                    .get()
-                    .uri("/enhet/{enhetsnr}", enhetsnr)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .header(IntegrationUtils.HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                    .retrieve()
-                    .bodyToMono<NavEnhet>()
-                    .retryWhen(norgRetry)
-                    .onErrorMap(WebClientResponseException::class.java) { e ->
-                        log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
-                        NorgException(e.message, e)
-                    }.awaitSingle()
 
-            navEnhet.also { log.info("Hentet Nav-enhet $enhetsnr fra NORG2") }
+            norgWebClient
+                .get()
+                .uri("/enhet/{enhetsnr}", enhetsnr)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(IntegrationUtils.HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
+                .retrieve()
+                .bodyToMono<NavEnhet>()
+                .retryWhen(norgRetry)
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
+                    NorgException(e.message, e)
+                }.awaitSingle()
+                .also { log.info("Hentet Nav-enhet $enhetsnr fra NORG2") }
         }
 
     companion object {

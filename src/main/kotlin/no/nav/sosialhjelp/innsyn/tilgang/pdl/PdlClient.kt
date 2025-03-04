@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -32,6 +33,7 @@ interface PdlClient {
 }
 
 @Component
+@Profile("!test")
 class PdlClientImpl(
     private val pdlWebClient: WebClient,
     private val texasClient: TexasClient,

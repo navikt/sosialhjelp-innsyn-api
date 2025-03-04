@@ -9,14 +9,3 @@ spring:
       port: ${REDIS_PORT_CACHE}
       ssl:
         enabled: true
-  webflux:
-    base-path: '/sosialhjelp/innsyn-api'
-    multipart:
-      max-headers-size: 16KB
-nais:
-  token:
-    endpoint: ${NAIS_TOKEN_ENDPOINT}
-    exchange:
-      endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT}
-    introspection:
-        endpoint: ${NAIS_TOKEN_INTROSPECTION_ENDPOINT}

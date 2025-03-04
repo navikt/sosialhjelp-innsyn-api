@@ -1,6 +1,7 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.sosialhjelp"
@@ -73,6 +74,8 @@ dependencies {
     testImplementation(libs.springmockk)
     testImplementation(libs.mockk)
     testImplementation(libs.mockwebserver)
+    testImplementation(libs.spring.boot.security.test)
+    testImplementation("io.projectreactor:reactor-test:3.7.3")
 }
 
 // override spring managed dependencies
@@ -109,9 +112,9 @@ tasks.withType<DependencyUpdatesTask> {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
+    compilerOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "21"
+        jvmTarget = JvmTarget.JVM_21
     }
 }
 

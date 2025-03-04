@@ -1,15 +1,14 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.FilUrl
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
-import org.springframework.http.HttpHeaders
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
@@ -25,9 +24,9 @@ class KlageController(
     @GetMapping("/{fiksDigisosId}/klage", produces = ["application/json;charset=UTF-8"])
     suspend fun hentKlager(
         @PathVariable fiksDigisosId: String,
-        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ): List<KlageDto> {
-        tilgangskontroll.sjekkTilgang(token)
+        val token = TokenUtils.getToken()
+        tilgangskontroll.sjekkTilgang()
 
         val klager = klageService.hentKlager(fiksDigisosId, token)
 
@@ -50,9 +49,9 @@ class KlageController(
     suspend fun sendKlage(
         @PathVariable fiksDigisosId: String,
         @RequestBody body: InputKlage,
-        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String,
     ) {
-        tilgangskontroll.sjekkTilgang(token)
+        val token = TokenUtils.getToken()
+        tilgangskontroll.sjekkTilgang()
 
         klageService.sendKlage(fiksDigisosId, body, token)
     }

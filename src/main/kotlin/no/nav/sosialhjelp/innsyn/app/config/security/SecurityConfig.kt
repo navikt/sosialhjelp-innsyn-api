@@ -1,9 +1,13 @@
 package no.nav.sosialhjelp.innsyn.app.config.security
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.swagger.v3.core.util.Json
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -25,6 +29,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain
  */
 @Configuration
 @EnableWebFluxSecurity
+@Profile("!test")
 class SecurityConfiguration(
     @Value("\${idporten.issuer}")
     private val issuer: String,
@@ -54,7 +59,6 @@ class SecurityConfiguration(
 
     @Bean
     fun jwtDecoder(): ReactiveJwtDecoder {
-        println(issuer)
         val jwtDecoder = ReactiveJwtDecoders.fromOidcIssuerLocation(issuer) as NimbusReactiveJwtDecoder
 
         val withAcr: OAuth2TokenValidator<Jwt> = AcrValidator()
@@ -62,7 +66,6 @@ class SecurityConfiguration(
         val withAcrAndAudience: OAuth2TokenValidator<Jwt> = JwtValidators.createDefaultWithValidators(audienceValidator, withAcr)
 
         jwtDecoder.setJwtValidator(withAcrAndAudience)
-
         return jwtDecoder
     }
 }
@@ -71,7 +74,7 @@ class AudienceValidator(private val audience: String) : OAuth2TokenValidator<Jwt
     var error: OAuth2Error = OAuth2Error("invalid_token", "The required audience is missing", null)
 
     override fun validate(jwt: Jwt): OAuth2TokenValidatorResult {
-        println("jwt.audience: ${jwt.audience}")
+        println("AudienceValidator.validate: \n${objectMapper.writeValueAsString(jwt)}")
         return if (jwt.audience.contains(audience)) {
             OAuth2TokenValidatorResult.success()
         } else {
@@ -86,7 +89,6 @@ class AcrValidator : OAuth2TokenValidator<Jwt> {
 
     override fun validate(jwt: Jwt): OAuth2TokenValidatorResult {
         val acr = jwt.getClaimAsString("acr")
-        println("acr: $acr")
         return if (acr in listOf("Level4", "idporten-loa-high")) {
             OAuth2TokenValidatorResult.success()
         } else {

@@ -26,8 +26,6 @@ nais:
     endpoint: http://localhost:${mock-oauth2-server.port}/maskinporten/token
     exchange:
       endpoint: http://localhost:${mock-oauth2-server.port}/tokenx/token
-    introspection:
-      endpoint: http://localhost:${mock-oauth2-server.port}/introspection
 
 innsyn:
   vedlegg:

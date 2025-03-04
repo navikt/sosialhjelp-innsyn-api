@@ -18,7 +18,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8888/default
+          issuer-uri: ${IDPORTEN_ISSUER:http://localhost:8888/default}
 server:
   max-http-request-header-size: 16KB
   shutdown: graceful
@@ -62,12 +62,11 @@ client:
   soknad_api_url: ${SOKNAD_API_URL}
   soknad_api_audience: ${SOKNAD_API_AUDIENCE}
 
-#Token-validering
-no.nav.security.jwt:
-  issuer.selvbetjening:
-    discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
-    validation:
-      optional-claims: aud,nbf
+nais:
+  token:
+    endpoint: ${NAIS_TOKEN_ENDPOINT}
+    exchange:
+      endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT}
 
 innsyn.loginurl: ${INNSYN_LOGINURL:null}
 
@@ -91,5 +90,5 @@ fiks-io:
   virksomhetssertifikatPath: ${VIRKSERT_PATH:}
 
 idporten:
-  well-known-url: ${IDPORTEN_WELL_KNOWN_URL}
-  audience: ${IDPORTEN_AUDIENCE}
+  well-known-url: ${IDPORTEN_ISSUER}
+  audience: ${IDPORTEN_CLIENT_ID}

@@ -29,6 +29,15 @@ server:
   shutdown: graceful
 
 resilience4j:
+  bulkhead:
+    configs:
+      default:
+        max-concurrent-calls: 20
+    instances:
+      pdl:
+        base-config: default
+      norg:
+        base-config: default
   retry:
     configs:
       default:
@@ -37,6 +46,8 @@ resilience4j:
     instances:
       pdl:
         base-config: default
+      norg:
+        base-config: default
   circuitbreaker:
     configs:
       default:
@@ -44,6 +55,9 @@ resilience4j:
         failureRateThreshold: 75
     instances:
       pdl:
+        # Endre dette til true når koden er kjørt inn
+        registerHealthIndicator: false
+      norg:
         # Endre dette til true når koden er kjørt inn
         registerHealthIndicator: false
 

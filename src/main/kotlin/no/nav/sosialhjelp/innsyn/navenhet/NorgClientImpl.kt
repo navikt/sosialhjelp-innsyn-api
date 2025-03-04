@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
+import io.github.resilience4j.bulkhead.annotation.Bulkhead
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
+import io.github.resilience4j.retry.annotation.Retry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withContext
@@ -30,6 +33,9 @@ class NorgClientImpl(
             }
 
     @Cacheable("navenhet")
+    @CircuitBreaker(name = "norg")
+    @Retry(name = "norg")
+    @Bulkhead(name = "norg")
     override suspend fun hentNavEnhet(enhetsnr: String): NavEnhet =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente Nav-enhet $enhetsnr fra NORG2")

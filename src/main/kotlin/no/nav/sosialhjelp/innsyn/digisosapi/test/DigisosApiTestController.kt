@@ -1,10 +1,10 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -55,10 +54,9 @@ class DigisosApiTestController(
     @GetMapping("/{digisosId}/innsynsfil")
     suspend fun getInnsynsfil(
         @PathVariable digisosId: String,
-        @RequestHeader(value = HttpHeaders.AUTHORIZATION) token: String?,
     ): ResponseEntity<ByteArray> {
         val innsynsfil =
-            digisosApiTestService.hentInnsynsfil(digisosId, token ?: "") ?: return ResponseEntity.noContent().build()
+            digisosApiTestService.hentInnsynsfil(digisosId, TokenUtils.getToken()) ?: return ResponseEntity.noContent().build()
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(innsynsfil.toByteArray())
     }
 }

@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.app.texas
 import com.fasterxml.jackson.annotation.JsonProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
@@ -49,14 +50,14 @@ class TexasClient(
 
     private fun getTokenXParams(
         target: String,
-        userToken: String,
-    ): Map<String, String> = mapOf("identity_provider" to "tokenx", "target" to target, "user_token" to userToken)
+        userToken: Token,
+    ): Map<String, String> = mapOf("identity_provider" to "tokenx", "target" to target, "user_token" to userToken.value)
 
     suspend fun getMaskinportenToken() = getToken(TokenEndpointType.M2M, maskinportenParams)
 
     suspend fun getTokenXToken(
         target: String,
-        userToken: String,
+        userToken: Token,
     ) = getToken(
         TokenEndpointType.BEHALF_OF,
         getTokenXParams(target, userToken),
@@ -65,7 +66,7 @@ class TexasClient(
     private suspend fun getToken(
         tokenEndpointType: TokenEndpointType,
         params: Map<String, String>,
-    ): String =
+    ): Token =
         withContext(Dispatchers.IO) {
             val url =
                 when (tokenEndpointType) {
@@ -93,7 +94,7 @@ class TexasClient(
                 }
 
             when (response) {
-                is TokenResponse.Success -> response.accessToken
+                is TokenResponse.Success -> Token(response.accessToken)
                 is TokenResponse.Error -> {
                     error(
                         "Feil ved henting av $tokenEndpointType-token fra Texas. Statuscode: ${response.status}. Error: ${response.error}",

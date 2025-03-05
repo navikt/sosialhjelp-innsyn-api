@@ -78,7 +78,6 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.mockwebserver)
     testImplementation(libs.spring.boot.security.test)
-    testImplementation("io.projectreactor:reactor-test:3.7.3")
 }
 
 // override spring managed dependencies

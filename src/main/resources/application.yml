@@ -66,8 +66,6 @@ client:
   unleash_server_api_url: ${UNLEASH_SERVER_API_URL}
   unleash_server_api_token: ${UNLEASH_SERVER_API_TOKEN}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
-  soknad_api_url: ${SOKNAD_API_URL}
-  soknad_api_audience: ${SOKNAD_API_AUDIENCE}
 
 nais:
   token:

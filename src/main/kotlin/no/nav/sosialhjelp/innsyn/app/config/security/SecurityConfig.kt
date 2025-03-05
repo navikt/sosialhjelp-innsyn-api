@@ -1,9 +1,5 @@
 package no.nav.sosialhjelp.innsyn.app.config.security
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.swagger.v3.core.util.Json
-import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -34,10 +30,8 @@ class SecurityConfiguration(
     @Value("\${idporten.issuer}")
     private val issuer: String,
     @Value("\${idporten.audience}")
-    private val audience: String,
+    private val clientId: String,
 ) {
-    private val log by logger()
-
     @Bean
     fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
         http
@@ -62,7 +56,7 @@ class SecurityConfiguration(
         val jwtDecoder = ReactiveJwtDecoders.fromOidcIssuerLocation(issuer) as NimbusReactiveJwtDecoder
 
         val withAcr: OAuth2TokenValidator<Jwt> = AcrValidator()
-        val audienceValidator: OAuth2TokenValidator<Jwt> = AudienceValidator(audience)
+        val audienceValidator: OAuth2TokenValidator<Jwt> = AudienceValidator(clientId)
         val withAcrAndAudience: OAuth2TokenValidator<Jwt> = JwtValidators.createDefaultWithValidators(audienceValidator, withAcr)
 
         jwtDecoder.setJwtValidator(withAcrAndAudience)
@@ -71,11 +65,10 @@ class SecurityConfiguration(
 }
 
 class AudienceValidator(private val audience: String) : OAuth2TokenValidator<Jwt> {
-    var error: OAuth2Error = OAuth2Error("invalid_token", "The required audience is missing", null)
+    val error: OAuth2Error = OAuth2Error("invalid_token", "The required audience is missing", null)
 
     override fun validate(jwt: Jwt): OAuth2TokenValidatorResult {
-        println("AudienceValidator.validate: \n${objectMapper.writeValueAsString(jwt)}")
-        return if (jwt.audience.contains(audience)) {
+        return if (jwt.claims["client_id"] == audience) {
             OAuth2TokenValidatorResult.success()
         } else {
             OAuth2TokenValidatorResult.failure(error)

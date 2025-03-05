@@ -47,6 +47,7 @@ spec:
         - host: unleash.nais.io
         - host: digisos.ekstern.dev.nav.no
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
+        - host: test.idporten.no
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-soknad-api-mock

@@ -47,7 +47,8 @@ class VedleggController(
         @PathVariable fiksDigisosId: String,
         @RequestPart("files") rawFiles: List<MultipartFile>,
     ): List<OppgaveOpplastingResponse> {
-        counter.increment(rawFiles.sumOf { it.size }.toDouble())log.info("Forsøker å starter ettersendelse")
+        counter.increment(rawFiles.sumOf { it.size }.toDouble())
+        log.info("Forsøker å starter ettersendelse")
         val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 

@@ -32,16 +32,13 @@ client:
   fiks_integrasjonpassord_kommune: pw2
   norg_url: ${NORG_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/norg_endpoint_url/}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/pdl_endpoint_url}
-  pdl_audience: dummyAudience
+  pdl_audience: ${PDL_AUDIENCE:dev-fss:pdl:pdl-api}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID:local}
   unleash_env: ${UNLEASH_ENV:mock}
   unleash_server_api_url: ${UNLEASH_SERVER_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/internal/unleash}
   unleash_server_api_token: ${UNLEASH_SERVER_API_TOKEN:token}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
-  soknad_api_url: ${SOKNAD_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/soknad-api}
-  soknad_api_audience: dummyAudience
-
 
 idporten:
-  issuer: ${IDPORTEN_URL:http://localhost:8888/default}
+  issuer: ${IDPORTEN_ISSUER:http://localhost:8888/default}
   audience: ${IDPORTEN_CLIENT_ID:default}

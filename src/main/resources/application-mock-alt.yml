@@ -43,5 +43,5 @@ client:
 
 
 idporten:
-  issuer: ${IDPORTEN_URL:http://localhost:8888/default}
+  issuer: ${IDPORTEN_ISSUER:http://localhost:8888/default}
   audience: ${IDPORTEN_CLIENT_ID:default}

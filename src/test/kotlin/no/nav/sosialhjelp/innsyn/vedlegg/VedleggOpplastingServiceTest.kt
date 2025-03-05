@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
@@ -147,7 +148,7 @@ internal class VedleggOpplastingServiceTest {
                         null,
                     ),
                 )
-            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, "token")
+            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, Token("token"))
 
             val filerForOpplastingSlot = slot<List<FilForOpplasting>>()
             val vedleggSpesifikasjonSlot = slot<JsonVedleggSpesifikasjon>()
@@ -240,7 +241,7 @@ internal class VedleggOpplastingServiceTest {
                     ),
                 )
 
-            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, "token")
+            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, Token("token"))
 
             coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
@@ -286,7 +287,7 @@ internal class VedleggOpplastingServiceTest {
                     ),
                 )
 
-            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, "token")
+            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, Token("token"))
 
             coVerify(exactly = 1) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
@@ -328,7 +329,7 @@ internal class VedleggOpplastingServiceTest {
                     ),
                 )
 
-            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, "token")
+            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, Token("token"))
 
             coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
@@ -366,7 +367,7 @@ internal class VedleggOpplastingServiceTest {
                     ),
                 )
 
-            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, "token")
+            val vedleggOpplastingResponseList = service.sendVedleggTilFiks(id, metadata, Token("token"))
 
             coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any(), any()) }
 
@@ -398,7 +399,7 @@ internal class VedleggOpplastingServiceTest {
                     ),
                 )
 
-            val runResult = kotlin.runCatching { service.sendVedleggTilFiks(id, metadata, "token") }
+            val runResult = kotlin.runCatching { service.sendVedleggTilFiks(id, metadata, Token("token")) }
 
             assertThat(runResult.isFailure).isTrue()
             assertThat(runResult.exceptionOrNull()).isInstanceOf(VirusScanException::class.java)

@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.saksoversikt
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
@@ -80,7 +81,7 @@ class SaksOversiktController(
     private suspend fun hentAntallNyeVilkarOgDokumentasjonkrav(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): Int {
         // Alle vilkår og dokumentasjonskrav fjernes hvis alle utbetalinger har status utbetalt/annullert og er forbigått utbetalingsperioden med 21 dager
         val filterUtbetalinger =
@@ -99,7 +100,7 @@ class SaksOversiktController(
     private suspend fun hentAntallNyeOppgaver(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): Int {
         return when {
             model.oppgaver.isEmpty() -> 0
@@ -110,7 +111,7 @@ class SaksOversiktController(
     private suspend fun hentAntallNyeVilkar(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): Int {
         return when {
             model.vilkar.isEmpty() -> 0
@@ -121,7 +122,7 @@ class SaksOversiktController(
     private suspend fun hentAntallNyeDokumentasjonkrav(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): Int {
         return when {
             model.dokumentasjonkrav.isEmpty() -> 0

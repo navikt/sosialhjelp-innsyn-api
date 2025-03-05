@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.digisosapi.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
@@ -109,7 +110,7 @@ class DigisosApiTestClientImpl(
 
     override suspend fun hentInnsynsfil(
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): String? =
         withContext(Dispatchers.IO) {
             runCatching {
@@ -117,7 +118,7 @@ class DigisosApiTestClientImpl(
                     fiksWebClient.get()
                         .uri("/digisos/api/v1/soknader/$fiksDigisosId")
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(AUTHORIZATION, token)
+                        .header(AUTHORIZATION, token.withBearer())
                         .retrieve()
                         .bodyToMono(DigisosSak::class.java)
                         .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -133,7 +134,7 @@ class DigisosApiTestClientImpl(
                 fiksWebClient.get()
                     .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${digisosSoker.metadata}")
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION, token)
+                    .header(AUTHORIZATION, token.withBearer())
                     .retrieve()
                     .bodyToMono(String::class.java)
                     .onErrorMap(WebClientResponseException::class.java) { e ->

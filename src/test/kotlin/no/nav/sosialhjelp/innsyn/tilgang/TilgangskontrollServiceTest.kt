@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Adressebeskyttelse
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.Gradering
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
@@ -104,8 +105,8 @@ internal class TilgangskontrollServiceTest {
         runTestWithToken {
             coEvery { pdlClientMock.hentPerson(any(), any()) } returns null
 
-            assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
-            assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
+            assertThat(service.hentTilgang(ident, Token("token")).harTilgang).isFalse
+            assertThat(service.hentTilgang(ident, Token("token")).fornavn).isEqualTo("")
         }
 
     @Test
@@ -114,8 +115,8 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson } returns null
             coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-            assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
-            assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
+            assertThat(service.hentTilgang(ident, Token("token")).harTilgang).isFalse
+            assertThat(service.hentTilgang(ident, Token("token")).fornavn).isEqualTo("")
         }
 
     @Test
@@ -125,7 +126,7 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.navn } returns null
             coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-            assertThat(service.hentTilgang(ident, "token").harTilgang).isTrue
+            assertThat(service.hentTilgang(ident, Token("token")).harTilgang).isTrue
         }
 
     @Test
@@ -135,7 +136,7 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.navn } returns null
             coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-            assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
+            assertThat(service.hentTilgang(ident, Token("token")).harTilgang).isFalse
         }
 
     @Test
@@ -145,8 +146,8 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.navn } returns listOf(PdlNavn("KREATIV"), PdlNavn("NATA"))
             coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-            assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("Kreativ")
-            assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
+            assertThat(service.hentTilgang(ident, Token("token")).fornavn).isEqualTo("Kreativ")
+            assertThat(service.hentTilgang(ident, Token("token")).harTilgang).isFalse
         }
 
     @Test
@@ -156,8 +157,8 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.navn } returns null
             coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-            assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
-            assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
+            assertThat(service.hentTilgang(ident, Token("token")).fornavn).isEqualTo("")
+            assertThat(service.hentTilgang(ident, Token("token")).harTilgang).isFalse
         }
 
     @Test
@@ -167,8 +168,8 @@ internal class TilgangskontrollServiceTest {
             every { clientResponse.hentPerson?.navn } returns emptyList()
             coEvery { pdlClientMock.hentPerson(any(), any()) } returns clientResponse
 
-            assertThat(service.hentTilgang(ident, "token").fornavn).isEqualTo("")
-            assertThat(service.hentTilgang(ident, "token").harTilgang).isFalse
+            assertThat(service.hentTilgang(ident, Token("token")).fornavn).isEqualTo("")
+            assertThat(service.hentTilgang(ident, Token("token")).harTilgang).isFalse
         }
 
     @Test

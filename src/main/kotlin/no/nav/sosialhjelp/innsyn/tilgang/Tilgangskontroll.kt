@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.tilgang
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPerson
@@ -21,7 +22,7 @@ class TilgangskontrollService(
 
     suspend fun sjekkTilgang(
         ident: String,
-        token: String,
+        token: Token,
     ) {
         val hentPerson = hentPerson(ident, token)
         if (hentPerson != null && hentPerson.isKode6Or7()) {
@@ -31,7 +32,7 @@ class TilgangskontrollService(
 
     suspend fun hentTilgang(
         ident: String,
-        token: String,
+        token: Token,
     ): Tilgang {
         val pdlPerson = hentPerson(ident, token) ?: return Tilgang(false, "")
         return Tilgang(!pdlPerson.isKode6Or7(), fornavn(pdlPerson))
@@ -39,7 +40,7 @@ class TilgangskontrollService(
 
     private suspend fun hentPerson(
         ident: String,
-        token: String,
+        token: Token,
     ): PdlPerson? {
         return try {
             pdlClient.hentPerson(ident, token)?.hentPerson

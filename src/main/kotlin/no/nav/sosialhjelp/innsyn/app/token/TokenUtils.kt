@@ -31,22 +31,22 @@ object TokenUtils {
         }
     }
 
-    suspend fun getToken(): String {
+    suspend fun getToken(): Token {
         return getTokenOrNull() ?: error("No token in request context")
     }
 
-    private suspend fun getTokenOrNull(): String? {
+    private suspend fun getTokenOrNull(): Token? {
         return when (val authenticationToken = getAuthenticationToken()) {
             is JwtAuthenticationToken -> {
                 val creds = authenticationToken.credentials as OAuth2Token
-                creds.tokenValue
+                creds.tokenValue?.let { Token(it) }
             }
 
             is UsernamePasswordAuthenticationToken -> {
-                authenticationToken.credentials?.toString()
+                authenticationToken.credentials?.toString()?.let { Token(it) }
             }
             is TestingAuthenticationToken -> {
-                authenticationToken.credentials?.toString()
+                authenticationToken.credentials?.toString()?.let { Token(it) }
             }
             else -> TODO()
         }
@@ -54,4 +54,9 @@ object TokenUtils {
 
     private suspend fun getAuthenticationToken(): Authentication? =
         ReactiveSecurityContextHolder.getContext().awaitSingleOrNull()?.authentication
+}
+
+@JvmInline
+value class Token(val value: String) {
+    fun withBearer() = "Bearer $value"
 }

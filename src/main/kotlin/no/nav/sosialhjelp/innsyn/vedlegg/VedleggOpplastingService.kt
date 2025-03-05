@@ -8,6 +8,7 @@ import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
@@ -41,7 +42,7 @@ class VedleggOpplastingService(
     suspend fun sendVedleggTilFiks(
         digisosId: String,
         metadatas: List<OpplastetVedleggMetadata>,
-        token: String,
+        token: Token,
     ): List<OppgaveValidering> {
         log.info("Starter ettersendelse med ${metadatas.size} filer.")
 
@@ -98,7 +99,7 @@ class VedleggOpplastingService(
     suspend fun createEttersendelsePdf(
         metadata: List<OpplastetVedleggMetadata>,
         digisosId: String,
-        token: String,
+        token: Token,
     ): FilForOpplasting {
         try {
             log.info("Starter generering av ettersendelse.pdf")

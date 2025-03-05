@@ -6,17 +6,15 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.utils.runTestWithToken
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -73,20 +71,18 @@ internal class VedleggControllerTest {
     @BeforeEach
     internal fun setUp() {
         clearMocks(vedleggOpplastingService, vedleggService)
-        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
 
-        coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
+        coEvery { tilgangskontroll.sjekkTilgang() } just Runs
         every { digisosSak.fiksDigisosId } returns "123"
     }
 
     @AfterEach
     internal fun tearDown() {
-        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() =
-        runTest(timeout = 5.seconds) {
+        runTestWithToken {
             coEvery { fiksClient.hentDigisosSak(any(), any()) } returns digisosSak
             coEvery { eventService.createModel(any(), any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any(), any()) } returns
@@ -102,7 +98,7 @@ internal class VedleggControllerTest {
                     ),
                 )
 
-            val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
+            val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id)
 
             val body = vedleggResponses.body
 
@@ -121,7 +117,7 @@ internal class VedleggControllerTest {
 
     @Test
     fun `skal utelate duplikater i response`() =
-        runTest(timeout = 5.seconds) {
+        runTestWithToken {
             val now = LocalDateTime.now()
             coEvery { fiksClient.hentDigisosSak(any(), any()) } returns digisosSak
             coEvery { eventService.createModel(any(), any()) } returns model
@@ -147,7 +143,7 @@ internal class VedleggControllerTest {
                     ),
                 )
 
-            val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id, "token")
+            val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id)
 
             val body = vedleggResponses.body
 
@@ -162,14 +158,13 @@ internal class VedleggControllerTest {
 
     @Test
     fun `kaster exception dersom input til sendVedlegg ikke inneholder metadata-json`() =
-        runTest(timeout = 5.seconds) {
+        runTestWithToken {
             val files =
                 mutableListOf<MultipartFile>(
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                     MockMultipartFile("files", "test2.png", null, ByteArray(0)),
                 )
-            val request: HttpServletRequest = mockk()
-            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+            runCatching { controller.sendVedlegg(id, files) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
             }
@@ -184,24 +179,21 @@ internal class VedleggControllerTest {
                     MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                 )
-            val request: HttpServletRequest = mockk()
-            assertThat(runCatching { controller.sendVedlegg(id, files, "token", request) }.isSuccess)
+            assertThat(runCatching { controller.sendVedlegg(id, files) }.isSuccess)
         }
 
     // TODO: Denne testen gir ikke mening. Den bare tester at en exception blir kastet, men testen selv kaster exeptionen
     @Test
     fun `skal kaste exception dersom token mangler`() =
-        runTest(timeout = 5.seconds) {
+        runTestWithToken(timeout = 5.seconds) {
             coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any()) } returns emptyList()
             val files =
                 mutableListOf<MultipartFile>(
                     MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                 )
-            val request: HttpServletRequest = mockk()
-            every { request.cookies } returns arrayOf()
-            coEvery { tilgangskontroll.sjekkTilgang("bad token") } throws IllegalStateException()
-            runCatching { controller.sendVedlegg(id, files, "bad token", request) }.let {
+            coEvery { tilgangskontroll.sjekkTilgang() } throws IllegalStateException()
+            runCatching { controller.sendVedlegg(id, files) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
             }
@@ -209,7 +201,7 @@ internal class VedleggControllerTest {
 
     @Test
     fun `skal kaste exception hvis det er filer i metadata som ikke er i resten av filene`() =
-        runTest(timeout = 5.seconds) {
+        runTestWithToken {
             val metadata =
                 """
             |[{
@@ -223,8 +215,7 @@ internal class VedleggControllerTest {
             |
                 """.trimMargin()
 
-            val request: HttpServletRequest = mockk()
-            coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
+            coEvery { tilgangskontroll.sjekkTilgang() } just Runs
 
             val files =
                 mutableListOf<MultipartFile>(
@@ -232,7 +223,7 @@ internal class VedleggControllerTest {
                     MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
                     MockMultipartFile("files", "roflmao.jpg", null, ByteArray(0)),
                 )
-            runCatching { controller.sendVedlegg(id, files, "token", request) }.let {
+            runCatching { controller.sendVedlegg(id, files) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
                 assertThat(it.exceptionOrNull()?.message).contains("Fil i metadata var ikke i listen over filer")

@@ -13,8 +13,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -63,32 +62,14 @@ class FiksClientImpl(
     @Cacheable("digisosSak", key = "#digisosId")
     override suspend fun hentDigisosSak(
         digisosId: String,
-        token: String,
+        token: Token,
     ): DigisosSak {
         return hentDigisosSakFraFiks(digisosId, token).also { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
     }
 
-    @Cacheable("digisosSak", key = "#digisosId")
-    override suspend fun hentDigisosSakMedFnr(
-        digisosId: String,
-        token: String,
-        fnr: String,
-    ): DigisosSak {
-        val sak = hentDigisosSakFraFiks(digisosId, token)
-
-        // TODO henting av fnr og sammeligning benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
-        val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
-
-        if (fnr2 != fnr) {
-            log.error("Fødselsnr i kontekst har blitt endret - FiksClient.hentDigisosSak")
-        }
-        tilgangskontroll.verifyDigisosSakIsForCorrectUser(sak)
-        return sak
-    }
-
     private suspend fun hentDigisosSakFraFiks(
         digisosId: String,
-        token: String,
+        token: Token,
     ): DigisosSak =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
@@ -97,7 +78,7 @@ class FiksClientImpl(
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
                     .retrieve()
                     .bodyToMono<DigisosSak>()
                     .retryWhen(fiksRetry)
@@ -120,7 +101,7 @@ class FiksClientImpl(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,
-        token: String,
+        token: Token,
         cacheKey: String,
     ): T {
         return hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass, token)
@@ -130,7 +111,7 @@ class FiksClientImpl(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,
-        token: String,
+        token: Token,
     ): T =
         withContext(Dispatchers.IO) {
             log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
@@ -138,7 +119,7 @@ class FiksClientImpl(
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
                     .retrieve()
                     .bodyToMono(requestedClass)
                     .retryWhen(fiksRetry)
@@ -155,13 +136,13 @@ class FiksClientImpl(
             dokument.also { log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
-    override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
+    override suspend fun hentAlleDigisosSaker(token: Token): List<DigisosSak> {
         return withContext(Dispatchers.IO) {
             val digisosSaker: List<DigisosSak> =
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
                     .retrieve()
                     .bodyToMono<List<DigisosSak>>()
                     .retryWhen(fiksRetry)
@@ -183,7 +164,7 @@ class FiksClientImpl(
         files: List<FilForOpplasting>,
         vedleggJson: JsonVedleggSpesifikasjon,
         digisosId: String,
-        token: String,
+        token: Token,
     ) {
         log.info(
             "Starter sending til FIKS for ettersendelse med ${files.size} filer (inkludert ettersendelse.pdf)." +
@@ -205,10 +186,10 @@ class FiksClientImpl(
         }
 
         val responseEntity =
-            withContext(Dispatchers.IO + RequestAttributesContext()) {
+            withContext(Dispatchers.IO) {
                 fiksWebClient.post()
                     .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(body))
                     .retrieve()

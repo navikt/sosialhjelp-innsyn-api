@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -23,7 +24,7 @@ class HendelseService(
 ) {
     suspend fun hentHendelser(
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): List<HendelseResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)

@@ -10,7 +10,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 fun runTestWithToken(
-    token: Jwt = defaultAuthToken,
+    token: Jwt = createJwt(),
     timeout: Duration = 5.seconds,
     block: suspend TestScope.() -> Unit,
 ) = runTest(
@@ -37,20 +37,10 @@ fun createJwt(
         it["alg"] = ""
         it["typ"] = "JWT"
         it["kid"] = "kid"
-    }.issuer("iss").audience(audience).subject(subject).claim("pid", pid)
+    }.issuer(issuer).audience(audience).subject(subject).claim("pid", pid)
         .claim("acr", "idporten-loa-high")
         .also {
             extraClaims.map { (key, value) -> it.claim(key, value) }
         }
         .build()
 }
-
-private val defaultAuthToken: Jwt =
-    Jwt.withTokenValue("token").headers {
-        it["alg"] = "none"
-        it["typ"] = "JWT"
-        it["sub"] = "sub"
-        it["kid"] = "kid"
-    }.issuer("iss").audience(listOf("aud")).claim("sub", "sub").claim("pid", "123")
-        .claim("acr", "idporten-loa-high")
-        .build()

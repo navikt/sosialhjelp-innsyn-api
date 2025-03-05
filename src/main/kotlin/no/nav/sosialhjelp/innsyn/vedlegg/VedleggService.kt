@@ -6,6 +6,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.exceptions.NedlastingFilnavnMismatchException
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -23,7 +24,7 @@ class VedleggService(
     suspend fun hentAlleOpplastedeVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
-        token: String,
+        token: Token,
     ): List<InternalVedlegg> {
         val soknadVedlegg = hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, digisosSak, token)
         val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak, model, token)
@@ -34,7 +35,7 @@ class VedleggService(
     suspend fun hentSoknadVedleggMedStatus(
         status: String,
         digisosSak: DigisosSak,
-        token: String,
+        token: Token,
     ): List<InternalVedlegg> {
         val originalSoknadNAV = digisosSak.originalSoknadNAV ?: return emptyList()
         val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, originalSoknadNAV.vedleggMetadata, token)
@@ -63,7 +64,7 @@ class VedleggService(
     suspend fun hentEttersendteVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
-        token: String,
+        token: Token,
     ): List<InternalVedlegg> {
         val alleVedlegg =
             digisosSak.ettersendtInfoNAV
@@ -114,7 +115,7 @@ class VedleggService(
     private suspend fun hentVedleggSpesifikasjon(
         digisosSak: DigisosSak,
         dokumentlagerId: String,
-        token: String,
+        token: Token,
     ): JsonVedleggSpesifikasjon {
         return fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token)
     }

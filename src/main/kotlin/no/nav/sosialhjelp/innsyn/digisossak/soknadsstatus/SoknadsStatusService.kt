@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -21,7 +22,7 @@ class SoknadsStatusService(
 ) {
     suspend fun hentSoknadsStatus(
         fiksDigisosId: String,
-        token: String,
+        token: Token,
         fnr: String,
     ): UtvidetSoknadsStatus {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)

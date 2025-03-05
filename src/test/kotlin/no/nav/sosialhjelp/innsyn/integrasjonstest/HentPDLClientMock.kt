@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClientOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
@@ -23,7 +24,7 @@ class HentPDLClientMock : PdlClientOld {
 
     override suspend fun hentPerson(
         ident: String,
-        token: String,
+        token: Token,
     ): PdlHentPerson {
         val resourceAsStream = ClassLoader.getSystemResourceAsStream("pdl/pdlPersonResponse.json")
 
@@ -34,7 +35,7 @@ class HentPDLClientMock : PdlClientOld {
 
     override suspend fun hentIdenter(
         ident: String,
-        token: String,
+        token: Token,
     ): List<String> {
 //      ikke i bruk
         return emptyList()

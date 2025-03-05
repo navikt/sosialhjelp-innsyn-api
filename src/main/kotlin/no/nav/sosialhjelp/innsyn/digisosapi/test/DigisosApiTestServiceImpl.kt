@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import kotlinx.coroutines.CoroutineScope
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -45,7 +46,7 @@ class DigisosApiTestServiceImpl(
 
     override suspend fun hentInnsynsfil(
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): String? {
         return digisosApiTestClient.hentInnsynsfil(fiksDigisosId, token)
     }

@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -29,7 +30,7 @@ internal class SoknadsStatusServiceTest {
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockInternalDigisosSoker: InternalDigisosSoker = mockk()
 
-    private val token = "token"
+    private val token = Token("token")
     private val dokumentlagerId = "dokumentlagerId"
     private val navEnhet = "Nav Test"
 

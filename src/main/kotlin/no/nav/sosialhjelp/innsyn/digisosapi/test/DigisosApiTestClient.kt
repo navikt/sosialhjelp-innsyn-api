@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 
@@ -16,6 +17,6 @@ interface DigisosApiTestClient {
 
     suspend fun hentInnsynsfil(
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): String?
 }

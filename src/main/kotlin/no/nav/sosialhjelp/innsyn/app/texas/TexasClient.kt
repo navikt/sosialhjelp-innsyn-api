@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.codec.json.Jackson2JsonDecoder
@@ -27,15 +28,22 @@ enum class TokenEndpointType {
     INTROSPECTION,
 }
 
-@Component
-class TexasClient(
+sealed class TexasClient(
     texasWebClientBuilder: WebClient.Builder,
-    @Value("\${nais.token.endpoint}")
     private val tokenEndpoint: String,
-    @Value("\${nais.token.exchange.endpoint}")
     private val tokenXEndpoint: String,
 ) {
-    private val log by logger()
+    protected val log by logger()
+
+    open suspend fun getMaskinportenToken(): Token = getToken(TokenEndpointType.M2M, maskinportenParams)
+
+    suspend fun getTokenXToken(
+        target: String,
+        userToken: Token,
+    ): Token = getToken(
+        TokenEndpointType.BEHALF_OF,
+        getTokenXParams(target, userToken),
+    )
 
     private val texasWebClient =
         texasWebClientBuilder.defaultHeaders {
@@ -51,19 +59,11 @@ class TexasClient(
     private fun getTokenXParams(
         target: String,
         userToken: Token,
-    ): Map<String, String> = mapOf("identity_provider" to "tokenx", "target" to target, "user_token" to userToken.value)
+    ): Map<String, String> {
+        return mapOf("identity_provider" to "tokenx", "target" to target, "user_token" to userToken.value)
+    }
 
-    suspend fun getMaskinportenToken() = getToken(TokenEndpointType.M2M, maskinportenParams)
-
-    suspend fun getTokenXToken(
-        target: String,
-        userToken: Token,
-    ) = getToken(
-        TokenEndpointType.BEHALF_OF,
-        getTokenXParams(target, userToken),
-    )
-
-    private suspend fun getToken(
+    protected suspend fun getToken(
         tokenEndpointType: TokenEndpointType,
         params: Map<String, String>,
     ): Token =
@@ -102,7 +102,31 @@ class TexasClient(
                 }
             }
         }
+
 }
+
+@Component
+@Profile("!mock-alt")
+class TexasClientImpl(
+    texasWebClientBuilder: WebClient.Builder,
+    @Value("\${nais.token.endpoint}")
+    private val tokenEndpoint: String,
+    @Value("\${nais.token.exchange.endpoint}")
+    private val tokenXEndpoint: String,
+) : TexasClient(texasWebClientBuilder, tokenEndpoint, tokenXEndpoint)
+
+@Component
+@Profile("mock-alt")
+class MockTexasClient(
+    texasWebClientBuilder: WebClient.Builder,
+    @Value("\${nais.token.endpoint}")
+    private val tokenEndpoint: String,
+    @Value("\${nais.token.exchange.endpoint}")
+    private val tokenXEndpoint: String,
+) : TexasClient(texasWebClientBuilder, tokenEndpoint, tokenXEndpoint) {
+    override suspend fun getMaskinportenToken(): Token = Token("token")
+}
+
 
 sealed class TokenResponse {
     data class Success(

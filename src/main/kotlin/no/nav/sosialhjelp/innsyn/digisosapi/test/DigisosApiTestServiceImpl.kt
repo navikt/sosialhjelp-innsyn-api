@@ -1,6 +1,9 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
@@ -8,8 +11,11 @@ import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
+import java.io.SequenceInputStream
+import java.util.Collections
 import kotlin.coroutines.EmptyCoroutineContext
 
 @Profile("!prodgcp")
@@ -29,18 +35,18 @@ class DigisosApiTestServiceImpl(
 
     override suspend fun lastOppFil(
         fiksDigisosId: String,
-        file: MultipartFile,
+        file: FilePart,
     ): String {
-        val bytes = file.bytes
-        virusScanner.scan(file.name, bytes)
+        val inputstream = SequenceInputStream(Collections.enumeration(file.content().asFlow().map { it.asInputStream() }.toList()))
+        virusScanner.scan(file.filename(), file)
 
         val inputStream =
             krypteringService.krypter(
-                file.inputStream,
+                inputstream,
                 dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
                 CoroutineScope(EmptyCoroutineContext),
             )
-        val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
+        val filerForOpplasting = listOf(FilForOpplasting(file.filename(), file.headers().contentType?.toString(), file.headers().contentLength, inputStream))
         return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 

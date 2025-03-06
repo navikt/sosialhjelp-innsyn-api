@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.micrometer.core.instrument.MeterRegistry
+import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
@@ -18,15 +18,17 @@ import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.multipart.MultipartFile
+import reactor.core.publisher.Flux
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.jvm.optionals.getOrDefault
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -37,28 +39,25 @@ class VedleggController(
     private val tilgangskontroll: TilgangskontrollService,
     private val eventService: EventService,
     private val fiksClient: FiksClient,
-    meterRegistry: MeterRegistry,
 ) {
-    val counter = meterRegistry.counter("vedlegg_size")
 
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
-        @RequestPart("files") rawFiles: List<MultipartFile>,
+        @RequestPart("files") rawFiles: Flux<FilePart>,
     ): List<OppgaveOpplastingResponse> {
-        counter.increment(rawFiles.sumOf { it.size }.toDouble())
         log.info("Forsøker å starter ettersendelse")
         val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
+        val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles.collectList().block() ?: emptyList())
 
         check(files.isNotEmpty()) { "Ingen filer i forsendelse" }
 
         metadata.flatMap { it.filer }.onEach { fil ->
             fil.fil = files.find {
-                it.originalFilename?.contains(fil.uuid.toString()) ?: false
+                it.filename().contains(fil.uuid.toString())
             } ?: error("Fil i metadata var ikke i listen over filer")
         }
 
@@ -110,11 +109,11 @@ class VedleggController(
             )
         }
 
-    private fun getMetadataAndRemoveFromFileList(files: List<MultipartFile>): Pair<List<OpplastetVedleggMetadata>, List<MultipartFile>> {
+    private suspend fun getMetadataAndRemoveFromFileList(files: List<FilePart>): Pair<List<OpplastetVedleggMetadata>, List<FilePart>> {
         val metadataJson =
-            files.firstOrNull { it.originalFilename == "metadata.json" }
-                ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.size}")
-        return Pair(objectMapper.readValue<List<OpplastetVedleggMetadata>>(metadataJson.bytes), files - metadataJson)
+            files.firstOrNull { it.filename() == "metadata.json" }
+                ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.toList().size}")
+        return Pair(objectMapper.readValue<List<OpplastetVedleggMetadata>>(metadataJson.content().asFlow().asInputStream().readAllBytes()), files - metadataJson)
     }
 
     fun removeUUIDFromFilename(filename: String): String {
@@ -149,6 +148,6 @@ data class OpplastetFil(
     var filnavn: String,
     val uuid: UUID,
 ) {
-    lateinit var fil: MultipartFile
+    lateinit var fil: FilePart
     lateinit var validering: FilValidering
 }

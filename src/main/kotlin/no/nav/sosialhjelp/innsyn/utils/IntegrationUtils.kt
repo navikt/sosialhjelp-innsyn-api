@@ -6,8 +6,6 @@ object IntegrationUtils {
 
     const val KILDE_INNSYN_API = "innsyn-api"
 
-    const val BEARER = "Bearer "
-
     const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
 
     const val BEHANDLINGSNUMMER_INNSYN = "B478"

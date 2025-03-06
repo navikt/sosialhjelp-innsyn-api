@@ -9,7 +9,6 @@ import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_ALLE_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_KOMMUNEINFO
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -39,7 +38,7 @@ class KommuneInfoClient(
                 kommuneInfoWebClient.get()
                     .uri(PATH_ALLE_KOMMUNEINFO)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                    .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                     .retrieve()
                     .awaitBody<List<KommuneInfo>>()
             }.onFailure {
@@ -61,7 +60,7 @@ class KommuneInfoClient(
                 kommuneInfoWebClient.get()
                     .uri(PATH_KOMMUNEINFO, kommunenummer)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                    .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                     .retrieve()
                     .awaitBody<KommuneInfo>()
             }.onFailure {

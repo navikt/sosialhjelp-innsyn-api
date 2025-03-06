@@ -14,7 +14,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
 import no.nav.sosialhjelp.innsyn.digisosapi.toHttpEntity
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -54,7 +53,7 @@ class DigisosApiTestClientImpl(
 
             digisosApiTestWebClient.post()
                 .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
-                .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                 .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
                 .retrieve()
                 .bodyToMono<String>()
@@ -89,7 +88,7 @@ class DigisosApiTestClientImpl(
             withContext(Dispatchers.IO) {
                 digisosApiTestWebClient.post()
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
-                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                    .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(body))
                     .retrieve()
@@ -153,7 +152,7 @@ class DigisosApiTestClientImpl(
             val response =
                 digisosApiTestWebClient.post()
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
-                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                    .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                     .body(BodyInserters.fromValue(""))
                     .retrieve()
                     .bodyToMono<String>()

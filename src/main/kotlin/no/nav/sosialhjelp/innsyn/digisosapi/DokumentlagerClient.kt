@@ -5,7 +5,6 @@ import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -38,7 +37,7 @@ class DokumentlagerClientImpl(
                     fiksWebClient.get()
                         .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
                         .accept(APPLICATION_JSON)
-                        .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                        .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                         .retrieve()
                         .awaitBody<ByteArray>()
                 }.onFailure {

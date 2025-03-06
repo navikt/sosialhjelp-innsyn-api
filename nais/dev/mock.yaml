@@ -50,7 +50,6 @@ spec:
     - "https://digisos.ekstern.dev.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
-      cpu: 500m
       memory: 2Gi
     requests:
       cpu: 10m

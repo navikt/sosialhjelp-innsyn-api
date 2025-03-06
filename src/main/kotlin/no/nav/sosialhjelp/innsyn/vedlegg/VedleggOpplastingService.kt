@@ -77,9 +77,10 @@ class VedleggOpplastingService(
             withTimeout(30.seconds) {
                 val etterKryptering =
                     filerForOpplasting.map { fil ->
-                        val kryptert = fil.fil.use {
-                            krypteringService.krypter(it, certificate, this)
-                        }
+                        val kryptert =
+                            fil.fil.use {
+                                krypteringService.krypter(it, certificate, this)
+                            }
                         fil.copy(fil = kryptert)
                     }
                 val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadataWithoutEmpties)

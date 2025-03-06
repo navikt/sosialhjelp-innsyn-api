@@ -40,10 +40,11 @@ sealed class TexasClient(
     suspend fun getTokenXToken(
         target: String,
         userToken: Token,
-    ): Token = getToken(
-        TokenEndpointType.BEHALF_OF,
-        getTokenXParams(target, userToken),
-    )
+    ): Token =
+        getToken(
+            TokenEndpointType.BEHALF_OF,
+            getTokenXParams(target, userToken),
+        )
 
     private val texasWebClient =
         texasWebClientBuilder.defaultHeaders {
@@ -102,7 +103,6 @@ sealed class TexasClient(
                 }
             }
         }
-
 }
 
 @Component
@@ -126,7 +126,6 @@ class MockTexasClient(
 ) : TexasClient(texasWebClientBuilder, tokenEndpoint, tokenXEndpoint) {
     override suspend fun getMaskinportenToken(): Token = Token("token")
 }
-
 
 sealed class TokenResponse {
     data class Success(

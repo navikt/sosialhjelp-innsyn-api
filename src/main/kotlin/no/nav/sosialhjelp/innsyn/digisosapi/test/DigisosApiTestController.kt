@@ -1,10 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
@@ -19,12 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.multipart.MultipartFile
-import java.io.SequenceInputStream
-import java.util.Collections
 
 /**
  *  Endepunkter som kun tilbys for sosialhjelp-fagsystem-mock -> kun tilgjengelig i preprod og dev, ved lokal kjøring og i mock

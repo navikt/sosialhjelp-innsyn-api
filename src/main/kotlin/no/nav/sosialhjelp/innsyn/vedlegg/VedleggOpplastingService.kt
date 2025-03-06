@@ -7,6 +7,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
@@ -22,8 +23,8 @@ import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.springframework.cache.CacheManager
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
-import org.springframework.web.multipart.MultipartFile
 import java.io.IOException
 import java.io.InputStream
 import java.time.LocalDate
@@ -58,9 +59,14 @@ class VedleggOpplastingService(
         val filerForOpplasting =
             metadatas.flatMap { metadata ->
                 metadata.filer.map { fil ->
-                    val detectedMimetype = detectTikaType(fil.fil.inputStream)
+                    val detectedMimetype = detectTikaType(fil.fil.content().asFlow().asInputStream())
                     val filename = createFilename(fil).also { fil.filnavn = it }
-                    FilForOpplasting(filename, getMimetype(detectedMimetype), fil.fil.size, fil.fil.inputStream)
+                    FilForOpplasting(
+                        filename,
+                        getMimetype(detectedMimetype),
+                        fil.fil.headers().contentLength,
+                        fil.fil.content().asFlow().asInputStream(),
+                    )
                 }
             } + createEttersendelsePdf(metadataWithoutEmpties, digisosId, token)
 
@@ -70,9 +76,11 @@ class VedleggOpplastingService(
             // Kjører kryptering i parallell
             withTimeout(30.seconds) {
                 val etterKryptering =
-                    filerForOpplasting.map {
-                        val kryptert = krypteringService.krypter(it.fil, certificate, this)
-                        it.copy(fil = kryptert)
+                    filerForOpplasting.map { fil ->
+                        val kryptert = fil.fil.use {
+                            krypteringService.krypter(it, certificate, this)
+                        }
+                        fil.copy(fil = kryptert)
                     }
                 val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadataWithoutEmpties)
                 try {
@@ -121,7 +129,7 @@ class VedleggOpplastingService(
         }
     }
 
-    fun createJsonVedleggSpesifikasjon(metadata: List<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon {
+    suspend fun createJsonVedleggSpesifikasjon(metadata: List<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon {
         return JsonVedleggSpesifikasjon()
             .withVedlegg(
                 metadata.map {
@@ -130,7 +138,7 @@ class VedleggOpplastingService(
                         it.filer.map { fil ->
                             JsonFiler()
                                 .withFilnavn(fil.filnavn)
-                                .withSha512(getSha512FromByteArray(fil.fil.bytes))
+                                .withSha512(getSha512FromDataBuffer(fil.fil))
                         },
                     )
                 },
@@ -187,10 +195,10 @@ class VedleggOpplastingService(
         }.awaitAll()
 
     suspend fun validateFil(
-        file: MultipartFile,
+        file: FilePart,
         filnavn: String,
     ): ValidationResult {
-        if (file.size > MAKS_TOTAL_FILSTORRELSE) {
+        if (file.headers().contentLength > MAKS_TOTAL_FILSTORRELSE) {
             return ValidationResult(ValidationValues.FILE_TOO_LARGE)
         }
 
@@ -198,9 +206,9 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
 
-        virusScanner.scan(filnavn, file.bytes)
+        virusScanner.scan(filnavn, file)
 
-        val tikaMediaType = detectTikaType(file.inputStream)
+        val tikaMediaType = detectTikaType(file.content().asFlow().asInputStream())
         if (tikaMediaType == "text/x-matlab") {
             log.info(
                 "Tika detekterte mimeType text/x-matlab. " +
@@ -210,29 +218,23 @@ class VedleggOpplastingService(
         val fileType = mapToTikaFileType(tikaMediaType)
 
         if (fileType == TikaFileType.UNKNOWN) {
-            val content = String(file.bytes)
-            val firstBytes =
-                content.subSequence(
-                    0,
-                    when {
-                        content.length > 8 -> 8
-                        content.isNotEmpty() -> content.length
-                        else -> 0
-                    },
-                )
+            val firstBytes = file.content().asFlow().asInputStream().use { it.readNBytes(8) }
 
             log.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +
                     "\r\nextension: \"${splitFileName(filnavn).extension}\"," +
                     "\r\nvalidatedFileType: ${fileType.name}," +
                     "\r\ntikaMediaType: $tikaMediaType," +
-                    "\r\nmime: ${file.contentType}" +
+                    "\r\nmime: ${file.headers().contentType}" +
                     ",\r\nførste bytes: $firstBytes",
             )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
         if (fileType == TikaFileType.PDF) {
-            return ValidationResult(checkIfPdfIsValid(file.inputStream), TikaFileType.PDF)
+            val data = file.content().asFlow().asInputStream()
+            data.use {
+                return ValidationResult(checkIfPdfIsValid(data), TikaFileType.PDF)
+            }
         }
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
             val ext: String = filnavn.substringAfterLast(".")
@@ -246,13 +248,16 @@ class VedleggOpplastingService(
 
     private fun checkIfPdfIsValid(data: InputStream): ValidationValues {
         try {
-            Loader.loadPDF(RandomAccessReadBuffer(data))
-                .use { document ->
-                    if (document.isEncrypted) {
-                        return ValidationValues.PDF_IS_ENCRYPTED
+            val randomAccessReadBuffer = RandomAccessReadBuffer(data)
+            randomAccessReadBuffer.use {
+                Loader.loadPDF(randomAccessReadBuffer)
+                    .use { document ->
+                        if (document.isEncrypted) {
+                            return ValidationValues.PDF_IS_ENCRYPTED
+                        }
+                        return ValidationValues.OK
                     }
-                    return ValidationValues.OK
-                }
+            }
         } catch (e: InvalidPasswordException) {
             log.warn(ValidationValues.PDF_IS_ENCRYPTED.name + " " + e.message)
             return ValidationValues.PDF_IS_ENCRYPTED

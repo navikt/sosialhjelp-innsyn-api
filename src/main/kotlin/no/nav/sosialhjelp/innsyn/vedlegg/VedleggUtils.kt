@@ -1,20 +1,38 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.fold
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.collect
 import org.apache.tika.Tika
+import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.http.codec.multipart.FilePart
 import java.io.InputStream
+import java.io.SequenceInputStream
 import java.security.MessageDigest
 import java.text.Normalizer
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.Collections
 import kotlin.math.absoluteValue
 
-fun getSha512FromByteArray(bytes: ByteArray?): String {
-    if (bytes == null) {
+suspend fun getSha512FromDataBuffer(filePart: FilePart?): String {
+    if (filePart == null) {
         return ""
     }
 
     val md = MessageDigest.getInstance("SHA-512")
-    val digest = md.digest(bytes)
+
+    filePart.content().collect { dataBuffer: DataBuffer ->
+        val byteArray = ByteArray(dataBuffer.readableByteCount())
+        dataBuffer.read(byteArray)
+        md.update(byteArray)
+        DataBufferUtils.release(dataBuffer)
+    }
+
+    val digest = md.digest()
     return digest.fold("") { str, it -> str + "%02x".format(it) }
 }
 
@@ -90,3 +108,7 @@ fun areDatesWithinOneMinute(
     return (firstDate == null && secondDate == null) ||
         ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
 }
+
+suspend fun Flow<DataBuffer>.size(): Long = fold(0L) { acc, it -> acc + it.readableByteCount() }
+
+suspend fun Flow<DataBuffer>.asInputStream(): SequenceInputStream = SequenceInputStream(Collections.enumeration(map { it.asInputStream() }.toList()))

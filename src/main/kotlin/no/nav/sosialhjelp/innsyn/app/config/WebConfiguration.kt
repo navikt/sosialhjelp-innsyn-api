@@ -14,12 +14,13 @@ import org.springframework.web.server.WebFilter
 class WebConfiguration(
     private val tracingWebFilter: TracingWebFilter,
     private val mdcFilter: MDCFilter,
-): WebFluxConfigurer {
+) : WebFluxConfigurer {
     override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
         val partReader = DefaultPartHttpMessageReader()
 
         configurer.defaultCodecs().multipartReader(MultipartHttpMessageReader(partReader))
     }
+
     @Bean
     fun webFilters(): List<WebFilter> {
         return listOf(tracingWebFilter, mdcFilter)

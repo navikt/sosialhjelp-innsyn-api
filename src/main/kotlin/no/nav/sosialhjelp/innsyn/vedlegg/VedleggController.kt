@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.collect
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.jvm.optionals.getOrDefault
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -42,7 +40,6 @@ class VedleggController(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
-
     // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun sendVedlegg(
@@ -115,7 +112,10 @@ class VedleggController(
         val metadataJson =
             files.firstOrNull { it.filename() == "metadata.json" }
                 ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.toList().size}")
-        return Pair(objectMapper.readValue<List<OpplastetVedleggMetadata>>(metadataJson.content().asFlow().asInputStream().readAllBytes()), files - metadataJson)
+        return Pair(
+            objectMapper.readValue<List<OpplastetVedleggMetadata>>(metadataJson.content().asFlow().asInputStream().readAllBytes()),
+            files - metadataJson,
+        )
     }
 
     fun removeUUIDFromFilename(filename: String): String {

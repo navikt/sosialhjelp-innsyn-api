@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
+import no.nav.sosialhjelp.innsyn.vedlegg.calculateContentLength
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
 import org.springframework.http.codec.multipart.FilePart
@@ -31,7 +32,8 @@ class DigisosApiTestServiceImpl(
         fiksDigisosId: String,
         file: FilePart,
     ): String {
-        virusScanner.scan(file.filename(), file)
+        val size = file.calculateContentLength()
+        virusScanner.scan(file.filename(), file, size)
 
         val encrypted =
             coroutineScope {
@@ -46,7 +48,7 @@ class DigisosApiTestServiceImpl(
                 FilForOpplasting(
                     Filename(file.filename()),
                     file.headers().contentType?.toString(),
-                    file.headers().contentLength,
+                    size,
                     encrypted,
                 ),
             )

@@ -116,8 +116,6 @@ fun areDatesWithinOneMinute(
         ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
 }
 
-suspend fun Flow<DataBuffer>.size(): Long = fold(0L) { acc, it -> acc + it.readableByteCount() }
-
 suspend fun Flow<DataBuffer>.asInputStream(): SequenceInputStream =
     SequenceInputStream(
         Collections.enumeration(

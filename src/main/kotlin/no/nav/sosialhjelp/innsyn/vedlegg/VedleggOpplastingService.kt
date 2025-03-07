@@ -32,7 +32,6 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import java.io.IOException
-import java.io.InputStream
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.seconds
 
@@ -69,7 +68,7 @@ class VedleggOpplastingService(
                             "text/x-matlab" -> "application/pdf"
                             else -> fil.tikaMimeType
                         },
-                        fil.fil.headers().contentLength, fil.fil.content(),
+                        fil.size(), fil.fil.content(),
                     )
                 }
             } + createEttersendelsePdf(metadata, fiksDigisosId)
@@ -149,27 +148,6 @@ class VedleggOpplastingService(
             .withHendelseReferanse(metadata.hendelsereferanse)
     }
 
-    private fun checkIfPdfIsValid(data: InputStream): ValidationValues {
-        try {
-            val randomAccessReadBuffer = RandomAccessReadBuffer(data)
-            randomAccessReadBuffer.use {
-                Loader.loadPDF(randomAccessReadBuffer)
-                    .use { document ->
-                        if (document.isEncrypted) {
-                            return ValidationValues.PDF_IS_ENCRYPTED
-                        }
-                        return ValidationValues.OK
-                    }
-            }
-        } catch (e: InvalidPasswordException) {
-            log.warn(ValidationValues.PDF_IS_ENCRYPTED.name + " " + e.message)
-            return ValidationValues.PDF_IS_ENCRYPTED
-        } catch (e: IOException) {
-            log.warn(ValidationValues.COULD_NOT_LOAD_DOCUMENT.name, e)
-            return ValidationValues.COULD_NOT_LOAD_DOCUMENT
-        }
-    }
-
     suspend fun List<OpplastetVedleggMetadata>.validate() =
         coroutineScope {
             map { metadata ->
@@ -181,7 +159,8 @@ class VedleggOpplastingService(
                         metadata.hendelsetype,
                         metadata.hendelsereferanse,
                         metadata.filer.map { file ->
-                            FilValidering(file.filnavn.sanitize(), file.validate()).also { file.validering = it }
+                            val validationResult = file.validate()
+                            FilValidering(file.filnavn.sanitize(), validationResult).also { file.validering = it }
                         },
                     )
                 }
@@ -189,14 +168,14 @@ class VedleggOpplastingService(
         }
 
     suspend fun OpplastetFil.validate(): ValidationResult {
-        if (fil.headers().contentLength > MAKS_TOTAL_FILSTORRELSE) {
+        if (size() > MAKS_TOTAL_FILSTORRELSE) {
             return ValidationResult(ValidationValues.FILE_TOO_LARGE)
         }
 
         if (filnavn.containsIllegalCharacters()) {
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
-        virusScanner.scan(filnavn.value, fil)
+        virusScanner.scan(filnavn.value, fil, size())
 
         val result = validateFileType()
 
@@ -239,7 +218,7 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
         if (fileType == TikaFileType.PDF) {
-            return ValidationResult(checkIfPdfIsValid(DataBufferUtils.join(fil.content()).awaitSingle()), TikaFileType.PDF)
+            return ValidationResult(DataBufferUtils.join(fil.content()).awaitSingle().checkIfPdfIsValid(), TikaFileType.PDF)
         }
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
             val ext: String = fil.filename().substringAfterLast(".")
@@ -251,9 +230,9 @@ class VedleggOpplastingService(
         return ValidationResult(ValidationValues.OK, fileType)
     }
 
-    private fun checkIfPdfIsValid(data: DataBuffer): ValidationValues {
+    private fun DataBuffer.checkIfPdfIsValid(): ValidationValues {
         try {
-            val randomAccessReadBuffer = RandomAccessReadBuffer(data.asInputStream())
+            val randomAccessReadBuffer = RandomAccessReadBuffer(this.asInputStream())
             randomAccessReadBuffer.use {
                 Loader.loadPDF(it)
                     .use { document ->

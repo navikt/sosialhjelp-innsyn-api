@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
@@ -72,10 +73,8 @@ class VedleggController(
                 }
 
         val allDeclaredFilesHasAMatch =
-            metadata.all {
-                    metadata ->
-                metadata.filer.all {
-                        metadataFile ->
+            metadata.all { metadata ->
+                metadata.filer.all { metadataFile ->
                     metadataFile.uuid.toString() in files.map { it.filename().substringBefore(".") }
                 }
             }
@@ -87,7 +86,9 @@ class VedleggController(
         files.onEach { file ->
             metadata.flatMap { it.filer }.find {
                 file.filename().contains(it.uuid.toString())
-            }?.fil = file
+            }?.also {
+                it.fil = file
+            }
         }
 
         return vedleggOpplastingService.processFileUpload(fiksDigisosId, metadata).mapToResponse()
@@ -157,6 +158,16 @@ data class OpplastetFil(
     val uuid: UUID,
 ) {
     lateinit var fil: FilePart
+
+    private var size: Long = -1
+
+    suspend fun size(): Long {
+        if (size == -1L) {
+            size = fil.calculateContentLength()
+        }
+        return size
+    }
+
     lateinit var validering: FilValidering
     lateinit var tikaMimeType: String
 }
@@ -172,3 +183,10 @@ private fun List<OppgaveValidering>.mapToResponse() =
             it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result) },
         )
     }
+
+suspend fun FilePart.calculateContentLength(): Long {
+    val dataBuffer = DataBufferUtils.join(content()).awaitSingle()
+    val contentLength = dataBuffer.readableByteCount().toLong()
+    DataBufferUtils.release(dataBuffer)
+    return contentLength
+}

@@ -18,10 +18,12 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
+import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
+import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -74,14 +76,21 @@ class DigisosApiTestClientImpl(
         files: List<FilForOpplasting>,
         soknadId: String,
     ): List<String> {
-        val body = LinkedMultiValueMap<String, Any>()
+        val bodyBuilder = MultipartBodyBuilder()
         files.forEachIndexed { fileId, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
-            body.add(
+            bodyBuilder.part(
                 "vedleggSpesifikasjon:$fileId",
                 fiksClientImpl.serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
-            body.add("dokument:$fileId", file.toHttpEntity("dokument:$fileId"))
+            bodyBuilder.asyncPart("dokument:$fileId", file.fil, DataBuffer::class.java).headers {
+                it.contentType = MediaType.APPLICATION_OCTET_STREAM
+                it.contentDisposition =
+                    ContentDisposition.builder("form-data")
+                        .name("dokument:$fileId")
+                        .filename(file.filnavn?.value)
+                        .build()
+            }
         }
 
         val opplastingResponseList =
@@ -90,7 +99,7 @@ class DigisosApiTestClientImpl(
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
                     .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(body))
+                    .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                     .retrieve()
                     .bodyToMono<List<FilOpplastingResponse>>()
                     .onErrorMap(WebClientResponseException::class.java) { e ->

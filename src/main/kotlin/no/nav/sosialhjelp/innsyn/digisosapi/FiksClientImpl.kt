@@ -299,10 +299,6 @@ private fun Any.toHttpEntity(
     return HttpEntity(this, headerMap)
 }
 
-fun FilForOpplasting.toHttpEntity(name: String): HttpEntity<Any> {
-    return InputStreamResource(InputStream.nullInputStream()).toHttpEntity(name, this.filnavn?.value, "application/octet-stream")
-}
-
 fun String.toHttpEntity(name: String): HttpEntity<Any> {
     return this.toHttpEntity(name, null, "text/plain;charset=UTF-8")
 }

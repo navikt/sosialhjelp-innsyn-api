@@ -33,7 +33,7 @@ internal class VirusScannerTest {
     fun scanFile_scanningIsNotEnabled_doesNotThrowException() =
         runTest(timeout = 5.seconds) {
             virusScanner = VirusScanner(webClient, enabled = false)
-            assertThat(runCatching { virusScanner.scan(filnavn, mockk()) }.isSuccess)
+            assertThat(runCatching { virusScanner.scan(filnavn, mockk(), 21L) }.isSuccess)
         }
 
     @Test
@@ -41,7 +41,7 @@ internal class VirusScannerTest {
         runTest(timeout = 5.seconds) {
             virusScanner = VirusScanner(webClient, enabled = true)
 
-            runCatching { virusScanner.scan("virustest", mockPart("whatever", data)) }.let {
+            runCatching { virusScanner.scan("virustest", mockPart("whatever", data), 21L) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(VirusScanException::class.java)
             }
@@ -63,7 +63,7 @@ internal class VirusScannerTest {
                     ),
             )
 
-            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, mockPart("whatever", data)) }.isSuccess)
+            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, mockPart("whatever", data), 21L) }.isSuccess)
         }
 
     @Test
@@ -81,7 +81,7 @@ internal class VirusScannerTest {
                         ),
                     ),
             )
-            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, mockPart("whatever", data)) }.isSuccess)
+            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, mockPart("whatever", data), 21L) }.isSuccess)
         }
 
     @Test
@@ -99,7 +99,7 @@ internal class VirusScannerTest {
                         ),
                     ),
             )
-            runCatching { virusScanner.scan(filnavn, mockPart("whatever", data)) }.let {
+            runCatching { virusScanner.scan(filnavn, mockPart("whatever", data), 21L) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(VirusScanException::class.java)
             }
@@ -120,7 +120,7 @@ internal class VirusScannerTest {
                         ),
                     ),
             )
-            kotlin.runCatching { virusScanner.scan(filnavn, mockPart("whatever", data)) }.let {
+            kotlin.runCatching { virusScanner.scan(filnavn, mockPart("whatever", data), 21L) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(VirusScanException::class.java)
             }
@@ -147,6 +147,6 @@ internal class VirusScannerTest {
                     ),
             )
 
-            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, mockPart("whatever", data)) }.isSuccess)
+            assertThat(kotlin.runCatching { virusScanner.scan(filnavn, mockPart("whatever", data), 21L) }.isSuccess)
         }
 }

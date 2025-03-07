@@ -1,6 +1,9 @@
 package no.nav.sosialhjelp.innsyn.digisosapi
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
@@ -41,6 +44,7 @@ class DokumentlagerClientImpl(
                         .retrieve()
                         .awaitBody<ByteArray>()
                 }.onFailure {
+                    if (it is CancellationException) currentCoroutineContext().ensureActive()
                     if (it is WebClientResponseException) {
                         log.warn("Fiks - getDokumentlagerPublicKey feilet - ${it.statusCode} ${it.statusText}", it)
                         when {

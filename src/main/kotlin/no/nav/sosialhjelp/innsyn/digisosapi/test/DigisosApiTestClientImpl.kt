@@ -76,7 +76,7 @@ class DigisosApiTestClientImpl(
     ): List<String> {
         val body = LinkedMultiValueMap<String, Any>()
         files.forEachIndexed { fileId, file ->
-            val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
+            val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
             body.add(
                 "vedleggSpesifikasjon:$fileId",
                 fiksClientImpl.serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),

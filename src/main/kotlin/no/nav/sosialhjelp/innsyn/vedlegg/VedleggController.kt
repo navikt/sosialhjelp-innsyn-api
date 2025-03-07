@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
@@ -16,6 +17,7 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.OppgaveOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -40,29 +42,49 @@ class VedleggController(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
-    // Send alle opplastede vedlegg for fiksDigisosId til Fiks
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): List<OppgaveOpplastingResponse> {
+        val allFiles = rawFiles.asFlow().toList()
         log.info("Forsøker å starter ettersendelse")
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles.asFlow().toList())
+        // Ekstraherer metadata.json
+        val metadata =
+            allFiles
+                .firstOrNull { it.filename() == "metadata.json" }
+                ?.content()?.let {
+                    DataBufferUtils.join(it)
+                }?.map {
+                    val bytes = ByteArray(it.readableByteCount())
+                    it.read(bytes)
+                    DataBufferUtils.release(it)
+                    objectMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
+                }?.awaitSingleOrNull()?.filter { it.filer.isNotEmpty() } ?: error("Missing metadata.json")
 
-        check(files.isNotEmpty()) { "Ingen filer i forsendelse" }
+        val files =
+            allFiles
+                .filterNot { it.filename() == "metadata.json" }
+                .also {
+                    require(it.isNotEmpty()) { "Ingen filer i forsendelse" }
+                }
 
-        metadata.flatMap { it.filer }.onEach { fil ->
-            fil.fil = files.find {
-                it.filename().contains(fil.uuid.toString())
-            } ?: error("Fil i metadata var ikke i listen over filer")
+        val allDeclaredFilesHasAMatch =
+            metadata.all { metadata -> metadata.filer.all { metadataFile -> metadataFile.uuid.toString() in files.map { it.filename() } } }
+        require(allDeclaredFilesHasAMatch) {
+            "Ikke alle filer i metadata.json ble funnet i forsendelsen"
         }
 
-        val oppgaveValideringList =
-            vedleggOpplastingService.sendVedleggTilFiks(fiksDigisosId, metadata, token)
-        return mapToResponse(oppgaveValideringList)
+        // Set hver fil på sitt tilhørende metadata-objekt
+        files.onEach { file ->
+            metadata.flatMap { it.filer }.find {
+                file.filename().contains(it.uuid.toString())
+            }?.fil = file
+        }
+
+        return vedleggOpplastingService.processFileUpload(fiksDigisosId, metadata).mapToResponse()
     }
 
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
@@ -96,28 +118,6 @@ class VedleggController(
         return ResponseEntity.ok(vedleggResponses.distinct())
     }
 
-    private fun mapToResponse(oppgaveValideringList: List<OppgaveValidering>) =
-        oppgaveValideringList.map {
-            OppgaveOpplastingResponse(
-                it.type,
-                it.tilleggsinfo,
-                it.innsendelsesfrist,
-                it.hendelsetype,
-                it.hendelsereferanse,
-                it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result) },
-            )
-        }
-
-    private suspend fun getMetadataAndRemoveFromFileList(files: List<FilePart>): Pair<List<OpplastetVedleggMetadata>, List<FilePart>> {
-        val metadataJson =
-            files.firstOrNull { it.filename() == "metadata.json" }
-                ?: throw IllegalStateException("Mangler metadata.json. Totalt antall filer var ${files.toList().size}")
-        return Pair(
-            objectMapper.readValue<List<OpplastetVedleggMetadata>>(metadataJson.content().asFlow().asInputStream().readAllBytes()),
-            files - metadataJson,
-        )
-    }
-
     fun removeUUIDFromFilename(filename: String): String {
         val indexOfFileExtension = filename.lastIndexOf(".")
         if (indexOfFileExtension != -1 && indexOfFileExtension > LENGTH_OF_UUID_PART &&
@@ -147,9 +147,22 @@ data class OpplastetVedleggMetadata(
 )
 
 data class OpplastetFil(
-    var filnavn: String,
+    var filnavn: Filename,
     val uuid: UUID,
 ) {
     lateinit var fil: FilePart
     lateinit var validering: FilValidering
+    lateinit var tikaMimeType: String
 }
+
+private fun List<OppgaveValidering>.mapToResponse() =
+    map {
+        OppgaveOpplastingResponse(
+            it.type,
+            it.tilleggsinfo,
+            it.innsendelsesfrist,
+            it.hendelsetype,
+            it.hendelsereferanse,
+            it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result) },
+        )
+    }

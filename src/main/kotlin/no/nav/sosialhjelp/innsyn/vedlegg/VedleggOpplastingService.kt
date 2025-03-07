@@ -1,18 +1,19 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sosialhjelp.innsyn.app.token.Token
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
@@ -22,9 +23,12 @@ import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
+import org.apache.tika.Tika
 import org.springframework.cache.CacheManager
-import org.springframework.http.codec.multipart.FilePart
+import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
 import java.io.IOException
 import java.io.InputStream
 import java.time.LocalDate
@@ -43,85 +47,69 @@ class VedleggOpplastingService(
 ) {
     private val log by logger()
 
-    suspend fun sendVedleggTilFiks(
-        digisosId: String,
-        metadatas: List<OpplastetVedleggMetadata>,
-        token: Token,
+    suspend fun processFileUpload(
+        fiksDigisosId: String,
+        metadata: List<OpplastetVedleggMetadata>,
     ): List<OppgaveValidering> {
-        log.info("Starter ettersendelse med ${metadatas.size} filer.")
-
-        val oppgaveValideringer = validateFiler(metadatas)
-        if (oppgaveValideringer.flatMap { validering -> validering.filer.map { it.status.result } }.any { it != ValidationValues.OK }) {
-            return oppgaveValideringer
+        // Valider
+        val validations = metadata.validate().awaitAll()
+        if (validations.flatMap { validation -> validation.filer.map { it.status } }.any { it.result != ValidationValues.OK }) {
+            return validations
         }
-        val metadataWithoutEmpties = metadatas.filter { it.filer.isNotEmpty() }
 
         val filerForOpplasting =
-            metadatas.flatMap { metadata ->
+            metadata.flatMap { metadata ->
                 metadata.filer.map { fil ->
-                    val detectedMimetype = detectTikaType(fil.fil.content().asFlow().asInputStream())
-                    val filename = createFilename(fil).also { fil.filnavn = it }
+                    val filename = fil.createFilename().also { fil.filnavn = it }
                     FilForOpplasting(
                         filename,
-                        getMimetype(detectedMimetype),
-                        fil.fil.headers().contentLength,
-                        fil.fil.content().asFlow().asInputStream(),
+                        when (fil.tikaMimeType) {
+                            "text/x-matlab" -> "application/pdf"
+                            else -> fil.tikaMimeType
+                        },
+                        fil.fil.headers().contentLength, fil.fil.content(),
                     )
                 }
-            } + createEttersendelsePdf(metadataWithoutEmpties, digisosId, token)
+            } + createEttersendelsePdf(metadata, fiksDigisosId)
 
+        // kryptering og opplasting
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
-
         coroutineScope {
             // Kjører kryptering i parallell
-            withTimeout(30.seconds) {
+            withTimeout(60.seconds) {
                 val etterKryptering =
                     filerForOpplasting.map { fil ->
-                        val kryptert =
-                            fil.fil.use {
-                                krypteringService.krypter(it, certificate, this)
-                            }
+                        val kryptert = krypteringService.krypter(fil.fil, certificate, this)
                         fil.copy(fil = kryptert)
                     }
-                val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadataWithoutEmpties)
+                val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadata)
                 try {
-                    fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, digisosId, token)
+                    fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, fiksDigisosId)
                 } catch (e: FiksClientFileExistsException) {
                     // ignorerer når filen allerede er lastet opp
                 }
-
-                etterKryptering.onEach { it.fil.close() }
             }
         }
 
-        // Evict cache for digisosSak
-        cacheManager?.getCache("digisosSak")?.evict(digisosId)?.also {
-            log.info("Evicted cache for digisosSak with key $digisosId")
+        cacheManager?.getCache("digisosSak")?.evict(fiksDigisosId)?.also {
+            log.info("Evicted cache for digisosSak with key $fiksDigisosId")
         }
-
-        return oppgaveValideringer
+        return validations
     }
-
-    private fun getMimetype(detectedMimetype: String) =
-        when (detectedMimetype) {
-            "text/x-matlab" -> "application/pdf"
-            else -> detectedMimetype
-        }
 
     suspend fun createEttersendelsePdf(
         metadata: List<OpplastetVedleggMetadata>,
         digisosId: String,
-        token: Token,
     ): FilForOpplasting {
         try {
             log.info("Starter generering av ettersendelse.pdf")
-            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, token)
+            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, TokenUtils.getToken())
             val ettersendelsePdf = ettersendelsePdfGenerator.generate(metadata, currentDigisosSak.sokerFnr)
             return FilForOpplasting(
-                "ettersendelse.pdf",
+                Filename("ettersendelse.pdf"),
                 "application/pdf",
                 ettersendelsePdf.size.toLong(),
-                ettersendelsePdf.inputStream(),
+                Flux.just(),
             )
         } catch (e: Exception) {
             if (e is CancellationException) currentCoroutineContext().ensureActive()
@@ -138,7 +126,7 @@ class VedleggOpplastingService(
                         it,
                         it.filer.map { fil ->
                             JsonFiler()
-                                .withFilnavn(fil.filnavn)
+                                .withFilnavn(fil.filnavn.value)
                                 .withSha512(getSha512FromDataBuffer(fil.fil))
                         },
                     )
@@ -159,86 +147,100 @@ class VedleggOpplastingService(
             .withHendelseReferanse(metadata.hendelsereferanse)
     }
 
-    fun createFilename(fil: OpplastetFil): String {
-        val filenameSplit = splitFileName(sanitizeFileName(fil.filnavn))
-        return filenameSplit.name.take(50) + "-" + fil.uuid.toString().substringBefore("-") + fil.validering.status.fileType.toExt()
+    private fun checkIfPdfIsValid(data: InputStream): ValidationValues {
+        try {
+            val randomAccessReadBuffer = RandomAccessReadBuffer(data)
+            randomAccessReadBuffer.use {
+                Loader.loadPDF(randomAccessReadBuffer)
+                    .use { document ->
+                        if (document.isEncrypted) {
+                            return ValidationValues.PDF_IS_ENCRYPTED
+                        }
+                        return ValidationValues.OK
+                    }
+            }
+        } catch (e: InvalidPasswordException) {
+            log.warn(ValidationValues.PDF_IS_ENCRYPTED.name + " " + e.message)
+            return ValidationValues.PDF_IS_ENCRYPTED
+        } catch (e: IOException) {
+            log.warn(ValidationValues.COULD_NOT_LOAD_DOCUMENT.name, e)
+            return ValidationValues.COULD_NOT_LOAD_DOCUMENT
+        }
     }
 
-    suspend fun validateFiler(metadatas: List<OpplastetVedleggMetadata>): List<OppgaveValidering> =
+    suspend fun List<OpplastetVedleggMetadata>.validate() =
         coroutineScope {
-            metadatas.map { metadata ->
-                async(Dispatchers.IO) {
-                    val filValideringer =
-                        metadata.filer.mapIndexed { index, mpf ->
-                            async(Dispatchers.IO) {
-                                val valideringstatus = validateFil(mpf.fil, mpf.filnavn)
-                                if (valideringstatus.result != ValidationValues.OK) {
-                                    log.warn(
-                                        "Opplasting av fil $index av ${metadatas.sumOf { it.filer.size }} til ettersendelse feilet. " +
-                                            "Det var ${metadatas.size} oppgaveElement. Status: $valideringstatus",
-                                    )
-                                }
-                                FilValidering(sanitizeFileName(mpf.filnavn), valideringstatus).also { mpf.validering = it }
-                            }
-                        }
-                    with(metadata) {
-                        OppgaveValidering(
-                            type,
-                            tilleggsinfo,
-                            innsendelsesfrist,
-                            hendelsetype,
-                            hendelsereferanse,
-                            filValideringer.awaitAll(),
-                        )
-                    }
+            map { metadata ->
+                async {
+                    OppgaveValidering(
+                        metadata.type,
+                        metadata.tilleggsinfo,
+                        metadata.innsendelsesfrist,
+                        metadata.hendelsetype,
+                        metadata.hendelsereferanse,
+                        metadata.filer.map { file ->
+                            FilValidering(file.filnavn.sanitize(), file.validate()).also { file.validering = it }
+                        },
+                    )
                 }
             }
-        }.awaitAll()
+        }
 
-    suspend fun validateFil(
-        file: FilePart,
-        filnavn: String,
-    ): ValidationResult {
-        if (file.headers().contentLength > MAKS_TOTAL_FILSTORRELSE) {
+    suspend fun OpplastetFil.validate(): ValidationResult {
+        if (fil.headers().contentLength > MAKS_TOTAL_FILSTORRELSE) {
             return ValidationResult(ValidationValues.FILE_TOO_LARGE)
         }
 
         if (filnavn.containsIllegalCharacters()) {
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
+        virusScanner.scan(filnavn.value, fil)
 
-        virusScanner.scan(filnavn, file)
+        val result = validateFileType()
 
-        val tikaMediaType = detectTikaType(file.content().asFlow().asInputStream())
-        if (tikaMediaType == "text/x-matlab") {
+        return result
+    }
+
+    private suspend fun OpplastetFil.detectAndSetMimeType() =
+        fil.content().asFlow().asInputStream().use { ins ->
+            Tika().detect(ins).also { tikaMimeType = it }
+        }
+
+    suspend fun OpplastetFil.validateFileType(): ValidationResult {
+        detectAndSetMimeType()
+
+        if (tikaMimeType == "text/x-matlab") {
             log.info(
                 "Tika detekterte mimeType text/x-matlab. " +
                     "Vi antar at dette egentlig er en PDF, men som ikke har korrekte magic bytes (%PDF).",
             )
         }
-        val fileType = mapToTikaFileType(tikaMediaType)
+        val fileType = mapToTikaFileType(tikaMimeType)
 
         if (fileType == TikaFileType.UNKNOWN) {
-            val firstBytes = file.content().asFlow().asInputStream().use { it.readNBytes(8) }
+            val firstBytes =
+                DataBufferUtils.join(fil.content()).awaitFirstOrNull()?.let { dataBuffer ->
+                    ByteArray(dataBuffer.readableByteCount().coerceAtMost(8)).also {
+                        dataBuffer.read(it)
+                        DataBufferUtils.release(dataBuffer)
+                    }
+                }
 
             log.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +
-                    "\r\nextension: \"${splitFileName(filnavn).extension}\"," +
+                    "\r\nextension: \"${splitFileName(fil.filename()).extension}\"," +
                     "\r\nvalidatedFileType: ${fileType.name}," +
-                    "\r\ntikaMediaType: $tikaMediaType," +
-                    "\r\nmime: ${file.headers().contentType}" +
+                    "\r\ntikaMediaType: $tikaMimeType," +
+                    "\r\nmime: ${fil.headers().contentType}" +
                     ",\r\nførste bytes: $firstBytes",
             )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
         if (fileType == TikaFileType.PDF) {
-            val data = file.content().asFlow().asInputStream()
-            data.use {
-                return ValidationResult(checkIfPdfIsValid(data), TikaFileType.PDF)
-            }
+            return ValidationResult(checkIfPdfIsValid(DataBufferUtils.join(fil.content()).awaitSingle()), TikaFileType.PDF)
         }
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
-            val ext: String = filnavn.substringAfterLast(".")
+            val ext: String = fil.filename().substringAfterLast(".")
             if (ext.lowercase() in listOf("jfif", "pjpeg", "pjp")) {
                 log.warn("Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.")
                 return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
@@ -247,11 +249,11 @@ class VedleggOpplastingService(
         return ValidationResult(ValidationValues.OK, fileType)
     }
 
-    private fun checkIfPdfIsValid(data: InputStream): ValidationValues {
+    private fun checkIfPdfIsValid(data: DataBuffer): ValidationValues {
         try {
-            val randomAccessReadBuffer = RandomAccessReadBuffer(data)
+            val randomAccessReadBuffer = RandomAccessReadBuffer(data.asInputStream())
             randomAccessReadBuffer.use {
-                Loader.loadPDF(randomAccessReadBuffer)
+                Loader.loadPDF(it)
                     .use { document ->
                         if (document.isEncrypted) {
                             return ValidationValues.PDF_IS_ENCRYPTED
@@ -294,8 +296,13 @@ enum class ValidationValues {
 }
 
 data class FilForOpplasting(
-    val filnavn: String?,
+    val filnavn: Filename?,
     val mimetype: String?,
     val storrelse: Long,
-    val fil: InputStream,
+    val fil: Flux<DataBuffer>,
 )
+
+fun OpplastetFil.createFilename(): Filename {
+    val filenameSplit = splitFileName(filnavn.sanitize())
+    return Filename(filenameSplit.name.take(50) + "-" + uuid.toString().substringBefore("-") + validering.status.fileType.toExt())
+}

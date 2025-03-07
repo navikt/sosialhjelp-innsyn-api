@@ -25,8 +25,10 @@ import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.apache.tika.Tika
 import org.springframework.cache.CacheManager
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import java.io.IOException
@@ -109,7 +111,7 @@ class VedleggOpplastingService(
                 Filename("ettersendelse.pdf"),
                 "application/pdf",
                 ettersendelsePdf.size.toLong(),
-                Flux.just(),
+                DataBufferUtils.read(ByteArrayResource(ettersendelsePdf), DefaultDataBufferFactory.sharedInstance, 1024),
             )
         } catch (e: Exception) {
             if (e is CancellationException) currentCoroutineContext().ensureActive()

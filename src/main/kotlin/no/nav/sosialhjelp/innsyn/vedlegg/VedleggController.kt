@@ -72,7 +72,13 @@ class VedleggController(
                 }
 
         val allDeclaredFilesHasAMatch =
-            metadata.all { metadata -> metadata.filer.all { metadataFile -> metadataFile.uuid.toString() in files.map { it.filename().substringBefore(".") } } }
+            metadata.all {
+                    metadata ->
+                metadata.filer.all {
+                        metadataFile ->
+                    metadataFile.uuid.toString() in files.map { it.filename().substringBefore(".") }
+                }
+            }
         require(allDeclaredFilesHasAMatch) {
             "Ikke alle filer i metadata.json ble funnet i forsendelsen"
         }

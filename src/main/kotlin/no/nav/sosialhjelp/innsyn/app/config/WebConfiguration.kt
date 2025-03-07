@@ -16,7 +16,9 @@ class WebConfiguration(
     private val mdcFilter: MDCFilter,
 ) : WebFluxConfigurer {
     override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
-        val partReader = DefaultPartHttpMessageReader()
+        val partReader = DefaultPartHttpMessageReader().apply {
+            maxInMemorySize = 16 * 1024 * 1024
+        }
 
         configurer.defaultCodecs().multipartReader(MultipartHttpMessageReader(partReader))
     }

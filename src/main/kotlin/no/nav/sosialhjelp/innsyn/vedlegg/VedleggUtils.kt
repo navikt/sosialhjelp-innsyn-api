@@ -36,6 +36,13 @@ suspend fun getSha512FromDataBuffer(filePart: FilePart?): String {
     return digest.fold("") { str, it -> str + "%02x".format(it) }
 }
 
+@JvmInline
+value class Filename(val value: String) {
+    fun sanitize() = Normalizer.normalize(value, Normalizer.Form.NFC).trim()
+
+    fun containsIllegalCharacters(): Boolean = this.sanitize().contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
+}
+
 fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC).trim()
 
 fun detectTikaType(inputStream: InputStream): String {
@@ -115,7 +122,7 @@ suspend fun Flow<DataBuffer>.asInputStream(): SequenceInputStream =
     SequenceInputStream(
         Collections.enumeration(
             map {
-                it.asInputStream()
+                it.asInputStream(true)
             }.toList(),
         ),
     )

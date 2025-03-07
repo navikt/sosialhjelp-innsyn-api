@@ -1,21 +1,16 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.coroutineScope
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
-import java.io.SequenceInputStream
-import java.util.Collections
-import kotlin.coroutines.EmptyCoroutineContext
 
 @Profile("!prodgcp")
 @Component
@@ -36,17 +31,25 @@ class DigisosApiTestServiceImpl(
         fiksDigisosId: String,
         file: FilePart,
     ): String {
-        val inputstream = SequenceInputStream(Collections.enumeration(file.content().asFlow().map { it.asInputStream() }.toList()))
         virusScanner.scan(file.filename(), file)
 
-        val inputStream =
-            krypteringService.krypter(
-                inputstream,
-                dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
-                CoroutineScope(EmptyCoroutineContext),
-            )
+        val encrypted =
+            coroutineScope {
+                krypteringService.krypter(
+                    file.content(),
+                    dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
+                    this,
+                )
+            }
         val filerForOpplasting =
-            listOf(FilForOpplasting(file.filename(), file.headers().contentType?.toString(), file.headers().contentLength, inputStream))
+            listOf(
+                FilForOpplasting(
+                    Filename(file.filename()),
+                    file.headers().contentType?.toString(),
+                    file.headers().contentLength,
+                    encrypted,
+                ),
+            )
         return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 

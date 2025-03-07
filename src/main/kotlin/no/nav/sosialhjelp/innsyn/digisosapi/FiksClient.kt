@@ -18,7 +18,6 @@ interface FiksClient {
         files: List<FilForOpplasting>,
         vedleggJson: JsonVedleggSpesifikasjon,
         digisosId: String,
-        token: Token,
     )
 
     suspend fun <T : Serializable> hentDokument(

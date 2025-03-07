@@ -14,6 +14,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.token.Token
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -24,19 +25,23 @@ import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.InputStreamResource
+import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE
 import org.springframework.http.MediaType
+import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
+import java.io.InputStream
 import java.io.Serializable
 
 @Component
@@ -164,7 +169,6 @@ class FiksClientImpl(
         files: List<FilForOpplasting>,
         vedleggJson: JsonVedleggSpesifikasjon,
         digisosId: String,
-        token: Token,
     ) {
         log.info(
             "Starter sending til FIKS for ettersendelse med ${files.size} filer (inkludert ettersendelse.pdf)." +
@@ -173,7 +177,7 @@ class FiksClientImpl(
 
         val body = createBodyForUpload(vedleggJson, files)
 
-        val digisosSak = hentDigisosSakFraFiks(digisosId, token)
+        val digisosSak = hentDigisosSakFraFiks(digisosId, TokenUtils.getToken())
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val kommunenummer = digisosSak.kommunenummer
         if (kommunenummer == "1507") {
@@ -189,7 +193,7 @@ class FiksClientImpl(
             withContext(Dispatchers.IO) {
                 fiksWebClient.post()
                     .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
-                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
+                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(body))
                     .retrieve()
@@ -237,19 +241,23 @@ class FiksClientImpl(
     fun createBodyForUpload(
         vedleggJson: JsonVedleggSpesifikasjon,
         files: List<FilForOpplasting>,
-    ): LinkedMultiValueMap<String, Any> {
-        val body = LinkedMultiValueMap<String, Any>()
-        body.add("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
+    ): MultiValueMap<String, HttpEntity<*>> {
+        val bodyBuilder = MultipartBodyBuilder()
+        bodyBuilder.part("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
 
         files.forEachIndexed { fileId, file ->
-            val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
-            body.add(
-                "vedleggSpesifikasjon:$fileId",
-                serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
-            )
-            body.add("dokument:$fileId", file.toHttpEntity("dokument:$fileId"))
+            val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
+            bodyBuilder.part("vedleggSpesifikasjon:$fileId", serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"))
+            bodyBuilder.asyncPart("dokument:$fileId", file.fil, DataBuffer::class.java).headers {
+                it.contentType = MediaType.APPLICATION_OCTET_STREAM
+                it.contentDisposition =
+                    ContentDisposition.builder("form-data")
+                        .name("dokument:$fileId")
+                        .filename(file.filnavn?.value)
+                        .build()
+            }
         }
-        return body
+        return bodyBuilder.build()
     }
 
     fun serialiser(metadata: Any): String {
@@ -292,7 +300,7 @@ private fun Any.toHttpEntity(
 }
 
 fun FilForOpplasting.toHttpEntity(name: String): HttpEntity<Any> {
-    return InputStreamResource(this.fil).toHttpEntity(name, this.filnavn, "application/octet-stream")
+    return InputStreamResource(InputStream.nullInputStream()).toHttpEntity(name, this.filnavn?.value, "application/octet-stream")
 }
 
 fun String.toHttpEntity(name: String): HttpEntity<Any> {

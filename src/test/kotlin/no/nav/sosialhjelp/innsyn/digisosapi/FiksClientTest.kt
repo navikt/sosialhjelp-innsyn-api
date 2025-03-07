@@ -20,6 +20,7 @@ import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
 import okhttp3.mockwebserver.MockResponse
@@ -28,10 +29,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import java.io.InputStream
+import reactor.core.publisher.Flux
 import kotlin.time.Duration.Companion.seconds
 
 internal class FiksClientTest {
@@ -167,10 +169,8 @@ internal class FiksClientTest {
             )
             mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("true"))
 
-            val fil1: InputStream = mockk()
-            val fil2: InputStream = mockk()
-            every { fil1.readAllBytes() } returns "test-fil".toByteArray()
-            every { fil2.readAllBytes() } returns "div".toByteArray()
+            val fil1: Flux<DataBuffer> = mockk()
+            val fil2: Flux<DataBuffer> = mockk()
 
             val ettersendelsPdf = ByteArray(1)
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
@@ -178,8 +178,8 @@ internal class FiksClientTest {
 
             val files =
                 listOf(
-                    FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-                    FilForOpplasting("filnavn1", "image/jpg", 1L, fil2),
+                    FilForOpplasting(Filename("filnavn0"), "image/png", 1L, fil1),
+                    FilForOpplasting(Filename("filnavn1"), "image/jpg", 1L, fil2),
                 )
 
             runCatching {
@@ -187,22 +187,19 @@ internal class FiksClientTest {
                     files,
                     JsonVedleggSpesifikasjon(),
                     id,
-                    Token("token"),
                 )
             }.let { assertThat(it.isSuccess) }
         }
 
     @Test
     internal fun `should produce body for upload`() {
-        val fil1: InputStream = mockk()
-        val fil2: InputStream = mockk()
-        every { fil1.readAllBytes() } returns "test-fil".toByteArray()
-        every { fil2.readAllBytes() } returns "div".toByteArray()
+        val fil1: Flux<DataBuffer> = mockk()
+        val fil2: Flux<DataBuffer> = mockk()
 
         val files =
             listOf(
-                FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-                FilForOpplasting("filnavn1", "image/jpg", 1L, fil2),
+                FilForOpplasting(Filename("filnavn0"), "image/png", 1L, fil1),
+                FilForOpplasting(Filename("filnavn1"), "image/jpg", 1L, fil2),
             )
         val body = fiksClient.createBodyForUpload(JsonVedleggSpesifikasjon(), files)
 

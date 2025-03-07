@@ -20,9 +20,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
+import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
-import org.springframework.mock.web.MockMultipartFile
-import org.springframework.web.multipart.MultipartFile
+import org.springframework.http.codec.multipart.FilePart
+import reactor.core.publisher.Flux
 import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.seconds
 
@@ -44,7 +48,6 @@ internal class VedleggControllerTest {
             tilgangskontroll,
             eventService,
             fiksClient,
-            meterRegistry = mockk(relaxed = true),
         )
 
     private val id = "123"
@@ -159,11 +162,7 @@ internal class VedleggControllerTest {
     @Test
     fun `kaster exception dersom input til sendVedlegg ikke inneholder metadata-json`() =
         runTestWithToken {
-            val files =
-                mutableListOf<MultipartFile>(
-                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-                    MockMultipartFile("files", "test2.png", null, ByteArray(0)),
-                )
+            val files = Flux.just(mockPart("abc.jpg"), mockPart("rofglmao.jpg"))
             runCatching { controller.sendVedlegg(id, files) }.let {
                 assertThat(it.isFailure)
                 assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
@@ -173,30 +172,10 @@ internal class VedleggControllerTest {
     @Test
     fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() =
         runTest(timeout = 5.seconds) {
-            coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any()) } returns emptyList()
-            val files =
-                mutableListOf<MultipartFile>(
-                    MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
-                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-                )
-            assertThat(runCatching { controller.sendVedlegg(id, files) }.isSuccess)
-        }
+            coEvery { vedleggOpplastingService.processFileUpload(any(), any()) } returns emptyList()
 
-    // TODO: Denne testen gir ikke mening. Den bare tester at en exception blir kastet, men testen selv kaster exeptionen
-    @Test
-    fun `skal kaste exception dersom token mangler`() =
-        runTestWithToken(timeout = 5.seconds) {
-            coEvery { vedleggOpplastingService.sendVedleggTilFiks(any(), any(), any()) } returns emptyList()
-            val files =
-                mutableListOf<MultipartFile>(
-                    MockMultipartFile("files", "metadata.json", null, metadataJson.toByteArray()),
-                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-                )
-            coEvery { tilgangskontroll.sjekkTilgang() } throws IllegalStateException()
-            runCatching { controller.sendVedlegg(id, files) }.let {
-                assertThat(it.isFailure)
-                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-            }
+            val files = Flux.just(mockPart("metadata.json", metadataJson.toByteArray()), mockPart("test.jpg", byteArrayOf()))
+            assertThat(runCatching { controller.sendVedlegg(id, files) }.isSuccess)
         }
 
     @Test
@@ -218,15 +197,15 @@ internal class VedleggControllerTest {
             coEvery { tilgangskontroll.sjekkTilgang() } just Runs
 
             val files =
-                mutableListOf<MultipartFile>(
-                    MockMultipartFile("files", "metadata.json", null, metadata.toByteArray()),
-                    MockMultipartFile("files", "test.jpg", null, ByteArray(0)),
-                    MockMultipartFile("files", "roflmao.jpg", null, ByteArray(0)),
+                Flux.just(
+                    mockPart("metadata.json", metadata.toByteArray()),
+                    mockPart("test.jpg", byteArrayOf()),
+                    mockPart("roflmao.jpg", byteArrayOf()),
                 )
             runCatching { controller.sendVedlegg(id, files) }.let {
                 assertThat(it.isFailure)
-                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-                assertThat(it.exceptionOrNull()?.message).contains("Fil i metadata var ikke i listen over filer")
+                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+                assertThat(it.exceptionOrNull()?.message).contains("Ikke alle filer i metadata.json ble funnet i forsendelsen")
             }
         }
 
@@ -256,3 +235,14 @@ internal class VedleggControllerTest {
         assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
     }
 }
+
+fun mockPart(
+    name: String,
+    content: ByteArray = byteArrayOf(),
+    headers: HttpHeaders = HttpHeaders.EMPTY,
+): FilePart =
+    mockk {
+        every { filename() } returns name
+        every { headers() } returns headers
+        every { content() } returns DataBufferUtils.read(ByteArrayResource(content), DefaultDataBufferFactory.sharedInstance, 1024)
+    }

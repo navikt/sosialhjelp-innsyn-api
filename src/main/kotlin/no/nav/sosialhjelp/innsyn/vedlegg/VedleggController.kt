@@ -49,7 +49,7 @@ class VedleggController(
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): List<OppgaveOpplastingResponse> {
         val allFiles = rawFiles.asFlow().toList()
-        log.info("Forsøker å starter ettersendelse")
+        log.info("Forsøker å starte ettersendelse")
         tilgangskontroll.sjekkTilgang()
 
         // Ekstraherer metadata.json

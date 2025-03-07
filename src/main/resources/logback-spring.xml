@@ -82,7 +82,7 @@
             </encoder>
         </appender>
 
-        <logger name="no.nav.sosialhjelp.innsyn" level="DEBUG"/>
+        <logger name="no.nav.sosialhjelp.innsyn" level="INFO"/>
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.springframework.security" level="INFO"/>
 

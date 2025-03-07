@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
@@ -24,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.netty.http.client.HttpClient
+import kotlin.coroutines.cancellation.CancellationException
 
 @Component
 class KommuneInfoClient(
@@ -42,6 +45,7 @@ class KommuneInfoClient(
                     .retrieve()
                     .awaitBody<List<KommuneInfo>>()
             }.onFailure {
+                if (it is CancellationException) currentCoroutineContext().ensureActive()
                 log.warn("Fiks - hentKommuneInfoForAlle feilet", it)
                 if (it is WebClientResponseException) {
                     when {
@@ -64,6 +68,7 @@ class KommuneInfoClient(
                     .retrieve()
                     .awaitBody<KommuneInfo>()
             }.onFailure {
+                if (it is CancellationException) currentCoroutineContext().ensureActive()
                 log.warn("Fiks - hentKommuneInfoForAlle feilet for kommune=$kommunenummer", it)
                 if (it is WebClientResponseException) {
                     when {

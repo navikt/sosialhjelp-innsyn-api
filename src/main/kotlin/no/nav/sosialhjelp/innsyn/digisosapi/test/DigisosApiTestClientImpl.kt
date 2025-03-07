@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -28,6 +30,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Brukes kun i dev eller ved lokal testing mot fiks-test
@@ -121,7 +124,7 @@ class DigisosApiTestClientImpl(
         token: Token,
     ): String? =
         withContext(Dispatchers.IO) {
-            runCatching {
+            try {
                 val soknad =
                     fiksWebClient.get()
                         .uri("/digisos/api/v1/soknader/$fiksDigisosId")
@@ -153,7 +156,10 @@ class DigisosApiTestClientImpl(
                         }
                     }
                     .awaitSingleOrNull()
-            }.getOrNull()
+            } catch (e: Exception) {
+                if (e is CancellationException) currentCoroutineContext().ensureActive()
+                null
+            }
         }
 
     suspend fun opprettDigisosSak(): String? =

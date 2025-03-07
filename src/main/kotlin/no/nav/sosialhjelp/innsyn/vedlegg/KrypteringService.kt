@@ -36,19 +36,17 @@ interface KrypteringService {
     ): Flux<DataBuffer> {
         val kryptertOutput = PipedOutputStream()
         val plainOutput = PipedOutputStream()
-        val defaultContext = Dispatchers.Default
         val kryptertInput =
-            withContext(defaultContext) {
+            withContext(Dispatchers.IO) {
                 PipedInputStream(kryptertOutput)
             }
-        val writerJob =
-            coroutineScope.launch(Dispatchers.IO) {
-                DataBufferUtils.write(databuffer, plainOutput)
-                    .map { DataBufferUtils.release(it) }
-                    .awaitLast()
-                log.debug("Skrev hele databuffern til outputstream")
-                plainOutput.close()
-            }
+        coroutineScope.launch(Dispatchers.IO) {
+            DataBufferUtils.write(databuffer, plainOutput)
+                .map { DataBufferUtils.release(it) }
+                .awaitLast()
+            log.debug("Skrev hele databuffern til outputstream")
+            plainOutput.close()
+        }
         coroutineScope.launch(Dispatchers.IO) {
             val plainInput = PipedInputStream(plainOutput)
             try {
@@ -62,7 +60,6 @@ interface KrypteringService {
             } finally {
                 plainInput.close()
                 kryptertOutput.close()
-                writerJob.join()
             }
         }
         return withContext(Dispatchers.IO) {

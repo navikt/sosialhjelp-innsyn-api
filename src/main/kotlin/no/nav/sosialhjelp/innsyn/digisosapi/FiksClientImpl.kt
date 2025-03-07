@@ -24,7 +24,6 @@ import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
@@ -41,7 +40,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
-import java.io.InputStream
 import java.io.Serializable
 
 @Component

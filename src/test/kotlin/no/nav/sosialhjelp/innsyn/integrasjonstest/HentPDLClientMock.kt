@@ -6,26 +6,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClientOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Component
 
-@Configuration
-class PdlIntegrationTestConfig {
-    /**
-     * overskriver pdlHentPersonConsumer for itester
-     */
-    @Primary
-    @Bean
-    fun pdlClientOld(): PdlClientOld {
-        return HentPDLClientOldMock()
-    }
-}
-
-class HentPDLClientOldMock : PdlClientOld {
+@Component
+@Profile("test")
+class HentPDLClientMock : PdlClientOld {
     val mapper: ObjectMapper =
         jacksonObjectMapper()
             .registerKotlinModule()
@@ -34,7 +24,7 @@ class HentPDLClientOldMock : PdlClientOld {
 
     override suspend fun hentPerson(
         ident: String,
-        token: String,
+        token: Token,
     ): PdlHentPerson {
         val resourceAsStream = ClassLoader.getSystemResourceAsStream("pdl/pdlPersonResponse.json")
 
@@ -45,7 +35,7 @@ class HentPDLClientOldMock : PdlClientOld {
 
     override suspend fun hentIdenter(
         ident: String,
-        token: String,
+        token: Token,
     ): List<String> {
 //      ikke i bruk
         return emptyList()

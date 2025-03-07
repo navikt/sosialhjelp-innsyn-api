@@ -18,6 +18,9 @@ client:
   soknad_api_url: "http://localhost:59999"
   soknad_api_audience: "dummyAudience"
 
+mock-oauth2-server:
+  port: 12345
+
 nais:
   token:
     endpoint: http://localhost:${mock-oauth2-server.port}/maskinporten/token
@@ -42,5 +45,3 @@ no.nav.security.jwt:
     discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
     accepted_audience: someaudience
 innsyn.loginurl: http://localhost:8080/sosialhjelp/innsyn-api/local/cookie
-
-login_api_idporten_clientid: clientId

@@ -15,19 +15,11 @@ mock-alt-api-wellknown-queryparam: ${MOCK_ALT_API_WELLKNOWN_QUERYPARAM:}
 
 nais:
   token:
-    endpoint: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/token/maskinporten}
+    endpoint: ${NAIS_TOKEN_ENDPOINT:http://localhost:8081/api/v1/token}
     exchange:
-      endpoint: ${TOKEN_X_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/token/tokenx}
+      endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT:http://localhost:8081/api/v1/token/exchange}
 
-#Token-validering
-no.nav.security.jwt:
-  issuer.selvbetjening:
-    discoveryurl: ${METADATA_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/selvbetjening${mock-alt-api-wellknown-queryparam}}
-    validation:
-      optional-claims: aud,nbf
 innsyn.loginurl: ${INNSYN_LOGINURL:http://127.0.0.1:3008/sosialhjelp/mock-alt/login}
-
-login_api_idporten_clientid: clientId
 
 client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/fiks}
@@ -40,17 +32,13 @@ client:
   fiks_integrasjonpassord_kommune: pw2
   norg_url: ${NORG_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/norg_endpoint_url/}
   pdl_endpoint_url: ${PDL_ENDPOINT_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/pdl_endpoint_url}
-  pdl_audience: dummyAudience
+  pdl_audience: ${PDL_AUDIENCE:dev-gcp:teamdigisos:sosialhjelp-mock-alt-api}
   unleash_instance_id: ${UNLEASH_INSTANCE_ID:local}
   unleash_env: ${UNLEASH_ENV:mock}
   unleash_server_api_url: ${UNLEASH_SERVER_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/internal/unleash}
   unleash_server_api_token: ${UNLEASH_SERVER_API_TOKEN:token}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
-  soknad_api_url: ${SOKNAD_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/soknad-api}
-  soknad_api_audience: dummyAudience
 
-#Maskinporten
-maskinporten_clientid: maskinporten_clientid
-maskinporten_scopes: scopes
-maskinporten_well_known_url: ${MASKINPORTEN_WELL_KNOWN_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/maskinporten${mock-alt-api-wellknown-queryparam}}
-maskinporten_client_jwk: generateRSA
+idporten:
+  issuer: ${IDPORTEN_ISSUER:http://localhost:8888/default}
+  audience: ${IDPORTEN_CLIENT_ID:default}

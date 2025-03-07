@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.event
 
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -9,6 +11,7 @@ import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import org.slf4j.LoggerFactory
+import kotlin.coroutines.cancellation.CancellationException
 
 private val log = LoggerFactory.getLogger(JsonTildeltNavKontor::class.java.name)
 
@@ -29,7 +32,12 @@ suspend fun InternalDigisosSoker.apply(
     tildeltNavKontor = hendelse.navKontor
 
     val destinasjon =
-        runCatching { norgClient.hentNavEnhet(hendelse.navKontor).navn }.getOrNull()
+        try {
+            norgClient.hentNavEnhet(hendelse.navKontor).navn
+        } catch (e: Exception) {
+            if (e is CancellationException) currentCoroutineContext().ensureActive()
+            null
+        }
 
     soknadsmottaker = Soknadsmottaker(hendelse.navKontor, destinasjon ?: "et annet Nav-kontor")
 

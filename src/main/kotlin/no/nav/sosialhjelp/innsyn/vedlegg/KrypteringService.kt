@@ -3,67 +3,107 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.awaitLast
+import kotlinx.coroutines.withContext
 import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.slf4j.Logger
 import org.springframework.context.annotation.Profile
+import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
 import java.io.InputStream
+import java.io.OutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
+import java.nio.channels.Channels
 import java.security.Security
 import java.security.cert.X509Certificate
 
 interface KrypteringService {
+    val log: Logger
+
     suspend fun krypter(
-        fileInputStream: InputStream,
+        databuffer: Flux<DataBuffer>,
         certificate: X509Certificate,
         coroutineScope: CoroutineScope,
-    ): InputStream
+    ): Flux<DataBuffer> {
+        val kryptertOutput = PipedOutputStream()
+        val plainOutput = PipedOutputStream()
+        val kryptertInput =
+            withContext(Dispatchers.IO) {
+                PipedInputStream(kryptertOutput)
+            }
+        coroutineScope.launch(Dispatchers.IO) {
+            DataBufferUtils.write(databuffer, plainOutput)
+                .map { DataBufferUtils.release(it) }
+                .awaitLast()
+            log.debug("Skrev hele databuffern til outputstream")
+            plainOutput.close()
+        }
+        coroutineScope.launch(Dispatchers.IO) {
+            val plainInput = PipedInputStream(plainOutput)
+            try {
+                log.debug("Starter kryptering")
+                krypterData(kryptertOutput, plainInput, certificate)
+                log.debug("Ferdig med kryptering")
+            } catch (e: Exception) {
+                if (e is CancellationException) currentCoroutineContext().ensureActive()
+                log.error("Det skjedde en feil under kryptering", e)
+                throw IllegalStateException("An error occurred during encryption", e)
+            } finally {
+                plainInput.close()
+                kryptertOutput.close()
+            }
+        }
+        return withContext(Dispatchers.IO) {
+            DataBufferUtils.readByteChannel({ Channels.newChannel(kryptertInput) }, DefaultDataBufferFactory.sharedInstance, 4096)
+                .doFinally {
+                    kryptertInput.close()
+                }
+        }
+    }
+
+    fun krypterData(
+        outputStream: OutputStream,
+        inputStream: InputStream,
+        certificate: X509Certificate,
+    )
 }
 
 @Profile("!mock-alt")
 @Component
 class KrypteringServiceImpl : KrypteringService {
+    override val log by logger()
     private val kryptering = CMSKrypteringImpl()
 
-    override suspend fun krypter(
-        fileInputStream: InputStream,
+    override fun krypterData(
+        outputStream: OutputStream,
+        inputStream: InputStream,
         certificate: X509Certificate,
-        coroutineScope: CoroutineScope,
-    ): InputStream {
-        val inputStream = PipedInputStream()
-        coroutineScope.launch(Dispatchers.IO) {
-            PipedOutputStream(inputStream).use { pos ->
-                try {
-                    log.debug("Starter kryptering")
-                    kryptering.krypterData(pos, fileInputStream, certificate, Security.getProvider("BC"))
-                    log.debug("Ferdig med kryptering")
-                } catch (e: Exception) {
-                    if (e is CancellationException) currentCoroutineContext().ensureActive()
-                    log.error("Det skjedde en feil ved kryptering, exception blir lagt til kryptert InputStream", e)
-                    throw IllegalStateException("An error occurred during encryption", e)
-                }
-            }
-        }
-        return inputStream
-    }
-
-    companion object {
-        private val log by logger()
+    ) {
+        kryptering.krypterData(outputStream, inputStream, certificate, Security.getProvider("BC"))
     }
 }
 
 @Profile("mock-alt")
 @Component
 class KrypteringServiceMock : KrypteringService {
-    override suspend fun krypter(
-        fileInputStream: InputStream,
+    override val log by logger()
+
+    override fun krypterData(
+        outputStream: OutputStream,
+        inputStream: InputStream,
         certificate: X509Certificate,
-        coroutineScope: CoroutineScope,
-    ): InputStream {
-        return fileInputStream
+    ) {
+        val byteArray = inputStream.readAllBytes()
+        log.info("\"Krypterer\" ${byteArray.size} bytes")
+        outputStream.write(byteArray)
     }
 }

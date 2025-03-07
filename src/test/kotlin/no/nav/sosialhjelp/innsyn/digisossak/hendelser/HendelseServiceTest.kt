@@ -7,6 +7,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -79,7 +80,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any(), any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(1)
             assertThat(hendelser[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR.name)
@@ -114,7 +115,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any(), any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(3)
         }
@@ -129,7 +130,7 @@ internal class HendelseServiceTest {
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2, DOK_3), tidspunkt5, null),
                 )
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(2)
 
@@ -149,7 +150,7 @@ internal class HendelseServiceTest {
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(), tidspunkt5, null),
                 )
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(0)
         }
@@ -166,7 +167,7 @@ internal class HendelseServiceTest {
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2, DOK_3), tidspunkt5, null),
                 )
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(2)
 
@@ -190,7 +191,7 @@ internal class HendelseServiceTest {
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2), tidspunkt4, null),
                 )
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(1)
 
@@ -211,7 +212,7 @@ internal class HendelseServiceTest {
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2), tidspunkt4.plus(1, ChronoUnit.MILLIS), null),
                 )
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(2)
         }
@@ -283,7 +284,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any(), any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(2)
             val first = hendelser[0]
@@ -378,7 +379,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any(), any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123", "Token")
+            val hendelser = service.hentHendelser("123", Token("token"))
 
             assertThat(hendelser).hasSize(3)
             assertThat(hendelser[0].tidspunkt).isEqualTo(time.toString())

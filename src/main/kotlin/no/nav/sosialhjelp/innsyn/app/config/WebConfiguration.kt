@@ -1,73 +1,31 @@
 package no.nav.sosialhjelp.innsyn.app.config
 
-import jakarta.servlet.Filter
-import jakarta.servlet.FilterChain
-import jakarta.servlet.ServletRequest
-import jakarta.servlet.ServletResponse
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletRequestWrapper
-import no.nav.sosialhjelp.innsyn.app.config.interceptor.TracingInterceptor
-import org.springframework.boot.web.servlet.FilterRegistrationBean
+import no.nav.sosialhjelp.innsyn.app.config.webfilter.TracingWebFilter
+import no.nav.sosialhjelp.innsyn.app.config.webfilter.mdc.MDCFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.http.codec.ServerCodecConfigurer
+import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader
+import org.springframework.http.codec.multipart.MultipartHttpMessageReader
+import org.springframework.web.reactive.config.WebFluxConfigurer
+import org.springframework.web.server.WebFilter
 
 @Configuration
-class WebConfig(
-    private val tracingInterceptor: TracingInterceptor,
-) : WebMvcConfigurer {
-    override fun addInterceptors(registry: InterceptorRegistry) {
-        registry.addInterceptor(tracingInterceptor)
+class WebConfiguration(
+    private val tracingWebFilter: TracingWebFilter,
+    private val mdcFilter: MDCFilter,
+) : WebFluxConfigurer {
+    override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
+        val partReader =
+            DefaultPartHttpMessageReader().apply {
+                maxInMemorySize = 16 * 1024 * 1024
+            }
+
+        configurer.defaultCodecs().multipartReader(MultipartHttpMessageReader(partReader))
     }
 
     @Bean
-    fun trailingSlashRedirectFilter(): Filter = TrailingSlashRedirectFilter()
-
-    @Bean
-    fun trailingSlashFilter(): FilterRegistrationBean<Filter> {
-        val registrationBean = FilterRegistrationBean<Filter>()
-        registrationBean.filter = trailingSlashRedirectFilter()
-        registrationBean.addUrlPatterns("/*")
-        return registrationBean
-    }
-}
-
-class TrailingSlashRedirectFilter : Filter {
-    override fun doFilter(
-        request: ServletRequest,
-        response: ServletResponse?,
-        chain: FilterChain,
-    ) {
-        val httpRequest = request as HttpServletRequest
-        val path = httpRequest.requestURI
-        if (path.endsWith("/")) {
-            val newPath = path.substring(0, path.length - 1)
-            val newRequest: HttpServletRequest = CustomHttpServletRequestWrapper(httpRequest, newPath)
-            chain.doFilter(newRequest, response)
-        } else {
-            chain.doFilter(request, response)
-        }
-    }
-}
-
-private class CustomHttpServletRequestWrapper(
-    request: HttpServletRequest?,
-    private val newPath: String,
-) : HttpServletRequestWrapper(
-        request,
-    ) {
-    override fun getRequestURI(): String = newPath
-
-    override fun getRequestURL(): StringBuffer {
-        val url = StringBuffer()
-        url
-            .append(scheme)
-            .append("://")
-            .append(serverName)
-            .append(":")
-            .append(serverPort)
-            .append(newPath)
-        return url
+    fun webFilters(): List<WebFilter> {
+        return listOf(tracingWebFilter, mdcFilter)
     }
 }

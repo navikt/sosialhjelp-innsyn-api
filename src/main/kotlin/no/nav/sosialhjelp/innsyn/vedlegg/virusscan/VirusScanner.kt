@@ -28,8 +28,9 @@ class VirusScanner(
     suspend fun scan(
         filnavn: String?,
         data: FilePart,
+        size: Long,
     ) {
-        if (enabled && isInfected(filnavn, data)) {
+        if (enabled && isInfected(filnavn, data, size)) {
             throw VirusScanException("Fant virus i fil forsøkt opplastet", null)
         } else if (!enabled) {
             log.warn("Virusscanning er ikke aktivert")
@@ -39,13 +40,13 @@ class VirusScanner(
     private suspend fun isInfected(
         filnavn: String?,
         data: FilePart,
+        size: Long,
     ): Boolean {
         try {
             if (!isRunningInProd() && filnavn != null && filnavn.startsWith("virustest")) {
                 return true
             }
 
-            val size = data.headers().contentLength
             log.info("Scanner $size bytes for virus")
 
             val scanResults: List<ScanResult> =

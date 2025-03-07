@@ -85,7 +85,7 @@ internal class VedleggOpplastingServiceTest {
 
         coEvery { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
-        coEvery { virusScanner.scan(any(), any()) } just runs
+        coEvery { virusScanner.scan(any(), any(), any()) } just runs
         coEvery { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate() } returns mockCertificate
         coEvery { cacheManager.getCache(any()) } returns null
     }
@@ -375,7 +375,7 @@ internal class VedleggOpplastingServiceTest {
     @Test
     fun `sendVedleggTilFiks skal kaste exception hvis virus er detektert`() =
         runTest(timeout = 5.seconds) {
-            coEvery { virusScanner.scan(any(), any()) } throws VirusScanException("mulig virus!", null)
+            coEvery { virusScanner.scan(any(), any(), any()) } throws VirusScanException("mulig virus!", null)
 
             val metadata =
                 mutableListOf(

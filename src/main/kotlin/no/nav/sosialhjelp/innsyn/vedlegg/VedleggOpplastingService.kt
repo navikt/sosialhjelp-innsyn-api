@@ -6,9 +6,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
@@ -218,7 +218,7 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
         if (fileType == TikaFileType.PDF) {
-            return ValidationResult(DataBufferUtils.join(fil.content()).awaitSingle().checkIfPdfIsValid(), TikaFileType.PDF)
+            return ValidationResult(fil.content().asFlow().checkIfPdfIsValid(), TikaFileType.PDF)
         }
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
             val ext: String = fil.filename().substringAfterLast(".")
@@ -230,7 +230,7 @@ class VedleggOpplastingService(
         return ValidationResult(ValidationValues.OK, fileType)
     }
 
-    private fun DataBuffer.checkIfPdfIsValid(): ValidationValues {
+    private suspend fun Flow<DataBuffer>.checkIfPdfIsValid(): ValidationValues {
         try {
             val randomAccessReadBuffer = RandomAccessReadBuffer(this.asInputStream())
             randomAccessReadBuffer.use {

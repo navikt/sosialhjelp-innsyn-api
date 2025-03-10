@@ -52,6 +52,7 @@ spec:
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
         - host: idporten.no
       rules:
+        - application: sosialhjelp-konvertering-til-pdf
         - application: clamav
           namespace: nais-system
         - application: norg2
@@ -104,3 +105,5 @@ spec:
       value: "https://maskinporten.no/.well-known/oauth-authorization-server"
     - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI
       value: "https://www.nav.no/no/utlogget"
+    - name: GOTENBERG_URL
+      value: "http://sosialhjelp-konvertering-til-pdf/"

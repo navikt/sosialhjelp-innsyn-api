@@ -6,7 +6,6 @@ metadata:
   labels:
     team: teamdigisos
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "150M"
     texas.nais.io/enabled: "true"
 spec:
   image: {{image}}
@@ -55,8 +54,6 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-innsyn-mock
-  ingresses:
-    - "https://digisos.ekstern.dev.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
       memory: 2Gi

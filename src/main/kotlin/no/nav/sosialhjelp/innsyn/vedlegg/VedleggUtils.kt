@@ -1,15 +1,12 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.collect
-import org.apache.tika.Tika
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.codec.multipart.FilePart
-import java.io.InputStream
 import java.io.SequenceInputStream
 import java.security.MessageDigest
 import java.text.Normalizer
@@ -44,10 +41,6 @@ value class Filename(val value: String) {
 }
 
 fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC).trim()
-
-fun detectTikaType(inputStream: InputStream): String {
-    return Tika().detect(inputStream)
-}
 
 fun mapToTikaFileType(tikaMediaType: String): TikaFileType {
     return when {

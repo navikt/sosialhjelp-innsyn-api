@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
@@ -65,7 +66,7 @@ internal class OppgaveServiceTest {
     private val dok = DokumentInfo("tittel 1", dokumentasjonkravId, 11)
     private val tidspunkt = LocalDateTime.now().plusHours(9)
 
-    private val token = "token"
+    private val token = Token("token")
 
     @BeforeEach
     fun init() {

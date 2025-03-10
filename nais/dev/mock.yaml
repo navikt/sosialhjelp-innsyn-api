@@ -6,7 +6,7 @@ metadata:
   labels:
     team: teamdigisos
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "150M"
+    texas.nais.io/enabled: "true"
 spec:
   image: {{image}}
   port: 8080
@@ -33,12 +33,20 @@ spec:
       destinations:
         - id: loki
         - id: elastic
+  tokenx:
+    enabled: true
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: "ks:fiks"
   accessPolicy:
     outbound:
       external:
         - host: unleash.nais.io
         - host: digisos.ekstern.dev.nav.no
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
+        - host: test.idporten.no
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-soknad-api-mock
@@ -46,8 +54,6 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-innsyn-mock
-  ingresses:
-    - "https://digisos.ekstern.dev.nav.no/sosialhjelp/innsyn-api"
   resources:
     limits:
       memory: 2Gi
@@ -55,13 +61,11 @@ spec:
       cpu: 10m
       memory: 512Mi
   envFrom:
-    - configmap: loginservice-idporten
     - secret: sosialhjelp-innsyn-api-unleash-api-token
+    - secret: idporten-sosialhjelp
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
-    - name: METADATA_URL
-      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/well-known/selvbetjening"
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
@@ -72,6 +76,8 @@ spec:
       value: "https://digisos.ekstern.dev.nav.no/sosialhjelp/mock-alt/login"
     - name: NORG_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/norg_endpoint_url"
+    - name: PDL_AUDIENCE
+      value: "dev-gcp:teamdigisos:sosialhjelp-mock-alt-api-mock"
     - name: PDL_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/pdl_endpoint_url"
     - name: UNLEASH_INSTANCE_ID

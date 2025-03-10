@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
@@ -36,33 +37,36 @@ interface KrypteringService {
     ): Flux<DataBuffer> {
         val kryptertOutput = PipedOutputStream()
         val plainOutput = PipedOutputStream()
-        val kryptertInput =
-            withContext(Dispatchers.IO) {
-                PipedInputStream(kryptertOutput)
+        val plainInput = PipedInputStream(plainOutput)
+        val writerJob =
+            coroutineScope.launch(Dispatchers.IO, start = CoroutineStart.LAZY) {
+                plainOutput.use {
+                    DataBufferUtils.write(databuffer, plainOutput)
+                        .map { DataBufferUtils.release(it) }
+                        .awaitLast()
+                    log.debug("Skrev hele databuffern til outputstream")
+                }
             }
-        coroutineScope.launch(Dispatchers.IO) {
-            DataBufferUtils.write(databuffer, plainOutput)
-                .map { DataBufferUtils.release(it) }
-                .awaitLast()
-            log.debug("Skrev hele databuffern til outputstream")
-            plainOutput.close()
-        }
-        coroutineScope.launch(Dispatchers.IO) {
-            val plainInput = PipedInputStream(plainOutput)
-            try {
-                log.debug("Starter kryptering")
-                krypterData(kryptertOutput, plainInput, certificate)
-                log.debug("Ferdig med kryptering")
-            } catch (e: Exception) {
-                if (e is CancellationException) currentCoroutineContext().ensureActive()
-                log.error("Det skjedde en feil under kryptering", e)
-                throw IllegalStateException("An error occurred during encryption", e)
-            } finally {
-                plainInput.close()
-                kryptertOutput.close()
+        val encryptingJob =
+            coroutineScope.launch(Dispatchers.IO, start = CoroutineStart.LAZY) {
+                try {
+                    val plainInput = PipedInputStream(plainOutput)
+                    writerJob.start()
+                    log.debug("Starter kryptering")
+                    krypterData(kryptertOutput, plainInput, certificate)
+                    log.debug("Ferdig med kryptering")
+                } catch (e: Exception) {
+                    if (e is CancellationException) currentCoroutineContext().ensureActive()
+                    log.error("Det skjedde en feil under kryptering", e)
+                    throw IllegalStateException("An error occurred during encryption", e)
+                } finally {
+                    plainInput.close()
+                    kryptertOutput.close()
+                }
             }
-        }
         return withContext(Dispatchers.IO) {
+            val kryptertInput = PipedInputStream(kryptertOutput)
+            encryptingJob.start()
             DataBufferUtils.readByteChannel({ Channels.newChannel(kryptertInput) }, DefaultDataBufferFactory.sharedInstance, 4096)
                 .doFinally {
                     kryptertInput.close()

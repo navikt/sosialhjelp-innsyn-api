@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.isNewerThanMonths
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -20,7 +19,7 @@ class UtbetalingerService(
     private val fiksClient: FiksClient,
 ) {
     suspend fun hentUtbetalteUtbetalinger(
-        token: Token,
+        token: String,
         months: Int,
     ): List<UtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
@@ -43,7 +42,7 @@ class UtbetalingerService(
     }
 
     private suspend fun hentUtbetalinger(
-        token: Token,
+        token: String,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
     ): List<ManedUtbetaling> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
@@ -60,13 +59,13 @@ class UtbetalingerService(
             }
     }
 
-    suspend fun hentTidligereUtbetalinger(token: Token): List<NyeOgTidligereUtbetalingerResponse> {
+    suspend fun hentTidligereUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
         val utbetalinger =
             hentUtbetalinger(token) { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
         return toTidligereUtbetalingerResponse(utbetalinger)
     }
 
-    suspend fun hentNyeUtbetalinger(token: Token): List<NyeOgTidligereUtbetalingerResponse> {
+    suspend fun hentNyeUtbetalinger(token: String): List<NyeOgTidligereUtbetalingerResponse> {
         val utbetalinger = hentUtbetalinger(token) { status -> (status !== UtbetalingsStatus.ANNULLERT) }
         return toNyeUtbetalingerResponse(utbetalinger)
     }
@@ -147,7 +146,7 @@ class UtbetalingerService(
             }
 
     private suspend fun manedsutbetalinger(
-        token: Token,
+        token: String,
         digisosSak: DigisosSak,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
     ): List<ManedUtbetaling> {
@@ -193,7 +192,7 @@ class UtbetalingerService(
     }
 
     suspend fun utbetalingExists(
-        token: Token,
+        token: String,
         months: Int,
     ): Boolean {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)

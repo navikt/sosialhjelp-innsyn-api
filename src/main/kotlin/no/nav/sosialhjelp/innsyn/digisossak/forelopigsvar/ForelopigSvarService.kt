@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.forelopigsvar
 
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -13,7 +12,7 @@ class ForelopigSvarService(
 ) {
     suspend fun hentForelopigSvar(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): ForelopigSvarResponse {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)

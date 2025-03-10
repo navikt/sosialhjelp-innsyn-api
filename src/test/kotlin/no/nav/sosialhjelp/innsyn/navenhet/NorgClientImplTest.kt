@@ -2,6 +2,8 @@ package no.nav.sosialhjelp.innsyn.navenhet
 
 import io.mockk.clearAllMocks
 import kotlinx.coroutines.test.runTest
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
@@ -23,10 +25,13 @@ internal class NorgClientImplTest {
     @BeforeEach
     fun init() {
         clearAllMocks()
+
+        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
     }
 
     @AfterEach
     internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
         mockWebServer.shutdown()
     }
 

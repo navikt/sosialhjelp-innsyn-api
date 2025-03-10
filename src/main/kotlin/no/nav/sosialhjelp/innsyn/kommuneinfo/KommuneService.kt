@@ -4,7 +4,6 @@ import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
@@ -16,7 +15,7 @@ class KommuneService(
 ) {
     suspend fun hentKommuneInfo(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): KommuneInfo? {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val kommunenummer: String = digisosSak.kommunenummer
@@ -43,7 +42,7 @@ class KommuneService(
 
     suspend fun erInnsynDeaktivertForKommune(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): Boolean {
         val kommuneInfo = hentKommuneInfo(fiksDigisosId, token)
         return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus

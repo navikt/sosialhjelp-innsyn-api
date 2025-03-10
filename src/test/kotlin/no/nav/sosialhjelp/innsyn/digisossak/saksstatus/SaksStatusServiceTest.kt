@@ -5,7 +5,6 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
@@ -25,7 +24,7 @@ internal class SaksStatusServiceTest {
 
     private val service = SaksStatusService(eventService, fiksClient)
 
-    private val token = Token("token")
+    private val token = "token"
 
     private val tittel = "tittel"
     private val referanse = "referanse"
@@ -252,21 +251,21 @@ internal class SaksStatusServiceTest {
 
             val digisosSak1 = DigisosSak("id1", "", "", "", 1L, null, null, null, null)
             coEvery {
-                fiksClient.hentDigisosSak("id1", Token("token"))
+                fiksClient.hentDigisosSak("id1", "token")
             } returns digisosSak1
             val digisosSak2 = DigisosSak("id2", "", "", "", 1L, null, null, null, null)
             coEvery {
-                fiksClient.hentDigisosSak("id2", Token("token"))
+                fiksClient.hentDigisosSak("id2", "token")
             } returns digisosSak2
 
             coEvery {
-                eventService.createModel(digisosSak1, Token("token"))
+                eventService.createModel(digisosSak1, "token")
             } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiTrue))
             coEvery {
-                eventService.createModel(digisosSak2, Token("token"))
+                eventService.createModel(digisosSak2, "token")
             } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiFalse))
 
-            assertThat(service.hentSaksStatuser("id1", Token("token")).first().skalViseVedtakInfoPanel).isEqualTo(true)
-            assertThat(service.hentSaksStatuser("id2", Token("token")).first().skalViseVedtakInfoPanel).isEqualTo(false)
+            assertThat(service.hentSaksStatuser("id1", "token").first().skalViseVedtakInfoPanel).isEqualTo(true)
+            assertThat(service.hentSaksStatuser("id2", "token").first().skalViseVedtakInfoPanel).isEqualTo(false)
         }
 }

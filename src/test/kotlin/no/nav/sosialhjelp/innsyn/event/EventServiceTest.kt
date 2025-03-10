@@ -15,7 +15,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -118,7 +117,7 @@ internal class EventServiceTest {
             coEvery { innsynService.hentOriginalSoknad(any(), any()) } returns null
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
@@ -129,10 +128,10 @@ internal class EventServiceTest {
     fun `ingen innsyn `() =
         runTest(timeout = 5.seconds) {
             every { mockDigisosSak.digisosSoker } returns null
-            coEvery { innsynService.hentJsonDigisosSoker(any(), Token("token")) } returns null
+            coEvery { innsynService.hentJsonDigisosSoker(any(), "token") } returns null
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.historikk).hasSize(1)
@@ -156,7 +155,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -192,7 +191,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -229,7 +228,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -270,7 +269,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -312,7 +311,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -355,7 +354,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -394,7 +393,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -433,7 +432,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -468,7 +467,7 @@ internal class EventServiceTest {
                         )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak, "token")
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -503,7 +502,7 @@ internal class EventServiceTest {
                     )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -526,7 +525,7 @@ internal class EventServiceTest {
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
             every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns "asdf"
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
             assertThat(model).isNotNull
             val hendelse: Hendelse = model.historikk[0]
             assertThat(hendelse).isNotNull
@@ -545,7 +544,7 @@ internal class EventServiceTest {
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
             every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
             assertThat(model).isNotNull
             val hendelse = model.historikk[0]
             assertThat(hendelse).isNotNull
@@ -579,12 +578,12 @@ internal class EventServiceTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(1)
             coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }
 
-            val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak, Token("token"))
+            val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak, "token")
             assertThat(saksoversiktModel).isNotNull
             assertThat(saksoversiktModel.oppgaver).hasSize(1)
             coVerify(exactly = 2) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }
@@ -617,12 +616,12 @@ internal class EventServiceTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(0)
             coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }
 
-            val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak, Token("token"))
+            val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak, "token")
             assertThat(saksoversiktModel).isNotNull
             assertThat(saksoversiktModel.oppgaver).hasSize(0)
             coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }

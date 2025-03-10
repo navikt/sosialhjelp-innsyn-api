@@ -27,7 +27,13 @@ class ClientProperties {
     lateinit var unleashServerApiToken: String
 
     lateinit var tokendingsUrl: String
+    lateinit var tokendingsClientId: String
     lateinit var tokendingsPrivateJwk: String
 
     lateinit var vilkarDokkravFagsystemVersjoner: List<String>
+
+    lateinit var soknadApiUrl: String
+    lateinit var soknadApiAudience: String
+
+    lateinit var klageEnabled: String
 }

@@ -7,3 +7,20 @@ spring:
       port: ${REDIS_PORT_CACHE}
       ssl:
         enabled: true
+
+nais:
+  token:
+    endpoint: ${NAIS_TOKEN_ENDPOINT}
+    exchange:
+      endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT}
+
+server:
+  servlet:
+    context-path: '/sosialhjelp/innsyn-api'
+
+no.nav.security.jwt:
+  issuer.selvbetjening:
+    discoveryurl: ${IDPORTEN_WELL_KNOWN_URL}
+    validation:
+      optional-claims: aud,nbf
+

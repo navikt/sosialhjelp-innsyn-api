@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.context.annotation.Bean
@@ -31,5 +32,6 @@ class DigisosApiTestConfig(
         }
         .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
         .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
+        .filter(mdcExchangeFilter)
         .build()
 }

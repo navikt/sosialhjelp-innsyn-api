@@ -1,42 +1,49 @@
 package no.nav.sosialhjelp.innsyn.app.exceptions
 
+import no.nav.security.token.support.core.exceptions.IssuerConfigurationException
+import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
+import no.nav.security.token.support.core.exceptions.MetaDataNotAvailableException
+import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.context.request.WebRequest
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler
-import org.springframework.web.server.ServerWebExchange
-import org.springframework.web.server.ServerWebInputException
-import reactor.core.publisher.Mono
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 @ControllerAdvice
-class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
+class InnsynExceptionHandler(
+    @Value("\${innsyn.loginurl}") private val innsynLoginUrl: String,
+) : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Throwable::class)
-    fun handleAll(e: Throwable): Mono<ResponseEntity<FrontendErrorMessage>> {
+    fun handleAll(e: Throwable): ResponseEntity<FrontendErrorMessage> {
         log.error(e.message, e)
         val error = FrontendErrorMessage(UNEXPECTED_ERROR, e.message)
-        return Mono.just(ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR))
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    override fun handleServerWebInputException(
-        ex: ServerWebInputException,
+    override fun handleHttpMessageNotReadable(
+        e: HttpMessageNotReadableException,
         headers: HttpHeaders,
         status: HttpStatusCode,
-        exchange: ServerWebExchange,
-    ): Mono<ResponseEntity<Any>> {
-        log.error(ex.message, ex)
-        val error = FrontendErrorMessage(UNEXPECTED_ERROR, ex.message)
-        return Mono.just(ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR))
+        request: WebRequest,
+    ): ResponseEntity<Any> {
+        log.error(e.message, e)
+        val error = FrontendErrorMessage(UNEXPECTED_ERROR, e.message)
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(FiksNotFoundException::class)
@@ -111,6 +118,47 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         val error = FrontendErrorMessage(TILGANG_ERROR, "Ingen tilgang")
         return ResponseEntity(error, HttpStatus.FORBIDDEN)
     }
+
+    @ExceptionHandler(value = [JwtTokenUnauthorizedException::class, JwtTokenMissingException::class])
+    fun handleAzureAdValidationExceptions(
+        ex: RuntimeException,
+        request: WebRequest,
+    ): ResponseEntity<FrontendErrorMessage> {
+        if (ex.message?.contains("Server misconfigured") == true) {
+            log.error(ex.message)
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
+        }
+        log.error("Bruker er ikke autentisert mot AzureAD (enda). Sender 401 med loginurl", ex)
+        return createUnauthorizedWithLoginUrlResponse(innsynLoginUrl)
+    }
+
+    @ExceptionHandler(value = [MetaDataNotAvailableException::class, IssuerConfigurationException::class])
+    fun handleTokenValidationConfigurationExceptions(
+        ex: RuntimeException,
+        request: WebRequest,
+    ): ResponseEntity<FrontendErrorMessage> {
+        log.error("Klarer ikke hente metadata fra discoveryurl eller problemer ved konfigurering av issuer. Feilmelding: ${ex.message}")
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(FrontendErrorMessage(UNEXPECTED_ERROR, NOE_UVENTET_FEILET))
+    }
+
+    private fun createUnauthorizedWithLoginUrlResponse(loginUrl: String): ResponseEntity<FrontendErrorMessage> =
+        ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                FrontendUnauthorizedMessage(
+                    "azuread_authentication_error",
+                    "azuread_authentication_error",
+                    "Autentiseringsfeil",
+                    loginUrl,
+                ),
+            )
 
     companion object {
         private val log by logger()

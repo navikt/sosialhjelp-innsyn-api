@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app.health
 
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 const val APPLICATION_LIVENESS = "Application is alive!"
 const val APPLICATION_READY = "Application is ready!"
 
+@Unprotected
 @RestController
 @RequestMapping(value = ["/internal"])
 class HealthController {

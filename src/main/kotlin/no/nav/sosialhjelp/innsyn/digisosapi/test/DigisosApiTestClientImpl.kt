@@ -1,8 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -10,27 +8,24 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.digisosapi.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
 import no.nav.sosialhjelp.innsyn.digisosapi.toHttpEntity
+import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
-import org.springframework.core.io.buffer.DataBuffer
-import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
-import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Brukes kun i dev eller ved lokal testing mot fiks-test
@@ -58,7 +53,7 @@ class DigisosApiTestClientImpl(
 
             digisosApiTestWebClient.post()
                 .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
-                .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+                .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                 .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
                 .retrieve()
                 .bodyToMono<String>()
@@ -79,30 +74,23 @@ class DigisosApiTestClientImpl(
         files: List<FilForOpplasting>,
         soknadId: String,
     ): List<String> {
-        val bodyBuilder = MultipartBodyBuilder()
+        val body = LinkedMultiValueMap<String, Any>()
         files.forEachIndexed { fileId, file ->
-            val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
-            bodyBuilder.part(
+            val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
+            body.add(
                 "vedleggSpesifikasjon:$fileId",
                 fiksClientImpl.serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
-            bodyBuilder.asyncPart("dokument:$fileId", file.fil, DataBuffer::class.java).headers {
-                it.contentType = MediaType.APPLICATION_OCTET_STREAM
-                it.contentDisposition =
-                    ContentDisposition.builder("form-data")
-                        .name("dokument:$fileId")
-                        .filename(file.filnavn?.value)
-                        .build()
-            }
+            body.add("dokument:$fileId", file.toHttpEntity("dokument:$fileId"))
         }
 
         val opplastingResponseList =
             withContext(Dispatchers.IO) {
                 digisosApiTestWebClient.post()
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
-                    .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+                    .body(BodyInserters.fromMultipartData(body))
                     .retrieve()
                     .bodyToMono<List<FilOpplastingResponse>>()
                     .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -121,15 +109,15 @@ class DigisosApiTestClientImpl(
 
     override suspend fun hentInnsynsfil(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): String? =
         withContext(Dispatchers.IO) {
-            try {
+            runCatching {
                 val soknad =
                     fiksWebClient.get()
                         .uri("/digisos/api/v1/soknader/$fiksDigisosId")
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(AUTHORIZATION, token.withBearer())
+                        .header(AUTHORIZATION, token)
                         .retrieve()
                         .bodyToMono(DigisosSak::class.java)
                         .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -145,7 +133,7 @@ class DigisosApiTestClientImpl(
                 fiksWebClient.get()
                     .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${digisosSoker.metadata}")
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION, token.withBearer())
+                    .header(AUTHORIZATION, token)
                     .retrieve()
                     .bodyToMono(String::class.java)
                     .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -156,10 +144,7 @@ class DigisosApiTestClientImpl(
                         }
                     }
                     .awaitSingleOrNull()
-            } catch (e: Exception) {
-                if (e is CancellationException) currentCoroutineContext().ensureActive()
-                null
-            }
+            }.getOrNull()
         }
 
     suspend fun opprettDigisosSak(): String? =
@@ -167,7 +152,7 @@ class DigisosApiTestClientImpl(
             val response =
                 digisosApiTestWebClient.post()
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
-                    .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                     .body(BodyInserters.fromValue(""))
                     .retrieve()
                     .bodyToMono<String>()

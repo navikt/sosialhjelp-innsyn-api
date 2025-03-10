@@ -9,8 +9,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.StaticSubjectHandlerImpl
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
@@ -25,12 +28,12 @@ import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.MOTTATT
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
-import no.nav.sosialhjelp.innsyn.utils.runTestWithToken
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import kotlin.time.Duration.Companion.seconds
 
 internal class SaksOversiktControllerTest {
     private val saksOversiktService: SaksOversiktService = mockk()
@@ -63,7 +66,9 @@ internal class SaksOversiktControllerTest {
     internal fun setUp() {
         clearAllMocks()
 
-        coEvery { tilgangskontroll.sjekkTilgang() } just Runs
+        SubjectHandlerUtils.setNewSubjectHandlerImpl(StaticSubjectHandlerImpl())
+
+        coEvery { tilgangskontroll.sjekkTilgang("token") } just Runs
 
         every { digisosSak1.fiksDigisosId } returns "123"
         every { digisosSak1.sistEndret } returns 0L
@@ -88,23 +93,24 @@ internal class SaksOversiktControllerTest {
 
     @AfterEach
     internal fun tearDown() {
+        SubjectHandlerUtils.resetSubjectHandlerImpl()
     }
 
     @Test
     internal fun `skal returnere 503 ved FiksException`() =
-        runTestWithToken {
+        runTest(timeout = 5.seconds) {
             coEvery { saksOversiktService.hentAlleSaker(any()) } throws FiksException("message", null)
 
-            val response = controller.hentAlleSaker()
+            val response = controller.hentAlleSaker("token")
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
         }
 
     @Test
     fun `skal mappe fra DigisosSak til SakResponse for detaljer`() =
-        runTestWithToken {
-            coEvery { fiksClient.hentDigisosSak("123", any()) } returns digisosSak1
-            coEvery { fiksClient.hentDigisosSak("456", any()) } returns digisosSak2
+        runTest(timeout = 5.seconds) {
+            coEvery { fiksClient.hentDigisosSak("123", "token") } returns digisosSak1
+            coEvery { fiksClient.hentDigisosSak("456", "token") } returns digisosSak2
             coEvery { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
             coEvery { eventService.createSaksoversiktModel(digisosSak2, any()) } returns model2
 
@@ -131,13 +137,13 @@ internal class SaksOversiktControllerTest {
             every { model1.utbetalinger } returns mutableListOf()
             every { model2.utbetalinger } returns mutableListOf()
 
-            val sak1 = controller.getSaksDetaljer("123")
+            val sak1 = controller.getSaksDetaljer("123", "token")
 
             assertThat(sak1).isNotNull
             assertThat(sak1.soknadTittel).isEqualTo("")
             assertThat(sak1.antallNyeOppgaver).isEqualTo(6)
 
-            val sak2 = controller.getSaksDetaljer("456")
+            val sak2 = controller.getSaksDetaljer("456", "token")
 
             assertThat(sak2).isNotNull
             assertThat(sak2.soknadTittel).contains("Livsopphold", "Strøm")
@@ -147,8 +153,8 @@ internal class SaksOversiktControllerTest {
 
     @Test
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() =
-        runTestWithToken {
-            coEvery { fiksClient.hentDigisosSak("123", any()) } returns digisosSak1
+        runTest(timeout = 5.seconds) {
+            coEvery { fiksClient.hentDigisosSak("123", "token") } returns digisosSak1
             coEvery { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
 
             every { model1.status } returns MOTTATT
@@ -158,7 +164,7 @@ internal class SaksOversiktControllerTest {
             every { model1.saker } returns mutableListOf()
             every { model1.utbetalinger } returns mutableListOf()
 
-            val sak = controller.getSaksDetaljer(digisosSak1.fiksDigisosId)
+            val sak = controller.getSaksDetaljer(digisosSak1.fiksDigisosId, "token")
 
             assertThat(sak).isNotNull
 

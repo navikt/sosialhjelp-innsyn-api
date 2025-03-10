@@ -1,7 +1,6 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "no.nav.sosialhjelp"
@@ -37,6 +36,11 @@ dependencies {
     // Resilience4j (Retry, CircuitBreaker, ...)
     implementation(libs.bundles.resilience4j)
 
+    // tokendings
+    implementation(libs.auth0.java.jwt)
+    implementation(libs.auth0.jwks.rsa)
+    implementation(libs.nimbus.jose.jwt)
+
     // Micrometer/Prometheus
     implementation(libs.bundles.prometheus)
 
@@ -56,9 +60,12 @@ dependencies {
     // Jackson
     implementation(libs.jackson.module.kotlin)
 
+    // Token-validering
+    implementation(libs.token.validation.spring)
+
     // Springdoc
     implementation(libs.springdoc.openapi.starter.common)
-    implementation(libs.springdoc.openapi.starter.webflux.ui)
+    implementation(libs.springdoc.openapi.starter.webmvc.ui)
 
     // Fiks-kryptering
     implementation(libs.fiks.kryptering)
@@ -76,8 +83,7 @@ dependencies {
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.springmockk)
     testImplementation(libs.mockk)
-    testImplementation(libs.mockwebserver)
-    testImplementation(libs.spring.boot.security.test)
+    testImplementation(libs.token.validation.spring.test)
 }
 
 // override spring managed dependencies
@@ -114,9 +120,9 @@ tasks.withType<DependencyUpdatesTask> {
 }
 
 tasks.withType<KotlinCompile> {
-    compilerOptions {
+    kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = JvmTarget.JVM_21
+        jvmTarget = "21"
     }
 }
 

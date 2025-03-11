@@ -19,6 +19,8 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+val valkeyVersion = "5.3.0"
+
 ktlint {
     this.version.set(libs.versions.ktlint)
 }
@@ -29,6 +31,9 @@ dependencies {
 
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.spring.boot)
+
+    // VALKEY https://github.com/valkey-io/valkey-java
+    implementation("io.valkey:valkey-java:$valkeyVersion")
 
     // Sosialhjelp-common
     implementation(libs.bundles.sosialhjelp.common)

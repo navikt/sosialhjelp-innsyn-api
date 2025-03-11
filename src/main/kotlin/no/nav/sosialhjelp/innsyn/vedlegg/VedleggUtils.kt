@@ -1,18 +1,13 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.collect
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.codec.multipart.FilePart
-import java.io.SequenceInputStream
 import java.security.MessageDigest
 import java.text.Normalizer
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.Collections
 import kotlin.math.absoluteValue
 
 suspend fun getSha512FromDataBuffer(filePart: FilePart?): String {
@@ -108,12 +103,3 @@ fun areDatesWithinOneMinute(
     return (firstDate == null && secondDate == null) ||
         ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
 }
-
-suspend fun Flow<DataBuffer>.asInputStream(): SequenceInputStream =
-    SequenceInputStream(
-        Collections.enumeration(
-            map {
-                it.asInputStream(true)
-            }.toList(),
-        ),
-    )

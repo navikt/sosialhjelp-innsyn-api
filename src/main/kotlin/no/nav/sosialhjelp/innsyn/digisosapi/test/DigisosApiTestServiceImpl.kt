@@ -41,6 +41,7 @@ class DigisosApiTestServiceImpl(
                     file.content(),
                     dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
                     this,
+                    Filename(file.filename()),
                 )
             }
         val filerForOpplasting =
@@ -52,6 +53,7 @@ class DigisosApiTestServiceImpl(
                     encrypted,
                 ),
             )
+
         return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 

@@ -52,6 +52,7 @@ class DigisosApiTestServiceImpl(
                     encrypted,
                 ),
             )
+
         return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 

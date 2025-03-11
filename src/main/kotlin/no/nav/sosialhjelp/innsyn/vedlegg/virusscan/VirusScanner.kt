@@ -65,7 +65,7 @@ class VirusScanner(
                 return false
             }
             val scanResult = scanResults[0]
-            log.debug("Fikk scan result $scanResult")
+            log.debug("Fikk scan result {}", scanResult)
             if (Result.OK == scanResult.result) {
                 log.info("Ingen virus i fil ($size bytes)")
                 return false

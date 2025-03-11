@@ -80,6 +80,8 @@ spec:
       value: "https://api.fiks.ks.no"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL
       value: "https://minside.kommune.no"
+    - name: FIKS_SVAR_UT_ENDPOINT_URL
+      value: "https://svarut.ks.no"
     - name: NORG_URL
       value: "http://norg2.org/norg2/api/v1"
     - name: CACHE_TIME_TO_LIVE_SECONDS

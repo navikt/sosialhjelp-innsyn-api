@@ -9,6 +9,7 @@ import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.server.WebFilter
+import reactor.core.scheduler.Schedulers
 
 @Configuration
 class WebConfiguration(
@@ -18,7 +19,7 @@ class WebConfiguration(
     override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
         val partReader =
             DefaultPartHttpMessageReader().apply {
-                maxInMemorySize = 16 * 1024 * 1024
+                maxInMemorySize = 150 * 1024 * 1024
             }
 
         configurer.defaultCodecs().multipartReader(MultipartHttpMessageReader(partReader))

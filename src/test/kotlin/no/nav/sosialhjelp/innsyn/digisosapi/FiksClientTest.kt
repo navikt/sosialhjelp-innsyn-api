@@ -174,7 +174,7 @@ internal class FiksClientTest {
 
             val ettersendelsPdf = ByteArray(1)
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
-            coEvery { krypteringService.krypter(any(), any(), any()) } returns fil1
+            coEvery { krypteringService.krypter(any(), any(), any(), any()) } returns fil1
 
             val files =
                 listOf(

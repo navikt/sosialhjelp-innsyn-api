@@ -3,12 +3,12 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
@@ -59,8 +59,8 @@ class VedleggOpplastingService(
         }
 
         val filerForOpplasting =
-            metadata.flatMap { metadata ->
-                metadata.filer.map { fil ->
+            metadata.flatMap { _metadata ->
+                _metadata.filer.map { fil ->
                     val filename = fil.createFilename().also { fil.filnavn = it }
                     FilForOpplasting(
                         filename,
@@ -75,21 +75,23 @@ class VedleggOpplastingService(
 
         // kryptering og opplasting
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
-        coroutineScope {
-            // Kjører kryptering i parallell
-            withTimeout(60.seconds) {
-                val etterKryptering =
-                    filerForOpplasting.map { fil ->
-                        val kryptert = krypteringService.krypter(fil.fil, certificate, this)
-                        fil.copy(fil = kryptert)
-                    }
-                val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadata)
-                try {
-                    fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, fiksDigisosId)
-                } catch (e: FiksClientFileExistsException) {
-                    // ignorerer når filen allerede er lastet opp
+
+        // Kjører kryptering i parallell
+        withTimeout(60.seconds) {
+            val etterKryptering =
+                filerForOpplasting.map { fil ->
+                    val kryptert = krypteringService.krypter(fil.fil, certificate, this)
+                    fil.copy(fil = kryptert)
                 }
+            val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadata)
+            try {
+                fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, fiksDigisosId)
+            } catch (e: FiksClientFileExistsException) {
+                // ignorerer når filen allerede er lastet opp
             }
+            this.coroutineContext.cancelChildren(
+                CancellationException("Kryptering og opplasting ferdig. Kansellerer child coroutines"),
+            )
         }
 
         cacheManager?.getCache("digisosSak")?.evict(fiksDigisosId)?.also {
@@ -182,14 +184,22 @@ class VedleggOpplastingService(
         return result
     }
 
-    private suspend fun OpplastetFil.detectAndSetMimeType() =
-        fil.content().asFlow().asInputStream().use { ins ->
-            Tika().detect(ins).also { tikaMimeType = it }
+    private suspend fun OpplastetFil.detectAndSetMimeType() {
+        val dataBuffer = DataBufferUtils.join(fil.content()).awaitSingle()
+        val inputStream = dataBuffer.asInputStream()
+
+        try {
+            Tika().detect(inputStream).also {
+                tikaMimeType = it
+            }
+        } finally {
+            DataBufferUtils.release(dataBuffer)
+            inputStream.close()
         }
+    }
 
     suspend fun OpplastetFil.validateFileType(): ValidationResult {
         detectAndSetMimeType()
-
         if (tikaMimeType == "text/x-matlab") {
             log.info(
                 "Tika detekterte mimeType text/x-matlab. " +
@@ -218,7 +228,7 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
         if (fileType == TikaFileType.PDF) {
-            return ValidationResult(fil.content().asFlow().checkIfPdfIsValid(), TikaFileType.PDF)
+            return ValidationResult(fil.content().checkIfPdfIsValid(), TikaFileType.PDF)
         }
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
             val ext: String = fil.filename().substringAfterLast(".")
@@ -230,24 +240,28 @@ class VedleggOpplastingService(
         return ValidationResult(ValidationValues.OK, fileType)
     }
 
-    private suspend fun Flow<DataBuffer>.checkIfPdfIsValid(): ValidationValues {
-        try {
-            val randomAccessReadBuffer = RandomAccessReadBuffer(this.asInputStream())
-            randomAccessReadBuffer.use {
-                Loader.loadPDF(it)
-                    .use { document ->
-                        if (document.isEncrypted) {
-                            return ValidationValues.PDF_IS_ENCRYPTED
-                        }
-                        return ValidationValues.OK
+    private suspend fun Flux<DataBuffer>.checkIfPdfIsValid(): ValidationValues {
+        val dataBuffer = DataBufferUtils.join(this).awaitSingle()
+        val inputStream = dataBuffer.asInputStream()
+        val randomAccessReadBuffer = RandomAccessReadBuffer(inputStream)
+        return try {
+            Loader.loadPDF(randomAccessReadBuffer)
+                .use { document ->
+                    if (document.isEncrypted) {
+                        ValidationValues.PDF_IS_ENCRYPTED
                     }
-            }
+                    ValidationValues.OK
+                }
         } catch (e: InvalidPasswordException) {
             log.warn(ValidationValues.PDF_IS_ENCRYPTED.name + " " + e.message)
-            return ValidationValues.PDF_IS_ENCRYPTED
+            ValidationValues.PDF_IS_ENCRYPTED
         } catch (e: IOException) {
             log.warn(ValidationValues.COULD_NOT_LOAD_DOCUMENT.name, e)
-            return ValidationValues.COULD_NOT_LOAD_DOCUMENT
+            ValidationValues.COULD_NOT_LOAD_DOCUMENT
+        } finally {
+            DataBufferUtils.release(dataBuffer)
+            randomAccessReadBuffer.close()
+            inputStream.close()
         }
     }
 }

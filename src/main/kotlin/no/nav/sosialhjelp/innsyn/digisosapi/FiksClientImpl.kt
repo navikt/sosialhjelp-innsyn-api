@@ -240,22 +240,25 @@ class FiksClientImpl(
         vedleggJson: JsonVedleggSpesifikasjon,
         files: List<FilForOpplasting>,
     ): MultiValueMap<String, HttpEntity<*>> {
-        val bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
+        val bodyBuilder =
+            MultipartBodyBuilder().also {
+                it.part("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
+            }
 
-        files.forEachIndexed { fileId, file ->
+        return files.foldIndexed(bodyBuilder) { i, builder, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
-            bodyBuilder.part("vedleggSpesifikasjon:$fileId", serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"))
-            bodyBuilder.asyncPart("dokument:$fileId", file.fil, DataBuffer::class.java).headers {
+            println(vedleggMetadata)
+            builder.part("vedleggSpesifikasjon:$i", serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$i"))
+            builder.asyncPart("dokument:$i", file.fil, DataBuffer::class.java).headers {
                 it.contentType = MediaType.APPLICATION_OCTET_STREAM
                 it.contentDisposition =
                     ContentDisposition.builder("form-data")
-                        .name("dokument:$fileId")
+                        .name("dokument:$i")
                         .filename(file.filnavn?.value)
                         .build()
             }
-        }
-        return bodyBuilder.build()
+            builder
+        }.build()
     }
 
     fun serialiser(metadata: Any): String {

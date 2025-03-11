@@ -4,12 +4,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.reactive.awaitLast
-import kotlinx.coroutines.withContext
 import no.ks.kryptering.CMSKrypteringImpl
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.slf4j.Logger
@@ -30,28 +27,26 @@ import java.security.cert.X509Certificate
 interface KrypteringService {
     val log: Logger
 
-    suspend fun krypter(
+    fun krypter(
         databuffer: Flux<DataBuffer>,
         certificate: X509Certificate,
         coroutineScope: CoroutineScope,
     ): Flux<DataBuffer> {
         val kryptertOutput = PipedOutputStream()
         val plainOutput = PipedOutputStream()
+        val plainInput = PipedInputStream(plainOutput)
+        val kryptertInput = PipedInputStream(kryptertOutput)
         val writerJob =
             coroutineScope.launch(Dispatchers.IO, start = CoroutineStart.LAZY) {
-                plainOutput.use {
-                    DataBufferUtils.write(databuffer, plainOutput)
-                        .map { DataBufferUtils.release(it) }
-                        .doFinally {
-                            plainOutput.close()
-                        }
-                        .awaitLast()
-                    log.debug("Skrev hele databuffern til outputstream")
-                }
+                DataBufferUtils.write(databuffer, plainOutput)
+                    .doFinally {
+                        log.debug("Skrev hele databuffern til outputstream")
+                        plainOutput.close()
+                    }
+                    .subscribe(DataBufferUtils.releaseConsumer())
             }
         val encryptingJob =
             coroutineScope.launch(Dispatchers.IO, start = CoroutineStart.LAZY) {
-                val plainInput = PipedInputStream(plainOutput)
                 try {
                     writerJob.start()
                     log.debug("Starter kryptering")
@@ -66,14 +61,11 @@ interface KrypteringService {
                     kryptertOutput.close()
                 }
             }
-        return withContext(Dispatchers.IO) {
-            val kryptertInput = PipedInputStream(kryptertOutput)
-            encryptingJob.start()
-            DataBufferUtils.readByteChannel({ Channels.newChannel(kryptertInput) }, DefaultDataBufferFactory.sharedInstance, 4096)
-                .doFinally {
-                    kryptertInput.close()
-                }
-        }
+        encryptingJob.start()
+        return DataBufferUtils.readByteChannel({ Channels.newChannel(kryptertInput) }, DefaultDataBufferFactory.sharedInstance, 4096)
+            .doFinally {
+                kryptertInput.close()
+            }
     }
 
     fun krypterData(

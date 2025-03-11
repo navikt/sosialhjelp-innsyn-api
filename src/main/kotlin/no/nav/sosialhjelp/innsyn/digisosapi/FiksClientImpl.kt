@@ -25,6 +25,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -40,6 +41,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
+import reactor.core.publisher.Flux
+import reactor.core.scheduler.Schedulers
 import java.io.Serializable
 
 @Component
@@ -117,7 +120,7 @@ class FiksClientImpl(
         token: Token,
     ): T =
         withContext(Dispatchers.IO) {
-            log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
+            log.debug("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
             val dokument =
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
@@ -136,7 +139,7 @@ class FiksClientImpl(
                     .awaitSingleOrNull()
                     ?: throw FiksClientException(500, "dokument er null selv om request ikke har kastet exception", null)
 
-            dokument.also { log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
+            dokument.also { log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
     override suspend fun hentAlleDigisosSaker(token: Token): List<DigisosSak> {
@@ -193,7 +196,7 @@ class FiksClientImpl(
                     .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
                     .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(body))
+                    .bodyValue(body)
                     .retrieve()
                     .toEntity<String>()
                     .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -211,7 +214,8 @@ class FiksClientImpl(
                             }
                         }
                     }
-                    .awaitSingleOrNull() ?: throw FiksClientException(
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .block() ?: throw FiksClientException(
                     500,
                     "responseEntity er null selv om request ikke har kastet exception",
                     null,
@@ -240,22 +244,24 @@ class FiksClientImpl(
         vedleggJson: JsonVedleggSpesifikasjon,
         files: List<FilForOpplasting>,
     ): MultiValueMap<String, HttpEntity<*>> {
-        val bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
+        val bodyBuilder =
+            MultipartBodyBuilder().also {
+                it.part("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
+            }
 
-        files.forEachIndexed { fileId, file ->
+        return files.foldIndexed(bodyBuilder) { i, builder, file ->
             val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
-            bodyBuilder.part("vedleggSpesifikasjon:$fileId", serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"))
-            bodyBuilder.asyncPart("dokument:$fileId", file.fil, DataBuffer::class.java).headers {
+            builder.part("vedleggSpesifikasjon:$i", serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$i"))
+            builder.asyncPart("dokument:$i", file.fil, DataBuffer::class.java).headers {
                 it.contentType = MediaType.APPLICATION_OCTET_STREAM
                 it.contentDisposition =
                     ContentDisposition.builder("form-data")
-                        .name("dokument:$fileId")
+                        .name("dokument:$i")
                         .filename(file.filnavn?.value)
                         .build()
             }
-        }
-        return bodyBuilder.build()
+            builder
+        }.build()
     }
 
     fun serialiser(metadata: Any): String {

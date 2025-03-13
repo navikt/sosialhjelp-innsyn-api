@@ -7,7 +7,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -46,7 +45,7 @@ internal class KommuneServiceTest {
                     behandlingsansvarlig = null,
                 )
 
-            val svar = service.erInnsynDeaktivertForKommune("123", Token("token"))
+            val svar = service.erInnsynDeaktivertForKommune("123", "token")
 
             assertThat(svar).isTrue
         }
@@ -66,7 +65,7 @@ internal class KommuneServiceTest {
                     behandlingsansvarlig = null,
                 )
 
-            val svar = service.erInnsynDeaktivertForKommune("123", Token("token"))
+            val svar = service.erInnsynDeaktivertForKommune("123", "token")
 
             assertThat(svar).isFalse
         }

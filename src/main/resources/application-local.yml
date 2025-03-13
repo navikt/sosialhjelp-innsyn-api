@@ -18,6 +18,8 @@ no.nav.security.jwt:
       optional-claims: aud,nbf
 innsyn.loginurl: ${INNSYN_LOGINURL:http://127.0.0.1:3008/sosialhjelp/mock-alt/login}
 
+login_api_idporten_clientid: clientId
+
 client:
   fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:https://api.fiks.test.ks.no}
   fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:https://minside.fiks.test.ks.no}
@@ -36,3 +38,5 @@ client:
   tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:tokendings_endpoint_url}
   tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK:generateRSA}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
+  soknad_api_url: ${SOKNAD_API_URL:soknad_api_url}
+  soknad_api_audience: ${SOKNAD_API_AUDIENCE:dummyAudience}

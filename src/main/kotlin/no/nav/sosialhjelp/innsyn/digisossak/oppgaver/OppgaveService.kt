@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.util.VersionUtil
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
@@ -30,7 +29,7 @@ class OppgaveService(
 
     suspend fun hentOppgaver(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): List<OppgaveResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
@@ -69,7 +68,7 @@ class OppgaveService(
 
     suspend fun hentOppgaverMedOppgaveId(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
         oppgaveId: String,
     ): List<OppgaveResponse> = hentOppgaver(fiksDigisosId, token).filter { it.oppgaveId == oppgaveId }
 
@@ -84,7 +83,7 @@ class OppgaveService(
 
     suspend fun getVilkar(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): List<VilkarResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
@@ -126,7 +125,7 @@ class OppgaveService(
 
     suspend fun getDokumentasjonkrav(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): List<DokumentasjonkravResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
@@ -185,7 +184,7 @@ class OppgaveService(
     suspend fun getDokumentasjonkravMedId(
         fiksDigisosId: String,
         dokumentasjonkravId: String,
-        token: Token,
+        token: String,
     ): List<DokumentasjonkravResponse> {
         val dokumentasjonkrav = getDokumentasjonkrav(fiksDigisosId, token)
 
@@ -203,7 +202,7 @@ class OppgaveService(
 
     suspend fun getHarLevertDokumentasjonkrav(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): Boolean {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
@@ -226,7 +225,7 @@ class OppgaveService(
 
     suspend fun getFagsystemHarVilkarOgDokumentasjonkrav(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): Boolean {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)
@@ -266,7 +265,7 @@ class OppgaveService(
 
     suspend fun sakHarStatusMottattOgIkkeHattSendt(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): Boolean {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)

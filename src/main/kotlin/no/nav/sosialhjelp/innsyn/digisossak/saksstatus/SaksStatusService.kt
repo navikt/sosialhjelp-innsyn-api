@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.saksstatus
 
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -20,7 +19,7 @@ class SaksStatusService(
 
     suspend fun hentSaksStatuser(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): List<SaksStatusResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createModel(digisosSak, token)

@@ -10,7 +10,6 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
@@ -78,7 +77,7 @@ internal class DokumentasjonEtterspurtTest {
                         ),
                     )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -113,7 +112,7 @@ internal class DokumentasjonEtterspurtTest {
                         ),
                     )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -143,7 +142,7 @@ internal class DokumentasjonEtterspurtTest {
                         ),
                     )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -178,7 +177,7 @@ internal class DokumentasjonEtterspurtTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -216,7 +215,7 @@ internal class DokumentasjonEtterspurtTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             val oppgave = model.oppgaver.last()
             assertThat(oppgave.tilleggsinfo).isEqualTo(vedleggKrevesTilleggsinfo)
@@ -241,7 +240,7 @@ internal class DokumentasjonEtterspurtTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             val oppgave = model.oppgaver.last()
             assertThat(oppgave.hendelsetype).isEqualTo(JsonVedlegg.HendelseType.SOKNAD)
@@ -275,7 +274,7 @@ internal class DokumentasjonEtterspurtTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -318,7 +317,7 @@ internal class DokumentasjonEtterspurtTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -359,7 +358,7 @@ internal class DokumentasjonEtterspurtTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
@@ -399,7 +398,7 @@ internal class DokumentasjonEtterspurtTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.BEHANDLES_IKKE)
@@ -433,7 +432,7 @@ internal class DokumentasjonEtterspurtTest {
                         ),
                     )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak, "token")
 
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(1)

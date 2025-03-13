@@ -7,7 +7,6 @@ import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.utbetalinger.UtbetalingerService.Companion.UTBETALING_DEFAULT_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
@@ -41,7 +40,7 @@ internal class UtbetalingerServiceTest {
 
     private val mockDigisosSak: DigisosSak = mockk()
 
-    private val token = Token("token")
+    private val token = "token"
 
     private val digisosId = "some id"
 

@@ -7,7 +7,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
@@ -54,7 +53,7 @@ internal class SaksOversiktServiceTest {
         runTest(timeout = 5.seconds) {
             coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2)
 
-            val alleSaker = saksOversiktService.hentAlleSaker(Token("token"))
+            val alleSaker = saksOversiktService.hentAlleSaker("token")
 
             assertThat(alleSaker).hasSize(2)
             assertThat(alleSaker[0].fiksDigisosId).isEqualTo("123")
@@ -73,7 +72,7 @@ internal class SaksOversiktServiceTest {
             val tomDigisosSak = DigisosSak("123", "123", "123", "123", 123L, null, null, null, null)
             coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(tomDigisosSak)
 
-            val alleSaker = saksOversiktService.hentAlleSaker(Token("token"))
+            val alleSaker = saksOversiktService.hentAlleSaker("token")
 
             assertThat(alleSaker).hasSize(0)
         }

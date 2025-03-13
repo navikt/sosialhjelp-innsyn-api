@@ -3,26 +3,36 @@ package no.nav.sosialhjelp.innsyn.tilgang
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
-import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClientOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPersonOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.isKode6Or7
 import no.nav.sosialhjelp.innsyn.utils.logger
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import java.util.Locale
 
 @Component
 class TilgangskontrollService(
+    @Value("\${login_api_idporten_clientid}") private val loginApiClientId: String,
+    private val environment: Environment,
     private val pdlClientOld: PdlClientOld,
 ) {
-    suspend fun sjekkTilgang() {
-        sjekkTilgang(TokenUtils.getUserIdFromToken(), TokenUtils.getToken())
+    suspend fun sjekkTilgang(token: String) {
+        if (
+            !environment.activeProfiles.contains("preprod") &&
+            !environment.activeProfiles.contains("prodgcp") &&
+            !environment.activeProfiles.contains("dev")
+        ) {
+            if (SubjectHandlerUtils.getClientId() != loginApiClientId) throw TilgangskontrollException("Feil clientId")
+        }
+        sjekkTilgang(SubjectHandlerUtils.getUserIdFromToken(), token)
     }
 
     suspend fun sjekkTilgang(
         ident: String,
-        token: Token,
+        token: String,
     ) {
         val hentPerson = hentPerson(ident, token)
         if (hentPerson != null && hentPerson.isKode6Or7()) {
@@ -32,7 +42,7 @@ class TilgangskontrollService(
 
     suspend fun hentTilgang(
         ident: String,
-        token: Token,
+        token: String,
     ): Tilgang {
         val pdlPerson = hentPerson(ident, token) ?: return Tilgang(false, "")
         return Tilgang(!pdlPerson.isKode6Or7(), fornavn(pdlPerson))
@@ -40,7 +50,7 @@ class TilgangskontrollService(
 
     private suspend fun hentPerson(
         ident: String,
-        token: Token,
+        token: String,
     ): PdlPersonOld? {
         return try {
             pdlClientOld.hentPerson(ident, token)?.hentPerson
@@ -51,7 +61,7 @@ class TilgangskontrollService(
     }
 
     suspend fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
-        val gyldigeIdenter = pdlClientOld.hentIdenter(TokenUtils.getUserIdFromToken(), TokenUtils.getToken())
+        val gyldigeIdenter = pdlClientOld.hentIdenter(SubjectHandlerUtils.getUserIdFromToken(), SubjectHandlerUtils.getToken())
         if (!gyldigeIdenter.contains(digisosSak.sokerFnr)) {
             throw TilgangskontrollException("digisosSak hører ikke til rett person")
         }

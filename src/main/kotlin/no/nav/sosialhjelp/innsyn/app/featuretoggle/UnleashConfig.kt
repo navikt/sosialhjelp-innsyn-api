@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 
-@Profile("!(local|test|mock-alt)")
+@Profile("!local")
 @Configuration
 class UnleashConfig(
     private val clientProperties: ClientProperties,
@@ -34,7 +34,7 @@ class UnleashConfig(
     }
 }
 
-@Profile("local|test|mock-alt")
+@Profile("local")
 @Configuration
 class UnleashMockConfig {
     @Bean

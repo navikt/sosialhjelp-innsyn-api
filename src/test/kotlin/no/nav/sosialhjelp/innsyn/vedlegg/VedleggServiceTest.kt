@@ -12,7 +12,6 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.Ettersendelse
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -47,25 +46,25 @@ internal class VedleggServiceTest {
         every { mockJsonVedleggSpesifikasjon.vedlegg } returns emptyList()
 
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any(), Token("token"))
+            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any(), "token")
         } returns soknadVedleggSpesifikasjon
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_2, any(), Token("token"))
+            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_2, any(), "token")
         } returns soknadVedleggSpesifikasjonMedStatusKrevesOgLastetOpp
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_1, any(), Token("token"))
+            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_1, any(), "token")
         } returns ettersendteVedleggSpesifikasjon_1
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_2, any(), Token("token"))
+            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_2, any(), "token")
         } returns ettersendteVedleggSpesifikasjon_2
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_3, any(), Token("token"))
+            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_3, any(), "token")
         } returns ettersendteVedleggSpesifikasjon_3
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_4, any(), Token("token"))
+            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_4, any(), "token")
         } returns ettersendteVedleggSpesifikasjon_4
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any(), Token("token"))
+            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any(), "token")
         } returns ettersendteVedleggSpesifikasjon_5
     }
 
@@ -78,7 +77,7 @@ internal class VedleggServiceTest {
             } returns mockJsonVedleggSpesifikasjon
             every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, Token("token"))
+            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
             assertThat(list).isEmpty()
         }
 
@@ -88,7 +87,7 @@ internal class VedleggServiceTest {
             coEvery { eventService.createModel(any(), any()) } returns model
             every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, Token("token"))
+            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
             assertThat(list).hasSize(2)
             assertThat(list[0].type).isEqualTo(DOKUMENTTYPE)
@@ -114,7 +113,7 @@ internal class VedleggServiceTest {
                     ),
                 )
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, Token("token"))
+            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
             assertThat(list).hasSize(0)
         }
@@ -127,7 +126,7 @@ internal class VedleggServiceTest {
                 fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any(), any())
             } returns mockJsonVedleggSpesifikasjon
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, Token("token"))
+            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
             assertThat(list).hasSize(4)
             assertThat(list[0].type).isEqualTo(DOKUMENTTYPE_3)
@@ -153,7 +152,7 @@ internal class VedleggServiceTest {
         runTest(timeout = 5.seconds) {
             coEvery { eventService.createModel(any(), any()) } returns model
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, Token("token"))
+            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
             assertThat(list).hasSize(6)
 
@@ -182,8 +181,8 @@ internal class VedleggServiceTest {
     fun `skal hente soknadsvedlegg filtrert pa status for digisosSak`() =
         runTest(timeout = 5.seconds) {
             every { mockDigisosSak.originalSoknadNAV } returns originalSoknadMedVedleggKrevesOgLastetOpp
-            val lastetOppList = service.hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, mockDigisosSak, Token("token"))
-            val vedleggKrevesList = service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, mockDigisosSak, Token("token"))
+            val lastetOppList = service.hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, mockDigisosSak, "token")
+            val vedleggKrevesList = service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, mockDigisosSak, "token")
 
             assertThat(lastetOppList).hasSize(1)
             assertThat(vedleggKrevesList).hasSize(1)
@@ -249,7 +248,7 @@ internal class VedleggServiceTest {
                     ),
                 )
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, Token("token"))
+            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model, "token")
 
             assertThat(list).hasSize(2)
 

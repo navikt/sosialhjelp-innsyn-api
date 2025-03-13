@@ -16,7 +16,6 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -44,7 +43,7 @@ class EventService(
 ) {
     suspend fun createModel(
         digisosSak: DigisosSak,
-        token: Token,
+        token: String,
     ): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak, token)
@@ -148,7 +147,7 @@ class EventService(
 
     suspend fun createSaksoversiktModel(
         digisosSak: DigisosSak,
-        token: Token,
+        token: String,
     ): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
@@ -169,7 +168,7 @@ class EventService(
         jsonDigisosSoker: JsonDigisosSoker?,
         model: InternalDigisosSoker,
         digisosSak: DigisosSak,
-        token: Token,
+        token: String,
     ) {
         jsonDigisosSoker?.hendelser
             ?.sortedWith(hendelseComparator)
@@ -190,7 +189,7 @@ class EventService(
     }
 
     suspend fun hentAlleUtbetalinger(
-        token: Token,
+        token: String,
         digisosSak: DigisosSak,
     ): InternalDigisosSoker {
         val model = InternalDigisosSoker()

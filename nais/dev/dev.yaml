@@ -72,8 +72,9 @@ spec:
     - secret: fiks-integrasjon-secret
     - secret: fiks-kommune-integrasjon-secret
     - secret: sosialhjelp-innsyn-api-unleash-api-token
-    - secret: idporten-sosialhjelp
   env:
+    - name: IDPORTEN_WELL_KNOWN_URL
+      value: "https://test.idporten.no/.well-known/openid-configuration"
     - name: SPRING_PROFILES_ACTIVE
       value: "log-kibana,dev"
     - name: FIKS_DIGISOS_ENDPOINT_URL
@@ -100,3 +101,7 @@ spec:
       value: "http://clamav.nais-system/scan"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
+    - name: MASKINPORTEN_WELL_KNOWN_URL
+      value: "https://test.maskinporten.no/.well-known/oauth-authorization-server"
+    - name: IDPORTEN_POST_LOGOUT_REDIRECT_URI
+      value: "https://www.dev.nav.no/no/utlogget"

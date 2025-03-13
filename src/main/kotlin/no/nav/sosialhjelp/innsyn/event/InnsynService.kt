@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.event
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -16,7 +15,7 @@ class InnsynService(
 ) {
     suspend fun hentJsonDigisosSoker(
         digisosSak: DigisosSak,
-        token: Token,
+        token: String,
     ): JsonDigisosSoker? {
         val metadataId = digisosSak.digisosSoker?.metadata
         val sistOppdatert = digisosSak.digisosSoker?.timestampSistOppdatert
@@ -43,7 +42,7 @@ class InnsynService(
 
     suspend fun hentOriginalSoknad(
         digisosSak: DigisosSak,
-        token: Token,
+        token: String,
     ): JsonSoknad? {
         val originalMetadataId = digisosSak.originalSoknadNAV?.metadata
         return when {

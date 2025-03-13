@@ -1,19 +1,15 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.reactor.awaitSingle
-import no.nav.sosialhjelp.innsyn.app.token.Token
+import kotlinx.coroutines.CoroutineScope
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
-import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
-import no.nav.sosialhjelp.innsyn.vedlegg.calculateContentLength
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
-import org.springframework.core.io.buffer.DataBufferUtils
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
+import org.springframework.web.multipart.MultipartFile
+import kotlin.coroutines.EmptyCoroutineContext
 
 @Profile("!prodgcp")
 @Component
@@ -32,36 +28,24 @@ class DigisosApiTestServiceImpl(
 
     override suspend fun lastOppFil(
         fiksDigisosId: String,
-        file: FilePart,
+        file: MultipartFile,
     ): String {
-        val size = file.calculateContentLength()
-        virusScanner.scan(file.filename(), file, size)
+        val bytes = file.bytes
+        virusScanner.scan(file.name, bytes)
 
-        val encrypted =
-            coroutineScope {
-                val dataBuffer = DataBufferUtils.join(file.content()).awaitSingle()
-                krypteringService.krypter(
-                    dataBuffer.asInputStream(),
-                    dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
-                    this,
-                )
-            }
-        val filerForOpplasting =
-            listOf(
-                FilForOpplasting(
-                    Filename(file.filename()),
-                    file.headers().contentType?.toString(),
-                    size,
-                    encrypted,
-                ),
+        val inputStream =
+            krypteringService.krypter(
+                file.inputStream,
+                dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
+                CoroutineScope(EmptyCoroutineContext),
             )
-
+        val filerForOpplasting = listOf(FilForOpplasting(file.originalFilename, file.contentType, file.size, inputStream))
         return digisosApiTestClient.lastOppNyeFilerTilFiks(filerForOpplasting, fiksDigisosId).first()
     }
 
     override suspend fun hentInnsynsfil(
         fiksDigisosId: String,
-        token: Token,
+        token: String,
     ): String? {
         return digisosApiTestClient.hentInnsynsfil(fiksDigisosId, token)
     }

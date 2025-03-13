@@ -14,11 +14,13 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
 import okhttp3.mockwebserver.MockResponse
@@ -73,7 +75,7 @@ internal class FiksClientTest {
                     .setBody(ok_digisossak_response),
             )
 
-            val result = fiksClient.hentDigisosSak(id, "Token")
+            val result = fiksClient.hentDigisosSak(id, Token("token"))
 
             assertThat(result).isNotNull
         }
@@ -88,7 +90,7 @@ internal class FiksClientTest {
                 )
             }
 
-            val result = kotlin.runCatching { fiksClient.hentDigisosSak(id, "Token") }
+            val result = kotlin.runCatching { fiksClient.hentDigisosSak(id, Token("token")) }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksServerException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(3)
@@ -104,7 +106,7 @@ internal class FiksClientTest {
                 )
             }
 
-            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker("Token") }
+            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker(Token("token")) }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksServerException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(3)
@@ -118,7 +120,7 @@ internal class FiksClientTest {
                     .setResponseCode(400),
             )
 
-            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker("Token") }
+            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker(Token("token")) }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksClientException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(1)
@@ -136,7 +138,7 @@ internal class FiksClientTest {
                     .setBody(objectMapper.writeValueAsString(listOf(digisosSakOk, digisosSakOk))),
             )
 
-            val result = fiksClient.hentAlleDigisosSaker("Token")
+            val result = fiksClient.hentAlleDigisosSaker(Token("token"))
 
             assertThat(result).isNotNull
             assertThat(result).hasSize(2)
@@ -152,7 +154,7 @@ internal class FiksClientTest {
                     .setBody(ok_minimal_jsondigisossoker_response),
             )
 
-            val result = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, "Token")
+            val result = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, Token("token"))
 
             assertThat(result).isNotNull
         }
@@ -168,8 +170,6 @@ internal class FiksClientTest {
 
             val fil1: InputStream = mockk()
             val fil2: InputStream = mockk()
-            every { fil1.readAllBytes() } returns "test-fil".toByteArray()
-            every { fil2.readAllBytes() } returns "div".toByteArray()
 
             val ettersendelsPdf = ByteArray(1)
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
@@ -177,8 +177,8 @@ internal class FiksClientTest {
 
             val files =
                 listOf(
-                    FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-                    FilForOpplasting("filnavn1", "image/jpg", 1L, fil2),
+                    FilForOpplasting(Filename("filnavn0"), "image/png", 1L, fil1),
+                    FilForOpplasting(Filename("filnavn1"), "image/jpg", 1L, fil2),
                 )
 
             runCatching {
@@ -186,7 +186,6 @@ internal class FiksClientTest {
                     files,
                     JsonVedleggSpesifikasjon(),
                     id,
-                    "token",
                 )
             }.let { assertThat(it.isSuccess) }
         }
@@ -195,13 +194,11 @@ internal class FiksClientTest {
     internal fun `should produce body for upload`() {
         val fil1: InputStream = mockk()
         val fil2: InputStream = mockk()
-        every { fil1.readAllBytes() } returns "test-fil".toByteArray()
-        every { fil2.readAllBytes() } returns "div".toByteArray()
 
         val files =
             listOf(
-                FilForOpplasting("filnavn0", "image/png", 1L, fil1),
-                FilForOpplasting("filnavn1", "image/jpg", 1L, fil2),
+                FilForOpplasting(Filename("filnavn0"), "image/png", 1L, fil1),
+                FilForOpplasting(Filename("filnavn1"), "image/jpg", 1L, fil2),
             )
         val body = fiksClient.createBodyForUpload(JsonVedleggSpesifikasjon(), files)
 

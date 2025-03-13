@@ -10,21 +10,16 @@ spring:
       password: pw
   session:
     store-type: redis
-  servlet:
+  webflux:
+    base-path: '/sosialhjelp/innsyn-api'
     multipart:
-      max-file-size: 10MB
-      max-request-size: 150MB
-
+      max-headers-size: 16KB
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${IDPORTEN_ISSUER:http://localhost:8888/default}
 server:
-  servlet:
-    context-path: '/sosialhjelp/innsyn-api'
-    session:
-      cookie:
-        name: sosialhjelp-innsyn-id
-        path: /sosialhjelp
-        secure: true
-        max-age: 30M
-        http-only: true
   max-http-request-header-size: 16KB
   shutdown: graceful
 
@@ -71,19 +66,14 @@ client:
   unleash_server_api_url: ${UNLEASH_SERVER_API_URL}
   unleash_server_api_token: ${UNLEASH_SERVER_API_TOKEN}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
-  soknad_api_url: ${SOKNAD_API_URL}
-  soknad_api_audience: ${SOKNAD_API_AUDIENCE}
 
-#Token-validering
-no.nav.security.jwt:
-  issuer.selvbetjening:
-    discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
-    validation:
-      optional-claims: aud,nbf
+nais:
+  token:
+    endpoint: ${NAIS_TOKEN_ENDPOINT}
+    exchange:
+      endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT}
 
 innsyn.loginurl: ${INNSYN_LOGINURL:null}
-
-login_api_idporten_clientid: ${LOGIN_API_IDPORTEN_CLIENTID:dummy}
 
 innsyn:
   vedlegg:
@@ -103,3 +93,7 @@ fiks-io:
   private-key-path: "/var/run/secrets/key.der"
   kontoId: ${FIKS_IO_KONTO_ID:}
   virksomhetssertifikatPath: ${VIRKSERT_PATH:}
+
+idporten:
+  well-known-url: ${IDPORTEN_ISSUER}
+  audience: ${IDPORTEN_CLIENT_ID}

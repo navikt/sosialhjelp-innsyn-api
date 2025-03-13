@@ -9,6 +9,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
@@ -72,7 +73,7 @@ internal class UtbetalingTest {
                     )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, "token")
+            val model = service.createModel(mockDigisosSak, Token("token"))
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
@@ -115,7 +116,7 @@ internal class UtbetalingTest {
                     )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, "token")
+            val model = service.createModel(mockDigisosSak, Token("token"))
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -140,7 +141,7 @@ internal class UtbetalingTest {
                     )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, "token")
+            val model = service.createModel(mockDigisosSak, Token("token"))
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)

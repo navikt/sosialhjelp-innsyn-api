@@ -12,6 +12,7 @@ import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
@@ -26,9 +27,10 @@ class VirusScanner(
 
     suspend fun scan(
         filnavn: String?,
-        data: ByteArray,
+        data: FilePart,
+        size: Long,
     ) {
-        if (enabled && isInfected(filnavn, data)) {
+        if (enabled && isInfected(filnavn, data, size)) {
             throw VirusScanException("Fant virus i fil forsøkt opplastet", null)
         } else if (!enabled) {
             log.warn("Virusscanning er ikke aktivert")
@@ -37,18 +39,20 @@ class VirusScanner(
 
     private suspend fun isInfected(
         filnavn: String?,
-        data: ByteArray,
+        data: FilePart,
+        size: Long,
     ): Boolean {
         try {
             if (!isRunningInProd() && filnavn != null && filnavn.startsWith("virustest")) {
                 return true
             }
-            log.info("Scanner ${data.size} bytes for virus")
+
+            log.info("Scanner $size bytes for virus")
 
             val scanResults: List<ScanResult> =
                 withContext(Dispatchers.IO) {
                     virusScanWebClient.put()
-                        .body(BodyInserters.fromValue(data))
+                        .body(BodyInserters.fromDataBuffers(data.content()))
                         .retrieve()
                         .bodyToMono<List<ScanResult>>()
                         .retryWhen(virusScanRetry)
@@ -61,9 +65,9 @@ class VirusScanner(
                 return false
             }
             val scanResult = scanResults[0]
-            log.debug("Fikk scan result $scanResult")
+            log.debug("Fikk scan result {}", scanResult)
             if (Result.OK == scanResult.result) {
-                log.info("Ingen virus i fil (${data.size} bytes)")
+                log.info("Ingen virus i fil ($size bytes)")
                 return false
             }
             log.warn("Fant virus med status ${scanResult.result} i fil forsøkt opplastet")

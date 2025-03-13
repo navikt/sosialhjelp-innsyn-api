@@ -13,8 +13,8 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
-import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
+import no.nav.sosialhjelp.innsyn.app.token.Token
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -31,13 +31,15 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE
 import org.springframework.http.MediaType
+import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
+import reactor.core.scheduler.Schedulers
 import java.io.Serializable
 
 @Component
@@ -63,32 +65,14 @@ class FiksClientImpl(
     @Cacheable("digisosSak", key = "#digisosId")
     override suspend fun hentDigisosSak(
         digisosId: String,
-        token: String,
+        token: Token,
     ): DigisosSak {
         return hentDigisosSakFraFiks(digisosId, token).also { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
     }
 
-    @Cacheable("digisosSak", key = "#digisosId")
-    override suspend fun hentDigisosSakMedFnr(
-        digisosId: String,
-        token: String,
-        fnr: String,
-    ): DigisosSak {
-        val sak = hentDigisosSakFraFiks(digisosId, token)
-
-        // TODO henting av fnr og sammeligning benyttes til søk i feilsituasjon. Fjernes når feilsøking er ferdig.
-        val fnr2 = SubjectHandlerUtils.getUserIdFromToken()
-
-        if (fnr2 != fnr) {
-            log.error("Fødselsnr i kontekst har blitt endret - FiksClient.hentDigisosSak")
-        }
-        tilgangskontroll.verifyDigisosSakIsForCorrectUser(sak)
-        return sak
-    }
-
     private suspend fun hentDigisosSakFraFiks(
         digisosId: String,
-        token: String,
+        token: Token,
     ): DigisosSak =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
@@ -97,7 +81,7 @@ class FiksClientImpl(
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
                     .retrieve()
                     .bodyToMono<DigisosSak>()
                     .retryWhen(fiksRetry)
@@ -120,7 +104,7 @@ class FiksClientImpl(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,
-        token: String,
+        token: Token,
         cacheKey: String,
     ): T {
         return hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass, token)
@@ -130,15 +114,15 @@ class FiksClientImpl(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,
-        token: String,
+        token: Token,
     ): T =
         withContext(Dispatchers.IO) {
-            log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
+            log.debug("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
             val dokument =
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
                     .retrieve()
                     .bodyToMono(requestedClass)
                     .retryWhen(fiksRetry)
@@ -152,16 +136,16 @@ class FiksClientImpl(
                     .awaitSingleOrNull()
                     ?: throw FiksClientException(500, "dokument er null selv om request ikke har kastet exception", null)
 
-            dokument.also { log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
+            dokument.also { log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
-    override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
+    override suspend fun hentAlleDigisosSaker(token: Token): List<DigisosSak> {
         return withContext(Dispatchers.IO) {
             val digisosSaker: List<DigisosSak> =
                 fiksWebClient.get()
                     .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
                     .retrieve()
                     .bodyToMono<List<DigisosSak>>()
                     .retryWhen(fiksRetry)
@@ -183,7 +167,6 @@ class FiksClientImpl(
         files: List<FilForOpplasting>,
         vedleggJson: JsonVedleggSpesifikasjon,
         digisosId: String,
-        token: String,
     ) {
         log.info(
             "Starter sending til FIKS for ettersendelse med ${files.size} filer (inkludert ettersendelse.pdf)." +
@@ -192,7 +175,7 @@ class FiksClientImpl(
 
         val body = createBodyForUpload(vedleggJson, files)
 
-        val digisosSak = hentDigisosSakFraFiks(digisosId, token)
+        val digisosSak = hentDigisosSakFraFiks(digisosId, TokenUtils.getToken())
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val kommunenummer = digisosSak.kommunenummer
         if (kommunenummer == "1507") {
@@ -205,12 +188,12 @@ class FiksClientImpl(
         }
 
         val responseEntity =
-            withContext(Dispatchers.IO + RequestAttributesContext()) {
+            withContext(Dispatchers.IO) {
                 fiksWebClient.post()
                     .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(body))
+                    .bodyValue(body)
                     .retrieve()
                     .toEntity<String>()
                     .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -228,7 +211,8 @@ class FiksClientImpl(
                             }
                         }
                     }
-                    .awaitSingleOrNull() ?: throw FiksClientException(
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .block() ?: throw FiksClientException(
                     500,
                     "responseEntity er null selv om request ikke har kastet exception",
                     null,
@@ -256,19 +240,25 @@ class FiksClientImpl(
     fun createBodyForUpload(
         vedleggJson: JsonVedleggSpesifikasjon,
         files: List<FilForOpplasting>,
-    ): LinkedMultiValueMap<String, Any> {
-        val body = LinkedMultiValueMap<String, Any>()
-        body.add("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
+    ): MultiValueMap<String, HttpEntity<*>> {
+        val bodyBuilder =
+            MultipartBodyBuilder().also {
+                it.part("vedlegg.json", serialiser(vedleggJson).toHttpEntity("vedlegg.json"))
+            }
 
-        files.forEachIndexed { fileId, file ->
-            val vedleggMetadata = VedleggMetadata(file.filnavn, file.mimetype, file.storrelse)
-            body.add(
-                "vedleggSpesifikasjon:$fileId",
-                serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
-            )
-            body.add("dokument:$fileId", file.toHttpEntity("dokument:$fileId"))
-        }
-        return body
+        return files.foldIndexed(bodyBuilder) { i, builder, file ->
+            val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
+            builder.part("vedleggSpesifikasjon:$i", serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$i"))
+            builder.part("dokument:$i", InputStreamResource(file.fil)).headers {
+                it.contentType = MediaType.APPLICATION_OCTET_STREAM
+                it.contentDisposition =
+                    ContentDisposition.builder("form-data")
+                        .name("dokument:$i")
+                        .filename(file.filnavn?.value)
+                        .build()
+            }
+            builder
+        }.build()
     }
 
     fun serialiser(metadata: Any): String {
@@ -308,10 +298,6 @@ private fun Any.toHttpEntity(
     headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
     headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
     return HttpEntity(this, headerMap)
-}
-
-fun FilForOpplasting.toHttpEntity(name: String): HttpEntity<Any> {
-    return InputStreamResource(this.fil).toHttpEntity(name, this.filnavn, "application/octet-stream")
 }
 
 fun String.toHttpEntity(name: String): HttpEntity<Any> {

@@ -27,13 +27,11 @@ import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.apache.tika.Tika
 import org.springframework.cache.CacheManager
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
-import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Flux
+import java.io.ByteArrayInputStream
 import java.io.IOException
+import java.io.InputStream
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.seconds
 
@@ -64,13 +62,14 @@ class VedleggOpplastingService(
             metadata.flatMap { _metadata ->
                 _metadata.filer.map { fil ->
                     val filename = fil.createFilename().also { fil.filnavn = it }
+                    val dataBuffer = DataBufferUtils.join(fil.fil.content()).awaitSingle()
                     FilForOpplasting(
                         filename,
                         when (fil.tikaMimeType) {
                             "text/x-matlab" -> "application/pdf"
                             else -> fil.tikaMimeType
                         },
-                        fil.size(), fil.fil.content(),
+                        fil.size(), dataBuffer.asInputStream(),
                     )
                 }
             } + createEttersendelsePdf(metadata, fiksDigisosId)
@@ -81,8 +80,8 @@ class VedleggOpplastingService(
         withContext(Dispatchers.IO) {
             withTimeout(60.seconds) {
                 val etterKryptering =
-                    filerForOpplasting.mapIndexed { i, fil ->
-                        val kryptert = krypteringService.krypter(fil.fil, certificate, this, fil.filnavn)
+                    filerForOpplasting.map { fil ->
+                        val kryptert = krypteringService.krypter(fil.fil, certificate, this)
                         fil.copy(fil = kryptert)
                     }
                 val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadata)
@@ -115,7 +114,7 @@ class VedleggOpplastingService(
                 Filename("ettersendelse.pdf"),
                 "application/pdf",
                 ettersendelsePdf.size.toLong(),
-                DataBufferUtils.read(ByteArrayResource(ettersendelsePdf), DefaultDataBufferFactory.sharedInstance, 1024),
+                ByteArrayInputStream(ettersendelsePdf),
             )
         } catch (e: Exception) {
             if (e is CancellationException) currentCoroutineContext().ensureActive()
@@ -188,16 +187,18 @@ class VedleggOpplastingService(
     }
 
     private suspend fun OpplastetFil.detectAndSetMimeType() {
-        val dataBuffer = DataBufferUtils.join(fil.content()).awaitSingle()
-        val inputStream = dataBuffer.asInputStream()
+        withContext(Dispatchers.IO) {
+            val dataBuffer = DataBufferUtils.join(fil.content()).awaitSingle()
+            val inputStream = dataBuffer.asInputStream()
 
-        try {
-            Tika().detect(inputStream).also {
-                tikaMimeType = it
+            try {
+                Tika().detect(inputStream).also {
+                    tikaMimeType = it
+                }
+            } finally {
+                DataBufferUtils.release(dataBuffer)
+                inputStream.close()
             }
-        } finally {
-            DataBufferUtils.release(dataBuffer)
-            inputStream.close()
         }
     }
 
@@ -214,9 +215,9 @@ class VedleggOpplastingService(
         if (fileType == TikaFileType.UNKNOWN) {
             val firstBytes =
                 DataBufferUtils.join(fil.content()).awaitFirstOrNull()?.let { dataBuffer ->
-                    ByteArray(dataBuffer.readableByteCount().coerceAtMost(8)).also {
-                        dataBuffer.read(it)
-                        DataBufferUtils.release(dataBuffer)
+                    val size = dataBuffer.readableByteCount().coerceAtMost(8)
+                    ByteArray(size).also {
+                        dataBuffer.read(it, 0, size)
                     }
                 }
 
@@ -231,7 +232,9 @@ class VedleggOpplastingService(
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
         if (fileType == TikaFileType.PDF) {
-            return ValidationResult(fil.content().checkIfPdfIsValid(), TikaFileType.PDF)
+            val dataBuffer = DataBufferUtils.join(fil.content()).awaitSingle()
+            val inputStream = dataBuffer.asInputStream()
+            return ValidationResult(inputStream.use { it.checkIfPdfIsValid() }, TikaFileType.PDF)
         }
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
             val ext: String = fil.filename().substringAfterLast(".")
@@ -243,30 +246,28 @@ class VedleggOpplastingService(
         return ValidationResult(ValidationValues.OK, fileType)
     }
 
-    private suspend fun Flux<DataBuffer>.checkIfPdfIsValid(): ValidationValues {
-        val dataBuffer = DataBufferUtils.join(this).awaitSingle()
-        val inputStream = dataBuffer.asInputStream()
-        val randomAccessReadBuffer = RandomAccessReadBuffer(inputStream)
-        return try {
-            Loader.loadPDF(randomAccessReadBuffer)
-                .use { document ->
-                    if (document.isEncrypted) {
-                        ValidationValues.PDF_IS_ENCRYPTED
+    private suspend fun InputStream.checkIfPdfIsValid(): ValidationValues =
+        withContext(Dispatchers.IO) {
+            val randomAccessReadBuffer = RandomAccessReadBuffer(this@checkIfPdfIsValid)
+            try {
+                Loader.loadPDF(randomAccessReadBuffer)
+                    .use { document ->
+                        if (document.isEncrypted) {
+                            ValidationValues.PDF_IS_ENCRYPTED
+                        }
+                        ValidationValues.OK
                     }
-                    ValidationValues.OK
-                }
-        } catch (e: InvalidPasswordException) {
-            log.warn(ValidationValues.PDF_IS_ENCRYPTED.name + " " + e.message)
-            ValidationValues.PDF_IS_ENCRYPTED
-        } catch (e: IOException) {
-            log.warn(ValidationValues.COULD_NOT_LOAD_DOCUMENT.name, e)
-            ValidationValues.COULD_NOT_LOAD_DOCUMENT
-        } finally {
-            DataBufferUtils.release(dataBuffer)
-            randomAccessReadBuffer.close()
-            inputStream.close()
+            } catch (e: InvalidPasswordException) {
+                log.warn(ValidationValues.PDF_IS_ENCRYPTED.name + " " + e.message)
+                ValidationValues.PDF_IS_ENCRYPTED
+            } catch (e: IOException) {
+                log.warn(ValidationValues.COULD_NOT_LOAD_DOCUMENT.name, e)
+                ValidationValues.COULD_NOT_LOAD_DOCUMENT
+            } finally {
+                randomAccessReadBuffer.close()
+                close()
+            }
         }
-    }
 }
 
 fun String.containsIllegalCharacters(): Boolean = sanitizeFileName(this).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
@@ -297,7 +298,7 @@ data class FilForOpplasting(
     val filnavn: Filename?,
     val mimetype: String?,
     val storrelse: Long,
-    val fil: Flux<DataBuffer>,
+    val fil: InputStream,
 )
 
 fun OpplastetFil.createFilename(): Filename {

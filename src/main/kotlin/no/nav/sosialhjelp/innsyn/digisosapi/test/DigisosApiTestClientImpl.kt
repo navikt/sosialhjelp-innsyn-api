@@ -20,7 +20,6 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
-import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
@@ -86,7 +85,7 @@ class DigisosApiTestClientImpl(
                 "vedleggSpesifikasjon:$fileId",
                 fiksClientImpl.serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
-            bodyBuilder.asyncPart("dokument:$fileId", file.fil, DataBuffer::class.java).headers {
+            bodyBuilder.part("dokument:$fileId", file.fil).headers {
                 it.contentType = MediaType.APPLICATION_OCTET_STREAM
                 it.contentDisposition =
                     ContentDisposition.builder("form-data")

@@ -29,11 +29,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Flux
+import java.io.InputStream
 import kotlin.time.Duration.Companion.seconds
 
 internal class FiksClientTest {
@@ -169,12 +168,12 @@ internal class FiksClientTest {
             )
             mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("true"))
 
-            val fil1: Flux<DataBuffer> = mockk()
-            val fil2: Flux<DataBuffer> = mockk()
+            val fil1: InputStream = mockk()
+            val fil2: InputStream = mockk()
 
             val ettersendelsPdf = ByteArray(1)
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
-            coEvery { krypteringService.krypter(any(), any(), any(), any()) } returns fil1
+            coEvery { krypteringService.krypter(any(), any(), any()) } returns fil1
 
             val files =
                 listOf(
@@ -193,8 +192,8 @@ internal class FiksClientTest {
 
     @Test
     internal fun `should produce body for upload`() {
-        val fil1: Flux<DataBuffer> = mockk()
-        val fil2: Flux<DataBuffer> = mockk()
+        val fil1: InputStream = mockk()
+        val fil2: InputStream = mockk()
 
         val files =
             listOf(

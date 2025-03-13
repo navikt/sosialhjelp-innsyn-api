@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.reactor.awaitSingle
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
@@ -10,6 +11,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.vedlegg.calculateContentLength
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.context.annotation.Profile
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 
@@ -37,11 +39,11 @@ class DigisosApiTestServiceImpl(
 
         val encrypted =
             coroutineScope {
+                val dataBuffer = DataBufferUtils.join(file.content()).awaitSingle()
                 krypteringService.krypter(
-                    file.content(),
+                    dataBuffer.asInputStream(),
                     dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate(),
                     this,
-                    Filename(file.filename()),
                 )
             }
         val filerForOpplasting =

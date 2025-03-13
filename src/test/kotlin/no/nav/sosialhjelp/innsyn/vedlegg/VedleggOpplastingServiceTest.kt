@@ -27,11 +27,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.cache.CacheManager
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.buffer.DataBuffer
-import org.springframework.core.io.buffer.DataBufferUtils
-import org.springframework.core.io.buffer.DefaultDataBufferFactory
-import reactor.core.publisher.Flux
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.security.cert.X509Certificate
@@ -94,8 +89,8 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal kalle FiksClient med gyldige filer for opplasting`() =
         runTestWithToken {
             coEvery {
-                krypteringService.krypter(any(), any(), any(), any())
-            } returns "some test data for my input stream".toDataBufferFlux()
+                krypteringService.krypter(any(), any(), any())
+            } returns "some test data for my input stream".byteInputStream()
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } just runs
 
             val ettersendelsPdf = ByteArray(1)
@@ -212,8 +207,8 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal ikke kalle FiksClient hvis ikke alle filene blir validert ok`() =
         runTest(timeout = 5.seconds) {
             coEvery {
-                krypteringService.krypter(any(), any(), any(), any())
-            } returns "some test data for my input stream".toDataBufferFlux()
+                krypteringService.krypter(any(), any(), any())
+            } returns "some test data for my input stream".byteInputStream()
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } answers { nothing }
 
             val metadata =
@@ -263,8 +258,8 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal ikke gi feilmelding hvis pdf-filen er signert`() =
         runTestWithToken {
             coEvery {
-                krypteringService.krypter(any(), any(), any(), any())
-            } returns "some test data for my input stream".toDataBufferFlux()
+                krypteringService.krypter(any(), any(), any())
+            } returns "some test data for my input stream".byteInputStream()
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } answers { nothing }
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ByteArray(1)
 
@@ -306,8 +301,8 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal gi feilmelding hvis pdf-filen er passord-beskyttet`() =
         runTest(timeout = 5.seconds) {
             coEvery {
-                krypteringService.krypter(any(), any(), any(), any())
-            } returns "some test data for my input stream".toDataBufferFlux()
+                krypteringService.krypter(any(), any(), any())
+            } returns "some test data for my input stream".byteInputStream()
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } answers { nothing }
 
             val filnavn1 = Filename("test1.pdf")
@@ -342,8 +337,8 @@ internal class VedleggOpplastingServiceTest {
     fun `sendVedleggTilFiks skal gi feilmelding hvis bilde er jfif`() =
         runTest(timeout = 5.seconds) {
             coEvery {
-                krypteringService.krypter(any(), any(), any(), any())
-            } returns "some test data for my input stream".toDataBufferFlux()
+                krypteringService.krypter(any(), any(), any())
+            } returns "some test data for my input stream".byteInputStream()
             coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } answers { nothing }
 
             val filnavn1 = Filename("test1.jfif")
@@ -511,6 +506,3 @@ internal class VedleggOpplastingServiceTest {
         return outputStream.toByteArray()
     }
 }
-
-private fun String.toDataBufferFlux(): Flux<DataBuffer> =
-    DataBufferUtils.read(ByteArrayResource(this.toByteArray()), DefaultDataBufferFactory.sharedInstance, 1024)

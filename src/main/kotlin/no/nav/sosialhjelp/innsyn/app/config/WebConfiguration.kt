@@ -9,7 +9,6 @@ import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.server.WebFilter
-import reactor.core.scheduler.Schedulers
 
 @Configuration
 class WebConfiguration(

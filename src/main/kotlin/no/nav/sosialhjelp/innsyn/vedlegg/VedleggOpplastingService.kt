@@ -11,7 +11,6 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -78,22 +77,20 @@ class VedleggOpplastingService(
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
         withContext(Dispatchers.IO) {
-            withTimeout(60.seconds) {
-                val etterKryptering =
-                    filerForOpplasting.map { fil ->
-                        val kryptert = krypteringService.krypter(fil.fil, certificate, this)
-                        fil.copy(fil = kryptert)
-                    }
-                val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadata)
-                try {
-                    fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, fiksDigisosId)
-                } catch (e: FiksClientFileExistsException) {
-                    // ignorerer når filen allerede er lastet opp
+            val etterKryptering =
+                filerForOpplasting.map { fil ->
+                    val kryptert = krypteringService.krypter(fil.fil, certificate, this)
+                    fil.copy(fil = kryptert)
                 }
-                this.coroutineContext.cancelChildren(
-                    CancellationException("Kryptering og opplasting ferdig. Kansellerer child coroutines"),
-                )
+            val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadata)
+            try {
+                fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, fiksDigisosId)
+            } catch (e: FiksClientFileExistsException) {
+                // ignorerer når filen allerede er lastet opp
             }
+            this.coroutineContext.cancelChildren(
+                CancellationException("Kryptering og opplasting ferdig. Kansellerer child coroutines"),
+            )
         }
 
         cacheManager?.getCache("digisosSak")?.evict(fiksDigisosId)?.also {

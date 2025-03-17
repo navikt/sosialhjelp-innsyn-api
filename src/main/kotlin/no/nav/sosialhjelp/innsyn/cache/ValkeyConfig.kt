@@ -1,7 +1,5 @@
-package no.nav.sosialhjelp.innsyn.cashe
+package no.nav.sosialhjelp.innsyn.cache
 
-import io.valkey.JedisPool
-import io.valkey.JedisPoolConfig
 import java.net.URI
 
 class ValkeyConfig(

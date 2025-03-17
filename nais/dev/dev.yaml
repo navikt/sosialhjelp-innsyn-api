@@ -65,6 +65,11 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
+  valkey:
+    - instance: sessions
+      access: readwrite
+    - instance: lookup
+      access: readwrite
   redis:
     - instance: cache
       access: readwrite

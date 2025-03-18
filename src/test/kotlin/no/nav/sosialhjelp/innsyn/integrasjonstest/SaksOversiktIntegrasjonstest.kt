@@ -19,6 +19,7 @@ import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.saksoversikt.SaksListeResponse
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.testutils.MockOauth2ServerUtils
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -100,8 +101,8 @@ class SaksOversiktIntegrasjonstest {
             .exchange()
             .expectStatus().isOk
 
-        coVerify(exactly = 2) { fiksClient.hentDigisosSak(any(), any()) }
-        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
-        coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
+        coVerify(exactly = 3) { fiksClient.hentDigisosSak(any(), any()) }
+        coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
+        coVerify(exactly = 3) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
     }
 }

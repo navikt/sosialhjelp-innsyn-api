@@ -44,3 +44,4 @@ no.nav.security.jwt:
 innsyn.loginurl: http://localhost:8080/sosialhjelp/innsyn-api/local/cookie
 
 login_api_idporten_clientid: clientId
+fil-konvertering_url: ${GOTENBERG_URL:https://konvertering-til-pdf.intern.dev.nav.no}

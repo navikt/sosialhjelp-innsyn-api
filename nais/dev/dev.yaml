@@ -61,7 +61,6 @@ spec:
         - application: sosialhjelp-innsyn-dev
   resources:
     limits:
-      cpu: 500m
       memory: 2Gi
     requests:
       cpu: 10m

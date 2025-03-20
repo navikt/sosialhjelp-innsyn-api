@@ -100,8 +100,8 @@ class SaksOversiktIntegrasjonstest {
             .exchange()
             .expectStatus().isOk
 
-        coVerify(exactly = 2) { fiksClient.hentDigisosSak(any(), any()) }
-        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
-        coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
+        coVerify(exactly = 3) { fiksClient.hentDigisosSak(any(), any()) }
+        coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
+        coVerify(exactly = 3) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
     }
 }

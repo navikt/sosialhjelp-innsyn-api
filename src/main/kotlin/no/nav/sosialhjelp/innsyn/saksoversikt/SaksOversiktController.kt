@@ -80,12 +80,18 @@ class SaksOversiktController(
                 val antallOppgaver =
                     hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +
                         hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
+                val dokumentasjonEtterspurt = hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) > 0
+                val vilkar = hentAntallNyeVilkar(model, sak.fiksDigisosId, token) > 0
+                val dokumentasjonkrav = hentAntallNyeDokumentasjonkrav(model, sak.fiksDigisosId, token) > 0
 
                 SaksDetaljerResponse(
                     sak.fiksDigisosId,
                     hentNavn(model),
                     model.status.name,
                     antallOppgaver,
+                    dokumentasjonEtterspurt,
+                    vilkar,
+                    dokumentasjonkrav,
                 )
             }
         }

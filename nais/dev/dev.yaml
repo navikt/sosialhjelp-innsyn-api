@@ -9,7 +9,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "150M"
     texas.nais.io/enabled: "true"
 spec:
-  image: {{image}}
   port: 8080
   liveness:
     path: /sosialhjelp/innsyn-api/internal/isAlive
@@ -65,7 +64,7 @@ spec:
     requests:
       cpu: 10m
       memory: 512Mi
-  redis:
+  valkey:
     - instance: cache
       access: readwrite
   envFrom:

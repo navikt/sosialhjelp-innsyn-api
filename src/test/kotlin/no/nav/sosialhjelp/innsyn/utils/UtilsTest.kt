@@ -136,7 +136,7 @@ internal class UtilsTest {
     }
 
     @Test
-    fun `11-sifret tall skal fjernes fra redis cachekey logging`() {
+    fun `11-sifret tall skal fjernes fra valkey cachekey logging`() {
         val fnr = "12345612345"
         val str = "cache key=adressebeskyttelse-$fnr"
         val errorMessage = ErrorMessage(null, null, null, null, str, null, null, 500, null)

@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.redis
+package no.nav.sosialhjelp.innsyn.valkey
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
@@ -14,10 +14,12 @@ import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.Duration
 
+// TODO: Migrer til å bruke Valkey på ordentlig. Vi kommer ikke til å kunne bruke nye valkey-features før dette er gjort
+//   Vi bruker valkey, men behandler den som en redis-instans (bruker ikke valkey-features).
 @Configuration
 @Profile("!mock-redis")
 @EnableCaching
-class RedisConfig(
+class ValkeyConfig(
     @Value("\${innsyn.cache.time_to_live_seconds}") private val defaultTTL: Long,
     @Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long,
 ) {

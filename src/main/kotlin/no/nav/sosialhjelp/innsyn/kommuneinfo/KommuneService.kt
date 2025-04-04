@@ -37,6 +37,12 @@ class KommuneService(
                 if (!it.kanMottaSoknader) {
                     log.warn("Kommune $kommunenummer kan ikke motta søknader/ettersendelser")
                 }
+                if (!it.kanOppdatereStatus) {
+                    log.warn("Kommune $kommunenummer har ikke aktivert innsyn")
+                }
+                if (it.harMidlertidigDeaktivertOppdateringer) {
+                    log.warn("Kommune $kommunenummer har midlertidig deaktivert innsyn")
+                }
             }
         } catch (e: FiksClientException) {
             null

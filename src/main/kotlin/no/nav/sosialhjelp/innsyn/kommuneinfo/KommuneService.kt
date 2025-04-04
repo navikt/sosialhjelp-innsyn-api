@@ -30,7 +30,14 @@ class KommuneService(
 
     private suspend fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
         return try {
-            kommuneInfoClient.getKommuneInfo(kommunenummer)
+            kommuneInfoClient.getKommuneInfo(kommunenummer).also {
+                if (it.harMidlertidigDeaktivertMottak) {
+                    log.warn("Kommune $kommunenummer har midlertidig deaktivert mottak")
+                }
+                if (!it.kanMottaSoknader) {
+                    log.warn("Kommune $kommunenummer kan ikke motta søknader/ettersendelser")
+                }
+            }
         } catch (e: FiksClientException) {
             null
         } catch (e: FiksServerException) {

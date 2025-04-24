@@ -64,6 +64,9 @@ class InnsynExceptionHandler(
     fun handleFiksClientError(e: FiksClientException): ResponseEntity<FrontendErrorMessage> {
         if (e.cause is WebClientResponseException.Unauthorized) {
             log.warn("Bruker er ikke autorisert for kall mot fiks. Token har utløpt")
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(FrontendErrorMessage("Token utløpt", "Token utløpt"))
         } else {
             log.error("Client-feil - ${e.message}", e)
         }

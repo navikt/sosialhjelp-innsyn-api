@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksGoneException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -51,6 +52,13 @@ class InnsynExceptionHandler(
         log.warn(e.message, e)
         val error = FrontendErrorMessage(FIKS_ERROR, "DigisosSak finnes ikke")
         return ResponseEntity(error, HttpStatus.NOT_FOUND)
+    }
+
+    @ExceptionHandler(FiksGoneException::class)
+    fun handleFiksNotFoundError(e: FiksGoneException): ResponseEntity<FrontendErrorMessage> {
+        log.warn(e.message, e)
+        val error = FrontendErrorMessage(FIKS_ERROR, "DigisosSak finnes ikke (410 gone)")
+        return ResponseEntity(error, HttpStatus.GONE)
     }
 
     @ExceptionHandler(FiksException::class)

@@ -105,6 +105,7 @@ class FiksClientImpl(
                         val feilmelding = "Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}"
                         when {
                             e.statusCode == HttpStatus.NOT_FOUND -> FiksNotFoundException(feilmelding, e)
+                            e.statusCode == HttpStatus.GONE -> FiksGoneException(feilmelding, e)
                             e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
                             else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                         }
@@ -285,6 +286,8 @@ class FiksClientImpl(
 }
 
 class FiksClientFileExistsException(message: String?, e: WebClientResponseException?) : RuntimeException(message, e)
+
+class FiksGoneException(message: String?, e: WebClientResponseException?) : RuntimeException(message, e)
 
 data class VedleggMetadata(
     val filnavn: String?,

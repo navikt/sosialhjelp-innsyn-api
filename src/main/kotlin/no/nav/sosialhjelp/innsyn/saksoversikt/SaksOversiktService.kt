@@ -47,7 +47,6 @@ class SaksOversiktService(
                     )
                 }
 
-        // flyttet fra SaksOversiktController inn hit.
         if (unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false) &&
             digisosSaker.isNotEmpty() &&
             oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(digisosSaker[0].fiksDigisosId, token)

@@ -18,8 +18,7 @@ import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
 
-internal class SaksStatusIntegrasjonsTest: AbstractIntegrationTest() {
-
+internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
     private val navEnhet: NavEnhet = mockk()
 
     @MockkBean

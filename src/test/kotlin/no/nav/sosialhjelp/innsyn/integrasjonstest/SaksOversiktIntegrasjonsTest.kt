@@ -19,8 +19,7 @@ import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
 
-class SaksOversiktIntegrasjonsTest: AbstractIntegrationTest() {
-
+class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
     lateinit var fiksClient: FiksClientImpl
 
@@ -37,7 +36,7 @@ class SaksOversiktIntegrasjonsTest: AbstractIntegrationTest() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
 
-        doGet(uri = "/api/v1/innsyn/saker",)
+        doGet(uri = "/api/v1/innsyn/saker")
             .expectBodyList(SaksListeResponse::class.java)
             .hasSize(1)
 
@@ -65,5 +64,3 @@ class SaksOversiktIntegrasjonsTest: AbstractIntegrationTest() {
         coVerify(exactly = 3) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
     }
 }
-
-

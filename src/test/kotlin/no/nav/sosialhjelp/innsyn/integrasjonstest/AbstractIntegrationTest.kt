@@ -19,7 +19,6 @@ import org.springframework.test.web.reactive.server.WebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 abstract class AbstractIntegrationTest {
-
     @Autowired
     private lateinit var webClient: WebTestClient
 
@@ -37,9 +36,7 @@ abstract class AbstractIntegrationTest {
         coEvery { pdlClientOld.hentPerson(any(), any()) } returns hentPersonAnswer()
     }
 
-    protected fun doGet(
-        uri: String,
-    ): WebTestClient.ResponseSpec {
+    protected fun doGet(uri: String): WebTestClient.ResponseSpec {
         return webClient
             .get()
             .uri(uri)

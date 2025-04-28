@@ -16,25 +16,10 @@ import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.saksoversikt.SaksListeResponse
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
-import no.nav.sosialhjelp.innsyn.testutils.MockOauth2ServerUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.web.reactive.server.WebTestClient
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
-class SaksOversiktIntegrasjonstest {
-    @Autowired
-    private lateinit var webClient: WebTestClient
-
-    @Autowired
-    lateinit var mockLogin: MockOauth2ServerUtils
+class SaksOversiktIntegrasjonsTest: AbstractIntegrationTest() {
 
     @MockkBean
     lateinit var fiksClient: FiksClientImpl
@@ -47,25 +32,12 @@ class SaksOversiktIntegrasjonstest {
 
     private val navEnhet: NavEnhet = mockk()
 
-    var token: String = ""
-
-    @BeforeEach
-    fun setUp() {
-        token = mockLogin.hentLevel4SelvbetjeningToken()
-    }
-
     @Test
     fun `skal hente liste med saker`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
 
-        webClient
-            .get()
-            .uri("/api/v1/innsyn/saker")
-            .accept(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .exchange()
-            .expectStatus().isOk
+        doGet(uri = "/api/v1/innsyn/saker",)
             .expectBodyList(SaksListeResponse::class.java)
             .hasSize(1)
 
@@ -86,16 +58,12 @@ class SaksOversiktIntegrasjonstest {
         every { navEnhet.navn } returns "testNavKontor"
         coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) } returns soknad
 
-        webClient
-            .get()
-            .uri("/api/v1/innsyn/sak/1234/detaljer")
-            .accept(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .exchange()
-            .expectStatus().isOk
+        doGet("/api/v1/innsyn/sak/1234/detaljer")
 
         coVerify(exactly = 3) { fiksClient.hentDigisosSak(any(), any()) }
         coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
         coVerify(exactly = 3) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
     }
 }
+
+

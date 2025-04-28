@@ -3,14 +3,13 @@ kotlin = "2.1.10"
 versions = "0.51.0"
 spring-boot = "3.4.5"
 coroutines = "1.8.1"
-sosialhjelp_common = "1.20231205.0930-5ce172f"
-#sosialhjelp_common = "1.20250120.1009-d88048d"
+sosialhjelp_common = "1.20250120.1009-d88048d"
 logback = "1.5.6"
 logstash = "8.0"
 filformat = "1.2025.01.20-12.05-901742ed6fe0"
 micrometer_registry = "1.13.2"
 prometheus = "0.16.0"
-token_validation = "4.1.4"
+token_validation = "5.0.25"
 jackson = "2.17.2"
 commons_codec = "1.17.1"
 commons_io = "2.16.1"
@@ -22,7 +21,6 @@ jemp_box = "1.8.17"
 unleash = "9.2.4"
 springdoc = "2.6.0"
 json_smart = "2.4.10"
-fiks_io = "3.3.6"
 
 java_jwt = "4.4.0"
 jwks_rsa = "0.22.1"
@@ -67,8 +65,6 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 logback-logstash = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash" }
 
 sosialhjelp-filformat = { module = "no.nav.sbl.dialogarena:soknadsosialhjelp-filformat", version.ref = "filformat" }
-
-fiks-io = { module = "no.ks.fiks:fiks-io-klient-java", version.ref = "fiks_io" }
 
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 

@@ -54,8 +54,7 @@ dependencies {
     // Filformat
     implementation(libs.sosialhjelp.filformat)
 
-    // Fiks IO
-    implementation(libs.fiks.io)
+    testImplementation("org.freemarker:freemarker:2.3.34")
 
     // Jackson
     implementation(libs.jackson.module.kotlin)

@@ -3,7 +3,8 @@ kotlin = "2.1.10"
 versions = "0.51.0"
 spring-boot = "3.4.5"
 coroutines = "1.8.1"
-sosialhjelp_common = "1.20250120.1009-d88048d"
+sosialhjelp_common = "1.20231205.0930-5ce172f"
+#sosialhjelp_common = "1.20250120.1009-d88048d"
 logback = "1.5.6"
 logstash = "8.0"
 filformat = "1.2025.01.20-12.05-901742ed6fe0"
@@ -30,7 +31,7 @@ opentelemetry = "1.42.1"
 
 ktlint = "1.0.1"
 
-mockk = "1.13.12"
+mockk = "1.13.13"
 spring_mockk = "4.0.2"
 resilience4j = "2.3.0"
 
@@ -93,6 +94,7 @@ opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "spring_mockk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockk-jvm = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
 token-validation-spring-test = { module = "no.nav.security:token-validation-spring-test", version.ref = "token_validation" }
 
 [bundles]

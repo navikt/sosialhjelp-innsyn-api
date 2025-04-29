@@ -1,12 +1,10 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import no.ks.fiks.io.client.FiksIOKlient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -14,7 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodilessEntity
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.core.publisher.Mono
-import java.lang.IllegalStateException
 
 interface KlageService {
     suspend fun sendKlage(
@@ -66,7 +63,6 @@ class KlageServiceLocalImpl(
 
 @Service
 @Profile("preprod|prodgcp|dev")
-@ConditionalOnBean(FiksIOKlient::class)
 @ConditionalOnProperty(name = ["klageEnabled"], havingValue = "true")
 class KlageServiceImpl(
     private val fiksClient: FiksClient,

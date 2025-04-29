@@ -54,9 +54,6 @@ dependencies {
     // Filformat
     implementation(libs.sosialhjelp.filformat)
 
-    // Fiks IO
-    implementation(libs.fiks.io)
-
     // Jackson
     implementation(libs.jackson.module.kotlin)
 
@@ -83,6 +80,7 @@ dependencies {
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.springmockk)
     testImplementation(libs.mockk)
+    testImplementation(libs.mockk.jvm)
     testImplementation(libs.token.validation.spring.test)
 }
 

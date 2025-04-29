@@ -215,8 +215,7 @@ internal class VedleggServiceTest {
                                         JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_1).withSha512("1231231"),
                                         JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_2).withSha512("adfgbjn"),
                                     ),
-                                )
-                                .withStatus(LASTET_OPP_STATUS)
+                                ).withStatus(LASTET_OPP_STATUS)
                                 .withType(DOKUMENTTYPE_3),
                             JsonVedlegg()
                                 .withFiler(
@@ -224,8 +223,7 @@ internal class VedleggServiceTest {
                                         JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_2).withSha512("aasdcx"),
                                         JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("qweqqa"),
                                     ),
-                                )
-                                .withStatus(LASTET_OPP_STATUS)
+                                ).withStatus(LASTET_OPP_STATUS)
                                 .withType(DOKUMENTTYPE_4),
                         ),
                     )
@@ -375,16 +373,14 @@ private val soknadVedleggSpesifikasjon =
                         listOf(
                             JsonFiler().withFilnavn(SOKNAD_FILNAVN_1).withSha512("1234fasd"),
                         ),
-                    )
-                    .withStatus(LASTET_OPP_STATUS)
+                    ).withStatus(LASTET_OPP_STATUS)
                     .withType(DOKUMENTTYPE),
                 JsonVedlegg()
                     .withFiler(
                         listOf(
                             JsonFiler().withFilnavn(SOKNAD_FILNAVN_2).withSha512("sfg234"),
                         ),
-                    )
-                    .withStatus(LASTET_OPP_STATUS)
+                    ).withStatus(LASTET_OPP_STATUS)
                     .withType(DOKUMENTTYPE_2),
             ),
         )
@@ -398,8 +394,7 @@ private val soknadVedleggSpesifikasjonMedStatusKrevesOgLastetOpp =
                         listOf(
                             JsonFiler().withFilnavn(SOKNAD_FILNAVN_1).withSha512("1234fasd"),
                         ),
-                    )
-                    .withStatus(LASTET_OPP_STATUS)
+                    ).withStatus(LASTET_OPP_STATUS)
                     .withType(DOKUMENTTYPE),
                 JsonVedlegg()
                     .withFiler(listOf())
@@ -417,16 +412,14 @@ private val ettersendteVedleggSpesifikasjon_1 =
                         listOf(
                             JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_1).withSha512("g25b3"),
                         ),
-                    )
-                    .withStatus(LASTET_OPP_STATUS)
+                    ).withStatus(LASTET_OPP_STATUS)
                     .withType(DOKUMENTTYPE_3),
                 JsonVedlegg()
                     .withFiler(
                         listOf(
                             JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_2).withSha512("4avc65a8"),
                         ),
-                    )
-                    .withStatus(LASTET_OPP_STATUS)
+                    ).withStatus(LASTET_OPP_STATUS)
                     .withType(DOKUMENTTYPE_4),
             ),
         )
@@ -441,8 +434,7 @@ private val ettersendteVedleggSpesifikasjon_2 =
                             JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_3).withSha512("aadsfwr"),
                             JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("uiuusss"),
                         ),
-                    )
-                    .withStatus(LASTET_OPP_STATUS)
+                    ).withStatus(LASTET_OPP_STATUS)
                     .withType(DOKUMENTTYPE_3),
             ),
         )
@@ -456,8 +448,7 @@ private val ettersendteVedleggSpesifikasjon_3 =
                         listOf(
                             JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_3).withSha512("aadsfwr"),
                         ),
-                    )
-                    .withStatus("VedleggAlleredeSendt")
+                    ).withStatus("VedleggAlleredeSendt")
                     .withType(DOKUMENTTYPE_3),
             ),
         )
@@ -471,8 +462,7 @@ private val ettersendteVedleggSpesifikasjon_4 =
                         listOf(
                             JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("1231231"),
                         ),
-                    )
-                    .withStatus(LASTET_OPP_STATUS)
+                    ).withStatus(LASTET_OPP_STATUS)
                     .withType(DOKUMENTTYPE_3),
             ),
         )
@@ -487,8 +477,7 @@ private val ettersendteVedleggSpesifikasjon_5 =
                             JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_1).withSha512("1231231"),
                             JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_5).withSha512("9786468"),
                         ),
-                    )
-                    .withStatus(LASTET_OPP_STATUS)
+                    ).withStatus(LASTET_OPP_STATUS)
                     .withType(DOKUMENTTYPE),
             ),
         )

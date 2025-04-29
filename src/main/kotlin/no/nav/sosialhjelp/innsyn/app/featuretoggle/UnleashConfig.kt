@@ -19,7 +19,8 @@ class UnleashConfig(
     fun unleashClient(): Unleash {
         val byInstanceIdStrategy = ByInstanceIdStrategy(clientProperties.unleashEnv)
         val config =
-            UnleashConfig.builder()
+            UnleashConfig
+                .builder()
                 .appName(clientProperties.unleashInstanceId)
                 .environment(clientProperties.unleashEnv)
                 .instanceId(clientProperties.unleashInstanceId + "_" + clientProperties.unleashEnv)
@@ -38,7 +39,5 @@ class UnleashConfig(
 @Configuration
 class UnleashMockConfig {
     @Bean
-    fun unleashClient(): Unleash {
-        return FakeUnleash()
-    }
+    fun unleashClient(): Unleash = FakeUnleash()
 }

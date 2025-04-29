@@ -1,16 +1,5 @@
 package no.nav.sosialhjelp.innsyn.utils
 
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.ErrorMessage
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.slf4j.Marker
-import org.slf4j.MarkerFactory
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.io.IOException
 import java.sql.Timestamp
 import java.time.Instant
@@ -25,14 +14,23 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
 import kotlin.reflect.full.companionObject
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.ErrorMessage
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 const val COUNTER_SUFFIX_LENGTH = 4
 
 fun hentUrlFraFilreferanse(
     clientProperties: ClientProperties,
     filreferanse: JsonFilreferanse,
-): String {
-    return when (filreferanse) {
+): String =
+    when (filreferanse) {
         is JsonDokumentlagerFilreferanse ->
             clientProperties.fiksDokumentlagerEndpointUrl +
                 "/dokumentlager/nedlasting/niva4/${filreferanse.id}?inline=true"
@@ -45,38 +43,30 @@ fun hentUrlFraFilreferanse(
             "Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse",
         )
     }
-}
 
 fun hentDokumentlagerUrl(
     clientProperties: ClientProperties,
     dokumentlagerId: String,
-): String {
-    return clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/$dokumentlagerId?inline=true"
-}
+): String = clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/$dokumentlagerId?inline=true"
 
-fun String.toLocalDateTime(): LocalDateTime {
-    return ZonedDateTime.parse(this, ISO_DATE_TIME)
-        .withZoneSameInstant(ZoneId.of("Europe/Oslo")).toLocalDateTime()
-}
+fun String.toLocalDateTime(): LocalDateTime =
+    ZonedDateTime
+        .parse(this, ISO_DATE_TIME)
+        .withZoneSameInstant(ZoneId.of("Europe/Oslo"))
+        .toLocalDateTime()
 
 fun String.toLocalDate(): LocalDate = LocalDate.parse(this, ISO_LOCAL_DATE)
 
-fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime {
-    return LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneId.of("Europe/Oslo"))
-}
+fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneId.of("Europe/Oslo"))
 
-fun unixTimestampToDate(tidspunkt: Long): Date {
-    return Timestamp.valueOf(unixToLocalDateTime(tidspunkt))
-}
+fun unixTimestampToDate(tidspunkt: Long): Date = Timestamp.valueOf(unixToLocalDateTime(tidspunkt))
 
 fun formatLocalDateTime(dato: LocalDateTime): String {
     val datoFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy 'kl.' HH.mm", Locale.forLanguageTag("nb"))
     return dato.format(datoFormatter)
 }
 
-fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long {
-    return tidspunktSendt?.until(LocalDateTime.now(), ChronoUnit.MINUTES) ?: -1
-}
+fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long = tidspunktSendt?.until(LocalDateTime.now(), ChronoUnit.MINUTES) ?: -1
 
 /**
  * Generer navEksternRefId for nytt opplastet vedlegg
@@ -86,8 +76,10 @@ fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long {
  */
 fun lagNavEksternRefId(digisosSak: DigisosSak): String {
     val previousId: String =
-        digisosSak.ettersendtInfoNAV?.ettersendelser
-            ?.map { it.navEksternRefId }?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
+        digisosSak.ettersendtInfoNAV
+            ?.ettersendelser
+            ?.map { it.navEksternRefId }
+            ?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
             ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
             ?: digisosSak.fiksDigisosId.plus("0000")
 
@@ -103,37 +95,31 @@ private fun lagIdSuffix(previousId: String): String {
     return suffix.toString().padStart(4, '0')
 }
 
-fun <R : Any> R.logger(): Lazy<Logger> {
-    return lazy { LoggerFactory.getLogger(unwrapCompanionClass(this.javaClass).name) }
-}
+fun <R : Any> R.logger(): Lazy<Logger> = lazy { LoggerFactory.getLogger(unwrapCompanionClass(this.javaClass).name) }
 
 // unwrap companion class to enclosing class given a Java Class
-fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> {
-    return ofClass.enclosingClass?.takeIf {
+fun <T : Any> unwrapCompanionClass(ofClass: Class<T>): Class<*> =
+    ofClass.enclosingClass?.takeIf {
         ofClass.enclosingClass.kotlin.companionObject?.java == ofClass
     } ?: ofClass
-}
 
 fun messageUtenFnr(e: WebClientResponseException): String {
     val fiksErrorMessage = toFiksErrorMessageUtenFnr(e)
-    val message = e.message?.maskerFnr
+    val message = e.message.maskerFnr
     return "$message - $fiksErrorMessage"
 }
 
 fun toFiksErrorMessageUtenFnr(e: WebClientResponseException) = e.toFiksErrorMessage()?.feilmeldingUtenFnr ?: ""
 
-private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessage? {
-    return try {
+private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessage? =
+    try {
         objectMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
     } catch (e: IOException) {
         null
     }
-}
 
 val String.maskerFnr: String
     get() = this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")
 
 val ErrorMessage.feilmeldingUtenFnr: String?
     get() = this.message?.maskerFnr
-
-val SECURE: Marker = MarkerFactory.getMarker("SECURE_LOG")

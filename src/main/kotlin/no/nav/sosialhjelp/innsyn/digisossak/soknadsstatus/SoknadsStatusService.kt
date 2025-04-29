@@ -53,13 +53,13 @@ class SoknadsStatusService(
             tidspunktSendt = model.tidspunktSendt,
             navKontor = model.soknadsmottaker?.navEnhetsnavn?.takeIf { erInnsynDeaktivertForKommune },
             soknadUrl =
-                dokumentlagerId?.let {
-                    UrlResponse(
-                        HendelseTekstType.VIS_BREVET_LENKETEKST,
-                        hentDokumentlagerUrl(clientProperties, it),
-                    )
-                }
-                    .takeIf { erInnsynDeaktivertForKommune },
+                dokumentlagerId
+                    ?.let {
+                        UrlResponse(
+                            HendelseTekstType.VIS_BREVET_LENKETEKST,
+                            hentDokumentlagerUrl(clientProperties, it),
+                        )
+                    }.takeIf { erInnsynDeaktivertForKommune },
             digisosSak.kommunenummer,
             digisosSak.originalSoknadNAV?.navEksternRefId,
         )

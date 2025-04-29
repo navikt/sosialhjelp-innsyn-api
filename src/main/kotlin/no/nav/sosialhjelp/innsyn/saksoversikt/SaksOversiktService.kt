@@ -15,22 +15,21 @@ class SaksOversiktService(
     private val unleashClient: Unleash,
     private val oppgaveService: OppgaveService,
 ) {
-    suspend fun hentAlleSaker(token: String): List<SaksListeResponse> {
-        return hentAlleDigisosSakerFraFiks(token)
+    suspend fun hentAlleSaker(token: String): List<SaksListeResponse> =
+        hentAlleDigisosSakerFraFiks(token)
             .sortedByDescending { it.sistOppdatert }
-    }
 
     private suspend fun hentAlleDigisosSakerFraFiks(token: String): List<SaksListeResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
         val responseList =
             digisosSaker
-                .partition { it.originalSoknadNAV == null && it.digisosSoker == null } // Ikke returner "tomme" søknader som som regel er feilregistreringer
+                // Ikke returner "tomme" søknader som som regel er feilregistreringer
+                .partition { it.originalSoknadNAV == null && it.digisosSoker == null }
                 .let { (tommeSoknader, gyldigeSoknader) ->
                     log.info("Fant ${tommeSoknader.size} tomme søknader. Ider: ${tommeSoknader.map { it.fiksDigisosId }}")
                     log.info("Fant ${gyldigeSoknader.size} gyldige søknader. Ider: ${gyldigeSoknader.map { it.fiksDigisosId }}")
                     gyldigeSoknader
-                }
-                .map {
+                }.map {
                     SaksListeResponse(
                         fiksDigisosId = it.fiksDigisosId,
                         soknadTittel = "saker.default_tittel",

@@ -320,7 +320,9 @@ internal class VedleggOpplastingServiceTest {
                                 it.fil =
                                     MockMultipartFile(
                                         "files",
-                                        "${it.uuid}.pdf", filtype, pdfFile,
+                                        "${it.uuid}.pdf",
+                                        filtype,
+                                        pdfFile,
                                     )
                             },
                         ),
@@ -358,7 +360,9 @@ internal class VedleggOpplastingServiceTest {
                                 it.fil =
                                     MockMultipartFile(
                                         "files",
-                                        "${it.uuid}.jfif", filtype1, jpgFile,
+                                        "${it.uuid}.jfif",
+                                        filtype1,
+                                        jpgFile,
                                     )
                             },
                         ),

@@ -161,7 +161,9 @@ internal class FiksClientTest {
     fun `POST ny ettersendelse`() =
         runTest(timeout = 5.seconds) {
             mockWebServer.enqueue(
-                MockResponse().setResponseCode(200).setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .setBody(ok_minimal_jsondigisossoker_response),
             )
             mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("true"))

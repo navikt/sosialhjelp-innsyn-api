@@ -51,14 +51,13 @@ class TilgangskontrollService(
     private suspend fun hentPerson(
         ident: String,
         token: String,
-    ): PdlPersonOld? {
-        return try {
+    ): PdlPersonOld? =
+        try {
             pdlClientOld.hentPerson(ident, token)?.hentPerson
         } catch (e: PdlException) {
             log.warn("PDL kaster feil -> midlertidig ikke tilgang", e)
             null
         }
-    }
 
     suspend fun verifyDigisosSakIsForCorrectUser(digisosSak: DigisosSak) {
         val gyldigeIdenter = pdlClientOld.hentIdenter(SubjectHandlerUtils.getUserIdFromToken(), SubjectHandlerUtils.getToken())

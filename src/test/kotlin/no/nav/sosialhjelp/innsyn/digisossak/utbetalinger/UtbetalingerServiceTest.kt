@@ -364,14 +364,26 @@ internal class UtbetalingerServiceTest {
             val vilkar = Vilkar("vilkar1", "tittel", "Skal hoppe", Oppgavestatus.RELEVANT, null, now, now)
             val utbetaling1 =
                 Utbetaling(
-                    "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                    "referanse",
+                    UtbetalingsStatus.UTBETALT,
+                    BigDecimal.TEN,
+                    "Nødhjelp",
                     null,
                     LocalDate.of(
                         2019,
                         8,
                         10,
                     ),
-                    null, null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    mutableListOf(vilkar),
+                    mutableListOf(),
+                    LocalDateTime.now(),
                 )
             model.saker.add(
                 Sak(
@@ -383,13 +395,26 @@ internal class UtbetalingerServiceTest {
                         mutableListOf(
                             utbetaling1,
                             Utbetaling(
-                                "Sak2", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Tannlege", null,
+                                "Sak2",
+                                UtbetalingsStatus.UTBETALT,
+                                BigDecimal.TEN,
+                                "Tannlege",
+                                null,
                                 LocalDate.of(
                                     2019,
                                     9,
                                     12,
                                 ),
-                                null, null, null, null, false, null, null, mutableListOf(vilkar), mutableListOf(), LocalDateTime.now(),
+                                null,
+                                null,
+                                null,
+                                null,
+                                false,
+                                null,
+                                null,
+                                mutableListOf(vilkar),
+                                mutableListOf(),
+                                LocalDateTime.now(),
                             ),
                         ),
                 ),
@@ -425,14 +450,26 @@ internal class UtbetalingerServiceTest {
                 )
             val utbetaling1 =
                 Utbetaling(
-                    "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                    "referanse",
+                    UtbetalingsStatus.UTBETALT,
+                    BigDecimal.TEN,
+                    "Nødhjelp",
                     null,
                     LocalDate.of(
                         2019,
                         8,
                         10,
                     ),
-                    null, null, null, null, false, null, null, mutableListOf(), mutableListOf(dokumentasjonkrav), LocalDateTime.now(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    mutableListOf(),
+                    mutableListOf(dokumentasjonkrav),
+                    LocalDateTime.now(),
                 )
             model.saker.add(
                 Sak(
@@ -687,7 +724,7 @@ internal class UtbetalingerServiceTest {
         }
 
     @Test
-    fun `Hent tidlige utbetalinger skal returnere utbetalinger fra forrige måned med status UTBETALT`() =
+    fun `Hent tidlige utbetalinger skal returnere utbetalinger fra forrige maned med status UTBETALT`() =
         runTest(timeout = 5.seconds) {
             val thisYearMonth: YearMonth = YearMonth.from(LocalDateTime.now().toLocalDate())
             val datoDenneManed = thisYearMonth.atDay(1)
@@ -763,7 +800,7 @@ internal class UtbetalingerServiceTest {
             val datoForrigeManed = LocalDate.now().minusMonths(1)
             val datoNesteManed = LocalDate.now().plusMonths(1)
 
-            var fellesUtbetaling =
+            val fellesUtbetaling =
                 Utbetaling(
                     referanse = "Sak1",
                     status = UtbetalingsStatus.PLANLAGT_UTBETALING,
@@ -808,14 +845,14 @@ internal class UtbetalingerServiceTest {
         }
 
     @Test
-    fun `Hent nye og hent tidligere utbetalinger skal returnere utbetalinger med STATUS stoppet basert på dato`() =
+    fun `Hent nye og hent tidligere utbetalinger skal returnere utbetalinger med STATUS stoppet basert pa dato`() =
         runTest(timeout = 5.seconds) {
             val thisYearMonth: YearMonth = YearMonth.from(LocalDateTime.now().toLocalDate())
             val datoDenneManed = thisYearMonth.atDay(1)
             val datoForrigeManed = LocalDate.now().minusMonths(1)
             val datoNesteManed = LocalDate.now().plusMonths(1)
 
-            var fellesUtbetaling =
+            val fellesUtbetaling =
                 Utbetaling(
                     referanse = "Sak1",
                     status = UtbetalingsStatus.STOPPET,

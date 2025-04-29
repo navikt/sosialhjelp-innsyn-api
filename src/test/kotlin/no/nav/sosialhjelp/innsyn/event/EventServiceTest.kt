@@ -641,9 +641,22 @@ internal class EventServiceTest {
     fun `skal ikke logge nar vi ikke har gamle utbetalinger`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp", LocalDate.now(),
-                null, null, null, null, null, false, null,
-                null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                "referanse",
+                UtbetalingsStatus.PLANLAGT_UTBETALING,
+                BigDecimal.TEN,
+                "Nødhjelp",
+                LocalDate.now(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -657,14 +670,26 @@ internal class EventServiceTest {
     fun `skal logge selv nar vi har gamel utbetaling som er utbetalt i tide`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                "referanse",
+                UtbetalingsStatus.UTBETALT,
+                BigDecimal.TEN,
+                "Nødhjelp",
                 LocalDate.now().minusDays(
                     2,
                 ),
                 LocalDate.now().minusDays(
                     2,
                 ),
-                null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -690,7 +715,10 @@ internal class EventServiceTest {
     fun `skal logge selv nar vi har gamel utbetaling som er stoppet i tide`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.STOPPET, BigDecimal.TEN, "Nødhjelp",
+                "referanse",
+                UtbetalingsStatus.STOPPET,
+                BigDecimal.TEN,
+                "Nødhjelp",
                 LocalDate.now().minusDays(
                     2,
                 ),
@@ -698,7 +726,15 @@ internal class EventServiceTest {
                 LocalDate.now().minusDays(
                     2,
                 ),
-                null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -724,11 +760,24 @@ internal class EventServiceTest {
     fun `skal logge selv nar vi har gamel forfallsdato som er utbetalt samtidig som event er opprettet`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                "referanse",
+                UtbetalingsStatus.UTBETALT,
+                BigDecimal.TEN,
+                "Nødhjelp",
                 LocalDate.now().minusDays(
                     20,
                 ),
-                LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                LocalDate.now(),
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -754,11 +803,24 @@ internal class EventServiceTest {
     fun `skal logge selv nar vi har gamel forfallsdato som er utbetalt fort nok etter at event er opprettet`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                "referanse",
+                UtbetalingsStatus.UTBETALT,
+                BigDecimal.TEN,
+                "Nødhjelp",
                 LocalDate.now().minusDays(
                     20,
                 ),
-                LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                LocalDate.now(),
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -793,11 +855,24 @@ internal class EventServiceTest {
     fun `skal logge nar vi har gamel utbetaling som ikke er utbetalt`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.PLANLAGT_UTBETALING, BigDecimal.TEN, "Nødhjelp",
+                "referanse",
+                UtbetalingsStatus.PLANLAGT_UTBETALING,
+                BigDecimal.TEN,
+                "Nødhjelp",
                 LocalDate.now().minusDays(
                     2,
                 ),
-                null, null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -825,14 +900,26 @@ internal class EventServiceTest {
     fun `skal logge nar vi har gamel utbetaling som er utbetalt for sent`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                "referanse",
+                UtbetalingsStatus.UTBETALT,
+                BigDecimal.TEN,
+                "Nødhjelp",
                 LocalDate.now().minusDays(
                     4,
                 ),
                 LocalDate.now().minusDays(
                     2,
                 ),
-                null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -869,7 +956,10 @@ internal class EventServiceTest {
     fun `skal logge nar vi har gamel utbetaling som er stoppet for sent`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.STOPPET, BigDecimal.TEN, "Nødhjelp",
+                "referanse",
+                UtbetalingsStatus.STOPPET,
+                BigDecimal.TEN,
+                "Nødhjelp",
                 LocalDate.now().minusDays(
                     4,
                 ),
@@ -877,7 +967,15 @@ internal class EventServiceTest {
                 LocalDate.now().minusDays(
                     2,
                 ),
-                null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
@@ -914,11 +1012,24 @@ internal class EventServiceTest {
     fun `skal logge nar vi har gamel forfallsdato som ikke er utbetalt fort nok etter at event er opprettet`() {
         val nyUtbetaling =
             Utbetaling(
-                "referanse", UtbetalingsStatus.UTBETALT, BigDecimal.TEN, "Nødhjelp",
+                "referanse",
+                UtbetalingsStatus.UTBETALT,
+                BigDecimal.TEN,
+                "Nødhjelp",
                 LocalDate.now().minusDays(
                     20,
                 ),
-                LocalDate.now(), null, null, null, null, false, null, null, mutableListOf(), mutableListOf(), LocalDateTime.now(),
+                LocalDate.now(),
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null,
+                mutableListOf(),
+                mutableListOf(),
+                LocalDateTime.now(),
             )
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger

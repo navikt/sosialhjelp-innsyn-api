@@ -41,7 +41,8 @@ class PdlClientOldImpl(
     private val pdlAudience: String,
 ) : PdlClientOld {
     private val pdlRetry =
-        RetryUtils.retryBackoffSpec({ it is WebClientResponseException })
+        RetryUtils
+            .retryBackoffSpec({ it is WebClientResponseException })
             .onRetryExhaustedThrow { spec, retrySignal ->
                 throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
             }
@@ -50,9 +51,7 @@ class PdlClientOldImpl(
     override suspend fun hentPerson(
         ident: String,
         token: String,
-    ): PdlHentPerson? {
-        return hentFraPdl(ident, token)
-    }
+    ): PdlHentPerson? = hentFraPdl(ident, token)
 
     @Cacheable("pdlHistoriskeIdenterOld", key = "#ident")
     override suspend fun hentIdenter(
@@ -68,7 +67,8 @@ class PdlClientOldImpl(
             val query = getHentPersonResource().replace("[\n\r]", "")
             try {
                 val pdlPersonResponse =
-                    pdlWebClient.post()
+                    pdlWebClient
+                        .post()
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
                         .header(AUTHORIZATION, BEARER + tokenXtoken(token.removePrefix("Bearer ")))
@@ -94,7 +94,8 @@ class PdlClientOldImpl(
         val query = getHentIdenterResource().replace("[\n\r]", "")
         try {
             val pdlIdenterResponse =
-                pdlWebClient.post()
+                pdlWebClient
+                    .post()
                     .contentType(MediaType.APPLICATION_JSON)
                     .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
                     .header(AUTHORIZATION, BEARER + tokenXtoken(token.removePrefix("Bearer ")))
@@ -116,13 +117,13 @@ class PdlClientOldImpl(
     private suspend fun tokenXtoken(token: String) = texasClient.getTokenXToken(pdlAudience, token)
 
     override fun ping() {
-        pdlWebClient.options()
+        pdlWebClient
+            .options()
             .retrieve()
             .bodyToMono<String>()
             .doOnError { e ->
                 log.error("PDL - ping feilet", e)
-            }
-            .subscribe()
+            }.subscribe()
     }
 
     private fun getHentPersonResource() = getResourceAsString("/graphql-documents/hentPerson.graphql")

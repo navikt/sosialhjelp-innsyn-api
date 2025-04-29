@@ -18,7 +18,9 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 
-class PdfGenerator internal constructor(private var document: PDDocument) {
+class PdfGenerator internal constructor(
+    private var document: PDDocument,
+) {
     private var currentPage = PDPage(PDRectangle.A4)
     private var currentStream: PDPageContentStream
     private var y: Float
@@ -37,9 +39,7 @@ class PdfGenerator internal constructor(private var document: PDDocument) {
     private var fontStream2: InputStream? = ClassPathResource("SourceSansPro-Regular.ttf").inputStream
     private val fontPlain: PDFont = PDType0Font.load(document, fontStream2)
 
-    private fun calculateStartY(): Float {
-        return MEDIA_BOX.upperRightY - MARGIN
-    }
+    private fun calculateStartY(): Float = MEDIA_BOX.upperRightY - MARGIN
 
     fun finish(): ByteArray {
         cat.metadata = metadata

@@ -8,7 +8,8 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 
 val objectMapper: ObjectMapper =
-    JsonSosialhjelpObjectMapper.createObjectMapper()
+    JsonSosialhjelpObjectMapper
+        .createObjectMapper()
         .registerKotlinModule()
         .registerModule(JavaTimeModule())
         .configure(SerializationFeature.INDENT_OUTPUT, true)

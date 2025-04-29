@@ -38,13 +38,14 @@ class TexasClient(
     private val log by logger()
 
     private val texasWebClient =
-        texasWebClientBuilder.defaultHeaders {
-            it.contentType = MediaType.APPLICATION_JSON
-        }.codecs {
-            it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
-            it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
-            it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
-        }.build()
+        texasWebClientBuilder
+            .defaultHeaders {
+                it.contentType = MediaType.APPLICATION_JSON
+            }.codecs {
+                it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
+                it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
+                it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
+            }.build()
 
     private val maskinportenParams: Map<String, String> = mapOf("identity_provider" to "maskinporten", "target" to "ks:fiks")
 
@@ -76,12 +77,14 @@ class TexasClient(
                 }
             val response =
                 try {
-                    texasWebClient.post().uri(url)
+                    texasWebClient
+                        .post()
+                        .uri(url)
                         .bodyValue(params)
                         .retrieve()
                         .awaitBody<TokenResponse.Success>()
                         .also {
-                            log.debug("Hentet $tokenEndpointType-token fra Texas")
+                            log.debug("Hentet {}-token fra Texas", tokenEndpointType)
                         }
                 } catch (e: WebClientResponseException) {
                     val error =

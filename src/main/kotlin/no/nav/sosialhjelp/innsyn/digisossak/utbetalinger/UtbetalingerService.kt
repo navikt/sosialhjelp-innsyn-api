@@ -104,8 +104,7 @@ class UtbetalingerService(
                         it.status == UtbetalingsStatus.PLANLAGT_UTBETALING
                 }.filter {
                     it.utbetalingsdato != null || it.forfallsdato != null
-                }
-                .groupBy {
+                }.groupBy {
                     val year =
                         it.utbetalingsdato?.year
                             ?: it.forfallsdato?.year
@@ -115,15 +114,13 @@ class UtbetalingerService(
                             ?: it.forfallsdato?.month
                             ?: error("Fant ikke en dato å gruppere utbetaling på (utbetalingsdato og forfallsdato er null)")
                     YearMonth.of(year, month)
-                }
-                .map { (key, value) ->
+                }.map { (key, value) ->
                     NyeOgTidligereUtbetalingerResponse(
                         ar = key.year,
                         maned = key.monthValue,
                         utbetalingerForManed = value.sortedBy { it.utbetalingsdato ?: it.forfallsdato },
                     )
-                }
-                .toList()
+                }.toList()
 
         return nye
     }
@@ -135,8 +132,7 @@ class UtbetalingerService(
                 utbetaling.utbetalingsdato?.let { YearMonth.of(it.year, it.month) }
                     ?: utbetaling.forfallsdato?.let { YearMonth.of(it.year, it.month) }
                     ?: YearMonth.of(Year.MIN_VALUE, 1)
-            }
-            .map { (key, value) ->
+            }.map { (key, value) ->
                 UtbetalingerResponse(
                     ar = key.year,
                     maned = key.monthValue,
@@ -175,21 +171,18 @@ class UtbetalingerService(
     fun isDateNewerThanMonths(
         date: LocalDate,
         months: Int,
-    ): Boolean {
-        return date >= LocalDate.now().minusMonths(months.toLong())
-    }
+    ): Boolean = date >= LocalDate.now().minusMonths(months.toLong())
 
     fun containsUtbetalingNewerThanMonth(
         model: InternalDigisosSoker,
         months: Int,
-    ): Boolean {
-        return model.utbetalinger
+    ): Boolean =
+        model.utbetalinger
             .any {
                 it.status == UtbetalingsStatus.UTBETALT &&
                     it.utbetalingsDato != null &&
                     isDateNewerThanMonths(it.utbetalingsDato!!, months)
             }
-    }
 
     suspend fun utbetalingExists(
         token: String,

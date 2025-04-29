@@ -31,15 +31,14 @@ class NorgClientImpl(
             }
 
     @Cacheable("navenhet")
-    override suspend fun hentNavEnhet(enhetsnr: String): NavEnhet {
-        return hentFraNorg(enhetsnr)
-    }
+    override suspend fun hentNavEnhet(enhetsnr: String): NavEnhet = hentFraNorg(enhetsnr)
 
     private suspend fun hentFraNorg(enhetsnr: String): NavEnhet =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente Nav-enhet $enhetsnr fra NORG2")
             val navEnhet: NavEnhet =
-                norgWebClient.get()
+                norgWebClient
+                    .get()
                     .uri("/enhet/{enhetsnr}", enhetsnr)
                     .accept(MediaType.APPLICATION_JSON)
                     .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
@@ -49,8 +48,7 @@ class NorgClientImpl(
                     .onErrorMap(WebClientResponseException::class.java) { e ->
                         log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
                         NorgException(e.message, e)
-                    }
-                    .awaitSingleOrNull()
+                    }.awaitSingleOrNull()
                     ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
 
             navEnhet.also { log.info("Hentet Nav-enhet $enhetsnr fra NORG2") }

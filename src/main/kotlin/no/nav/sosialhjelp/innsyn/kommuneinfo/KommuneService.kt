@@ -28,8 +28,8 @@ class KommuneService(
         return hentKommuneInfoFraFiks(kommunenummer)
     }
 
-    private suspend fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? {
-        return try {
+    private suspend fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? =
+        try {
             kommuneInfoClient.getKommuneInfo(kommunenummer).also {
                 if (it.harMidlertidigDeaktivertMottak) {
                     log.warn("Kommune $kommunenummer har midlertidig deaktivert mottak")
@@ -51,7 +51,6 @@ class KommuneService(
         } catch (e: FiksException) {
             null
         }
-    }
 
     suspend fun erInnsynDeaktivertForKommune(
         fiksDigisosId: String,

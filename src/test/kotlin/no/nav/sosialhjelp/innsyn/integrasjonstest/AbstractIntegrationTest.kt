@@ -36,15 +36,15 @@ abstract class AbstractIntegrationTest {
         coEvery { pdlClientOld.hentPerson(any(), any()) } returns hentPersonAnswer()
     }
 
-    protected fun doGet(uri: String): WebTestClient.ResponseSpec {
-        return webClient
+    protected fun doGet(uri: String): WebTestClient.ResponseSpec =
+        webClient
             .get()
             .uri(uri)
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
-            .expectStatus().isOk
-    }
+            .expectStatus()
+            .isOk
 }
 
 private fun hentPersonAnswer(): PdlHentPerson {

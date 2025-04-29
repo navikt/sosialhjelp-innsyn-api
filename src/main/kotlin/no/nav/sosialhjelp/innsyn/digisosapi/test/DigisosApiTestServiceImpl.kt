@@ -22,9 +22,7 @@ class DigisosApiTestServiceImpl(
     override suspend fun oppdaterDigisosSak(
         fiksDigisosId: String?,
         digisosApiWrapper: DigisosApiWrapper,
-    ): String? {
-        return digisosApiTestClient.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
-    }
+    ): String? = digisosApiTestClient.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
 
     override suspend fun lastOppFil(
         fiksDigisosId: String,
@@ -46,7 +44,5 @@ class DigisosApiTestServiceImpl(
     override suspend fun hentInnsynsfil(
         fiksDigisosId: String,
         token: String,
-    ): String? {
-        return digisosApiTestClient.hentInnsynsfil(fiksDigisosId, token)
-    }
+    ): String? = digisosApiTestClient.hentInnsynsfil(fiksDigisosId, token)
 }

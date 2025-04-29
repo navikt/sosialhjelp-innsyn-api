@@ -42,10 +42,11 @@ class SaksStatusService(
                 SaksStatus.FERDIGBEHANDLET
             }
         val vedtakfilUrlList =
-            sak.vedtak.map {
-                log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
-                FilUrl(it.dato, it.vedtaksFilUrl, it.id)
-            }.ifEmpty { null }
+            sak.vedtak
+                .map {
+                    log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
+                    FilUrl(it.dato, it.vedtaksFilUrl, it.id)
+                }.ifEmpty { null }
         val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak)
         return SaksStatusResponse(sak.tittel ?: DEFAULT_SAK_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList)
     }

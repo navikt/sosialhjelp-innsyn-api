@@ -106,8 +106,7 @@ class SaksOversiktController(
             model.utbetalinger
                 .filter { utbetaling ->
                     utbetaling.status == UtbetalingsStatus.UTBETALT || utbetaling.status == UtbetalingsStatus.ANNULLERT
-                }
-                .filter { utbetaling -> utbetaling.tom?.isBefore(LocalDate.now().minusDays(21)) ?: false }
+                }.filter { utbetaling -> utbetaling.tom?.isBefore(LocalDate.now().minusDays(21)) ?: false }
 
         return when {
             model.utbetalinger.size > 0 && model.utbetalinger.size == filterUtbetalinger.size -> 0
@@ -119,34 +118,31 @@ class SaksOversiktController(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: String,
-    ): Int {
-        return when {
+    ): Int =
+        when {
             model.oppgaver.isEmpty() -> 0
             else -> oppgaveService.hentOppgaver(fiksDigisosId, token).sumOf { it.oppgaveElementer.size }
         }
-    }
 
     private suspend fun hentAntallNyeVilkar(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: String,
-    ): Int {
-        return when {
+    ): Int =
+        when {
             model.vilkar.isEmpty() -> 0
             else -> oppgaveService.getVilkar(fiksDigisosId, token).size
         }
-    }
 
     private suspend fun hentAntallNyeDokumentasjonkrav(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: String,
-    ): Int {
-        return when {
+    ): Int =
+        when {
             model.dokumentasjonkrav.isEmpty() -> 0
             else -> oppgaveService.getDokumentasjonkrav(fiksDigisosId, token).sumOf { it.dokumentasjonkravElementer.size }
         }
-    }
 
     companion object {
         private val log by logger()

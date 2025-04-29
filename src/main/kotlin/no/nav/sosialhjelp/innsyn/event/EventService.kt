@@ -55,7 +55,9 @@ class EventService(
                 | Hva vet vi:
                 | enhetsnummer: null -> mismatch mellom norg og Fiks mellom 8 og 9 den 2. januar 2024
                 | kommunenummer satt i søknaden: ${jsonSoknad.mottaker?.kommunenummer}
-                | sakstatus: ${jsonDigisosSoker?.hendelser?.filterIsInstance<JsonSoknadsStatus>()?.filter { it.status == JsonSoknadsStatus.Status.MOTTATT }}
+                | sakstatus: ${jsonDigisosSoker?.hendelser?.filterIsInstance<JsonSoknadsStatus>()?.filter {
+                    it.status == JsonSoknadsStatus.Status.MOTTATT
+                }}
                 | ${
                     jsonDigisosSoker?.hendelser?.filterIsInstance<JsonTildeltNavKontor>()?.map {
                         "Tildelt navkontor: ${it.navKontor} på tidspunkt: ${it.hendelsestidspunkt}"
@@ -113,7 +115,9 @@ class EventService(
                 if (forfallsDato != null) {
                     val eventListe = mutableListOf<String>()
                     var opprettelsesdato = LocalDate.now()
-                    jsonDigisosSoker?.hendelser?.filterIsInstance<JsonUtbetaling>()
+                    jsonDigisosSoker
+                        ?.hendelser
+                        ?.filterIsInstance<JsonUtbetaling>()
                         ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
                         ?.forEach {
                             eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
@@ -170,12 +174,14 @@ class EventService(
         digisosSak: DigisosSak,
         token: String,
     ) {
-        jsonDigisosSoker?.hendelser
+        jsonDigisosSoker
+            ?.hendelser
             ?.sortedWith(hendelseComparator)
             ?.forEach { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
 
         val ingenDokumentasjonskravFraInnsyn =
-            jsonDigisosSoker?.hendelser
+            jsonDigisosSoker
+                ?.hendelser
                 ?.filterIsInstance<JsonDokumentasjonEtterspurt>()
                 ?.isEmpty() ?: true
 
@@ -268,8 +274,6 @@ class EventService(
         private fun soknadSendtForMindreEnn30DagerSiden(timestampSendt: Long) =
             unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
 
-        fun stripEnhetsnavnForKommune(navEnhetsnavn: String?): String? {
-            return navEnhetsnavn?.replace(" kommune", "")
-        }
+        fun stripEnhetsnavnForKommune(navEnhetsnavn: String?): String? = navEnhetsnavn?.replace(" kommune", "")
     }
 }

@@ -31,6 +31,5 @@ suspend fun InternalDigisosSoker.applySoknadKrav(
                     unixToLocalDateTime(timestampSendt),
                     false,
                 )
-            }
-            .toMutableList()
+            }.toMutableList()
 }

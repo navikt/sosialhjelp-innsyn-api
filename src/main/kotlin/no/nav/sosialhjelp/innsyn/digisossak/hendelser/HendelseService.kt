@@ -78,10 +78,9 @@ class HendelseService(
             }
     }
 
-    private fun LocalDateTime.rundNedTilNaermeste5Minutt(): LocalDateTime {
-        return withMinute((floor(this.minute / 5.0) * 5.0).toInt())
+    private fun LocalDateTime.rundNedTilNaermeste5Minutt(): LocalDateTime =
+        withMinute((floor(this.minute / 5.0) * 5.0).toInt())
             .truncatedTo(ChronoUnit.MINUTES)
-    }
 
     companion object {
         private val log by logger()

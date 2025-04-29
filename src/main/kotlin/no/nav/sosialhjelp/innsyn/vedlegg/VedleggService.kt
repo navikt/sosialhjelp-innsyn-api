@@ -115,40 +115,37 @@ class VedleggService(
         digisosSak: DigisosSak,
         dokumentlagerId: String,
         token: String,
-    ): JsonVedleggSpesifikasjon {
-        return fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token)
-    }
+    ): JsonVedleggSpesifikasjon =
+        fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token)
 
     private fun matchDokumentInfoAndJsonFiler(
         dokumentInfoList: List<DokumentInfo>,
         jsonFiler: List<JsonFiler>,
-    ): List<DokumentInfo> {
-        return jsonFiler
+    ): List<DokumentInfo> =
+        jsonFiler
             .flatMap { fil ->
                 dokumentInfoList
                     .filter { it.filnavn == fil.filnavn }
             }
-    }
 
     private fun filenamesMatchInDokumentInfoAndFiles(
         dokumentInfoList: List<DokumentInfo>,
         files: List<JsonFiler>,
-    ): Boolean {
-        return dokumentInfoList.size == files.size &&
-            dokumentInfoList.filterIndexed { idx, it ->
-                sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn)
-            }.size == dokumentInfoList.size
-    }
+    ): Boolean =
+        dokumentInfoList.size == files.size &&
+            dokumentInfoList
+                .filterIndexed { idx, it ->
+                    sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn)
+                }.size == dokumentInfoList.size
 
     private fun hentInnsendelsesfristFraOppgave(
         model: InternalDigisosSoker,
         vedlegg: JsonVedlegg,
-    ): LocalDateTime? {
-        return model.oppgaver
+    ): LocalDateTime? =
+        model.oppgaver
             .sortedByDescending { it.innsendelsesfrist }
             .firstOrNull { it.tittel == vedlegg.type && it.tilleggsinfo == vedlegg.tilleggsinfo }
             ?.innsendelsesfrist
-    }
 
     companion object {
         private val log by logger()

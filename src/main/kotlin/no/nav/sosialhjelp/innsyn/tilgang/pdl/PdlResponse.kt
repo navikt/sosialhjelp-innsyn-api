@@ -69,16 +69,12 @@ enum class Gradering : Serializable {
     UGRADERT,
 }
 
-fun PdlPersonOld.isKode6Or7(): Boolean {
-    return adressebeskyttelse.any {
+fun PdlPersonOld.isKode6Or7(): Boolean =
+    adressebeskyttelse.any {
         it.isKode6() || it.isKode7()
     }
-}
 
-fun Adressebeskyttelse.isKode6(): Boolean {
-    return this.gradering == Gradering.STRENGT_FORTROLIG || this.gradering == Gradering.STRENGT_FORTROLIG_UTLAND
-}
+fun Adressebeskyttelse.isKode6(): Boolean =
+    this.gradering == Gradering.STRENGT_FORTROLIG || this.gradering == Gradering.STRENGT_FORTROLIG_UTLAND
 
-fun Adressebeskyttelse.isKode7(): Boolean {
-    return this.gradering == Gradering.FORTROLIG
-}
+fun Adressebeskyttelse.isKode7(): Boolean = this.gradering == Gradering.FORTROLIG

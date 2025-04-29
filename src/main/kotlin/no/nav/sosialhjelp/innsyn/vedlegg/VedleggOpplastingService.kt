@@ -120,8 +120,8 @@ class VedleggOpplastingService(
         }
     }
 
-    fun createJsonVedleggSpesifikasjon(metadata: List<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon {
-        return JsonVedleggSpesifikasjon()
+    fun createJsonVedleggSpesifikasjon(metadata: List<OpplastetVedleggMetadata>): JsonVedleggSpesifikasjon =
+        JsonVedleggSpesifikasjon()
             .withVedlegg(
                 metadata.map {
                     createJsonVedlegg(
@@ -134,20 +134,18 @@ class VedleggOpplastingService(
                     )
                 },
             )
-    }
 
     fun createJsonVedlegg(
         metadata: OpplastetVedleggMetadata,
         filer: List<JsonFiler>,
-    ): JsonVedlegg? {
-        return JsonVedlegg()
+    ): JsonVedlegg? =
+        JsonVedlegg()
             .withType(metadata.type)
             .withTilleggsinfo(metadata.tilleggsinfo)
             .withStatus(LASTET_OPP_STATUS)
             .withFiler(filer)
             .withHendelseType(metadata.hendelsetype)
             .withHendelseReferanse(metadata.hendelsereferanse)
-    }
 
     fun createFilename(fil: OpplastetFil): String {
         val filenameSplit = splitFileName(sanitizeFileName(fil.filnavn))
@@ -245,7 +243,8 @@ class VedleggOpplastingService(
 
     private fun checkIfPdfIsValid(data: InputStream): ValidationValues {
         try {
-            Loader.loadPDF(RandomAccessReadBuffer(data))
+            Loader
+                .loadPDF(RandomAccessReadBuffer(data))
                 .use { document ->
                     if (document.isEncrypted) {
                         return ValidationValues.PDF_IS_ENCRYPTED
@@ -273,9 +272,15 @@ class OppgaveValidering(
     val filer: List<FilValidering>,
 )
 
-class FilValidering(val filename: String?, val status: ValidationResult)
+class FilValidering(
+    val filename: String?,
+    val status: ValidationResult,
+)
 
-data class ValidationResult(val result: ValidationValues, val fileType: TikaFileType = TikaFileType.UNKNOWN)
+data class ValidationResult(
+    val result: ValidationValues,
+    val fileType: TikaFileType = TikaFileType.UNKNOWN,
+)
 
 enum class ValidationValues {
     OK,

@@ -12,9 +12,7 @@ object MDCUtils {
 
     private val RANDOM = SecureRandom()
 
-    fun get(key: String): String? {
-        return MDC.get(key)
-    }
+    fun get(key: String): String? = MDC.get(key)
 
     fun put(
         key: String,

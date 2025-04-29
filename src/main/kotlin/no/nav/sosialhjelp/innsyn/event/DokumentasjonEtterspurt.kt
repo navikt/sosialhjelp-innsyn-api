@@ -35,8 +35,7 @@ fun InternalDigisosSoker.apply(
                     hendelse.hendelsestidspunkt.toLocalDateTime(),
                     true,
                 )
-            }
-            .toMutableList()
+            }.toMutableList()
 
     if (status == SoknadsStatus.FERDIGBEHANDLET) {
         log.warn("Dokumentasjon etterspurt etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")

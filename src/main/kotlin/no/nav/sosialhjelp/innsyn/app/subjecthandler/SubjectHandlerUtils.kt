@@ -10,21 +10,13 @@ object SubjectHandlerUtils {
     @JvmStatic
     private var subjectHandlerService: SubjectHandler = AzureAdSubjectHandlerImpl(SpringTokenValidationContextHolder())
 
-    fun getUserIdFromToken(): String {
-        return subjectHandlerService.getUserIdFromToken()
-    }
+    fun getUserIdFromToken(): String = subjectHandlerService.getUserIdFromToken()
 
-    fun getUserIdFromTokenOrNull(): String? {
-        return subjectHandlerService.getUserIdFromTokenOrNull()
-    }
+    fun getUserIdFromTokenOrNull(): String? = subjectHandlerService.getUserIdFromTokenOrNull()
 
-    fun getToken(): String {
-        return subjectHandlerService.getToken()
-    }
+    fun getToken(): String = subjectHandlerService.getToken()
 
-    fun getClientId(): String {
-        return subjectHandlerService.getClientId()
-    }
+    fun getClientId(): String = subjectHandlerService.getClientId()
 
     fun setNewSubjectHandlerImpl(subjectHandlerImpl: SubjectHandler) {
         if (isRunningInProd()) {

@@ -9,10 +9,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 class CorsConfig {
     @Bean
-    fun addCorsConfig(): WebMvcConfigurer {
-        return object : WebMvcConfigurer {
+    fun addCorsConfig(): WebMvcConfigurer =
+        object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
-                registry.addMapping("/**")
+                registry
+                    .addMapping("/**")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedOriginPatterns(*allowedOrigins)
                     .allowedHeaders(
@@ -21,12 +22,10 @@ class CorsConfig {
                         "Accept",
                         "Authorization",
                         "Nav-Call-Id",
-                    )
-                    .allowCredentials(true)
+                    ).allowCredentials(true)
                     .maxAge(3600L)
             }
         }
-    }
 
     companion object {
         private val allowedOrigins get() = if (MiljoUtils.isRunningInProd()) ALLOWED_ORIGINS_PROD else ALLOWED_ORIGINS_NON_PROD

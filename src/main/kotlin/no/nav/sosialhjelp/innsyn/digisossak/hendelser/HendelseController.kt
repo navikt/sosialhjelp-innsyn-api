@@ -9,7 +9,6 @@ import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_IDPORTEN_LOA_HIGH
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.ACR_LEVEL4
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.SELVBETJENING
-import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -29,8 +28,6 @@ class HendelseController(
     private val hendelseService: HendelseService,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
-    private val log by logger()
-
     @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
     fun hentHendelser(
         @PathVariable fiksDigisosId: String,
@@ -48,9 +45,8 @@ class HendelseController(
 
 class RequestAttributesContext(
     private val requestAttributes: RequestAttributes? = RequestContextHolder.getRequestAttributes(),
-) : ThreadContextElement<RequestAttributes?>, AbstractCoroutineContextElement(Key) {
-    private val log by logger()
-
+) : AbstractCoroutineContextElement(Key),
+    ThreadContextElement<RequestAttributes?> {
     companion object Key : CoroutineContext.Key<RequestAttributesContext>
 
     override fun updateThreadContext(context: CoroutineContext): RequestAttributes? {

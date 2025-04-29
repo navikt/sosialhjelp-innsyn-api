@@ -34,46 +34,51 @@ class KommuneInfoClient(
     webClientBuilder: WebClient.Builder,
     httpClient: HttpClient,
 ) {
+    // TODO Sparer litt ved å cache på denne istedet
     suspend fun getAll(): List<KommuneInfo> =
         withContext(Dispatchers.IO) {
-            kotlin.runCatching {
-                kommuneInfoWebClient.get()
-                    .uri(PATH_ALLE_KOMMUNEINFO)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
-                    .retrieve()
-                    .awaitBody<List<KommuneInfo>>()
-            }.onFailure {
-                log.warn("Fiks - hentKommuneInfoForAlle feilet", it)
-                if (it is WebClientResponseException) {
-                    when {
-                        it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
-                        else -> throw FiksServerException(it.statusCode.value(), it.message, it)
+            kotlin
+                .runCatching {
+                    kommuneInfoWebClient
+                        .get()
+                        .uri(PATH_ALLE_KOMMUNEINFO)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                        .retrieve()
+                        .awaitBody<List<KommuneInfo>>()
+                }.onFailure {
+                    log.warn("Fiks - hentKommuneInfoForAlle feilet", it)
+                    if (it is WebClientResponseException) {
+                        when {
+                            it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
+                            else -> throw FiksServerException(it.statusCode.value(), it.message, it)
+                        }
                     }
-                }
-            }.getOrNull()
+                }.getOrNull()
                 ?: emptyList()
         }
 
     @Cacheable("kommuneinfo")
     suspend fun getKommuneInfo(kommunenummer: String): KommuneInfo =
         withContext(Dispatchers.IO) {
-            kotlin.runCatching {
-                kommuneInfoWebClient.get()
-                    .uri(PATH_KOMMUNEINFO, kommunenummer)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
-                    .retrieve()
-                    .awaitBody<KommuneInfo>()
-            }.onFailure {
-                log.warn("Fiks - hentKommuneInfoForAlle feilet for kommune=$kommunenummer", it)
-                if (it is WebClientResponseException) {
-                    when {
-                        it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
-                        else -> throw FiksServerException(it.statusCode.value(), it.message, it)
+            kotlin
+                .runCatching {
+                    kommuneInfoWebClient
+                        .get()
+                        .uri(PATH_KOMMUNEINFO, kommunenummer)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                        .retrieve()
+                        .awaitBody<KommuneInfo>()
+                }.onFailure {
+                    log.warn("Fiks - hentKommuneInfoForAlle feilet for kommune=$kommunenummer", it)
+                    if (it is WebClientResponseException) {
+                        when {
+                            it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
+                            else -> throw FiksServerException(it.statusCode.value(), it.message, it)
+                        }
                     }
-                }
-            }.getOrThrow()
+                }.getOrThrow()
         }
 
     private val kommuneInfoWebClient: WebClient =
@@ -84,8 +89,7 @@ class KommuneInfoClient(
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
                 it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
                 it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
-            }
-            .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
+            }.defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .filter(mdcExchangeFilter)
             .build()

@@ -29,8 +29,7 @@ class DigisosApiTestConfig(
             it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
             it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
             it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
-        }
-        .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
+        }.defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
         .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
         .filter(mdcExchangeFilter)
         .build()

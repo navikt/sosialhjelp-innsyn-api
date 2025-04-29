@@ -47,7 +47,8 @@ class VirusScanner(
 
             val scanResults: List<ScanResult> =
                 withContext(Dispatchers.IO) {
-                    virusScanWebClient.put()
+                    virusScanWebClient
+                        .put()
                         .body(BodyInserters.fromValue(data))
                         .retrieve()
                         .bodyToMono<List<ScanResult>>()

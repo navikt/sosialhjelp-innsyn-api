@@ -16,9 +16,8 @@ object RetryUtils {
         predicate: (Throwable) -> (Boolean) = DEFAULT_SERVER_ERROR_FILTER,
         maxAttempts: Long = DEFAULT_MAX_ATTEMPTS,
         initialWaitIntervalMillis: Long = DEFAULT_INITIAL_WAIT_INTERVAL_MILLIS,
-    ): RetryBackoffSpec {
-        return Retry
+    ): RetryBackoffSpec =
+        Retry
             .backoff(maxAttempts, Duration.ofMillis(initialWaitIntervalMillis))
             .filter { predicate(it) }
-    }
 }

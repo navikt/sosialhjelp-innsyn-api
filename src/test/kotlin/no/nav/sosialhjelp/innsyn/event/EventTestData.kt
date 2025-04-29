@@ -61,17 +61,21 @@ val tidspunkt_6: String = now.minusHours(5).format(DateTimeFormatter.ISO_DATE_TI
 val innsendelsesfrist: String = now.plusDays(7).format(DateTimeFormatter.ISO_DATE_TIME)
 
 val DOKUMENTLAGER_1: JsonDokumentlagerFilreferanse =
-    JsonDokumentlagerFilreferanse().withType(
-        JsonFilreferanse.Type.DOKUMENTLAGER,
-    ).withId(DOKUMENTLAGERID_1)
+    JsonDokumentlagerFilreferanse()
+        .withType(
+            JsonFilreferanse.Type.DOKUMENTLAGER,
+        ).withId(DOKUMENTLAGERID_1)
 val DOKUMENTLAGER_2: JsonDokumentlagerFilreferanse =
-    JsonDokumentlagerFilreferanse().withType(
-        JsonFilreferanse.Type.DOKUMENTLAGER,
-    ).withId(DOKUMENTLAGERID_2)
+    JsonDokumentlagerFilreferanse()
+        .withType(
+            JsonFilreferanse.Type.DOKUMENTLAGER,
+        ).withId(DOKUMENTLAGERID_2)
 val SVARUT_1: JsonSvarUtFilreferanse =
-    JsonSvarUtFilreferanse().withType(
-        JsonFilreferanse.Type.DOKUMENTLAGER,
-    ).withId(SVARUTID).withNr(SVAR_UT_NR)
+    JsonSvarUtFilreferanse()
+        .withType(
+            JsonFilreferanse.Type.DOKUMENTLAGER,
+        ).withId(SVARUTID)
+        .withNr(SVAR_UT_NR)
 
 val SOKNADS_STATUS_MOTTATT: JsonSoknadsStatus =
     JsonSoknadsStatus()
@@ -161,12 +165,13 @@ val DOKUMENTASJONETTERSPURT: JsonDokumentasjonEtterspurt =
         .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
         .withDokumenter(
             mutableListOf(
-                JsonDokumenter().withInnsendelsesfrist(
-                    innsendelsesfrist,
-                ).withDokumenttype(DOKUMENTTYPE).withTilleggsinformasjon(TILLEGGSINFO),
+                JsonDokumenter()
+                    .withInnsendelsesfrist(
+                        innsendelsesfrist,
+                    ).withDokumenttype(DOKUMENTTYPE)
+                    .withTilleggsinformasjon(TILLEGGSINFO),
             ),
-        )
-        .withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(DOKUMENTLAGER_1))
+        ).withForvaltningsbrev(JsonForvaltningsbrev().withReferanse(DOKUMENTLAGER_1))
 
 val DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE: JsonDokumentasjonEtterspurt =
     JsonDokumentasjonEtterspurt()
@@ -178,9 +183,11 @@ val DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV: JsonDokumentasjonEtterspurt =
         .withType(JsonHendelse.Type.DOKUMENTASJON_ETTERSPURT)
         .withDokumenter(
             mutableListOf(
-                JsonDokumenter().withInnsendelsesfrist(
-                    innsendelsesfrist,
-                ).withDokumenttype(DOKUMENTTYPE).withTilleggsinformasjon(TILLEGGSINFO),
+                JsonDokumenter()
+                    .withInnsendelsesfrist(
+                        innsendelsesfrist,
+                    ).withDokumenttype(DOKUMENTTYPE)
+                    .withTilleggsinformasjon(TILLEGGSINFO),
             ),
         )
 

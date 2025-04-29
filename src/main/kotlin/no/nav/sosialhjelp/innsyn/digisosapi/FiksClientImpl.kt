@@ -64,9 +64,7 @@ class FiksClientImpl(
     override suspend fun hentDigisosSak(
         digisosId: String,
         token: String,
-    ): DigisosSak {
-        return hentDigisosSakFraFiks(digisosId, token).also { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
-    }
+    ): DigisosSak = hentDigisosSakFraFiks(digisosId, token).also { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
 
     @Cacheable("digisosSak", key = "#digisosId")
     override suspend fun hentDigisosSakMedFnr(
@@ -94,7 +92,8 @@ class FiksClientImpl(
             log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
 
             val digisosSak: DigisosSak =
-                fiksWebClient.get()
+                fiksWebClient
+                    .get()
                     .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
                     .accept(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.AUTHORIZATION, token)
@@ -109,8 +108,7 @@ class FiksClientImpl(
                             e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
                             else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                         }
-                    }
-                    .awaitSingleOrNull()
+                    }.awaitSingleOrNull()
                     ?: throw BadStateException("digisosSak er null selv om request ikke har kastet exception")
 
             digisosSak.also { log.debug("Hentet DigisosSak fra Fiks") }
@@ -123,9 +121,7 @@ class FiksClientImpl(
         requestedClass: Class<out T>,
         token: String,
         cacheKey: String,
-    ): T {
-        return hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass, token)
-    }
+    ): T = hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass, token)
 
     private suspend fun <T : Any> hentDokumentFraFiks(
         digisosId: String,
@@ -136,7 +132,8 @@ class FiksClientImpl(
         withContext(Dispatchers.IO) {
             log.info("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
             val dokument =
-                fiksWebClient.get()
+                fiksWebClient
+                    .get()
                     .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
                     .accept(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.AUTHORIZATION, token)
@@ -149,17 +146,17 @@ class FiksClientImpl(
                             e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
                             else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                         }
-                    }
-                    .awaitSingleOrNull()
+                    }.awaitSingleOrNull()
                     ?: throw FiksClientException(500, "dokument er null selv om request ikke har kastet exception", null)
 
             dokument.also { log.info("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
-    override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> {
-        return withContext(Dispatchers.IO) {
+    override suspend fun hentAlleDigisosSaker(token: String): List<DigisosSak> =
+        withContext(Dispatchers.IO) {
             val digisosSaker: List<DigisosSak> =
-                fiksWebClient.get()
+                fiksWebClient
+                    .get()
                     .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
                     .accept(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.AUTHORIZATION, token)
@@ -172,13 +169,11 @@ class FiksClientImpl(
                             e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
                             else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                         }
-                    }
-                    .awaitSingleOrNull()
+                    }.awaitSingleOrNull()
                     ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
 
             digisosSaker.onEach { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
         }
-    }
 
     override suspend fun lastOppNyEttersendelse(
         files: List<FilForOpplasting>,
@@ -207,7 +202,8 @@ class FiksClientImpl(
 
         val responseEntity =
             withContext(Dispatchers.IO + RequestAttributesContext()) {
-                fiksWebClient.post()
+                fiksWebClient
+                    .post()
                     .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
                     .header(HttpHeaders.AUTHORIZATION, token)
                     .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -228,8 +224,7 @@ class FiksClientImpl(
                                 else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                             }
                         }
-                    }
-                    .awaitSingleOrNull() ?: throw FiksClientException(
+                    }.awaitSingleOrNull() ?: throw FiksClientException(
                     500,
                     "responseEntity er null selv om request ikke har kastet exception",
                     null,
@@ -243,9 +238,8 @@ class FiksClientImpl(
         )
     }
 
-    private fun erPapirsoknad(digisosSak: DigisosSak): Boolean {
-        return digisosSak.ettersendtInfoNAV?.ettersendelser?.isEmpty() != false && digisosSak.originalSoknadNAV == null
-    }
+    private fun erPapirsoknad(digisosSak: DigisosSak): Boolean =
+        digisosSak.ettersendtInfoNAV?.ettersendelser?.isEmpty() != false && digisosSak.originalSoknadNAV == null
 
     private fun filErAlleredeLastetOpp(
         exception: WebClientResponseException,
@@ -285,9 +279,15 @@ class FiksClientImpl(
     }
 }
 
-class FiksClientFileExistsException(message: String?, e: WebClientResponseException?) : RuntimeException(message, e)
+class FiksClientFileExistsException(
+    message: String?,
+    e: WebClientResponseException?,
+) : RuntimeException(message, e)
 
-class FiksGoneException(message: String?, e: WebClientResponseException?) : RuntimeException(message, e)
+class FiksGoneException(
+    message: String?,
+    e: WebClientResponseException?,
+) : RuntimeException(message, e)
 
 data class VedleggMetadata(
     val filnavn: String?,
@@ -313,10 +313,7 @@ private fun Any.toHttpEntity(
     return HttpEntity(this, headerMap)
 }
 
-fun FilForOpplasting.toHttpEntity(name: String): HttpEntity<Any> {
-    return InputStreamResource(this.fil).toHttpEntity(name, this.filnavn, "application/octet-stream")
-}
+fun FilForOpplasting.toHttpEntity(name: String): HttpEntity<Any> =
+    InputStreamResource(this.fil).toHttpEntity(name, this.filnavn, "application/octet-stream")
 
-fun String.toHttpEntity(name: String): HttpEntity<Any> {
-    return this.toHttpEntity(name, null, "text/plain;charset=UTF-8")
-}
+fun String.toHttpEntity(name: String): HttpEntity<Any> = this.toHttpEntity(name, null, "text/plain;charset=UTF-8")

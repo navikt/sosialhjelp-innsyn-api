@@ -51,7 +51,8 @@ class DigisosApiTestClientImpl(
                 log.info("Laget ny digisossak: $id")
             }
 
-            digisosApiTestWebClient.post()
+            digisosApiTestWebClient
+                .post()
                 .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
                 .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                 .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
@@ -63,8 +64,7 @@ class DigisosApiTestClientImpl(
                         e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
                         else -> FiksServerException(e.statusCode.value(), e.message, e)
                     }
-                }
-                .awaitSingleOrNull()
+                }.awaitSingleOrNull()
                 .also { log.info("Postet DigisosSak til Fiks og fikk response: $it") }
                 ?: id
         }
@@ -86,7 +86,8 @@ class DigisosApiTestClientImpl(
 
         val opplastingResponseList =
             withContext(Dispatchers.IO) {
-                digisosApiTestWebClient.post()
+                digisosApiTestWebClient
+                    .post()
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
                     .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                     .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -99,8 +100,7 @@ class DigisosApiTestClientImpl(
                             e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
                             else -> FiksServerException(e.statusCode.value(), e.message, e)
                         }
-                    }
-                    .awaitSingleOrNull()
+                    }.awaitSingleOrNull()
                     ?: throw BadStateException("Ingen feil, men heller ingen opplastingResponseList")
             }
         log.info("Filer sendt til Fiks")
@@ -114,7 +114,8 @@ class DigisosApiTestClientImpl(
         withContext(Dispatchers.IO) {
             runCatching {
                 val soknad =
-                    fiksWebClient.get()
+                    fiksWebClient
+                        .get()
                         .uri("/digisos/api/v1/soknader/$fiksDigisosId")
                         .accept(MediaType.APPLICATION_JSON)
                         .header(AUTHORIZATION, token)
@@ -126,11 +127,11 @@ class DigisosApiTestClientImpl(
                                 e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
                                 else -> FiksServerException(e.statusCode.value(), e.message, e)
                             }
-                        }
-                        .awaitSingleOrNull()
+                        }.awaitSingleOrNull()
                         ?: throw BadStateException("Ingen feil, men heller ingen soknad")
                 val digisosSoker = soknad.digisosSoker ?: throw BadStateException("Soknad mangler digisosSoker")
-                fiksWebClient.get()
+                fiksWebClient
+                    .get()
                     .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${digisosSoker.metadata}")
                     .accept(MediaType.APPLICATION_JSON)
                     .header(AUTHORIZATION, token)
@@ -142,15 +143,15 @@ class DigisosApiTestClientImpl(
                             e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
                             else -> FiksServerException(e.statusCode.value(), e.message, e)
                         }
-                    }
-                    .awaitSingleOrNull()
+                    }.awaitSingleOrNull()
             }.getOrNull()
         }
 
     suspend fun opprettDigisosSak(): String? =
         withContext(Dispatchers.IO) {
             val response =
-                digisosApiTestWebClient.post()
+                digisosApiTestWebClient
+                    .post()
                     .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
                     .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
                     .body(BodyInserters.fromValue(""))
@@ -162,8 +163,7 @@ class DigisosApiTestClientImpl(
                             e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), e.message, e)
                             else -> FiksServerException(e.statusCode.value(), e.message, e)
                         }
-                    }
-                    .awaitSingleOrNull()
+                    }.awaitSingleOrNull()
             log.info("Opprettet sak hos Fiks. Digisosid: $response")
             response?.replace("\"", "")
         }

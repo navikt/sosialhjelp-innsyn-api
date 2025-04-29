@@ -79,4 +79,9 @@ class KlageController(
         }
 }
 
-data class KlageDto(val klageUrl: FilUrl, val status: KlageStatus, val nyttVedtakUrl: FilUrl? = null, val paaklagetVedtakRefs: List<String>)
+data class KlageDto(
+    val klageUrl: FilUrl,
+    val status: KlageStatus,
+    val nyttVedtakUrl: FilUrl? = null,
+    val paaklagetVedtakRefs: List<String>,
+)

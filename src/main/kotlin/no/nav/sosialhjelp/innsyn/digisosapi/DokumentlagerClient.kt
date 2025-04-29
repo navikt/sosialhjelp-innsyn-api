@@ -35,7 +35,8 @@ class DokumentlagerClientImpl(
         return withContext(Dispatchers.IO) {
             val publicKey =
                 runCatching {
-                    fiksWebClient.get()
+                    fiksWebClient
+                        .get()
                         .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
                         .accept(APPLICATION_JSON)
                         .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())

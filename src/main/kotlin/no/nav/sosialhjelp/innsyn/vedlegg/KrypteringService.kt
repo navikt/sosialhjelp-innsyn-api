@@ -63,7 +63,5 @@ class KrypteringServiceMock : KrypteringService {
         fileInputStream: InputStream,
         certificate: X509Certificate,
         coroutineScope: CoroutineScope,
-    ): InputStream {
-        return fileInputStream
-    }
+    ): InputStream = fileInputStream
 }

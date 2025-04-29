@@ -20,19 +20,16 @@ fun getSha512FromByteArray(bytes: ByteArray?): String {
 
 fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC).trim()
 
-fun detectTikaType(inputStream: InputStream): String {
-    return Tika().detect(inputStream)
-}
+fun detectTikaType(inputStream: InputStream): String = Tika().detect(inputStream)
 
-fun mapToTikaFileType(tikaMediaType: String): TikaFileType {
-    return when {
+fun mapToTikaFileType(tikaMediaType: String): TikaFileType =
+    when {
         tikaMediaType.equals("application/pdf", ignoreCase = true) -> TikaFileType.PDF
         tikaMediaType.equals("text/x-matlab", ignoreCase = true) -> TikaFileType.PDF
         tikaMediaType.equals("image/png", ignoreCase = true) -> TikaFileType.PNG
         tikaMediaType.equals("image/jpeg", ignoreCase = true) -> TikaFileType.JPEG
         else -> TikaFileType.UNKNOWN
     }
-}
 
 enum class TikaFileType {
     JPEG,
@@ -61,7 +58,10 @@ fun splitFileName(fileName: String): FileNameSplit {
     return FileNameSplit(fileName, "")
 }
 
-class FileNameSplit(val name: String, val extension: String)
+class FileNameSplit(
+    val name: String,
+    val extension: String,
+)
 
 fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVedlegg> {
     val kombinertListe = ArrayList<InternalVedlegg>()
@@ -86,7 +86,6 @@ fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVe
 fun areDatesWithinOneMinute(
     firstDate: LocalDateTime?,
     secondDate: LocalDateTime?,
-): Boolean {
-    return (firstDate == null && secondDate == null) ||
+): Boolean =
+    (firstDate == null && secondDate == null) ||
         ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
-}

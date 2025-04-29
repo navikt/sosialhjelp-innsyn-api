@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
-import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
@@ -52,13 +51,17 @@ class KlageServiceLocalImpl(
         fiksDigisosId: String,
         token: String,
     ): List<Klage> =
-        webClient.get().uri("/$fiksDigisosId/klage").retrieve().onStatus(
-            { !it.is2xxSuccessful },
-            {
-                log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
-                Mono.error { IllegalStateException("Feil ved henting av klager") }
-            },
-        ).awaitBody()
+        webClient
+            .get()
+            .uri("/$fiksDigisosId/klage")
+            .retrieve()
+            .onStatus(
+                { !it.is2xxSuccessful },
+                {
+                    log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
+                    Mono.error { IllegalStateException("Feil ved henting av klager") }
+                },
+            ).awaitBody()
 }
 
 @Service
@@ -66,11 +69,8 @@ class KlageServiceLocalImpl(
 @ConditionalOnProperty(name = ["klageEnabled"], havingValue = "true")
 class KlageServiceImpl(
     private val fiksClient: FiksClient,
-    private val norgClient: NorgClient,
     private val tilgangskontroll: TilgangskontrollService,
 ) : KlageService {
-    private val log by logger()
-
     override suspend fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
@@ -78,7 +78,6 @@ class KlageServiceImpl(
     ) {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
-        val enhetsNr = digisosSak.tilleggsinformasjon?.enhetsnummer ?: error("Sak mangler enhetsnummer")
 
         // Send klage
     }
@@ -89,14 +88,17 @@ class KlageServiceImpl(
     ): List<Klage> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
-        val enhetsNr = digisosSak.tilleggsinformasjon?.enhetsnummer ?: error("Sak mangler enhetsnummer")
 
         // Hent klager
         return emptyList()
     }
 }
 
-data class InputKlage(val fiksDigisosId: String, val klageTekst: String, val vedtaksIds: List<String>)
+data class InputKlage(
+    val fiksDigisosId: String,
+    val klageTekst: String,
+    val vedtaksIds: List<String>,
+)
 
 data class Klage(
     val fiksDigisosId: String,

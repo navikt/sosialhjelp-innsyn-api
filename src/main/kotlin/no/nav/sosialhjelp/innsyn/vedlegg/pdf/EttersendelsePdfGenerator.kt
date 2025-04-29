@@ -11,8 +11,8 @@ class EttersendelsePdfGenerator {
     fun generate(
         metadata: List<OpplastetVedleggMetadata>,
         fodselsnummer: String,
-    ): ByteArray {
-        return try {
+    ): ByteArray =
+        try {
             PDDocument().use { document ->
                 val pdf = PdfGenerator(document)
 
@@ -41,7 +41,6 @@ class EttersendelsePdfGenerator {
         } catch (e: Exception) {
             throw RuntimeException("Error while creating pdf", e)
         }
-    }
 }
 
 /** Replace illegal characters bacause there is no glyph for that in the font we use (SourceSansPro-Regular):

@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
-import kotlin.coroutines.AbstractCoroutineContextElement
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.ThreadContextElement
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
@@ -20,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.context.request.RequestAttributes
 import org.springframework.web.context.request.RequestContextHolder
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 
 @ProtectedWithClaims(issuer = SELVBETJENING, claimMap = [ACR_LEVEL4, ACR_IDPORTEN_LOA_HIGH], combineWithOr = true)
 @RestController

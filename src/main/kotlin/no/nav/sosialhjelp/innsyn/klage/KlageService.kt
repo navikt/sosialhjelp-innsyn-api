@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
-import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value

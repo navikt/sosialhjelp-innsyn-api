@@ -18,7 +18,7 @@ tika = "2.9.2"
 pdf_box = "3.0.4"
 fiks_kryptering = "2.0.7"
 jemp_box = "1.8.17"
-unleash = "9.2.4"
+unleash = "10.2.2"
 springdoc = "2.6.0"
 json_smart = "2.4.10"
 

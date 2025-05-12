@@ -24,7 +24,7 @@ json_smart = "2.4.10"
 
 java_jwt = "4.5.0"
 jwks_rsa = "0.22.1"
-nimbus_jose_jwt = "9.40"
+nimbus_jose_jwt = "10.2"
 opentelemetry = "1.49.0"
 
 ktlint = "1.5.0"

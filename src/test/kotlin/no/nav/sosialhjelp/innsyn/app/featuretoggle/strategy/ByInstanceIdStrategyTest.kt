@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class ByInstanceIdStrategyTest {
-
     private val ctx = UnleashContext("userId", "sessionId", "remoteAdress", emptyMap())
 
     @Test

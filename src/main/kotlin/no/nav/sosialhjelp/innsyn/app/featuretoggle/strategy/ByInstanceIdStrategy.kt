@@ -8,7 +8,10 @@ class ByInstanceIdStrategy(
 ) : Strategy {
     override fun getName(): String = "byInstanceId"
 
-    override fun isEnabled(parameters: MutableMap<String, String>, ctx: UnleashContext): Boolean {
+    override fun isEnabled(
+        parameters: MutableMap<String, String>,
+        ctx: UnleashContext,
+    ): Boolean {
         val instances: String = parameters["instance.id"] ?: ""
         val instanceIds: List<String> = instances.split(",\\s*".toRegex())
 

@@ -8,6 +8,7 @@ data class SaksListeResponse(
     val soknadTittel: String,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     val sistOppdatert: Date,
+    // TODO: Dette er legacy fra svarut-integrasjon i soknad-api. Kan avvikles.
     val kilde: String,
     val url: String?,
     val kommunenummer: String?,

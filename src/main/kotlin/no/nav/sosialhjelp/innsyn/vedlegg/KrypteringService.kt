@@ -35,7 +35,7 @@ class KrypteringServiceImpl : KrypteringService {
         coroutineScope: CoroutineScope,
     ): InputStream {
         val inputStream = PipedInputStream()
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.Default) {
             PipedOutputStream(inputStream).use { pos ->
                 try {
                     log.debug("Starter kryptering")

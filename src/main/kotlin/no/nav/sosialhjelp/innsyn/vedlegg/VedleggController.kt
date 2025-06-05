@@ -71,7 +71,7 @@ class VedleggController(
                 val (metadata, files) = getMetadataAndRemoveFromFileList(rawFiles)
 
                 check(files.isNotEmpty()) { "Ingen filer i forsendelse" }
-                check(files.size <= 30) { "Over 20 filer i forsendelse" }
+                check(files.size <= 30) { "Over 30 filer i forsendelse: ${files.size} filer" }
 
                 metadata.flatMap { it.filer }.onEach { fil ->
                     fil.fil = files.find {

@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.protectionAnnotation.ProtectionSelvbetjeningHigh
+import no.nav.sosialhjelp.innsyn.app.subjecthandler.SubjectHandlerUtils
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.RequestAttributesContext
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,6 +24,7 @@ class SessionMetadataController(
                 SessionMetadata(
                     fornavn = pdlService.getFornavn(),
                     harAdressebeskyttelse = pdlService.getAdressebeskyttelse(),
+                    personId = SubjectHandlerUtils.getUserIdFromToken()
                 )
             }
         }
@@ -32,5 +34,6 @@ class SessionMetadataController(
         val fornavn: String,
         /** PDL oppgir at bruker har adressebeskyttelse */
         val harAdressebeskyttelse: Boolean,
+        val personId: String,
     )
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import java.util.Date
 
 data class SaksListeResponse(
+    // TODO: Trenger denne å være nullable?
     val fiksDigisosId: String?,
     val soknadTittel: String,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")

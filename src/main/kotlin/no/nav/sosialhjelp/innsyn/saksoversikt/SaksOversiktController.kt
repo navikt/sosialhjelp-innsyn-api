@@ -84,7 +84,7 @@ class SaksOversiktController(
                 SaksDetaljerResponse(
                     sak.fiksDigisosId,
                     hentNavn(model),
-                    model.status.name,
+                    model.status,
                     antallOppgaver,
                     dokumentasjonEtterspurt,
                     vilkar,

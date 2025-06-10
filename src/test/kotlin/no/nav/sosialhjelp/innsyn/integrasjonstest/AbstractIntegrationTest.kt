@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -18,6 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
+@AutoConfigureWebTestClient(timeout = "PT36000S")
 abstract class AbstractIntegrationTest {
     @Autowired
     private lateinit var webClient: WebTestClient
@@ -45,6 +47,16 @@ abstract class AbstractIntegrationTest {
             .exchange()
             .expectStatus()
             .isOk
+
+    fun doPut(uri: String, requestBody: Any,): WebTestClient.ResponseSpec =
+        webClient.put()
+            .uri(uri)
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .bodyValue(requestBody)
+            .exchange()
+            .expectStatus().isOk
+
 }
 
 private fun hentPersonAnswer(): PdlHentPerson {

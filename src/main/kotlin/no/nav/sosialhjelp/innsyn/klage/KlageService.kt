@@ -1,111 +1,88 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
-import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
+import java.util.UUID
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonKlage
 import no.nav.sosialhjelp.innsyn.utils.logger
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Profile
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBodilessEntity
-import org.springframework.web.reactive.function.client.awaitBody
-import reactor.core.publisher.Mono
 
 interface KlageService {
-    suspend fun sendKlage(
-        fiksDigisosId: String,
-        klage: InputKlage,
-        token: String,
-    )
+    fun opprett(
+        digisosId: UUID,
+        vedtakIds: List<UUID>,
+    ): UUID
 
-    suspend fun hentKlager(
-        fiksDigisosId: String,
-        token: String,
-    ): List<Klage>
+    fun oppdater(klageId: UUID, klageTekst: String): Klage
+
+    fun sendKlage(klageId: UUID,)
+
+    fun hentKlager(fiksDigisosId: String,): List<Klage>
+
+    fun hentKlageDraft(klageId: UUID): Klage
+
+    fun hentKlage(fiksDigisosId: UUID, klageId: UUID): Klage
 }
 
 @Service
-@Profile("!preprod&!prodgcp&!dev")
-class KlageServiceLocalImpl(
-    @Value("\${client.fiks_klage_endpoint_url}")
-    klageUrl: String,
-) : KlageService {
-    private val log by logger()
-
-    private val webClient = WebClient.create(klageUrl)
-
-    override suspend fun sendKlage(
-        fiksDigisosId: String,
-        klage: InputKlage,
-        token: String,
-    ) {
-        val response = webClient.post().uri("/$fiksDigisosId/klage").bodyValue(klage).retrieve().awaitBodilessEntity()
-        if (!response.statusCode.is2xxSuccessful) {
-            log.error("Fikk ikke 2xx fra mock-alt-api i sending av klage. Status=${response.statusCode.value()}")
-            error("Feil ved levering av klage")
-        }
-    }
-
-    override suspend fun hentKlager(
-        fiksDigisosId: String,
-        token: String,
-    ): List<Klage> =
-        webClient
-            .get()
-            .uri("/$fiksDigisosId/klage")
-            .retrieve()
-            .onStatus(
-                { !it.is2xxSuccessful },
-                {
-                    log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
-                    Mono.error { IllegalStateException("Feil ved henting av klager") }
-                },
-            ).awaitBody()
-}
-
-@Service
-@Profile("preprod|prodgcp|dev")
-@ConditionalOnProperty(name = ["klageEnabled"], havingValue = "true")
 class KlageServiceImpl(
-    private val fiksClient: FiksClient,
-    private val tilgangskontroll: TilgangskontrollService,
+    private val klageRepository: KlageRepository,
+    private val klageClient: KlageClient
 ) : KlageService {
-    override suspend fun sendKlage(
-        fiksDigisosId: String,
-        klage: InputKlage,
-        token: String,
-    ) {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
 
-        // Send klage
+    override fun opprett(digisosId: UUID, vedtakIds: List<UUID>): UUID =
+        Klage(
+            fiksDigisosId = digisosId,
+            vedtakIds = vedtakIds,
+        )
+            .let { klageRepository.save(it) }
+            .id
+
+    override fun oppdater(klageId: UUID, klageTekst: String): Klage =
+        klageRepository.findByIdOrNull(klageId)
+            ?.run { copy(tekst = klageTekst,) }
+            ?.let { klageRepository.save(it) }
+            ?: throw IllegalArgumentException("Klage $klageId not found")
+
+
+    override fun sendKlage(klageId: UUID) {
+        val klage = klageRepository.findByIdOrNull(klageId)
+            ?: throw IllegalArgumentException("Klage $klageId not found")
+
+        runCatching { klageClient.send(klage) }
+            .onFailure { logger.error("Failed to send klage $klageId", it) }
+            .onSuccess { klageRepository.delete(klage) }
+            .getOrThrow()
     }
 
-    override suspend fun hentKlager(
-        fiksDigisosId: String,
-        token: String,
-    ): List<Klage> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
+    override fun hentKlager(fiksDigisosId: String): List<Klage> =
+        klageClient.hentKlager(fiksDigisosId).map { it.toKlage() }
 
-        // Hent klager
-        return emptyList()
+    override fun hentKlageDraft(klageId: UUID): Klage = klageRepository.findByIdOrNull(klageId)
+        ?: throw IllegalArgumentException("Klage $klageId not found")
+
+    override fun hentKlage(fiksDigisosId: UUID, klageId: UUID): Klage =
+        klageClient.hentKlage(fiksDigisosId, klageId).toKlage()
+
+    companion object {
+        private val logger by logger()
     }
 }
 
-data class InputKlage(
-    val fiksDigisosId: String,
-    val klageTekst: String,
-    val vedtaksIds: List<String>,
+private fun JsonKlage.toKlage(): Klage {
+    TODO("Not yet implemented")
+}
+
+data class KlageInput(
+    val tekst: String,
 )
 
 data class Klage(
-    val fiksDigisosId: String,
-    val filRef: String,
-    val vedtakRef: List<String>,
-    val status: KlageStatus,
-    val utfall: KlageUtfall?,
+    val id: UUID = UUID.randomUUID(),
+    val tekst: String? = null,
+    val fiksDigisosId: UUID,
+    val vedtakIds: List<UUID>,
+    val status: KlageStatus? = null,
+    val utfall: KlageUtfall? = null,
 )
 
 enum class KlageStatus {

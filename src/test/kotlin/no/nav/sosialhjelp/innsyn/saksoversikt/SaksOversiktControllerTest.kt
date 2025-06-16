@@ -24,6 +24,7 @@ import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
+import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.MOTTATT
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -147,7 +148,7 @@ internal class SaksOversiktControllerTest {
 
             assertThat(sak2).isNotNull
             assertThat(sak2.soknadTittel).contains("Livsopphold", "Strøm")
-            assertThat(sak2.status).isEqualTo("UNDER_BEHANDLING")
+            assertThat(sak2.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
             assertThat(sak2.antallNyeOppgaver).isEqualTo(3)
         }
 

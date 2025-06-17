@@ -10,12 +10,10 @@ import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 
 object TokenUtils {
-    suspend fun getUserIdFromToken(): String {
-        return getUserIdFromTokenOrNull() ?: error("No userId for token")
-    }
+    suspend fun getUserIdFromToken(): String = getUserIdFromTokenOrNull() ?: error("No userId for token")
 
-    suspend fun getUserIdFromTokenOrNull(): String? {
-        return when (val authenticationToken = getAuthenticationToken()) {
+    suspend fun getUserIdFromTokenOrNull(): String? =
+        when (val authenticationToken = getAuthenticationToken()) {
             is JwtAuthenticationToken -> {
                 val jwt: Jwt = authenticationToken.credentials as Jwt
                 jwt.getClaim("pid") ?: jwt.subject
@@ -29,14 +27,11 @@ object TokenUtils {
             }
             else -> TODO()
         }
-    }
 
-    suspend fun getToken(): Token {
-        return getTokenOrNull() ?: error("No token in request context")
-    }
+    suspend fun getToken(): Token = getTokenOrNull() ?: error("No token in request context")
 
-    private suspend fun getTokenOrNull(): Token? {
-        return when (val authenticationToken = getAuthenticationToken()) {
+    private suspend fun getTokenOrNull(): Token? =
+        when (val authenticationToken = getAuthenticationToken()) {
             is JwtAuthenticationToken -> {
                 val creds = authenticationToken.credentials as OAuth2Token
                 creds.tokenValue?.let { Token(it) }
@@ -50,13 +45,14 @@ object TokenUtils {
             }
             else -> TODO()
         }
-    }
 
     private suspend fun getAuthenticationToken(): Authentication? =
         ReactiveSecurityContextHolder.getContext().awaitSingleOrNull()?.authentication
 }
 
 @JvmInline
-value class Token(val value: String) {
+value class Token(
+    val value: String,
+) {
     fun withBearer() = "Bearer $value"
 }

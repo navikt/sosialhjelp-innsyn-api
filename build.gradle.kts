@@ -76,6 +76,7 @@ dependencies {
     testImplementation(libs.mockk.jvm)
     testImplementation(libs.mockwebserver)
     testImplementation(libs.spring.boot.security.test)
+    testImplementation(libs.mock.oauth2.server)
 }
 
 // override spring managed dependencies

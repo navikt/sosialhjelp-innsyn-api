@@ -17,12 +17,13 @@ fun runTestWithToken(
     timeout = timeout,
     testBody = block,
     context =
-        ReactiveSecurityContextHolder.withAuthentication(
-            TestingAuthenticationToken(
-                token,
-                token,
-            ),
-        ).asCoroutineContext(),
+        ReactiveSecurityContextHolder
+            .withAuthentication(
+                TestingAuthenticationToken(
+                    token,
+                    token,
+                ),
+            ).asCoroutineContext(),
 )
 
 fun createJwt(
@@ -32,15 +33,18 @@ fun createJwt(
     pid: String = "123",
     audience: List<String> = listOf("aud"),
     extraClaims: Map<String, String> = emptyMap(),
-): Jwt {
-    return Jwt.withTokenValue(tokenValue).headers {
-        it["alg"] = ""
-        it["typ"] = "JWT"
-        it["kid"] = "kid"
-    }.issuer(issuer).audience(audience).subject(subject).claim("pid", pid)
+): Jwt =
+    Jwt
+        .withTokenValue(tokenValue)
+        .headers {
+            it["alg"] = ""
+            it["typ"] = "JWT"
+            it["kid"] = "kid"
+        }.issuer(issuer)
+        .audience(audience)
+        .subject(subject)
+        .claim("pid", pid)
         .claim("acr", "idporten-loa-high")
         .also {
             extraClaims.map { (key, value) -> it.claim(key, value) }
-        }
-        .build()
-}
+        }.build()

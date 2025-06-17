@@ -8,9 +8,7 @@ object MDCUtils {
     const val USER_AGENT = "userAgent"
     const val REFERER = "request_Referer"
 
-    fun get(key: String): String? {
-        return MDC.get(key)
-    }
+    fun get(key: String): String? = MDC.get(key)
 
     fun put(
         key: String,

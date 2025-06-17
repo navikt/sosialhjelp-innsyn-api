@@ -17,9 +17,8 @@ import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.saksoversikt.SaksListeResponse
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.security.test.context.support.WithMockUser
 
 class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
@@ -32,19 +31,6 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     lateinit var norgClient: NorgClient
 
     private val navEnhet: NavEnhet = mockk()
-
-    var token: String = ""
-
-    @BeforeEach
-    fun setUp() {
-        mockLogin.init()
-        token = mockLogin.hentLevel4SelvbetjeningToken()
-    }
-
-    @AfterEach
-    fun cleanup() {
-        mockLogin.cleanup()
-    }
 
     @Test
     @WithMockUser

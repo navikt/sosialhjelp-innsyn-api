@@ -56,21 +56,23 @@ class VedleggController(
         val metadata =
             allFiles
                 .firstOrNull { it.filename() == "metadata.json" }
-                ?.content()?.let {
+                ?.content()
+                ?.let {
                     DataBufferUtils.join(it)
                 }?.map {
                     val bytes = ByteArray(it.readableByteCount())
                     it.read(bytes)
                     DataBufferUtils.release(it)
                     objectMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
-                }?.awaitSingleOrNull()?.filter { it.filer.isNotEmpty() } ?: error("Missing metadata.json")
+                }?.awaitSingleOrNull()
+                ?.filter { it.filer.isNotEmpty() } ?: error("Missing metadata.json")
 
         val files =
             allFiles
                 .filterNot { it.filename() == "metadata.json" }
                 .also {
                     check(it.isNotEmpty()) { "Ingen filer i forsendelse" }
-                    check(files.size <= 30) { "Over 30 filer i forsendelse: ${files.size} filer" }
+                    check(it.size <= 30) { "Over 30 filer i forsendelse: ${it.size} filer" }
                 }
 
         val allDeclaredFilesHasAMatch =
@@ -85,11 +87,13 @@ class VedleggController(
 
         // Set hver fil på sitt tilhørende metadata-objekt
         files.onEach { file ->
-            metadata.flatMap { it.filer }.find {
-                file.filename().contains(it.uuid.toString())
-            }?.also {
-                it.fil = file
-            }
+            metadata
+                .flatMap { it.filer }
+                .find {
+                    file.filename().contains(it.uuid.toString())
+                }?.also {
+                    it.fil = file
+                }
         }
 
         return vedleggOpplastingService.processFileUpload(fiksDigisosId, metadata).mapToResponse()

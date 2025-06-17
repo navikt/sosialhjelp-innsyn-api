@@ -44,7 +44,5 @@ class LocalTracingWebFilter : TracingWebFilter {
     override fun filter(
         exchange: ServerWebExchange,
         chain: WebFilterChain,
-    ): Mono<Void> {
-        return chain.filter(exchange)
-    }
+    ): Mono<Void> = chain.filter(exchange)
 }

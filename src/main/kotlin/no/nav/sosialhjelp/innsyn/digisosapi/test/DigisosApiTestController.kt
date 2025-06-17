@@ -47,9 +47,7 @@ class DigisosApiTestController(
     suspend fun filOpplasting(
         @PathVariable fiksDigisosId: String,
         @RequestPart("file") file: FilePart,
-    ): String {
-        return digisosApiTestService.lastOppFil(fiksDigisosId, file)
-    }
+    ): String = digisosApiTestService.lastOppFil(fiksDigisosId, file)
 
     @GetMapping("/{digisosId}/innsynsfil")
     suspend fun getInnsynsfil(

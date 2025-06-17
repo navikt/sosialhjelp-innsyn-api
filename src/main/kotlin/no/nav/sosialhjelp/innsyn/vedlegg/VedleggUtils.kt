@@ -29,7 +29,9 @@ suspend fun getSha512FromDataBuffer(filePart: FilePart?): String {
 }
 
 @JvmInline
-value class Filename(val value: String) {
+value class Filename(
+    val value: String,
+) {
     fun sanitize() = Normalizer.normalize(value, Normalizer.Form.NFC).trim()
 
     fun containsIllegalCharacters(): Boolean = this.sanitize().contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
@@ -37,15 +39,14 @@ value class Filename(val value: String) {
 
 fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC).trim()
 
-fun mapToTikaFileType(tikaMediaType: String): TikaFileType {
-    return when {
+fun mapToTikaFileType(tikaMediaType: String): TikaFileType =
+    when {
         tikaMediaType.equals("application/pdf", ignoreCase = true) -> TikaFileType.PDF
         tikaMediaType.equals("text/x-matlab", ignoreCase = true) -> TikaFileType.PDF
         tikaMediaType.equals("image/png", ignoreCase = true) -> TikaFileType.PNG
         tikaMediaType.equals("image/jpeg", ignoreCase = true) -> TikaFileType.JPEG
         else -> TikaFileType.UNKNOWN
     }
-}
 
 enum class TikaFileType {
     JPEG,
@@ -74,7 +75,10 @@ fun splitFileName(fileName: String): FileNameSplit {
     return FileNameSplit(fileName, "")
 }
 
-class FileNameSplit(val name: String, val extension: String)
+class FileNameSplit(
+    val name: String,
+    val extension: String,
+)
 
 fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVedlegg> {
     val kombinertListe = ArrayList<InternalVedlegg>()
@@ -99,7 +103,6 @@ fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVe
 fun areDatesWithinOneMinute(
     firstDate: LocalDateTime?,
     secondDate: LocalDateTime?,
-): Boolean {
-    return (firstDate == null && secondDate == null) ||
+): Boolean =
+    (firstDate == null && secondDate == null) ||
         ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
-}

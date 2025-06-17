@@ -88,7 +88,8 @@ class DigisosApiTestClientImpl(
             bodyBuilder.part("dokument:$fileId", file.fil).headers {
                 it.contentType = MediaType.APPLICATION_OCTET_STREAM
                 it.contentDisposition =
-                    ContentDisposition.builder("form-data")
+                    ContentDisposition
+                        .builder("form-data")
                         .name("dokument:$fileId")
                         .filename(file.filnavn?.value)
                         .build()

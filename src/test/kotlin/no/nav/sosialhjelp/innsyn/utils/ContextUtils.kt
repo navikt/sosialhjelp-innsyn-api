@@ -3,9 +3,9 @@ package no.nav.sosialhjelp.innsyn.utils
 import kotlinx.coroutines.reactor.asCoroutineContext
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -17,12 +17,12 @@ fun runTestWithToken(
     timeout = timeout,
     testBody = block,
     context =
-        ReactiveSecurityContextHolder.withAuthentication(
-            TestingAuthenticationToken(
-                token,
-                token,
-            ),
-        ).asCoroutineContext(),
+        ReactiveSecurityContextHolder
+            .withAuthentication(
+                JwtAuthenticationToken(
+                    token,
+                ),
+            ).asCoroutineContext(),
 )
 
 fun createJwt(
@@ -32,15 +32,18 @@ fun createJwt(
     pid: String = "123",
     audience: List<String> = listOf("aud"),
     extraClaims: Map<String, String> = emptyMap(),
-): Jwt {
-    return Jwt.withTokenValue(tokenValue).headers {
-        it["alg"] = ""
-        it["typ"] = "JWT"
-        it["kid"] = "kid"
-    }.issuer(issuer).audience(audience).subject(subject).claim("pid", pid)
+): Jwt =
+    Jwt
+        .withTokenValue(tokenValue)
+        .headers {
+            it["alg"] = ""
+            it["typ"] = "JWT"
+            it["kid"] = "kid"
+        }.issuer(issuer)
+        .audience(audience)
+        .subject(subject)
+        .claim("pid", pid)
         .claim("acr", "idporten-loa-high")
         .also {
             extraClaims.map { (key, value) -> it.claim(key, value) }
-        }
-        .build()
-}
+        }.build()

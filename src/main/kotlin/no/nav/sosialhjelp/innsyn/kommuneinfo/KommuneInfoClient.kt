@@ -48,7 +48,7 @@ class KommuneInfoClient(
                         .retrieve()
                         .awaitBody<List<KommuneInfo>>()
                 }.onFailure {
-                if (it is CancellationException) currentCoroutineContext().ensureActive()
+                    if (it is CancellationException) currentCoroutineContext().ensureActive()
                     log.warn("Fiks - hentKommuneInfoForAlle feilet", it)
                     if (it is WebClientResponseException) {
                         when {
@@ -73,7 +73,7 @@ class KommuneInfoClient(
                         .retrieve()
                         .awaitBody<KommuneInfo>()
                 }.onFailure {
-                if (it is CancellationException) currentCoroutineContext().ensureActive()
+                    if (it is CancellationException) currentCoroutineContext().ensureActive()
                     log.warn("Fiks - hentKommuneInfoForAlle feilet for kommune=$kommunenummer", it)
                     if (it is WebClientResponseException) {
                         when {

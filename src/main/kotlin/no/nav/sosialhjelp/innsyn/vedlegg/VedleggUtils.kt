@@ -1,35 +1,51 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import org.apache.tika.Tika
-import java.io.InputStream
+import kotlinx.coroutines.reactive.collect
+import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.http.codec.multipart.FilePart
 import java.security.MessageDigest
 import java.text.Normalizer
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 
-fun getSha512FromByteArray(bytes: ByteArray?): String {
-    if (bytes == null) {
+suspend fun getSha512FromDataBuffer(filePart: FilePart?): String {
+    if (filePart == null) {
         return ""
     }
 
     val md = MessageDigest.getInstance("SHA-512")
-    val digest = md.digest(bytes)
+
+    filePart.content().collect { dataBuffer: DataBuffer ->
+        val byteArray = ByteArray(dataBuffer.readableByteCount())
+        dataBuffer.read(byteArray)
+        md.update(byteArray)
+        DataBufferUtils.release(dataBuffer)
+    }
+
+    val digest = md.digest()
     return digest.fold("") { str, it -> str + "%02x".format(it) }
+}
+
+@JvmInline
+value class Filename(val value: String) {
+    fun sanitize() = Normalizer.normalize(value, Normalizer.Form.NFC).trim()
+
+    fun containsIllegalCharacters(): Boolean = this.sanitize().contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
 }
 
 fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC).trim()
 
-fun detectTikaType(inputStream: InputStream): String = Tika().detect(inputStream)
-
-fun mapToTikaFileType(tikaMediaType: String): TikaFileType =
-    when {
+fun mapToTikaFileType(tikaMediaType: String): TikaFileType {
+    return when {
         tikaMediaType.equals("application/pdf", ignoreCase = true) -> TikaFileType.PDF
         tikaMediaType.equals("text/x-matlab", ignoreCase = true) -> TikaFileType.PDF
         tikaMediaType.equals("image/png", ignoreCase = true) -> TikaFileType.PNG
         tikaMediaType.equals("image/jpeg", ignoreCase = true) -> TikaFileType.JPEG
         else -> TikaFileType.UNKNOWN
     }
+}
 
 enum class TikaFileType {
     JPEG,
@@ -58,10 +74,7 @@ fun splitFileName(fileName: String): FileNameSplit {
     return FileNameSplit(fileName, "")
 }
 
-class FileNameSplit(
-    val name: String,
-    val extension: String,
-)
+class FileNameSplit(val name: String, val extension: String)
 
 fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVedlegg> {
     val kombinertListe = ArrayList<InternalVedlegg>()
@@ -86,6 +99,7 @@ fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVe
 fun areDatesWithinOneMinute(
     firstDate: LocalDateTime?,
     secondDate: LocalDateTime?,
-): Boolean =
-    (firstDate == null && secondDate == null) ||
+): Boolean {
+    return (firstDate == null && secondDate == null) ||
         ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
+}

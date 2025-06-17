@@ -1,11 +1,13 @@
 package no.nav.sosialhjelp.innsyn.digisosapi
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -39,10 +41,11 @@ class DokumentlagerClientImpl(
                         .get()
                         .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
                         .accept(APPLICATION_JSON)
-                        .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                        .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                         .retrieve()
                         .awaitBody<ByteArray>()
                 }.onFailure {
+                    if (it is CancellationException) currentCoroutineContext().ensureActive()
                     if (it is WebClientResponseException) {
                         log.warn("Fiks - getDokumentlagerPublicKey feilet - ${it.statusCode} ${it.statusText}", it)
                         when {

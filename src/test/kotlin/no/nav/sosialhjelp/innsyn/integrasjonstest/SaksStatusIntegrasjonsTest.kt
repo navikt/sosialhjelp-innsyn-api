@@ -15,8 +15,10 @@ import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
+import no.nav.sosialhjelp.innsyn.testutils.MockOauth2ServerUtils
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 
 internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
     private val navEnhet: NavEnhet = mockk()
@@ -31,6 +33,7 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
     lateinit var norgClient: NorgClient
 
     @Test
+    @WithMockUser("123")
     fun `Skal hente saksstatus for fiksDigisoID`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soknad = JsonSoknad()

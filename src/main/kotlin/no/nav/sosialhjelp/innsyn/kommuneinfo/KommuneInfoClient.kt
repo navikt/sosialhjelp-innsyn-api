@@ -1,16 +1,16 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.client.mdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_ALLE_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_KOMMUNEINFO
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -26,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.netty.http.client.HttpClient
+import kotlin.coroutines.cancellation.CancellationException
 
 @Component
 class KommuneInfoClient(
@@ -43,10 +44,11 @@ class KommuneInfoClient(
                         .get()
                         .uri(PATH_ALLE_KOMMUNEINFO)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                        .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                         .retrieve()
                         .awaitBody<List<KommuneInfo>>()
                 }.onFailure {
+                if (it is CancellationException) currentCoroutineContext().ensureActive()
                     log.warn("Fiks - hentKommuneInfoForAlle feilet", it)
                     if (it is WebClientResponseException) {
                         when {
@@ -67,10 +69,11 @@ class KommuneInfoClient(
                         .get()
                         .uri(PATH_KOMMUNEINFO, kommunenummer)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(AUTHORIZATION, BEARER + texasClient.getMaskinportenToken())
+                        .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                         .retrieve()
                         .awaitBody<KommuneInfo>()
                 }.onFailure {
+                if (it is CancellationException) currentCoroutineContext().ensureActive()
                     log.warn("Fiks - hentKommuneInfoForAlle feilet for kommune=$kommunenummer", it)
                     if (it is WebClientResponseException) {
                         when {
@@ -91,7 +94,6 @@ class KommuneInfoClient(
                 it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
             }.defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
-            .filter(mdcExchangeFilter)
             .build()
 
     companion object {

@@ -1,9 +1,8 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import org.springframework.graphql.client.HttpGraphQlClient
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -14,12 +13,11 @@ class PdlGraphQlClientFactory(
     private val texasClient: TexasClient,
     private val clientProperties: ClientProperties,
 ) {
-    suspend fun getClient(token: String): HttpGraphQlClient =
+    suspend fun getClient(token: Token): HttpGraphQlClient =
         HttpGraphQlClient
             .builder(pdlWebClient)
-            .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-            .header("Authorization", "Bearer ${tokenXtoken(token)}")
+            .header("Authorization", tokenXtoken(token).withBearer())
             .build()
 
-    private suspend fun tokenXtoken(token: String) = texasClient.getTokenXToken(clientProperties.pdlAudience, token)
+    private suspend fun tokenXtoken(token: Token) = texasClient.getTokenXToken(clientProperties.pdlAudience, token)
 }

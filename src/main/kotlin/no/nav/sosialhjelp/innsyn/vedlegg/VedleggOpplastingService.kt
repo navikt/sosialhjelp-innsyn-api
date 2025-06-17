@@ -69,7 +69,8 @@ class VedleggOpplastingService(
                             "text/x-matlab" -> "application/pdf"
                             else -> fil.tikaMimeType
                         },
-                        fil.size(), dataBuffer.asInputStream(),
+                        fil.size(),
+                        dataBuffer.asInputStream(),
                     )
                 }
             } + createEttersendelsePdf(metadata, fiksDigisosId)
@@ -77,7 +78,7 @@ class VedleggOpplastingService(
         // kryptering og opplasting
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Default) {
             withTimeout(60.seconds) {
                 val etterKryptering =
                     filerForOpplasting.map { fil ->
@@ -249,7 +250,7 @@ class VedleggOpplastingService(
             val randomAccessReadBuffer = RandomAccessReadBuffer(this@checkIfPdfIsValid)
             try {
                 Loader
-                .loadPDF(randomAccessReadBuffer)
+                    .loadPDF(randomAccessReadBuffer)
                     .use { document ->
                         if (document.isEncrypted) {
                             ValidationValues.PDF_IS_ENCRYPTED

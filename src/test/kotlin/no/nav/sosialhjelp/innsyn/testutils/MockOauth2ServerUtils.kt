@@ -34,8 +34,7 @@ class TexasServer(
                                     "expires_in": 3600
                                 }
                                 """.trimIndent(),
-                            )
-                            .addHeader("Content-Type", "application/json")
+                            ).addHeader("Content-Type", "application/json")
                     }
                     "/tokenx/token" -> {
                         MockResponse()
@@ -48,8 +47,7 @@ class TexasServer(
                                     "expires_in": 3600
                                 }
                                 """.trimIndent(),
-                            )
-                            .addHeader("Content-Type", "application/json")
+                            ).addHeader("Content-Type", "application/json")
                     }
                     "/introspection" -> {
                         MockResponse()
@@ -70,7 +68,7 @@ class TexasServer(
     fun init() {
         mockWebServer = MockWebServer()
         mockWebServer.dispatcher = dispatcher
-        mockWebServer.start(port)
+//        mockWebServer.start(port)
     }
 
     fun cleanup() {
@@ -84,29 +82,36 @@ class TexasServer(
         claims: Map<String, String>,
     ): JWT {
         val payload =
-            JWTClaimsSet.Builder()
+            JWTClaimsSet
+                .Builder()
                 .issuer(issuerId)
                 .audience(audience)
                 .subject(subject)
                 .expirationTime(Date.from(Instant.now().plusSeconds(60)))
-                .build()
+                .also { builder ->
+                    claims.onEach {
+                        builder.claim(it.key, it.value)
+                    }
+                }.build()
         return PlainJWT(payload)
     }
 }
 
 @Component
-class MockOauth2ServerUtils(private val mockOauth2Server: TexasServer) {
-    fun hentLevel4SelvbetjeningToken(): String {
-        return mockOauth2Server.issueToken(
-            issuerId = "selvbetjening",
-            subject = "selvbetjening",
-            audience = "someaudience",
-            claims =
-                mapOf(
-                    "acr" to "Level4",
-                ),
-        ).serialize()
-    }
+class MockOauth2ServerUtils(
+    private val mockOauth2Server: TexasServer,
+) {
+    fun hentLevel4SelvbetjeningToken(): String =
+        mockOauth2Server
+            .issueToken(
+                issuerId = "selvbetjening",
+                subject = "selvbetjening",
+                audience = "someaudience",
+                claims =
+                    mapOf(
+                        "acr" to "Level4",
+                    ),
+            ).serialize()
 
     fun init() {
         mockOauth2Server.init()

@@ -318,9 +318,10 @@ internal class VedleggOpplastingServiceTest {
                         mutableListOf(
                             OpplastetFil(filnavn1, UUID.randomUUID()).also {
                                 it.fil =
-                                    mockPart(it.uuid.toString() + ".pdf",
-
-                                        pdfFile)
+                                    mockPart(
+                                        it.uuid.toString() + ".pdf",
+                                        pdfFile,
+                                    )
                             },
                         ),
                         null,
@@ -354,9 +355,11 @@ internal class VedleggOpplastingServiceTest {
                         null,
                         mutableListOf(
                             OpplastetFil(filnavn1, UUID.randomUUID()).also {
-                                it.fil = mockPart(it.uuid.toString() + ".jfif",
-
-                                        jpgFile)
+                                it.fil =
+                                    mockPart(
+                                        it.uuid.toString() + ".jfif",
+                                        jpgFile,
+                                    )
                             },
                         ),
                         null,

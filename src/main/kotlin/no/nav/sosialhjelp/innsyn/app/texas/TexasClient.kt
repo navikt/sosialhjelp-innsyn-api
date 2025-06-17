@@ -61,9 +61,7 @@ sealed class TexasClient(
     private fun getTokenXParams(
         target: String,
         userToken: Token,
-    ): Map<String, String> {
-        return mapOf("identity_provider" to "tokenx", "target" to target, "user_token" to userToken.value)
-    }
+    ): Map<String, String> = mapOf("identity_provider" to "tokenx", "target" to target, "user_token" to userToken.value)
 
     protected suspend fun getToken(
         tokenEndpointType: TokenEndpointType,

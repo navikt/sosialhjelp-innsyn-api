@@ -17,12 +17,6 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders
 import org.springframework.security.web.server.SecurityWebFilterChain
 
-/**
- * Basic security resource server.
- *
- * @author Rob Winch
- * @since 5.1
- */
 @Configuration
 @EnableWebFluxSecurity
 @Profile("!test")
@@ -43,7 +37,8 @@ class SecurityConfiguration(
                 authorize
                     .pathMatchers("/internal/**")
                     .permitAll()
-                    .anyExchange().authenticated()
+                    .anyExchange()
+                    .authenticated()
             }.oauth2ResourceServer { resourceServer ->
                 resourceServer
                     .jwt(Customizer.withDefaults())
@@ -64,16 +59,17 @@ class SecurityConfiguration(
     }
 }
 
-class AudienceValidator(private val audience: String) : OAuth2TokenValidator<Jwt> {
+class AudienceValidator(
+    private val audience: String,
+) : OAuth2TokenValidator<Jwt> {
     val error: OAuth2Error = OAuth2Error("invalid_token", "The required audience is missing", null)
 
-    override fun validate(jwt: Jwt): OAuth2TokenValidatorResult {
-        return if (jwt.claims["client_id"] == audience) {
+    override fun validate(jwt: Jwt): OAuth2TokenValidatorResult =
+        if (jwt.claims["client_id"] == audience) {
             OAuth2TokenValidatorResult.success()
         } else {
             OAuth2TokenValidatorResult.failure(error)
         }
-    }
 }
 
 class AcrValidator : OAuth2TokenValidator<Jwt> {

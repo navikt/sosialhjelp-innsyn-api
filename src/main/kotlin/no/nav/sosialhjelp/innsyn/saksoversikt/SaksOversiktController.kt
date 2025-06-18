@@ -76,8 +76,19 @@ class SaksOversiktController(
             model.status,
             antallOppgaver,
             dokumentasjonEtterspurt,
-            vilkar,
             dokumentasjonkrav,
+            vilkar,
+            model.forelopigSvar,
+            model.saker.map { sak ->
+                SaksDetaljerResponse.Sak(
+                    sak.vedtak.size,
+                    if (sak.vedtak.isEmpty()) {
+                        sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
+                    } else {
+                        SaksStatus.FERDIGBEHANDLET
+                    },
+                )
+            },
         )
     }
 

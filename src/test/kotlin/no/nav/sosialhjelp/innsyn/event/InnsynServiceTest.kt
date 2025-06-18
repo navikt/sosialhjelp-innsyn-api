@@ -11,6 +11,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import org.assertj.core.api.Assertions.assertThat
@@ -44,9 +45,11 @@ internal class InnsynServiceTest {
         runTest(timeout = 5.seconds) {
             val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
 
-            coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, "token", any()) } returns mockJsonDigisosSoker
+            coEvery {
+                fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, Token("token"), any())
+            } returns mockJsonDigisosSoker
 
-            val jsonDigisosSoker: JsonDigisosSoker? = service.hentJsonDigisosSoker(digisosSak, "token")
+            val jsonDigisosSoker: JsonDigisosSoker? = service.hentJsonDigisosSoker(digisosSak, Token("token"))
 
             assertThat(jsonDigisosSoker).isNotNull
         }
@@ -55,7 +58,7 @@ internal class InnsynServiceTest {
     fun `Skal returnere null hvis JsonDigisosSoker er null`() =
         runTest(timeout = 5.seconds) {
             every { digisosSak.digisosSoker } returns null
-            val jsonDigisosSoker = service.hentJsonDigisosSoker(digisosSak, "token")
+            val jsonDigisosSoker = service.hentJsonDigisosSoker(digisosSak, Token("token"))
 
             assertThat(jsonDigisosSoker).isNull()
         }
@@ -64,9 +67,9 @@ internal class InnsynServiceTest {
     fun `Skal returnere originalSoknad`() =
         runTest(timeout = 5.seconds) {
             val mockJsonSoknad: JsonSoknad = mockk()
-            coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, "token", any()) } returns mockJsonSoknad
+            coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, Token("token"), any()) } returns mockJsonSoknad
 
-            val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad(digisosSak, "token")
+            val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad(digisosSak, Token("token"))
 
             assertThat(jsonSoknad).isNotNull
         }
@@ -75,7 +78,7 @@ internal class InnsynServiceTest {
     fun `Skal returnere null hvis originalSoknadNAV er null`() =
         runTest(timeout = 5.seconds) {
             every { digisosSak.originalSoknadNAV } returns null
-            val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad(digisosSak, "token")
+            val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad(digisosSak, Token("token"))
 
             assertThat(jsonSoknad).isNull()
         }
@@ -85,7 +88,7 @@ internal class InnsynServiceTest {
         runTest(timeout = 5.seconds) {
             coEvery { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns true
 
-            assertThat(service.hentJsonDigisosSoker(digisosSak, "token")).isNull()
+            assertThat(service.hentJsonDigisosSoker(digisosSak, Token("token"))).isNull()
             coVerify(exactly = 0) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
         }
 }

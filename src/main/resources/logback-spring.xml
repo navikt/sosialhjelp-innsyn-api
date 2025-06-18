@@ -30,8 +30,7 @@
         </appender>
 
         <logger name="no.nav.sosialhjelp.innsyn" level="INFO"/>
-
-        <logger name="klientlogger" level="debug"/>
+        <logger name="no.nav.sosialhjelp.innsyn.app.config" level="TRACE"/>
 
         <root level="INFO">
             <appender-ref ref="stdout_json"/>
@@ -69,8 +68,6 @@
 
         <logger name="no.nav.sosialhjelp.innsyn" level="INFO"/>
 
-        <logger name="klientlogger" level="debug"/>
-
         <root level="INFO">
             <appender-ref ref="stdout_json"/>
             <appender-ref ref="secureLog"/>
@@ -85,10 +82,9 @@
             </encoder>
         </appender>
 
-        <logger name="no.nav.sosialhjelp.innsyn" level="DEBUG"/>
+        <logger name="no.nav.sosialhjelp.innsyn" level="INFO"/>
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.springframework.security" level="INFO"/>
-        <logger name="org.springframework.web" level="INFO"/>
 
         <root level="INFO">
             <appender-ref ref="console"/>

@@ -18,6 +18,7 @@ import no.nav.sosialhjelp.innsyn.saksoversikt.SaksListeResponse
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
+import org.springframework.security.test.context.support.WithMockUser
 
 class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
@@ -32,6 +33,7 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     private val navEnhet: NavEnhet = mockk()
 
     @Test
+    @WithMockUser
     fun `skal hente liste med saker`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
@@ -44,6 +46,7 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     }
 
     @Test
+    @WithMockUser("123")
     fun `skal hente saksdetaljer for sak`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)

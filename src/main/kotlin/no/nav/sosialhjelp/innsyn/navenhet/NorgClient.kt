@@ -6,8 +6,6 @@ import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
-import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.MediaType
@@ -41,7 +39,6 @@ class NorgClientImpl(
                     .get()
                     .uri("/enhet/{enhetsnr}", enhetsnr)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
                     .retrieve()
                     .bodyToMono<NavEnhet>()
                     .retryWhen(norgRetry)

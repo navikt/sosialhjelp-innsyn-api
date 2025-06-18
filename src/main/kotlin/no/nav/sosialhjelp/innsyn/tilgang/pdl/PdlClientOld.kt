@@ -5,13 +5,12 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
-import no.nav.sosialhjelp.innsyn.app.mdc.MDCUtils
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.BEARER
-import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_CALL_ID
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -22,18 +21,19 @@ import org.springframework.web.reactive.function.client.bodyToMono
 interface PdlClientOld {
     suspend fun hentPerson(
         ident: String,
-        token: String,
+        token: Token,
     ): PdlHentPerson?
 
     suspend fun hentIdenter(
         ident: String,
-        token: String,
+        token: Token,
     ): List<String>
 
     fun ping()
 }
 
 @Component
+@Profile("!test")
 class PdlClientOldImpl(
     private val pdlWebClient: WebClient,
     private val texasClient: TexasClient,
@@ -50,18 +50,18 @@ class PdlClientOldImpl(
     @Cacheable("pdlPersonOld", key = "#ident")
     override suspend fun hentPerson(
         ident: String,
-        token: String,
+        token: Token,
     ): PdlHentPerson? = hentFraPdl(ident, token)
 
     @Cacheable("pdlHistoriskeIdenterOld", key = "#ident")
     override suspend fun hentIdenter(
         ident: String,
-        token: String,
+        token: Token,
     ): List<String> = hentIdenterFraPdl(ident, token)?.identer?.map { it.ident } ?: emptyList()
 
     private suspend fun hentFraPdl(
         ident: String,
-        token: String,
+        token: Token,
     ): PdlHentPerson? =
         withContext(Dispatchers.IO) {
             val query = getHentPersonResource().replace("[\n\r]", "")
@@ -70,8 +70,7 @@ class PdlClientOldImpl(
                     pdlWebClient
                         .post()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                        .header(AUTHORIZATION, BEARER + tokenXtoken(token.removePrefix("Bearer ")))
+                        .header(AUTHORIZATION, tokenXtoken(token).withBearer())
                         .bodyValue(PdlRequest(query, Variables(ident)))
                         .retrieve()
                         .bodyToMono<PdlPersonResponse>()
@@ -89,7 +88,7 @@ class PdlClientOldImpl(
 
     private suspend fun hentIdenterFraPdl(
         ident: String,
-        token: String,
+        token: Token,
     ): PdlIdenter? {
         val query = getHentIdenterResource().replace("[\n\r]", "")
         try {
@@ -97,8 +96,7 @@ class PdlClientOldImpl(
                 pdlWebClient
                     .post()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header(HEADER_CALL_ID, MDCUtils.get(MDCUtils.CALL_ID))
-                    .header(AUTHORIZATION, BEARER + tokenXtoken(token.removePrefix("Bearer ")))
+                    .header(AUTHORIZATION, tokenXtoken(token).withBearer())
                     .bodyValue(PdlRequest(query, Variables(ident)))
                     .retrieve()
                     .bodyToMono<PdlIdenterResponse>()
@@ -114,7 +112,7 @@ class PdlClientOldImpl(
         }
     }
 
-    private suspend fun tokenXtoken(token: String) = texasClient.getTokenXToken(pdlAudience, token)
+    private suspend fun tokenXtoken(token: Token) = texasClient.getTokenXToken(pdlAudience, token)
 
     override fun ping() {
         pdlWebClient

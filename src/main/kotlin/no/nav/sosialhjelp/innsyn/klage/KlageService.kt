@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -16,12 +17,12 @@ interface KlageService {
     suspend fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
-        token: String,
+        token: Token,
     )
 
     suspend fun hentKlager(
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): List<Klage>
 }
 
@@ -38,7 +39,7 @@ class KlageServiceLocalImpl(
     override suspend fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
-        token: String,
+        token: Token,
     ) {
         val response = webClient.post().uri("/$fiksDigisosId/klage").bodyValue(klage).retrieve().awaitBodilessEntity()
         if (!response.statusCode.is2xxSuccessful) {
@@ -49,7 +50,7 @@ class KlageServiceLocalImpl(
 
     override suspend fun hentKlager(
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): List<Klage> =
         webClient
             .get()
@@ -74,7 +75,7 @@ class KlageServiceImpl(
     override suspend fun sendKlage(
         fiksDigisosId: String,
         klage: InputKlage,
-        token: String,
+        token: Token,
     ) {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
@@ -84,7 +85,7 @@ class KlageServiceImpl(
 
     override suspend fun hentKlager(
         fiksDigisosId: String,
-        token: String,
+        token: Token,
     ): List<Klage> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)

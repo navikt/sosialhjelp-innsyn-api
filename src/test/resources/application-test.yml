@@ -18,6 +18,18 @@ client:
   soknad_api_url: "http://localhost:59999"
   soknad_api_audience: "dummyAudience"
 
+IDPORTEN_ISSUER: http://localhost:${mock-oauth2-server.port}/default
+IDPORTEN_CLIENT_ID: testclient
+
+mock-oauth2-server:
+  port: 12345
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${IDPORTEN_ISSUER:http://localhost:8888/default}
 nais:
   token:
     endpoint: http://localhost:${mock-oauth2-server.port}/maskinporten/token
@@ -36,11 +48,3 @@ springdoc:
   api-docs:
     enabled: true
 
-#Token-valdering
-no.nav.security.jwt:
-  issuer.selvbetjening:
-    discoveryurl: http://localhost:${mock-oauth2-server.port}/selvbetjening/.well-known/openid-configuration
-    accepted_audience: someaudience
-innsyn.loginurl: http://localhost:8080/sosialhjelp/innsyn-api/local/cookie
-
-login_api_idporten_clientid: clientId

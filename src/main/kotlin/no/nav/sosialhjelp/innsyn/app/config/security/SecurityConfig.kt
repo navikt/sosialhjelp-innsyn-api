@@ -35,7 +35,7 @@ class SecurityConfiguration(
             .cors { it.disable() }
             .authorizeExchange { authorize ->
                 authorize
-                    .pathMatchers("/internal/**")
+                    .pathMatchers("/internal/**", "/v3/api-docs")
                     .permitAll()
                     .anyExchange()
                     .authenticated()

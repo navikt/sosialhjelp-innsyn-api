@@ -21,7 +21,7 @@ class DefaultTracingWebFilter : TracingWebFilter {
         chain: WebFilterChain,
     ): Mono<Void> {
         val request = exchange.request
-        if (request.uri.path.contains("/internal")) {
+        if (request.uri.path.contains(Regex("(/internal|/v3/api-docs)"))) {
             return chain.filter(exchange)
         }
         val fiksDigisosId = exchange.getAttribute<String>("fiksDigisosId")

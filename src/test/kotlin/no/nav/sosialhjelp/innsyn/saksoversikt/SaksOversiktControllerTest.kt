@@ -18,6 +18,7 @@ import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveElement
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
+import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -112,6 +113,9 @@ internal class SaksOversiktControllerTest {
             every { model1.status } returns MOTTATT
             every { model2.status } returns UNDER_BEHANDLING
 
+            every { model1.forelopigSvar } returns ForelopigSvar(false, null)
+            every { model2.forelopigSvar } returns ForelopigSvar(false, null)
+
             every { model1.oppgaver } returns mutableListOf(mockk())
             every { model2.oppgaver } returns mutableListOf(mockk())
 
@@ -123,8 +127,10 @@ internal class SaksOversiktControllerTest {
 
             every { sak1.tittel } returns "Livsopphold"
             every { sak1.saksStatus } returns SaksStatus.UNDER_BEHANDLING
+            every { sak1.vedtak } returns mutableListOf()
             every { sak2.tittel } returns "Strøm"
             every { sak2.saksStatus } returns SaksStatus.UNDER_BEHANDLING
+            every { sak2.vedtak } returns mutableListOf()
 
             every { model1.saker } returns mutableListOf()
             every { model2.saker } returns mutableListOf(sak1, sak2)
@@ -153,6 +159,7 @@ internal class SaksOversiktControllerTest {
             coEvery { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
 
             every { model1.status } returns MOTTATT
+            every { model1.forelopigSvar } returns ForelopigSvar(false, null)
             every { model1.oppgaver } returns mutableListOf()
             every { model1.vilkar } returns mutableListOf()
             every { model1.dokumentasjonkrav } returns mutableListOf()

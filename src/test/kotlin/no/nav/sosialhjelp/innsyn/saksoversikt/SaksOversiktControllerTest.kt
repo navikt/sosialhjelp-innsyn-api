@@ -33,6 +33,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import java.time.LocalDate
 
 internal class SaksOversiktControllerTest {
     private val saksOversiktService: SaksOversiktService = mockk()
@@ -76,7 +77,9 @@ internal class SaksOversiktControllerTest {
         every { digisosSak2.digisosSoker } returns mockk()
 
         every { oppgaveResponseMock.oppgaveElementer } returns listOf(oppgaveElement1)
+        every { oppgaveResponseMock.innsendelsesfrist } returns LocalDate.now()
         every { dokumentasjonkravResponseMock.dokumentasjonkravElementer } returns listOf(dokumentasjonkravElement1)
+        every { dokumentasjonkravResponseMock.frist } returns LocalDate.now()
 
         coEvery { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
         coEvery { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave

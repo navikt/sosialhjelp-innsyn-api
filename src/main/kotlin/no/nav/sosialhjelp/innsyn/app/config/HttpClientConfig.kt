@@ -11,12 +11,15 @@ import kotlin.time.toJavaDuration
 class HttpClientConfig {
     @Bean
     fun unproxiedHttpClient(): HttpClient {
-        val provider = ConnectionProvider.builder("fixed")
-            .maxConnections(500)
-            .maxIdleTime(20.seconds.toJavaDuration())
-            .maxLifeTime(60.seconds.toJavaDuration())
-            .pendingAcquireTimeout(60.seconds.toJavaDuration())
-            .evictInBackground(120.seconds.toJavaDuration()).build()
+        val provider =
+            ConnectionProvider
+                .builder("fixed")
+                .maxConnections(500)
+                .maxIdleTime(20.seconds.toJavaDuration())
+                .maxLifeTime(60.seconds.toJavaDuration())
+                .pendingAcquireTimeout(60.seconds.toJavaDuration())
+                .evictInBackground(120.seconds.toJavaDuration())
+                .build()
         return HttpClient.create(provider)
     }
 }

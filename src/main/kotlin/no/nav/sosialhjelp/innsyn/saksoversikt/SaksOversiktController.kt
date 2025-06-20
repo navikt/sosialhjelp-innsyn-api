@@ -6,7 +6,10 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -63,21 +66,24 @@ class SaksOversiktController(
 
         val sak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createSaksoversiktModel(sak, token)
+        val oppgaver = hentNyeOppgaver(model, sak.fiksDigisosId, token)
         val antallOppgaver =
-            hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) +
+            oppgaver.sumOf { it.oppgaveElementer.size } +
                 hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
-        val dokumentasjonEtterspurt = hentAntallNyeOppgaver(model, sak.fiksDigisosId, token) > 0
-        val vilkar = hentAntallNyeVilkar(model, sak.fiksDigisosId, token) > 0
-        val dokumentasjonkrav = hentAntallNyeDokumentasjonkrav(model, sak.fiksDigisosId, token) > 0
+        val harDokumentasjonEtterspurt = oppgaver.sumOf { it.oppgaveElementer.size } > 0
+        val vilkar = hentNyeVilkar(model, sak.fiksDigisosId, token)
+        val harVilkar = vilkar.isNotEmpty()
+        val dokkrav = hentNyeDokumentasjonkrav(model, sak.fiksDigisosId, token)
+        val dokumentasjonkrav = dokkrav.sumOf { it.dokumentasjonkravElementer.size } > 0
 
         return SaksDetaljerResponse(
             sak.fiksDigisosId,
             hentNavn(model),
             model.status,
             antallOppgaver,
-            dokumentasjonEtterspurt,
+            harDokumentasjonEtterspurt,
             dokumentasjonkrav,
-            vilkar,
+            harVilkar,
             model.forelopigSvar,
             model.saker.map { sak ->
                 SaksDetaljerResponse.Sak(
@@ -89,6 +95,7 @@ class SaksOversiktController(
                     },
                 )
             },
+            (oppgaver.mapNotNull { it.innsendelsesfrist } + dokkrav.mapNotNull { it.frist }).min()
         )
     }
 
@@ -108,39 +115,39 @@ class SaksOversiktController(
                 }.filter { utbetaling -> utbetaling.tom?.isBefore(LocalDate.now().minusDays(21)) ?: false }
 
         return when {
-            model.utbetalinger.size > 0 && model.utbetalinger.size == filterUtbetalinger.size -> 0
-            else -> hentAntallNyeVilkar(model, fiksDigisosId, token) + hentAntallNyeDokumentasjonkrav(model, fiksDigisosId, token)
+            model.utbetalinger.isNotEmpty() && model.utbetalinger.size == filterUtbetalinger.size -> 0
+            else -> hentNyeVilkar(model, fiksDigisosId, token).size + hentNyeDokumentasjonkrav(model, fiksDigisosId, token).sumOf { it.dokumentasjonkravElementer.size }
         }
     }
 
-    private suspend fun hentAntallNyeOppgaver(
+    private suspend fun hentNyeOppgaver(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: Token,
-    ): Int =
+    ): List<OppgaveResponse> =
         when {
-            model.oppgaver.isEmpty() -> 0
-            else -> oppgaveService.hentOppgaver(fiksDigisosId, token).sumOf { it.oppgaveElementer.size }
+            model.oppgaver.isEmpty() -> emptyList()
+            else -> oppgaveService.hentOppgaver(fiksDigisosId, token)
         }
 
-    private suspend fun hentAntallNyeVilkar(
+    private suspend fun hentNyeVilkar(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: Token,
-    ): Int =
+    ): List<VilkarResponse> =
         when {
-            model.vilkar.isEmpty() -> 0
-            else -> oppgaveService.getVilkar(fiksDigisosId, token).size
+            model.vilkar.isEmpty() -> emptyList()
+            else -> oppgaveService.getVilkar(fiksDigisosId, token)
         }
 
-    private suspend fun hentAntallNyeDokumentasjonkrav(
+    private suspend fun hentNyeDokumentasjonkrav(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
         token: Token,
-    ): Int =
+    ): List<DokumentasjonkravResponse> =
         when {
-            model.dokumentasjonkrav.isEmpty() -> 0
-            else -> oppgaveService.getDokumentasjonkrav(fiksDigisosId, token).sumOf { it.dokumentasjonkravElementer.size }
+            model.dokumentasjonkrav.isEmpty() -> emptyList()
+            else -> oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
         }
 
     companion object {

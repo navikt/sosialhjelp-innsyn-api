@@ -67,35 +67,32 @@ class SaksOversiktController(
         val sak = fiksClient.hentDigisosSak(fiksDigisosId, token)
         val model = eventService.createSaksoversiktModel(sak, token)
         val oppgaver = hentNyeOppgaver(model, sak.fiksDigisosId, token)
-        val antallOppgaver =
-            oppgaver.sumOf { it.oppgaveElementer.size } +
-                hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token)
-        val harDokumentasjonEtterspurt = oppgaver.sumOf { it.oppgaveElementer.size } > 0
         val vilkar = hentNyeVilkar(model, sak.fiksDigisosId, token)
-        val harVilkar = vilkar.isNotEmpty()
         val dokkrav = hentNyeDokumentasjonkrav(model, sak.fiksDigisosId, token)
-        val dokumentasjonkrav = dokkrav.sumOf { it.dokumentasjonkravElementer.size } > 0
 
         return SaksDetaljerResponse(
-            sak.fiksDigisosId,
-            hentNavn(model),
-            model.status,
-            antallOppgaver,
-            harDokumentasjonEtterspurt,
-            dokumentasjonkrav,
-            harVilkar,
-            model.forelopigSvar,
-            model.saker.map { sak ->
-                SaksDetaljerResponse.Sak(
-                    sak.vedtak.size,
-                    if (sak.vedtak.isEmpty()) {
-                        sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
-                    } else {
-                        SaksStatus.FERDIGBEHANDLET
-                    },
-                )
-            },
-            (oppgaver.mapNotNull { it.innsendelsesfrist } + dokkrav.mapNotNull { it.frist }).minOrNull(),
+            fiksDigisosId = sak.fiksDigisosId,
+            soknadTittel = hentNavn(model),
+            status = model.status,
+            antallNyeOppgaver =
+                oppgaver.sumOf { it.oppgaveElementer.size } +
+                    hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId, token),
+            dokumentasjonEtterspurt = oppgaver.sumOf { it.oppgaveElementer.size } > 0,
+            dokumentasjonkrav = dokkrav.sumOf { it.dokumentasjonkravElementer.size } > 0,
+            vilkar = vilkar.isNotEmpty(),
+            forelopigSvar = model.forelopigSvar,
+            saker =
+                model.saker.map { sak ->
+                    SaksDetaljerResponse.Sak(
+                        sak.vedtak.size,
+                        if (sak.vedtak.isEmpty()) {
+                            sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
+                        } else {
+                            SaksStatus.FERDIGBEHANDLET
+                        },
+                    )
+                },
+            forsteOppgaveFrist = (oppgaver.mapNotNull { it.innsendelsesfrist } + dokkrav.mapNotNull { it.frist }).minOrNull(),
         )
     }
 

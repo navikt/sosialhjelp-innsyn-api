@@ -10,7 +10,7 @@ import kotlin.time.toJavaDuration
 @Configuration
 class HttpClientConfig {
     @Bean
-    fun unproxiedHttpClient(): HttpClient {
+    fun httpClient(): HttpClient {
         val provider =
             ConnectionProvider
                 .builder("fixed")

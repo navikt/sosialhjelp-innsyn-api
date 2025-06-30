@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.domain
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
+import no.nav.sosialhjelp.innsyn.digisossak.hendelser.HendelseDto
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -192,31 +193,172 @@ enum class HistorikkType {
     DOKUMENTASJONSKRAV,
 }
 
-enum class HendelseTekstType {
-    SOKNAD_SEND_TIL_KONTOR,
-    SOKNAD_UNDER_BEHANDLING,
-    SOKNAD_MOTTATT_MED_KOMMUNENAVN,
-    SOKNAD_MOTTATT_UTEN_KOMMUNENAVN,
-    SOKNAD_FERDIGBEHANDLET,
-    SOKNAD_BEHANDLES_IKKE,
-    SOKNAD_VIDERESENDT_PAPIRSOKNAD_MED_NORG_ENHET,
-    SOKNAD_VIDERESENDT_PAPIRSOKNAD_UTEN_NORG_ENHET,
-    SOKNAD_VIDERESENDT_MED_NORG_ENHET,
-    SOKNAD_VIDERESENDT_UTEN_NORG_ENHET,
-    SOKNAD_KAN_IKKE_VISE_STATUS_MED_TITTEL,
-    SOKNAD_KAN_IKKE_VISE_STATUS_UTEN_TITTEL,
-    SAK_UNDER_BEHANDLING_MED_TITTEL,
-    SAK_UNDER_BEHANDLING_UTEN_TITTEL,
-    SAK_FERDIGBEHANDLET_MED_TITTEL,
-    SAK_FERDIGBEHANDLET_UTEN_TITTEL,
-    SAK_KAN_IKKE_VISE_STATUS_MED_TITTEL,
-    SAK_KAN_IKKE_VISE_STATUS_UTEN_TITTEL,
-    ANTALL_SENDTE_VEDLEGG,
-    UTBETALINGER_OPPDATERT,
-    BREV_OM_SAKSBEANDLINGSTID,
-    ETTERSPOR_MER_DOKUMENTASJON,
-    ETTERSPOR_IKKE_MER_DOKUMENTASJON,
-    DOKUMENTASJONKRAV,
-    SOKNAD_SEND_TIL_KONTOR_LENKETEKST,
-    VIS_BREVET_LENKETEKST,
+interface HendelseDtoMapper {
+    fun mapTilHendelseDto(
+        hendelse: Hendelse,
+        enhetNavn: String?,
+    ): HendelseDto?
+}
+
+enum class HendelseTekstType : HendelseDtoMapper {
+    SOKNAD_SEND_TIL_KONTOR {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.Sendt(hendelse.tidspunkt, enhetNavn, hendelse.url?.link)
+    },
+    SOKNAD_UNDER_BEHANDLING {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SoknadUnderBehandling(hendelse.tidspunkt, enhetNavn)
+    },
+    SOKNAD_MOTTATT_MED_KOMMUNENAVN {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.Mottatt(hendelse.tidspunkt, enhetNavn)
+    },
+    SOKNAD_MOTTATT_UTEN_KOMMUNENAVN {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.Mottatt(hendelse.tidspunkt, enhetNavn)
+    },
+    SOKNAD_FERDIGBEHANDLET {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SoknadFerdigBehandlet(hendelse.tidspunkt, hendelse.url?.link)
+    },
+    SOKNAD_BEHANDLES_IKKE {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.BehandlesIkke(hendelse.tidspunkt)
+    },
+    SOKNAD_VIDERESENDT_PAPIRSOKNAD_MED_NORG_ENHET {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.Videresendt(hendelse.tidspunkt, hendelse.tekstArgument, true)
+    },
+    SOKNAD_VIDERESENDT_PAPIRSOKNAD_UTEN_NORG_ENHET {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.Videresendt(hendelse.tidspunkt, hendelse.tekstArgument, true)
+    },
+    SOKNAD_VIDERESENDT_MED_NORG_ENHET {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.Videresendt(hendelse.tidspunkt, hendelse.tekstArgument, false)
+    },
+    SOKNAD_VIDERESENDT_UTEN_NORG_ENHET {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.Videresendt(hendelse.tidspunkt, hendelse.tekstArgument, false)
+    },
+    SOKNAD_KAN_IKKE_VISE_STATUS_MED_TITTEL {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SoknadKanIkkeViseStatus(hendelse.tidspunkt, hendelse.tekstArgument)
+    },
+    SOKNAD_KAN_IKKE_VISE_STATUS_UTEN_TITTEL {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SoknadKanIkkeViseStatus(hendelse.tidspunkt, hendelse.tekstArgument)
+    },
+    SAK_UNDER_BEHANDLING_MED_TITTEL {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SakUnderBehandling(hendelse.tidspunkt, hendelse.tekstArgument)
+    },
+    SAK_UNDER_BEHANDLING_UTEN_TITTEL {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SakUnderBehandling(hendelse.tidspunkt, hendelse.tekstArgument)
+    },
+    SAK_FERDIGBEHANDLET_MED_TITTEL {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SakFerdigBehandlet(hendelse.tidspunkt, hendelse.tekstArgument, hendelse.url?.link)
+    },
+    SAK_FERDIGBEHANDLET_UTEN_TITTEL {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SakFerdigBehandlet(hendelse.tidspunkt, hendelse.tekstArgument, hendelse.url?.link)
+    },
+    SAK_KAN_IKKE_VISE_STATUS_MED_TITTEL {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SakKanIkkeViseStatus(hendelse.tidspunkt, hendelse.tekstArgument)
+    },
+    SAK_KAN_IKKE_VISE_STATUS_UTEN_TITTEL {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.SakKanIkkeViseStatus(hendelse.tidspunkt, hendelse.tekstArgument)
+    },
+    ANTALL_SENDTE_VEDLEGG {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto =
+            HendelseDto.LevertEtterspurtDokumentasjon(
+                hendelse.tidspunkt,
+                hendelse.tekstArgument?.toIntOrNull() ?: 0,
+            )
+    },
+    UTBETALINGER_OPPDATERT {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.UtbetalingerOppdatert(hendelse.tidspunkt)
+    },
+    BREV_OM_SAKSBEANDLINGSTID {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.ForelopigSvarHendelse(hendelse.tidspunkt, hendelse.url?.link)
+    },
+    ETTERSPOR_MER_DOKUMENTASJON {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.EtterspurtDokumentasjon(hendelse.tidspunkt, hendelse.url?.link)
+    },
+    ETTERSPOR_IKKE_MER_DOKUMENTASJON {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.LevertEtterspurtDokumentasjon(hendelse.tidspunkt, 0)
+    },
+    DOKUMENTASJONKRAV {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.DokumentasjonKrav(hendelse.tidspunkt, hendelse.url?.link)
+    },
+    SOKNAD_SEND_TIL_KONTOR_LENKETEKST {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto? = null
+    },
+    VIS_BREVET_LENKETEKST {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto? = null
+    },
 }

@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
 import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
-import no.nav.sosialhjelp.innsyn.domain.Hendelse
-import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -39,8 +37,8 @@ class HendelseController(
         val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val (hendelser, _, enhetNummer, enhetNavn) = hendelseService.hentHendelser(fiksDigisosId, token)
-        return hendelser.mapToHendelseDto(enhetNavn)
+        val hendelserInfo = hendelseService.hentHendelser(fiksDigisosId, token)
+        return hendelserInfo.hendelser.mapNotNull { it.hendelseType.mapTilHendelseDto(it, hendelserInfo.enhetNavn) }
     }
 }
 
@@ -178,53 +176,3 @@ sealed class HendelseDto(
         tidspunkt: LocalDateTime,
     ) : HendelseDto(tidspunkt)
 }
-
-private fun List<Hendelse>.mapToHendelseDto(enhetNavn: String?): List<HendelseDto> =
-    mapNotNull {
-        when (it.hendelseType) {
-            HendelseTekstType.SOKNAD_SEND_TIL_KONTOR -> HendelseDto.Sendt(it.tidspunkt, enhetNavn, it.url?.link)
-            HendelseTekstType.SOKNAD_UNDER_BEHANDLING -> HendelseDto.SoknadUnderBehandling(it.tidspunkt, enhetNavn)
-            HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN,
-            HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN,
-            -> HendelseDto.Mottatt(it.tidspunkt, enhetNavn)
-
-            HendelseTekstType.SOKNAD_FERDIGBEHANDLET -> HendelseDto.SoknadFerdigBehandlet(it.tidspunkt, it.url?.link)
-            HendelseTekstType.SOKNAD_BEHANDLES_IKKE -> HendelseDto.BehandlesIkke(it.tidspunkt)
-            HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD_MED_NORG_ENHET,
-            HendelseTekstType.SOKNAD_VIDERESENDT_PAPIRSOKNAD_UTEN_NORG_ENHET,
-            -> HendelseDto.Videresendt(it.tidspunkt, it.tekstArgument, true)
-
-            HendelseTekstType.SOKNAD_VIDERESENDT_MED_NORG_ENHET,
-            HendelseTekstType.SOKNAD_VIDERESENDT_UTEN_NORG_ENHET,
-            -> HendelseDto.Videresendt(it.tidspunkt, it.tekstArgument, false)
-
-            HendelseTekstType.SOKNAD_KAN_IKKE_VISE_STATUS_MED_TITTEL,
-            HendelseTekstType.SOKNAD_KAN_IKKE_VISE_STATUS_UTEN_TITTEL,
-            -> HendelseDto.SoknadKanIkkeViseStatus(it.tidspunkt, it.tekstArgument)
-
-            HendelseTekstType.SAK_UNDER_BEHANDLING_MED_TITTEL,
-            HendelseTekstType.SAK_UNDER_BEHANDLING_UTEN_TITTEL,
-            -> HendelseDto.SakUnderBehandling(it.tidspunkt, it.tekstArgument)
-
-            HendelseTekstType.SAK_FERDIGBEHANDLET_MED_TITTEL,
-            HendelseTekstType.SAK_FERDIGBEHANDLET_UTEN_TITTEL,
-            -> HendelseDto.SakFerdigBehandlet(it.tidspunkt, it.tekstArgument, it.url?.link)
-
-            HendelseTekstType.SAK_KAN_IKKE_VISE_STATUS_MED_TITTEL,
-            HendelseTekstType.SAK_KAN_IKKE_VISE_STATUS_UTEN_TITTEL,
-            -> HendelseDto.SakKanIkkeViseStatus(it.tidspunkt, it.tekstArgument)
-
-            HendelseTekstType.ANTALL_SENDTE_VEDLEGG ->
-                HendelseDto.LevertEtterspurtDokumentasjon(
-                    it.tidspunkt,
-                    it.tekstArgument?.toIntOrNull() ?: 0,
-                )
-
-            HendelseTekstType.UTBETALINGER_OPPDATERT -> HendelseDto.UtbetalingerOppdatert(it.tidspunkt)
-            HendelseTekstType.BREV_OM_SAKSBEANDLINGSTID -> HendelseDto.ForelopigSvarHendelse(it.tidspunkt, it.url?.link)
-            HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON -> HendelseDto.EtterspurtDokumentasjon(it.tidspunkt, it.url?.link)
-            HendelseTekstType.ETTERSPOR_IKKE_MER_DOKUMENTASJON -> HendelseDto.LevertEtterspurtDokumentasjon(it.tidspunkt, 0)
-            HendelseTekstType.DOKUMENTASJONKRAV -> HendelseDto.DokumentasjonKrav(it.tidspunkt, it.url?.link)
-            else -> null
-        }
-    }

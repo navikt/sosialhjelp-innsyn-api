@@ -329,13 +329,13 @@ enum class HendelseTekstType : HendelseDtoMapper {
         override fun mapTilHendelseDto(
             hendelse: Hendelse,
             enhetNavn: String?,
-        ): HendelseDto = HendelseDto.ForelopigSvarHendelse(hendelse.tidspunkt, hendelse.url?.link)
+        ): HendelseDto = HendelseDto.ForelopigSvarHendelse(hendelse.tidspunkt, hendelse.url?.link, enhetNavn)
     },
     ETTERSPOR_MER_DOKUMENTASJON {
         override fun mapTilHendelseDto(
             hendelse: Hendelse,
             enhetNavn: String?,
-        ): HendelseDto = HendelseDto.EtterspurtDokumentasjon(hendelse.tidspunkt, hendelse.url?.link)
+        ): HendelseDto = HendelseDto.EtterspurtDokumentasjon(hendelse.tidspunkt, hendelse.url?.link, enhetNavn)
     },
     ETTERSPOR_IKKE_MER_DOKUMENTASJON {
         override fun mapTilHendelseDto(

@@ -124,6 +124,7 @@ sealed class HendelseDto(
     class EtterspurtDokumentasjon(
         tidspunkt: LocalDateTime,
         val link: String?,
+        val navKontor: String?,
     ) : HendelseDto(tidspunkt)
 
     class DokumentasjonKrav(
@@ -150,6 +151,7 @@ sealed class HendelseDto(
     class ForelopigSvarHendelse(
         tidspunkt: LocalDateTime,
         val link: String?,
+        val navKontor: String?,
     ) : HendelseDto(tidspunkt)
 
     class BehandlesIkke(

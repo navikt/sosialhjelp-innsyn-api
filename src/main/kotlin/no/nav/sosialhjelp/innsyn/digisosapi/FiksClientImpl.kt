@@ -22,6 +22,7 @@ import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.InputStreamResource
@@ -51,6 +52,8 @@ class FiksClientImpl(
     meterRegistry: MeterRegistry,
 ) : FiksClient {
     private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
+
+    private val filTypeTeller = Counter.builder("filtype").withRegistry(meterRegistry)
 
     private val fiksRetry =
         retryBackoffSpec(maxAttempts = retryMaxAttempts, initialWaitIntervalMillis = retryInitialDelay)
@@ -216,6 +219,14 @@ class FiksClientImpl(
             }
 
         opplastingsteller.increment()
+        with(files) {
+            joinToString("\n", "Sendte følgende filer til Fiks:\n") {
+                "${it.mimetype}: (${FileUtils.byteCountToDisplaySize(it.storrelse)})"
+            }.also(log::info)
+            onEach { file ->
+                filTypeTeller.withTag("filtype", file.mimetype ?: "Ukjent").increment()
+            }
+        }
         log.info(
             "Sendte ettersendelse til kommune $kommunenummer i Fiks, " +
                 "fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCode})",

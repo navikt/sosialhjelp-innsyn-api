@@ -96,3 +96,5 @@ spec:
       value: "http://sosialhjelp-soknad-api-mock/sosialhjelp/soknad-api"
     - name: FIKS_KLAGE_ENDPOINT_URL
       value: http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/klage
+    - name: IDPORTEN_ISSUER
+      value: https://digisos.ekstern.dev.nav.no/sosialhjelp/idporten-mock/default

@@ -33,11 +33,6 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-  maskinporten:
-    enabled: true
-    scopes:
-      consumes:
-        - name: "ks:fiks"
   accessPolicy:
     outbound:
       external:

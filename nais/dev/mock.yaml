@@ -62,7 +62,6 @@ spec:
       memory: 512Mi
   envFrom:
     - secret: sosialhjelp-innsyn-api-unleash-api-token
-    - secret: idporten-sosialhjelp
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"

@@ -33,8 +33,6 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-  tokenx:
-    enabled: true
   maskinporten:
     enabled: true
     scopes:

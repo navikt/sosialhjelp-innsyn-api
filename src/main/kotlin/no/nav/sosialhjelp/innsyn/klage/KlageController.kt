@@ -1,17 +1,19 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import java.util.UUID
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
-import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.FilUrl
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
+import reactor.core.publisher.Flux
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -21,45 +23,78 @@ class KlageController(
     private val tilgangskontroll: TilgangskontrollService,
     private val clientProperties: ClientProperties,
 ) {
-    @GetMapping("/{fiksDigisosId}/klage", produces = ["application/json;charset=UTF-8"])
-    suspend fun hentKlager(
-        @PathVariable fiksDigisosId: String,
-    ): List<KlageDto> {
-        val token = TokenUtils.getToken()
+
+    @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg")
+    suspend fun lastOppVedlegg(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+        @RequestPart("files") rawFiles: Flux<FilePart>
+    ) {
         tilgangskontroll.sjekkTilgang()
 
-        val klager = klageService.hentKlager(fiksDigisosId, token)
-
-        val klageDtos =
-            klager.map {
-                KlageDto(
-                    FilUrl(dato = LocalDate.now(), url = it.filRef.toDokumentLagerUrl(), id = it.filRef),
-                    status = it.status,
-                    nyttVedtakUrl = FilUrl(LocalDate.now(), it.vedtakRef.first().toDokumentLagerUrl(), it.vedtakRef.first()),
-                    paaklagetVedtakRefs = it.vedtakRef,
-                )
-            }
-        return klageDtos
+        klageService.lastOppVedlegg(
+            fiksDigisosId = fiksDigisosId,
+            klageId = klageId,
+            rawFiles = rawFiles
+        )
     }
 
-    private fun String.toDokumentLagerUrl() =
-        clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/$this?inline=true"
-
-    @PostMapping("/{fiksDigisosId}/klage", consumes = ["application/json;charset=UTF-8"])
+    @PostMapping("/{fiksDigisosId}/klage/send")
     suspend fun sendKlage(
-        @PathVariable fiksDigisosId: String,
-        @RequestBody body: InputKlage,
+        @PathVariable fiksDigisosId: UUID,
+        @RequestBody input: KlageInput,
     ) {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        klageService.sendKlage(fiksDigisosId, body, token)
+        klageService.sendKlage(
+            fiksDigisosId = fiksDigisosId,
+            input = input
+        )
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{vedtakId}")
+    suspend fun hentKlage(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable vedtakId: UUID
+    ): KlageDto {
+        tilgangskontroll.sjekkTilgang()
+
+        return klageService.hentKlage(fiksDigisosId, vedtakId)?.toKlageDto()
+            ?: throw NotFoundException("Klage for vedtakId $vedtakId ikke funnet for fiksDigisosId $fiksDigisosId")
+    }
+
+    @GetMapping("/{fiksDigisosId}/klager")
+    suspend fun hentKlager(
+        @PathVariable fiksDigisosId: UUID,
+    ): KlagerDto {
+        tilgangskontroll.sjekkTilgang()
+
+        return KlagerDto(klager = klageService.hentKlager(fiksDigisosId).map { it.toKlageDto() })
     }
 }
 
+private fun Klage.toKlageDto() = KlageDto(
+    klageId = klageId,
+    vedtakId = vedtakId,
+    klageTekst = klageTekst,
+    status = status,
+)
+
+data class KlageInput (
+    val klageId: UUID,
+    val vedtakId: UUID,
+    val klageTekst: String,
+)
+
+data class KlagerDto(
+    val klager: List<KlageDto>,
+)
+
+// TODO Hva skal legges ved i denne? Kun json, pdf,?
 data class KlageDto(
-    val klageUrl: FilUrl,
+//    val klageUrl: FilUrl,
+    val klageId: UUID,
+    val vedtakId: UUID,
+    val klageTekst: String,
     val status: KlageStatus,
-    val nyttVedtakUrl: FilUrl? = null,
-    val paaklagetVedtakRefs: List<String>,
 )

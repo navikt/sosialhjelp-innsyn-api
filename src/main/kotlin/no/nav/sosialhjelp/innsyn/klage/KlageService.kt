@@ -1,123 +1,134 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import java.util.UUID
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
+import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
-import no.nav.sosialhjelp.innsyn.utils.logger
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Profile
+import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.vedlegg.OpplastetVedleggMetadata
+import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBodilessEntity
-import org.springframework.web.reactive.function.client.awaitBody
-import reactor.core.publisher.Mono
+import reactor.core.publisher.Flux
 
 interface KlageService {
     suspend fun sendKlage(
-        fiksDigisosId: String,
-        klage: InputKlage,
-        token: Token,
+        fiksDigisosId: UUID,
+        input: KlageInput,
     )
 
     suspend fun hentKlager(
-        fiksDigisosId: String,
-        token: Token,
+        fiksDigisosId: UUID,
     ): List<Klage>
+
+    suspend fun hentKlage(
+        fiksDigisosId: UUID,
+        vedtakId: UUID
+    ): Klage?
+
+    suspend fun lastOppVedlegg(fiksDigisosId: UUID, klageId: UUID, rawFiles: Flux<FilePart>)
 }
 
 @Service
-@Profile("!preprod&!prodgcp&!dev")
-class KlageServiceLocalImpl(
-    @Value("\${client.fiks_klage_endpoint_url}")
-    klageUrl: String,
-) : KlageService {
-    private val log by logger()
-
-    private val webClient = WebClient.create(klageUrl)
-
-    override suspend fun sendKlage(
-        fiksDigisosId: String,
-        klage: InputKlage,
-        token: Token,
-    ) {
-        val response = webClient.post().uri("/$fiksDigisosId/klage").bodyValue(klage).retrieve().awaitBodilessEntity()
-        if (!response.statusCode.is2xxSuccessful) {
-            log.error("Fikk ikke 2xx fra mock-alt-api i sending av klage. Status=${response.statusCode.value()}")
-            error("Feil ved levering av klage")
-        }
-    }
-
-    override suspend fun hentKlager(
-        fiksDigisosId: String,
-        token: Token,
-    ): List<Klage> =
-        webClient
-            .get()
-            .uri("/$fiksDigisosId/klage")
-            .retrieve()
-            .onStatus(
-                { !it.is2xxSuccessful },
-                {
-                    log.error("Fikk ikke 2xx fra mock-alt-api i henting av klager. Status=${it.statusCode().value()}}")
-                    Mono.error { IllegalStateException("Feil ved henting av klager") }
-                },
-            ).awaitBody()
-}
-
-@Service
-@Profile("preprod|prodgcp|dev")
-@ConditionalOnProperty(name = ["klageEnabled"], havingValue = "true")
-class KlageServiceImpl(
-    private val fiksClient: FiksClient,
+class LocalKlageService(
+    private val klageRepository: KlageRepository,
+    private val klageClient: FiksKlageClient,
+    private val mellomlagerService: MellomlagerService,
     private val tilgangskontroll: TilgangskontrollService,
 ) : KlageService {
+
     override suspend fun sendKlage(
-        fiksDigisosId: String,
-        klage: InputKlage,
-        token: Token,
+        fiksDigisosId: UUID,
+        input: KlageInput,
     ) {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
-
-        // Send klage
+        runCatching {
+            klageClient.sendKlage(
+                klageId = input.klageId,
+                klage = Klage(
+                    digisosId = fiksDigisosId,
+                    klageId = input.klageId,
+                    klageTekst = input.klageTekst,
+                    vedtakId = input.vedtakId,
+                )
+            )
+        }
+            .onSuccess {
+                klageRepository.save(
+                    digisosId = fiksDigisosId,
+                    vedtakId = input.vedtakId,
+                    klageId = input.klageId,
+                )
+            }
+            .getOrThrow()
     }
 
-    override suspend fun hentKlager(
-        fiksDigisosId: String,
-        token: Token,
-    ): List<Klage> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
+    override suspend fun hentKlager(fiksDigisosId: UUID,): List<Klage> = klageClient.hentKlager(fiksDigisosId)
 
-        // Hent klager
-        return emptyList()
+    override suspend fun hentKlage(
+        fiksDigisosId: UUID,
+        vedtakId: UUID
+    ): Klage? {
+        return klageClient.hentKlager(fiksDigisosId).find { it.vedtakId == vedtakId }
+    }
+
+    override suspend fun lastOppVedlegg(
+        fiksDigisosId: UUID,
+        klageId: UUID,
+        rawFiles: Flux<FilePart>
+    ) {
+        tilgangskontroll.sjekkTilgang()
+
+        val allFiles = rawFiles.asFlow().toList()
+        val metadatas = allFiles.getMetadataJson()
+
+        val files = allFiles.getFilesNotMetadata()
+        metadatas.validateAllFilesHasMetadata(files)
+
+        files.forEach { file ->
+            metadatas.flatMap { it.filer }
+                .find { file.filename().contains(it.uuid.toString()) }
+                ?.also { it.fil = file }
+        }
+
+        if (metadatas.isNotEmpty()) {
+            mellomlagerService.processFileUpload(klageId, metadatas.first())
+        }
     }
 }
 
-data class InputKlage(
-    val fiksDigisosId: String,
-    val klageTekst: String,
-    val vedtaksIds: List<String>,
-)
-
-data class Klage(
-    val fiksDigisosId: String,
-    val filRef: String,
-    val vedtakRef: List<String>,
-    val status: KlageStatus,
-    val utfall: KlageUtfall?,
-)
-
-enum class KlageStatus {
-    SENDT,
-    MOTTATT,
-    UNDER_BEHANDLING,
-    FERDIG_BEHANDLET,
-    HOS_STATSFORVALTER,
+private suspend fun List<FilePart>.getMetadataJson(): List<OpplastetVedleggMetadata> {
+    return firstOrNull { it.filename() == "metadata.json" }
+        ?.content()
+        ?.let { DataBufferUtils.join(it) }
+        ?.map {
+            val bytes = ByteArray(it.readableByteCount())
+            it.read(bytes)
+            DataBufferUtils.release(it)
+            objectMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
+        }
+        ?.awaitSingleOrNull()
+        ?.filter { it.filer.isNotEmpty() }
+        ?: error("Missing metadata.json")
 }
 
-enum class KlageUtfall {
-    NYTT_VEDTAK,
-    AVVIST,
+private fun List<FilePart>.getFilesNotMetadata(): List<FilePart> {
+    return filterNot { it.filename() == "metadata.json" }
+        .also {
+            check(it.isNotEmpty()) { "Ingen filer i forsendelse" }
+            check(it.size <= 30) { "Over 30 filer i forsendelse: ${it.size} filer" }
+        }
+}
+
+private fun List<OpplastetVedleggMetadata>.validateAllFilesHasMetadata(files: List<FilePart>) {
+    flatMap { it.filer }
+        .all { metadataFile ->
+            metadataFile.uuid.toString() in files.map { it.filename().substringBefore(".") }
+        }
+        .also { allHasMatch ->
+            require(allHasMatch) {
+                "Ikke alle filer i metadata.json ble funnet i forsendelsen"
+            }
+        }
 }

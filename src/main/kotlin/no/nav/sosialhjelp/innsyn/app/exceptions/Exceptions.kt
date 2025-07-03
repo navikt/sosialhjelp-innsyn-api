@@ -36,3 +36,7 @@ class PdlException(
 class TilgangskontrollException(
     override val message: String?,
 ) : RuntimeException(message)
+
+data class NotFoundException(
+    override val message: String,
+): RuntimeException(message)

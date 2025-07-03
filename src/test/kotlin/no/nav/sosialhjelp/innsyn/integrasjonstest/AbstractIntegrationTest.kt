@@ -54,8 +54,19 @@ abstract class AbstractIntegrationTest {
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
+
+    protected fun doPost(uri: String, body: Any): WebTestClient.ResponseSpec =
+        webClient
+            .post()
+            .uri(uri)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .bodyValue(body)
+            .exchange()
             .expectStatus()
             .isOk
+
 }
 
 private fun hentPersonAnswer(): PdlHentPerson {

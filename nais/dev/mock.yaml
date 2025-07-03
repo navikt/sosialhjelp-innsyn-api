@@ -50,6 +50,7 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-soknad-api-mock
+        - application: sosialhjelp-idporten-mock
     inbound:
       rules:
         - application: sosialhjelp-mock-alt-api-mock

@@ -13,6 +13,8 @@ interface KlageRepository {
     )
 
     fun delete(klageId: UUID)
+
+    fun deleteAll(klageIds: List<UUID>)
 }
 
 @Repository
@@ -29,6 +31,10 @@ class InMemoryKlageRepository : KlageRepository {
 
     override fun delete(klageId: UUID) {
         klagerStorage.removeIf { it.klageId == klageId }
+    }
+
+    override fun deleteAll(klageIds: List<UUID>) {
+        klagerStorage.removeIf { lagretKlage -> klageIds.contains(lagretKlage.klageId) }
     }
 
     companion object {

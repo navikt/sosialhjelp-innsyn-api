@@ -33,13 +33,18 @@ interface KlageService {
     )
 }
 
+interface ScheduledKlageService {
+    suspend fun findKlagerStatusSendt(): List<KlageRef>
+    suspend fun slettKlagerMottattAvFagsysten(ids: List<UUID>)
+}
+
 @Service
 class LocalKlageService(
     private val klageRepository: KlageRepository,
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
     private val tilgangskontroll: TilgangskontrollService,
-) : KlageService {
+) : KlageService, ScheduledKlageService {
     override suspend fun sendKlage(
         fiksDigisosId: UUID,
         input: KlageInput,
@@ -94,6 +99,13 @@ class LocalKlageService(
         if (metadatas.isNotEmpty()) {
             mellomlagerService.processFileUpload(klageId, metadatas.first())
         }
+    }
+
+    override suspend fun findKlagerStatusSendt(): List<KlageRef> =
+        klageRepository.getKlagerStatusSendt()
+
+    override suspend fun slettKlagerMottattAvFagsysten(ids: List<UUID>) {
+        klageRepository.deleteAll(ids)
     }
 }
 

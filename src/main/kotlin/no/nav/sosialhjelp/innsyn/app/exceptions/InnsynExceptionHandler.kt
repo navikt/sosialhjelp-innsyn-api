@@ -84,6 +84,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(NorgException::class)
     fun handleNorgError(e: NorgException): ResponseEntity<FrontendErrorMessage> {
+        log.error("Noe feilet ved kall til Norg", e)
         val error = FrontendErrorMessage(NORG_ERROR, NOE_UVENTET_FEILET)
         return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -123,6 +124,13 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(error, HttpStatus.FORBIDDEN)
     }
 
+    @ExceptionHandler(NotFoundException::class)
+    fun handleNotFoundException(e: NotFoundException): ResponseEntity<FrontendErrorMessage> {
+        log.warn("Ressurs ikke funnet", e)
+        val error = FrontendErrorMessage(NOT_FOUND_ERROR, "Ressurs ikke funnet")
+        return ResponseEntity(error, HttpStatus.NOT_FOUND)
+    }
+
     companion object {
         private val log by logger()
 
@@ -134,5 +142,6 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         private const val FILOPPLASTING_ERROR = "FILOPPLASTING_ERROR"
         private const val PDL_ERROR = "pdl_error"
         private const val TILGANG_ERROR = "tilgang_error"
+        private const val NOT_FOUND_ERROR = "not_found_error"
     }
 }

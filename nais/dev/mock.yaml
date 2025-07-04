@@ -33,13 +33,6 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-  tokenx:
-    enabled: true
-  maskinporten:
-    enabled: true
-    scopes:
-      consumes:
-        - name: "ks:fiks"
   accessPolicy:
     outbound:
       external:
@@ -50,6 +43,8 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-soknad-api-mock
+        - application: sosialhjelp-idporten-mock
+        - application: sosialhjelp-texas-mock
     inbound:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
@@ -62,7 +57,6 @@ spec:
       memory: 512Mi
   envFrom:
     - secret: sosialhjelp-innsyn-api-unleash-api-token
-    - secret: idporten-sosialhjelp
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
@@ -96,3 +90,11 @@ spec:
       value: "http://sosialhjelp-soknad-api-mock/sosialhjelp/soknad-api"
     - name: FIKS_KLAGE_ENDPOINT_URL
       value: http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/klage
+    - name: IDPORTEN_ISSUER
+      value: https://digisos.ekstern.dev.nav.no/sosialhjelp/idporten-mock/default
+    - name: IDPORTEN_CLIENT_ID
+      value: default
+    - name: NAIS_TOKEN_ENDPOINT
+      value: http://sosialhjelp-texas-mock/api/v1/token
+    - name: NAIS_TOKEN_EXCHANGE_ENDPOINT
+      value: http://sosialhjelp-texas-mock/api/v1/token/exchange

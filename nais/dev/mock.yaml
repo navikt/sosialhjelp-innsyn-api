@@ -95,6 +95,6 @@ spec:
     - name: IDPORTEN_CLIENT_ID
       value: default
     - name: NAIS_TOKEN_ENDPOINT
-      value: https://digisos.ekstern.dev.nav.no/sosialhjelp/texas/api/v1/token
+      value: http://sosialhjelp-texas-mock/api/v1/token
     - name: NAIS_TOKEN_EXCHANGE_ENDPOINT
-      value: https://digisos.ekstern.dev.nav.no/sosialhjelp/texas/api/v1/token/exchange
+      value: http://sosialhjelp-texas-mock/api/v1/token/exchange

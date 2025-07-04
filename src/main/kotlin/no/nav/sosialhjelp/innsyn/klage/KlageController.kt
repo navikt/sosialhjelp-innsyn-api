@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.util.UUID
-import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -22,7 +21,6 @@ import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 class KlageController(
     private val klageService: KlageService,
     private val tilgangskontroll: TilgangskontrollService,
-    private val clientProperties: ClientProperties,
 ) {
     @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg")
     suspend fun lastOppVedlegg(

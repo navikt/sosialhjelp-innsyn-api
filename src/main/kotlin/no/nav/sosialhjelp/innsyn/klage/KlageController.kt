@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -29,6 +30,7 @@ class KlageController(
         @PathVariable klageId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ) {
+        validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
         klageService.lastOppVedlegg(
@@ -43,6 +45,7 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @RequestBody input: KlageInput,
     ) {
+        validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
         klageService.sendKlage(
@@ -56,6 +59,7 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable vedtakId: UUID,
     ): KlageDto {
+        validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
         return klageService.hentKlage(fiksDigisosId, vedtakId)?.toKlageDto()
@@ -66,9 +70,14 @@ class KlageController(
     suspend fun hentKlager(
         @PathVariable fiksDigisosId: UUID,
     ): KlagerDto {
+        validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
         return KlagerDto(klager = klageService.hentKlager(fiksDigisosId).map { it.toKlageDto() })
+    }
+
+    private fun validateNotProd() {
+        if (MiljoUtils.isRunningInProd()) throw IllegalStateException("KlageController should not be used in production environment")
     }
 }
 

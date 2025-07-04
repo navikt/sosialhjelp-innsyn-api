@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.util.UUID
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -23,19 +23,18 @@ class KlageController(
     private val tilgangskontroll: TilgangskontrollService,
     private val clientProperties: ClientProperties,
 ) {
-
     @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg")
     suspend fun lastOppVedlegg(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
-        @RequestPart("files") rawFiles: Flux<FilePart>
+        @RequestPart("files") rawFiles: Flux<FilePart>,
     ) {
         tilgangskontroll.sjekkTilgang()
 
         klageService.lastOppVedlegg(
             fiksDigisosId = fiksDigisosId,
             klageId = klageId,
-            rawFiles = rawFiles
+            rawFiles = rawFiles,
         )
     }
 
@@ -48,14 +47,14 @@ class KlageController(
 
         klageService.sendKlage(
             fiksDigisosId = fiksDigisosId,
-            input = input
+            input = input,
         )
     }
 
     @GetMapping("/{fiksDigisosId}/klage/{vedtakId}")
     suspend fun hentKlage(
         @PathVariable fiksDigisosId: UUID,
-        @PathVariable vedtakId: UUID
+        @PathVariable vedtakId: UUID,
     ): KlageDto {
         tilgangskontroll.sjekkTilgang()
 
@@ -73,14 +72,15 @@ class KlageController(
     }
 }
 
-private fun Klage.toKlageDto() = KlageDto(
-    klageId = klageId,
-    vedtakId = vedtakId,
-    klageTekst = klageTekst,
-    status = status,
-)
+private fun Klage.toKlageDto() =
+    KlageDto(
+        klageId = klageId,
+        vedtakId = vedtakId,
+        klageTekst = klageTekst,
+        status = status,
+    )
 
-data class KlageInput (
+data class KlageInput(
     val klageId: UUID,
     val vedtakId: UUID,
     val klageTekst: String,

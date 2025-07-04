@@ -1,10 +1,9 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.util.UUID
 import org.springframework.stereotype.Repository
+import java.util.UUID
 
 interface KlageRepository {
-
     fun getKlagerStatusSendt(): List<KlageRef>
 
     fun save(
@@ -20,7 +19,11 @@ interface KlageRepository {
 class InMemoryKlageRepository : KlageRepository {
     override fun getKlagerStatusSendt(): List<KlageRef> = klagerStorage.filter { it.status == KlageStatus.SENDT }
 
-    override fun save(digisosId: UUID, vedtakId: UUID, klageId: UUID) {
+    override fun save(
+        digisosId: UUID,
+        vedtakId: UUID,
+        klageId: UUID,
+    ) {
         klagerStorage.add(KlageRef(digisosId, vedtakId, klageId))
     }
 
@@ -31,7 +34,9 @@ class InMemoryKlageRepository : KlageRepository {
     companion object {
         val klagerStorage = mutableListOf<KlageRef>()
 
-        fun reset() { klagerStorage.clear() }
+        fun reset() {
+            klagerStorage.clear()
+        }
     }
 }
 

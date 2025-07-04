@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
-import java.util.UUID
 import no.nav.sosialhjelp.innsyn.app.exceptions.FrontendErrorMessage
 import no.nav.sosialhjelp.innsyn.klage.InMemoryKlageRepository
 import no.nav.sosialhjelp.innsyn.klage.Klage
@@ -13,9 +12,9 @@ import no.nav.sosialhjelp.innsyn.klage.LocalFiksKlageClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
-class KlageIntegrationTest: AbstractIntegrationTest() {
-
+class KlageIntegrationTest : AbstractIntegrationTest() {
     private val klageRefStorage = InMemoryKlageRepository.klagerStorage
     private val fiksStorage = LocalFiksKlageClient.klageStorage
 
@@ -27,21 +26,22 @@ class KlageIntegrationTest: AbstractIntegrationTest() {
 
     @Test
     fun `Sende klage skal lagres`() {
-
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
         doPost(
             uri = putUrl(digisosId),
-            body = KlageInput(
-                klageId = klageId,
-                vedtakId = vedtakId,
-                klageTekst = "Dette er en testklage",
-            )
+            body =
+                KlageInput(
+                    klageId = klageId,
+                    vedtakId = vedtakId,
+                    klageTekst = "Dette er en testklage",
+                ),
         )
 
-        klageRefStorage.find { it.klageId == klageId }
+        klageRefStorage
+            .find { it.klageId == klageId }
             .also {
                 assertThat(it!!.digisosId).isEqualTo(digisosId)
                 assertThat(it.vedtakId).isEqualTo(vedtakId)
@@ -60,16 +60,18 @@ class KlageIntegrationTest: AbstractIntegrationTest() {
         val vedtakId = UUID.randomUUID()
 
         klageRefStorage.add(KlageRef(digisosId, klageId, vedtakId))
-        fiksStorage[klageId] = Klage(
-            digisosId = digisosId,
-            klageId = klageId,
-            vedtakId = vedtakId,
-            klageTekst = "Dette er en testklage"
-        )
+        fiksStorage[klageId] =
+            Klage(
+                digisosId = digisosId,
+                klageId = klageId,
+                vedtakId = vedtakId,
+                klageTekst = "Dette er en testklage",
+            )
 
         doGet(getKlageUrl(digisosId, vedtakId))
             .expectBody(KlageDto::class.java)
-            .returnResult().responseBody
+            .returnResult()
+            .responseBody
             .also { klage ->
                 assertThat(klage!!).isNotNull
                 assertThat(klage.klageId).isEqualTo(klageId)
@@ -81,9 +83,11 @@ class KlageIntegrationTest: AbstractIntegrationTest() {
     @Test
     fun `Hente klage som ikke eksisterer returnerer 404`() {
         doGet(getKlageUrl(UUID.randomUUID(), UUID.randomUUID()))
-            .expectStatus().isNotFound
+            .expectStatus()
+            .isNotFound
             .expectBody(FrontendErrorMessage::class.java)
-            .returnResult().responseBody
+            .returnResult()
+            .responseBody
             .also { error ->
                 assertThat(error!!.type).isEqualTo("not_found_error")
             }
@@ -97,17 +101,19 @@ class KlageIntegrationTest: AbstractIntegrationTest() {
 
         vedtakIds.forEachIndexed { i, vedtakId ->
             klageRefStorage.add(KlageRef(digisosId, vedtakId, klageIds[i]))
-            fiksStorage[klageIds[i]] = Klage(
-                digisosId = digisosId,
-                klageId = klageIds[i],
-                vedtakId = vedtakIds[i],
-                klageTekst = "Dette er en testklage: $i"
-            )
+            fiksStorage[klageIds[i]] =
+                Klage(
+                    digisosId = digisosId,
+                    klageId = klageIds[i],
+                    vedtakId = vedtakIds[i],
+                    klageTekst = "Dette er en testklage: $i",
+                )
         }
 
         doGet(getKlagerUrl(digisosId))
             .expectBody(KlagerDto::class.java)
-            .returnResult().responseBody
+            .returnResult()
+            .responseBody
             .also { klagerDto ->
                 klagerDto!!.klager.forEach { klageDto ->
                     assertThat(klageDto.klageId).isIn(klageIds)
@@ -121,13 +127,19 @@ class KlageIntegrationTest: AbstractIntegrationTest() {
     fun `Digisos-sak uten klager returnerer tom liste`() {
         doGet(getKlagerUrl(UUID.randomUUID()))
             .expectBody(KlagerDto::class.java)
-            .returnResult().responseBody
+            .returnResult()
+            .responseBody
             .also { klagerDto -> assertThat(klagerDto!!.klager).isEmpty() }
     }
 
     companion object {
         fun putUrl(digisosId: UUID) = "/api/v1/innsyn/$digisosId/klage/send"
-        fun getKlageUrl(digisosId: UUID, vedtakId: UUID) = "/api/v1/innsyn/$digisosId/klage/$vedtakId"
+
+        fun getKlageUrl(
+            digisosId: UUID,
+            vedtakId: UUID,
+        ) = "/api/v1/innsyn/$digisosId/klage/$vedtakId"
+
         fun getKlagerUrl(digisosId: UUID) = "/api/v1/innsyn/$digisosId/klager"
     }
 }

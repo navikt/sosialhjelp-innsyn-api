@@ -41,7 +41,10 @@ abstract class AbstractIntegrationTest {
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
 
-    protected fun doPost(uri: String, body: Any): WebTestClient.ResponseSpec =
+    protected fun doPost(
+        uri: String,
+        body: Any,
+    ): WebTestClient.ResponseSpec =
         webClient
             .post()
             .uri(uri)

@@ -39,4 +39,4 @@ class TilgangskontrollException(
 
 data class NotFoundException(
     override val message: String,
-): RuntimeException(message)
+) : RuntimeException(message)

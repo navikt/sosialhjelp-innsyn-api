@@ -1,17 +1,23 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.util.UUID
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 interface FiksKlageClient {
-    suspend fun sendKlage(klageId: UUID, klage: Klage)
+    suspend fun sendKlage(
+        klageId: UUID,
+        klage: Klage,
+    )
+
     suspend fun hentKlager(digisosId: UUID): List<Klage>
 }
 
 @Component
 class LocalFiksKlageClient : FiksKlageClient {
-
-    override suspend fun sendKlage(klageId: UUID, klage: Klage) {
+    override suspend fun sendKlage(
+        klageId: UUID,
+        klage: Klage,
+    ) {
         klageStorage[klageId] = klage
     }
 
@@ -27,5 +33,5 @@ data class Klage(
     val klageId: UUID,
     val klageTekst: String,
     val vedtakId: UUID,
-    val status: KlageStatus = KlageStatus.SENDT
+    val status: KlageStatus = KlageStatus.SENDT,
 )

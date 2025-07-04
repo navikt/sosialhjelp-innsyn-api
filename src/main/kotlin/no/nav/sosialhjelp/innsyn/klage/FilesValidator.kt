@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.io.IOException
-import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -26,12 +24,13 @@ import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.apache.tika.Tika
 import org.springframework.core.io.buffer.DataBufferUtils
+import java.io.IOException
+import java.io.InputStream
 
 class FilesValidator(
     private val virusScanner: VirusScanner,
     private val metadatas: List<OpplastetVedleggMetadata>,
 ) {
-
     suspend fun validate() = metadatas.validate().awaitAll()
 
     private suspend fun List<OpplastetVedleggMetadata>.validate() =
@@ -73,7 +72,7 @@ class FilesValidator(
         if (tikaMimeType == "text/x-matlab") {
             logger.info(
                 "Tika detekterte mimeType text/x-matlab. " +
-                        "Vi antar at dette egentlig er en PDF, men som ikke har korrekte magic bytes (%PDF).",
+                    "Vi antar at dette egentlig er en PDF, men som ikke har korrekte magic bytes (%PDF).",
             )
         }
         val fileType = mapToTikaFileType(tikaMimeType)
@@ -89,11 +88,11 @@ class FilesValidator(
 
             logger.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +
-                        "\r\nextension: \"${splitFileName(fil.filename()).extension}\"," +
-                        "\r\nvalidatedFileType: ${fileType.name}," +
-                        "\r\ntikaMediaType: $tikaMimeType," +
-                        "\r\nmime: ${fil.headers().contentType}" +
-                        ",\r\nførste bytes: $firstBytes",
+                    "\r\nextension: \"${splitFileName(fil.filename()).extension}\"," +
+                    "\r\nvalidatedFileType: ${fileType.name}," +
+                    "\r\ntikaMediaType: $tikaMimeType," +
+                    "\r\nmime: ${fil.headers().contentType}" +
+                    ",\r\nførste bytes: $firstBytes",
             )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
@@ -105,7 +104,9 @@ class FilesValidator(
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
             val ext: String = fil.filename().substringAfterLast(".")
             if (ext.lowercase() in listOf("jfif", "pjpeg", "pjp")) {
-                logger.warn("Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.")
+                logger.warn(
+                    "Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.",
+                )
                 return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
             }
         }

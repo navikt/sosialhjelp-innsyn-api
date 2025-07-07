@@ -9,7 +9,7 @@ interface FiksKlageClient {
         klage: Klage,
     )
 
-    suspend fun hentKlager(digisosId: UUID): List<Klage>
+    suspend fun hentKlager(digisosId: String): List<Klage>
 }
 
 @Component
@@ -21,7 +21,7 @@ class LocalFiksKlageClient : FiksKlageClient {
         klageStorage[klageId] = klage
     }
 
-    override suspend fun hentKlager(digisosId: UUID): List<Klage> = klageStorage.values.filter { it.digisosId == digisosId }
+    override suspend fun hentKlager(digisosId: String): List<Klage> = klageStorage.values.filter { it.digisosId == digisosId }
 
     companion object {
         val klageStorage = mutableMapOf<UUID, Klage>()
@@ -29,7 +29,7 @@ class LocalFiksKlageClient : FiksKlageClient {
 }
 
 data class Klage(
-    val digisosId: UUID,
+    val digisosId: String,
     val klageId: UUID,
     val klageTekst: String,
     val vedtakId: UUID,

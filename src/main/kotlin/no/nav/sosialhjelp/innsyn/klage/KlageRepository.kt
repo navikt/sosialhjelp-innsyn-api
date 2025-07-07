@@ -7,7 +7,7 @@ interface KlageRepository {
     fun getKlagerStatusSendt(): List<KlageRef>
 
     fun save(
-        digisosId: UUID,
+        digisosId: String,
         vedtakId: UUID,
         klageId: UUID,
     )
@@ -20,7 +20,7 @@ class InMemoryKlageRepository : KlageRepository {
     override fun getKlagerStatusSendt(): List<KlageRef> = klagerStorage.filter { it.status == KlageStatus.SENDT }
 
     override fun save(
-        digisosId: UUID,
+        digisosId: String,
         vedtakId: UUID,
         klageId: UUID,
     ) {
@@ -41,7 +41,7 @@ class InMemoryKlageRepository : KlageRepository {
 }
 
 data class KlageRef(
-    val digisosId: UUID,
+    val digisosId: String,
     val vedtakId: UUID,
     val klageId: UUID,
     val status: KlageStatus = KlageStatus.SENDT,

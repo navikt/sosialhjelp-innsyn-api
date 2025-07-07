@@ -24,7 +24,7 @@ class KlageController(
 ) {
     @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg")
     suspend fun lastOppVedlegg(
-        @PathVariable fiksDigisosId: UUID,
+        @PathVariable fiksDigisosId: String,
         @PathVariable klageId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ) {
@@ -40,7 +40,7 @@ class KlageController(
 
     @PostMapping("/{fiksDigisosId}/klage/send")
     suspend fun sendKlage(
-        @PathVariable fiksDigisosId: UUID,
+        @PathVariable fiksDigisosId: String,
         @RequestBody input: KlageInput,
     ) {
         validateNotProd()
@@ -54,7 +54,7 @@ class KlageController(
 
     @GetMapping("/{fiksDigisosId}/klage/{vedtakId}")
     suspend fun hentKlage(
-        @PathVariable fiksDigisosId: UUID,
+        @PathVariable fiksDigisosId: String,
         @PathVariable vedtakId: UUID,
     ): KlageDto {
         validateNotProd()
@@ -66,7 +66,7 @@ class KlageController(
 
     @GetMapping("/{fiksDigisosId}/klager")
     suspend fun hentKlager(
-        @PathVariable fiksDigisosId: UUID,
+        @PathVariable fiksDigisosId: String,
     ): KlagerDto {
         validateNotProd()
         tilgangskontroll.sjekkTilgang()

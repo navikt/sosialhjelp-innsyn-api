@@ -15,19 +15,19 @@ import java.util.UUID
 
 interface KlageService {
     suspend fun sendKlage(
-        fiksDigisosId: UUID,
+        fiksDigisosId: String,
         input: KlageInput,
     )
 
-    suspend fun hentKlager(fiksDigisosId: UUID): List<Klage>
+    suspend fun hentKlager(fiksDigisosId: String): List<Klage>
 
     suspend fun hentKlage(
-        fiksDigisosId: UUID,
+        fiksDigisosId: String,
         vedtakId: UUID,
     ): Klage?
 
     suspend fun lastOppVedlegg(
-        fiksDigisosId: UUID,
+        fiksDigisosId: String,
         klageId: UUID,
         rawFiles: Flux<FilePart>,
     )
@@ -41,7 +41,7 @@ class LocalKlageService(
     private val tilgangskontroll: TilgangskontrollService,
 ) : KlageService {
     override suspend fun sendKlage(
-        fiksDigisosId: UUID,
+        fiksDigisosId: String,
         input: KlageInput,
     ) {
         runCatching {
@@ -64,15 +64,15 @@ class LocalKlageService(
         }.getOrThrow()
     }
 
-    override suspend fun hentKlager(fiksDigisosId: UUID): List<Klage> = klageClient.hentKlager(fiksDigisosId)
+    override suspend fun hentKlager(fiksDigisosId: String): List<Klage> = klageClient.hentKlager(fiksDigisosId)
 
     override suspend fun hentKlage(
-        fiksDigisosId: UUID,
+        fiksDigisosId: String,
         vedtakId: UUID,
     ): Klage? = klageClient.hentKlager(fiksDigisosId).find { it.vedtakId == vedtakId }
 
     override suspend fun lastOppVedlegg(
-        fiksDigisosId: UUID,
+        fiksDigisosId: String,
         klageId: UUID,
         rawFiles: Flux<FilePart>,
     ) {

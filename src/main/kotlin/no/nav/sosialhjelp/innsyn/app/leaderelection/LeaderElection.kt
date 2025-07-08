@@ -1,12 +1,12 @@
 package no.nav.sosialhjelp.innsyn.app.leaderelection
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.net.InetAddress.getLocalHost
-import java.time.LocalDateTime
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import java.net.InetAddress.getLocalHost
+import java.time.LocalDateTime
 
 interface LeaderElection {
     fun isLeader(): Boolean
@@ -17,7 +17,6 @@ interface LeaderElection {
 class LeaderElectionImpl(
     webClientBuilder: WebClient.Builder,
 ) : LeaderElection {
-
     private var leader: String? = null
 
     private val webClient: WebClient = webClientBuilder.baseUrl("http://$electorPath").build()
@@ -45,15 +44,15 @@ class LeaderElectionImpl(
 
     private fun doGet(): String? =
         runCatching {
-            webClient.get()
+            webClient
+                .get()
                 .retrieve()
                 .bodyToMono(String::class.java)
                 .block()
+        }.getOrElse {
+            logger.warn("LeaderElection - kunne ikke bestemme lederpod. ${it.message}", it)
+            null
         }
-            .getOrElse {
-                logger.warn("LeaderElection - kunne ikke bestemme lederpod. ${it.message}", it)
-                null
-            }
 
     companion object {
         private const val ELECTOR_GET_URL = "ELECTOR_GET_URL"
@@ -65,7 +64,5 @@ class LeaderElectionImpl(
 @Component
 @Profile("!leader-election")
 class NoLeaderElection : LeaderElection {
-    override fun isLeader(): Boolean {
-        return true
-    }
+    override fun isLeader(): Boolean = true
 }

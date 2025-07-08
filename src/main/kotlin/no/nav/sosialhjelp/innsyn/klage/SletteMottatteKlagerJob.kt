@@ -1,12 +1,12 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withTimeoutOrNull
 import no.nav.sosialhjelp.innsyn.app.leaderelection.LeaderElection
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 @Component
 class SletteMottatteKlagerJob(
@@ -14,7 +14,6 @@ class SletteMottatteKlagerJob(
     private val fiksKlageClient: FiksKlageClient,
     private val klageService: ScheduledKlageService,
 ) {
-
     @Scheduled
     suspend fun slettMottatteKlager() {
         if (leaderElection.isLeader()) {
@@ -27,7 +26,8 @@ class SletteMottatteKlagerJob(
 
     private suspend fun doDeleteMottatteKlager() {
         withTimeoutOrNull(60.seconds) {
-            klageService.findKlagerStatusSendt()
+            klageService
+                .findKlagerStatusSendt()
                 .map { klageRef -> klageRef.digisosId }
                 .distinct()
                 .flatMap { digisosId -> doGetKlageFromFiks(digisosId) }
@@ -43,7 +43,8 @@ class SletteMottatteKlagerJob(
     }
 
     private suspend fun logNumberOfStatusSendtAfterDeletion() {
-        klageService.findKlagerStatusSendt()
+        klageService
+            .findKlagerStatusSendt()
             .also { klager ->
                 if (klager.isNotEmpty()) logger.info("Antall klager med status SENDT etter sletting: ${klager.size}")
             }

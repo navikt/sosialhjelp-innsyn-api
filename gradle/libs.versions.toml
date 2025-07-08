@@ -23,7 +23,7 @@ json_smart = "2.4.10"
 spring_security_test = "6.5.1"
 mock-oauth2-server = "2.2.1"
 
-opentelemetry = "1.50.0"
+opentelemetry = "1.51.0"
 
 ktlint = "1.5.0"
 

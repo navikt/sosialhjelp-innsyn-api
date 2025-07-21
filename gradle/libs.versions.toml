@@ -11,7 +11,7 @@ micrometer_registry = "1.15.1"
 prometheus = "0.16.0"
 jackson = "2.19.1"
 commons_codec = "1.18.0"
-commons_io = "2.19.0"
+commons_io = "2.20.0"
 file_upload = "1.6.0"
 tika = "3.2.0"
 pdf_box = "3.0.5"
@@ -23,7 +23,7 @@ json_smart = "2.4.10"
 spring_security_test = "6.5.1"
 mock-oauth2-server = "2.2.1"
 
-opentelemetry = "1.51.0"
+opentelemetry = "1.52.0"
 
 ktlint = "1.5.0"
 

@@ -10,12 +10,6 @@ springdoc:
   api-docs:
     enabled: true
 
-#Token-validering
-no.nav.security.jwt:
-  issuer.selvbetjening:
-    discoveryurl: ${METADATA_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/well-known/selvbetjening${mock-alt-api-wellknown-queryparam}}
-    validation:
-      optional-claims: aud,nbf
 innsyn.loginurl: ${INNSYN_LOGINURL:http://127.0.0.1:3008/sosialhjelp/mock-alt/login}
 
 client:
@@ -33,6 +27,5 @@ client:
   unleash_env: "local"
   unleash_server_api_url: "http://localhost:58888"
   unleash_server_api_token: "localtoken"
-  tokendings_url: ${TOKEN_X_WELL_KNOWN_URL:tokendings_endpoint_url}
   tokendings_private_jwk: ${TOKEN_X_PRIVATE_JWK:generateRSA}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}

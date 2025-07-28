@@ -78,12 +78,6 @@ spec:
       value: "sosialhjelp-innsyn-api"
     - name: UNLEASH_ENV
       value: "mock"
-    - name: TOKEN_X_WELL_KNOWN_URL
-      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/token/tokenx"
-    - name: TOKEN_X_CLIENT_ID
-      value: "dev-gcp:teamdigisos:sosialhjelp-innsyn-api-mock"
-    - name: MASKINPORTEN_WELL_KNOWN_URL
-      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/token/maskinporten"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON,Testsystemet;1.0.0"
     - name: SOKNAD_API_URL

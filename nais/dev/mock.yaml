@@ -85,7 +85,7 @@ spec:
     - name: FIKS_KLAGE_ENDPOINT_URL
       value: http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/klage
     - name: IDPORTEN_ISSUER
-      value: https://digisos.ekstern.dev.nav.no/sosialhjelp/idporten-mock/default
+      value: https://sosiauth2.ekstern.dev.nav.no/default
     - name: IDPORTEN_CLIENT_ID
       value: default
     - name: NAIS_TOKEN_ENDPOINT

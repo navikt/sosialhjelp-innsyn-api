@@ -42,3 +42,7 @@ client:
 idporten:
   issuer: ${IDPORTEN_ISSUER:http://localhost:8888/default}
   audience: ${IDPORTEN_CLIENT_ID:default}
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG

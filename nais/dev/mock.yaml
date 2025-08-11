@@ -33,13 +33,6 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-  tokenx:
-    enabled: true
-  maskinporten:
-    enabled: true
-    scopes:
-      consumes:
-        - name: "ks:fiks"
   accessPolicy:
     outbound:
       external:
@@ -50,6 +43,8 @@ spec:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
         - application: sosialhjelp-soknad-api-mock
+        - application: sosialhjelp-idporten-mock
+        - application: sosialhjelp-texas-mock
     inbound:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
@@ -62,7 +57,6 @@ spec:
       memory: 512Mi
   envFrom:
     - secret: sosialhjelp-innsyn-api-unleash-api-token
-    - secret: idporten-sosialhjelp
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "mock-alt,log-console,mock-redis"
@@ -84,15 +78,17 @@ spec:
       value: "sosialhjelp-innsyn-api"
     - name: UNLEASH_ENV
       value: "mock"
-    - name: TOKEN_X_WELL_KNOWN_URL
-      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/token/tokenx"
-    - name: TOKEN_X_CLIENT_ID
-      value: "dev-gcp:teamdigisos:sosialhjelp-innsyn-api-mock"
-    - name: MASKINPORTEN_WELL_KNOWN_URL
-      value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/token/maskinporten"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON,Testsystemet;1.0.0"
     - name: SOKNAD_API_URL
       value: "http://sosialhjelp-soknad-api-mock/sosialhjelp/soknad-api"
     - name: FIKS_KLAGE_ENDPOINT_URL
       value: http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/klage
+    - name: IDPORTEN_ISSUER
+      value: https://sosiauth2.ekstern.dev.nav.no/default
+    - name: IDPORTEN_CLIENT_ID
+      value: default
+    - name: NAIS_TOKEN_ENDPOINT
+      value: http://sosialhjelp-texas-mock/api/v1/token
+    - name: NAIS_TOKEN_EXCHANGE_ENDPOINT
+      value: http://sosialhjelp-texas-mock/api/v1/token/exchange

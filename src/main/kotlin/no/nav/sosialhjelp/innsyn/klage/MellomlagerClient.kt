@@ -3,11 +3,13 @@ package no.nav.sosialhjelp.innsyn.klage
 import org.springframework.stereotype.Component
 import java.io.InputStream
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import org.springframework.context.annotation.Profile
 
-interface FiksMellomlagerClient {
+interface MellomlagerClient {
     fun lastOppVedlegg(
         klageId: UUID,
-        filerForOpplasting: List<FilOpplasting>,
+        filerForOpplasting: List<FilForOpplasting>,
     )
 
     fun hentVedlegg(vedleggId: UUID): ByteArray
@@ -15,11 +17,32 @@ interface FiksMellomlagerClient {
     fun hentMetadata(klageId: UUID): List<FilMetadata>
 }
 
+@Profile("!local")
 @Component
-class LocalFiksMellomlagerClient : FiksMellomlagerClient {
+class FiksMellomlagerClient: MellomlagerClient {
     override fun lastOppVedlegg(
         klageId: UUID,
-        filerForOpplasting: List<FilOpplasting>,
+        filerForOpplasting: List<FilForOpplasting>
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun hentVedlegg(vedleggId: UUID): ByteArray {
+        TODO("Not yet implemented")
+    }
+
+    override fun hentMetadata(klageId: UUID): List<FilMetadata> {
+        TODO("Not yet implemented")
+    }
+
+}
+
+@Profile("local")
+@Component
+class LocalMellomlagerClient : MellomlagerClient {
+    override fun lastOppVedlegg(
+        klageId: UUID,
+        filerForOpplasting: List<FilForOpplasting>,
     ) {
         mellomlager.put(klageId, filerForOpplasting)
     }
@@ -35,7 +58,7 @@ class LocalFiksMellomlagerClient : FiksMellomlagerClient {
     }
 
     companion object {
-        val mellomlager = mutableMapOf<UUID, List<FilOpplasting>>()
+        val mellomlager = mutableMapOf<UUID, List<FilForOpplasting>>()
     }
 }
 

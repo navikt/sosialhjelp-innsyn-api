@@ -79,21 +79,8 @@ class LocalKlageService(
         tilgangskontroll.sjekkTilgang()
 
         val allFiles = rawFiles.asFlow().toList()
-        val metadatas = allFiles.getMetadataJson()
 
-        val files = allFiles.getFilesNotMetadata()
-        metadatas.validateAllFilesHasMetadata(files)
-
-        files.forEach { file ->
-            metadatas
-                .flatMap { it.filer }
-                .find { file.filename().contains(it.uuid.toString()) }
-                ?.also { it.fil = file }
-        }
-
-        if (metadatas.isNotEmpty()) {
-            mellomlagerService.processFileUpload(klageId, metadatas.first())
-        }
+        mellomlagerService.processFileUpload(klageId, allFiles)
     }
 }
 

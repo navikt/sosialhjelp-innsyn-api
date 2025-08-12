@@ -9,7 +9,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -51,7 +50,7 @@ internal class DokumentasjonkravTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        coEvery { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
+        coEvery { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
         every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
@@ -61,7 +60,7 @@ internal class DokumentasjonkravTest {
     @Test
     fun `dokumentasjonkrav ETTER utbetaling`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -75,9 +74,9 @@ internal class DokumentasjonkravTest {
                             DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
@@ -99,7 +98,7 @@ internal class DokumentasjonkravTest {
     @Test
     fun `dokumentasjonkrav UTEN utbetaling - skal ikke legge til dokumentasjonkrav eller historikk`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -110,9 +109,9 @@ internal class DokumentasjonkravTest {
                             DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_3),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -126,7 +125,7 @@ internal class DokumentasjonkravTest {
     @Test
     fun `dokumentasjonkrav ETTER utbetaling UTEN saksreferanse`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -139,9 +138,9 @@ internal class DokumentasjonkravTest {
                             DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
@@ -156,7 +155,7 @@ internal class DokumentasjonkravTest {
     @Test
     fun `dokumentasjonkrav samme dokumentasjonkravreferanse to ganger`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -170,9 +169,9 @@ internal class DokumentasjonkravTest {
                             DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
@@ -187,7 +186,7 @@ internal class DokumentasjonkravTest {
     @Test
     fun `dokumentasjonkrav FOR utbetaling - skal ikke gi noen dokumentasjonkrav`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -201,9 +200,9 @@ internal class DokumentasjonkravTest {
                             UTBETALING.withHendelsestidspunkt(tidspunkt_6),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.saker).hasSize(1)
@@ -217,7 +216,7 @@ internal class DokumentasjonkravTest {
     @Test
     fun `dokumentasjonkrav og utbetaling har identiske hendelsestidspunkt`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -231,9 +230,9 @@ internal class DokumentasjonkravTest {
                             UTBETALING.withHendelsestidspunkt(tidspunkt_5),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.saker).hasSize(1)

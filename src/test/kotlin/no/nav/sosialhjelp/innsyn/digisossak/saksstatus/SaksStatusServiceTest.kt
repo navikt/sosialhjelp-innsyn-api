@@ -38,14 +38,14 @@ internal class SaksStatusServiceTest {
     fun init() {
         clearMocks(eventService, fiksClient)
 
-        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        coEvery { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
     }
 
     @Test
     fun `Skal returnere emptyList når model_saker er null`() =
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
             val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -66,7 +66,7 @@ internal class SaksStatusServiceTest {
                 ),
             )
 
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
             val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -99,7 +99,7 @@ internal class SaksStatusServiceTest {
                 ),
             )
 
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
             val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -133,7 +133,7 @@ internal class SaksStatusServiceTest {
                 ),
             )
 
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
             val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -182,7 +182,7 @@ internal class SaksStatusServiceTest {
                 ),
             )
 
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
             val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
 
@@ -252,18 +252,18 @@ internal class SaksStatusServiceTest {
 
             val digisosSak1 = DigisosSak("id1", "", "", "", 1L, null, null, null, null)
             coEvery {
-                fiksClient.hentDigisosSak("id1", Token("token"))
+                fiksClient.hentDigisosSak("id1")
             } returns digisosSak1
             val digisosSak2 = DigisosSak("id2", "", "", "", 1L, null, null, null, null)
             coEvery {
-                fiksClient.hentDigisosSak("id2", Token("token"))
+                fiksClient.hentDigisosSak("id2")
             } returns digisosSak2
 
             coEvery {
-                eventService.createModel(digisosSak1, Token("token"))
+                eventService.createModel(digisosSak1)
             } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiTrue))
             coEvery {
-                eventService.createModel(digisosSak2, Token("token"))
+                eventService.createModel(digisosSak2)
             } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiFalse))
 
             assertThat(service.hentSaksStatuser("id1", Token("token")).first().skalViseVedtakInfoPanel).isEqualTo(true)

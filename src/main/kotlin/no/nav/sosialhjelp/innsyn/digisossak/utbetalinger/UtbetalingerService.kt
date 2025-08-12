@@ -23,7 +23,7 @@ class UtbetalingerService(
         token: Token,
         months: Int,
     ): List<UtbetalingerResponse> {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
+        val digisosSaker = fiksClient.hentAlleDigisosSaker()
 
         if (digisosSaker.isEmpty()) {
             log.info("Fant ingen søknader for bruker")
@@ -46,7 +46,7 @@ class UtbetalingerService(
         token: Token,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
     ): List<ManedUtbetaling> {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
+        val digisosSaker = fiksClient.hentAlleDigisosSaker()
 
         if (digisosSaker.isEmpty()) {
             log.info("Fant ingen søknader for bruker")
@@ -147,7 +147,7 @@ class UtbetalingerService(
         digisosSak: DigisosSak,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
     ): List<ManedUtbetaling> {
-        val model = eventService.hentAlleUtbetalinger(token, digisosSak)
+        val model = eventService.hentAlleUtbetalinger(digisosSak)
         return model.utbetalinger
             .filter { statusFilter(it.status) }
             .map { utbetaling ->
@@ -189,7 +189,7 @@ class UtbetalingerService(
         token: Token,
         months: Int,
     ): Boolean {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
+        val digisosSaker = fiksClient.hentAlleDigisosSaker()
 
         if (digisosSaker.isEmpty()) {
             log.info("Fant ingen søknader for bruker")
@@ -199,7 +199,7 @@ class UtbetalingerService(
             .asSequence()
             .filter { it.isNewerThanMonths(months) }
             .any {
-                val model = eventService.hentAlleUtbetalinger(token, it)
+                val model = eventService.hentAlleUtbetalinger(it)
                 (containsUtbetalingNewerThanMonth(model, months))
             }
     }

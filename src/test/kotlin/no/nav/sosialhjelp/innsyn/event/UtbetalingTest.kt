@@ -9,7 +9,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
@@ -48,7 +47,7 @@ internal class UtbetalingTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        coEvery { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
+        coEvery { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
 
         resetHendelser()
@@ -57,7 +56,7 @@ internal class UtbetalingTest {
     @Test
     fun `utbetaling ETTER vedtakFattet og saksStatus`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -71,9 +70,9 @@ internal class UtbetalingTest {
                             UTBETALING.withHendelsestidspunkt(tidspunkt_6),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
@@ -103,7 +102,7 @@ internal class UtbetalingTest {
     @Test
     fun `utbetaling UTEN vedtakFattet`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -114,9 +113,9 @@ internal class UtbetalingTest {
                             UTBETALING_BANKOVERFORING.withHendelsestidspunkt(tidspunkt_3),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -128,7 +127,7 @@ internal class UtbetalingTest {
     @Test
     fun `utbetaling kontonummer settes kun hvis annenMottaker er false`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -139,9 +138,9 @@ internal class UtbetalingTest {
                             UTBETALING_BANKOVERFORING_ANNEN_MOTTAKER.withHendelsestidspunkt(tidspunkt_3),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)

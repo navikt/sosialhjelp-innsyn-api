@@ -15,7 +15,6 @@ import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
@@ -109,7 +108,7 @@ class VedleggOpplastingService(
     ): FilForOpplasting {
         try {
             log.info("Starter generering av ettersendelse.pdf")
-            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId, TokenUtils.getToken())
+            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId)
             val ettersendelsePdf = ettersendelsePdfGenerator.generate(metadata, currentDigisosSak.sokerFnr)
             return FilForOpplasting(
                 Filename("ettersendelse.pdf"),

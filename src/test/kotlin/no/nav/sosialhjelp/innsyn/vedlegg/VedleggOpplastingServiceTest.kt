@@ -78,7 +78,7 @@ internal class VedleggOpplastingServiceTest {
     fun init() {
         clearAllMocks()
 
-        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        coEvery { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
         coEvery { virusScanner.scan(any(), any(), any()) } just runs
         coEvery { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate() } returns mockCertificate

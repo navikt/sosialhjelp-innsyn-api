@@ -38,18 +38,18 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
         val soknad = JsonSoknad()
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
 
-        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns digisosSakOk
-        coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) } returns soknad
-        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
-        coEvery { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
-        coEvery { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
+        coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSakOk
+        coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
+        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { kommuneService.hentKommuneInfo(any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
+        coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
         coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
 
         doGet("/api/v1/innsyn/1234/saksStatus")
 
-        coVerify(exactly = 1) { fiksClient.hentDigisosSak(any(), any()) }
-        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
-        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
+        coVerify(exactly = 1) { fiksClient.hentDigisosSak(any()) }
+        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }
+        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
     }
 }

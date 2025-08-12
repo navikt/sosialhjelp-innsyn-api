@@ -13,7 +13,7 @@ class SoknadMedInnsynService(
 ) {
     suspend fun harSoknaderMedInnsyn(token: Token): Boolean =
         fiksClient
-            .hentAlleDigisosSaker(token)
+            .hentAlleDigisosSaker()
             .filter { it.isNewerThanMonths(15) }
-            .any { !kommuneService.erInnsynDeaktivertForKommune(it.fiksDigisosId, token) }
+            .any { !kommuneService.erInnsynDeaktivertForKommune(it.fiksDigisosId) }
 }

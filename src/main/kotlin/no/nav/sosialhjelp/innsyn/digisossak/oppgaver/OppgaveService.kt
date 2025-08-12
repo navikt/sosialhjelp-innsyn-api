@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.util.VersionUtil
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
@@ -28,23 +27,55 @@ class OppgaveService(
 ) {
     private val oppgaveTeller = Counter.builder("oppgave_teller")
 
-    suspend fun hentOppgaver(
-        fiksDigisosId: String,
-        token: Token,
-    ): List<OppgaveResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+    suspend fun hentOppgaverBeta(fiksDigisosId: String): List<OppgaveResponseBeta> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
         if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
             return emptyList()
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, model, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, model)
 
         val oppgaveResponseList =
             model.oppgaver
-                .filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
-                .groupBy { it.innsendelsesfrist?.toLocalDate() }
+                .map { oppgave ->
+                    val alleredeLastetOpp = finnAlleredeLastetOpp(oppgave, ettersendteVedlegg)
+                    OppgaveResponseBeta(
+                        innsendelsesfrist = oppgave.innsendelsesfrist?.toLocalDate(),
+                        oppgaveId = oppgave.oppgaveId,
+                        dokumenttype = oppgave.tittel,
+                        tilleggsinformasjon = oppgave.tilleggsinfo,
+                        hendelsetype = oppgave.hendelsetype,
+                        hendelsereferanse = oppgave.hendelsereferanse,
+                        erFraInnsyn = oppgave.erFraInnsyn,
+                        erLastetOpp = alleredeLastetOpp.isNotEmpty(),
+                        opplastetDato = alleredeLastetOpp.firstOrNull()?.tidspunktLastetOpp,
+                    )
+                }.sortedWith(compareBy<OppgaveResponseBeta> { it.erLastetOpp }.thenBy { it.innsendelsesfrist })
+        log.info("Hentet ${oppgaveResponseList.size} oppgaver")
+        oppgaveTeller.tag("fiksDigisosId", fiksDigisosId).register(meterRegistry).increment(oppgaveResponseList.size.toDouble())
+        return oppgaveResponseList
+    }
+
+    suspend fun hentOppgaver(fiksDigisosId: String): List<OppgaveResponse> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
+        if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
+            return emptyList()
+        }
+
+        val ettersendteVedlegg =
+            vedleggService.hentEttersendteVedlegg(digisosSak, model)
+
+        val oppgaveResponseList =
+            model.oppgaver
+                .filter { oppgave ->
+                    finnAlleredeLastetOpp(
+                        oppgave,
+                        ettersendteVedlegg,
+                    ).isEmpty()
+                }.groupBy { it.innsendelsesfrist?.toLocalDate() }
                 .map { (key, value) ->
                     OppgaveResponse(
                         innsendelsesfrist = key,
@@ -69,25 +100,21 @@ class OppgaveService(
 
     suspend fun hentOppgaverMedOppgaveId(
         fiksDigisosId: String,
-        token: Token,
         oppgaveId: String,
-    ): List<OppgaveResponse> = hentOppgaver(fiksDigisosId, token).filter { it.oppgaveId == oppgaveId }
+    ): List<OppgaveResponse> = hentOppgaver(fiksDigisosId).filter { it.oppgaveId == oppgaveId }
 
-    private fun erAlleredeLastetOpp(
+    private fun finnAlleredeLastetOpp(
         oppgave: Oppgave,
         vedleggListe: List<InternalVedlegg>,
-    ): Boolean =
+    ): List<InternalVedlegg> =
         vedleggListe
             .filter { it.type == oppgave.tittel }
             .filter { it.tilleggsinfo == oppgave.tilleggsinfo }
-            .any { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
+            .filter { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
 
-    suspend fun getVilkar(
-        fiksDigisosId: String,
-        token: Token,
-    ): List<VilkarResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+    suspend fun getVilkar(fiksDigisosId: String): List<VilkarResponse> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
         if (model.vilkar.isEmpty()) {
             return emptyList()
         }
@@ -124,18 +151,15 @@ class OppgaveService(
         return vilkarResponseList
     }
 
-    suspend fun getDokumentasjonkrav(
-        fiksDigisosId: String,
-        token: Token,
-    ): List<DokumentasjonkravResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+    suspend fun getDokumentasjonkrav(fiksDigisosId: String): List<DokumentasjonkravResponse> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
         if (model.dokumentasjonkrav.isEmpty()) {
             return emptyList()
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, model, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, model)
 
         // Logger om fagsystemene har tatt i bruk nye statuser
         val antallWithNewStatus =
@@ -154,7 +178,7 @@ class OppgaveService(
                     !it
                         .isEmpty()
                         .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-                }.filter { !erAlleredeLastetOpp(it, ettersendteVedlegg) }
+                }.filter { !finnAlleredeLastetOpp(it, ettersendteVedlegg) }
                 .filter { it.status == Oppgavestatus.RELEVANT }
                 .groupBy { it.frist }
                 .map { (key, value) ->
@@ -185,14 +209,13 @@ class OppgaveService(
     suspend fun getDokumentasjonkravMedId(
         fiksDigisosId: String,
         dokumentasjonkravId: String,
-        token: Token,
     ): List<DokumentasjonkravResponse> {
-        val dokumentasjonkrav = getDokumentasjonkrav(fiksDigisosId, token)
+        val dokumentasjonkrav = getDokumentasjonkrav(fiksDigisosId)
 
         return dokumentasjonkrav.filter { it.dokumentasjonkravId == dokumentasjonkravId }
     }
 
-    private fun erAlleredeLastetOpp(
+    private fun finnAlleredeLastetOpp(
         dokumentasjonkrav: Dokumentasjonkrav,
         vedleggListe: List<InternalVedlegg>,
     ): Boolean =
@@ -201,35 +224,29 @@ class OppgaveService(
             .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
             .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) }
 
-    suspend fun getHarLevertDokumentasjonkrav(
-        fiksDigisosId: String,
-        token: Token,
-    ): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+    suspend fun getHarLevertDokumentasjonkrav(fiksDigisosId: String): Boolean {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
         if (model.dokumentasjonkrav.isEmpty()) {
             return false
         }
 
         val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, model, token)
+            vedleggService.hentEttersendteVedlegg(digisosSak, model)
 
         return model.dokumentasjonkrav
             .filter {
                 !it
                     .isEmpty()
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-            }.filter { erAlleredeLastetOpp(it, ettersendteVedlegg) }
+            }.filter { finnAlleredeLastetOpp(it, ettersendteVedlegg) }
             .toList()
             .isNotEmpty()
     }
 
-    suspend fun getFagsystemHarVilkarOgDokumentasjonkrav(
-        fiksDigisosId: String,
-        token: Token,
-    ): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+    suspend fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String): Boolean {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
         if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
             return false
         }
@@ -264,12 +281,9 @@ class OppgaveService(
         return avsenderVersion >= godkjentVersion
     }
 
-    suspend fun sakHarStatusMottattOgIkkeHattSendt(
-        fiksDigisosId: String,
-        token: Token,
-    ): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+    suspend fun sakHarStatusMottattOgIkkeHattSendt(fiksDigisosId: String): Boolean {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
         if (model.status != SoknadsStatus.MOTTATT) {
             return false
         }

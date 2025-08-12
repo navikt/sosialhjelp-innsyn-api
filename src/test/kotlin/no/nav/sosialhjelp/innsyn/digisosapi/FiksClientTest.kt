@@ -8,6 +8,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -15,6 +16,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.token.Token
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -51,6 +53,9 @@ internal class FiksClientTest {
     @BeforeEach
     fun init() {
         clearAllMocks()
+        mockkObject(TokenUtils)
+
+        coEvery { TokenUtils.getToken() } returns Token("token")
 
         coEvery { tilgangskontroll.verifyDigisosSakIsForCorrectUser(any()) } just Runs
 
@@ -75,7 +80,7 @@ internal class FiksClientTest {
                     .setBody(ok_digisossak_response),
             )
 
-            val result = fiksClient.hentDigisosSak(id, Token("token"))
+            val result = fiksClient.hentDigisosSak(id)
 
             assertThat(result).isNotNull
         }
@@ -90,7 +95,7 @@ internal class FiksClientTest {
                 )
             }
 
-            val result = kotlin.runCatching { fiksClient.hentDigisosSak(id, Token("token")) }
+            val result = kotlin.runCatching { fiksClient.hentDigisosSak(id) }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksServerException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(3)
@@ -106,7 +111,7 @@ internal class FiksClientTest {
                 )
             }
 
-            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker(Token("token")) }
+            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker() }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksServerException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(3)
@@ -120,7 +125,7 @@ internal class FiksClientTest {
                     .setResponseCode(400),
             )
 
-            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker(Token("token")) }
+            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker() }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksClientException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(1)
@@ -138,7 +143,7 @@ internal class FiksClientTest {
                     .setBody(objectMapper.writeValueAsString(listOf(digisosSakOk, digisosSakOk))),
             )
 
-            val result = fiksClient.hentAlleDigisosSaker(Token("token"))
+            val result = fiksClient.hentAlleDigisosSaker()
 
             assertThat(result).isNotNull
             assertThat(result).hasSize(2)
@@ -154,7 +159,7 @@ internal class FiksClientTest {
                     .setBody(ok_minimal_jsondigisossoker_response),
             )
 
-            val result = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java, Token("token"))
+            val result = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java)
 
             assertThat(result).isNotNull
         }

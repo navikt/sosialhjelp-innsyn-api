@@ -23,14 +23,13 @@ class SoknadsStatusService(
     suspend fun hentSoknadsStatus(
         fiksDigisosId: String,
         token: Token,
-        fnr: String,
     ): UtvidetSoknadsStatus {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
         val status = model.status
 
         log.info("Hentet nåværende søknadsstatus=${status.name}")
-        val erInnsynDeaktivertForKommune = kommuneService.erInnsynDeaktivertForKommune(fiksDigisosId, token)
+        val erInnsynDeaktivertForKommune = kommuneService.erInnsynDeaktivertForKommune(fiksDigisosId)
         val dokumentlagerId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 
         return UtvidetSoknadsStatus(

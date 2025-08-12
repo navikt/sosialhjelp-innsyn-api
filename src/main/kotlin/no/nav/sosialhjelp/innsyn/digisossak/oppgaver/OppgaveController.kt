@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -19,10 +18,23 @@ class OppgaveController(
     suspend fun getOppgaver(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<OppgaveResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId, token)
+        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId)
+        return if (oppgaver.isEmpty()) {
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } else {
+            ResponseEntity.ok(oppgaver)
+        }
+    }
+
+    @GetMapping("/{fiksDigisosId}/oppgaver/beta", produces = ["application/json;charset=UTF-8"])
+    suspend fun getOppgaverBeta(
+        @PathVariable fiksDigisosId: String,
+    ): ResponseEntity<List<OppgaveResponseBeta>> {
+        tilgangskontroll.sjekkTilgang()
+
+        val oppgaver = oppgaveService.hentOppgaverBeta(fiksDigisosId)
         return if (oppgaver.isEmpty()) {
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {
@@ -35,10 +47,9 @@ class OppgaveController(
         @PathVariable fiksDigisosId: String,
         @PathVariable oppgaveId: String,
     ): ResponseEntity<List<OppgaveResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, token, oppgaveId)
+        val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, oppgaveId)
         return if (oppgaver.isEmpty()) {
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {
@@ -50,10 +61,9 @@ class OppgaveController(
     suspend fun getVilkar(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<VilkarResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val vilkar = oppgaveService.getVilkar(fiksDigisosId, token)
+        val vilkar = oppgaveService.getVilkar(fiksDigisosId)
         return if (vilkar.isEmpty()) {
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {
@@ -65,10 +75,9 @@ class OppgaveController(
     suspend fun getDokumentasjonkrav(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<DokumentasjonkravResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId, token)
+        val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId)
         return if (dokumentasjonkrav.isEmpty()) {
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {
@@ -81,10 +90,9 @@ class OppgaveController(
         @PathVariable fiksDigisosId: String,
         @PathVariable dokumentasjonkravId: String,
     ): ResponseEntity<List<DokumentasjonkravResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId, token)
+        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId)
         return if (dokumentasjonkrav.isEmpty()) {
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {
@@ -96,19 +104,17 @@ class OppgaveController(
     suspend fun getHarLevertDokumentasjonkrav(
         @PathVariable fiksDigisosId: String,
     ): Boolean {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        return oppgaveService.getHarLevertDokumentasjonkrav(fiksDigisosId, token)
+        return oppgaveService.getHarLevertDokumentasjonkrav(fiksDigisosId)
     }
 
     @GetMapping("/{fiksDigisosId}/fagsystemHarDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
     suspend fun getfagsystemHarDokumentasjonkrav(
         @PathVariable fiksDigisosId: String,
     ): Boolean {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        return oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId, token)
+        return oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId)
     }
 }

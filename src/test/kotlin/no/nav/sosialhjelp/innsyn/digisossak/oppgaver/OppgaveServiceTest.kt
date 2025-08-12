@@ -11,7 +11,6 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
@@ -66,12 +65,10 @@ internal class OppgaveServiceTest {
     private val dok = DokumentInfo("tittel 1", dokumentasjonkravId, 11)
     private val tidspunkt = LocalDateTime.now().plusHours(9)
 
-    private val token = Token("token")
-
     @BeforeEach
     fun init() {
         clearAllMocks()
-        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns mockDigisosSak
+        coEvery { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
         every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("socio;10.1.16", "mock-alt;1.0.0")
     }
@@ -81,9 +78,9 @@ internal class OppgaveServiceTest {
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
 
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            val oppgaver = service.hentOppgaver("123", token)
+            val oppgaver = service.hentOppgaver("123")
 
             assertThat(oppgaver).isNotNull
             assertThat(oppgaver).isEmpty()
@@ -95,10 +92,10 @@ internal class OppgaveServiceTest {
             val model = InternalDigisosSoker()
             model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true))
 
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.hentOppgaver("123", token)
+            val responseList = service.hentOppgaver("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
@@ -114,10 +111,10 @@ internal class OppgaveServiceTest {
             val model = InternalDigisosSoker()
             model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
 
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.hentOppgaver("123", token)
+            val responseList = service.hentOppgaver("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
@@ -140,10 +137,10 @@ internal class OppgaveServiceTest {
                 ),
             )
 
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.hentOppgaver("123", token)
+            val responseList = service.hentOppgaver("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 4)
@@ -180,8 +177,8 @@ internal class OppgaveServiceTest {
                 ),
             )
 
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
                 listOf(
                     InternalVedlegg(type, tillegg, null, null, mutableListOf(), tidspunktEtterKrav, null),
                     InternalVedlegg(type2, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
@@ -189,7 +186,7 @@ internal class OppgaveServiceTest {
                     InternalVedlegg(type3, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
                 )
 
-            val responseList = service.hentOppgaver("123", token)
+            val responseList = service.hentOppgaver("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 1)
@@ -207,10 +204,10 @@ internal class OppgaveServiceTest {
             model.status = SoknadsStatus.FERDIGBEHANDLET
             model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
 
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.hentOppgaver("123", token)
+            val responseList = service.hentOppgaver("123")
 
             assertThat(responseList).isEmpty()
         }
@@ -228,9 +225,9 @@ internal class OppgaveServiceTest {
                     Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            val responseList = service.getVilkar("123", token)
+            val responseList = service.getVilkar("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList).hasSize(2)
@@ -252,9 +249,9 @@ internal class OppgaveServiceTest {
                     Vilkar("vilkar2", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            val responseList = service.getVilkar("123", token)
+            val responseList = service.getVilkar("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 1)
@@ -303,10 +300,10 @@ internal class OppgaveServiceTest {
                     ),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.getDokumentasjonkrav("123", token)
+            val responseList = service.getDokumentasjonkrav("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 1)
@@ -366,10 +363,10 @@ internal class OppgaveServiceTest {
                     ),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.getDokumentasjonkrav("123", token)
+            val responseList = service.getDokumentasjonkrav("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 1)
@@ -421,10 +418,10 @@ internal class OppgaveServiceTest {
                     ),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.getDokumentasjonkrav("123", token)
+            val responseList = service.getDokumentasjonkrav("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 1)
@@ -443,10 +440,10 @@ internal class OppgaveServiceTest {
                     Vilkar("vilkar3", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.getVilkar("123", token)
+            val responseList = service.getVilkar("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 1)
@@ -507,10 +504,10 @@ internal class OppgaveServiceTest {
                     ),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.getDokumentasjonkrav("123", token)
+            val responseList = service.getDokumentasjonkrav("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 3)
@@ -580,10 +577,10 @@ internal class OppgaveServiceTest {
                     ),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.getDokumentasjonkrav("123", token)
+            val responseList = service.getDokumentasjonkrav("123")
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 3)
@@ -646,10 +643,10 @@ internal class OppgaveServiceTest {
                     ),
                 ),
             )
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns emptyList()
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
 
-            val responseList = service.getDokumentasjonkravMedId("123", dokumentasjonkravId2, token)
+            val responseList = service.getDokumentasjonkravMedId("123", dokumentasjonkravId2)
 
             assertThat(responseList).isNotNull
             assertThat(responseList.size == 1)
@@ -678,8 +675,8 @@ internal class OppgaveServiceTest {
                         LocalDate.now(),
                     ),
                 )
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any(), any()) } returns
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
                 listOf(
                     InternalVedlegg(
                         dokumenttype,
@@ -692,7 +689,7 @@ internal class OppgaveServiceTest {
                     ),
                 )
 
-            val response = service.getHarLevertDokumentasjonkrav("123", token)
+            val response = service.getHarLevertDokumentasjonkrav("123")
 
             assertThat(response).isTrue
         }
@@ -702,15 +699,15 @@ internal class OppgaveServiceTest {
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
             model.fagsystem = Fagsystem("socio", "10.1.16")
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            var response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+            var response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
 
             assertThat(response).isTrue
 
             model.fagsystem = Fagsystem("mock-alt", "1.0-MOCKVERSJON")
 
-            response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+            response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
 
             assertThat(response).isTrue
         }
@@ -721,15 +718,15 @@ internal class OppgaveServiceTest {
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
             model.fagsystem = Fagsystem("mock-alt", "0.0.3:0")
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            var response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+            var response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
 
             assertThat(response).isFalse
 
             model.fagsystem = Fagsystem("annet system", "1.0.0:MOCKVERSJON")
 
-            response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+            response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
 
             assertThat(response).isFalse
         }
@@ -739,12 +736,12 @@ internal class OppgaveServiceTest {
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
             model.fagsystem = Fagsystem("mock-alt", "1.0.1:MOCKVERSJON")
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
             every {
                 clientProperties.vilkarDokkravFagsystemVersjoner
             } returns listOf("ugyldigFormatertFagsystemConfig--0.1.1", "mock-alt;1.0.0:MOCKVERSJON")
 
-            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
 
             assertThat(response).isTrue
         }
@@ -754,9 +751,9 @@ internal class OppgaveServiceTest {
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
             model.fagsystem = Fagsystem("mock-alt", "1.0.1")
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
 
             assertThat(response).isTrue
         }
@@ -766,9 +763,9 @@ internal class OppgaveServiceTest {
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
             model.fagsystem = Fagsystem("socio", "1.2.0:MOCKVERSJON")
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123", token)
+            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
 
             assertThat(response).isFalse
         }
@@ -779,9 +776,9 @@ internal class OppgaveServiceTest {
             val model = InternalDigisosSoker()
             model.status = SoknadsStatus.MOTTATT
             model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, LocalDateTime.now(), null))
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123", token)
+            val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123")
             assertThat(sakHarStatusMottattOgIkkeHattSendt).isTrue
         }
 
@@ -792,9 +789,9 @@ internal class OppgaveServiceTest {
             model.status = SoknadsStatus.MOTTATT
             model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_VIDERESENDT_MED_NORG_ENHET, LocalDateTime.now(), null))
             model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, LocalDateTime.now(), null))
-            coEvery { eventService.createModel(any(), any()) } returns model
+            coEvery { eventService.createModel(any()) } returns model
 
-            val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123", token)
+            val sakHarStatusMottattOgIkkeHattSendt = service.sakHarStatusMottattOgIkkeHattSendt("123")
             assertThat(sakHarStatusMottattOgIkkeHattSendt).isFalse
         }
 }

@@ -49,7 +49,8 @@ class SaksStatusService(
                     FilUrl(it.dato, it.vedtaksFilUrl, it.id)
                 }.ifEmpty { null }
         val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak)
-        return SaksStatusResponse(sak.tittel ?: DEFAULT_SAK_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList)
+        val utfallVedtak = sak.vedtak.lastOrNull()?.utfall
+        return SaksStatusResponse(sak.tittel ?: DEFAULT_SAK_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList, utfallVedtak)
     }
 
     fun getSkalViseVedtakInfoPanel(sak: Sak): Boolean =

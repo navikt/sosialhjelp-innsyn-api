@@ -13,7 +13,6 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
@@ -66,15 +65,10 @@ class FiksClientImpl(
             }
 
     @Cacheable("digisosSak", key = "#digisosId")
-    override suspend fun hentDigisosSak(
-        digisosId: String,
-        token: Token,
-    ): DigisosSak = hentDigisosSakFraFiks(digisosId, token).also { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
+    override suspend fun hentDigisosSak(digisosId: String): DigisosSak =
+        hentDigisosSakFraFiks(digisosId).also { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
 
-    private suspend fun hentDigisosSakFraFiks(
-        digisosId: String,
-        token: Token,
-    ): DigisosSak =
+    private suspend fun hentDigisosSakFraFiks(digisosId: String): DigisosSak =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
 
@@ -83,7 +77,7 @@ class FiksClientImpl(
                     .get()
                     .uri(FiksPaths.PATH_DIGISOSSAK, digisosId)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
+                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .retrieve()
                     .bodyToMono<DigisosSak>()
                     .retryWhen(fiksRetry)
@@ -105,15 +99,13 @@ class FiksClientImpl(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,
-        token: Token,
         cacheKey: String,
-    ): T = hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass, token)
+    ): T = hentDokumentFraFiks(digisosId, dokumentlagerId, requestedClass)
 
     private suspend fun <T : Any> hentDokumentFraFiks(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,
-        token: Token,
     ): T =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente dokument fra /digisos/api/v1/soknader/$digisosId/dokumenter/$dokumentlagerId")
@@ -122,7 +114,7 @@ class FiksClientImpl(
                     .get()
                     .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
+                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .retrieve()
                     .bodyToMono(requestedClass)
                     .retryWhen(fiksRetry)
@@ -138,14 +130,14 @@ class FiksClientImpl(
             dokument.also { log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
-    override suspend fun hentAlleDigisosSaker(token: Token): List<DigisosSak> =
+    override suspend fun hentAlleDigisosSaker(): List<DigisosSak> =
         withContext(Dispatchers.IO) {
             val digisosSaker: List<DigisosSak> =
                 fiksWebClient
                     .get()
                     .uri(FiksPaths.PATH_ALLE_DIGISOSSAKER)
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.AUTHORIZATION, token.withBearer())
+                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .retrieve()
                     .bodyToMono<List<DigisosSak>>()
                     .retryWhen(fiksRetry)
@@ -173,7 +165,7 @@ class FiksClientImpl(
 
         val body = createBodyForUpload(vedleggJson, files)
 
-        val digisosSak = hentDigisosSakFraFiks(digisosId, TokenUtils.getToken())
+        val digisosSak = hentDigisosSakFraFiks(digisosId)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val kommunenummer = digisosSak.kommunenummer
         if (kommunenummer == "1507") {

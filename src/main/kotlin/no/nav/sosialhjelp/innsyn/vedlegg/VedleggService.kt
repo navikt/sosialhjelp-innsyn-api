@@ -6,7 +6,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.exceptions.NedlastingFilnavnMismatchException
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -24,10 +23,9 @@ class VedleggService(
     suspend fun hentAlleOpplastedeVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
-        token: Token,
     ): List<InternalVedlegg> {
-        val soknadVedlegg = hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, digisosSak, token)
-        val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak, model, token)
+        val soknadVedlegg = hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, digisosSak)
+        val ettersendteVedlegg = hentEttersendteVedlegg(digisosSak, model)
 
         return soknadVedlegg.plus(ettersendteVedlegg)
     }
@@ -35,10 +33,9 @@ class VedleggService(
     suspend fun hentSoknadVedleggMedStatus(
         status: String,
         digisosSak: DigisosSak,
-        token: Token,
     ): List<InternalVedlegg> {
         val originalSoknadNAV = digisosSak.originalSoknadNAV ?: return emptyList()
-        val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, originalSoknadNAV.vedleggMetadata, token)
+        val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, originalSoknadNAV.vedleggMetadata)
 
         if (jsonVedleggSpesifikasjon.vedlegg.isEmpty()) {
             return emptyList()
@@ -64,14 +61,13 @@ class VedleggService(
     suspend fun hentEttersendteVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
-        token: Token,
     ): List<InternalVedlegg> {
         val alleVedlegg =
             digisosSak.ettersendtInfoNAV
                 ?.ettersendelser
                 ?.flatMap { ettersendelse ->
                     var filIndex = 0
-                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, ettersendelse.vedleggMetadata, token)
+                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, ettersendelse.vedleggMetadata)
                     jsonVedleggSpesifikasjon.vedlegg
                         .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                         .map { vedlegg ->
@@ -115,9 +111,7 @@ class VedleggService(
     private suspend fun hentVedleggSpesifikasjon(
         digisosSak: DigisosSak,
         dokumentlagerId: String,
-        token: Token,
-    ): JsonVedleggSpesifikasjon =
-        fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java, token)
+    ): JsonVedleggSpesifikasjon = fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java)
 
     private fun matchDokumentInfoAndJsonFiler(
         dokumentInfoList: List<DokumentInfo>,

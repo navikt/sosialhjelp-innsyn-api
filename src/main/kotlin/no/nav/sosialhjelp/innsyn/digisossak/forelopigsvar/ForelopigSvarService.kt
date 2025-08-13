@@ -15,8 +15,8 @@ class ForelopigSvarService(
         fiksDigisosId: String,
         token: Token,
     ): ForelopigSvarResponse {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
         val forelopigSvarStatus: ForelopigSvar = model.forelopigSvar
         return ForelopigSvarResponse(forelopigSvarStatus.harMottattForelopigSvar, forelopigSvarStatus.link)
     }

@@ -22,7 +22,6 @@ import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
-import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.MOTTATT
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus.UNDER_BEHANDLING
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -81,14 +80,14 @@ internal class SaksOversiktControllerTest {
         every { dokumentasjonkravResponseMock.dokumentasjonkravElementer } returns listOf(dokumentasjonkravElement1)
         every { dokumentasjonkravResponseMock.frist } returns LocalDate.now()
 
-        coEvery { oppgaveService.hentOppgaver("123", any()) } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
-        coEvery { oppgaveService.hentOppgaver("456", any()) } returns listOf(oppgaveResponseMock) // 1 oppgave
-        coEvery { oppgaveService.getVilkar("123", any()) } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
-        coEvery { oppgaveService.getVilkar("456", any()) } returns listOf(vilkarResponseMock) // 1 oppgave
+        coEvery { oppgaveService.hentOppgaver("123") } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
+        coEvery { oppgaveService.hentOppgaver("456") } returns listOf(oppgaveResponseMock) // 1 oppgave
+        coEvery { oppgaveService.getVilkar("123") } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
+        coEvery { oppgaveService.getVilkar("456") } returns listOf(vilkarResponseMock) // 1 oppgave
         coEvery {
-            oppgaveService.getDokumentasjonkrav("123", any())
+            oppgaveService.getDokumentasjonkrav("123")
         } returns listOf(dokumentasjonkravResponseMock, dokumentasjonkravResponseMock) // 2 oppgaver
-        coEvery { oppgaveService.getDokumentasjonkrav("456", any()) } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
+        coEvery { oppgaveService.getDokumentasjonkrav("456") } returns listOf(dokumentasjonkravResponseMock) // 1 oppgave
     }
 
     @AfterEach
@@ -98,7 +97,7 @@ internal class SaksOversiktControllerTest {
     @Test
     internal fun `skal returnere 503 ved FiksException`() =
         runTestWithToken {
-            coEvery { saksOversiktService.hentAlleSaker(any()) } throws FiksException("message", null)
+            coEvery { saksOversiktService.hentAlleSaker() } throws FiksException("message", null)
 
             val response = controller.hentAlleSaker()
 
@@ -108,10 +107,10 @@ internal class SaksOversiktControllerTest {
     @Test
     fun `skal mappe fra DigisosSak til SakResponse for detaljer`() =
         runTestWithToken {
-            coEvery { fiksClient.hentDigisosSak("123", any()) } returns digisosSak1
-            coEvery { fiksClient.hentDigisosSak("456", any()) } returns digisosSak2
-            coEvery { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
-            coEvery { eventService.createSaksoversiktModel(digisosSak2, any()) } returns model2
+            coEvery { fiksClient.hentDigisosSak("123") } returns digisosSak1
+            coEvery { fiksClient.hentDigisosSak("456") } returns digisosSak2
+            coEvery { eventService.createSaksoversiktModel(digisosSak1) } returns model1
+            coEvery { eventService.createSaksoversiktModel(digisosSak2) } returns model2
 
             every { model1.status } returns MOTTATT
             every { model2.status } returns UNDER_BEHANDLING
@@ -151,15 +150,15 @@ internal class SaksOversiktControllerTest {
 
             assertThat(sak2).isNotNull
             assertThat(sak2.soknadTittel).contains("Livsopphold", "Strøm")
-            assertThat(sak2.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(sak2.status).isEqualTo(UNDER_BEHANDLING)
             assertThat(sak2.antallNyeOppgaver).isEqualTo(3)
         }
 
     @Test
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() =
         runTestWithToken {
-            coEvery { fiksClient.hentDigisosSak("123", any()) } returns digisosSak1
-            coEvery { eventService.createSaksoversiktModel(digisosSak1, any()) } returns model1
+            coEvery { fiksClient.hentDigisosSak("123") } returns digisosSak1
+            coEvery { eventService.createSaksoversiktModel(digisosSak1) } returns model1
 
             every { model1.status } returns MOTTATT
             every { model1.forelopigSvar } returns ForelopigSvar(false, null)

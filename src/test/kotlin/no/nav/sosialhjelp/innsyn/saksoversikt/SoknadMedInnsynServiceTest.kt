@@ -38,15 +38,15 @@ internal class SoknadMedInnsynServiceTest {
         every { digisosSakEldreEnnEtAar.fiksDigisosId } returns "789"
         every { digisosSakEldreEnnEtAar.sistEndret } returns LocalDateTime.now().minusYears(2).toInstant(ZoneOffset.UTC).toEpochMilli()
 
-        coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSak1, digisosSak2, digisosSakEldreEnnEtAar)
+        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSak1, digisosSak2, digisosSakEldreEnnEtAar)
     }
 
     @Test
     fun skalReturnereFalseVedIngenSoknaderSiste12ManederMedInnsyn() =
         runTest(timeout = 5.seconds) {
-            coEvery { kommuneService.erInnsynDeaktivertForKommune("123", Token("token")) } returns true
-            coEvery { kommuneService.erInnsynDeaktivertForKommune("456", Token("token")) } returns true
-            coEvery { kommuneService.erInnsynDeaktivertForKommune("789", Token("token")) } returns false
+            coEvery { kommuneService.erInnsynDeaktivertForKommune("123") } returns true
+            coEvery { kommuneService.erInnsynDeaktivertForKommune("456") } returns true
+            coEvery { kommuneService.erInnsynDeaktivertForKommune("789") } returns false
 
             val harSoknaderMedInnsyn = soknadMedInnsynService.harSoknaderMedInnsyn(Token("token"))
             assertThat(harSoknaderMedInnsyn).isFalse
@@ -55,9 +55,9 @@ internal class SoknadMedInnsynServiceTest {
     @Test
     fun skalReturnereTrueVedSoknaderSiste12ManederMedInnsyn() =
         runTest(timeout = 5.seconds) {
-            coEvery { kommuneService.erInnsynDeaktivertForKommune("123", Token("token")) } returns true
-            coEvery { kommuneService.erInnsynDeaktivertForKommune("456", Token("token")) } returns false
-            coEvery { kommuneService.erInnsynDeaktivertForKommune("789", Token("token")) } returns true
+            coEvery { kommuneService.erInnsynDeaktivertForKommune("123") } returns true
+            coEvery { kommuneService.erInnsynDeaktivertForKommune("456") } returns false
+            coEvery { kommuneService.erInnsynDeaktivertForKommune("789") } returns true
 
             val harSoknaderMedInnsyn = soknadMedInnsynService.harSoknaderMedInnsyn(Token("token"))
 

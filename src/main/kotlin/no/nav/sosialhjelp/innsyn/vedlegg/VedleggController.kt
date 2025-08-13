@@ -105,10 +105,10 @@ class VedleggController(
     ): ResponseEntity<List<VedleggResponse>> {
         val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, TokenUtils.getToken())
-        val model = eventService.createModel(digisosSak, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
 
-        val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(digisosSak, model, token)
+        val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(digisosSak, model)
         if (internalVedleggList.isEmpty()) {
             return ResponseEntity(HttpStatus.NO_CONTENT)
         }

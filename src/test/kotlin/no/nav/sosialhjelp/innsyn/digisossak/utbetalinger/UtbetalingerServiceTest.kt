@@ -62,7 +62,7 @@ internal class UtbetalingerServiceTest {
     @Test
     fun `Skal returnere at utbetalinger ikke eksisterer om soker ikke har noen digisosSaker`() =
         runTest(timeout = 5.seconds) {
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns emptyList()
 
             val response = service.utbetalingExists(token, 6)
 
@@ -73,8 +73,8 @@ internal class UtbetalingerServiceTest {
     fun `Skal returnere at utbetalinger ikke eksisterer om soker ikke har utbetalinger pa noen digisosSaker`() =
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response = service.utbetalingExists(token, 6)
 
@@ -87,8 +87,8 @@ internal class UtbetalingerServiceTest {
             val model = InternalDigisosSoker()
             model.utbetalinger = mutableListOf()
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response = service.utbetalingExists(token, 6)
 
@@ -121,8 +121,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response = service.utbetalingExists(token, 12)
 
@@ -155,8 +155,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response = service.utbetalingExists(token, 12)
 
@@ -166,7 +166,7 @@ internal class UtbetalingerServiceTest {
     @Test
     fun `Skal returnere emptyList hvis soker ikke har noen digisosSaker`() =
         runTest(timeout = 5.seconds) {
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns emptyList()
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns emptyList()
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
@@ -199,8 +199,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
@@ -265,8 +265,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
@@ -330,8 +330,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
@@ -421,8 +421,8 @@ internal class UtbetalingerServiceTest {
                 ),
             )
 
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
@@ -482,8 +482,8 @@ internal class UtbetalingerServiceTest {
                 ),
             )
 
-            coEvery { eventService.createModel(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
@@ -551,9 +551,9 @@ internal class UtbetalingerServiceTest {
             coEvery { mockDigisosSak2.fiksDigisosId } returns id2
             coEvery { mockDigisosSak2.kommunenummer } returns "kommune2"
             coEvery { mockDigisosSak2.sistEndret } returns nowMillis
-            coEvery { eventService.hentAlleUtbetalinger(token, mockDigisosSak) } returns model
-            coEvery { eventService.hentAlleUtbetalinger(token, mockDigisosSak2) } returns model2
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak, mockDigisosSak2)
+            coEvery { eventService.hentAlleUtbetalinger(mockDigisosSak) } returns model
+            coEvery { eventService.hentAlleUtbetalinger(mockDigisosSak2) } returns model2
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak, mockDigisosSak2)
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
@@ -605,8 +605,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 6)
 
@@ -711,8 +711,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val response: List<UtbetalingerResponse> = service.hentUtbetalteUtbetalinger(token, 12)
 
@@ -769,8 +769,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val responseNye: List<NyeOgTidligereUtbetalingerResponse> = service.hentNyeUtbetalinger(token)
             val responseTidligere: List<NyeOgTidligereUtbetalingerResponse> = service.hentTidligereUtbetalinger(token)
@@ -834,8 +834,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val responseNye: List<NyeOgTidligereUtbetalingerResponse> = service.hentNyeUtbetalinger(token)
             val responseTidligere: List<NyeOgTidligereUtbetalingerResponse> = service.hentTidligereUtbetalinger(token)
@@ -886,8 +886,8 @@ internal class UtbetalingerServiceTest {
                     ),
                 )
 
-            coEvery { eventService.hentAlleUtbetalinger(any(), any()) } returns model
-            coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(mockDigisosSak)
+            coEvery { eventService.hentAlleUtbetalinger(any()) } returns model
+            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(mockDigisosSak)
 
             val responseNye: List<NyeOgTidligereUtbetalingerResponse> = service.hentNyeUtbetalinger(token)
             val responseTidligere: List<NyeOgTidligereUtbetalingerResponse> = service.hentTidligereUtbetalinger(token)

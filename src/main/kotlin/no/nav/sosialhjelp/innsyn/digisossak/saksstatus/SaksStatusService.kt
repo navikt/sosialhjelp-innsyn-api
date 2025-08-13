@@ -22,8 +22,8 @@ class SaksStatusService(
         fiksDigisosId: String,
         token: Token,
     ): List<SaksStatusResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId, token)
-        val model = eventService.createModel(digisosSak, token)
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
 
         if (model.saker.isEmpty()) {
             log.info("Fant ingen saker")

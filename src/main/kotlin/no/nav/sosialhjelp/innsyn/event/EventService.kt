@@ -16,7 +16,6 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -42,12 +41,9 @@ class EventService(
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
 ) {
-    suspend fun createModel(
-        digisosSak: DigisosSak,
-        token: Token,
-    ): InternalDigisosSoker {
-        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
-        val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak, token)
+    suspend fun createModel(digisosSak: DigisosSak): InternalDigisosSoker {
+        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak)
+        val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak)
 
         // Infologging fra kommunesplitting av Ålesund
         if (jsonSoknad != null && jsonSoknad.mottaker?.enhetsnummer == null && jsonSoknad.mottaker?.kommunenummer == "1507") {
@@ -56,9 +52,11 @@ class EventService(
                 | Hva vet vi:
                 | enhetsnummer: null -> mismatch mellom norg og Fiks mellom 8 og 9 den 2. januar 2024
                 | kommunenummer satt i søknaden: ${jsonSoknad.mottaker?.kommunenummer}
-                | sakstatus: ${jsonDigisosSoker?.hendelser?.filterIsInstance<JsonSoknadsStatus>()?.filter {
-                    it.status == JsonSoknadsStatus.Status.MOTTATT
-                }}
+                | sakstatus: ${
+                    jsonDigisosSoker?.hendelser?.filterIsInstance<JsonSoknadsStatus>()?.filter {
+                        it.status == JsonSoknadsStatus.Status.MOTTATT
+                    }
+                }
                 | ${
                     jsonDigisosSoker?.hendelser?.filterIsInstance<JsonTildeltNavKontor>()?.map {
                         "Tildelt navkontor: ${it.navKontor} på tidspunkt: ${it.hendelsestidspunkt}"
@@ -97,7 +95,7 @@ class EventService(
             }
         }
 
-        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak, token)
+        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak)
 
         return model
     }
@@ -150,11 +148,8 @@ class EventService(
         }
     }
 
-    suspend fun createSaksoversiktModel(
-        digisosSak: DigisosSak,
-        token: Token,
-    ): InternalDigisosSoker {
-        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak, token)
+    suspend fun createSaksoversiktModel(digisosSak: DigisosSak): InternalDigisosSoker {
+        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak)
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
 
         val model = InternalDigisosSoker()
@@ -163,7 +158,7 @@ class EventService(
             model.status = SoknadsStatus.SENDT
         }
 
-        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak, token)
+        applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak)
         logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
 
         return model
@@ -173,7 +168,6 @@ class EventService(
         jsonDigisosSoker: JsonDigisosSoker?,
         model: InternalDigisosSoker,
         digisosSak: DigisosSak,
-        token: Token,
     ) {
         jsonDigisosSoker
             ?.hendelser
@@ -191,17 +185,14 @@ class EventService(
             ingenDokumentasjonskravFraInnsyn &&
             soknadSendtForMindreEnn30DagerSiden(originalSoknadNAV.timestampSendt)
         ) {
-            model.applySoknadKrav(digisosSak, vedleggService, originalSoknadNAV.timestampSendt, token)
+            model.applySoknadKrav(digisosSak, vedleggService, originalSoknadNAV.timestampSendt)
         }
     }
 
-    suspend fun hentAlleUtbetalinger(
-        token: Token,
-        digisosSak: DigisosSak,
-    ): InternalDigisosSoker {
+    suspend fun hentAlleUtbetalinger(digisosSak: DigisosSak): InternalDigisosSoker {
         val model = InternalDigisosSoker()
         val jsonDigisosSoker: JsonDigisosSoker =
-            innsynService.hentJsonDigisosSoker(digisosSak, token)
+            innsynService.hentJsonDigisosSoker(digisosSak)
                 ?: return model
         jsonDigisosSoker.hendelser
             .filterIsInstance<JsonUtbetaling>()

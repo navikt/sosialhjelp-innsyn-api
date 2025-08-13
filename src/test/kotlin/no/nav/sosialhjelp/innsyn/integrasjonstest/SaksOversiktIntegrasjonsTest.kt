@@ -36,13 +36,13 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @WithMockUser
     fun `skal hente liste med saker`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        coEvery { fiksClient.hentAlleDigisosSaker(any()) } returns listOf(digisosSakOk)
+        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSakOk)
 
         doGet(uri = "/api/v1/innsyn/saker")
             .expectBodyList(SaksListeResponse::class.java)
             .hasSize(1)
 
-        coVerify(exactly = 1) { fiksClient.hentAlleDigisosSaker(any()) }
+        coVerify(exactly = 1) { fiksClient.hentAlleDigisosSaker() }
     }
 
     @Test
@@ -52,18 +52,18 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
         val soknad = JsonSoknad()
 
-        coEvery { fiksClient.hentDigisosSak(any(), any()) } returns digisosSakOk
-        coEvery { kommuneService.hentKommuneInfo(any(), any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
-        coEvery { kommuneService.erInnsynDeaktivertForKommune(any(), any()) } returns false
-        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) } returns soker
+        coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSakOk
+        coEvery { kommuneService.hentKommuneInfo(any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
+        coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
+        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
         coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
-        coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) } returns soknad
+        coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
 
         doGet("/api/v1/innsyn/sak/1234/detaljer")
 
-        coVerify(exactly = 2) { fiksClient.hentDigisosSak(any(), any()) }
-        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any(), any()) }
-        coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any(), any()) }
+        coVerify(exactly = 2) { fiksClient.hentDigisosSak(any()) }
+        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }
+        coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
     }
 }

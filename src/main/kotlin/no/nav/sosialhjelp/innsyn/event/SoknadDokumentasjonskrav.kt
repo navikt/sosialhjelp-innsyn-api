@@ -2,7 +2,6 @@ package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.utils.sha256
@@ -14,9 +13,8 @@ suspend fun InternalDigisosSoker.applySoknadKrav(
     digisosSak: DigisosSak,
     vedleggService: VedleggService,
     timestampSendt: Long,
-    token: Token,
 ) {
-    val vedleggKreves = vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak, token)
+    val vedleggKreves = vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak)
 
     oppgaver =
         vedleggKreves

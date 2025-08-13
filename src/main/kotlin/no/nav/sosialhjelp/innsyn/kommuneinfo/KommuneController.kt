@@ -22,7 +22,7 @@ class KommuneController(
         val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId, token)
+        val kommuneInfo: KommuneInfo? = kommuneService.hentKommuneInfo(fiksDigisosId)
 
         return KommuneResponse(
             erInnsynDeaktivert = kommuneInfo == null || !kommuneInfo.kanOppdatereStatus,

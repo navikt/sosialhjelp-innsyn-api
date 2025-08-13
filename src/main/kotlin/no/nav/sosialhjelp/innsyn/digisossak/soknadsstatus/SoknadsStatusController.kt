@@ -23,7 +23,7 @@ class SoknadsStatusController(
         tilgangskontroll.sjekkTilgang()
 
         val fnr = TokenUtils.getUserIdFromToken()
-        val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token, fnr)
+        val utvidetSoknadsStatus = soknadsStatusService.hentSoknadsStatus(fiksDigisosId, token)
 
         return SoknadsStatusResponse(
             status = utvidetSoknadsStatus.status,

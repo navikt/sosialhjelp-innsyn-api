@@ -2,7 +2,6 @@ package no.nav.sosialhjelp.innsyn.saksoversikt
 
 import io.getunleash.Unleash
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
@@ -16,12 +15,12 @@ class SaksOversiktService(
     private val unleashClient: Unleash,
     private val oppgaveService: OppgaveService,
 ) {
-    suspend fun hentAlleSaker(token: Token): List<SaksListeResponse> =
-        hentAlleDigisosSakerFraFiks(token)
+    suspend fun hentAlleSaker(): List<SaksListeResponse> =
+        hentAlleDigisosSakerFraFiks()
             .sortedByDescending { it.sistOppdatert }
 
-    private suspend fun hentAlleDigisosSakerFraFiks(token: Token): List<SaksListeResponse> {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker(token)
+    private suspend fun hentAlleDigisosSakerFraFiks(): List<SaksListeResponse> {
+        val digisosSaker = fiksClient.hentAlleDigisosSaker()
         val responseList =
             digisosSaker
                 // Ikke returner "tomme" søknader som som regel er feilregistreringer
@@ -49,9 +48,9 @@ class SaksOversiktService(
 
         if (unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false) &&
             digisosSaker.isNotEmpty() &&
-            oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(digisosSaker[0].fiksDigisosId, token)
+            oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(digisosSaker[0].fiksDigisosId)
         ) {
-            if (oppgaveService.sakHarStatusMottattOgIkkeHattSendt(digisosSaker[0].fiksDigisosId, token)) {
+            if (oppgaveService.sakHarStatusMottattOgIkkeHattSendt(digisosSaker[0].fiksDigisosId)) {
                 log.info("Kommune med kommunenummer ${digisosSaker[0].kommunenummer} har aktivert innsyn i papirsøknader")
             } else {
                 log.info(

@@ -15,7 +15,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -76,7 +75,7 @@ internal class EventServiceTest {
         every { mockJsonSoknad.mottaker.navEnhetsnavn } returns soknadsmottaker
         every { mockJsonSoknad.mottaker.enhetsnummer } returns enhetsnr
         every { mockDigisosSak.ettersendtInfoNAV } returns null
-        coEvery { innsynService.hentOriginalSoknad(any(), any()) } returns mockJsonSoknad
+        coEvery { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
         every { digisosSak.fiksDigisosId } returns "fiksDigisosId"
         every { digisosSak.kommunenummer } returns "1234"
@@ -114,11 +113,11 @@ internal class EventServiceTest {
     @Test
     fun `ingen innsyn OG ingen soknad, men med sendTidspunkt`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns null
-            coEvery { innsynService.hentOriginalSoknad(any(), any()) } returns null
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
+            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
@@ -129,10 +128,10 @@ internal class EventServiceTest {
     fun `ingen innsyn `() =
         runTest(timeout = 5.seconds) {
             every { mockDigisosSak.digisosSoker } returns null
-            coEvery { innsynService.hentJsonDigisosSoker(any(), Token("token")) } returns null
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.historikk).hasSize(1)
@@ -143,7 +142,7 @@ internal class EventServiceTest {
         @Test
         fun `saksStatus UTEN vedtakFattet`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -154,9 +153,9 @@ internal class EventServiceTest {
                                 SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -179,7 +178,7 @@ internal class EventServiceTest {
         @Test
         fun `saksStatus UTEN tittel eller status`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -190,9 +189,9 @@ internal class EventServiceTest {
                                 SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.withHendelsestidspunkt(tidspunkt_3),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -215,7 +214,7 @@ internal class EventServiceTest {
         @Test
         fun `saksStatus FOR vedtakFattet`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -227,9 +226,9 @@ internal class EventServiceTest {
                                 SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -257,7 +256,7 @@ internal class EventServiceTest {
         @Test
         fun `vedtakFattet UTEN saksStatus`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -268,9 +267,9 @@ internal class EventServiceTest {
                                 SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -298,7 +297,7 @@ internal class EventServiceTest {
         @Test
         fun `vedtakFattet FOR saksStatus`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -310,9 +309,9 @@ internal class EventServiceTest {
                                 SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_4),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -340,7 +339,7 @@ internal class EventServiceTest {
         @Test
         fun `saksStatus med 2 vedtakFattet`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -353,9 +352,9 @@ internal class EventServiceTest {
                                 SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -380,7 +379,7 @@ internal class EventServiceTest {
         @Test
         fun `saksStatus uten tittel eller status med vedtakFattet uten utfall`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -392,9 +391,9 @@ internal class EventServiceTest {
                                 SAK1_VEDTAK_FATTET_UTEN_UTFALL.withHendelsestidspunkt(tidspunkt_4),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -420,7 +419,7 @@ internal class EventServiceTest {
         @Test
         internal fun `saksStatus ikke_innsyn`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -431,9 +430,9 @@ internal class EventServiceTest {
                                 SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(tidspunkt_3),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -454,7 +453,7 @@ internal class EventServiceTest {
         @Test
         internal fun `saksStatus endres fra under_behandling til ikke_innsyn`() =
             runTest(timeout = 5.seconds) {
-                coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+                coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                     JsonDigisosSoker()
                         .withAvsender(avsender)
                         .withVersion("123")
@@ -466,9 +465,9 @@ internal class EventServiceTest {
                                 SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(tidspunkt_4),
                             ),
                         )
-                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+                coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-                val model = service.createModel(mockDigisosSak, Token("token"))
+                val model = service.createModel(mockDigisosSak)
 
                 assertThat(model).isNotNull
                 assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -490,7 +489,7 @@ internal class EventServiceTest {
     @Test
     fun `forelopigSvar skal gi historikk`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -501,9 +500,9 @@ internal class EventServiceTest {
                             FORELOPIGSVAR.withHendelsestidspunkt(tidspunkt_3),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -519,14 +518,14 @@ internal class EventServiceTest {
     @Test
     fun `At soknad sendt hendelse blir lagt til og at linkTekst er Vis soknaden`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
             every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns "asdf"
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
             assertThat(model).isNotNull
             val hendelse: Hendelse = model.historikk[0]
             assertThat(hendelse).isNotNull
@@ -538,14 +537,14 @@ internal class EventServiceTest {
     @Test
     fun `At soknad sendt hendelse blir lagt til selv om soknad pdf ikke eksisterer`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
             every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
             assertThat(model).isNotNull
             val hendelse = model.historikk[0]
             assertThat(hendelse).isNotNull
@@ -557,7 +556,7 @@ internal class EventServiceTest {
     @Test
     fun `skal legge til dokumentasjonkrav fra soknaden`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -566,7 +565,7 @@ internal class EventServiceTest {
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
                         type = "statsborgerskap",
@@ -579,15 +578,15 @@ internal class EventServiceTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(1)
-            coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }
+            coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
 
-            val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak, Token("token"))
+            val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak)
             assertThat(saksoversiktModel).isNotNull
             assertThat(saksoversiktModel.oppgaver).hasSize(1)
-            coVerify(exactly = 2) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }
+            coVerify(exactly = 2) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
         }
 
     @Test
@@ -595,7 +594,7 @@ internal class EventServiceTest {
         runTest(timeout = 5.seconds) {
             val tidspunktSendt31dagerSiden = ZonedDateTime.now().minusDays(31).toEpochSecond() * 1000L
             every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunktSendt31dagerSiden
-            coEvery { innsynService.hentJsonDigisosSoker(any(), any()) } returns
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
                 JsonDigisosSoker()
                     .withAvsender(avsender)
                     .withVersion("123")
@@ -604,7 +603,7 @@ internal class EventServiceTest {
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                         ),
                     )
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) } returns
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
                         type = "statsborgerskap",
@@ -617,15 +616,15 @@ internal class EventServiceTest {
                     ),
                 )
 
-            val model = service.createModel(mockDigisosSak, Token("token"))
+            val model = service.createModel(mockDigisosSak)
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(0)
-            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }
+            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
 
-            val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak, Token("token"))
+            val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak)
             assertThat(saksoversiktModel).isNotNull
             assertThat(saksoversiktModel.oppgaver).hasSize(0)
-            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any(), any()) }
+            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
         }
 
     @Test

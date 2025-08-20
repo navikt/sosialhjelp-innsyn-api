@@ -50,7 +50,14 @@ class SaksStatusService(
                 }.ifEmpty { null }
         val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak)
         val utfallVedtak = sak.vedtak.lastOrNull()?.utfall
-        return SaksStatusResponse(sak.tittel ?: DEFAULT_SAK_TITTEL, saksStatus, skalViseVedtakInfoPanel, vedtakfilUrlList, utfallVedtak)
+        return SaksStatusResponse(
+            sak.tittel ?: DEFAULT_SAK_TITTEL,
+            saksStatus,
+            skalViseVedtakInfoPanel,
+            vedtakfilUrlList,
+            utfallVedtak,
+            sak.referanse,
+        )
     }
 
     fun getSkalViseVedtakInfoPanel(sak: Sak): Boolean =

@@ -116,6 +116,7 @@ data class Vilkar(
     override var utbetalingsReferanse: List<String>?,
     var datoLagtTil: LocalDateTime,
     var datoSistEndret: LocalDateTime,
+    var saksReferanse: String?,
 ) : Oppgavehendelse()
 
 data class Dokumentasjonkrav(

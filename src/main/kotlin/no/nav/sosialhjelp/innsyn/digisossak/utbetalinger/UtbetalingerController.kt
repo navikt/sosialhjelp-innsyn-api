@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpStatus
@@ -21,11 +20,10 @@ class UtbetalingerController(
     suspend fun hentUtbetalinger(
         @RequestParam(defaultValue = "3") month: Int,
     ): ResponseEntity<List<UtbetalingerResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
         return try {
-            ResponseEntity.ok().body(utbetalingerService.hentUtbetalteUtbetalinger(token, month))
+            ResponseEntity.ok().body(utbetalingerService.hentUtbetalteUtbetalinger(month))
         } catch (e: FiksClientException) {
             if (e.status == HttpStatus.FORBIDDEN.value()) {
                 log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
@@ -38,11 +36,10 @@ class UtbetalingerController(
 
     @GetMapping("/nye")
     suspend fun hentNyeUtbetalinger(): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
         return try {
-            ResponseEntity.ok().body(utbetalingerService.hentNyeUtbetalinger(token))
+            ResponseEntity.ok().body(utbetalingerService.hentNyeUtbetalinger())
         } catch (e: FiksClientException) {
             if (e.status == HttpStatus.FORBIDDEN.value()) {
                 log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)
@@ -55,11 +52,10 @@ class UtbetalingerController(
 
     @GetMapping("/tidligere")
     suspend fun hentTidligereUtbetalinger(): ResponseEntity<List<NyeOgTidligereUtbetalingerResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
         return try {
-            ResponseEntity.ok().body(utbetalingerService.hentTidligereUtbetalinger(token))
+            ResponseEntity.ok().body(utbetalingerService.hentTidligereUtbetalinger())
         } catch (e: FiksClientException) {
             if (e.status == HttpStatus.FORBIDDEN.value()) {
                 log.error("FiksClientException i UtbetalingerController status: ${e.status} message: ${e.message}", e)

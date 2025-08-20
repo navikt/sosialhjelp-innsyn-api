@@ -144,6 +144,7 @@ class OppgaveService(
                         beskrivelse,
                         it.getOppgaveStatus(),
                         it.utbetalingsReferanse,
+                        it.saksReferanse,
                     )
                 }.sortedBy { it.hendelsetidspunkt }
 

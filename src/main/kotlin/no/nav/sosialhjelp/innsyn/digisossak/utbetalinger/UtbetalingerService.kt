@@ -19,10 +19,7 @@ class UtbetalingerService(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
-    suspend fun hentUtbetalteUtbetalinger(
-        token: Token,
-        months: Int,
-    ): List<UtbetalingerResponse> {
+    suspend fun hentUtbetalteUtbetalinger(months: Int): List<UtbetalingerResponse> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker()
 
         if (digisosSaker.isEmpty()) {
@@ -35,17 +32,13 @@ class UtbetalingerService(
                 .filter { it.isNewerThanMonths(months) }
                 .flatMap {
                     manedsutbetalinger(
-                        token,
                         it,
                     ) { status -> status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.PLANLAGT_UTBETALING }
                 }
         return toUtbetalingerResponse(alleUtbetalinger)
     }
 
-    private suspend fun hentUtbetalinger(
-        token: Token,
-        statusFilter: (status: UtbetalingsStatus) -> Boolean,
-    ): List<ManedUtbetaling> {
+    private suspend fun hentUtbetalinger(statusFilter: (status: UtbetalingsStatus) -> Boolean): List<ManedUtbetaling> {
         val digisosSaker = fiksClient.hentAlleDigisosSaker()
 
         if (digisosSaker.isEmpty()) {
@@ -56,18 +49,18 @@ class UtbetalingerService(
         return digisosSaker
             .filter { it.isNewerThanMonths(15) }
             .flatMap {
-                manedsutbetalinger(token, it, statusFilter)
+                manedsutbetalinger(it, statusFilter)
             }
     }
 
-    suspend fun hentTidligereUtbetalinger(token: Token): List<NyeOgTidligereUtbetalingerResponse> {
+    suspend fun hentTidligereUtbetalinger(): List<NyeOgTidligereUtbetalingerResponse> {
         val utbetalinger =
-            hentUtbetalinger(token) { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
+            hentUtbetalinger { status -> (status == UtbetalingsStatus.UTBETALT || status == UtbetalingsStatus.STOPPET) }
         return toTidligereUtbetalingerResponse(utbetalinger)
     }
 
-    suspend fun hentNyeUtbetalinger(token: Token): List<NyeOgTidligereUtbetalingerResponse> {
-        val utbetalinger = hentUtbetalinger(token) { status -> (status !== UtbetalingsStatus.ANNULLERT) }
+    suspend fun hentNyeUtbetalinger(): List<NyeOgTidligereUtbetalingerResponse> {
+        val utbetalinger = hentUtbetalinger { status -> (status !== UtbetalingsStatus.ANNULLERT) }
         return toNyeUtbetalingerResponse(utbetalinger)
     }
 
@@ -143,7 +136,6 @@ class UtbetalingerService(
             }
 
     private suspend fun manedsutbetalinger(
-        token: Token,
         digisosSak: DigisosSak,
         statusFilter: (status: UtbetalingsStatus) -> Boolean,
     ): List<ManedUtbetaling> {

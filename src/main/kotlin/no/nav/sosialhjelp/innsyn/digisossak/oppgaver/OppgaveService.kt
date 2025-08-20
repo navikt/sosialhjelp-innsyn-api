@@ -16,6 +16,8 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.stereotype.Component
+import kotlin.collections.sortedWith
+import kotlin.comparisons.nullsLast
 
 @Component
 class OppgaveService(
@@ -58,6 +60,7 @@ class OppgaveService(
         return oppgaveResponseList
     }
 
+    @Deprecated("Gammel funksjon", replaceWith = ReplaceWith("hentOppgaverBeta(fiksDigisosId)"))
     suspend fun hentOppgaver(fiksDigisosId: String): List<OppgaveResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
@@ -152,6 +155,62 @@ class OppgaveService(
         return vilkarResponseList
     }
 
+    suspend fun getDokumentasjonkravBeta(fiksDigisosId: String): List<DokumentasjonkravDto> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val model = eventService.createModel(digisosSak)
+        if (model.dokumentasjonkrav.isEmpty()) {
+            return emptyList()
+        }
+
+        val ettersendteVedlegg =
+            vedleggService.hentEttersendteVedlegg(digisosSak, model)
+
+        // Logger om fagsystemene har tatt i bruk nye statuser
+        val antallWithNewStatus =
+            model.dokumentasjonkrav
+                .count {
+                    it.status in listOf(Oppgavestatus.RELEVANT, Oppgavestatus.ANNULLERT, Oppgavestatus.LEVERT_TIDLIGERE)
+                }
+        if (antallWithNewStatus > 0) {
+            log.info("Hentet $antallWithNewStatus dokumentasjonkrav med nye statuser (RELEVANT / ANNULERT / LEVERT_TIDLIGERE).")
+        }
+
+        val dokumentasjonkravResponseList =
+            model.dokumentasjonkrav
+                .asSequence()
+                .filter {
+                    !it
+                        .isEmpty()
+                        .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
+                }.filter { it.status == Oppgavestatus.RELEVANT }
+                .map {
+                    val (tittel, beskrivelse) = it.getTittelOgBeskrivelse()
+                    val alleredeLastetOpp = finnAlleredeLastetOpp(it, ettersendteVedlegg)
+                    DokumentasjonkravDto(
+                        dokumentasjonkravId = it.dokumentasjonkravId,
+                        frist = it.frist,
+                        hendelsetidspunkt = it.datoLagtTil.toLocalDate(),
+                        hendelsetype = it.hendelsetype,
+                        dokumentasjonkravReferanse = it.referanse,
+                        tittel = tittel,
+                        beskrivelse = beskrivelse,
+                        status = it.getOppgaveStatus(),
+                        utbetalingsReferanse = it.utbetalingsReferanse ?: emptyList(),
+                        saksreferanse = it.saksreferanse,
+                        erLastetOpp = alleredeLastetOpp.isNotEmpty(),
+                        opplastetDato = alleredeLastetOpp.firstOrNull()?.tidspunktLastetOpp,
+                    )
+                }.sortedWith(
+                    compareBy<DokumentasjonkravDto> {
+                        it.erLastetOpp
+                    }.thenBy(nullsLast()) { it.frist },
+                ).toList()
+
+        log.info("Hentet ${dokumentasjonkravResponseList.size} dokumentasjonkrav")
+        return dokumentasjonkravResponseList
+    }
+
+    @Deprecated("Gammel funksjon", replaceWith = ReplaceWith("getDokumentasjonkravBeta(fiksDigisosId)"))
     suspend fun getDokumentasjonkrav(fiksDigisosId: String): List<DokumentasjonkravResponse> {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
@@ -179,7 +238,7 @@ class OppgaveService(
                     !it
                         .isEmpty()
                         .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-                }.filter { !finnAlleredeLastetOpp(it, ettersendteVedlegg) }
+                }.filter { finnAlleredeLastetOpp(it, ettersendteVedlegg).isEmpty() }
                 .filter { it.status == Oppgavestatus.RELEVANT }
                 .groupBy { it.frist }
                 .map { (key, value) ->
@@ -219,11 +278,11 @@ class OppgaveService(
     private fun finnAlleredeLastetOpp(
         dokumentasjonkrav: Dokumentasjonkrav,
         vedleggListe: List<InternalVedlegg>,
-    ): Boolean =
+    ): List<InternalVedlegg> =
         vedleggListe
             .filter { it.type == dokumentasjonkrav.tittel }
             .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
-            .any { dokumentasjonkrav.frist == null || it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) }
+            .filter { it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) || dokumentasjonkrav.frist == null }
 
     suspend fun getHarLevertDokumentasjonkrav(fiksDigisosId: String): Boolean {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
@@ -240,7 +299,7 @@ class OppgaveService(
                 !it
                     .isEmpty()
                     .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-            }.filter { finnAlleredeLastetOpp(it, ettersendteVedlegg) }
+            }.filter { finnAlleredeLastetOpp(it, ettersendteVedlegg).isNotEmpty() }
             .toList()
             .isNotEmpty()
     }

@@ -130,6 +130,7 @@ data class Dokumentasjonkrav(
     override var utbetalingsReferanse: List<String>?,
     var datoLagtTil: LocalDateTime,
     var frist: LocalDate?,
+    var saksreferanse: String?,
 ) : Oppgavehendelse()
 
 data class Hendelse(

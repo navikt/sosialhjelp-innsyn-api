@@ -11,6 +11,7 @@ data class SaksStatusResponse(
     val skalViseVedtakInfoPanel: Boolean,
     val vedtaksfilUrlList: List<FilUrl>?,
     val utfallVedtak: UtfallVedtak?,
+    val referanse: String?,
 )
 
 data class FilUrl(

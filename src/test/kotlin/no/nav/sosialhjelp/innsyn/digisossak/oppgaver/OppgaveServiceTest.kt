@@ -220,9 +220,18 @@ internal class OppgaveServiceTest {
             val beskrivelse = "mer vilkarer2"
             model.vilkar.addAll(
                 listOf(
-                    Vilkar("vilkar1", tittel, "mer vilkarer1", Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
-                    Vilkar("vilkar2", null, beskrivelse, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
-                    Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
+                    Vilkar(
+                        "vilkar1",
+                        tittel,
+                        "mer vilkarer1",
+                        Oppgavestatus.RELEVANT,
+                        null,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        null,
+                    ),
+                    Vilkar("vilkar2", null, beskrivelse, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now(), null),
+                    Vilkar("vilkar3", "", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now(), null),
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
@@ -245,8 +254,8 @@ internal class OppgaveServiceTest {
             val model = InternalDigisosSoker()
             model.vilkar.addAll(
                 listOf(
-                    Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, null, LocalDateTime.now(), LocalDateTime.now()),
-                    Vilkar("vilkar2", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
+                    Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, null, LocalDateTime.now(), LocalDateTime.now(), null),
+                    Vilkar("vilkar2", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now(), null),
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
@@ -435,9 +444,9 @@ internal class OppgaveServiceTest {
             val model = InternalDigisosSoker()
             model.vilkar.addAll(
                 listOf(
-                    Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now()),
-                    Vilkar("vilkar2", "tittel", null, Oppgavestatus.IKKE_OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now()),
-                    Vilkar("vilkar3", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now()),
+                    Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now(), null),
+                    Vilkar("vilkar2", "tittel", null, Oppgavestatus.IKKE_OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now(), null),
+                    Vilkar("vilkar3", "tittel", null, Oppgavestatus.RELEVANT, null, LocalDateTime.now(), LocalDateTime.now(), null),
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model

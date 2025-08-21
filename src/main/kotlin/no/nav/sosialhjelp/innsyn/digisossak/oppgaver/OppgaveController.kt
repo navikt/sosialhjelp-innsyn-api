@@ -15,6 +15,7 @@ class OppgaveController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = ["application/json;charset=UTF-8"])
+    @Deprecated("Gammelt endepunkt", replaceWith = ReplaceWith("getOppgaverBeta(fiksDigisosId)"))
     suspend fun getOppgaver(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<OppgaveResponse>> {
@@ -72,6 +73,7 @@ class OppgaveController(
     }
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
+    @Deprecated("Gammelt endepunkt", replaceWith = ReplaceWith("getDokumentasjonkravBeta(fiksDigisosId)"))
     suspend fun getDokumentasjonkrav(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<DokumentasjonkravResponse>> {
@@ -85,7 +87,22 @@ class OppgaveController(
         }
     }
 
+    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/beta", produces = ["application/json;charset=UTF-8"])
+    suspend fun getDokumentasjonkravBeta(
+        @PathVariable fiksDigisosId: String,
+    ): ResponseEntity<List<DokumentasjonkravDto>> {
+        tilgangskontroll.sjekkTilgang()
+
+        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravBeta(fiksDigisosId)
+        return if (dokumentasjonkrav.isEmpty()) {
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } else {
+            ResponseEntity.ok(dokumentasjonkrav)
+        }
+    }
+
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{dokumentasjonkravId}", produces = ["application/json;charset=UTF-8"])
+    @Deprecated("Gammelt endepunkt")
     suspend fun getDokumentasjonkravMedId(
         @PathVariable fiksDigisosId: String,
         @PathVariable dokumentasjonkravId: String,

@@ -26,6 +26,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
             datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
             frist = hendelse.frist?.toLocalDateTime()?.toLocalDate(),
             utbetalingsReferanse = hendelse.utbetalingsreferanse,
+            saksreferanse = hendelse.saksreferanse,
         )
 
     this.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav)
@@ -73,4 +74,5 @@ private fun Dokumentasjonkrav.oppdaterFelter(dokumentasjonkrav: Dokumentasjonkra
     this.status = dokumentasjonkrav.status
     this.utbetalingsReferanse = dokumentasjonkrav.utbetalingsReferanse
     this.frist = dokumentasjonkrav.frist
+    this.saksreferanse = dokumentasjonkrav.saksreferanse
 }

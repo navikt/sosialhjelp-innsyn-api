@@ -448,6 +448,7 @@ internal class UtbetalingerServiceTest {
                     null,
                     now,
                     LocalDate.now(),
+                    null,
                 )
             val utbetaling1 =
                 Utbetaling(

@@ -284,6 +284,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -295,6 +296,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -306,6 +308,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                 ),
             )
@@ -336,6 +339,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -347,6 +351,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -358,6 +363,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -369,6 +375,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                 ),
             )
@@ -402,6 +409,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -413,6 +421,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -424,6 +433,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                 ),
             )
@@ -477,6 +487,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         frist2.toLocalDate(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -488,6 +499,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         frist2.toLocalDate(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -499,6 +511,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         frist.toLocalDate(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -510,6 +523,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         frist3.toLocalDate(),
+                        null,
                     ),
                 ),
             )
@@ -550,6 +564,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         frist.toLocalDate(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -560,6 +575,7 @@ internal class OppgaveServiceTest {
                         Oppgavestatus.RELEVANT,
                         null,
                         LocalDateTime.now(),
+                        null,
                         null,
                     ),
                     Dokumentasjonkrav(
@@ -572,6 +588,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         frist2.toLocalDate(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId,
@@ -582,6 +599,7 @@ internal class OppgaveServiceTest {
                         Oppgavestatus.RELEVANT,
                         null,
                         LocalDateTime.now(),
+                        null,
                         null,
                     ),
                 ),
@@ -616,6 +634,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         frist.toLocalDate(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId2,
@@ -626,6 +645,7 @@ internal class OppgaveServiceTest {
                         Oppgavestatus.RELEVANT,
                         null,
                         LocalDateTime.now(),
+                        null,
                         null,
                     ),
                     Dokumentasjonkrav(
@@ -638,6 +658,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         frist2.toLocalDate(),
+                        null,
                     ),
                     Dokumentasjonkrav(
                         dokumentasjonkravId2,
@@ -648,6 +669,7 @@ internal class OppgaveServiceTest {
                         Oppgavestatus.RELEVANT,
                         null,
                         LocalDateTime.now(),
+                        null,
                         null,
                     ),
                 ),
@@ -682,6 +704,7 @@ internal class OppgaveServiceTest {
                         null,
                         LocalDateTime.now(),
                         LocalDate.now(),
+                        null,
                     ),
                 )
             coEvery { eventService.createModel(any()) } returns model

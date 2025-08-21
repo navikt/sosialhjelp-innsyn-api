@@ -46,8 +46,8 @@ import java.io.Serializable
 class FiksClientImpl(
     private val fiksWebClient: WebClient,
     private val tilgangskontroll: TilgangskontrollService,
-    @Value("\${retry_fiks_max_attempts}") private val retryMaxAttempts: Long,
-    @Value("\${retry_fiks_initial_delay}") private val retryInitialDelay: Long,
+    @param:Value("\${retry_fiks_max_attempts}") private val retryMaxAttempts: Long,
+    @param:Value("\${retry_fiks_initial_delay}") private val retryInitialDelay: Long,
     meterRegistry: MeterRegistry,
 ) : FiksClient {
     private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
@@ -248,7 +248,7 @@ class FiksClientImpl(
             .foldIndexed(bodyBuilder) { i, builder, file ->
                 val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
                 builder.part("vedleggSpesifikasjon:$i", serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$i"))
-                builder.part("dokument:$i", InputStreamResource(file.fil)).headers {
+                builder.part("dokument:$i", InputStreamResource(file.data)).headers {
                     it.contentType = MediaType.APPLICATION_OCTET_STREAM
                     it.contentDisposition =
                         ContentDisposition

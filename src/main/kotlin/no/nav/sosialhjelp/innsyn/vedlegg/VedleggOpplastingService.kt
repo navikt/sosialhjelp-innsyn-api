@@ -81,13 +81,13 @@ class VedleggOpplastingService(
             withTimeout(60.seconds) {
                 val etterKryptering =
                     filerForOpplasting.map { fil ->
-                        val kryptert = krypteringService.krypter(fil.fil, certificate, this)
-                        fil.copy(fil = kryptert)
+                        val kryptert = krypteringService.krypter(fil.data, certificate, this)
+                        fil.copy(data = kryptert)
                     }
                 val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadata)
                 try {
                     fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, fiksDigisosId)
-                } catch (e: FiksClientFileExistsException) {
+                } catch (ignored: FiksClientFileExistsException) {
                     // ignorerer når filen allerede er lastet opp
                 }
                 this.coroutineContext.cancelChildren(
@@ -271,7 +271,7 @@ class VedleggOpplastingService(
 
 fun String.containsIllegalCharacters(): Boolean = sanitizeFileName(this).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
 
-class OppgaveValidering(
+data class OppgaveValidering(
     val type: String,
     val tilleggsinfo: String?,
     val innsendelsesfrist: LocalDate?,
@@ -280,7 +280,7 @@ class OppgaveValidering(
     val filer: List<FilValidering>,
 )
 
-class FilValidering(
+data class FilValidering(
     val filename: String?,
     val status: ValidationResult,
 )
@@ -303,7 +303,7 @@ data class FilForOpplasting(
     val filnavn: Filename?,
     val mimetype: String?,
     val storrelse: Long,
-    val fil: InputStream,
+    val data: InputStream,
 )
 
 fun OpplastetFil.createFilename(): Filename {

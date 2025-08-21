@@ -5,7 +5,6 @@ import java.io.IOException
 import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
@@ -25,7 +24,6 @@ import no.nav.sosialhjelp.innsyn.vedlegg.ValidationValues
 import no.nav.sosialhjelp.innsyn.vedlegg.createFilename
 import no.nav.sosialhjelp.innsyn.vedlegg.mapToTikaFileType
 import no.nav.sosialhjelp.innsyn.vedlegg.splitFileName
-import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
@@ -33,13 +31,13 @@ import org.apache.tika.Tika
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.codec.multipart.FilePart
 
-class UploadDocumentHelper(private val virusScanner: VirusScanner) {
+class DocumentUploadHelper() {
 
     companion object {
         private val logger by logger()
     }
 
-    suspend fun extractAndAddFilesToMetadata(allFiles: List<FilePart>): List<OpplastetVedleggMetadata> {
+    suspend fun extractMetadataAndAddFiles(allFiles: List<FilePart>): List<OpplastetVedleggMetadata> {
         val metadataList = extractMetadata(allFiles)
         val files = extractOtherFiles(allFiles)
 
@@ -49,12 +47,11 @@ class UploadDocumentHelper(private val virusScanner: VirusScanner) {
         return metadataList
     }
 
-    suspend fun validateMetadata(metadataList: List<OpplastetVedleggMetadata>): List<OppgaveValidering> =
-        metadataList.validate().awaitAll()
+    suspend fun validateMetadata(metadata: OpplastetVedleggMetadata): OppgaveValidering =
+        metadata.validate().await()
 
-    suspend fun createFilerForOpplasting(metadataList: List<OpplastetVedleggMetadata>): List<FilForOpplasting> =
-        metadataList
-            .flatMap { metadata -> metadata.filer }
+    suspend fun createFilerForOpplasting(metadata: OpplastetVedleggMetadata): List<FilForOpplasting> =
+        metadata.filer
             .map { file ->
                 file.filnavn = file.createFilename()
                 val dataBuffer = DataBufferUtils.join (file.fil.content()).awaitSingle()
@@ -62,7 +59,7 @@ class UploadDocumentHelper(private val virusScanner: VirusScanner) {
                     filnavn = file.filnavn,
                     mimetype = file.getMimeType(),
                     storrelse = file.size(),
-                    fil = dataBuffer.asInputStream()
+                    data = dataBuffer.asInputStream()
                 )
             }
 
@@ -85,7 +82,7 @@ class UploadDocumentHelper(private val virusScanner: VirusScanner) {
             }
             ?.awaitSingleOrNull()
             ?.filter { it.filer.isNotEmpty() }
-            ?: error("Missing metadata.json")
+            ?: error("Missing metadata.json for Klage upload")
 
     private fun extractOtherFiles(files: List<FilePart>): List<FilePart> =
         files
@@ -115,26 +112,20 @@ class UploadDocumentHelper(private val virusScanner: VirusScanner) {
         }
     }
 
-    private suspend fun List<OpplastetVedleggMetadata>.validateFiles(): List<OppgaveValidering> =
-        this.validate().awaitAll()
-
-
-    private suspend fun List<OpplastetVedleggMetadata>.validate() =
+    private suspend fun OpplastetVedleggMetadata.validate() =
         coroutineScope {
-            map { metadata ->
-                async {
-                    OppgaveValidering(
-                        metadata.type,
-                        metadata.tilleggsinfo,
-                        metadata.innsendelsesfrist,
-                        metadata.hendelsetype,
-                        metadata.hendelsereferanse,
-                        metadata.filer.map { file ->
-                            val validationResult = file.validate()
-                            FilValidering(file.filnavn.sanitize(), validationResult).also { file.validering = it }
-                        },
-                    )
-                }
+            async {
+                OppgaveValidering(
+                    type,
+                    tilleggsinfo,
+                    innsendelsesfrist,
+                    hendelsetype,
+                    hendelsereferanse,
+                    filer.map { file ->
+                        val validationResult = file.validate()
+                        FilValidering(file.filnavn.sanitize(), validationResult).also { file.validering = it }
+                    },
+                )
             }
         }
 
@@ -146,7 +137,6 @@ class UploadDocumentHelper(private val virusScanner: VirusScanner) {
         if (filnavn.containsIllegalCharacters()) {
             return ValidationResult(ValidationValues.ILLEGAL_FILENAME)
         }
-        virusScanner.scan(filnavn.value, fil, size())
 
         val result = validateFileType()
 

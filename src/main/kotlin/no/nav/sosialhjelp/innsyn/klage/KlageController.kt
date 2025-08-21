@@ -28,11 +28,11 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
-    ) {
+    ): DocumentReferences {
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        klageService.lastOppVedlegg(
+        return klageService.lastOppVedlegg(
             fiksDigisosId = fiksDigisosId,
             klageId = klageId,
             rawFiles = rawFiles,
@@ -79,6 +79,15 @@ class KlageController(
         if (MiljoUtils.isRunningInProd()) throw IllegalStateException("KlageController should not be used in production environment")
     }
 }
+
+data class DocumentReferences (
+    val documents: List<DocumentRef>,
+)
+
+data class DocumentRef(
+    val documentId: UUID,
+    val filename: String,
+)
 
 private fun Klage.toKlageDto() =
     KlageDto(

@@ -2,13 +2,14 @@ package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.time.LocalDate
+import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -30,8 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
-import java.time.LocalDate
-import java.util.UUID
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -103,7 +102,6 @@ class VedleggController(
     suspend fun hentVedlegg(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<VedleggResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
@@ -155,7 +153,7 @@ data class OpplastetVedleggMetadata(
     val hendelsetype: JsonVedlegg.HendelseType?,
     val hendelsereferanse: String?,
     val filer: MutableList<OpplastetFil>,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val innsendelsesfrist: LocalDate?,
 )
 

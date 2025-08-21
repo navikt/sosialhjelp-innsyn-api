@@ -1,112 +1,106 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import no.nav.sosialhjelp.innsyn.vedlegg.OppgaveValidering
-import no.nav.sosialhjelp.innsyn.vedlegg.OpplastetVedleggMetadata
-import no.nav.sosialhjelp.innsyn.vedlegg.ValidationValues
-import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
-import org.springframework.core.io.buffer.DataBufferUtils
-import org.springframework.stereotype.Service
 import java.util.UUID
-import org.springframework.context.annotation.Profile
+import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.vedlegg.ValidationValues
+import no.nav.sosialhjelp.innsyn.vedlegg.calculateContentLength
+import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.http.codec.multipart.FilePart
+import org.springframework.stereotype.Service
 
 interface MellomlagerService {
-    suspend fun processFileUpload(
-        klageId: UUID,
+    suspend fun getAllDocumentMetadataForRef(
+        navEksternRef: UUID,
+    ): List<MellomlagringDokumentInfo>
+
+    suspend fun getDocument(
+        navEksternRef: UUID,
+        documentId: UUID,
+    ): ByteArray
+
+    suspend fun deleteDocument(
+        navEksternRef: UUID,
+        documentId: UUID,
+    )
+
+    suspend fun deleteAllDocumentsForRef(navEksternRef: UUID,)
+
+    suspend fun processDocumentUpload(
+        navEksternRef: UUID,
         allFiles: List<FilePart>,
-    ): List<OppgaveValidering>
+    ): DocumentReferences
 }
 
-@Profile("!local")
 @Service
 class MellomlagerServiceImpl(
     private val mellomlagerClient: MellomlagerClient,
     private val virusScanner: VirusScanner,
 ): MellomlagerService {
 
-    private val uploadDocumentHelper = UploadDocumentHelper(virusScanner)
+    private val documentUploadHelper = DocumentUploadHelper()
 
-    override suspend fun processFileUpload(
-        klageId: UUID,
+
+    override suspend fun getAllDocumentMetadataForRef(navEksternRef: UUID): List<MellomlagringDokumentInfo> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getDocument(navEksternRef: UUID, documentId: UUID): ByteArray {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteDocument(navEksternRef: UUID, documentId: UUID) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteAllDocumentsForRef(navEksternRef: UUID) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun processDocumentUpload(
+        navEksternRef: UUID,
         allFiles: List<FilePart>,
-    ): List<OppgaveValidering> {
+    ): DocumentReferences {
 
-        val metadataList = uploadDocumentHelper.extractAndAddFilesToMetadata(allFiles)
+        allFiles.doVirusScan()
 
-        val validations = uploadDocumentHelper.validateMetadata(metadataList)
-        if (validations.flatMap { validation -> validation.filer.map { it.status } }.any { it.result != ValidationValues.OK }) {
-            return validations
+        val metadata = documentUploadHelper.extractMetadataAndAddFiles(allFiles).firstOrNull()
+            ?: error("Missing metadata.json for Klage upload")
+
+        val validation = documentUploadHelper.validateMetadata(metadata)
+
+        if (validation.filer.any { it.status.result != ValidationValues.OK }) {
+            logger.error(
+                "On file upload Klage - Validation failed for file(s): " +
+                        "${validation.filer.filter { it.status.result != ValidationValues.OK }}"
+            )
+            throw FileValidationException("Upload document for Klage failed due to validation errors.")
         }
 
-        val filerForOpplasting = uploadDocumentHelper.createFilerForOpplasting(metadataList)
-
-
-        mellomlagerClient.lastOppVedlegg(klageId, filerForOpplasting)
-
-        // TODO Do upload
-
-
-        return validations
+        return documentUploadHelper.createFilerForOpplasting(metadata)
+            .let { mellomlagerClient.uploadDocuments(navEksternRef, it) }
+            .toDocumentRefs()
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-@Profile("local")
-@Service
-class LocalMellomlagerService(
-    private val mellomlagerClient: MellomlagerClient,
-    private val virusScanner: VirusScanner,
-) : MellomlagerService {
-    override suspend fun processFileUpload(
-        klageId: UUID,
-        metadata: OpplastetVedleggMetadata,
-    ): List<OppgaveValidering> {
-        val validations = FilesValidator(virusScanner, listOf(metadata)).validate()
-        if (validations.flatMap { validation -> validation.filer.map { it.status } }.any { it.result != ValidationValues.OK }) {
-            return validations
+    private suspend fun List<FilePart>.doVirusScan() {
+        forEach { filePart ->
+            virusScanner.scan(
+                filePart.filename(),
+                data = filePart,
+                size = filePart.calculateContentLength()
+            )
         }
+    }
 
-        mellomlagerClient.lastOppVedlegg(
-            klageId = klageId,
-            filerForOpplasting = metadata.toFilOpplasting(),
-        )
-
-        return validations
+    companion object {
+        private val logger by logger()
     }
 }
 
-private suspend fun OpplastetVedleggMetadata.toFilOpplasting(): List<FilOpplasting> {
-    filer.map { opplastetFil ->
+private fun MellomlagringDto.toDocumentRefs(): DocumentReferences =
+    DocumentReferences(
+        this.mellomlagringMetadataList.map { DocumentRef(it.filId, it.filnavn) }
+    )
 
-        val content = opplastetFil.fil.content()
-        DataBufferUtils
-            .join { content }
-            .map {
-                val bytes = ByteArray(it.readableByteCount())
-                it.read(bytes)
-                DataBufferUtils.release(it)
-            }.awaitSingleOrNull()
-    }
-
-    return emptyList()
-}
+data class FileValidationException(
+    override val message: String,
+): RuntimeException(message)

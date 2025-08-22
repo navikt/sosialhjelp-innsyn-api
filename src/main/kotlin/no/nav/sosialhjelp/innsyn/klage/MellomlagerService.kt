@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.ValidationValues
 import no.nav.sosialhjelp.innsyn.vedlegg.calculateContentLength
@@ -41,19 +42,47 @@ class MellomlagerServiceImpl(
 
 
     override suspend fun getAllDocumentMetadataForRef(navEksternRef: UUID): List<MellomlagringDokumentInfo> {
-        TODO("Not yet implemented")
+        return mellomlagerClient.getDocumentMetadataForRef(navEksternRef)
+            .let { response ->
+                when (response) {
+                    is MellomlagerResponse.MellomlagringDto -> response.mellomlagringMetadataList
+                    is MellomlagerResponse.FiksError -> handleError(response)
+                    else -> error("Unexpected response type: $response")
+                }
+            }
     }
 
     override suspend fun getDocument(navEksternRef: UUID, documentId: UUID): ByteArray {
-        TODO("Not yet implemented")
+        return mellomlagerClient.getDocument(navEksternRef, documentId)
+            .let { response ->
+                when (response) {
+                    is MellomlagerResponse.ByteArrayResponse -> response.data
+                    is MellomlagerResponse.FiksError -> handleError(response)
+                    else -> error("Unexpected response type: $response")
+                }
+            }
     }
 
     override suspend fun deleteDocument(navEksternRef: UUID, documentId: UUID) {
-        TODO("Not yet implemented")
+        mellomlagerClient.deleteDocument(navEksternRef, documentId)
+            .also { response ->
+                when (response) {
+                    is MellomlagerResponse.EmptyResponse -> logger.info("Deleted document $documentId")
+                    is MellomlagerResponse.FiksError -> handleError(response)
+                    else -> error("Unexpected response type: $response")
+                }
+            }
     }
 
     override suspend fun deleteAllDocumentsForRef(navEksternRef: UUID) {
-        TODO("Not yet implemented")
+        mellomlagerClient.getDocumentMetadataForRef(navEksternRef)
+            .also { response ->
+                when (response) {
+                    is MellomlagerResponse.EmptyResponse -> logger.info("Deleted all documents for ref $navEksternRef")
+                    is MellomlagerResponse.FiksError -> handleError(response)
+                    else -> error("Unexpected response type: $response")
+                }
+            }
     }
 
     override suspend fun processDocumentUpload(
@@ -78,7 +107,13 @@ class MellomlagerServiceImpl(
 
         return documentUploadHelper.createFilerForOpplasting(metadata)
             .let { mellomlagerClient.uploadDocuments(navEksternRef, it) }
-            .toDocumentRefs()
+            .let { mellomlagerResponse ->
+                when (mellomlagerResponse) {
+                    is MellomlagerResponse.MellomlagringDto -> mellomlagerResponse.toDocumentRefs()
+                    is MellomlagerResponse.FiksError -> handleError(mellomlagerResponse)
+                    else -> error("Unexpected response type: $mellomlagerResponse")
+                }
+            }
     }
 
     private suspend fun List<FilePart>.doVirusScan() {
@@ -91,12 +126,19 @@ class MellomlagerServiceImpl(
         }
     }
 
+    private fun handleError(error: MellomlagerResponse.FiksError): Nothing {
+        when (error.status) {
+            404 -> throw NotFoundException(error.message)
+            else -> throw MellomlagerException("Noe feilet: $error")
+        }
+    }
+
     companion object {
         private val logger by logger()
     }
 }
 
-private fun MellomlagringDto.toDocumentRefs(): DocumentReferences =
+private fun MellomlagerResponse.MellomlagringDto.toDocumentRefs(): DocumentReferences =
     DocumentReferences(
         this.mellomlagringMetadataList.map { DocumentRef(it.filId, it.filnavn) }
     )
@@ -104,3 +146,5 @@ private fun MellomlagringDto.toDocumentRefs(): DocumentReferences =
 data class FileValidationException(
     override val message: String,
 ): RuntimeException(message)
+
+data class MellomlagerException(override val message: String): RuntimeException(message)

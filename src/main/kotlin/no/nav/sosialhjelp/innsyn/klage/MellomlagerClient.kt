@@ -2,14 +2,12 @@ package no.nav.sosialhjelp.innsyn.klage
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.io.InputStream
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import org.apache.commons.io.IOUtils
@@ -18,6 +16,7 @@ import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
@@ -26,24 +25,24 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 
 interface MellomlagerClient {
-    fun getDocumentMetadataForRef(navEksternId: String): MellomlagringDto?
+    suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
+
+    suspend fun getDocument(
+        navEksternId: UUID,
+        digisosDokumentId: UUID,
+    ): MellomlagerResponse
 
     suspend fun uploadDocuments(
         navEksternId: UUID,
         filerForOpplasting: List<FilForOpplasting>,
-    ): MellomlagringDto
+    ): MellomlagerResponse
 
-    fun deleteAllDocumentsForRef(navEksternId: String)
+    suspend fun deleteAllDocumentsForRef(navEksternId: UUID): MellomlagerResponse
 
-    fun getDocument(
-        navEksternId: String,
-        digisosDokumentId: String,
-    ): ByteArray
-
-    fun deleteDocument(
-        navEksternId: String,
-        digisosDokumentId: String,
-    )
+    suspend fun deleteDocument(
+        navEksternId: UUID,
+        digisosDokumentId: UUID,
+    ): MellomlagerResponse
 }
 
 @Profile("!local")
@@ -55,50 +54,76 @@ class FiksMellomlagerClient(
     private val dokumentlagerClient: DokumentlagerClient,
 ): MellomlagerClient {
 
-
-    override fun getDocumentMetadataForRef(navEksternId: String): MellomlagringDto? {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse =
+        runCatching {
+            mellomlagerWebClient.get()
+                .uri(MELLOMLAGRING_PATH, navEksternId)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
+                .retrieve()
+                .bodyToMono<MellomlagerResponse.MellomlagringDto>()
+                .block()
+                ?: error("MellomlagringDto er null")
+        }
+            .getOrElse { ex -> handleClientError(ex, "get metadata") }
 
     override suspend fun uploadDocuments(
         navEksternId: UUID,
         filerForOpplasting: List<FilForOpplasting>
-    ): MellomlagringDto {
+    ): MellomlagerResponse {
 
         val body = createBodyForUpload(krypterFiler(filerForOpplasting))
 
-        return mellomlagerWebClient.post()
+        return runCatching { mellomlagerWebClient.post()
             .uri(MELLOMLAGRING_PATH, navEksternId)
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
             .body(BodyInserters.fromMultipartData(body))
             .retrieve()
-            .bodyToMono<MellomlagringDto>()
-            .doOnError(WebClientResponseException::class.java) {
-                logger.error(
-                    "Feil ved opplasting av dokumenter til mellomlager for navEksternId: $navEksternId",
-                    it
-                )
-            }
+            .bodyToMono<MellomlagerResponse.MellomlagringDto>()
             .block()
-            ?: throw FiksClientException(
-                500,
-                "MellomlagringDto er null ved opplasting av dokumenter: $navEksternId",
-                null
-            )
+            ?: error("MellomlagringDto is null")
+        }
+            .getOrElse { ex -> handleClientError(ex, "upload documents") }
     }
 
-
-
-    override fun deleteAllDocumentsForRef(navEksternId: String) {
-        TODO("Not yet implemented")
+    override suspend fun getDocument(navEksternId: UUID, digisosDokumentId: UUID): MellomlagerResponse {
+        return runCatching {
+            mellomlagerWebClient.get()
+                .uri(MELLOMLAGRING_DOKUMENT_PATH, navEksternId, digisosDokumentId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
+                .retrieve()
+                .bodyToMono<ByteArray>()
+                .block()
+                ?.let { data -> MellomlagerResponse.ByteArrayResponse(data) }
+                ?: error("Document data is null")
+        }
+            .getOrElse { ex -> handleClientError(ex, "get document")}
     }
 
-    override fun getDocument(navEksternId: String, digisosDokumentId: String): ByteArray {
-        TODO("Not yet implemented")
+    override suspend fun deleteAllDocumentsForRef(navEksternId: UUID): MellomlagerResponse {
+        return runCatching {
+            mellomlagerWebClient.delete()
+                .uri(MELLOMLAGRING_PATH, navEksternId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
+                .retrieve()
+                .toBodilessEntity()
+                .block()
+                .let { MellomlagerResponse.EmptyResponse }
+        }
+            .getOrElse { ex -> handleClientError(ex, "delete all documents") }
     }
 
-    override fun deleteDocument(navEksternId: String, digisosDokumentId: String) {
-        TODO("Not yet implemented")
+    override suspend fun deleteDocument(navEksternId: UUID, digisosDokumentId: UUID): MellomlagerResponse {
+        return runCatching {
+            mellomlagerWebClient.delete()
+                .uri(MELLOMLAGRING_DOKUMENT_PATH, navEksternId, digisosDokumentId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
+                .retrieve()
+                .toBodilessEntity()
+                .block()
+                .let { MellomlagerResponse.EmptyResponse }
+        }
+            .getOrElse { ex -> handleClientError(ex, "delete document") }
     }
 
     private suspend fun krypterFiler(filerForOpplasting: List<FilForOpplasting>): List<FilForOpplasting> {
@@ -112,71 +137,32 @@ class FiksMellomlagerClient(
         }
     }
 
+    private fun handleClientError(
+        exception: Throwable,
+        context: String? = null,
+    ): MellomlagerResponse.FiksError =
+        when (exception) {
+            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
+            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
+        }
+
     private suspend fun getMaskinportenToken() = texasClient.getMaskinportenToken()
 
     companion object {
         private const val MELLOMLAGRING_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}"
         private const val MELLOMLAGRING_DOKUMENT_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}/{digisosDokumentId}"
-
-        private val logger by logger()
-    }
-
-}
-
-// TODO Enkel implementasjon for lokal testing - fjernes når mock-alt-api er klart
-@Profile("local")
-@Component
-class LocalMellomlagerClient : MellomlagerClient {
-    override fun getDocumentMetadataForRef(navEksternId: String): MellomlagringDto? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun uploadDocuments(
-        navEksternId: UUID,
-        filerForOpplasting: List<FilForOpplasting>
-    ): MellomlagringDto {
-        TODO("Not yet implemented")
-    }
-
-    override fun deleteAllDocumentsForRef(navEksternId: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getDocument(navEksternId: String, digisosDokumentId: String): ByteArray {
-        TODO("Not yet implemented")
-    }
-
-    override fun deleteDocument(navEksternId: String, digisosDokumentId: String) {
-        TODO("Not yet implemented")
-    }
-
-
-    companion object {
-        val mellomlager = mutableMapOf<UUID, List<FilForOpplasting>>()
     }
 }
 
-data class FilOpplasting(
-    val metadata: FilMetadata,
-    val data: InputStream,
-)
+data class MellomlagerClientException(
+    override val message: String,
+    override val cause: Throwable
+): RuntimeException(message, cause)
 
 data class FilMetadata(
     val filnavn: String,
     val mimetype: String,
     val storrelse: Long,
-)
-
-data class MellomlagringDto(
-    val navEksternRefId: UUID,
-    val mellomlagringMetadataList: List<MellomlagringDokumentInfo>,
-)
-
-data class MellomlagringDokumentInfo(
-    val filnavn: String,
-    val filId: UUID,
-    val storrelse: Long,
-    val mimetype: String,
 )
 
 private fun createHttpEntityOfString(
@@ -246,3 +232,37 @@ private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): Lin
 
     return body
 }
+
+private fun String.toFiksError() = jacksonObjectMapper().readValue<MellomlagerResponse.FiksError>(this)
+
+sealed interface MellomlagerResponse {
+    data class MellomlagringDto(
+        val navEksternRefId: UUID,
+        val mellomlagringMetadataList: List<MellomlagringDokumentInfo>,
+    ): MellomlagerResponse
+
+    data class FiksError(
+        val timestamp: Int,
+        val status: Int,
+        val error: String,
+        val errorId: UUID,
+        val path: String,
+        val originalPath: String,
+        val message: String,
+        val errorCode: String,
+        val errorJson: String,
+    ) : MellomlagerResponse
+
+    class ByteArrayResponse(
+        val data: ByteArray,
+    ): MellomlagerResponse
+
+    object EmptyResponse : MellomlagerResponse
+}
+
+data class MellomlagringDokumentInfo(
+    val filnavn: String,
+    val filId: UUID,
+    val storrelse: Long,
+    val mimetype: String,
+)

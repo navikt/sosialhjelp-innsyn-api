@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -20,10 +20,12 @@ class SoknadsStatusService(
     private val kommuneService: KommuneService,
     private val clientProperties: ClientProperties,
 ) {
-    suspend fun hentSoknadsStatus(
-        fiksDigisosId: String,
-        token: Token,
-    ): UtvidetSoknadsStatus {
+    suspend fun hentOriginalSoknad(fiksDigisosId: String): OriginalSoknadNAV? {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        return digisosSak.originalSoknadNAV
+    }
+
+    suspend fun hentSoknadsStatus(fiksDigisosId: String): UtvidetSoknadsStatus {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         val status = model.status

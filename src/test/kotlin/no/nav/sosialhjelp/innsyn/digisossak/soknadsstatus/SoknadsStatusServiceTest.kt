@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -30,7 +29,6 @@ internal class SoknadsStatusServiceTest {
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockInternalDigisosSoker: InternalDigisosSoker = mockk()
 
-    private val token = Token("token")
     private val dokumentlagerId = "dokumentlagerId"
     private val navEnhet = "Nav Test"
 
@@ -56,7 +54,7 @@ internal class SoknadsStatusServiceTest {
             every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns navEnhet
             coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
 
-            val response = service.hentSoknadsStatus("123", token)
+            val response = service.hentSoknadsStatus("123")
 
             assertThat(response).isNotNull
             assertThat(response.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
@@ -75,7 +73,7 @@ internal class SoknadsStatusServiceTest {
             every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns navEnhet
             coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns true
 
-            val response = service.hentSoknadsStatus("123", token)
+            val response = service.hentSoknadsStatus("123")
 
             assertThat(response).isNotNull
             assertThat(response.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)

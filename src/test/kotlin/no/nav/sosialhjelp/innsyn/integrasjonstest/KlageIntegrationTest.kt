@@ -8,7 +8,7 @@ import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
 import no.nav.sosialhjelp.innsyn.klage.KlageStatus
 import no.nav.sosialhjelp.innsyn.klage.KlagerDto
-import no.nav.sosialhjelp.innsyn.klage.LocalFiksKlageClient
+import no.nav.sosialhjelp.innsyn.klage.FiksKlageClientImpl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ import java.util.UUID
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     private val klageRefStorage = InMemoryKlageRepository.klagerStorage
-    private val fiksStorage = LocalFiksKlageClient.klageStorage
+    private val fiksStorage = FiksKlageClientImpl.klageStorage
 
     @BeforeEach
     fun clear() {
@@ -36,7 +36,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                 KlageInput(
                     klageId = klageId,
                     vedtakId = vedtakId,
-                    klageTekst = "Dette er en testklage",
+                    tekst = "Dette er en testklage",
                 ),
         )
 

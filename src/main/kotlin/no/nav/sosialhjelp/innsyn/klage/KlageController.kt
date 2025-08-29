@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.util.UUID
+import org.springframework.http.ResponseEntity
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -24,11 +25,12 @@ class KlageController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    suspend fun lastOppVedlegg(
+    suspend fun uploadDocuments(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): DocumentReferences {
+        // TODO En eller annen form for sjekk av fiksDigisosId ?
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
@@ -37,6 +39,33 @@ class KlageController(
             klageId = klageId,
             rawFiles = rawFiles,
         )
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{klageId}/vedlegg")
+    suspend fun getAllDocumentsForKlage(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+    ): DocumentReferences {
+        TODO ("Implementer hentVedlegg i KlageController")
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{klageId}/vedlegg/{documentId}")
+    suspend fun getDocument(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+        @PathVariable documentId: UUID,
+    ): ResponseEntity<ByteArray> {
+        TODO ("Implementer hentVedlegg i KlageController, og slett denne funksjonen")
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{klageId}/avbryt")
+    suspend fun cancelKlage(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+    ) {
+        TODO("Implementer avbrytKlage i KlageController")
+
+        // TODO Slette eventuelle vedlegg i mellomlageret
     }
 
     @PostMapping("/{fiksDigisosId}/klage/send")
@@ -80,6 +109,10 @@ class KlageController(
     }
 }
 
+private fun FiksKlageDto?.toKlageDto(): KlageDto {
+    TODO("Not yet implemented")
+}
+
 data class DocumentReferences (
     val documents: List<DocumentRef>,
 )
@@ -89,18 +122,10 @@ data class DocumentRef(
     val filename: String,
 )
 
-private fun Klage.toKlageDto() =
-    KlageDto(
-        klageId = klageId,
-        vedtakId = vedtakId,
-        klageTekst = klageTekst,
-        status = status,
-    )
-
 data class KlageInput(
     val klageId: UUID,
     val vedtakId: UUID,
-    val klageTekst: String,
+    val tekst: String,
 )
 
 data class KlagerDto(

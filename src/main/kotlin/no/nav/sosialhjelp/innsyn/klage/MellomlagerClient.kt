@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 
 interface MellomlagerClient {
@@ -141,10 +140,11 @@ class FiksMellomlagerClient(
         exception: Throwable,
         context: String? = null,
     ): MellomlagerResponse.FiksError =
-        when (exception) {
-            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
-            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
-        }
+        throw exception
+//        when (exception) {
+//            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
+//            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
+//        }
 
     private suspend fun getMaskinportenToken() = texasClient.getMaskinportenToken()
 

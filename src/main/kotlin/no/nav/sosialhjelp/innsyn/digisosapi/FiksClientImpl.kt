@@ -168,9 +168,6 @@ class FiksClientImpl(
         val digisosSak = hentDigisosSakFraFiks(digisosId)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val kommunenummer = digisosSak.kommunenummer
-        if (kommunenummer == "1507") {
-            error("Kan ikke laste opp vedlegg på søknad fra Ålesund kommune")
-        }
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
         if (erPapirsoknad(digisosSak)) {

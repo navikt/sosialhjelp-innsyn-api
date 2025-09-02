@@ -45,26 +45,6 @@ class EventService(
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak)
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak)
 
-        // Infologging fra kommunesplitting av Ålesund
-        if (jsonSoknad != null && jsonSoknad.mottaker?.enhetsnummer == null && jsonSoknad.mottaker?.kommunenummer == "1507") {
-            log.info(
-                """Enhetsnummer=null: 
-                | Hva vet vi:
-                | enhetsnummer: null -> mismatch mellom norg og Fiks mellom 8 og 9 den 2. januar 2024
-                | kommunenummer satt i søknaden: ${jsonSoknad.mottaker?.kommunenummer}
-                | sakstatus: ${
-                    jsonDigisosSoker?.hendelser?.filterIsInstance<JsonSoknadsStatus>()?.filter {
-                        it.status == JsonSoknadsStatus.Status.MOTTATT
-                    }
-                }
-                | ${
-                    jsonDigisosSoker?.hendelser?.filterIsInstance<JsonTildeltNavKontor>()?.map {
-                        "Tildelt navkontor: ${it.navKontor} på tidspunkt: ${it.hendelsestidspunkt}"
-                    } ?: emptyList()
-                }
-                """.trimMargin(),
-            )
-        }
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
         val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 

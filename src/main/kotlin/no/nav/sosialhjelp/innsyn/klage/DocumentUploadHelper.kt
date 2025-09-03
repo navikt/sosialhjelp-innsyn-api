@@ -1,8 +1,11 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.IOException
 import java.io.InputStream
+import java.time.LocalDate
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -10,10 +13,12 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.FilValidering
+import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.MAKS_TOTAL_FILSTORRELSE
 import no.nav.sosialhjelp.innsyn.vedlegg.OppgaveValidering
 import no.nav.sosialhjelp.innsyn.vedlegg.OpplastetFil
@@ -41,7 +46,7 @@ class DocumentUploadHelper() {
         val metadataList = extractMetadata(allFiles)
         val files = extractOtherFiles(allFiles)
 
-        metadataList.checkAllFilesHasMatch(files)
+        files.checkAllFilesHasMatch(metadataList.flatMap { it.filer })
         addFileToMatchingMetadata(metadataList, files)
 
         return metadataList
@@ -63,12 +68,6 @@ class DocumentUploadHelper() {
                 )
             }
 
-    private fun OpplastetFil.getMimeType() =
-        when (this.tikaMimeType) {
-            "text/x-matlab" -> "application/pdf"
-            else -> this.tikaMimeType
-        }
-
     private suspend fun extractMetadata(files: List<FilePart>): List<OpplastetVedleggMetadata> =
         files
             .firstOrNull { it.filename() == "metadata.json" }
@@ -78,11 +77,18 @@ class DocumentUploadHelper() {
                 val bytes = ByteArray(it.readableByteCount())
                 it.read(bytes)
                 DataBufferUtils.release(it)
+
                 objectMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
             }
             ?.awaitSingleOrNull()
             ?.filter { it.filer.isNotEmpty() }
             ?: error("Missing metadata.json for Klage upload")
+
+    private fun OpplastetFil.getMimeType() =
+        when (this.tikaMimeType) {
+            "text/x-matlab" -> "application/pdf"
+            else -> this.tikaMimeType
+        }
 
     private fun extractOtherFiles(files: List<FilePart>): List<FilePart> =
         files
@@ -92,16 +98,25 @@ class DocumentUploadHelper() {
                 check(it.size <= 30) { "Over 30 filer i forsendelse: ${it.size} filer" }
             }
 
-    private fun List<OpplastetVedleggMetadata>.checkAllFilesHasMatch(files: List<FilePart>) {
-        this
-            .flatMap { it.filer }
-            .all { file -> file.uuid.toString() in files.map { it.filename().substringBefore(".") } }
+    private fun List<FilePart>.checkAllFilesHasMatch(fileRefs: List<OpplastetFil>) {
+        all { file -> file.filename().substringBefore(".") in fileRefs.map { ref -> ref.uuid.toString() } }
             .also { allFilesHasMatch ->
                 require(allFilesHasMatch) {
                     "Ikke alle filer i metadata.json ble funnet i forsendelsen"
                 }
             }
     }
+
+//    private fun List<OpplastetVedleggMetadata>.checkAllFilesHasMatch(files: List<FilePart>) {
+//        this
+//            .flatMap { it.filer }
+//            .all { fileRef -> fileRef.uuid.toString() in files.map { file -> file.filename().substringBefore(".") } }
+//            .also { allFilesHasMatch ->
+//                require(allFilesHasMatch) {
+//                    "Ikke alle filer i metadata.json ble funnet i forsendelsen"
+//                }
+//            }
+//    }
 
     private fun addFileToMatchingMetadata(metadataList: List<OpplastetVedleggMetadata>, files: List<FilePart>) {
         files.forEach { file ->
@@ -226,6 +241,29 @@ class DocumentUploadHelper() {
                 close()
             }
         }
-
 }
 
+data class OpplastetVedleggMetadataRequest(
+    val type: String,
+    val tilleggsinfo: String?,
+    val hendelsetype: JsonVedlegg.HendelseType?,
+    val hendelsereferanse: String?,
+    val filer: List<OpplastetFilMetadata>,
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
+    val innsendelsesfrist: LocalDate?,
+)
+
+data class OpplastetFilMetadata(
+    val filnavn: String,
+    val uuid: UUID,
+)
+
+private fun OpplastetVedleggMetadataRequest.toOpplastetVedleggMetadata() =
+    OpplastetVedleggMetadata(
+        type = type,
+        tilleggsinfo = tilleggsinfo,
+        hendelsetype = hendelsetype,
+        hendelsereferanse = hendelsereferanse,
+        filer = filer.map { OpplastetFil(Filename(it.filnavn), it.uuid) }.toMutableList(),
+        innsendelsesfrist = innsendelsesfrist
+    )

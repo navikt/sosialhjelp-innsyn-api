@@ -10,12 +10,14 @@ import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 
+@AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
 abstract class AbstractIntegrationTest {
@@ -50,6 +52,20 @@ abstract class AbstractIntegrationTest {
             .uri(uri)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .bodyValue(body)
+            .exchange()
+            .expectStatus()
+            .isOk
+
+    protected fun doPostFiles(
+        uri: String,
+        body: Any,
+    ): WebTestClient.ResponseSpec =
+        webClient
+            .post()
+            .uri(uri)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .bodyValue(body)
             .exchange()

@@ -73,14 +73,15 @@ class FiksMellomlagerClient(
 
         val body = createBodyForUpload(krypterFiler(filerForOpplasting))
 
-        return runCatching { mellomlagerWebClient.post()
-            .uri(MELLOMLAGRING_PATH, navEksternId)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
-            .body(BodyInserters.fromMultipartData(body))
-            .retrieve()
-            .bodyToMono<MellomlagerResponse.MellomlagringDto>()
-            .block()
-            ?: error("MellomlagringDto is null")
+        return runCatching {
+            mellomlagerWebClient.post()
+                .uri(MELLOMLAGRING_PATH, navEksternId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
+                .body(BodyInserters.fromMultipartData(body))
+                .retrieve()
+                .bodyToMono<MellomlagerResponse.MellomlagringDto>()
+                .block()
+                ?: error("MellomlagringDto is null")
         }
             .getOrElse { ex -> handleClientError(ex, "upload documents") }
     }

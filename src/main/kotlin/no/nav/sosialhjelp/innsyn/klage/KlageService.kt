@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.io.ByteArrayInputStream
-import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
@@ -16,6 +14,8 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import java.io.ByteArrayInputStream
+import java.util.UUID
 
 interface KlageService {
     suspend fun sendKlage(
@@ -92,7 +92,6 @@ class KlageServiceImpl(
             .withKlageId(klageId.toString())
             .withFiler(allMetadata.map { JsonFiler().withFilnavn(it.filnavn) })
             .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
-
     }
 
     private fun KlageInput.toJson(): String = objectMapper.writeValueAsString(this)

@@ -1,16 +1,13 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import org.springframework.stereotype.Component
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisosapi.toHttpEntity
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -21,6 +18,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 
@@ -28,6 +26,7 @@ interface FiksKlageClient {
     suspend fun sendKlage(
         digisosId: UUID,
         klageId: UUID,
+        vedtakId: UUID,
         files: MandatoryFilesForKlage,
     )
 
@@ -39,12 +38,12 @@ class FiksKlageClientImpl(
     private val krypteringService: KrypteringService,
     private val dokumentlagerClient: DokumentlagerClient,
     private val fiksWebClient: WebClient,
-    private val fiksClient: FiksClient,
 ) : FiksKlageClient {
 
     override suspend fun sendKlage(
         digisosId: UUID,
         klageId: UUID,
+        vedtakId: UUID,
         files: MandatoryFilesForKlage,
     ) {
         val body = createBodyForUpload(
@@ -53,19 +52,22 @@ class FiksKlageClientImpl(
             klagePdf = files.klagePdf.encryptFiles()
         )
 
-        val digisosSak = fiksClient.hentDigisosSak(digisosId.toString())
-
-        doSendKlage(digisosId, digisosSak.kommunenummer, klageId, body)
+        doSendKlage(
+            digisosId = digisosId,
+            klageId = klageId,
+            vedtakId = vedtakId,
+            body = body
+        )
     }
 
     private suspend fun doSendKlage(
         digisosId: UUID,
-        kommunenummer: String,
         klageId: UUID,
+        vedtakId: UUID,
         body: MultiValueMap<String, HttpEntity<*>>
     ) {
         val response = fiksWebClient.post()
-            .uri(SEND_INN_KLAGE_PATH, digisosId, kommunenummer, klageId, klageId)
+            .uri(SEND_INN_KLAGE_PATH, digisosId, klageId, klageId, vedtakId)
             .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .bodyValue(body)
@@ -107,7 +109,7 @@ class FiksKlageClientImpl(
     }
 
     companion object {
-        private const val SEND_INN_KLAGE_PATH = "/digisos/klage/api/v1/{digisosId}/{kommunenummer}/{navEksternRefId}/{klageId}"
+        private const val SEND_INN_KLAGE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/{vedtakId}"
         private const val GET_KLAGER_PATH = "/digisos/klage/api/v1/klager"
         private fun GET_KLAGER_QUERY_PARAM(digisosId: UUID) = "?digisosId=$digisosId"
     }
@@ -145,11 +147,12 @@ data class MandatoryFilesForKlage(
 data class FiksKlageDto(
     val fiksOrgId: UUID,
     val klageId: UUID,
+    val vedtakId: UUID,
     val navEksternRefId: UUID,
     val klageMetadata: UUID, // id til klage.json i dokumentlager
     val vedleggMetadata: UUID, // id til vedlegg.json (jsonVedleggSpec) i dokumentlager
     val klageDokument: DokumentInfoDto, // id til klage.pdf i dokumentlager
-    val trekkKlageInfo: TrekkKlageInfoDto,
+    val trekkKlageInfo: TrekkKlageInfoDto?,
     val sendtKvittering: SendtKvitteringDto,
     val ettersendtInfoNAV: EttersendtInfoNAVDto,
     val trukket: Boolean,

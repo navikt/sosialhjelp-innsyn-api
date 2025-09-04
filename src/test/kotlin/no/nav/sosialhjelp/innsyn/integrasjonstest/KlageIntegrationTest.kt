@@ -2,21 +2,33 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
+import io.mockk.Runs
 import io.mockk.coEvery
+import io.mockk.just
 import java.io.File
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.exceptions.FrontendErrorMessage
 import no.nav.sosialhjelp.innsyn.klage.DocumentReferences
-import no.nav.sosialhjelp.innsyn.klage.InMemoryKlageRepository
+import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
+import no.nav.sosialhjelp.innsyn.klage.EttersendtInfoNAVDto
+import no.nav.sosialhjelp.innsyn.klage.FiksKlageClient
+import no.nav.sosialhjelp.innsyn.klage.FiksKlageDto
+import no.nav.sosialhjelp.innsyn.klage.FiksProtokoll
+import no.nav.sosialhjelp.innsyn.klage.KlageDto
+import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import no.nav.sosialhjelp.innsyn.klage.KlagerDto
 import no.nav.sosialhjelp.innsyn.klage.MellomlagerClient
 import no.nav.sosialhjelp.innsyn.klage.MellomlagerResponse
 import no.nav.sosialhjelp.innsyn.klage.MellomlagringDokumentInfo
+import no.nav.sosialhjelp.innsyn.klage.SendtKvitteringDto
+import no.nav.sosialhjelp.innsyn.klage.SendtStatus
+import no.nav.sosialhjelp.innsyn.klage.SendtStatusDto
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.InputStreamResource
@@ -28,75 +40,58 @@ import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.util.MultiValueMap
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
-    private val klageRefStorage = InMemoryKlageRepository.klagerStorage
 
     @MockkBean
     private lateinit var mellomlagerClient: MellomlagerClient
 
-    @BeforeEach
-    fun clear() {
-        klageRefStorage.clear()
-//        fiksStorage.clear()
+    @MockkBean
+    private lateinit var fiksKlageClient: FiksKlageClient
+
+    @Test
+    fun `Sende klage skal lagres`() {
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val vedtakId = UUID.randomUUID()
+
+        coEvery { mellomlagerClient.getDocumentMetadataForRef(klageId) } returns
+                MellomlagerResponse.MellomlagringDto(klageId, emptyList())
+
+        coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just Runs
+
+        doPost(
+            uri = putUrl(digisosId),
+            body =
+                KlageInput(
+                    klageId = klageId,
+                    vedtakId = vedtakId,
+                    tekst = "Dette er en testklage",
+                ),
+        )
     }
 
-//    @Test
-//    fun `Sende klage skal lagres`() {
-//        val digisosId = UUID.randomUUID()
-//        val klageId = UUID.randomUUID()
-//        val vedtakId = UUID.randomUUID()
-//
-//        doPost(
-//            uri = putUrl(digisosId),
-//            body =
-//                KlageInput(
-//                    klageId = klageId,
-//                    vedtakId = vedtakId,
-//                    tekst = "Dette er en testklage",
-//                ),
-//        )
-//
-//        klageRefStorage
-//            .find { it.klageId == klageId }
-//            .also {
-//                assertThat(it!!.digisosId).isEqualTo(digisosId)
-//                assertThat(it.vedtakId).isEqualTo(vedtakId)
-//            }
-//        fiksStorage[klageId]
-//            .also {
-//                assertThat(it!!.digisosId).isEqualTo(digisosId)
-//                assertThat(it.vedtakId).isEqualTo(vedtakId)
-//            }
-//    }
+    @Test
+    fun `Hente lagret klage skal returnere riktig klage`() {
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val vedtakId = UUID.randomUUID()
 
-//    @Test
-//    fun `Hente lagret klage skal returnere riktig klage`() {
-//        val digisosId = UUID.randomUUID()
-//        val klageId = UUID.randomUUID()
-//        val vedtakId = UUID.randomUUID()
-//
-//        klageRefStorage.add(KlageRef(digisosId, klageId, vedtakId))
-//        fiksStorage[klageId] =
-//            Klage(
-//                digisosId = digisosId,
-//                klageId = klageId,
-//                vedtakId = vedtakId,
-//                klageTekst = "Dette er en testklage",
-//            )
-//
-//        doGet(getKlageUrl(digisosId, vedtakId))
-//            .expectBody(KlageDto::class.java)
-//            .returnResult()
-//            .responseBody
-//            .also { klage ->
-//                assertThat(klage!!).isNotNull
-//                assertThat(klage.klageId).isEqualTo(klageId)
-//                assertThat(klage.vedtakId).isEqualTo(vedtakId)
-//                assertThat(klage.status).isEqualTo(KlageStatus.SENDT)
-//            }
-//    }
+        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId))
+
+        doGet(getKlageUrl(digisosId, vedtakId))
+            .expectStatus().isOk
+            .expectBody(KlageDto::class.java)
+            .returnResult().responseBody
+            ?.also { dto ->
+                assertThat { dto.klageId == klageId }
+                assertThat { dto.vedtakId == vedtakId }
+            }
+            ?: error("Forventet klage tilbake")
+    }
 
     @Test
     fun `Hente klage som ikke eksisterer returnerer 404`() {
+        coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
+
         doGet(getKlageUrl(UUID.randomUUID(), UUID.randomUUID()))
             .expectStatus()
             .isNotFound
@@ -108,38 +103,32 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             }
     }
 
-//    @Test
-//    fun `Hente alle klager skal returnere alle klager for digisosId`() {
-//        val digisosId = UUID.randomUUID()
-//        val klageIds = listOf(UUID.randomUUID(), UUID.randomUUID())
-//        val vedtakIds = listOf(UUID.randomUUID(), UUID.randomUUID())
-//
-//        vedtakIds.forEachIndexed { i, vedtakId ->
-//            klageRefStorage.add(KlageRef(digisosId, vedtakId, klageIds[i]))
-//            fiksStorage[klageIds[i]] =
-//                Klage(
-//                    digisosId = digisosId,
-//                    klageId = klageIds[i],
-//                    vedtakId = vedtakIds[i],
-//                    klageTekst = "Dette er en testklage: $i",
-//                )
-//        }
-//
-//        doGet(getKlagerUrl(digisosId))
-//            .expectBody(KlagerDto::class.java)
-//            .returnResult()
-//            .responseBody
-//            .also { klagerDto ->
-//                klagerDto!!.klager.forEach { klageDto ->
-//                    assertThat(klageDto.klageId).isIn(klageIds)
-//                    assertThat(klageDto.vedtakId).isIn(vedtakIds)
-//                    assertThat(klageDto.status).isEqualTo(KlageStatus.SENDT)
-//                }
-//            }
-//    }
+    @Test
+    fun `Hente alle klager skal returnere alle klager for digisosId`() {
+        val klageId = UUID.randomUUID()
+        val vedtakId = UUID.randomUUID()
+
+        coEvery { fiksKlageClient.hentKlager(any()) } returns
+                listOf(createFiksKlageDto(klageId, vedtakId))
+
+        val digisosId = UUID.randomUUID()
+
+        doGet(getKlagerUrl(digisosId))
+            .expectBody(KlagerDto::class.java)
+            .returnResult()
+            .responseBody
+            .also { klagerDto ->
+                klagerDto!!.klager.forEach { klageDto ->
+                    assertThat(klageDto.klageId).isEqualTo(klageId)
+                    assertThat(klageDto.vedtakId).isEqualTo(vedtakId)
+                }
+            }
+    }
 
     @Test
     fun `Digisos-sak uten klager returnerer tom liste`() {
+        coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
+
         doGet(getKlagerUrl(UUID.randomUUID()))
             .expectBody(KlagerDto::class.java)
             .returnResult()
@@ -264,3 +253,33 @@ data class OpplastetFilMetadata(
     val filnavn: String,
     val uuid: UUID,
 )
+
+private fun createFiksKlageDto(klageId: UUID, vedtakId: UUID): FiksKlageDto {
+    return FiksKlageDto(
+        fiksOrgId = UUID.randomUUID(),
+        klageId = klageId,
+        vedtakId = vedtakId,
+        navEksternRefId = klageId,
+        klageMetadata = UUID.randomUUID(),
+        vedleggMetadata = UUID.randomUUID(),
+        trukket = false,
+        klageDokument = DokumentInfoDto(
+            filnavn = "klage.pdf",
+            storrelse = 12345L,
+            dokumentlagerDokumentId = UUID.randomUUID(),
+        ),
+        trekkKlageInfo = null,
+        sendtKvittering = SendtKvitteringDto(
+            sendtKanal = FiksProtokoll.SVARUT,
+            meldingId = UUID.randomUUID(),
+            sendtStatus = SendtStatusDto(
+                status = SendtStatus.SENDT,
+                timestamp = LocalDateTime.now().toInstant(ZoneOffset.UTC).epochSecond
+            ),
+            statusListe = emptyList(),
+        ),
+        ettersendtInfoNAV = EttersendtInfoNAVDto(ettersendelser = emptyList()),
+
+        )
+
+}

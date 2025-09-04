@@ -109,9 +109,14 @@ class KlageController(
     }
 }
 
-private fun FiksKlageDto?.toKlageDto(): KlageDto {
-    TODO("Not yet implemented")
-}
+private fun FiksKlageDto.toKlageDto() =
+    KlageDto(
+        klageId = klageId,
+        vedtakId = vedtakId,
+        // TODO Skal vi utlede status fra denne?
+        status = sendtKvittering.sendtStatus,
+        documentIdPdf = klageDokument.dokumentlagerDokumentId,
+    )
 
 data class DocumentReferences (
     val documents: List<DocumentRef>,
@@ -134,9 +139,8 @@ data class KlagerDto(
 
 // TODO Hva skal legges ved i denne? Kun json, pdf,?
 data class KlageDto(
-//    val klageUrl: FilUrl,
     val klageId: UUID,
     val vedtakId: UUID,
-    val klageTekst: String,
-    val status: KlageStatus,
+    val status: SendtStatusDto,
+    val documentIdPdf: UUID,
 )

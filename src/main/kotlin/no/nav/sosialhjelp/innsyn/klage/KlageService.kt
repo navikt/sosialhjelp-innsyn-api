@@ -9,7 +9,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
@@ -44,7 +43,6 @@ class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
     private val fiksClient: FiksClient,
-    private val eventService: EventService,
 ) : KlageService {
 
     override suspend fun sendKlage(
@@ -54,6 +52,7 @@ class KlageServiceImpl(
         klageClient.sendKlage(
             digisosId = fiksDigisosId,
             klageId = input.klageId,
+            vedtakId = input.vedtakId,
             MandatoryFilesForKlage(
                 klageJson = input.toJson(),
                 klagePdf = input.createKlagePdf(),
@@ -62,7 +61,9 @@ class KlageServiceImpl(
         )
     }
 
-    override suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto> = klageClient.hentKlager(fiksDigisosId)
+    override suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto> {
+        return klageClient.hentKlager(fiksDigisosId)
+    }
 
     override suspend fun hentKlage(
         fiksDigisosId: UUID,
@@ -70,15 +71,7 @@ class KlageServiceImpl(
     ): FiksKlageDto? {
         val klager = klageClient.hentKlager(digisosId = fiksDigisosId)
 
-        validateVedtakExists(fiksDigisosId, vedtakId)
-
-        TODO ("Pr nå ingen kobling mellom vedtak og klage")
-    }
-
-    private suspend fun validateVedtakExists(fiksDigisosId: UUID, vedtakId: UUID) {
-        fiksClient.hentDigisosSak(fiksDigisosId.toString())
-            .let { digisosSak -> eventService.createModel(digisosSak) }
-            .also { internalDigisosSoker -> internalDigisosSoker.validateVedtakExists(vedtakId) }
+        return klager.find { it.vedtakId == vedtakId }
     }
 
     override suspend fun lastOppVedlegg(

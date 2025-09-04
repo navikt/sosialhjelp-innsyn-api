@@ -3,10 +3,12 @@ package no.nav.sosialhjelp.innsyn.klage
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
+import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import org.apache.commons.io.IOUtils
@@ -20,8 +22,8 @@ import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.util.UUID
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
@@ -140,11 +142,11 @@ class FiksMellomlagerClient(
     private fun handleClientError(
         exception: Throwable,
         context: String? = null,
-    ): MellomlagerResponse.FiksError = throw exception
-//        when (exception) {
-//            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
-//            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
-//        }
+    ): MellomlagerResponse.FiksError =
+        when (exception) {
+            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
+            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
+        }
 
     private suspend fun getMaskinportenToken() = texasClient.getMaskinportenToken().value
 
@@ -229,7 +231,7 @@ private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): Lin
     return body
 }
 
-private fun String.toFiksError() = jacksonObjectMapper().readValue<MellomlagerResponse.FiksError>(this)
+private fun String.toFiksError() = objectMapper.readValue<MellomlagerResponse.FiksError>(this)
 
 sealed interface MellomlagerResponse {
     data class MellomlagringDto(

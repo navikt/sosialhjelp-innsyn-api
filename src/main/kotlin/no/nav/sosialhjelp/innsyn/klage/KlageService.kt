@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import java.io.ByteArrayInputStream
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 
 interface KlageService {
     suspend fun sendKlage(
@@ -80,7 +81,12 @@ class KlageServiceImpl(
     }
 
     private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
-        val allMetadata = mellomlagerService.getAllDocumentMetadataForRef(klageId)
+        val allMetadata =
+            runCatching { mellomlagerService.getAllDocumentMetadataForRef(klageId) }
+                .getOrElse { ex ->
+                    if (ex is NotFoundException) emptyList()
+                    else throw ex
+                }
 
         // TODO Hva forventes her i kontekst av klage?
         return JsonVedlegg()
@@ -121,11 +127,4 @@ class KlageServiceImpl(
                 addText(input.tekst)
                 finish()
             }
-}
-
-private fun InternalDigisosSoker.validateVedtakExists(vedtakId: UUID) {
-    this.saker
-        .flatMap { sak -> sak.vedtak }
-        .find { vedtak -> vedtak.id == vedtakId.toString() }
-        ?: throw IllegalArgumentException("Vedtak med id $vedtakId finnes ikke")
 }

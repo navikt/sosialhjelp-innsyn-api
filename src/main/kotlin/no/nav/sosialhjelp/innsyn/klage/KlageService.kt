@@ -5,7 +5,7 @@ import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import java.io.ByteArrayInputStream
 import java.util.UUID
-import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 
 interface KlageService {
     suspend fun sendKlage(
@@ -84,8 +83,11 @@ class KlageServiceImpl(
         val allMetadata =
             runCatching { mellomlagerService.getAllDocumentMetadataForRef(klageId) }
                 .getOrElse { ex ->
-                    if (ex is NotFoundException) emptyList()
-                    else throw ex
+                    if (ex is NotFoundException) {
+                        emptyList()
+                    } else {
+                        throw ex
+                    }
                 }
 
         // TODO Hva forventes her i kontekst av klage?

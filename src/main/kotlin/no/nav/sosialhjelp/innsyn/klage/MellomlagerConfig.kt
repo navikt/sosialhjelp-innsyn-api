@@ -14,23 +14,21 @@ import reactor.netty.http.client.HttpClient
 
 @Configuration
 class MellomlagerConfig(
-    private val clientProperties: ClientProperties
+    private val clientProperties: ClientProperties,
 ) {
-
     @Bean
     fun mellomlagerWebClient(
         webClientBuilder: WebClient.Builder,
-        httpClient: HttpClient
+        httpClient: HttpClient,
     ): WebClient =
         webClientBuilder
-            .clientConnector( ReactorClientHttpConnector(httpClient) )
+            .clientConnector(ReactorClientHttpConnector(httpClient))
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
                 it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
                 it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
-            }
-            .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
+            }.defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .build()
 }

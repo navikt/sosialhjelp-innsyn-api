@@ -2,10 +2,6 @@ package no.nav.sosialhjelp.innsyn.klage
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.io.IOException
-import java.io.InputStream
-import java.time.LocalDate
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -35,9 +31,12 @@ import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.apache.tika.Tika
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.codec.multipart.FilePart
+import java.io.IOException
+import java.io.InputStream
+import java.time.LocalDate
+import java.util.UUID
 
-class DocumentUploadHelper() {
-
+class DocumentUploadHelper {
     companion object {
         private val logger by logger()
     }
@@ -52,19 +51,18 @@ class DocumentUploadHelper() {
         return metadataList
     }
 
-    suspend fun validateMetadata(metadata: OpplastetVedleggMetadata): OppgaveValidering =
-        metadata.validate().await()
+    suspend fun validateMetadata(metadata: OpplastetVedleggMetadata): OppgaveValidering = metadata.validate().await()
 
     suspend fun createFilerForOpplasting(metadata: OpplastetVedleggMetadata): List<FilForOpplasting> =
         metadata.filer
             .map { file ->
                 file.filnavn = file.createFilename()
-                val dataBuffer = DataBufferUtils.join (file.fil.content()).awaitSingle()
+                val dataBuffer = DataBufferUtils.join(file.fil.content()).awaitSingle()
                 FilForOpplasting(
                     filnavn = file.filnavn,
                     mimetype = file.getMimeType(),
                     storrelse = file.size(),
-                    data = dataBuffer.asInputStream()
+                    data = dataBuffer.asInputStream(),
                 )
             }
 
@@ -79,8 +77,7 @@ class DocumentUploadHelper() {
                 DataBufferUtils.release(it)
 
                 objectMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
-            }
-            ?.awaitSingleOrNull()
+            }?.awaitSingleOrNull()
             ?.filter { it.filer.isNotEmpty() }
             ?: error("Missing metadata.json for Klage upload")
 
@@ -118,7 +115,10 @@ class DocumentUploadHelper() {
 //            }
 //    }
 
-    private fun addFileToMatchingMetadata(metadataList: List<OpplastetVedleggMetadata>, files: List<FilePart>) {
+    private fun addFileToMatchingMetadata(
+        metadataList: List<OpplastetVedleggMetadata>,
+        files: List<FilePart>,
+    ) {
         files.forEach { file ->
             metadataList
                 .flatMap { it.filer }
@@ -163,7 +163,7 @@ class DocumentUploadHelper() {
         if (tikaMimeType == "text/x-matlab") {
             logger.info(
                 "Tika detekterte mimeType text/x-matlab. " +
-                        "Vi antar at dette egentlig er en PDF, men som ikke har korrekte magic bytes (%PDF).",
+                    "Vi antar at dette egentlig er en PDF, men som ikke har korrekte magic bytes (%PDF).",
             )
         }
         val fileType = mapToTikaFileType(tikaMimeType)
@@ -179,11 +179,11 @@ class DocumentUploadHelper() {
 
             logger.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +
-                        "\r\nextension: \"${splitFileName(fil.filename()).extension}\"," +
-                        "\r\nvalidatedFileType: ${fileType.name}," +
-                        "\r\ntikaMediaType: $tikaMimeType," +
-                        "\r\nmime: ${fil.headers().contentType}" +
-                        ",\r\nførste bytes: $firstBytes",
+                    "\r\nextension: \"${splitFileName(fil.filename()).extension}\"," +
+                    "\r\nvalidatedFileType: ${fileType.name}," +
+                    "\r\ntikaMediaType: $tikaMimeType," +
+                    "\r\nmime: ${fil.headers().contentType}" +
+                    ",\r\nførste bytes: $firstBytes",
             )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
@@ -195,7 +195,9 @@ class DocumentUploadHelper() {
         if (fileType == TikaFileType.JPEG || fileType == TikaFileType.PNG) {
             val ext: String = fil.filename().substringAfterLast(".")
             if (ext.lowercase() in listOf("jfif", "pjpeg", "pjp")) {
-                logger.warn("Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.")
+                logger.warn(
+                    "Fil validert som TikaFileType.$fileType. Men filnavn slutter på $ext, som er en av filtypene vi pt ikke godtar.",
+                )
                 return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
             }
         }
@@ -265,5 +267,5 @@ private fun OpplastetVedleggMetadataRequest.toOpplastetVedleggMetadata() =
         hendelsetype = hendelsetype,
         hendelsereferanse = hendelsereferanse,
         filer = filer.map { OpplastetFil(Filename(it.filnavn), it.uuid) }.toMutableList(),
-        innsendelsesfrist = innsendelsesfrist
+        innsendelsesfrist = innsendelsesfrist,
     )

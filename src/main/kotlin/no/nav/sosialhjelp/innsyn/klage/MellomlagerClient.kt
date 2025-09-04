@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.klage
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
@@ -22,6 +21,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.util.UUID
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
@@ -51,11 +51,11 @@ class FiksMellomlagerClient(
     private val texasClient: TexasClient,
     private val krypteringService: KrypteringService,
     private val dokumentlagerClient: DokumentlagerClient,
-): MellomlagerClient {
-
+) : MellomlagerClient {
     override suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse =
         runCatching {
-            mellomlagerWebClient.get()
+            mellomlagerWebClient
+                .get()
                 .uri(MELLOMLAGRING_PATH, navEksternId)
                 .accept(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
@@ -63,18 +63,17 @@ class FiksMellomlagerClient(
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                 .block()
                 ?: error("MellomlagringDto er null")
-        }
-            .getOrElse { ex -> handleClientError(ex, "get metadata") }
+        }.getOrElse { ex -> handleClientError(ex, "get metadata") }
 
     override suspend fun uploadDocuments(
         navEksternId: UUID,
-        filerForOpplasting: List<FilForOpplasting>
+        filerForOpplasting: List<FilForOpplasting>,
     ): MellomlagerResponse {
-
         val body = createBodyForUpload(krypterFiler(filerForOpplasting))
 
         return runCatching {
-            mellomlagerWebClient.post()
+            mellomlagerWebClient
+                .post()
                 .uri(MELLOMLAGRING_PATH, navEksternId)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
                 .body(BodyInserters.fromMultipartData(body))
@@ -82,13 +81,16 @@ class FiksMellomlagerClient(
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                 .block()
                 ?: error("MellomlagringDto is null")
-        }
-            .getOrElse { ex -> handleClientError(ex, "upload documents") }
+        }.getOrElse { ex -> handleClientError(ex, "upload documents") }
     }
 
-    override suspend fun getDocument(navEksternId: UUID, digisosDokumentId: UUID): MellomlagerResponse {
-        return runCatching {
-            mellomlagerWebClient.get()
+    override suspend fun getDocument(
+        navEksternId: UUID,
+        digisosDokumentId: UUID,
+    ): MellomlagerResponse =
+        runCatching {
+            mellomlagerWebClient
+                .get()
                 .uri(MELLOMLAGRING_DOKUMENT_PATH, navEksternId, digisosDokumentId)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
                 .retrieve()
@@ -96,38 +98,36 @@ class FiksMellomlagerClient(
                 .block()
                 ?.let { data -> MellomlagerResponse.ByteArrayResponse(data) }
                 ?: error("Document data is null")
-        }
-            .getOrElse { ex -> handleClientError(ex, "get document")}
-    }
+        }.getOrElse { ex -> handleClientError(ex, "get document") }
 
-    override suspend fun deleteAllDocumentsForRef(navEksternId: UUID): MellomlagerResponse {
-        return runCatching {
-            mellomlagerWebClient.delete()
+    override suspend fun deleteAllDocumentsForRef(navEksternId: UUID): MellomlagerResponse =
+        runCatching {
+            mellomlagerWebClient
+                .delete()
                 .uri(MELLOMLAGRING_PATH, navEksternId)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
                 .retrieve()
                 .toBodilessEntity()
                 .block()
                 .let { MellomlagerResponse.EmptyResponse }
-        }
-            .getOrElse { ex -> handleClientError(ex, "delete all documents") }
-    }
+        }.getOrElse { ex -> handleClientError(ex, "delete all documents") }
 
-    override suspend fun deleteDocument(navEksternId: UUID, digisosDokumentId: UUID): MellomlagerResponse {
-        return runCatching {
-            mellomlagerWebClient.delete()
+    override suspend fun deleteDocument(
+        navEksternId: UUID,
+        digisosDokumentId: UUID,
+    ): MellomlagerResponse =
+        runCatching {
+            mellomlagerWebClient
+                .delete()
                 .uri(MELLOMLAGRING_DOKUMENT_PATH, navEksternId, digisosDokumentId)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
                 .retrieve()
                 .toBodilessEntity()
                 .block()
                 .let { MellomlagerResponse.EmptyResponse }
-        }
-            .getOrElse { ex -> handleClientError(ex, "delete document") }
-    }
+        }.getOrElse { ex -> handleClientError(ex, "delete document") }
 
     private suspend fun krypterFiler(filerForOpplasting: List<FilForOpplasting>): List<FilForOpplasting> {
-
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
         return withContext(Dispatchers.Default) {
@@ -140,8 +140,7 @@ class FiksMellomlagerClient(
     private fun handleClientError(
         exception: Throwable,
         context: String? = null,
-    ): MellomlagerResponse.FiksError =
-        throw exception
+    ): MellomlagerResponse.FiksError = throw exception
 //        when (exception) {
 //            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
 //            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
@@ -157,8 +156,8 @@ class FiksMellomlagerClient(
 
 data class MellomlagerClientException(
     override val message: String,
-    override val cause: Throwable
-): RuntimeException(message, cause)
+    override val cause: Throwable,
+) : RuntimeException(message, cause)
 
 data class FilMetadata(
     val filnavn: String,
@@ -169,9 +168,7 @@ data class FilMetadata(
 private fun createHttpEntityOfString(
     body: String,
     name: String,
-): HttpEntity<Any> {
-    return createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
-}
+): HttpEntity<Any> = createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
 
 fun createHttpEntity(
     body: Any,
@@ -192,42 +189,40 @@ fun createHttpEntity(
     return HttpEntity(body, headerMap)
 }
 
-private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): String {
-    return try {
+private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): String =
+    try {
         jacksonObjectMapper().writeValueAsString(
             FilMetadata(
                 filnavn = objectFilForOpplasting.filnavn?.value ?: error("Filnavn mangler"),
                 mimetype = objectFilForOpplasting.mimetype ?: "application/octet-stream",
                 storrelse = objectFilForOpplasting.storrelse,
-            )
+            ),
         )
     } catch (e: JsonProcessingException) {
         throw IllegalStateException(e)
     }
-}
 
 private fun createHttpEntityOfFile(
     file: FilForOpplasting,
     name: String,
-): HttpEntity<Any> {
-    return createHttpEntity(
+): HttpEntity<Any> =
+    createHttpEntity(
         body = ByteArrayResource(IOUtils.toByteArray(file.data)),
         name = name,
         filename = file.filnavn?.value,
-        contentType = "application/octet-stream"
+        contentType = "application/octet-stream",
     )
-}
 
 private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): LinkedMultiValueMap<String, Any> {
     val body = LinkedMultiValueMap<String, Any>()
     filerForOpplasting.forEachIndexed { index, fil ->
         body.add(
             "metadata$index",
-            createHttpEntityOfString(createJsonFilMetadata(fil),"metadata$index")
+            createHttpEntityOfString(createJsonFilMetadata(fil), "metadata$index"),
         )
         body.add(
             fil.filnavn?.value ?: error("Filnavn mangler"),
-            createHttpEntityOfFile(fil, fil.filnavn.value)
+            createHttpEntityOfFile(fil, fil.filnavn.value),
         )
     }
 
@@ -240,7 +235,7 @@ sealed interface MellomlagerResponse {
     data class MellomlagringDto(
         val navEksternRefId: UUID,
         val mellomlagringMetadataList: List<MellomlagringDokumentInfo>,
-    ): MellomlagerResponse
+    ) : MellomlagerResponse
 
     data class FiksError(
         val timestamp: Int,
@@ -256,7 +251,7 @@ sealed interface MellomlagerResponse {
 
     class ByteArrayResponse(
         val data: ByteArray,
-    ): MellomlagerResponse
+    ) : MellomlagerResponse
 
     object EmptyResponse : MellomlagerResponse
 }

@@ -5,11 +5,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.just
-import java.io.File
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.exceptions.FrontendErrorMessage
 import no.nav.sosialhjelp.innsyn.klage.DocumentReferences
@@ -38,9 +33,13 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.util.MultiValueMap
+import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
-
     @MockkBean
     private lateinit var mellomlagerClient: MellomlagerClient
 
@@ -54,7 +53,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val vedtakId = UUID.randomUUID()
 
         coEvery { mellomlagerClient.getDocumentMetadataForRef(klageId) } returns
-                MellomlagerResponse.MellomlagringDto(klageId, emptyList())
+            MellomlagerResponse.MellomlagringDto(klageId, emptyList())
 
         coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just Runs
 
@@ -78,9 +77,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId))
 
         doGet(getKlageUrl(digisosId, vedtakId))
-            .expectStatus().isOk
+            .expectStatus()
+            .isOk
             .expectBody(KlageDto::class.java)
-            .returnResult().responseBody
+            .returnResult()
+            .responseBody
             ?.also { dto ->
                 assertThat { dto.klageId == klageId }
                 assertThat { dto.vedtakId == vedtakId }
@@ -109,7 +110,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val vedtakId = UUID.randomUUID()
 
         coEvery { fiksKlageClient.hentKlager(any()) } returns
-                listOf(createFiksKlageDto(klageId, vedtakId))
+            listOf(createFiksKlageDto(klageId, vedtakId))
 
         val digisosId = UUID.randomUUID()
 
@@ -143,27 +144,30 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val pdfFile = getFile()
 
         coEvery { mellomlagerClient.uploadDocuments(any(), any()) } returns
-                MellomlagerResponse.MellomlagringDto(
-                    navEksternRefId = klageId,
-                    mellomlagringMetadataList = listOf(
-                        element = MellomlagringDokumentInfo(
-                            filnavn = "$pdfUuidFilename.pdf",
-                            filId = UUID.randomUUID(),
-                            storrelse = pdfFile.length(),
-                            mimetype = "application/pdf",
-                        ),
-                    )
-                )
+            MellomlagerResponse.MellomlagringDto(
+                navEksternRefId = klageId,
+                mellomlagringMetadataList =
+                    listOf(
+                        element =
+                            MellomlagringDokumentInfo(
+                                filnavn = "$pdfUuidFilename.pdf",
+                                filId = UUID.randomUUID(),
+                                storrelse = pdfFile.length(),
+                                mimetype = "application/pdf",
+                            ),
+                    ),
+            )
 
         val body = createBody(pdfFile, pdfUuidFilename)
 
         doPostFiles(
             uri = "/api/v1/innsyn/${UUID.randomUUID()}/${UUID.randomUUID()}/vedlegg",
             body = body,
-        )
-            .expectStatus().isOk
+        ).expectStatus()
+            .isOk
             .expectBody(DocumentReferences::class.java)
-            .returnResult().responseBody
+            .returnResult()
+            .responseBody
             ?.documents
             ?.firstOrNull()
             ?.also { docRef ->
@@ -190,8 +194,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     }
 }
 
-private fun createBody(pdfFile: File, pdfUuidFilename: UUID): MultiValueMap<String?, HttpEntity<*>?> {
-    return MultipartBodyBuilder()
+private fun createBody(
+    pdfFile: File,
+    pdfUuidFilename: UUID,
+): MultiValueMap<String?, HttpEntity<*>?> =
+    MultipartBodyBuilder()
         .apply {
             part("files", InputStreamResource(pdfFile.inputStream()))
                 .headers {
@@ -216,28 +223,25 @@ private fun createBody(pdfFile: File, pdfUuidFilename: UUID): MultiValueMap<Stri
                             .filename("metadata.json")
                             .build()
                 }
-        }
-        .build()
-}
+        }.build()
 
-private fun createMetadataJson(uuids: List<UUID>): String {
-    return listOf(
+private fun createMetadataJson(uuids: List<UUID>): String =
+    listOf(
         OpplastetVedleggMetadataRequest(
             type = "klage",
-            tilleggsinfo =  null,
+            tilleggsinfo = null,
             hendelsetype = null,
             hendelsereferanse = null,
-            filer = uuids.map { uuid ->
-                OpplastetFilMetadata(
-                    filnavn = uuid.toString() + ".pdf",
-                    uuid = uuid,
-                )
-            },
-            innsendelsesfrist = null
-        )
-    )
-        .let { objectMapper.writeValueAsString(it) }
-}
+            filer =
+                uuids.map { uuid ->
+                    OpplastetFilMetadata(
+                        filnavn = uuid.toString() + ".pdf",
+                        uuid = uuid,
+                    )
+                },
+            innsendelsesfrist = null,
+        ),
+    ).let { objectMapper.writeValueAsString(it) }
 
 data class OpplastetVedleggMetadataRequest(
     val type: String,
@@ -254,8 +258,11 @@ data class OpplastetFilMetadata(
     val uuid: UUID,
 )
 
-private fun createFiksKlageDto(klageId: UUID, vedtakId: UUID): FiksKlageDto {
-    return FiksKlageDto(
+private fun createFiksKlageDto(
+    klageId: UUID,
+    vedtakId: UUID,
+): FiksKlageDto =
+    FiksKlageDto(
         fiksOrgId = UUID.randomUUID(),
         klageId = klageId,
         vedtakId = vedtakId,
@@ -263,23 +270,23 @@ private fun createFiksKlageDto(klageId: UUID, vedtakId: UUID): FiksKlageDto {
         klageMetadata = UUID.randomUUID(),
         vedleggMetadata = UUID.randomUUID(),
         trukket = false,
-        klageDokument = DokumentInfoDto(
-            filnavn = "klage.pdf",
-            storrelse = 12345L,
-            dokumentlagerDokumentId = UUID.randomUUID(),
-        ),
-        trekkKlageInfo = null,
-        sendtKvittering = SendtKvitteringDto(
-            sendtKanal = FiksProtokoll.SVARUT,
-            meldingId = UUID.randomUUID(),
-            sendtStatus = SendtStatusDto(
-                status = SendtStatus.SENDT,
-                timestamp = LocalDateTime.now().toInstant(ZoneOffset.UTC).epochSecond
+        klageDokument =
+            DokumentInfoDto(
+                filnavn = "klage.pdf",
+                storrelse = 12345L,
+                dokumentlagerDokumentId = UUID.randomUUID(),
             ),
-            statusListe = emptyList(),
-        ),
+        trekkKlageInfo = null,
+        sendtKvittering =
+            SendtKvitteringDto(
+                sendtKanal = FiksProtokoll.SVARUT,
+                meldingId = UUID.randomUUID(),
+                sendtStatus =
+                    SendtStatusDto(
+                        status = SendtStatus.SENDT,
+                        timestamp = LocalDateTime.now().toInstant(ZoneOffset.UTC).epochSecond,
+                    ),
+                statusListe = emptyList(),
+            ),
         ettersendtInfoNAV = EttersendtInfoNAVDto(ettersendelser = emptyList()),
-
-        )
-
-}
+    )

@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.util.UUID
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.ValidationValues
@@ -8,11 +7,10 @@ import no.nav.sosialhjelp.innsyn.vedlegg.calculateContentLength
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 interface MellomlagerService {
-    suspend fun getAllDocumentMetadataForRef(
-        navEksternRef: UUID,
-    ): List<MellomlagringDokumentInfo>
+    suspend fun getAllDocumentMetadataForRef(navEksternRef: UUID): List<MellomlagringDokumentInfo>
 
     suspend fun getDocument(
         navEksternRef: UUID,
@@ -24,7 +22,7 @@ interface MellomlagerService {
         documentId: UUID,
     )
 
-    suspend fun deleteAllDocumentsForRef(navEksternRef: UUID,)
+    suspend fun deleteAllDocumentsForRef(navEksternRef: UUID)
 
     suspend fun processDocumentUpload(
         navEksternRef: UUID,
@@ -36,13 +34,12 @@ interface MellomlagerService {
 class MellomlagerServiceImpl(
     private val mellomlagerClient: MellomlagerClient,
     private val virusScanner: VirusScanner,
-): MellomlagerService {
-
+) : MellomlagerService {
     private val documentUploadHelper = DocumentUploadHelper()
 
-
-    override suspend fun getAllDocumentMetadataForRef(navEksternRef: UUID): List<MellomlagringDokumentInfo> {
-        return mellomlagerClient.getDocumentMetadataForRef(navEksternRef)
+    override suspend fun getAllDocumentMetadataForRef(navEksternRef: UUID): List<MellomlagringDokumentInfo> =
+        mellomlagerClient
+            .getDocumentMetadataForRef(navEksternRef)
             .let { response ->
                 when (response) {
                     is MellomlagerResponse.MellomlagringDto -> response.mellomlagringMetadataList
@@ -50,10 +47,13 @@ class MellomlagerServiceImpl(
                     else -> error("Unexpected response type: $response")
                 }
             }
-    }
 
-    override suspend fun getDocument(navEksternRef: UUID, documentId: UUID): ByteArray {
-        return mellomlagerClient.getDocument(navEksternRef, documentId)
+    override suspend fun getDocument(
+        navEksternRef: UUID,
+        documentId: UUID,
+    ): ByteArray =
+        mellomlagerClient
+            .getDocument(navEksternRef, documentId)
             .let { response ->
                 when (response) {
                     is MellomlagerResponse.ByteArrayResponse -> response.data
@@ -61,10 +61,13 @@ class MellomlagerServiceImpl(
                     else -> error("Unexpected response type: $response")
                 }
             }
-    }
 
-    override suspend fun deleteDocument(navEksternRef: UUID, documentId: UUID) {
-        mellomlagerClient.deleteDocument(navEksternRef, documentId)
+    override suspend fun deleteDocument(
+        navEksternRef: UUID,
+        documentId: UUID,
+    ) {
+        mellomlagerClient
+            .deleteDocument(navEksternRef, documentId)
             .also { response ->
                 when (response) {
                     is MellomlagerResponse.EmptyResponse -> logger.info("Deleted document $documentId")
@@ -75,7 +78,8 @@ class MellomlagerServiceImpl(
     }
 
     override suspend fun deleteAllDocumentsForRef(navEksternRef: UUID) {
-        mellomlagerClient.getDocumentMetadataForRef(navEksternRef)
+        mellomlagerClient
+            .getDocumentMetadataForRef(navEksternRef)
             .also { response ->
                 when (response) {
                     is MellomlagerResponse.EmptyResponse -> logger.info("Deleted all documents for ref $navEksternRef")
@@ -89,23 +93,24 @@ class MellomlagerServiceImpl(
         navEksternRef: UUID,
         allFiles: List<FilePart>,
     ): DocumentReferences {
-
         allFiles.doVirusScan()
 
-        val metadata = documentUploadHelper.extractMetadataAndAddFiles(allFiles).firstOrNull()
-            ?: error("Missing metadata.json for Klage upload")
+        val metadata =
+            documentUploadHelper.extractMetadataAndAddFiles(allFiles).firstOrNull()
+                ?: error("Missing metadata.json for Klage upload")
 
         val validation = documentUploadHelper.validateMetadata(metadata)
 
         if (validation.filer.any { it.status.result != ValidationValues.OK }) {
             logger.error(
                 "On file upload Klage - Validation failed for file(s): " +
-                        "${validation.filer.filter { it.status.result != ValidationValues.OK }}"
+                    "${validation.filer.filter { it.status.result != ValidationValues.OK }}",
             )
             throw FileValidationException("Upload document for Klage failed due to validation errors.")
         }
 
-        return documentUploadHelper.createFilerForOpplasting(metadata)
+        return documentUploadHelper
+            .createFilerForOpplasting(metadata)
             .let { mellomlagerClient.uploadDocuments(navEksternRef, it) }
             .let { mellomlagerResponse ->
                 when (mellomlagerResponse) {
@@ -121,7 +126,7 @@ class MellomlagerServiceImpl(
             virusScanner.scan(
                 filePart.filename(),
                 data = filePart,
-                size = filePart.calculateContentLength()
+                size = filePart.calculateContentLength(),
             )
         }
     }
@@ -140,11 +145,13 @@ class MellomlagerServiceImpl(
 
 private fun MellomlagerResponse.MellomlagringDto.toDocumentRefs(): DocumentReferences =
     DocumentReferences(
-        this.mellomlagringMetadataList.map { DocumentRef(it.filId, it.filnavn) }
+        this.mellomlagringMetadataList.map { DocumentRef(it.filId, it.filnavn) },
     )
 
 data class FileValidationException(
     override val message: String,
-): RuntimeException(message)
+) : RuntimeException(message)
 
-data class MellomlagerException(override val message: String): RuntimeException(message)
+data class MellomlagerException(
+    override val message: String,
+) : RuntimeException(message)

@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.io.ByteArrayInputStream
-import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
@@ -17,6 +15,8 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import java.io.ByteArrayInputStream
+import java.util.UUID
 
 interface KlageService {
     suspend fun sendKlage(
@@ -44,7 +44,6 @@ class KlageServiceImpl(
     private val mellomlagerService: MellomlagerService,
     private val fiksClient: FiksClient,
 ) : KlageService {
-
     override suspend fun sendKlage(
         fiksDigisosId: UUID,
         input: KlageInput,
@@ -57,13 +56,11 @@ class KlageServiceImpl(
                 klageJson = input.toJson(),
                 klagePdf = input.createKlagePdf(),
                 vedleggJson = input.createJsonVedleggSpec(),
-            )
+            ),
         )
     }
 
-    override suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto> {
-        return klageClient.hentKlager(fiksDigisosId)
-    }
+    override suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto> = klageClient.hentKlager(fiksDigisosId)
 
     override suspend fun hentKlage(
         fiksDigisosId: UUID,
@@ -85,7 +82,6 @@ class KlageServiceImpl(
     }
 
     private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
-
         val allMetadata = mellomlagerService.getAllDocumentMetadataForRef(klageId)
 
         // TODO Hva forventes her i kontekst av klage?
@@ -102,18 +98,17 @@ class KlageServiceImpl(
 
     private fun KlageInput.toJson(): String = objectMapper.writeValueAsString(this)
 
-    private fun KlageInput.createKlagePdf(): FilForOpplasting {
-        return PDDocument()
+    private fun KlageInput.createKlagePdf(): FilForOpplasting =
+        PDDocument()
             .use { document -> generateKlagePdf(document, this) }
             .let { pdf ->
                 FilForOpplasting(
                     filnavn = Filename("klage.pdf"),
                     mimetype = "application/pdf",
                     storrelse = pdf.size.toLong(),
-                    data = ByteArrayInputStream(pdf)
+                    data = ByteArrayInputStream(pdf),
                 )
             }
-    }
 
     private fun generateKlagePdf(
         document: PDDocument,

@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.util.UUID
-import org.springframework.http.ResponseEntity
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -46,7 +46,7 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
     ): DocumentReferences {
-        TODO ("Implementer hentVedlegg i KlageController")
+        TODO("Implementer hentVedlegg i KlageController")
     }
 
     @GetMapping("/{fiksDigisosId}/klage/{klageId}/vedlegg/{documentId}")
@@ -55,7 +55,7 @@ class KlageController(
         @PathVariable klageId: UUID,
         @PathVariable documentId: UUID,
     ): ResponseEntity<ByteArray> {
-        TODO ("Implementer hentVedlegg i KlageController, og slett denne funksjonen")
+        TODO("Implementer hentVedlegg i KlageController, og slett denne funksjonen")
     }
 
     @GetMapping("/{fiksDigisosId}/klage/{klageId}/avbryt")
@@ -118,7 +118,7 @@ private fun FiksKlageDto.toKlageDto() =
         documentIdPdf = klageDokument.dokumentlagerDokumentId,
     )
 
-data class DocumentReferences (
+data class DocumentReferences(
     val documents: List<DocumentRef>,
 )
 

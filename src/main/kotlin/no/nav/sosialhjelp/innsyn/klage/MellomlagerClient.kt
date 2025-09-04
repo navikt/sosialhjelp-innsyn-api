@@ -240,15 +240,15 @@ sealed interface MellomlagerResponse {
     ) : MellomlagerResponse
 
     data class FiksError(
-        val timestamp: Long,
-        val status: Int,
-        val error: String,
-        val errorId: UUID,
-        val path: String,
-        val originalPath: String,
-        val message: String,
-        val errorCode: String,
-        val errorJson: String,
+        val timestamp: Long?,
+        val status: Int?,
+        val error: String?,
+        val errorId: UUID?,
+        val path: String?,
+        val originalPath: String?,
+        val message: String?,
+        val errorCode: String?,
+        val errorJson: String?,
     ) : MellomlagerResponse
 
     class ByteArrayResponse(

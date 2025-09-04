@@ -4,8 +4,9 @@ import java.io.ByteArrayInputStream
 import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -40,7 +41,6 @@ interface KlageService {
 class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
-    private val fiksClient: FiksClient,
 ) : KlageService {
     override suspend fun sendKlage(
         fiksDigisosId: UUID,
@@ -80,24 +80,19 @@ class KlageServiceImpl(
     }
 
     private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
+        val allMetadata = mellomlagerService.getAllDocumentMetadataForRef(klageId)
 
+        // TODO Hva forventes her i kontekst av klage?
+        return JsonVedlegg()
+            .withType("klage")
+            .withStatus(if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG")
+            .withTilleggsinfo("tilleggsinfo")
+            .withHendelseType(JsonVedlegg.HendelseType.BRUKER)
+            .withHendelseReferanse(this.vedtakId.toString())
+            .withKlageId(klageId.toString())
+            .withFiler(allMetadata.map { JsonFiler().withFilnavn(it.filnavn) })
+            .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
 
-
-
-//        val allMetadata = mellomlagerService.getAllDocumentMetadataForRef(klageId)
-//
-//        // TODO Hva forventes her i kontekst av klage?
-//        return JsonVedlegg()
-//            .withType("klage")
-//            .withStatus(if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG")
-//            .withTilleggsinfo("tilleggsinfo")
-//            .withHendelseType(JsonVedlegg.HendelseType.BRUKER)
-//            .withHendelseReferanse(this.vedtakId.toString())
-//            .withKlageId(klageId.toString())
-//            .withFiler(allMetadata.map { JsonFiler().withFilnavn(it.filnavn) })
-//            .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
-
-        return JsonVedleggSpesifikasjon()
     }
 
     private fun KlageInput.toJson(): String = objectMapper.writeValueAsString(this)

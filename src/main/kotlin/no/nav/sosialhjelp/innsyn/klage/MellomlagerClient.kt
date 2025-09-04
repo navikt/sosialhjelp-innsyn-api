@@ -146,7 +146,7 @@ class FiksMellomlagerClient(
 //            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
 //        }
 
-    private suspend fun getMaskinportenToken() = texasClient.getMaskinportenToken()
+    private suspend fun getMaskinportenToken() = texasClient.getMaskinportenToken().value
 
     companion object {
         private const val MELLOMLAGRING_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}"

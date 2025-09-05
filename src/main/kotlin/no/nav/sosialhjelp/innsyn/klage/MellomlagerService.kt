@@ -111,8 +111,10 @@ class MellomlagerServiceImpl(
 
         return documentUploadHelper
             .createFilerForOpplasting(metadata)
-            .let { mellomlagerClient.uploadDocuments(navEksternRef, it) }
-            .let { mellomlagerResponse ->
+            .let {
+                logger.info("*** UPLOADING DOCUMENTS")
+                mellomlagerClient.uploadDocuments(navEksternRef, it)
+            }.let { mellomlagerResponse ->
                 when (mellomlagerResponse) {
                     is MellomlagerResponse.MellomlagringDto -> mellomlagerResponse.toDocumentRefs()
                     is MellomlagerResponse.FiksError -> handleError(mellomlagerResponse)

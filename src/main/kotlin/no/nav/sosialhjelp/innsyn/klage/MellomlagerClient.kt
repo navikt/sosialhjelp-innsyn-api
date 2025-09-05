@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
@@ -71,7 +72,10 @@ class FiksMellomlagerClient(
         navEksternId: UUID,
         filerForOpplasting: List<FilForOpplasting>,
     ): MellomlagerResponse {
+        logger.info("*** CREATE BODY FOR UPLOAD")
         val body = createBodyForUpload(krypterFiler(filerForOpplasting))
+
+        logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
 
         return runCatching {
             mellomlagerWebClient
@@ -130,11 +134,16 @@ class FiksMellomlagerClient(
         }.getOrElse { ex -> handleClientError(ex, "delete document") }
 
     private suspend fun krypterFiler(filerForOpplasting: List<FilForOpplasting>): List<FilForOpplasting> {
+        logger.info("*** ENCRYPT FILES")
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
+        logger.info("*** GOT CERTIFICATE, START ENCRYPTION")
         return withContext(Dispatchers.Default) {
             filerForOpplasting.map { fil ->
-                fil.copy(data = krypteringService.krypter(fil.data, certificate, this))
+                logger.info("*** ENCRYPTING FILE: ${fil.filnavn?.value}")
+                fil
+                    .copy(data = krypteringService.krypter(fil.data, certificate, this))
+                    .also { logger.info("*** DONE ENCRYPTING FILE") }
             }
         }
     }
@@ -151,6 +160,8 @@ class FiksMellomlagerClient(
     private suspend fun getMaskinportenToken() = texasClient.getMaskinportenToken().value
 
     companion object {
+        private val logger by logger()
+
         private const val MELLOMLAGRING_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}"
         private const val MELLOMLAGRING_DOKUMENT_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}/{digisosDokumentId}"
     }

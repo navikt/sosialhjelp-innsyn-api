@@ -61,6 +61,7 @@ class DocumentUploadHelper {
                 file.filnavn = file.createFilename()
                 logger.info("*** DATABUFFER JOIN")
                 val dataBuffer = DataBufferUtils.join(file.fil.content()).awaitSingle()
+                logger.info("*** DATABUFFER JOIN DONE")
                 FilForOpplasting(
                     filnavn = file.filnavn,
                     mimetype = file.getMimeType(),

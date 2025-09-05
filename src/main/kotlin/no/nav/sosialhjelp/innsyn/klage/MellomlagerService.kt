@@ -93,7 +93,6 @@ class MellomlagerServiceImpl(
         navEksternRef: UUID,
         allFiles: List<FilePart>,
     ): DocumentReferences {
-
         logger.info("*** VIRUS SCAN")
 
         allFiles.doVirusScan()
@@ -142,7 +141,7 @@ class MellomlagerServiceImpl(
 
     private fun handleError(error: MellomlagerResponse.FiksError): Nothing {
         when (error.status) {
-            404 -> throw NotFoundException(error.message?: "")
+            404 -> throw NotFoundException(error.message ?: "")
             else -> throw MellomlagerException("Noe feilet: $error")
         }
     }

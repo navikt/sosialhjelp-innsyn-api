@@ -86,7 +86,9 @@ class KlageServiceImpl(
     private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
         val allMetadata =
             runCatching { mellomlagerService.getAllDocumentMetadataForRef(klageId) }
-                .getOrThrow()
+                .getOrElse {
+                    return JsonVedleggSpesifikasjon()
+                }
 //                .getOrElse { ex ->
 //                    if (ex is NotFoundException) {
 //                        emptyList()

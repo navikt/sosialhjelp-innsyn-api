@@ -53,10 +53,13 @@ class DocumentUploadHelper {
 
     suspend fun validateMetadata(metadata: OpplastetVedleggMetadata): OppgaveValidering = metadata.validate().await()
 
-    suspend fun createFilerForOpplasting(metadata: OpplastetVedleggMetadata): List<FilForOpplasting> =
-        metadata.filer
+    suspend fun createFilerForOpplasting(metadata: OpplastetVedleggMetadata): List<FilForOpplasting> {
+        logger.info("*** CREATE FILES FOR UPLOAD")
+
+        return metadata.filer
             .map { file ->
                 file.filnavn = file.createFilename()
+                logger.info("*** DATABUFFER JOIN")
                 val dataBuffer = DataBufferUtils.join(file.fil.content()).awaitSingle()
                 FilForOpplasting(
                     filnavn = file.filnavn,
@@ -64,7 +67,8 @@ class DocumentUploadHelper {
                     storrelse = file.size(),
                     data = dataBuffer.asInputStream(),
                 )
-            }
+            }.also { logger.info("*** DONE CREATE FILES FOR UPLOAD") }
+    }
 
     private suspend fun extractMetadata(files: List<FilePart>): List<OpplastetVedleggMetadata> =
         files

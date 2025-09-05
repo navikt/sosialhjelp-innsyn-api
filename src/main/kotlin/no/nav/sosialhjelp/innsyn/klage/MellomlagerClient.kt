@@ -67,7 +67,8 @@ class FiksMellomlagerClient(
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                 .block()
                 ?: error("MellomlagringDto er null")
-        }.getOrElse { ex -> handleClientError(ex, "get metadata") }
+        }.getOrThrow()
+//            .getOrElse { ex -> handleClientError(ex, "get metadata") }
 
     override suspend fun uploadDocuments(
         navEksternId: UUID,

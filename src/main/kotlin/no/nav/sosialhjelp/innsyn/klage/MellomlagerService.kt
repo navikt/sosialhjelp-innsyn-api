@@ -43,7 +43,9 @@ class MellomlagerServiceImpl(
             .let { response ->
                 when (response) {
                     is MellomlagerResponse.MellomlagringDto -> response.mellomlagringMetadataList
-                    is MellomlagerResponse.FiksError -> handleError(response)
+                    is MellomlagerResponse.FiksError -> error("FIKS Error: $response")
+
+//                    is MellomlagerResponse.FiksError -> handleError(response)
                     else -> error("Unexpected response type: $response")
                 }
             }

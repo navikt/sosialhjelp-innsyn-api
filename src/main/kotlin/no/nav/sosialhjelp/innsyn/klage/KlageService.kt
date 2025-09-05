@@ -5,7 +5,6 @@ import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
-import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -87,13 +86,14 @@ class KlageServiceImpl(
     private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
         val allMetadata =
             runCatching { mellomlagerService.getAllDocumentMetadataForRef(klageId) }
-                .getOrElse { ex ->
-                    if (ex is NotFoundException) {
-                        emptyList()
-                    } else {
-                        throw ex
-                    }
-                }
+                .getOrThrow()
+//                .getOrElse { ex ->
+//                    if (ex is NotFoundException) {
+//                        emptyList()
+//                    } else {
+//                        throw ex
+//                    }
+//                }
 
         // TODO Hva forventes her i kontekst av klage?
         return JsonVedlegg()

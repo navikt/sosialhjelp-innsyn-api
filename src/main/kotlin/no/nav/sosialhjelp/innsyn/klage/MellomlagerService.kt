@@ -93,11 +93,18 @@ class MellomlagerServiceImpl(
         navEksternRef: UUID,
         allFiles: List<FilePart>,
     ): DocumentReferences {
+
+        logger.info("*** VIRUS SCAN")
+
         allFiles.doVirusScan()
+
+        logger.info("*** EXTRACT METADATA")
 
         val metadata =
             documentUploadHelper.extractMetadataAndAddFiles(allFiles).firstOrNull()
                 ?: error("Missing metadata.json for Klage upload")
+
+        logger.info("*** VALIDATE METADATA")
 
         val validation = documentUploadHelper.validateMetadata(metadata)
 
@@ -108,6 +115,8 @@ class MellomlagerServiceImpl(
             )
             throw FileValidationException("Upload document for Klage failed due to validation errors.")
         }
+
+        logger.info("*** CREATE FILES FOR UPLOAD")
 
         return documentUploadHelper
             .createFilerForOpplasting(metadata)

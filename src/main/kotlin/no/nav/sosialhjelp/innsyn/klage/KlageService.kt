@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import java.io.ByteArrayInputStream
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.utils.logger
 
 interface KlageService {
     suspend fun sendKlage(
@@ -76,7 +77,10 @@ class KlageServiceImpl(
     ): DocumentReferences {
         val allFiles = rawFiles.asFlow().toList()
 
+        logger.info("*** PROCESS FILES")
+
         return mellomlagerService.processDocumentUpload(klageId, allFiles)
+            .also { logger.info("*** DONE FILE PROCESSING") }
     }
 
     private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
@@ -129,4 +133,8 @@ class KlageServiceImpl(
                 addText(input.tekst)
                 finish()
             }
+
+    companion object {
+        private val logger by logger()
+    }
 }

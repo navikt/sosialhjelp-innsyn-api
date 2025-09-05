@@ -12,6 +12,7 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import org.apache.commons.io.IOUtils
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.ContentDisposition
@@ -145,7 +146,7 @@ class FiksMellomlagerClient(
                     .copy(data = krypteringService.krypter(fil.data, certificate, this))
                     .also { logger.info("*** DONE ENCRYPTING FILE") }
             }
-        }
+        }.also { logger.info("*** RETURNING AFTER ENCRYPTION") }
     }
 
     private fun handleClientError(
@@ -227,6 +228,7 @@ private fun createHttpEntityOfFile(
     )
 
 private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): LinkedMultiValueMap<String, Any> {
+    LoggerFactory.getLogger("CreateBodyForUploadFunction").info("*** CREATING MULTIPART BODY FOR UPLOAD")
     val body = LinkedMultiValueMap<String, Any>()
     filerForOpplasting.forEachIndexed { index, fil ->
         body.add(
@@ -239,6 +241,7 @@ private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): Lin
         )
     }
 
+    LoggerFactory.getLogger("CreateBodyForUploadFunction").info("*** DONE CREATING MULTIPART BODY FOR UPLOAD")
     return body
 }
 

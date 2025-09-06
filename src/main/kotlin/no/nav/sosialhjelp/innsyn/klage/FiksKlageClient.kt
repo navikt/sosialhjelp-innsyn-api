@@ -133,8 +133,8 @@ private fun createBodyForUpload(
 ): MultiValueMap<String, HttpEntity<*>> =
     MultipartBodyBuilder()
         .apply {
-            part("klageJson", klageJson.toHttpEntity("klageJson"))
-            part("vedleggJson", vedleggJson.toJson().toHttpEntity("vedleggJson"))
+            part("klage.json", klageJson.toHttpEntity("klage.json"))
+            part("vedlegg.json", vedleggJson.toJson().toHttpEntity("vedlegg.json"))
             part("klage.pdf", InputStreamResource(klagePdf.data))
                 .headers {
                     it.contentType = MediaType.APPLICATION_OCTET_STREAM

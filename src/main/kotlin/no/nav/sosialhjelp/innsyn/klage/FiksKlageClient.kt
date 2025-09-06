@@ -78,7 +78,11 @@ class FiksKlageClientImpl(
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .bodyValue(body)
                 .retrieve()
-                .toBodilessEntity()
+                .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
+                    clientResponse.bodyToMono(String::class.java).map { errorBody ->
+                        RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
+                    }
+                }.toBodilessEntity()
                 .awaitSingleOrNull()
 
         if (response?.statusCode?.is2xxSuccessful != true) {

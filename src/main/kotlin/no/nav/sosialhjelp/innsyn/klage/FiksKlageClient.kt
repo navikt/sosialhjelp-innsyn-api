@@ -21,6 +21,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 
 interface FiksKlageClient {
     suspend fun sendKlage(
@@ -78,7 +79,7 @@ class FiksKlageClientImpl(
                 .bodyValue(body)
                 .retrieve()
                 .toBodilessEntity()
-                .block()
+                .awaitSingleOrNull()
 
         if (response?.statusCode?.is2xxSuccessful != true) {
             throw RuntimeException("Failed to send klage, status code: ${response?.statusCode}")

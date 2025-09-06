@@ -53,7 +53,8 @@ class KlageServiceImpl(
             MandatoryFilesForKlage(
                 klageJson = input.toJson(),
                 klagePdf = input.createKlagePdf(),
-                vedleggJson = input.createJsonVedleggSpec(),
+                // TODO
+                vedleggJson = JsonVedleggSpesifikasjon(),
             ),
         )
     }

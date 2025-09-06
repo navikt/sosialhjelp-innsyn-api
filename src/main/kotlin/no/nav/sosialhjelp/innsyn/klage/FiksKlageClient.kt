@@ -49,7 +49,8 @@ class FiksKlageClientImpl(
             createBodyForUpload(
                 klageJson = files.klageJson,
                 vedleggJson = files.vedleggJson,
-                klagePdf = files.klagePdf.encryptFiles(),
+                klagePdf = files.klagePdf,
+//                klagePdf = files.klagePdf.encryptFiles(),
             )
 
         doSendKlage(

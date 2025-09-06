@@ -53,12 +53,14 @@ class FiksKlageClientImpl(
 //                klagePdf = files.klagePdf.encryptFiles(),
             )
 
-        doSendKlage(
-            digisosId = digisosId,
-            klageId = klageId,
-            vedtakId = vedtakId,
-            body = body,
-        )
+        withContext(Dispatchers.IO) {
+            doSendKlage(
+                digisosId = digisosId,
+                klageId = klageId,
+                vedtakId = vedtakId,
+                body = body,
+            )
+        }
     }
 
     private suspend fun doSendKlage(

@@ -76,23 +76,30 @@ class FiksMellomlagerClient(
         navEksternId: UUID,
         filerForOpplasting: List<FilForOpplasting>,
     ): MellomlagerResponse {
+
+        val krypterteFiler = krypterFiler(filerForOpplasting)
+
         logger.info("*** CREATE BODY FOR UPLOAD -> NavEksternRef: $navEksternId")
 
-        val body = createBodyForUpload(krypterFiler(filerForOpplasting))
+        return withContext(Dispatchers.IO) {
 
-        logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
+            val body = createBodyForUpload(krypterteFiler)
 
-        return runCatching {
-            mellomlagerWebClient
-                .post()
-                .uri(MELLOMLAGRING_PATH, navEksternId)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
-                .body(BodyInserters.fromMultipartData(body))
-                .retrieve()
-                .bodyToMono<MellomlagerResponse.MellomlagringDto>()
-                .block()
-                ?: error("MellomlagringDto is null")
-        }.getOrElse { ex -> handleClientError(ex, "upload documents") }
+            logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
+
+            runCatching {
+                mellomlagerWebClient
+                    .post()
+                    .uri(MELLOMLAGRING_PATH, navEksternId)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
+                    .body(BodyInserters.fromMultipartData(body))
+                    .retrieve()
+                    .bodyToMono<MellomlagerResponse.MellomlagringDto>()
+                    .block()
+                    ?: error("MellomlagringDto is null")
+            }
+                .getOrElse { ex -> handleClientError(ex, "upload documents") }
+        }
     }
 
     override suspend fun getDocument(

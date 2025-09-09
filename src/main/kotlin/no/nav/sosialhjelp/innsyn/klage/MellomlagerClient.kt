@@ -74,7 +74,7 @@ class FiksMellomlagerClient(
         navEksternId: UUID,
         filerForOpplasting: List<FilForOpplasting>,
     ): MellomlagerResponse {
-        logger.info("*** CREATE BODY FOR UPLOAD")
+        logger.info("*** CREATE BODY FOR UPLOAD -> NavEksternRef: $navEksternId")
 
         val body = createBodyForUpload(filerForOpplasting)
 

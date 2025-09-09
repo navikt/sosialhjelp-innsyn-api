@@ -8,10 +8,9 @@ import java.time.LocalDateTime
 data class SoknadsStatusResponse(
     val status: SoknadsStatus,
     val kommunenummer: String?,
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @param:JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     val tidspunktSendt: LocalDateTime?,
     val soknadsalderIMinutter: Long?,
     val navKontor: String?,
     val filUrl: UrlResponse?,
-    val isBroken: Boolean,
 )

@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.saksoversikt.BrokenSoknad
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
@@ -51,7 +50,6 @@ class SoknadsStatusController(
             soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
             navKontor = utvidetSoknadsStatus.navKontor,
             filUrl = utvidetSoknadsStatus.soknadUrl,
-            isBroken = utvidetSoknadsStatus.navEksternRefId?.let { BrokenSoknad.isBrokenSoknad(it) } ?: false,
         )
     }
 }

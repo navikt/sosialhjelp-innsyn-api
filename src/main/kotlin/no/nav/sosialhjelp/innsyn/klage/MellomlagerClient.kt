@@ -26,6 +26,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.withTimeout
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
@@ -76,9 +78,7 @@ class FiksMellomlagerClient(
     ): MellomlagerResponse {
         logger.info("*** CREATE BODY FOR UPLOAD -> NavEksternRef: $navEksternId")
 
-        val body = createBodyForUpload(filerForOpplasting)
-
-//        val body = createBodyForUpload(krypterFiler(filerForOpplasting))
+        val body = createBodyForUpload(krypterFiler(filerForOpplasting))
 
         logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
 
@@ -144,13 +144,16 @@ class FiksMellomlagerClient(
 
         logger.info("*** GOT CERTIFICATE, START ENCRYPTION")
         return withContext(Dispatchers.Default) {
-            filerForOpplasting.map { fil ->
-                logger.info("*** ENCRYPTING FILE: ${fil.filnavn?.value}")
-                fil
-                    .copy(data = krypteringService.krypter(fil.data, certificate, this))
-                    .also { logger.info("*** DONE ENCRYPTING FILE") }
-            }
-        }.also { logger.info("*** RETURNING AFTER ENCRYPTION") }
+            withTimeout(10.seconds) {
+
+                filerForOpplasting.map { fil ->
+                    logger.info("*** ENCRYPTING FILE: ${fil.filnavn?.value}")
+                    fil
+                        .copy(data = krypteringService.krypter(fil.data, certificate, this))
+                        .also { logger.info("*** DONE ENCRYPTING FILE") }
+                }
+            }.also { logger.info("*** RETURNING AFTER ENCRYPTION") }
+        }
     }
 
     private fun handleClientError(

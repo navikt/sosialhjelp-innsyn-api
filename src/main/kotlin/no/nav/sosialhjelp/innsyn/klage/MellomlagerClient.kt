@@ -76,13 +76,11 @@ class FiksMellomlagerClient(
         navEksternId: UUID,
         filerForOpplasting: List<FilForOpplasting>,
     ): MellomlagerResponse {
-
         val krypterteFiler = krypterFiler(filerForOpplasting)
 
         logger.info("*** CREATE BODY FOR UPLOAD -> NavEksternRef: $navEksternId")
 
         return withContext(Dispatchers.IO) {
-
             val body = createBodyForUpload(krypterteFiler)
 
             logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
@@ -97,8 +95,7 @@ class FiksMellomlagerClient(
                     .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                     .block()
                     ?: error("MellomlagringDto is null")
-            }
-                .getOrElse { ex -> handleClientError(ex, "upload documents") }
+            }.getOrElse { ex -> handleClientError(ex, "upload documents") }
         }
     }
 

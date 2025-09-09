@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -27,7 +28,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.withTimeout
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
@@ -145,7 +145,6 @@ class FiksMellomlagerClient(
         logger.info("*** GOT CERTIFICATE, START ENCRYPTION")
         return withContext(Dispatchers.Default) {
             withTimeout(10.seconds) {
-
                 filerForOpplasting.map { fil ->
                     logger.info("*** ENCRYPTING FILE: ${fil.filnavn?.value}")
                     fil

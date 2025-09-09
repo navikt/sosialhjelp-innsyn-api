@@ -54,21 +54,19 @@ class DocumentUploadHelper {
     suspend fun validateMetadata(metadata: OpplastetVedleggMetadata): OppgaveValidering = metadata.validate().await()
 
     suspend fun createFilerForOpplasting(metadata: OpplastetVedleggMetadata): List<FilForOpplasting> {
-        logger.info("*** CREATE FILES FOR UPLOAD")
 
         return metadata.filer
             .map { file ->
                 file.filnavn = file.createFilename()
-                logger.info("*** DATABUFFER JOIN")
                 val dataBuffer = DataBufferUtils.join(file.fil.content()).awaitSingle()
-                logger.info("*** DATABUFFER JOIN DONE")
+
                 FilForOpplasting(
                     filnavn = file.filnavn,
                     mimetype = file.getMimeType(),
                     storrelse = file.size(),
                     data = dataBuffer.asInputStream(),
                 )
-            }.also { logger.info("*** DONE CREATE FILES FOR UPLOAD") }
+            }
     }
 
     private suspend fun extractMetadata(files: List<FilePart>): List<OpplastetVedleggMetadata> =
@@ -168,7 +166,7 @@ class DocumentUploadHelper {
         if (tikaMimeType == "text/x-matlab") {
             logger.info(
                 "Tika detekterte mimeType text/x-matlab. " +
-                    "Vi antar at dette egentlig er en PDF, men som ikke har korrekte magic bytes (%PDF).",
+                        "Vi antar at dette egentlig er en PDF, men som ikke har korrekte magic bytes (%PDF).",
             )
         }
         val fileType = mapToTikaFileType(tikaMimeType)
@@ -184,11 +182,11 @@ class DocumentUploadHelper {
 
             logger.warn(
                 "Fil validert som TikaFileType.UNKNOWN. Men har " +
-                    "\r\nextension: \"${splitFileName(fil.filename()).extension}\"," +
-                    "\r\nvalidatedFileType: ${fileType.name}," +
-                    "\r\ntikaMediaType: $tikaMimeType," +
-                    "\r\nmime: ${fil.headers().contentType}" +
-                    ",\r\nførste bytes: $firstBytes",
+                        "\r\nextension: \"${splitFileName(fil.filename()).extension}\"," +
+                        "\r\nvalidatedFileType: ${fileType.name}," +
+                        "\r\ntikaMediaType: $tikaMimeType," +
+                        "\r\nmime: ${fil.headers().contentType}" +
+                        ",\r\nførste bytes: $firstBytes",
             )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }

@@ -43,9 +43,7 @@ class MellomlagerServiceImpl(
             .let { response ->
                 when (response) {
                     is MellomlagerResponse.MellomlagringDto -> response.mellomlagringMetadataList
-                    is MellomlagerResponse.FiksError -> error("FIKS Error: $response")
-
-//                    is MellomlagerResponse.FiksError -> handleError(response)
+                    is MellomlagerResponse.FiksError -> handleError(response)
                     else -> error("Unexpected response type: $response")
                 }
             }
@@ -97,26 +95,24 @@ class MellomlagerServiceImpl(
     ): DocumentReferences {
         allFiles.doVirusScan()
 
-        val metadata =
-            documentUploadHelper.extractMetadataAndAddFiles(allFiles).firstOrNull()
-                ?: error("Missing metadata.json for Klage upload")
+        val metadata = documentUploadHelper.extractMetadataAndAddFiles(allFiles).firstOrNull()
+            ?: error("Missing metadata.json for Klage upload")
 
-        val validation = documentUploadHelper.validateMetadata(metadata)
-
-        if (validation.filer.any { it.status.result != ValidationValues.OK }) {
-            logger.error(
-                "On file upload Klage - Validation failed for file(s): " +
-                    "${validation.filer.filter { it.status.result != ValidationValues.OK }}",
-            )
-            throw FileValidationException("Upload document for Klage failed due to validation errors.")
-        }
+        documentUploadHelper.validateMetadata(metadata)
+            .also { validation ->
+                if (validation.filer.any { it.status.result != ValidationValues.OK }) {
+                    logger.error(
+                        "On file upload Klage - Validation failed for file(s): " +
+                                "${validation.filer.filter { it.status.result != ValidationValues.OK }}",
+                    )
+                    throw FileValidationException("Upload document for Klage failed due to validation errors.")
+                }
+            }
 
         return documentUploadHelper
             .createFilerForOpplasting(metadata)
-            .let {
-                logger.info("*** UPLOADING DOCUMENTS")
-                mellomlagerClient.uploadDocuments(navEksternRef, it)
-            }.let { mellomlagerResponse ->
+            .let { mellomlagerClient.uploadDocuments(navEksternRef, it)}
+            .let { mellomlagerResponse ->
                 when (mellomlagerResponse) {
                     is MellomlagerResponse.MellomlagringDto -> mellomlagerResponse.toDocumentRefs()
                     is MellomlagerResponse.FiksError -> handleError(mellomlagerResponse)

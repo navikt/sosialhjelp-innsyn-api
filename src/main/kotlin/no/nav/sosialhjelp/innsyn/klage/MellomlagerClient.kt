@@ -1,8 +1,10 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.security.cert.X509Certificate
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,7 +16,6 @@ import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import org.apache.commons.io.IOUtils
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.ContentDisposition
@@ -27,9 +28,6 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.security.cert.X509Certificate
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
@@ -71,8 +69,8 @@ class FiksMellomlagerClient(
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                 .block()
                 ?: error("MellomlagringDto er null")
-        }.getOrThrow()
-//            .getOrElse { ex -> handleClientError(ex, "get metadata") }
+        }
+            .getOrElse { ex -> handleClientError(ex, "get metadata") }
 
     override suspend fun uploadDocuments(
         navEksternId: UUID,
@@ -154,15 +152,9 @@ class FiksMellomlagerClient(
         filerForOpplasting: List<FilForOpplasting>,
         coroutineScope: CoroutineScope,
     ): List<FilForOpplasting> {
-        logger.info("*** ENCRYPT FILES")
 
-        logger.info("*** GOT CERTIFICATE, START ENCRYPTION")
         return filerForOpplasting.map { fil ->
-            logger.info("*** ENCRYPTING FILE: ${fil.filnavn?.value}")
-            fil
-                .copy(data = krypteringService.krypter(fil.data, certificate, coroutineScope))
-                .also { logger.info("*** DONE ENCRYPTING FILE") }
-                .also { logger.info("*** RETURNING AFTER ENCRYPTION") }
+            fil.copy(data = krypteringService.krypter(fil.data, certificate, coroutineScope))
         }
     }
 
@@ -207,31 +199,30 @@ fun createHttpEntity(
     filename: String?,
     contentType: String,
 ): HttpEntity<Any> {
-    val headerMap = LinkedMultiValueMap<String, String>()
-    val builder: ContentDisposition.Builder =
-        ContentDisposition
-            .builder("form-data")
-            .name(name)
-    val contentDisposition: ContentDisposition =
-        if (filename == null) builder.build() else builder.filename(filename).build()
 
-    headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-    headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
-    return HttpEntity(body, headerMap)
+    val contentDisposition = ContentDisposition.builder("form-data")
+        .run {
+            name(name)
+            if (filename != null) filename(filename)
+            build()
+        }
+
+    return LinkedMultiValueMap<String, String>()
+        .apply {
+            add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+            add(HttpHeaders.CONTENT_TYPE, contentType)
+        }
+        .let { headerMap -> HttpEntity(body, headerMap) }
 }
 
 private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): String =
-    try {
-        jacksonObjectMapper().writeValueAsString(
-            FilMetadata(
-                filnavn = objectFilForOpplasting.filnavn?.value ?: error("Filnavn mangler"),
-                mimetype = objectFilForOpplasting.mimetype ?: "application/octet-stream",
-                storrelse = objectFilForOpplasting.storrelse,
-            ),
-        )
-    } catch (e: JsonProcessingException) {
-        throw IllegalStateException(e)
-    }
+    jacksonObjectMapper().writeValueAsString(
+        FilMetadata(
+            filnavn = objectFilForOpplasting.filnavn?.value ?: error("Filnavn mangler"),
+            mimetype = objectFilForOpplasting.mimetype ?: "application/octet-stream",
+            storrelse = objectFilForOpplasting.storrelse,
+        ),
+    )
 
 private fun createHttpEntityOfFile(
     file: FilForOpplasting,
@@ -245,21 +236,19 @@ private fun createHttpEntityOfFile(
     )
 
 private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): LinkedMultiValueMap<String, Any> {
-    LoggerFactory.getLogger("CreateBodyForUploadFunction").info("*** CREATING MULTIPART BODY FOR UPLOAD")
-    val body = LinkedMultiValueMap<String, Any>()
-    filerForOpplasting.forEachIndexed { index, fil ->
-        body.add(
-            "metadata$index",
-            createHttpEntityOfString(createJsonFilMetadata(fil), "metadata$index"),
-        )
-        body.add(
-            fil.filnavn?.value ?: error("Filnavn mangler"),
-            createHttpEntityOfFile(fil, fil.filnavn.value),
-        )
-    }
-
-    LoggerFactory.getLogger("CreateBodyForUploadFunction").info("*** DONE CREATING MULTIPART BODY FOR UPLOAD")
-    return body
+    return LinkedMultiValueMap<String, Any>()
+        .apply {
+            filerForOpplasting.forEachIndexed { index, fil ->
+                add(
+                    "metadata$index",
+                    createHttpEntityOfString(createJsonFilMetadata(fil), "metadata$index"),
+                )
+                add(
+                    fil.filnavn?.value ?: error("Filnavn mangler"),
+                    createHttpEntityOfFile(fil, fil.filnavn.value),
+                )
+            }
+        }
 }
 
 private fun String.toFiksError() = objectMapper.readValue<MellomlagerResponse.FiksError>(this)

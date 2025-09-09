@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import java.io.ByteArrayInputStream
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 
 interface KlageService {
     suspend fun sendKlage(
@@ -53,8 +54,7 @@ class KlageServiceImpl(
             MandatoryFilesForKlage(
                 klageJson = input.toJson(),
                 klagePdf = input.createKlagePdf(),
-                // TODO
-                vedleggJson = JsonVedleggSpesifikasjon(),
+                vedleggJson = input.createJsonVedleggSpec(),
             ),
         )
     }
@@ -77,26 +77,18 @@ class KlageServiceImpl(
     ): DocumentReferences {
         val allFiles = rawFiles.asFlow().toList()
 
-        logger.info("*** PROCESS FILES")
-
-        return mellomlagerService
-            .processDocumentUpload(klageId, allFiles)
-            .also { logger.info("*** DONE FILE PROCESSING") }
+        return mellomlagerService.processDocumentUpload(klageId, allFiles)
     }
 
     private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
         val allMetadata =
             runCatching { mellomlagerService.getAllDocumentMetadataForRef(klageId) }
-                .getOrElse {
-                    return JsonVedleggSpesifikasjon()
+                .getOrElse { ex ->
+                    when (ex) {
+                        is NotFoundException -> emptyList()
+                        else -> throw ex
+                    }
                 }
-//                .getOrElse { ex ->
-//                    if (ex is NotFoundException) {
-//                        emptyList()
-//                    } else {
-//                        throw ex
-//                    }
-//                }
 
         // TODO Hva forventes her i kontekst av klage?
         return JsonVedlegg()

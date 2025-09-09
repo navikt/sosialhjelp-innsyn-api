@@ -75,7 +75,10 @@ class FiksMellomlagerClient(
         filerForOpplasting: List<FilForOpplasting>,
     ): MellomlagerResponse {
         logger.info("*** CREATE BODY FOR UPLOAD")
-        val body = createBodyForUpload(krypterFiler(filerForOpplasting))
+
+        val body = createBodyForUpload(filerForOpplasting)
+
+//        val body = createBodyForUpload(krypterFiler(filerForOpplasting))
 
         logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
 

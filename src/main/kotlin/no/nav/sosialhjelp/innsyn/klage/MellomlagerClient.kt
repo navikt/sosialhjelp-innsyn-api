@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.klage
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -26,6 +27,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.security.cert.X509Certificate
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
@@ -76,26 +78,31 @@ class FiksMellomlagerClient(
         navEksternId: UUID,
         filerForOpplasting: List<FilForOpplasting>,
     ): MellomlagerResponse {
-        val krypterteFiler = krypterFiler(filerForOpplasting)
+        val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
-        logger.info("*** CREATE BODY FOR UPLOAD -> NavEksternRef: $navEksternId")
+        return withContext(Dispatchers.Default) {
+            withTimeout(10.seconds) {
+                val krypterteFiler = krypterFiler(certificate, filerForOpplasting, this)
+                logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
 
-        return withContext(Dispatchers.IO) {
-            val body = createBodyForUpload(krypterteFiler)
+                logger.info("*** CREATE BODY FOR UPLOAD -> NavEksternRef: $navEksternId")
 
-            logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
+                withContext(Dispatchers.IO) {
+                    val body = createBodyForUpload(krypterteFiler)
 
-            runCatching {
-                mellomlagerWebClient
-                    .post()
-                    .uri(MELLOMLAGRING_PATH, navEksternId)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
-                    .body(BodyInserters.fromMultipartData(body))
-                    .retrieve()
-                    .bodyToMono<MellomlagerResponse.MellomlagringDto>()
-                    .block()
-                    ?: error("MellomlagringDto is null")
-            }.getOrElse { ex -> handleClientError(ex, "upload documents") }
+                    runCatching {
+                        mellomlagerWebClient
+                            .post()
+                            .uri(MELLOMLAGRING_PATH, navEksternId)
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
+                            .body(BodyInserters.fromMultipartData(body))
+                            .retrieve()
+                            .bodyToMono<MellomlagerResponse.MellomlagringDto>()
+                            .block()
+                            ?: error("MellomlagringDto is null")
+                    }.getOrElse { ex -> handleClientError(ex, "upload documents") }
+                }
+            }
         }
     }
 
@@ -142,20 +149,20 @@ class FiksMellomlagerClient(
                 .let { MellomlagerResponse.EmptyResponse }
         }.getOrElse { ex -> handleClientError(ex, "delete document") }
 
-    private suspend fun krypterFiler(filerForOpplasting: List<FilForOpplasting>): List<FilForOpplasting> {
+    private suspend fun krypterFiler(
+        certificate: X509Certificate,
+        filerForOpplasting: List<FilForOpplasting>,
+        coroutineScope: CoroutineScope,
+    ): List<FilForOpplasting> {
         logger.info("*** ENCRYPT FILES")
-        val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
         logger.info("*** GOT CERTIFICATE, START ENCRYPTION")
-        return withContext(Dispatchers.Default) {
-            withTimeout(10.seconds) {
-                filerForOpplasting.map { fil ->
-                    logger.info("*** ENCRYPTING FILE: ${fil.filnavn?.value}")
-                    fil
-                        .copy(data = krypteringService.krypter(fil.data, certificate, this))
-                        .also { logger.info("*** DONE ENCRYPTING FILE") }
-                }
-            }.also { logger.info("*** RETURNING AFTER ENCRYPTION") }
+        return filerForOpplasting.map { fil ->
+            logger.info("*** ENCRYPTING FILE: ${fil.filnavn?.value}")
+            fil
+                .copy(data = krypteringService.krypter(fil.data, certificate, coroutineScope))
+                .also { logger.info("*** DONE ENCRYPTING FILE") }
+                .also { logger.info("*** RETURNING AFTER ENCRYPTION") }
         }
     }
 

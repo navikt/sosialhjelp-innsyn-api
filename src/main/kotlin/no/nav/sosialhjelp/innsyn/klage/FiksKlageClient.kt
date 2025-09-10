@@ -50,25 +50,23 @@ class FiksKlageClientImpl(
 
         withContext(Dispatchers.Default) {
             withTimeout(60.seconds) {
-                val pdfWithEncryptedData = files.klagePdf
-                    .let {
-                        val encryptedPdf = krypteringService.krypter(it.data, certificate, this@withContext)
-                        it.copy(data = encryptedPdf)
+                krypteringService
+                    .krypter(files.klagePdf.data, certificate, this@withContext)
+                    .let { encrypted -> files.klagePdf.copy(data = encrypted) }
+                    .let { pdfWithEncryptedData ->
+                        createBodyForUpload(
+                            klageJson = files.klageJson,
+                            vedleggJson = files.vedleggJson,
+                            klagePdf = pdfWithEncryptedData,
+                        )
+                    }.also { body ->
+                        doSendKlage(
+                            digisosId = digisosId,
+                            klageId = klageId,
+                            vedtakId = vedtakId,
+                            body = body,
+                        )
                     }
-
-                val body =
-                    createBodyForUpload(
-                        klageJson = files.klageJson,
-                        vedleggJson = files.vedleggJson,
-                        klagePdf = pdfWithEncryptedData,
-                    )
-
-                doSendKlage(
-                    digisosId = digisosId,
-                    klageId = klageId,
-                    vedtakId = vedtakId,
-                    body = body,
-                )
             }
         }
     }
@@ -92,15 +90,13 @@ class FiksKlageClientImpl(
                         clientResponse.bodyToMono(String::class.java).map { errorBody ->
                             RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
                         }
-                    }
-                    .toBodilessEntity()
+                    }.toBodilessEntity()
                     .awaitSingleOrNull()
             }
         if (response?.statusCode?.is2xxSuccessful != true) {
             throw RuntimeException("Failed to send klage, status code: ${response?.statusCode}")
         }
     }
-
 
     // Uten query param vil det alle klager for alle digisosIds returneres
     override suspend fun hentKlager(digisosId: UUID?): List<FiksKlageDto> {
@@ -119,16 +115,6 @@ class FiksKlageClientImpl(
             .block()
             ?.toList()
             ?: emptyList()
-
-    private suspend fun FilForOpplasting.encryptFiles(): FilForOpplasting {
-        val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
-
-        return withContext(Dispatchers.Default) {
-            withTimeout(60.seconds) {
-                krypteringService.krypter(data, certificate, this)
-            }
-        }.let { encryptedData -> this.copy(data = encryptedData) }
-    }
 
     companion object {
         private const val SEND_INN_KLAGE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/{vedtakId}"

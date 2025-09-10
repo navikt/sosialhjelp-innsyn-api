@@ -95,15 +95,17 @@ class MellomlagerServiceImpl(
     ): DocumentReferences {
         allFiles.doVirusScan()
 
-        val metadata = documentUploadHelper.extractMetadataAndAddFiles(allFiles).firstOrNull()
-            ?: error("Missing metadata.json for Klage upload")
+        val metadata =
+            documentUploadHelper.extractMetadataAndAddFiles(allFiles).firstOrNull()
+                ?: error("Missing metadata.json for Klage upload")
 
-        documentUploadHelper.validateMetadata(metadata)
+        documentUploadHelper
+            .validateMetadata(metadata)
             .also { validation ->
                 if (validation.filer.any { it.status.result != ValidationValues.OK }) {
                     logger.error(
                         "On file upload Klage - Validation failed for file(s): " +
-                                "${validation.filer.filter { it.status.result != ValidationValues.OK }}",
+                            "${validation.filer.filter { it.status.result != ValidationValues.OK }}",
                     )
                     throw FileValidationException("Upload document for Klage failed due to validation errors.")
                 }
@@ -111,7 +113,7 @@ class MellomlagerServiceImpl(
 
         return documentUploadHelper
             .createFilerForOpplasting(metadata)
-            .let { mellomlagerClient.uploadDocuments(navEksternRef, it)}
+            .let { mellomlagerClient.uploadDocuments(navEksternRef, it) }
             .let { mellomlagerResponse ->
                 when (mellomlagerResponse) {
                     is MellomlagerResponse.MellomlagringDto -> mellomlagerResponse.toDocumentRefs()

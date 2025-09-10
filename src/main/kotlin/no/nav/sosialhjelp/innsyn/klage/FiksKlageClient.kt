@@ -46,21 +46,30 @@ class FiksKlageClientImpl(
         vedtakId: UUID,
         files: MandatoryFilesForKlage,
     ) {
-        val body =
-            createBodyForUpload(
-                klageJson = files.klageJson,
-                vedleggJson = files.vedleggJson,
-                klagePdf = files.klagePdf,
-//                klagePdf = files.klagePdf.encryptFiles(),
-            )
+        val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
-        withContext(Dispatchers.IO) {
-            doSendKlage(
-                digisosId = digisosId,
-                klageId = klageId,
-                vedtakId = vedtakId,
-                body = body,
-            )
+        withContext(Dispatchers.Default) {
+            withTimeout(60.seconds) {
+                val pdfWithEncryptedData = files.klagePdf
+                    .let {
+                        val encryptedPdf = krypteringService.krypter(it.data, certificate, this@withContext)
+                        it.copy(data = encryptedPdf)
+                    }
+
+                val body =
+                    createBodyForUpload(
+                        klageJson = files.klageJson,
+                        vedleggJson = files.vedleggJson,
+                        klagePdf = pdfWithEncryptedData,
+                    )
+
+                doSendKlage(
+                    digisosId = digisosId,
+                    klageId = klageId,
+                    vedtakId = vedtakId,
+                    body = body,
+                )
+            }
         }
     }
 
@@ -71,24 +80,27 @@ class FiksKlageClientImpl(
         body: MultiValueMap<String, HttpEntity<*>>,
     ) {
         val response =
-            fiksWebClient
-                .post()
-                .uri(SEND_INN_KLAGE_PATH, digisosId, klageId, klageId, vedtakId)
-                .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .bodyValue(body)
-                .retrieve()
-                .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
-                    clientResponse.bodyToMono(String::class.java).map { errorBody ->
-                        RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
+            withContext(Dispatchers.IO) {
+                fiksWebClient
+                    .post()
+                    .uri(SEND_INN_KLAGE_PATH, digisosId, klageId, klageId, vedtakId)
+                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .bodyValue(body)
+                    .retrieve()
+                    .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
+                        clientResponse.bodyToMono(String::class.java).map { errorBody ->
+                            RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
+                        }
                     }
-                }.toBodilessEntity()
-                .awaitSingleOrNull()
-
+                    .toBodilessEntity()
+                    .awaitSingleOrNull()
+            }
         if (response?.statusCode?.is2xxSuccessful != true) {
             throw RuntimeException("Failed to send klage, status code: ${response?.statusCode}")
         }
     }
+
 
     // Uten query param vil det alle klager for alle digisosIds returneres
     override suspend fun hentKlager(digisosId: UUID?): List<FiksKlageDto> {

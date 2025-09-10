@@ -2,9 +2,6 @@ package no.nav.sosialhjelp.innsyn.klage
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.security.cert.X509Certificate
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,6 +25,9 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.security.cert.X509Certificate
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
@@ -69,8 +69,7 @@ class FiksMellomlagerClient(
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                 .block()
                 ?: error("MellomlagringDto er null")
-        }
-            .getOrElse { ex -> handleClientError(ex, "get metadata") }
+        }.getOrElse { ex -> handleClientError(ex, "get metadata") }
 
     override suspend fun uploadDocuments(
         navEksternId: UUID,
@@ -151,12 +150,10 @@ class FiksMellomlagerClient(
         certificate: X509Certificate,
         filerForOpplasting: List<FilForOpplasting>,
         coroutineScope: CoroutineScope,
-    ): List<FilForOpplasting> {
-
-        return filerForOpplasting.map { fil ->
+    ): List<FilForOpplasting> =
+        filerForOpplasting.map { fil ->
             fil.copy(data = krypteringService.krypter(fil.data, certificate, coroutineScope))
         }
-    }
 
     private fun handleClientError(
         exception: Throwable,
@@ -199,20 +196,20 @@ fun createHttpEntity(
     filename: String?,
     contentType: String,
 ): HttpEntity<Any> {
-
-    val contentDisposition = ContentDisposition.builder("form-data")
-        .run {
-            name(name)
-            if (filename != null) filename(filename)
-            build()
-        }
+    val contentDisposition =
+        ContentDisposition
+            .builder("form-data")
+            .run {
+                name(name)
+                if (filename != null) filename(filename)
+                build()
+            }
 
     return LinkedMultiValueMap<String, String>()
         .apply {
             add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
             add(HttpHeaders.CONTENT_TYPE, contentType)
-        }
-        .let { headerMap -> HttpEntity(body, headerMap) }
+        }.let { headerMap -> HttpEntity(body, headerMap) }
 }
 
 private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): String =
@@ -235,8 +232,8 @@ private fun createHttpEntityOfFile(
         contentType = "application/octet-stream",
     )
 
-private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): LinkedMultiValueMap<String, Any> {
-    return LinkedMultiValueMap<String, Any>()
+private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): LinkedMultiValueMap<String, Any> =
+    LinkedMultiValueMap<String, Any>()
         .apply {
             filerForOpplasting.forEachIndexed { index, fil ->
                 add(
@@ -249,7 +246,6 @@ private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): Lin
                 )
             }
         }
-}
 
 private fun String.toFiksError() = objectMapper.readValue<MellomlagerResponse.FiksError>(this)
 

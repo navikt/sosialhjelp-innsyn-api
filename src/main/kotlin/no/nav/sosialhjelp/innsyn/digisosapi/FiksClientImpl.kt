@@ -290,10 +290,10 @@ data class VedleggMetadata(
     val storrelse: Long,
 )
 
-private fun Any.toHttpEntity(
+fun Any.toHttpEntity(
     name: String,
-    filename: String?,
-    contentType: String,
+    filename: String? = null,
+    contentType: String = MediaType.APPLICATION_JSON_VALUE,
 ): HttpEntity<Any> {
     val headerMap = LinkedMultiValueMap<String, String>()
     val builder: ContentDisposition.Builder =
@@ -307,5 +307,3 @@ private fun Any.toHttpEntity(
     headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
     return HttpEntity(this, headerMap)
 }
-
-fun String.toHttpEntity(name: String): HttpEntity<Any> = this.toHttpEntity(name, null, "text/plain;charset=UTF-8")

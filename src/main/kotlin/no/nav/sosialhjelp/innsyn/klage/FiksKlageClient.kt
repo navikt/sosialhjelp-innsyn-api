@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
@@ -20,8 +22,6 @@ import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 interface FiksKlageClient {
     suspend fun sendKlage(
@@ -147,17 +147,38 @@ private fun createBodyForUpload(
                     MediaType.APPLICATION_JSON_VALUE,
                 ),
             )
-            part("klage.pdf", InputStreamResource(klagePdf.data))
-                .headers {
-                    it.contentType = MediaType.APPLICATION_OCTET_STREAM
-                    it.contentDisposition =
-                        ContentDisposition
-                            .builder("form-data")
-                            .name("klage.pdf")
-                            .filename(klagePdf.filnavn?.value)
-                            .build()
-                }
+            createMetadataAndPartForKlagePdf(klagePdf)
         }.build()
+
+private fun MultipartBodyBuilder.createMetadataAndPartForKlagePdf(klagePdf: FilForOpplasting) {
+    part(
+        "metadata",
+        createHttpEntity(
+            body = klagePdf.createMetadataPart(),
+            name = "metadata",
+            filename = null,
+            contentType = MediaType.APPLICATION_JSON_VALUE,
+        ),
+    )
+
+    part("klage.pdf", InputStreamResource(klagePdf.data))
+        .headers {
+            it.contentType = MediaType.APPLICATION_OCTET_STREAM
+            it.contentDisposition =
+                ContentDisposition
+                    .builder("form-data")
+                    .name("klage.pdf")
+                    .filename(klagePdf.filnavn?.value)
+                    .build()
+        }
+}
+
+private fun FilForOpplasting.createMetadataPart() =
+    FilMetadata(
+        filnavn = filnavn?.value ?: error("Mangler filnavn for Metadata"),
+        mimetype = mimetype ?: MediaType.APPLICATION_JSON_VALUE,
+        storrelse = storrelse,
+    )
 
 data class MandatoryFilesForKlage(
     val klageJson: String,

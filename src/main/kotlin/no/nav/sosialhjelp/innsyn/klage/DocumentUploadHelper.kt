@@ -105,17 +105,6 @@ class DocumentUploadHelper {
             }
     }
 
-//    private fun List<OpplastetVedleggMetadata>.checkAllFilesHasMatch(files: List<FilePart>) {
-//        this
-//            .flatMap { it.filer }
-//            .all { fileRef -> fileRef.uuid.toString() in files.map { file -> file.filename().substringBefore(".") } }
-//            .also { allFilesHasMatch ->
-//                require(allFilesHasMatch) {
-//                    "Ikke alle filer i metadata.json ble funnet i forsendelsen"
-//                }
-//            }
-//    }
-
     private fun addFileToMatchingMetadata(
         metadataList: List<OpplastetVedleggMetadata>,
         files: List<FilePart>,

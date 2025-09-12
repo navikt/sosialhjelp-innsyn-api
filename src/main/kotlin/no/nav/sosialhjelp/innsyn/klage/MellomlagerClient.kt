@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
@@ -67,7 +68,7 @@ class FiksMellomlagerClient(
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
                 .retrieve()
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
-                .block()
+                .awaitSingleOrNull()
                 ?: error("MellomlagringDto er null")
         }.getOrElse { ex -> handleClientError(ex, "get metadata") }
 
@@ -95,7 +96,7 @@ class FiksMellomlagerClient(
                             .body(BodyInserters.fromMultipartData(body))
                             .retrieve()
                             .bodyToMono<MellomlagerResponse.MellomlagringDto>()
-                            .block()
+                            .awaitSingleOrNull()
                             ?: error("MellomlagringDto is null")
                     }.getOrElse { ex -> handleClientError(ex, "upload documents") }
                 }
@@ -114,7 +115,7 @@ class FiksMellomlagerClient(
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
                 .retrieve()
                 .bodyToMono<ByteArray>()
-                .block()
+                .awaitSingleOrNull()
                 ?.let { data -> MellomlagerResponse.ByteArrayResponse(data) }
                 ?: error("Document data is null")
         }.getOrElse { ex -> handleClientError(ex, "get document") }
@@ -127,7 +128,7 @@ class FiksMellomlagerClient(
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
                 .retrieve()
                 .toBodilessEntity()
-                .block()
+                .awaitSingleOrNull()
                 .let { MellomlagerResponse.EmptyResponse }
         }.getOrElse { ex -> handleClientError(ex, "delete all documents") }
 
@@ -142,7 +143,7 @@ class FiksMellomlagerClient(
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${getMaskinportenToken()}")
                 .retrieve()
                 .toBodilessEntity()
-                .block()
+                .awaitSingleOrNull()
                 .let { MellomlagerResponse.EmptyResponse }
         }.getOrElse { ex -> handleClientError(ex, "delete document") }
 

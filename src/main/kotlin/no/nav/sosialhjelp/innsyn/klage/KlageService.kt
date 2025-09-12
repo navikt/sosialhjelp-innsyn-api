@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import java.io.ByteArrayInputStream
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 
 interface KlageService {
     suspend fun sendKlage(
@@ -83,21 +84,16 @@ class KlageServiceImpl(
         val allMetadata =
             runCatching { mellomlagerService.getAllDocumentMetadataForRef(klageId) }
                 .getOrElse { ex ->
-                    logger.error("Feil ved henting av metadata for vedlegg til klage med klageId=$klageId", ex)
-                    emptyList()
+                    when (ex) {
+                        is NotFoundException -> emptyList()
+                        else -> throw ex
+                    }
                 }
-
-//                    when (ex) {
-//                        is NotFoundException -> emptyList()
-//                        else -> throw ex
-//                    }
-//                }
 
         // TODO Hva forventes her i kontekst av klage?
         return JsonVedlegg()
             .withType("klage")
             .withStatus(if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG")
-            .withTilleggsinfo("tilleggsinfo")
             .withHendelseType(JsonVedlegg.HendelseType.BRUKER)
             .withHendelseReferanse(this.vedtakId.toString())
             .withKlageId(klageId.toString())

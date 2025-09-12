@@ -134,7 +134,7 @@ private fun createBodyForUpload(
             part(
                 "klage.json",
                 klageJson.toHttpEntity(
-                    "files",
+                    "klage.json",
                     "klage.json",
                     MediaType.APPLICATION_JSON_VALUE,
                 ),
@@ -142,7 +142,7 @@ private fun createBodyForUpload(
             part(
                 "vedlegg.json",
                 vedleggJson.toJson().toHttpEntity(
-                    "files",
+                    "vedlegg.json",
                     "vedlegg.json",
                     MediaType.APPLICATION_JSON_VALUE,
                 ),
@@ -167,7 +167,7 @@ private fun MultipartBodyBuilder.createMetadataAndPartForKlagePdf(klagePdf: FilF
             it.contentDisposition =
                 ContentDisposition
                     .builder("form-data")
-                    .name("files")
+                    .name("klage.pdf")
                     .filename(klagePdf.filnavn?.value)
                     .build()
         }

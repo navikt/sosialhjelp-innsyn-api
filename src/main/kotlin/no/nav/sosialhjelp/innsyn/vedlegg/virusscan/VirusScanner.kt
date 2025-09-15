@@ -21,7 +21,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 @Component
 class VirusScanner(
     private val virusScanWebClient: WebClient,
-    @Value("\${innsyn.vedlegg.virusscan.enabled}") val enabled: Boolean,
+    @param:Value("\${innsyn.vedlegg.virusscan.enabled}") val enabled: Boolean,
 ) {
     private val virusScanRetry = RetryUtils.retryBackoffSpec()
 

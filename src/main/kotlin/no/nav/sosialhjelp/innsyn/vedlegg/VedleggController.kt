@@ -8,7 +8,6 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -103,7 +102,6 @@ class VedleggController(
     suspend fun hentVedlegg(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<VedleggResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
@@ -155,7 +153,7 @@ data class OpplastetVedleggMetadata(
     val hendelsetype: JsonVedlegg.HendelseType?,
     val hendelsereferanse: String?,
     val filer: MutableList<OpplastetFil>,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val innsendelsesfrist: LocalDate?,
 )
 

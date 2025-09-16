@@ -145,6 +145,7 @@ class UtbetalingerService(
             .map { utbetaling ->
                 utbetaling.infoLoggVedManglendeUtbetalingsDatoEllerForfallsDato(digisosSak.kommunenummer)
                 ManedUtbetaling(
+                    referanse = utbetaling.referanse,
                     tittel = utbetaling.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
                     belop = utbetaling.belop,
                     utbetalingsdato = utbetaling.utbetalingsDato,

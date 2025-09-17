@@ -12,6 +12,7 @@ jobs:
     name: 'Build with Gradle'
     runs-on: ubuntu-latest
     permissions:
+      id-token: read
       packages: write
       contents: write
     env:

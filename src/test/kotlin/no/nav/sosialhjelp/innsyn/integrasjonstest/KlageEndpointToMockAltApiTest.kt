@@ -19,6 +19,7 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import java.util.UUID
+import org.junit.jupiter.api.AfterAll
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -156,6 +157,13 @@ class KlageEndpointToMockAltApiTest {
         @JvmStatic
         fun beforeAll() {
             System.setProperty("MOCK_PORT", mockAltApiContainer.getMappedPort(8989).toString())
+            mockOAuth2Server.start(PORT)
+        }
+
+        @AfterAll
+        @JvmStatic
+        fun afterAll() {
+            mockOAuth2Server.shutdown()
         }
 
         private const val POST = "/api/v1/innsyn/{digisosId}/klage/send"
@@ -163,7 +171,7 @@ class KlageEndpointToMockAltApiTest {
         private const val GET_ONE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
 
         private val mockOAuth2Server = MockOAuth2Server()
-        private const val PORT = 12345
+        private const val PORT = 12233
 
         init {
             mockOAuth2Server.start(PORT)

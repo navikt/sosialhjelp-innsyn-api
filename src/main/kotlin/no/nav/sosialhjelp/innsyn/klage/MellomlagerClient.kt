@@ -70,7 +70,13 @@ class FiksMellomlagerClient(
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                 .awaitSingleOrNull()
                 ?: error("MellomlagringDto er null")
-        }.getOrElse { ex -> handleClientError(ex, "get metadata") }
+        }
+            .getOrElse { ex ->
+                when (ex) {
+                    is WebClientResponseException.NotFound -> MellomlagerResponse.EmptyResponse
+                    else -> handleClientError(ex, "get metadata")
+                }
+            }
 
     override suspend fun uploadDocuments(
         navEksternId: UUID,
@@ -170,8 +176,8 @@ class FiksMellomlagerClient(
     companion object {
         private val logger by logger()
 
-        private const val MELLOMLAGRING_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}"
-        private const val MELLOMLAGRING_DOKUMENT_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}/{digisosDokumentId}"
+        private const val MELLOMLAGRING_PATH = "/digisos/api/v1/mellomlagring/{navEksternRefId}"
+        private const val MELLOMLAGRING_DOKUMENT_PATH = "/digisos/api/v1/mellomlagring/{navEksternRefId}/{digisosDokumentId}"
     }
 }
 

@@ -32,6 +32,8 @@ okhttp3 = "5.1.0"
 spring_mockk = "4.0.2"
 resilience4j = "2.3.0"
 
+testcontainers = "1.21.3"
+
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-slf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version.ref = "coroutines" }
@@ -86,6 +88,9 @@ springmockk = { module = "com.ninja-squad:springmockk", version.ref = "spring_mo
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockk-jvm = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
 mock-oauth2-server = { module = "no.nav.security:mock-oauth2-server", version.ref  = "mock-oauth2-server"}
+
+testcontainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
 
 [bundles]
 spring-boot = [

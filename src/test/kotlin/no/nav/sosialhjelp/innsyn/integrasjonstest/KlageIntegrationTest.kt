@@ -74,7 +74,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
-        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId))
+        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
         doGet(getKlageUrl(digisosId, vedtakId))
             .expectStatus()
@@ -108,11 +108,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     fun `Hente alle klager skal returnere alle klager for digisosId`() {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
+        val digisosId = UUID.randomUUID()
 
         coEvery { fiksKlageClient.hentKlager(any()) } returns
-            listOf(createFiksKlageDto(klageId, vedtakId))
+            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
-        val digisosId = UUID.randomUUID()
 
         doGet(getKlagerUrl(digisosId))
             .expectBody(KlagerDto::class.java)
@@ -261,9 +261,11 @@ data class OpplastetFilMetadata(
 private fun createFiksKlageDto(
     klageId: UUID,
     vedtakId: UUID,
+    digisosId: UUID,
 ): FiksKlageDto =
     FiksKlageDto(
         fiksOrgId = UUID.randomUUID(),
+        digisosId = digisosId,
         klageId = klageId,
         vedtakId = vedtakId,
         navEksternRefId = klageId,

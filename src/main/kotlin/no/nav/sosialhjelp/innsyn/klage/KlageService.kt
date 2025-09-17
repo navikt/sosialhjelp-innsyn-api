@@ -64,11 +64,7 @@ class KlageServiceImpl(
     override suspend fun hentKlage(
         fiksDigisosId: UUID,
         vedtakId: UUID,
-    ): FiksKlageDto? {
-        val klager = klageClient.hentKlager(digisosId = fiksDigisosId)
-
-        return klager.find { it.vedtakId == vedtakId }
-    }
+    ): FiksKlageDto? = klageClient.hentKlager(digisosId = fiksDigisosId).find { it.vedtakId == vedtakId }
 
     override suspend fun lastOppVedlegg(
         fiksDigisosId: UUID,

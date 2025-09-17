@@ -77,6 +77,10 @@ dependencies {
     testImplementation(libs.mockwebserver)
     testImplementation(libs.spring.boot.security.test)
     testImplementation(libs.mock.oauth2.server)
+
+    // testcontainers
+    testImplementation(libs.testcontainers.junit)
+    testImplementation(libs.testcontainers)
 }
 
 // override spring managed dependencies
@@ -96,6 +100,12 @@ repositories {
             username = githubUser
             password = githubPassword
         }
+    }
+}
+
+configurations {
+    testImplementation {
+        exclude(group = "org.mockito")
     }
 }
 

@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
@@ -22,6 +20,8 @@ import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 interface FiksKlageClient {
     suspend fun sendKlage(
@@ -90,8 +90,7 @@ class FiksKlageClientImpl(
                         clientResponse.bodyToMono(String::class.java).map { errorBody ->
                             RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
                         }
-                    }
-                    .toBodilessEntity()
+                    }.toBodilessEntity()
                     .awaitSingleOrNull()
             }
         if (response?.statusCode?.is2xxSuccessful != true) {

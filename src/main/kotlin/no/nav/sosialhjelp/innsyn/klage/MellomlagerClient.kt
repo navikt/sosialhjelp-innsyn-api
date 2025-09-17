@@ -70,13 +70,12 @@ class FiksMellomlagerClient(
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                 .awaitSingleOrNull()
                 ?: error("MellomlagringDto er null")
-        }
-            .getOrElse { ex ->
-                when (ex) {
-                    is WebClientResponseException.NotFound -> MellomlagerResponse.EmptyResponse
-                    else -> handleClientError(ex, "get metadata")
-                }
+        }.getOrElse { ex ->
+            when (ex) {
+                is WebClientResponseException.NotFound -> MellomlagerResponse.EmptyResponse
+                else -> handleClientError(ex, "get metadata")
             }
+        }
 
     override suspend fun uploadDocuments(
         navEksternId: UUID,

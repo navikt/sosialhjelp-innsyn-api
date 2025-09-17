@@ -113,7 +113,6 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.hentKlager(any()) } returns
             listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
-
         doGet(getKlagerUrl(digisosId))
             .expectBody(KlagerDto::class.java)
             .returnResult()

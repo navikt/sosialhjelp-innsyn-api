@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
-import java.util.UUID
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
@@ -19,13 +18,13 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
+import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash", "testcontainers"])
 @Testcontainers(disabledWithoutDocker = true)
 class KlageEndpointToMockAltApiTest {
-
     @Autowired
     private lateinit var webClient: WebTestClient
 
@@ -38,7 +37,6 @@ class KlageEndpointToMockAltApiTest {
 
     @Test
     fun `Sende og hente klage skal fungere`() {
-
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
@@ -49,8 +47,7 @@ class KlageEndpointToMockAltApiTest {
             .let { klager ->
                 assertThat(klager).hasSize(1)
                 klager[0]
-            }
-            .also { klage ->
+            }.also { klage ->
                 assertThat(klage.klageId).isEqualTo(klageId)
                 assertThat(klage.vedtakId).isEqualTo(vedtakId)
                 assertThat(klage.digisosId).isEqualTo(digisosId)
@@ -93,8 +90,14 @@ class KlageEndpointToMockAltApiTest {
         hentKlager(digisosId).also { assertThat(it).hasSize(3) }
     }
 
-    private fun sendKlage(digisosId: UUID, klageId: UUID, vedtakId: UUID, klageInput: KlageInput? = null) {
-        webClient.post()
+    private fun sendKlage(
+        digisosId: UUID,
+        klageId: UUID,
+        vedtakId: UUID,
+        klageInput: KlageInput? = null,
+    ) {
+        webClient
+            .post()
             .uri(POST, digisosId)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
@@ -105,45 +108,49 @@ class KlageEndpointToMockAltApiTest {
                         klageId = klageId,
                         vedtakId = vedtakId,
                         tekst = "Dette er en testklage",
-                    )
-            )
-            .exchange()
-            .expectStatus().isOk
+                    ),
+            ).exchange()
+            .expectStatus()
+            .isOk
     }
 
-    private fun hentKlager(digisosId: UUID): List<KlageDto> {
-        return webClient.get()
+    private fun hentKlager(digisosId: UUID): List<KlageDto> =
+        webClient
+            .get()
             .uri(GET_ALL, digisosId)
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
-            .expectStatus().isOk
-            .returnResult(KlageDto::class.java).responseBody
+            .expectStatus()
+            .isOk
+            .returnResult(KlageDto::class.java)
+            .responseBody
             .collectList()
             .block()
             ?: error("Kunne ikke hente klager")
-    }
 
-    private fun hentKlage(digisosId: UUID, vedtakId: UUID): KlageDto? {
-        return webClient.get()
+    private fun hentKlage(
+        digisosId: UUID,
+        vedtakId: UUID,
+    ): KlageDto? =
+        webClient
+            .get()
             .uri(GET_ONE, digisosId, vedtakId)
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
-            .expectStatus().isOk
-            .returnResult(KlageDto::class.java).responseBody
+            .expectStatus()
+            .isOk
+            .returnResult(KlageDto::class.java)
+            .responseBody
             .blockFirst()
-    }
 
     companion object {
-
         @Container
         private val mockAltApiContainer: GenericContainer<*> =
             GenericContainer(
-                DockerImageName.parse("europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api:latest")
-            )
-                .withExposedPorts(8989)
-
+                DockerImageName.parse("europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api:latest"),
+            ).withExposedPorts(8989)
 
         @BeforeAll
         @JvmStatic

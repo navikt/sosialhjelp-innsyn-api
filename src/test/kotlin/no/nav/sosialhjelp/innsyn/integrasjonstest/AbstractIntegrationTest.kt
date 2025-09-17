@@ -31,7 +31,7 @@ abstract class AbstractIntegrationTest {
 
     @BeforeEach
     fun setUp() {
-        token = mockOAuth2Server.issueToken("default").serialize()
+        token = MockOAuth2ServerHolder.server.issueToken("default").serialize()
         coEvery { pdlClientOld.hentPerson(any(), any()) } returns hentPersonAnswer()
     }
 
@@ -71,15 +71,6 @@ abstract class AbstractIntegrationTest {
             .exchange()
             .expectStatus()
             .isOk
-
-    companion object {
-        private val mockOAuth2Server = MockOAuth2Server()
-        private const val PORT = 12345
-
-        init {
-            mockOAuth2Server.start(PORT)
-        }
-    }
 }
 
 private fun hentPersonAnswer(): PdlHentPerson {
@@ -88,4 +79,13 @@ private fun hentPersonAnswer(): PdlHentPerson {
     assertThat(resourceAsStream).isNotNull
 
     return jacksonObjectMapper().readValue<PdlHentPerson>(resourceAsStream!!)
+}
+
+object MockOAuth2ServerHolder {
+    val server = MockOAuth2Server()
+    private const val PORT = 12345
+
+    init {
+        server.start(PORT)
+    }
 }

@@ -5,8 +5,12 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.just
+import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
-import no.nav.sosialhjelp.innsyn.app.exceptions.FrontendErrorMessage
 import no.nav.sosialhjelp.innsyn.klage.DocumentReferences
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.EttersendtInfoNAVDto
@@ -15,7 +19,6 @@ import no.nav.sosialhjelp.innsyn.klage.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.FiksProtokoll
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
-import no.nav.sosialhjelp.innsyn.klage.KlagerDto
 import no.nav.sosialhjelp.innsyn.klage.MellomlagerClient
 import no.nav.sosialhjelp.innsyn.klage.MellomlagerResponse
 import no.nav.sosialhjelp.innsyn.klage.MellomlagringDokumentInfo
@@ -33,11 +36,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.util.MultiValueMap
-import java.io.File
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
@@ -94,14 +92,10 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
         doGet(getKlageUrl(UUID.randomUUID(), UUID.randomUUID()))
-            .expectStatus()
-            .isNotFound
-            .expectBody(FrontendErrorMessage::class.java)
-            .returnResult()
-            .responseBody
-            .also { error ->
-                assertThat(error!!.type).isEqualTo("not_found_error")
-            }
+            .expectStatus().isOk
+            .expectBodyList(KlageDto::class.java)
+            .returnResult().responseBody
+            .also { klager -> assertThat(klager).isEmpty() }
     }
 
     @Test
@@ -114,13 +108,12 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
         doGet(getKlagerUrl(digisosId))
-            .expectBody(KlagerDto::class.java)
-            .returnResult()
-            .responseBody
-            .also { klagerDto ->
-                klagerDto!!.klager.forEach { klageDto ->
-                    assertThat(klageDto.klageId).isEqualTo(klageId)
-                    assertThat(klageDto.vedtakId).isEqualTo(vedtakId)
+            .   expectBodyList(KlageDto::class.java)
+            .returnResult().responseBody
+            .also { klager ->
+                klager!!.forEach { klage ->
+                    assertThat(klage.klageId).isEqualTo(klageId)
+                    assertThat(klage.vedtakId).isEqualTo(vedtakId)
                 }
             }
     }
@@ -130,10 +123,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
         doGet(getKlagerUrl(UUID.randomUUID()))
-            .expectBody(KlagerDto::class.java)
-            .returnResult()
-            .responseBody
-            .also { klagerDto -> assertThat(klagerDto!!.klager).isEmpty() }
+            .expectBodyList(KlageDto::class.java)
+            .returnResult().responseBody
+            .also { klager -> assertThat(klager).isEmpty() }
     }
 
     @Test

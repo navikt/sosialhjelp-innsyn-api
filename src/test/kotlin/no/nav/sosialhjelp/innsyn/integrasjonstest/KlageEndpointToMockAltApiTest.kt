@@ -1,6 +1,6 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
-import no.nav.security.mock.oauth2.MockOAuth2Server
+import java.util.UUID
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import org.assertj.core.api.Assertions.assertThat
@@ -18,7 +18,6 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -32,7 +31,7 @@ class KlageEndpointToMockAltApiTest {
 
     @BeforeEach
     fun setup() {
-        token = mockOAuth2Server.issueToken("default").serialize()
+        token = MockOAuth2ServerHolder.server.issueToken("default").serialize()
     }
 
     @Test
@@ -161,12 +160,5 @@ class KlageEndpointToMockAltApiTest {
         private const val POST = "/api/v1/innsyn/{digisosId}/klage/send"
         private const val GET_ALL = "/api/v1/innsyn/{digisosId}/klager"
         private const val GET_ONE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
-
-        private val mockOAuth2Server = MockOAuth2Server()
-        private const val PORT = 12233
-
-        init {
-            mockOAuth2Server.start(PORT)
-        }
     }
 }

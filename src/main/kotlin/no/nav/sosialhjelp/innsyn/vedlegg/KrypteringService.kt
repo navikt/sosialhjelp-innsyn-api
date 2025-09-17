@@ -69,7 +69,7 @@ class KrypteringServiceImpl : KrypteringService {
     }
 }
 
-@Profile("(mock-alt|testcontainers)")
+@Profile("mock-alt", "testcontainers")
 @Component
 class KrypteringServiceMock : KrypteringService {
     override val log by logger()

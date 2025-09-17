@@ -117,7 +117,7 @@ class TexasClientImpl(
 ) : TexasClient(texasWebClientBuilder, tokenEndpoint, tokenXEndpoint)
 
 @Component
-@Profile("(mock-alt|testcontainers)")
+@Profile("mock-alt", "testcontainers")
 class MockTexasClient(
     texasWebClientBuilder: WebClient.Builder,
     @Value("\${nais.token.endpoint}")

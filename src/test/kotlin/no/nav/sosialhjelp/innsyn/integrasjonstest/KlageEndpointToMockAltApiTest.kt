@@ -4,7 +4,6 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -157,13 +156,6 @@ class KlageEndpointToMockAltApiTest {
         @JvmStatic
         fun beforeAll() {
             System.setProperty("MOCK_PORT", mockAltApiContainer.getMappedPort(8989).toString())
-            mockOAuth2Server.start(PORT)
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun afterAll() {
-            mockOAuth2Server.shutdown()
         }
 
         private const val POST = "/api/v1/innsyn/{digisosId}/klage/send"

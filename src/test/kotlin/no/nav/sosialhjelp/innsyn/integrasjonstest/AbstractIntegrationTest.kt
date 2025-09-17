@@ -8,8 +8,6 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClientOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -78,16 +76,8 @@ abstract class AbstractIntegrationTest {
         private val mockOAuth2Server = MockOAuth2Server()
         private const val PORT = 12345
 
-        @BeforeAll
-        @JvmStatic
-        fun before() {
+        init {
             mockOAuth2Server.start(PORT)
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun after() {
-            mockOAuth2Server.shutdown()
         }
     }
 }

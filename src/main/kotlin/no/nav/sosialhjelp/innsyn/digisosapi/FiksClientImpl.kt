@@ -46,8 +46,8 @@ import java.io.Serializable
 class FiksClientImpl(
     private val fiksWebClient: WebClient,
     private val tilgangskontroll: TilgangskontrollService,
-    @Value("\${retry_fiks_max_attempts}") private val retryMaxAttempts: Long,
-    @Value("\${retry_fiks_initial_delay}") private val retryInitialDelay: Long,
+    @param:Value("\${retry_fiks_max_attempts}") private val retryMaxAttempts: Long,
+    @param:Value("\${retry_fiks_initial_delay}") private val retryInitialDelay: Long,
     meterRegistry: MeterRegistry,
 ) : FiksClient {
     private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
@@ -168,9 +168,6 @@ class FiksClientImpl(
         val digisosSak = hentDigisosSakFraFiks(digisosId)
         tilgangskontroll.verifyDigisosSakIsForCorrectUser(digisosSak)
         val kommunenummer = digisosSak.kommunenummer
-        if (kommunenummer == "1507") {
-            error("Kan ikke laste opp vedlegg på søknad fra Ålesund kommune")
-        }
         val navEksternRefId = lagNavEksternRefId(digisosSak)
 
         if (erPapirsoknad(digisosSak)) {
@@ -248,7 +245,7 @@ class FiksClientImpl(
             .foldIndexed(bodyBuilder) { i, builder, file ->
                 val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
                 builder.part("vedleggSpesifikasjon:$i", serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$i"))
-                builder.part("dokument:$i", InputStreamResource(file.fil)).headers {
+                builder.part("dokument:$i", InputStreamResource(file.data)).headers {
                     it.contentType = MediaType.APPLICATION_OCTET_STREAM
                     it.contentDisposition =
                         ContentDisposition
@@ -290,10 +287,10 @@ data class VedleggMetadata(
     val storrelse: Long,
 )
 
-private fun Any.toHttpEntity(
+fun Any.toHttpEntity(
     name: String,
-    filename: String?,
-    contentType: String,
+    filename: String? = null,
+    contentType: String = MediaType.APPLICATION_JSON_VALUE,
 ): HttpEntity<Any> {
     val headerMap = LinkedMultiValueMap<String, String>()
     val builder: ContentDisposition.Builder =
@@ -307,5 +304,3 @@ private fun Any.toHttpEntity(
     headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
     return HttpEntity(this, headerMap)
 }
-
-fun String.toHttpEntity(name: String): HttpEntity<Any> = this.toHttpEntity(name, null, "text/plain;charset=UTF-8")

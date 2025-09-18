@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -24,19 +25,47 @@ class KlageController(
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    suspend fun lastOppVedlegg(
+    suspend fun uploadDocuments(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
-    ) {
+    ): DocumentReferences {
+        // TODO En eller annen form for sjekk av fiksDigisosId ?
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        klageService.lastOppVedlegg(
+        return klageService.lastOppVedlegg(
             fiksDigisosId = fiksDigisosId,
             klageId = klageId,
             rawFiles = rawFiles,
         )
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{klageId}/vedlegg")
+    suspend fun getAllDocumentsForKlage(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+    ): DocumentReferences {
+        TODO("Implementer hentVedlegg i KlageController")
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{klageId}/vedlegg/{documentId}")
+    suspend fun getDocument(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+        @PathVariable documentId: UUID,
+    ): ResponseEntity<ByteArray> {
+        TODO("Implementer hentVedlegg i KlageController, og slett denne funksjonen")
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{klageId}/avbryt")
+    suspend fun cancelKlage(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+    ) {
+        TODO("Implementer avbrytKlage i KlageController")
+
+        // TODO Slette eventuelle vedlegg i mellomlageret
     }
 
     @PostMapping("/{fiksDigisosId}/klage/send")
@@ -80,18 +109,28 @@ class KlageController(
     }
 }
 
-private fun Klage.toKlageDto() =
+private fun FiksKlageDto.toKlageDto() =
     KlageDto(
         klageId = klageId,
         vedtakId = vedtakId,
-        klageTekst = klageTekst,
-        status = status,
+        // TODO Skal vi utlede status fra denne?
+        status = sendtKvittering.sendtStatus,
+        documentIdPdf = klageDokument.dokumentlagerDokumentId,
     )
+
+data class DocumentReferences(
+    val documents: List<DocumentRef>,
+)
+
+data class DocumentRef(
+    val documentId: UUID,
+    val filename: String,
+)
 
 data class KlageInput(
     val klageId: UUID,
     val vedtakId: UUID,
-    val klageTekst: String,
+    val tekst: String,
 )
 
 data class KlagerDto(
@@ -100,9 +139,8 @@ data class KlagerDto(
 
 // TODO Hva skal legges ved i denne? Kun json, pdf,?
 data class KlageDto(
-//    val klageUrl: FilUrl,
     val klageId: UUID,
     val vedtakId: UUID,
-    val klageTekst: String,
-    val status: KlageStatus,
+    val status: SendtStatusDto,
+    val documentIdPdf: UUID,
 )

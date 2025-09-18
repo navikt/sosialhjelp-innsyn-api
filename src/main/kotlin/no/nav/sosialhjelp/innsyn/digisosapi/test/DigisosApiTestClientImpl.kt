@@ -85,7 +85,7 @@ class DigisosApiTestClientImpl(
                 "vedleggSpesifikasjon:$fileId",
                 fiksClientImpl.serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
-            bodyBuilder.part("dokument:$fileId", file.fil).headers {
+            bodyBuilder.part("dokument:$fileId", file.data).headers {
                 it.contentType = MediaType.APPLICATION_OCTET_STREAM
                 it.contentDisposition =
                     ContentDisposition

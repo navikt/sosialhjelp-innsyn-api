@@ -1,16 +1,21 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
-import no.nav.sosialhjelp.innsyn.vedlegg.OpplastetVedleggMetadata
-import org.springframework.core.io.buffer.DataBufferUtils
+import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.Filename
+import no.nav.sosialhjelp.innsyn.vedlegg.pdf.PdfGenerator
+import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import java.io.ByteArrayInputStream
 import java.util.UUID
 
 interface KlageService {
@@ -19,111 +24,112 @@ interface KlageService {
         input: KlageInput,
     )
 
-    suspend fun hentKlager(fiksDigisosId: UUID): List<Klage>
+    suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto>
 
     suspend fun hentKlage(
         fiksDigisosId: UUID,
         vedtakId: UUID,
-    ): Klage?
+    ): FiksKlageDto?
 
     suspend fun lastOppVedlegg(
         fiksDigisosId: UUID,
         klageId: UUID,
         rawFiles: Flux<FilePart>,
-    )
+    ): DocumentReferences
 }
 
 @Service
-class LocalKlageService(
-    private val klageRepository: KlageRepository,
+class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
-    private val tilgangskontroll: TilgangskontrollService,
 ) : KlageService {
     override suspend fun sendKlage(
         fiksDigisosId: UUID,
         input: KlageInput,
     ) {
-        runCatching {
-            klageClient.sendKlage(
-                klageId = input.klageId,
-                klage =
-                    Klage(
-                        digisosId = fiksDigisosId,
-                        klageId = input.klageId,
-                        klageTekst = input.klageTekst,
-                        vedtakId = input.vedtakId,
-                    ),
-            )
-        }.onSuccess {
-            klageRepository.save(
-                digisosId = fiksDigisosId,
-                vedtakId = input.vedtakId,
-                klageId = input.klageId,
-            )
-        }.getOrThrow()
+        klageClient.sendKlage(
+            digisosId = fiksDigisosId,
+            klageId = input.klageId,
+            vedtakId = input.vedtakId,
+            MandatoryFilesForKlage(
+                klageJson = input.toJson(),
+                klagePdf = input.createKlagePdf(),
+                vedleggJson = input.createJsonVedleggSpec(),
+            ),
+        )
     }
 
-    override suspend fun hentKlager(fiksDigisosId: UUID): List<Klage> = klageClient.hentKlager(fiksDigisosId)
+    override suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto> = klageClient.hentKlager(fiksDigisosId)
 
     override suspend fun hentKlage(
         fiksDigisosId: UUID,
         vedtakId: UUID,
-    ): Klage? = klageClient.hentKlager(fiksDigisosId).find { it.vedtakId == vedtakId }
+    ): FiksKlageDto? {
+        val klager = klageClient.hentKlager(digisosId = fiksDigisosId)
+
+        return klager.find { it.vedtakId == vedtakId }
+    }
 
     override suspend fun lastOppVedlegg(
         fiksDigisosId: UUID,
         klageId: UUID,
         rawFiles: Flux<FilePart>,
-    ) {
-        tilgangskontroll.sjekkTilgang()
-
+    ): DocumentReferences {
         val allFiles = rawFiles.asFlow().toList()
-        val metadatas = allFiles.getMetadataJson()
 
-        val files = allFiles.getFilesNotMetadata()
-        metadatas.validateAllFilesHasMetadata(files)
-
-        files.forEach { file ->
-            metadatas
-                .flatMap { it.filer }
-                .find { file.filename().contains(it.uuid.toString()) }
-                ?.also { it.fil = file }
-        }
-
-        if (metadatas.isNotEmpty()) {
-            mellomlagerService.processFileUpload(klageId, metadatas.first())
-        }
+        return mellomlagerService.processDocumentUpload(klageId, allFiles)
     }
-}
 
-private suspend fun List<FilePart>.getMetadataJson(): List<OpplastetVedleggMetadata> =
-    firstOrNull { it.filename() == "metadata.json" }
-        ?.content()
-        ?.let { DataBufferUtils.join(it) }
-        ?.map {
-            val bytes = ByteArray(it.readableByteCount())
-            it.read(bytes)
-            DataBufferUtils.release(it)
-            objectMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
-        }?.awaitSingleOrNull()
-        ?.filter { it.filer.isNotEmpty() }
-        ?: error("Missing metadata.json")
+    private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
+        val allMetadata =
+            runCatching { mellomlagerService.getAllDocumentMetadataForRef(klageId) }
+                .getOrElse { ex ->
+                    when (ex) {
+                        is NotFoundException -> emptyList()
+                        else -> throw ex
+                    }
+                }
 
-private fun List<FilePart>.getFilesNotMetadata(): List<FilePart> =
-    filterNot { it.filename() == "metadata.json" }
-        .also {
-            check(it.isNotEmpty()) { "Ingen filer i forsendelse" }
-            check(it.size <= 30) { "Over 30 filer i forsendelse: ${it.size} filer" }
-        }
+        // TODO Hva forventes her i kontekst av klage?
+        return JsonVedlegg()
+            .withType("klage")
+            .withStatus(if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG")
+            .withHendelseType(JsonVedlegg.HendelseType.BRUKER)
+            .withHendelseReferanse(this.vedtakId.toString())
+            .withKlageId(klageId.toString())
+            .withFiler(allMetadata.map { JsonFiler().withFilnavn(it.filnavn) })
+            .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
+    }
 
-private fun List<OpplastetVedleggMetadata>.validateAllFilesHasMetadata(files: List<FilePart>) {
-    flatMap { it.filer }
-        .all { metadataFile ->
-            metadataFile.uuid.toString() in files.map { it.filename().substringBefore(".") }
-        }.also { allHasMatch ->
-            require(allHasMatch) {
-                "Ikke alle filer i metadata.json ble funnet i forsendelsen"
+    private fun KlageInput.toJson(): String = objectMapper.writeValueAsString(this)
+
+    private fun KlageInput.createKlagePdf(): FilForOpplasting =
+        PDDocument()
+            .use { document -> generateKlagePdf(document, this) }
+            .let { pdf ->
+                FilForOpplasting(
+                    filnavn = Filename("klage.pdf"),
+                    mimetype = "application/pdf",
+                    storrelse = pdf.size.toLong(),
+                    data = ByteArrayInputStream(pdf),
+                )
             }
-        }
+
+    private fun generateKlagePdf(
+        document: PDDocument,
+        input: KlageInput,
+    ): ByteArray =
+        PdfGenerator(document)
+            .run {
+                addCenteredH1Bold("Klage på vedtak")
+                addCenteredH4Bold("Vedtak: ${input.vedtakId}")
+                addBlankLine()
+                addCenteredH4Bold("Klage ID: ${input.klageId}")
+                addText(input.tekst)
+                finish()
+            }
+
+    companion object {
+        private val logger by logger()
+    }
 }

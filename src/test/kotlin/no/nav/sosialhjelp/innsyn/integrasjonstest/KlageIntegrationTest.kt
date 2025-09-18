@@ -5,11 +5,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.just
-import java.io.File
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.klage.DocumentReferences
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
@@ -36,6 +31,11 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.util.MultiValueMap
+import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
@@ -92,9 +92,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
         doGet(getKlageUrl(UUID.randomUUID(), UUID.randomUUID()))
-            .expectStatus().isOk
+            .expectStatus()
+            .isOk
             .expectBodyList(KlageDto::class.java)
-            .returnResult().responseBody
+            .returnResult()
+            .responseBody
             .also { klager -> assertThat(klager).isEmpty() }
     }
 
@@ -108,8 +110,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
         doGet(getKlagerUrl(digisosId))
-            .   expectBodyList(KlageDto::class.java)
-            .returnResult().responseBody
+            .expectBodyList(KlageDto::class.java)
+            .returnResult()
+            .responseBody
             .also { klager ->
                 klager!!.forEach { klage ->
                     assertThat(klage.klageId).isEqualTo(klageId)
@@ -124,7 +127,8 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         doGet(getKlagerUrl(UUID.randomUUID()))
             .expectBodyList(KlageDto::class.java)
-            .returnResult().responseBody
+            .returnResult()
+            .responseBody
             .also { klager -> assertThat(klager).isEmpty() }
     }
 

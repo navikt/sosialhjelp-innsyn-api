@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
-import java.util.UUID
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import org.assertj.core.api.Assertions.assertThat
@@ -16,6 +15,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
+import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -147,7 +147,7 @@ class KlageEndpointToMockAltApiTest {
         private val mockAltApiContainer: GenericContainer<*> =
             GenericContainer(
                 DockerImageName.parse(
-                    "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api:2025.09.16-13.52-341eb18"
+                    "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api:2025.09.16-13.52-341eb18",
                 ),
             ).withExposedPorts(8989)
 

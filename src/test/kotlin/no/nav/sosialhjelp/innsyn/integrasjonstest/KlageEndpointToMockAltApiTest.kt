@@ -4,7 +4,6 @@ import java.util.UUID
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,7 +14,6 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 
@@ -145,17 +143,24 @@ class KlageEndpointToMockAltApiTest {
             .blockFirst()
 
     companion object {
-        @Container
+//        @Container
         private val mockAltApiContainer: GenericContainer<*> =
             GenericContainer(
-                DockerImageName.parse("europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api:latest"),
+                DockerImageName.parse(
+                    "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api:2025.09.16-13.52-341eb18"
+                ),
             ).withExposedPorts(8989)
 
-        @BeforeAll
-        @JvmStatic
-        fun beforeAll() {
+        init {
+            mockAltApiContainer.start()
             System.setProperty("MOCK_PORT", mockAltApiContainer.getMappedPort(8989).toString())
         }
+//
+//        @BeforeAll
+//        @JvmStatic
+//        fun beforeAll() {
+//            System.setProperty("MOCK_PORT", mockAltApiContainer.getMappedPort(8989).toString())
+//        }
 
         private const val POST = "/api/v1/innsyn/{digisosId}/klage/send"
         private const val GET_ALL = "/api/v1/innsyn/{digisosId}/klager"

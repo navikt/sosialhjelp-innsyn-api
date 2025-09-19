@@ -1,8 +1,10 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
+import java.util.UUID
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,9 +15,10 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -143,27 +146,31 @@ class KlageEndpointToMockAltApiTest {
             .blockFirst()
 
     companion object {
-//        @Container
-        private val mockAltApiContainer: GenericContainer<*> =
-            GenericContainer(
-                DockerImageName.parse(
-                    "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api:2025.09.16-13.52-341eb18",
-                ),
-            ).withExposedPorts(8989)
+        @Container
+        private val container = MockAltApiContainer()
 
-        init {
-            mockAltApiContainer.start()
-            System.setProperty("MOCK_PORT", mockAltApiContainer.getMappedPort(8989).toString())
+        @BeforeAll
+        @JvmStatic
+        fun beforeAll() {
+            System.setProperty("MOCK_PORT", container.getMappedPort(8989).toString())
         }
-//
-//        @BeforeAll
-//        @JvmStatic
-//        fun beforeAll() {
-//            System.setProperty("MOCK_PORT", mockAltApiContainer.getMappedPort(8989).toString())
-//        }
 
         private const val POST = "/api/v1/innsyn/{digisosId}/klage/send"
         private const val GET_ALL = "/api/v1/innsyn/{digisosId}/klager"
         private const val GET_ONE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
+    }
+}
+
+object MockAltApiImage {
+    private const val PATH = "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api"
+    private const val TAG = "2025.09.16-13.52-341eb18"
+    val image: DockerImageName = DockerImageName.parse("$PATH:$TAG")
+}
+
+class MockAltApiContainer : GenericContainer<MockAltApiContainer>(MockAltApiImage.image) {
+    init {
+        withExposedPorts(8989)
+        waitingFor(Wait.forHttp("/sosialhjelp/mock-alt-api/internal/isAlive"))
+//        waitingFor(Wait.forHttp("http://localhost:8989/sosialhjelp/mock-alt-api/internal/isReady"))
     }
 }

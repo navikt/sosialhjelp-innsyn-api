@@ -171,6 +171,5 @@ class MockAltApiContainer : GenericContainer<MockAltApiContainer>(MockAltApiImag
     init {
         withExposedPorts(8989)
         waitingFor(Wait.forHttp("/sosialhjelp/mock-alt-api/internal/isAlive"))
-//        waitingFor(Wait.forHttp("http://localhost:8989/sosialhjelp/mock-alt-api/internal/isReady"))
     }
 }

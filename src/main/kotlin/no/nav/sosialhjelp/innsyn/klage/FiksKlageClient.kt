@@ -112,7 +112,7 @@ class FiksKlageClientImpl(
             .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
             .retrieve()
             .bodyToMono(Array<FiksKlageDto>::class.java)
-            .block()
+            .awaitSingleOrNull()
             ?.toList()
             ?: emptyList()
 

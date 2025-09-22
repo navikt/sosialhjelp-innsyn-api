@@ -1,9 +1,12 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.util.UUID
 
+@JsonIgnoreProperties(ignoreUnknown = false)
 data class FiksKlageDto(
     val fiksOrgId: UUID,
+    val digisosId: UUID,
     val klageId: UUID,
     val vedtakId: UUID,
     val navEksternRefId: UUID,

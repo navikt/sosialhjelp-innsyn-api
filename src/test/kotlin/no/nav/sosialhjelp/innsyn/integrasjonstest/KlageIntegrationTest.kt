@@ -6,7 +6,6 @@ import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.just
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
-import no.nav.sosialhjelp.innsyn.app.exceptions.FrontendErrorMessage
 import no.nav.sosialhjelp.innsyn.klage.DocumentReferences
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.EttersendtInfoNAVDto
@@ -15,7 +14,6 @@ import no.nav.sosialhjelp.innsyn.klage.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.FiksProtokoll
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
-import no.nav.sosialhjelp.innsyn.klage.KlagerDto
 import no.nav.sosialhjelp.innsyn.klage.MellomlagerClient
 import no.nav.sosialhjelp.innsyn.klage.MellomlagerResponse
 import no.nav.sosialhjelp.innsyn.klage.MellomlagringDokumentInfo
@@ -74,7 +72,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
-        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId))
+        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
         doGet(getKlageUrl(digisosId, vedtakId))
             .expectStatus()
@@ -95,33 +93,30 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         doGet(getKlageUrl(UUID.randomUUID(), UUID.randomUUID()))
             .expectStatus()
-            .isNotFound
-            .expectBody(FrontendErrorMessage::class.java)
+            .isOk
+            .expectBodyList(KlageDto::class.java)
             .returnResult()
             .responseBody
-            .also { error ->
-                assertThat(error!!.type).isEqualTo("not_found_error")
-            }
+            .also { klager -> assertThat(klager).isEmpty() }
     }
 
     @Test
     fun `Hente alle klager skal returnere alle klager for digisosId`() {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
-
-        coEvery { fiksKlageClient.hentKlager(any()) } returns
-            listOf(createFiksKlageDto(klageId, vedtakId))
-
         val digisosId = UUID.randomUUID()
 
+        coEvery { fiksKlageClient.hentKlager(any()) } returns
+            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+
         doGet(getKlagerUrl(digisosId))
-            .expectBody(KlagerDto::class.java)
+            .expectBodyList(KlageDto::class.java)
             .returnResult()
             .responseBody
-            .also { klagerDto ->
-                klagerDto!!.klager.forEach { klageDto ->
-                    assertThat(klageDto.klageId).isEqualTo(klageId)
-                    assertThat(klageDto.vedtakId).isEqualTo(vedtakId)
+            .also { klager ->
+                klager!!.forEach { klage ->
+                    assertThat(klage.klageId).isEqualTo(klageId)
+                    assertThat(klage.vedtakId).isEqualTo(vedtakId)
                 }
             }
     }
@@ -131,10 +126,10 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
         doGet(getKlagerUrl(UUID.randomUUID()))
-            .expectBody(KlagerDto::class.java)
+            .expectBodyList(KlageDto::class.java)
             .returnResult()
             .responseBody
-            .also { klagerDto -> assertThat(klagerDto!!.klager).isEmpty() }
+            .also { klager -> assertThat(klager).isEmpty() }
     }
 
     @Test
@@ -261,9 +256,11 @@ data class OpplastetFilMetadata(
 private fun createFiksKlageDto(
     klageId: UUID,
     vedtakId: UUID,
+    digisosId: UUID,
 ): FiksKlageDto =
     FiksKlageDto(
         fiksOrgId = UUID.randomUUID(),
+        digisosId = digisosId,
         klageId = klageId,
         vedtakId = vedtakId,
         navEksternRefId = klageId,

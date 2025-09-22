@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
-import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.http.MediaType
@@ -86,22 +85,21 @@ class KlageController(
     suspend fun hentKlage(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable vedtakId: UUID,
-    ): KlageDto {
+    ): KlageDto? {
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
         return klageService.hentKlage(fiksDigisosId, vedtakId)?.toKlageDto()
-            ?: throw NotFoundException("Klage for vedtakId $vedtakId ikke funnet for fiksDigisosId $fiksDigisosId")
     }
 
     @GetMapping("/{fiksDigisosId}/klager")
     suspend fun hentKlager(
         @PathVariable fiksDigisosId: UUID,
-    ): KlagerDto {
+    ): List<KlageDto> {
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return KlagerDto(klager = klageService.hentKlager(fiksDigisosId).map { it.toKlageDto() })
+        return klageService.hentKlager(fiksDigisosId).map { it.toKlageDto() }
     }
 
     private fun validateNotProd() {
@@ -111,6 +109,7 @@ class KlageController(
 
 private fun FiksKlageDto.toKlageDto() =
     KlageDto(
+        digisosId = digisosId,
         klageId = klageId,
         vedtakId = vedtakId,
         // TODO Skal vi utlede status fra denne?
@@ -139,6 +138,7 @@ data class KlagerDto(
 
 // TODO Hva skal legges ved i denne? Kun json, pdf,?
 data class KlageDto(
+    val digisosId: UUID,
     val klageId: UUID,
     val vedtakId: UUID,
     val status: SendtStatusDto,

@@ -54,7 +54,7 @@ interface KrypteringService {
     )
 }
 
-@Profile("!mock-alt")
+@Profile("!(mock-alt|testcontainers)")
 @Component
 class KrypteringServiceImpl : KrypteringService {
     override val log by logger()
@@ -69,7 +69,7 @@ class KrypteringServiceImpl : KrypteringService {
     }
 }
 
-@Profile("mock-alt")
+@Profile("mock-alt", "testcontainers")
 @Component
 class KrypteringServiceMock : KrypteringService {
     override val log by logger()

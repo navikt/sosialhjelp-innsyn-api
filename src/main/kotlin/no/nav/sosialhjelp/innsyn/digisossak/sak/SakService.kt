@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.sak
 
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -10,7 +11,7 @@ import kotlin.getValue
 const val DEFAULT_SAK_TITTEL = "default_sak_tittel"
 
 @Component
-class SaksService(
+class SakService(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
 ) {
@@ -19,17 +20,17 @@ class SaksService(
     suspend fun hentSakForVedtak(
         fiksDigisosId: String,
         vedtakId: String,
-    ): SaksResponse {
+    ): SakResponse {
         val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
 
         if (model.saker.isEmpty()) {
-            log.info("Fant ingen saker")
+            throw NotFoundException("Ingen saker funnet for fiksDigisosId $fiksDigisosId")
         }
 
         val sak =
             model.saker.find { it.vedtak.any { vedtak -> vedtak.id == vedtakId } }
-                ?: throw IllegalArgumentException("Sak with vedtakId $vedtakId not found")
+                ?: throw NotFoundException("Sak med vedtakId $vedtakId ikke funnet for fiksDigisosId $fiksDigisosId")
 
         val vedtakfilUrlList =
             sak.vedtak
@@ -38,7 +39,7 @@ class SaksService(
                     FilUrl(it.dato, it.vedtaksFilUrl, it.id)
                 }.ifEmpty { null }
 
-        return SaksResponse(
+        return SakResponse(
             sak.tittel ?: DEFAULT_SAK_TITTEL,
             vedtakfilUrlList,
             sak.vedtak.lastOrNull()?.utfall,

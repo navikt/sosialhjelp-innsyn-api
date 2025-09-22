@@ -8,17 +8,17 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
-class SaksController(
-    private val saksService: SaksService,
+class SakController(
+    private val sakService: SakService,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @GetMapping("/{fiksDigisosId}/sak/{vedtakId}")
     suspend fun hentSakForVedtak(
         @PathVariable fiksDigisosId: String,
         @PathVariable vedtakId: String,
-    ): SaksResponse {
+    ): SakResponse {
         tilgangskontroll.sjekkTilgang()
 
-        return saksService.hentSakForVedtak(fiksDigisosId, vedtakId)
+        return sakService.hentSakForVedtak(fiksDigisosId, vedtakId)
     }
 }

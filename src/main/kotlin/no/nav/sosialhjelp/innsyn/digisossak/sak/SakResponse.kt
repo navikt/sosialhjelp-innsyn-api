@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import java.time.LocalDate
 
-data class SaksResponse(
+data class SakResponse(
     val tittel: String,
     val vedtaksfilUrlList: List<FilUrl>?,
     val utfallVedtak: UtfallVedtak?,

@@ -2,13 +2,12 @@ package no.nav.sosialhjelp.innsyn.digisossak.sak
 
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import kotlin.collections.ifEmpty
 import kotlin.getValue
-
-const val DEFAULT_SAK_TITTEL = "default_sak_tittel"
 
 @Component
 class SakService(

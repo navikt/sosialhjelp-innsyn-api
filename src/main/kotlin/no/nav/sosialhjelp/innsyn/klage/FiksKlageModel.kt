@@ -13,6 +13,7 @@ data class FiksKlageDto(
     val klageMetadata: UUID, // id til klage.json i dokumentlager
     val vedleggMetadata: UUID, // id til vedlegg.json (jsonVedleggSpec) i dokumentlager
     val klageDokument: DokumentInfoDto, // id til klage.pdf i dokumentlager
+    val vedlegg: List<DokumentInfoDto>, // liste med opplastede vedlegg
     val trekkKlageInfo: TrekkKlageInfoDto?,
     val sendtKvittering: SendtKvitteringDto,
     val ettersendtInfoNAV: EttersendtInfoNAVDto,

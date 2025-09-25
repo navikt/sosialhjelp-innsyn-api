@@ -97,6 +97,7 @@ class DocumentUploadHelper {
             }
 
     private fun List<FilePart>.checkAllFilesHasMatch(fileRefs: List<OpplastetFil>) {
+
         all { file -> file.filename().substringBefore(".") in fileRefs.map { ref -> ref.uuid.toString() } }
             .also { allFilesHasMatch ->
                 require(allFilesHasMatch) {

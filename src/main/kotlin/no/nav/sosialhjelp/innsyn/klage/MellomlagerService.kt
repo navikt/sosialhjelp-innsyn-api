@@ -27,7 +27,7 @@ interface MellomlagerService {
     suspend fun processDocumentUpload(
         navEksternRef: UUID,
         allFiles: List<FilePart>,
-    ): DocumentReferences
+    ): DocumentsForKlage
 }
 
 @Service
@@ -92,7 +92,7 @@ class MellomlagerServiceImpl(
     override suspend fun processDocumentUpload(
         navEksternRef: UUID,
         allFiles: List<FilePart>,
-    ): DocumentReferences {
+    ): DocumentsForKlage {
         allFiles.doVirusScan()
 
         val metadata =
@@ -113,10 +113,10 @@ class MellomlagerServiceImpl(
 
         return documentUploadHelper
             .createFilerForOpplasting(metadata)
-            .let { mellomlagerClient.uploadDocuments(navEksternRef, it) }
+            .let { files -> mellomlagerClient.uploadDocuments(navEksternRef, files) }
             .let { mellomlagerResponse ->
                 when (mellomlagerResponse) {
-                    is MellomlagerResponse.MellomlagringDto -> mellomlagerResponse.toDocumentRefs()
+                    is MellomlagerResponse.MellomlagringDto -> mellomlagerResponse.toDocumentRefs(navEksternRef)
                     is MellomlagerResponse.FiksError -> handleError(mellomlagerResponse)
                     else -> error("Unexpected response type: $mellomlagerResponse")
                 }
@@ -145,10 +145,9 @@ class MellomlagerServiceImpl(
     }
 }
 
-private fun MellomlagerResponse.MellomlagringDto.toDocumentRefs(): DocumentReferences =
-    DocumentReferences(
-        this.mellomlagringMetadataList.map { DocumentRef(it.filId, it.filnavn) },
-    )
+private fun MellomlagerResponse.MellomlagringDto.toDocumentRefs(klageId: UUID): DocumentsForKlage =
+    DocumentsForKlage(mellomlagringMetadataList
+        .map { DocumentForKlage(klageId, it.filId, it.filnavn) },)
 
 data class FileValidationException(
     override val message: String,

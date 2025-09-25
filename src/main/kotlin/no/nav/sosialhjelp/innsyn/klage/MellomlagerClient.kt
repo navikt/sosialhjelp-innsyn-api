@@ -29,6 +29,9 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import java.security.cert.X509Certificate
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.util.MultiValueMap
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
@@ -164,11 +167,11 @@ class FiksMellomlagerClient(
     private fun handleClientError(
         exception: Throwable,
         context: String? = null,
-    ): MellomlagerResponse.FiksError =
-        when (exception) {
-            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
-            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
-        }
+    ): MellomlagerResponse.FiksError = throw exception
+//        when (exception) {
+//            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
+//            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
+//        }
 
     private suspend fun getMaskinportenToken() = texasClient.getMaskinportenToken().value
 
@@ -191,10 +194,59 @@ data class FilMetadata(
     val storrelse: Long,
 )
 
-private fun createHttpEntityOfString(
-    body: String,
-    name: String,
-): HttpEntity<Any> = createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
+private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): String =
+    jacksonObjectMapper().writeValueAsString(
+        FilMetadata(
+            filnavn = objectFilForOpplasting.filnavn?.value ?: error("Filnavn mangler"),
+            mimetype = objectFilForOpplasting.mimetype ?: "application/octet-stream",
+            storrelse = objectFilForOpplasting.storrelse,
+        ),
+    )
+
+private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): MultiValueMap<String, HttpEntity<*>> {
+
+    return MultipartBodyBuilder()
+        .run {
+            filerForOpplasting.forEachIndexed { index, file ->
+                part("metadata-part", createJsonFilMetadata(file))
+                    .headers {
+                        it.contentType = MediaType.APPLICATION_JSON
+                        it.contentDisposition =
+                            ContentDisposition
+                                .builder("form-data")
+                                .name("metadata")
+//                                .filename("metadata.json") // Uten filename kommer det i parameterMap i requesten
+                                .build()
+                    }
+                part("files-part", InputStreamResource(file.data))
+                    .headers {
+                        it.contentType = MediaType.APPLICATION_OCTET_STREAM
+                        it.contentDisposition =
+                            ContentDisposition
+                                .builder("form-data")
+                                .name("files")
+                                .filename(file.filnavn?.value)
+                                .build()
+                    }
+            }
+            build()
+        }
+
+
+//    return LinkedMultiValueMap<String, Any>()
+//        .apply {
+//            filerForOpplasting.forEachIndexed { index, fil ->
+//                add(
+//                    "metadata$index",
+//                    createHttpEntityOfString(createJsonFilMetadata(fil), "metadata$index"),
+//                )
+//                add(
+//                    fil.filnavn?.value ?: error("Filnavn mangler"),
+//                    createHttpEntityOfFile(fil, fil.filnavn.value),
+//                )
+//            }
+//        }
+}
 
 fun createHttpEntity(
     body: Any,
@@ -218,14 +270,10 @@ fun createHttpEntity(
         }.let { headerMap -> HttpEntity(body, headerMap) }
 }
 
-private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): String =
-    jacksonObjectMapper().writeValueAsString(
-        FilMetadata(
-            filnavn = objectFilForOpplasting.filnavn?.value ?: error("Filnavn mangler"),
-            mimetype = objectFilForOpplasting.mimetype ?: "application/octet-stream",
-            storrelse = objectFilForOpplasting.storrelse,
-        ),
-    )
+private fun createHttpEntityOfString(
+    body: String,
+    name: String,
+): HttpEntity<Any> = createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
 
 private fun createHttpEntityOfFile(
     file: FilForOpplasting,
@@ -237,21 +285,6 @@ private fun createHttpEntityOfFile(
         filename = file.filnavn?.value,
         contentType = "application/octet-stream",
     )
-
-private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): LinkedMultiValueMap<String, Any> =
-    LinkedMultiValueMap<String, Any>()
-        .apply {
-            filerForOpplasting.forEachIndexed { index, fil ->
-                add(
-                    "metadata$index",
-                    createHttpEntityOfString(createJsonFilMetadata(fil), "metadata$index"),
-                )
-                add(
-                    fil.filnavn?.value ?: error("Filnavn mangler"),
-                    createHttpEntityOfFile(fil, fil.filnavn.value),
-                )
-            }
-        }
 
 private fun String.toFiksError() = objectMapper.readValue<MellomlagerResponse.FiksError>(this)
 

@@ -6,7 +6,7 @@ import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.just
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
-import no.nav.sosialhjelp.innsyn.klage.DocumentReferences
+import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.EttersendtInfoNAVDto
 import no.nav.sosialhjelp.innsyn.klage.FiksKlageClient
@@ -160,7 +160,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body = body,
         ).expectStatus()
             .isOk
-            .expectBody(DocumentReferences::class.java)
+            .expectBody(DocumentsForKlage::class.java)
             .returnResult()
             .responseBody
             ?.documents
@@ -266,6 +266,7 @@ private fun createFiksKlageDto(
         navEksternRefId = klageId,
         klageMetadata = UUID.randomUUID(),
         vedleggMetadata = UUID.randomUUID(),
+        vedlegg = emptyList(),
         trukket = false,
         klageDokument =
             DokumentInfoDto(

@@ -26,12 +26,6 @@ interface KrypteringService {
         certificate: X509Certificate,
         coroutineScope: CoroutineScope,
     ): InputStream
-
-    fun krypterData(
-        outputStream: OutputStream,
-        inputStream: InputStream,
-        certificate: X509Certificate,
-    )
 }
 
 @Profile("!(mock-alt|testcontainers)")
@@ -66,7 +60,7 @@ class KrypteringServiceImpl : KrypteringService {
         return kryptertInput
     }
 
-    override fun krypterData(
+    private fun krypterData(
         outputStream: OutputStream,
         inputStream: InputStream,
         certificate: X509Certificate,
@@ -85,12 +79,4 @@ class KrypteringServiceMock : KrypteringService {
         certificate: X509Certificate,
         coroutineScope: CoroutineScope,
     ): InputStream = databuffer
-
-    override fun krypterData(
-        outputStream: OutputStream,
-        inputStream: InputStream,
-        certificate: X509Certificate,
-    ) {
-        log.info("Krypterer data (men not really though)")
-    }
 }

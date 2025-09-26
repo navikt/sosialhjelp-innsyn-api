@@ -242,23 +242,6 @@ class KlageEndpointToMockAltApiTest {
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
-    private fun getDocument(
-        baseUrl: String,
-        dokumentlagerId: UUID,
-        path: String = GET_DOCUMENT,
-    ): ByteArray =
-        WebClient
-            .builder()
-            .baseUrl(baseUrl)
-            .build()
-            .get()
-            .uri(path, dokumentlagerId)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
-            .retrieve()
-            .bodyToMono<ByteArray>()
-            .block()
-            ?: error("Kunne ikke hente dokument")
-
     private fun buildBody(fileMap: Map<String, ByteArray>): MultiValueMap<String, HttpEntity<*>> =
         MultipartBodyBuilder()
             .apply {
@@ -324,7 +307,6 @@ class KlageEndpointToMockAltApiTest {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-//            System.setProperty("MOCK_PORT", "8989")
             System.setProperty("MOCK_PORT", container.getMappedPort(8989).toString())
         }
 

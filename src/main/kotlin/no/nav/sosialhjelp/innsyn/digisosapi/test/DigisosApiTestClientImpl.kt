@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -11,8 +12,6 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.digisosapi.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
@@ -30,7 +29,6 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Brukes kun i dev eller ved lokal testing mot fiks-test
@@ -41,7 +39,6 @@ class DigisosApiTestClientImpl(
     private val fiksWebClient: WebClient,
     private val digisosApiTestWebClient: WebClient,
     private val texasClient: TexasClient,
-    private val fiksClient: FiksClient,
 ) : DigisosApiTestClient {
     private val testbrukerNatalie = System.getenv("TESTBRUKER_NATALIE") ?: "11111111111"
 
@@ -84,7 +81,7 @@ class DigisosApiTestClientImpl(
             val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
             bodyBuilder.part(
                 "vedleggSpesifikasjon:$fileId",
-                (fiksClient as FiksClientImpl).serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
+                objectMapper.writeValueAsString(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
             bodyBuilder.part("dokument:$fileId", file.data).headers {
                 it.contentType = MediaType.APPLICATION_OCTET_STREAM

@@ -30,7 +30,6 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
@@ -314,7 +313,6 @@ class KlageEndpointToMockAltApiTest {
         private const val GET_ALL = "/api/v1/innsyn/{digisosId}/klager"
         private const val GET_ONE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
         private const val UPLOAD = "/api/v1/innsyn/{digisosId}/{klageId}/vedlegg"
-        private const val GET_DOCUMENT = "/dokumentlager/nedlasting/niva4/{dokumentlagerId}"
     }
 }
 

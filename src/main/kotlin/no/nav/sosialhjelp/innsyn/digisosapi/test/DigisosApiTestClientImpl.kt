@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisosapi.test
 
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -29,6 +28,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Brukes kun i dev eller ved lokal testing mot fiks-test

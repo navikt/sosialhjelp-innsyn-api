@@ -25,6 +25,19 @@ interface KrypteringService {
         databuffer: InputStream,
         certificate: X509Certificate,
         coroutineScope: CoroutineScope,
+    ): InputStream
+}
+
+@Profile("!(mock-alt|testcontainers)")
+@Component
+class KrypteringServiceImpl : KrypteringService {
+    override val log by logger()
+    private val kryptering = CMSKrypteringImpl()
+
+    override suspend fun krypter(
+        databuffer: InputStream,
+        certificate: X509Certificate,
+        coroutineScope: CoroutineScope,
     ): InputStream {
         val kryptertInput = PipedInputStream()
         val plainOutput = PipedOutputStream()
@@ -47,20 +60,7 @@ interface KrypteringService {
         return kryptertInput
     }
 
-    fun krypterData(
-        outputStream: OutputStream,
-        inputStream: InputStream,
-        certificate: X509Certificate,
-    )
-}
-
-@Profile("!(mock-alt|testcontainers)")
-@Component
-class KrypteringServiceImpl : KrypteringService {
-    override val log by logger()
-    private val kryptering = CMSKrypteringImpl()
-
-    override fun krypterData(
+    private fun krypterData(
         outputStream: OutputStream,
         inputStream: InputStream,
         certificate: X509Certificate,
@@ -74,13 +74,9 @@ class KrypteringServiceImpl : KrypteringService {
 class KrypteringServiceMock : KrypteringService {
     override val log by logger()
 
-    private val kryptering = CMSKrypteringImpl()
-
-    override fun krypterData(
-        outputStream: OutputStream,
-        inputStream: InputStream,
+    override suspend fun krypter(
+        databuffer: InputStream,
         certificate: X509Certificate,
-    ) {
-        kryptering.krypterData(outputStream, inputStream, certificate, Security.getProvider("BC"))
-    }
+        coroutineScope: CoroutineScope,
+    ): InputStream = databuffer
 }

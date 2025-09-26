@@ -11,7 +11,6 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
 import no.nav.sosialhjelp.innsyn.digisosapi.VedleggMetadata
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
@@ -40,7 +39,6 @@ class DigisosApiTestClientImpl(
     private val fiksWebClient: WebClient,
     private val digisosApiTestWebClient: WebClient,
     private val texasClient: TexasClient,
-    private val fiksClientImpl: FiksClientImpl,
 ) : DigisosApiTestClient {
     private val testbrukerNatalie = System.getenv("TESTBRUKER_NATALIE") ?: "11111111111"
 
@@ -83,7 +81,7 @@ class DigisosApiTestClientImpl(
             val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
             bodyBuilder.part(
                 "vedleggSpesifikasjon:$fileId",
-                fiksClientImpl.serialiser(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
+                objectMapper.writeValueAsString(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
             bodyBuilder.part("dokument:$fileId", file.data).headers {
                 it.contentType = MediaType.APPLICATION_OCTET_STREAM

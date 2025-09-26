@@ -140,7 +140,7 @@ private fun createBodyForUpload(
                 ),
             )
             part(
-                "vedlegg.json",
+                "vedlegg_json_part",
                 vedleggJson.toJson().toHttpEntity(
                     "vedlegg.json",
                     "vedlegg.json",
@@ -152,16 +152,18 @@ private fun createBodyForUpload(
 
 private fun MultipartBodyBuilder.createMetadataAndPartForKlagePdf(klagePdf: FilForOpplasting) {
     part(
-        "metadata",
-        createHttpEntity(
-            body = klagePdf.createMetadataPart(),
-            name = "metadata",
-            filename = null,
-            contentType = MediaType.APPLICATION_JSON_VALUE,
-        ),
-    )
+        "klage_pdf_metadata_part",
+        objectMapper.writeValueAsString(klagePdf.createMetadataPart()),
+    ).headers {
+        it.contentType = MediaType.APPLICATION_JSON
+        it.contentDisposition =
+            ContentDisposition
+                .builder("form-data")
+                .name("metadata")
+                .build()
+    }
 
-    part("klage.pdf", InputStreamResource(klagePdf.data))
+    part("klage_pdf_part", InputStreamResource(klagePdf.data))
         .headers {
             it.contentType = MediaType.APPLICATION_OCTET_STREAM
             it.contentDisposition =

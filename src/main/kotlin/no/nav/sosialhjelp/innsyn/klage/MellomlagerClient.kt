@@ -13,9 +13,7 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
-import org.apache.commons.io.IOUtils
 import org.springframework.context.annotation.Profile
-import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
@@ -23,7 +21,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
@@ -167,11 +164,11 @@ class FiksMellomlagerClient(
     private fun handleClientError(
         exception: Throwable,
         context: String? = null,
-    ): MellomlagerResponse.FiksError = throw exception
-//        when (exception) {
-//            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
-//            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
-//        }
+    ): MellomlagerResponse.FiksError =
+        when (exception) {
+            is WebClientResponseException -> exception.responseBodyAsString.toFiksError()
+            else -> throw MellomlagerClientException("Unexpected error in $context", exception)
+        }
 
     private suspend fun getMaskinportenToken() = texasClient.getMaskinportenToken().value
 
@@ -203,8 +200,8 @@ private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): Str
         ),
     )
 
-private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): MultiValueMap<String, HttpEntity<*>> {
-    return MultipartBodyBuilder()
+private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): MultiValueMap<String, HttpEntity<*>> =
+    MultipartBodyBuilder()
         .run {
             filerForOpplasting.forEachIndexed { index, file ->
                 part("metadata-part", createJsonFilMetadata(file))
@@ -214,7 +211,6 @@ private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): Mul
                             ContentDisposition
                                 .builder("form-data")
                                 .name("metadata")
-//                                .filename("metadata.json") // Uten filename kommer det i parameterMap i requesten
                                 .build()
                     }
                 part("files-part", InputStreamResource(file.data))
@@ -230,59 +226,6 @@ private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): Mul
             }
             build()
         }
-
-//    return LinkedMultiValueMap<String, Any>()
-//        .apply {
-//            filerForOpplasting.forEachIndexed { index, fil ->
-//                add(
-//                    "metadata$index",
-//                    createHttpEntityOfString(createJsonFilMetadata(fil), "metadata$index"),
-//                )
-//                add(
-//                    fil.filnavn?.value ?: error("Filnavn mangler"),
-//                    createHttpEntityOfFile(fil, fil.filnavn.value),
-//                )
-//            }
-//        }
-}
-
-fun createHttpEntity(
-    body: Any,
-    name: String,
-    filename: String?,
-    contentType: String,
-): HttpEntity<Any> {
-    val contentDisposition =
-        ContentDisposition
-            .builder("form-data")
-            .run {
-                name(name)
-                if (filename != null) filename(filename)
-                build()
-            }
-
-    return LinkedMultiValueMap<String, String>()
-        .apply {
-            add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-            add(HttpHeaders.CONTENT_TYPE, contentType)
-        }.let { headerMap -> HttpEntity(body, headerMap) }
-}
-
-private fun createHttpEntityOfString(
-    body: String,
-    name: String,
-): HttpEntity<Any> = createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
-
-private fun createHttpEntityOfFile(
-    file: FilForOpplasting,
-    name: String,
-): HttpEntity<Any> =
-    createHttpEntity(
-        body = ByteArrayResource(IOUtils.toByteArray(file.data)),
-        name = name,
-        filename = file.filnavn?.value,
-        contentType = "application/octet-stream",
-    )
 
 private fun String.toFiksError() = objectMapper.readValue<MellomlagerResponse.FiksError>(this)
 

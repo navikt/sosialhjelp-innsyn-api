@@ -112,7 +112,7 @@ class FiksKlageClientImpl(
             .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
             .retrieve()
             .bodyToMono(Array<FiksKlageDto>::class.java)
-            .block()
+            .awaitSingleOrNull()
             ?.toList()
             ?: emptyList()
 
@@ -153,13 +153,15 @@ private fun createBodyForUpload(
 private fun MultipartBodyBuilder.createMetadataAndPartForKlagePdf(klagePdf: FilForOpplasting) {
     part(
         "metadata",
-        createHttpEntity(
-            body = klagePdf.createMetadataPart(),
-            name = "metadata",
-            filename = null,
-            contentType = MediaType.APPLICATION_JSON_VALUE,
-        ),
-    )
+        objectMapper.writeValueAsString(klagePdf.createMetadataPart()),
+    ).headers {
+        it.contentType = MediaType.APPLICATION_JSON
+        it.contentDisposition =
+            ContentDisposition
+                .builder("form-data")
+                .name("metadata")
+                .build()
+    }
 
     part("klage.pdf", InputStreamResource(klagePdf.data))
         .headers {

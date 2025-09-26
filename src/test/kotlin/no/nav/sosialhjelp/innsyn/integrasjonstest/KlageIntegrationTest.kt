@@ -6,8 +6,9 @@ import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.just
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
-import no.nav.sosialhjelp.innsyn.app.exceptions.FrontendErrorMessage
-import no.nav.sosialhjelp.innsyn.klage.DocumentReferences
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.EttersendtInfoNAVDto
 import no.nav.sosialhjelp.innsyn.klage.FiksKlageClient
@@ -15,7 +16,7 @@ import no.nav.sosialhjelp.innsyn.klage.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.FiksProtokoll
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
-import no.nav.sosialhjelp.innsyn.klage.KlagerDto
+import no.nav.sosialhjelp.innsyn.klage.KlageRef
 import no.nav.sosialhjelp.innsyn.klage.MellomlagerClient
 import no.nav.sosialhjelp.innsyn.klage.MellomlagerResponse
 import no.nav.sosialhjelp.innsyn.klage.MellomlagringDokumentInfo
@@ -44,6 +45,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     private lateinit var mellomlagerClient: MellomlagerClient
 
     @MockkBean
+    private lateinit var fiksClient: FiksClient
+
+    @MockkBean
     private lateinit var fiksKlageClient: FiksKlageClient
 
     @Test
@@ -58,7 +62,8 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just Runs
 
         doPost(
-            uri = putUrl(digisosId),
+            uri = POST_KLAGE,
+            digisosId = digisosId,
             body =
                 KlageInput(
                     klageId = klageId,
@@ -74,9 +79,17 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
-        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId))
+        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+        coEvery {
+            fiksClient.hentDokument(
+                any(),
+                any(),
+                JsonVedleggSpesifikasjon::class.java,
+                any(),
+            )
+        } returns JsonVedleggSpesifikasjon()
 
-        doGet(getKlageUrl(digisosId, vedtakId))
+        doGet(GET_KLAGE, listOf(digisosId, vedtakId))
             .expectStatus()
             .isOk
             .expectBody(KlageDto::class.java)
@@ -93,35 +106,32 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     fun `Hente klage som ikke eksisterer returnerer 404`() {
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
-        doGet(getKlageUrl(UUID.randomUUID(), UUID.randomUUID()))
+        doGet(GET_KLAGE, listOf(UUID.randomUUID(), UUID.randomUUID()))
             .expectStatus()
-            .isNotFound
-            .expectBody(FrontendErrorMessage::class.java)
+            .isOk
+            .expectBodyList(KlageDto::class.java)
             .returnResult()
             .responseBody
-            .also { error ->
-                assertThat(error!!.type).isEqualTo("not_found_error")
-            }
+            .also { klager -> assertThat(klager).isEmpty() }
     }
 
     @Test
     fun `Hente alle klager skal returnere alle klager for digisosId`() {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
-
-        coEvery { fiksKlageClient.hentKlager(any()) } returns
-            listOf(createFiksKlageDto(klageId, vedtakId))
-
         val digisosId = UUID.randomUUID()
 
-        doGet(getKlagerUrl(digisosId))
-            .expectBody(KlagerDto::class.java)
+        coEvery { fiksKlageClient.hentKlager(any()) } returns
+            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+
+        doGet(GET_KLAGER, listOf(digisosId))
+            .expectBodyList(KlageRef::class.java)
             .returnResult()
             .responseBody
-            .also { klagerDto ->
-                klagerDto!!.klager.forEach { klageDto ->
-                    assertThat(klageDto.klageId).isEqualTo(klageId)
-                    assertThat(klageDto.vedtakId).isEqualTo(vedtakId)
+            .also { klager ->
+                klager!!.forEach { klage ->
+                    assertThat(klage.klageId).isEqualTo(klageId)
+                    assertThat(klage.vedtakId).isEqualTo(vedtakId)
                 }
             }
     }
@@ -130,11 +140,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     fun `Digisos-sak uten klager returnerer tom liste`() {
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
-        doGet(getKlagerUrl(UUID.randomUUID()))
-            .expectBody(KlagerDto::class.java)
+        doGet(GET_KLAGER, listOf(UUID.randomUUID()))
+            .expectBodyList(KlageDto::class.java)
             .returnResult()
             .responseBody
-            .also { klagerDto -> assertThat(klagerDto!!.klager).isEmpty() }
+            .also { klager -> assertThat(klager).isEmpty() }
     }
 
     @Test
@@ -165,7 +175,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body = body,
         ).expectStatus()
             .isOk
-            .expectBody(DocumentReferences::class.java)
+            .expectBody(DocumentsForKlage::class.java)
             .returnResult()
             .responseBody
             ?.documents
@@ -183,14 +193,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     }
 
     companion object {
-        fun putUrl(digisosId: UUID) = "/api/v1/innsyn/$digisosId/klage/send"
-
-        fun getKlageUrl(
-            digisosId: UUID,
-            vedtakId: UUID,
-        ) = "/api/v1/innsyn/$digisosId/klage/$vedtakId"
-
-        fun getKlagerUrl(digisosId: UUID) = "/api/v1/innsyn/$digisosId/klager"
+        private const val POST_KLAGE = "/api/v1/innsyn/{digisosId}/klage/send"
+        private const val GET_KLAGE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
+        private const val GET_KLAGER = "/api/v1/innsyn/{digisosId}/klager"
     }
 }
 
@@ -261,14 +266,17 @@ data class OpplastetFilMetadata(
 private fun createFiksKlageDto(
     klageId: UUID,
     vedtakId: UUID,
+    digisosId: UUID,
 ): FiksKlageDto =
     FiksKlageDto(
         fiksOrgId = UUID.randomUUID(),
+        digisosId = digisosId,
         klageId = klageId,
         vedtakId = vedtakId,
         navEksternRefId = klageId,
         klageMetadata = UUID.randomUUID(),
         vedleggMetadata = UUID.randomUUID(),
+        vedlegg = emptyList(),
         trukket = false,
         klageDokument =
             DokumentInfoDto(

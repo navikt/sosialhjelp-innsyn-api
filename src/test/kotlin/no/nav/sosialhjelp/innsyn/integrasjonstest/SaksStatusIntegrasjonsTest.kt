@@ -46,7 +46,7 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
         coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
 
-        doGet("/api/v1/innsyn/1234/saksStatus")
+        doGet("/api/v1/innsyn/1234/saksStatus", emptyList())
 
         coVerify(exactly = 1) { fiksClient.hentDigisosSak(any()) }
         coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }

@@ -13,15 +13,15 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
-import org.apache.commons.io.IOUtils
 import org.springframework.context.annotation.Profile
-import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
-import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -70,7 +70,12 @@ class FiksMellomlagerClient(
                 .bodyToMono<MellomlagerResponse.MellomlagringDto>()
                 .awaitSingleOrNull()
                 ?: error("MellomlagringDto er null")
-        }.getOrElse { ex -> handleClientError(ex, "get metadata") }
+        }.getOrElse { ex ->
+            when (ex) {
+                is WebClientResponseException.NotFound -> MellomlagerResponse.EmptyResponse
+                else -> handleClientError(ex, "get metadata")
+            }
+        }
 
     override suspend fun uploadDocuments(
         navEksternId: UUID,
@@ -170,8 +175,8 @@ class FiksMellomlagerClient(
     companion object {
         private val logger by logger()
 
-        private const val MELLOMLAGRING_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}"
-        private const val MELLOMLAGRING_DOKUMENT_PATH = "digisos/api/v1/mellomlagring/{navEksternRefId}/{digisosDokumentId}"
+        private const val MELLOMLAGRING_PATH = "/digisos/api/v1/mellomlagring/{navEksternRefId}"
+        private const val MELLOMLAGRING_DOKUMENT_PATH = "/digisos/api/v1/mellomlagring/{navEksternRefId}/{digisosDokumentId}"
     }
 }
 
@@ -186,33 +191,6 @@ data class FilMetadata(
     val storrelse: Long,
 )
 
-private fun createHttpEntityOfString(
-    body: String,
-    name: String,
-): HttpEntity<Any> = createHttpEntity(body, name, null, "text/plain;charset=UTF-8")
-
-fun createHttpEntity(
-    body: Any,
-    name: String,
-    filename: String?,
-    contentType: String,
-): HttpEntity<Any> {
-    val contentDisposition =
-        ContentDisposition
-            .builder("form-data")
-            .run {
-                name(name)
-                if (filename != null) filename(filename)
-                build()
-            }
-
-    return LinkedMultiValueMap<String, String>()
-        .apply {
-            add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-            add(HttpHeaders.CONTENT_TYPE, contentType)
-        }.let { headerMap -> HttpEntity(body, headerMap) }
-}
-
 private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): String =
     jacksonObjectMapper().writeValueAsString(
         FilMetadata(
@@ -222,30 +200,31 @@ private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): Str
         ),
     )
 
-private fun createHttpEntityOfFile(
-    file: FilForOpplasting,
-    name: String,
-): HttpEntity<Any> =
-    createHttpEntity(
-        body = ByteArrayResource(IOUtils.toByteArray(file.data)),
-        name = name,
-        filename = file.filnavn?.value,
-        contentType = "application/octet-stream",
-    )
-
-private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): LinkedMultiValueMap<String, Any> =
-    LinkedMultiValueMap<String, Any>()
-        .apply {
-            filerForOpplasting.forEachIndexed { index, fil ->
-                add(
-                    "metadata$index",
-                    createHttpEntityOfString(createJsonFilMetadata(fil), "metadata$index"),
-                )
-                add(
-                    fil.filnavn?.value ?: error("Filnavn mangler"),
-                    createHttpEntityOfFile(fil, fil.filnavn.value),
-                )
+private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): MultiValueMap<String, HttpEntity<*>> =
+    MultipartBodyBuilder()
+        .run {
+            filerForOpplasting.forEachIndexed { index, file ->
+                part("metadata-part", createJsonFilMetadata(file))
+                    .headers {
+                        it.contentType = MediaType.APPLICATION_JSON
+                        it.contentDisposition =
+                            ContentDisposition
+                                .builder("form-data")
+                                .name("metadata")
+                                .build()
+                    }
+                part("files-part", InputStreamResource(file.data))
+                    .headers {
+                        it.contentType = MediaType.APPLICATION_OCTET_STREAM
+                        it.contentDisposition =
+                            ContentDisposition
+                                .builder("form-data")
+                                .name("files")
+                                .filename(file.filnavn?.value)
+                                .build()
+                    }
             }
+            build()
         }
 
 private fun String.toFiksError() = objectMapper.readValue<MellomlagerResponse.FiksError>(this)

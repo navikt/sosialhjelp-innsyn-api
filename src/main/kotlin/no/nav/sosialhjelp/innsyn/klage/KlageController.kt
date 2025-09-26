@@ -1,11 +1,10 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
-import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -29,7 +28,7 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
-    ): DocumentReferences {
+    ): DocumentsForKlage {
         // TODO En eller annen form for sjekk av fiksDigisosId ?
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
@@ -41,23 +40,6 @@ class KlageController(
         )
     }
 
-    @GetMapping("/{fiksDigisosId}/klage/{klageId}/vedlegg")
-    suspend fun getAllDocumentsForKlage(
-        @PathVariable fiksDigisosId: UUID,
-        @PathVariable klageId: UUID,
-    ): DocumentReferences {
-        TODO("Implementer hentVedlegg i KlageController")
-    }
-
-    @GetMapping("/{fiksDigisosId}/klage/{klageId}/vedlegg/{documentId}")
-    suspend fun getDocument(
-        @PathVariable fiksDigisosId: UUID,
-        @PathVariable klageId: UUID,
-        @PathVariable documentId: UUID,
-    ): ResponseEntity<ByteArray> {
-        TODO("Implementer hentVedlegg i KlageController, og slett denne funksjonen")
-    }
-
     @GetMapping("/{fiksDigisosId}/klage/{klageId}/avbryt")
     suspend fun cancelKlage(
         @PathVariable fiksDigisosId: UUID,
@@ -65,7 +47,7 @@ class KlageController(
     ) {
         TODO("Implementer avbrytKlage i KlageController")
 
-        // TODO Slette eventuelle vedlegg i mellomlageret
+        // TODO Slette eventuelle vedlegg i mellomlageret?
     }
 
     @PostMapping("/{fiksDigisosId}/klage/send")
@@ -86,43 +68,40 @@ class KlageController(
     suspend fun hentKlage(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable vedtakId: UUID,
-    ): KlageDto {
+    ): KlageDto? {
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return klageService.hentKlage(fiksDigisosId, vedtakId)?.toKlageDto()
-            ?: throw NotFoundException("Klage for vedtakId $vedtakId ikke funnet for fiksDigisosId $fiksDigisosId")
+        return klageService.hentKlage(fiksDigisosId, vedtakId)
     }
 
     @GetMapping("/{fiksDigisosId}/klager")
     suspend fun hentKlager(
         @PathVariable fiksDigisosId: UUID,
-    ): KlagerDto {
+    ): List<KlageRef> {
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return KlagerDto(klager = klageService.hentKlager(fiksDigisosId).map { it.toKlageDto() })
+        return klageService.hentKlager(fiksDigisosId).map { it.toKlageRef() }
     }
+
+    private fun FiksKlageDto.toKlageRef() =
+        KlageRef(
+            klageId = klageId,
+            vedtakId = vedtakId,
+        )
 
     private fun validateNotProd() {
         if (MiljoUtils.isRunningInProd()) throw IllegalStateException("KlageController should not be used in production environment")
     }
 }
 
-private fun FiksKlageDto.toKlageDto() =
-    KlageDto(
-        klageId = klageId,
-        vedtakId = vedtakId,
-        // TODO Skal vi utlede status fra denne?
-        status = sendtKvittering.sendtStatus,
-        documentIdPdf = klageDokument.dokumentlagerDokumentId,
-    )
-
-data class DocumentReferences(
-    val documents: List<DocumentRef>,
+data class DocumentsForKlage(
+    val documents: List<DocumentForKlage>,
 )
 
-data class DocumentRef(
+data class DocumentForKlage(
+    val klageId: UUID,
     val documentId: UUID,
     val filename: String,
 )
@@ -133,14 +112,18 @@ data class KlageInput(
     val tekst: String,
 )
 
-data class KlagerDto(
-    val klager: List<KlageDto>,
+data class KlageRef(
+    val klageId: UUID,
+    val vedtakId: UUID,
 )
 
 // TODO Hva skal legges ved i denne? Kun json, pdf,?
+// TODO Denne trenger URL til klage.pdf
 data class KlageDto(
+    val digisosId: UUID,
     val klageId: UUID,
     val vedtakId: UUID,
     val status: SendtStatusDto,
-    val documentIdPdf: UUID,
+    val klagePdf: VedleggResponse,
+    val opplastedeVedlegg: List<VedleggResponse> = emptyList(),
 )

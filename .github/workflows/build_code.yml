@@ -12,6 +12,7 @@ jobs:
     name: 'Build with Gradle'
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       packages: write
       contents: write
     env:
@@ -19,6 +20,9 @@ jobs:
       ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v5
+      - uses: nais/login@v0
+        with:
+          team: 'teamdigisos'
       - name: Build kotlin, and run tests/lint
         uses: navikt/sosialhjelp-ci/actions/build-kotlin@v7
         with:

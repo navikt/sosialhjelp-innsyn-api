@@ -1,0 +1,44 @@
+innsyn:
+  vedlegg:
+    virusscan:
+      enabled: false
+      url:
+  cache:
+    dokument_cache_time_to_live_seconds: 100
+
+springdoc:
+  api-docs:
+    enabled: true
+
+mock-alt-api-host: ${MOCK_ALT_API_HOST:127.0.0.1}
+mock-alt-api-wellknown-queryparam: ${MOCK_ALT_API_WELLKNOWN_QUERYPARAM:}
+
+nais:
+  token:
+    endpoint: ${NAIS_TOKEN_ENDPOINT:http://localhost:8081/api/v1/token}
+    exchange:
+      endpoint: ${NAIS_TOKEN_EXCHANGE_ENDPOINT:http://localhost:8081/api/v1/token/exchange}
+
+innsyn.loginurl: ${INNSYN_LOGINURL:http://127.0.0.1:3008/sosialhjelp/mock-alt/login}
+
+client:
+  fiks_digisos_endpoint_url: ${FIKS_DIGISOS_ENDPOINT_URL:http://${mock-alt-api-host}:${MOCK_PORT}/sosialhjelp/mock-alt-api/fiks}
+  fiks_klage_endpoint_url: ${FIKS_KLAGE_ENDPOINT_URL:http://${mock-alt-api-host}:${MOCK_PORT}/sosialhjelp/mock-alt-api/klage}
+  fiks_dokumentlager_endpoint_url: ${FIKS_DOKUMENTLAGER_ENDPOINT_URL:http://${mock-alt-api-host}:${MOCK_PORT}/sosialhjelp/mock-alt-api/fiks/dokumentlager}
+  fiks_svar_ut_endpoint_url: ${FIKS_SVAR_UT_ENDPOINT_URL:http://${mock-alt-api-host}:${MOCK_PORT}/sosialhjelp/mock-alt-api/fiks/svarut}
+  fiks_integrasjonid: id1
+  fiks_integrasjonid_kommune: id2
+  fiks_integrasjonpassord: pw1
+  fiks_integrasjonpassord_kommune: pw2
+  norg_url: ${NORG_URL:http://${mock-alt-api-host}:${MOCK_PORT}/sosialhjelp/mock-alt-api/norg_endpoint_url/}
+  pdl_endpoint_url: ${PDL_ENDPOINT_URL:http://${mock-alt-api-host}:${MOCK_PORT}/sosialhjelp/mock-alt-api/pdl_endpoint_url}
+  pdl_audience: ${PDL_AUDIENCE:dev-gcp:teamdigisos:sosialhjelp-mock-alt-api}
+  unleash_instance_id: ${UNLEASH_INSTANCE_ID:local}
+  unleash_env: ${UNLEASH_ENV:mock}
+  unleash_server_api_url: ${UNLEASH_SERVER_API_URL:http://${mock-alt-api-host}:${MOCK_PORT}/sosialhjelp/mock-alt-api/internal/unleash}
+  unleash_server_api_token: ${UNLEASH_SERVER_API_TOKEN:token}
+  vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
+
+idporten:
+  issuer: ${IDPORTEN_ISSUER:http://localhost:8888/default}
+  audience: ${IDPORTEN_CLIENT_ID:default}

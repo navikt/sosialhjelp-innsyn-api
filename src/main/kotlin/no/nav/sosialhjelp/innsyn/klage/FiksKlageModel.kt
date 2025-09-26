@@ -1,15 +1,19 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.util.UUID
 
+@JsonIgnoreProperties(ignoreUnknown = false)
 data class FiksKlageDto(
     val fiksOrgId: UUID,
+    val digisosId: UUID,
     val klageId: UUID,
     val vedtakId: UUID,
     val navEksternRefId: UUID,
     val klageMetadata: UUID, // id til klage.json i dokumentlager
     val vedleggMetadata: UUID, // id til vedlegg.json (jsonVedleggSpec) i dokumentlager
     val klageDokument: DokumentInfoDto, // id til klage.pdf i dokumentlager
+    val vedlegg: List<DokumentInfoDto>, // liste med opplastede vedlegg
     val trekkKlageInfo: TrekkKlageInfoDto?,
     val sendtKvittering: SendtKvitteringDto,
     val ettersendtInfoNAV: EttersendtInfoNAVDto,

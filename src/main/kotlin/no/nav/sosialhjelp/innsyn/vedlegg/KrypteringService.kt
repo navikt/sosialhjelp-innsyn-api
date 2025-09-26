@@ -79,13 +79,12 @@ class KrypteringServiceImpl : KrypteringService {
 @Component
 class KrypteringServiceMock : KrypteringService {
     override val log by logger()
+
     override suspend fun krypter(
         databuffer: InputStream,
         certificate: X509Certificate,
-        coroutineScope: CoroutineScope
-    ): InputStream {
-        return databuffer
-    }
+        coroutineScope: CoroutineScope,
+    ): InputStream = databuffer
 
     override fun krypterData(
         outputStream: OutputStream,

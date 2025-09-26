@@ -1,10 +1,6 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import java.io.ByteArrayInputStream
-import java.net.URI
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
@@ -41,12 +37,16 @@ import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
+import java.io.ByteArrayInputStream
+import java.net.URI
+import java.time.LocalDate
+import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash", "testcontainers"])
 @Testcontainers(disabledWithoutDocker = true)
-class KlageEndpointToMockAltApiTest() {
+class KlageEndpointToMockAltApiTest {
     @Autowired
     private lateinit var webClient: WebTestClient
 
@@ -114,32 +114,35 @@ class KlageEndpointToMockAltApiTest() {
     @Test
     fun `Referanse til opplastet vedlegg skal returneres ved hent klage`() {
         runTestWithToken {
-
             val digisosId = UUID.randomUUID()
 
-            val input = KlageInput(
-                klageId = UUID.randomUUID(),
-                vedtakId = UUID.randomUUID(),
-                tekst = "Min klage lyder slik"
-            )
+            val input =
+                KlageInput(
+                    klageId = UUID.randomUUID(),
+                    vedtakId = UUID.randomUUID(),
+                    tekst = "Min klage lyder slik",
+                )
 
-            val files = mapOf(
-                "klage.pdf" to input.createKlagePdf().data.readBytes(),
-                "klage2.pdf" to input.createKlagePdf().data.readBytes()
-            )
+            val files =
+                mapOf(
+                    "klage.pdf" to input.createKlagePdf().data.readBytes(),
+                    "klage2.pdf" to input.createKlagePdf().data.readBytes(),
+                )
 
-            val docRefs = lastOppDokument(
-                digisosId,
-                input.klageId,
-                files
-            )
+            val docRefs =
+                lastOppDokument(
+                    digisosId,
+                    input.klageId,
+                    files,
+                )
 
             sendKlage(digisosId, input.klageId, input.vedtakId, input)
 
             val klage = hentKlage(digisosId, input.vedtakId)
 
             getDocument(klage?.klagePdf?.url ?: error("Mangler klagePdf"))
-                .toEntity<ByteArray>().block()
+                .toEntity<ByteArray>()
+                .block()
                 .also { response ->
                     val contentDisposition = response?.headers?.contentDisposition ?: error("Mangler contentDisposition")
                     assertThat(contentDisposition.filename).isEqualTo("klage.pdf")
@@ -147,7 +150,8 @@ class KlageEndpointToMockAltApiTest() {
                 }
             klage.opplastedeVedlegg.forEach { vedlegg ->
                 getDocument(vedlegg.url)
-                    .toEntity<ByteArray>().block()
+                    .toEntity<ByteArray>()
+                    .block()
                     .also { response ->
                         val contentDisposition = response?.headers?.contentDisposition ?: error("Mangler contentDisposition")
                         assertThat(docRefs.documents.map { it.filename }).contains(contentDisposition.filename)
@@ -215,9 +219,9 @@ class KlageEndpointToMockAltApiTest() {
     private suspend fun lastOppDokument(
         digisosId: UUID,
         klageId: UUID,
-        fileMap: Map<String, ByteArray>
-    ): DocumentsForKlage {
-        return webClient
+        fileMap: Map<String, ByteArray>,
+    ): DocumentsForKlage =
+        webClient
             .post()
             .uri(UPLOAD, digisosId, klageId)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
@@ -225,22 +229,25 @@ class KlageEndpointToMockAltApiTest() {
             .exchange()
             .expectStatus()
             .isOk
-            .returnResult(DocumentsForKlage::class.java).responseBody
+            .returnResult(DocumentsForKlage::class.java)
+            .responseBody
             .blockFirst()
             ?: error("Kunne ikke laste opp dokument")
-    }
 
-    private fun getDocument(fullPath: String): WebClient.ResponseSpec {
-        return WebClient
+    private fun getDocument(fullPath: String): WebClient.ResponseSpec =
+        WebClient
             .create()
             .get()
             .uri(URI(fullPath))
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
-    }
 
-    private fun getDocument(baseUrl: String, dokumentlagerId: UUID, path: String = GET_DOCUMENT): ByteArray {
-        return WebClient
+    private fun getDocument(
+        baseUrl: String,
+        dokumentlagerId: UUID,
+        path: String = GET_DOCUMENT,
+    ): ByteArray =
+        WebClient
             .builder()
             .baseUrl(baseUrl)
             .build()
@@ -251,10 +258,9 @@ class KlageEndpointToMockAltApiTest() {
             .bodyToMono<ByteArray>()
             .block()
             ?: error("Kunne ikke hente dokument")
-    }
 
-    private fun buildBody(fileMap: Map<String, ByteArray>): MultiValueMap<String, HttpEntity<*>> {
-        return MultipartBodyBuilder()
+    private fun buildBody(fileMap: Map<String, ByteArray>): MultiValueMap<String, HttpEntity<*>> =
+        MultipartBodyBuilder()
             .apply {
                 val metadata = createMetadata(fileMap)
                 part("metadata", metadata)
@@ -280,38 +286,36 @@ class KlageEndpointToMockAltApiTest() {
                                     .build()
                         }
                 }
-            }
-            .build()
-    }
+            }.build()
 
     private fun resolveFilenameUuid(
         filename: String,
-        metadata: List<Metadata>
-    ): UUID {
-        return metadata
+        metadata: List<Metadata>,
+    ): UUID =
+        metadata
             .flatMap { it.filer }
             .find { it.filnavn.value == filename }
             ?.uuid
             ?: error("Fant ikke filnavn '$filename'")
-    }
 
-    private fun createMetadata(fileMap: Map<String, ByteArray>): List<Metadata> {
-        return listOf(
+    private fun createMetadata(fileMap: Map<String, ByteArray>): List<Metadata> =
+        listOf(
             Metadata(
                 type = "klage",
                 tilleggsinfo = null,
                 hendelsetype = JsonVedlegg.HendelseType.BRUKER,
                 hendelsereferanse = null,
                 innsendelsesfrist = null,
-                filer = fileMap.map { (filnavn, _) ->
-                    OpplastetFilRef(
-                        filnavn = Filename(filnavn),
-                        uuid = UUID.randomUUID()
-                    )
-                }.toMutableList()
-            )
+                filer =
+                    fileMap
+                        .map { (filnavn, _) ->
+                            OpplastetFilRef(
+                                filnavn = Filename(filnavn),
+                                uuid = UUID.randomUUID(),
+                            )
+                        }.toMutableList(),
+            ),
         )
-    }
 
     companion object {
         @Container
@@ -385,5 +389,3 @@ private fun generateKlagePdf(
             addText(input.tekst)
             finish()
         }
-
-

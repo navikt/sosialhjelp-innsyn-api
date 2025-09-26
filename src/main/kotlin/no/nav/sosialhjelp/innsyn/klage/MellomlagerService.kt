@@ -146,8 +146,10 @@ class MellomlagerServiceImpl(
 }
 
 private fun MellomlagerResponse.MellomlagringDto.toDocumentRefs(klageId: UUID): DocumentsForKlage =
-    DocumentsForKlage(mellomlagringMetadataList
-        .map { DocumentForKlage(klageId, it.filId, it.filnavn) },)
+    DocumentsForKlage(
+        mellomlagringMetadataList
+            .map { DocumentForKlage(klageId, it.filId, it.filnavn) },
+    )
 
 data class FileValidationException(
     override val message: String,

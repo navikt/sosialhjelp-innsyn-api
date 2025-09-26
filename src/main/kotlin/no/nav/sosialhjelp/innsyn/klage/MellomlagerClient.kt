@@ -16,12 +16,15 @@ import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import org.apache.commons.io.IOUtils
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -29,9 +32,6 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import java.security.cert.X509Certificate
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
-import org.springframework.core.io.InputStreamResource
-import org.springframework.http.client.MultipartBodyBuilder
-import org.springframework.util.MultiValueMap
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse
@@ -204,7 +204,6 @@ private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): Str
     )
 
 private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): MultiValueMap<String, HttpEntity<*>> {
-
     return MultipartBodyBuilder()
         .run {
             filerForOpplasting.forEachIndexed { index, file ->
@@ -231,7 +230,6 @@ private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): Mul
             }
             build()
         }
-
 
 //    return LinkedMultiValueMap<String, Any>()
 //        .apply {

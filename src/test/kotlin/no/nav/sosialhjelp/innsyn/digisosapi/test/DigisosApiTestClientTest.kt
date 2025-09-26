@@ -2,7 +2,6 @@ package no.nav.sosialhjelp.innsyn.digisosapi.test
 
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
@@ -16,6 +15,7 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.client.WebClient
+import kotlin.time.Duration.Companion.seconds
 
 internal class DigisosApiTestClientTest {
     private val mockWebServer = MockWebServer()

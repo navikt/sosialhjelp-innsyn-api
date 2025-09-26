@@ -38,7 +38,7 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSakOk)
 
-        doGet(uri = "/api/v1/innsyn/saker")
+        doGet(uri = "/api/v1/innsyn/saker", emptyList())
             .expectBodyList(SaksListeResponse::class.java)
             .hasSize(1)
 
@@ -60,7 +60,7 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
         every { navEnhet.navn } returns "testNavKontor"
         coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
 
-        doGet("/api/v1/innsyn/sak/1234/detaljer")
+        doGet("/api/v1/innsyn/sak/1234/detaljer", emptyList())
 
         coVerify(exactly = 2) { fiksClient.hentDigisosSak(any()) }
         coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }

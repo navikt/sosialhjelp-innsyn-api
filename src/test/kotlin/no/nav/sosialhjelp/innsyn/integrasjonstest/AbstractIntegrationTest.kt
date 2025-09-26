@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -35,21 +36,25 @@ abstract class AbstractIntegrationTest {
         coEvery { pdlClientOld.hentPerson(any(), any()) } returns hentPersonAnswer()
     }
 
-    protected fun doGet(uri: String): WebTestClient.ResponseSpec =
+    protected fun doGet(
+        uri: String,
+        variables: List<UUID>,
+    ): WebTestClient.ResponseSpec =
         webClient
             .get()
-            .uri(uri)
+            .uri(uri, *variables.toTypedArray())
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
 
     protected fun doPost(
         uri: String,
+        digisosId: UUID,
         body: Any,
     ): WebTestClient.ResponseSpec =
         webClient
             .post()
-            .uri(uri)
+            .uri(uri, digisosId)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")

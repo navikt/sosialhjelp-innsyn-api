@@ -33,14 +33,16 @@ interface KlageService {
 
     suspend fun hentKlage(
         fiksDigisosId: UUID,
-        vedtakId: UUID,
+        klageId: UUID,
     ): KlageDto?
 
     suspend fun lastOppVedlegg(
         fiksDigisosId: UUID,
-        klageId: UUID,
+        navEksternRefId: UUID,
         rawFiles: Flux<FilePart>,
     ): DocumentsForKlage
+
+    suspend fun sendEttersendelse(fiksDigisosId: UUID, klageId: UUID, ettersendelseId: UUID)
 }
 
 @Service
@@ -61,19 +63,37 @@ class KlageServiceImpl(
             MandatoryFilesForKlage(
                 klageJson = input.toJson(),
                 klagePdf = input.createKlagePdf(),
-                vedleggJson = input.createJsonVedleggSpec(),
+                vedleggJson = createJsonVedleggSpec(input.klageId),
             ),
         )
+    }
+
+    override suspend fun sendEttersendelse(
+        fiksDigisosId: UUID,
+        klageId: UUID,
+        ettersendelseId: UUID
+    ) {
+        createJsonVedleggSpec(ettersendelseId, klageId)
+            .also {
+                if(it.noFiles()) { error("Ingen vedlegg for ettersendelse av Klage") }
+
+                klageClient.sendEttersendelse(
+                    digisosId = fiksDigisosId,
+                    klageId = klageId,
+                    ettersendelseId = ettersendelseId,
+                    vedleggJson = it
+                )
+            }
     }
 
     override suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto> = klageClient.hentKlager(fiksDigisosId)
 
     override suspend fun hentKlage(
         fiksDigisosId: UUID,
-        vedtakId: UUID,
+        klageId: UUID,
     ): KlageDto? {
         val fiksKlage =
-            klageClient.hentKlager(digisosId = fiksDigisosId).find { it.vedtakId == vedtakId }
+            klageClient.hentKlager(digisosId = fiksDigisosId).find { it.klageId == klageId }
                 ?: return null
 
         val klagePdf = fiksKlage.klageDokument.toVedleggResponse(fiksKlage.getTidspunktSendt())
@@ -98,17 +118,21 @@ class KlageServiceImpl(
 
     override suspend fun lastOppVedlegg(
         fiksDigisosId: UUID,
-        klageId: UUID,
+        navEksternRefId: UUID,
         rawFiles: Flux<FilePart>,
     ): DocumentsForKlage {
         val allFiles = rawFiles.asFlow().toList()
 
-        return mellomlagerService.processDocumentUpload(klageId, allFiles)
+        return mellomlagerService.processDocumentUpload(navEksternRefId, allFiles)
     }
 
-    private suspend fun KlageInput.createJsonVedleggSpec(): JsonVedleggSpesifikasjon {
+    private suspend fun createJsonVedleggSpec(
+        navEksternRefId: UUID,
+        klageId: UUID = navEksternRefId
+    ): JsonVedleggSpesifikasjon {
+
         val allMetadata =
-            runCatching { mellomlagerService.getAllDocumentMetadataForRef(klageId) }
+            runCatching { mellomlagerService.getAllDocumentMetadataForRef(navEksternRefId) }
                 .getOrElse { ex ->
                     when (ex) {
                         is NotFoundException -> emptyList()
@@ -121,7 +145,7 @@ class KlageServiceImpl(
             .withType("klage")
             .withStatus(if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG")
             .withHendelseType(JsonVedlegg.HendelseType.BRUKER)
-            .withHendelseReferanse(this.vedtakId.toString())
+            .withHendelseReferanse(navEksternRefId.toString())
             .withKlageId(klageId.toString())
             .withFiler(allMetadata.map { JsonFiler().withFilnavn(it.filnavn) })
             .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
@@ -165,6 +189,8 @@ class KlageServiceImpl(
             datoLagtTil = tidspunktSendt,
         )
 }
+
+private fun JsonVedleggSpesifikasjon.noFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()
 
 private fun JsonVedleggSpesifikasjon.validerAllMatch(filnavnList: List<String>) {
     vedlegg

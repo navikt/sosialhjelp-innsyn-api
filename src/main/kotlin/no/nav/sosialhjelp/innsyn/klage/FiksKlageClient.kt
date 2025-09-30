@@ -7,7 +7,6 @@ import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.digisosapi.toHttpEntity
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
@@ -22,6 +21,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
+import org.springframework.web.reactive.function.BodyInserters
 
 interface FiksKlageClient {
     suspend fun sendKlage(
@@ -29,6 +29,13 @@ interface FiksKlageClient {
         klageId: UUID,
         vedtakId: UUID,
         files: MandatoryFilesForKlage,
+    )
+
+    suspend fun sendEttersendelse(
+        digisosId: UUID,
+        klageId: UUID,
+        ettersendelseId: UUID,
+        vedleggJson: JsonVedleggSpesifikasjon,
     )
 
     suspend fun hentKlager(digisosId: UUID?): List<FiksKlageDto>
@@ -59,7 +66,8 @@ class FiksKlageClientImpl(
                             vedleggJson = files.vedleggJson,
                             klagePdf = pdfWithEncryptedData,
                         )
-                    }.also { body ->
+                    }
+                    .also { body ->
                         doSendKlage(
                             digisosId = digisosId,
                             klageId = klageId,
@@ -90,7 +98,55 @@ class FiksKlageClientImpl(
                         clientResponse.bodyToMono(String::class.java).map { errorBody ->
                             RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
                         }
-                    }.toBodilessEntity()
+                    }
+                    .toBodilessEntity()
+                    .awaitSingleOrNull()
+            }
+        if (response?.statusCode?.is2xxSuccessful != true) {
+            throw RuntimeException("Failed to send klage, status code: ${response?.statusCode}")
+        }
+    }
+
+    override suspend fun sendEttersendelse(
+        digisosId: UUID,
+        klageId: UUID,
+        ettersendelseId: UUID,
+        vedleggJson: JsonVedleggSpesifikasjon
+    ) {
+        MultipartBodyBuilder()
+            .apply {
+                buildPart(
+                    "vedlegg.json",
+                    "vedlegg.json",
+                    MediaType.APPLICATION_JSON,
+                    vedleggJson.toJson()
+                )
+            }
+            .build()
+            .also { body -> doSendEttersendelse(digisosId, klageId, ettersendelseId, body) }
+    }
+
+    private suspend fun doSendEttersendelse(
+        digisosId: UUID,
+        klageId: UUID,
+        ettersendelseId: UUID,
+        body: MultiValueMap<String, HttpEntity<*>>,
+    ) {
+        val response =
+            withContext(Dispatchers.IO) {
+                fiksWebClient
+                    .post()
+                    .uri(ETTERSENDELSE_PATH, digisosId, ettersendelseId, klageId)
+                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(BodyInserters.fromMultipartData(body))
+                    .retrieve()
+                    .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
+                        clientResponse.bodyToMono(String::class.java).map { errorBody ->
+                            RuntimeException("Failed to send ettersendelse: ${clientResponse.statusCode()} - $errorBody")
+                        }
+                    }
+                    .toBodilessEntity()
                     .awaitSingleOrNull()
             }
         if (response?.statusCode?.is2xxSuccessful != true) {
@@ -119,6 +175,7 @@ class FiksKlageClientImpl(
     companion object {
         private const val SEND_INN_KLAGE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/{vedtakId}"
         private const val GET_KLAGER_PATH = "/digisos/klage/api/v1/klager"
+        private const val ETTERSENDELSE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/vedlegg"
 
         private fun getKlagerQueryParam(digisosId: UUID) = "?digisosId=$digisosId"
     }
@@ -131,51 +188,58 @@ private fun createBodyForUpload(
 ): MultiValueMap<String, HttpEntity<*>> =
     MultipartBodyBuilder()
         .apply {
-            part(
+            buildPart(
                 "klage.json",
-                klageJson.toHttpEntity(
-                    "klage.json",
-                    "klage.json",
-                    MediaType.APPLICATION_JSON_VALUE,
-                ),
+                "klage.json",
+                MediaType.APPLICATION_JSON,
+                klageJson
             )
-            part(
-                "vedlegg.json",
-                vedleggJson.toJson().toHttpEntity(
-                    "vedlegg.json",
-                    "vedlegg.json",
-                    MediaType.APPLICATION_JSON_VALUE,
-                ),
-            )
-            createMetadataAndPartForKlagePdf(klagePdf)
-        }.build()
 
-private fun MultipartBodyBuilder.createMetadataAndPartForKlagePdf(klagePdf: FilForOpplasting) {
-    part(
+            buildPart(
+                "vedlegg.json",
+                "vedlegg.json",
+                MediaType.APPLICATION_JSON,
+                vedleggJson
+            )
+
+            createMetadataAndPartBodyForKlagePdf(klagePdf)
+        }
+        .build()
+
+private fun MultipartBodyBuilder.createMetadataAndPartBodyForKlagePdf(klagePdf: FilForOpplasting) {
+    buildPart(
         "metadata",
-        objectMapper.writeValueAsString(klagePdf.createMetadataPart()),
-    ).headers {
-        it.contentType = MediaType.APPLICATION_JSON
+        null,
+        MediaType.APPLICATION_JSON,
+        objectMapper.writeValueAsString(klagePdf.createMetadataBody()),
+    )
+
+    buildPart(
+        "klage.pdf",
+        "klage.pdf",
+        MediaType.APPLICATION_OCTET_STREAM,
+        body = InputStreamResource(klagePdf.data)
+    )
+}
+
+fun MultipartBodyBuilder.buildPart(
+    name: String,
+    filename: String?,
+    contentType: MediaType,
+    body: Any
+) {
+    part(name, body).headers {
+        it.contentType = contentType
         it.contentDisposition =
             ContentDisposition
                 .builder("form-data")
-                .name("metadata")
+                .name(name)
+                .apply { if (filename != null) filename(filename) }
                 .build()
     }
-
-    part("klage.pdf", InputStreamResource(klagePdf.data))
-        .headers {
-            it.contentType = MediaType.APPLICATION_OCTET_STREAM
-            it.contentDisposition =
-                ContentDisposition
-                    .builder("form-data")
-                    .name("klage.pdf")
-                    .filename(klagePdf.filnavn?.value)
-                    .build()
-        }
 }
 
-private fun FilForOpplasting.createMetadataPart() =
+private fun FilForOpplasting.createMetadataBody() =
     FilMetadata(
         filnavn = filnavn?.value ?: error("Mangler filnavn for Metadata"),
         mimetype = mimetype ?: MediaType.APPLICATION_JSON_VALUE,

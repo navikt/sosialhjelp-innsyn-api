@@ -23,10 +23,10 @@ class KlageController(
     private val klageService: KlageService,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
-    @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{fiksDigisosId}/{navEksternRefId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun uploadDocuments(
         @PathVariable fiksDigisosId: UUID,
-        @PathVariable klageId: UUID,
+        @PathVariable navEksternRefId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): DocumentsForKlage {
         // TODO En eller annen form for sjekk av fiksDigisosId ?
@@ -35,10 +35,11 @@ class KlageController(
 
         return klageService.lastOppVedlegg(
             fiksDigisosId = fiksDigisosId,
-            klageId = klageId,
+            navEksternRefId = navEksternRefId,
             rawFiles = rawFiles,
         )
     }
+
 
     @GetMapping("/{fiksDigisosId}/klage/{klageId}/avbryt")
     suspend fun cancelKlage(
@@ -64,15 +65,31 @@ class KlageController(
         )
     }
 
-    @GetMapping("/{fiksDigisosId}/klage/{vedtakId}")
+    @PostMapping("/{fiksDigisosId}/klage/{klageId}/ettersendelse/{ettersendelseId}")
+    suspend fun sendEttersendelse(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+        @PathVariable ettersendelseId: UUID,
+    ) {
+        validateNotProd()
+        tilgangskontroll.sjekkTilgang()
+
+        klageService.sendEttersendelse(
+            fiksDigisosId = fiksDigisosId,
+            klageId = klageId,
+            ettersendelseId = ettersendelseId,
+        )
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{klageId}")
     suspend fun hentKlage(
         @PathVariable fiksDigisosId: UUID,
-        @PathVariable vedtakId: UUID,
+        @PathVariable klageId: UUID,
     ): KlageDto? {
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return klageService.hentKlage(fiksDigisosId, vedtakId)
+        return klageService.hentKlage(fiksDigisosId, klageId)
     }
 
     @GetMapping("/{fiksDigisosId}/klager")

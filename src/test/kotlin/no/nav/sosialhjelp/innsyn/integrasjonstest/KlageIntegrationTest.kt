@@ -10,7 +10,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
-import no.nav.sosialhjelp.innsyn.klage.EttersendtInfoNAVDto
+import no.nav.sosialhjelp.innsyn.klage.FiksEttersendtInfoNAVDto
 import no.nav.sosialhjelp.innsyn.klage.FiksKlageClient
 import no.nav.sosialhjelp.innsyn.klage.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.FiksProtokoll
@@ -296,5 +296,5 @@ private fun createFiksKlageDto(
                     ),
                 statusListe = emptyList(),
             ),
-        ettersendtInfoNAV = EttersendtInfoNAVDto(ettersendelser = emptyList()),
+        ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )

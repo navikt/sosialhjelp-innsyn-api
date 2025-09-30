@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import java.util.UUID
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
-import java.util.UUID
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -39,7 +39,6 @@ class KlageController(
             rawFiles = rawFiles,
         )
     }
-
 
     @GetMapping("/{fiksDigisosId}/klage/{klageId}/avbryt")
     suspend fun cancelKlage(
@@ -140,7 +139,14 @@ data class KlageDto(
     val digisosId: UUID,
     val klageId: UUID,
     val vedtakId: UUID,
-    val status: SendtStatusDto,
     val klagePdf: VedleggResponse,
     val opplastedeVedlegg: List<VedleggResponse> = emptyList(),
+    val ettersendelser: List<EttersendelseDto> = emptyList(),
+    val timestampSendt: Long,
+)
+
+data class EttersendelseDto(
+    val navEksternRefId: UUID,
+    val vedlegg: List<VedleggResponse> = emptyList(),
+    val timestampSendt: Long
 )

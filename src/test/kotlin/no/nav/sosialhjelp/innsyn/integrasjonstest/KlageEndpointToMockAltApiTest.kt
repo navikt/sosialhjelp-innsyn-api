@@ -123,8 +123,8 @@ class KlageEndpointToMockAltApiTest {
 
             val files =
                 mapOf(
-                    "klage.pdf" to input.createPdf().data,
-                    "klage2.pdf" to input.createPdf().data,
+                    "klage.pdf" to input.createPdf("klage.pdf").data,
+                    "klage2.pdf" to input.createPdf("klage2.pdf").data,
                 )
 
             val docRefs =
@@ -161,22 +161,43 @@ class KlageEndpointToMockAltApiTest {
 
     @Test
     fun `Sende ettersendelse pa Klage skal fungere`() {
-        runTestWithToken {
 
-            val digisosId = UUID.randomUUID()
-            val klageId = UUID.randomUUID()
-            val ettersendelseId = UUID.randomUUID()
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val ettersendelseId = UUID.randomUUID()
 
-            sendKlage(digisosId, klageId, UUID.randomUUID()).expectStatus().isOk
+        sendKlage(digisosId, klageId, UUID.randomUUID()).expectStatus().isOk
 
-            lastOppDokument(
-                digisosId,
-                ettersendelseId,
-                mapOf("doc.pdf" to createRandomDoc("doc.pdf").data)
-            )
+        val fileMap = mapOf("doc.pdf" to createRandomPdf("doc.pdf").data)
 
-            sendEttersendelse(digisosId, klageId, ettersendelseId).expectStatus().isOk
-        }
+        val docRefs = lastOppDokument(
+            digisosId,
+            ettersendelseId,
+            fileMap
+        )
+            .documents
+            .map { it.filename }
+
+
+        sendEttersendelse(digisosId, klageId, ettersendelseId).expectStatus().isOk
+
+        hentKlage(digisosId, klageId)
+            .ettersendelser
+            .flatMap { ettersendelse ->
+                assertThat(ettersendelse.navEksternRefId).isEqualTo(ettersendelseId)
+                assertThat(ettersendelse.vedlegg).hasSize(1)
+                ettersendelse.vedlegg
+            }
+            .forEach { vedlegg ->
+                getDocument(vedlegg.url)
+                    .toEntity<ByteArray>()
+                    .block()
+                    .also { response ->
+                        val contentDisposition = response?.headers?.contentDisposition ?: error("Mangler contentDisposition")
+                        assertThat(docRefs.contains(contentDisposition.filename))
+                        Tika().detect(response.body).also { assertThat(it).isEqualTo("application/pdf") }
+                    }
+            }
     }
 
     @Test
@@ -253,7 +274,7 @@ class KlageEndpointToMockAltApiTest {
     private fun hentKlage(
         digisosId: UUID,
         klageId: UUID,
-    ): KlageDto? =
+    ): KlageDto =
         webClient
             .get()
             .uri(GET_ONE, digisosId, klageId)
@@ -265,6 +286,7 @@ class KlageEndpointToMockAltApiTest {
             .returnResult(KlageDto::class.java)
             .responseBody
             .blockFirst()
+            ?: error("Klage er null")
 
     private fun lastOppDokument(
         digisosId: UUID,
@@ -303,7 +325,8 @@ class KlageEndpointToMockAltApiTest {
                     buildPart(
                         "files",
                         resolveFilenameUuid(filename, metadata).toString(),
-                        MediaType.APPLICATION_OCTET_STREAM,
+//                        MediaType.APPLICATION_OCTET_STREAM,
+                        MediaType.APPLICATION_PDF,
                         InputStreamResource(inputStream)
                     )
                 }
@@ -353,7 +376,7 @@ class KlageEndpointToMockAltApiTest {
         private const val POST = "/api/v1/innsyn/{digisosId}/klage/send"
         private const val GET_ALL = "/api/v1/innsyn/{digisosId}/klager"
         private const val GET_ONE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
-        private const val UPLOAD = "/api/v1/innsyn/{digisosId}/{navEksternRefIf}/vedlegg"
+        private const val UPLOAD = "/api/v1/innsyn/{digisosId}/{navEksternRefId}/vedlegg"
         private const val ETTERSENDELSE = "/api/v1/innsyn/{digisosId}/klage/{klageId}/ettersendelse/{ettersendelseId}"
     }
 }
@@ -386,22 +409,31 @@ class MockAltApiContainer : GenericContainer<MockAltApiContainer>(MockAltApiImag
     }
 }
 
-private fun KlageInput.createPdf(): FilForOpplasting =
+private fun KlageInput.createPdf(filename: String): FilForOpplasting =
     PDDocument()
         .use { document -> generateKlagePdf(document, this) }
-        .let { pdf ->
+        .let { pdfBytes ->
             FilForOpplasting(
-                filnavn = Filename("klage.pdf"),
+                filnavn = Filename(filename),
                 mimetype = MediaType.APPLICATION_PDF_VALUE,
-                storrelse = pdf.size.toLong(),
-                data = ByteArrayInputStream(pdf),
+                storrelse = pdfBytes.size.toLong(),
+                data = ByteArrayInputStream(pdfBytes),
             )
         }
 
-private fun generateKlagePdf(
-    document: PDDocument,
-    input: KlageInput,
-): ByteArray =
+private fun createRandomPdf(filename: String): FilForOpplasting =
+    PDDocument()
+        .use { document -> generatePdf(document) }
+        .let { pdfBytes ->
+            FilForOpplasting(
+                filnavn = Filename(filename),
+                mimetype = MediaType.APPLICATION_PDF_VALUE,
+                storrelse = pdfBytes.size.toLong(),
+                data = ByteArrayInputStream(pdfBytes),
+            )
+        }
+
+private fun generateKlagePdf(document: PDDocument, input: KlageInput,): ByteArray =
     PdfGenerator(document)
         .run {
             addCenteredH1Bold("Klage på vedtak")
@@ -412,26 +444,9 @@ private fun generateKlagePdf(
             finish()
         }
 
-private fun createRandomDoc(filename: String): FilForOpplasting =
-    PDDocument()
-        .use { document -> generatePdf(document) }
-        .let { pdf ->
-            FilForOpplasting(
-                filnavn = Filename(filename),
-                mimetype = MediaType.APPLICATION_PDF_VALUE,
-                storrelse = pdf.size.toLong(),
-                data = ByteArrayInputStream(pdf),
-            )
-        }
-
-private fun generatePdf(
-    document: PDDocument,
-): ByteArray =
+private fun generatePdf(document: PDDocument,): ByteArray =
     PdfGenerator(document)
         .run {
-            addCenteredH1Bold("Dokumentasjon")
-            addCenteredH4Bold("Whatever")
-            addBlankLine()
             addText("Dette er et vedlegg")
             finish()
         }

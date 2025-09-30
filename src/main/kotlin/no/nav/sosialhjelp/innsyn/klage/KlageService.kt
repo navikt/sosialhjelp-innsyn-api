@@ -99,20 +99,15 @@ class KlageServiceImpl(
         val klagePdf = fiksKlage.klageDokument.toVedleggResponse(fiksKlage.getTidspunktSendt())
         val opplastedeVedlegg = fiksKlage.vedlegg.map { it.toVedleggResponse(fiksKlage.getTidspunktSendt()) }
 
-        fiksClient
-            .hentDokument(
-                fiksDigisosId.toString(),
-                fiksKlage.klageMetadata.toString(),
-                JsonVedleggSpesifikasjon::class.java,
-            ).also { vedleggSpec -> vedleggSpec.validerAllMatch(opplastedeVedlegg.map { it.filnavn }) }
 
         return KlageDto(
             digisosId = fiksDigisosId,
             klageId = fiksKlage.klageId,
             vedtakId = fiksKlage.vedtakId,
             klagePdf = klagePdf,
-            status = fiksKlage.sendtKvittering.sendtStatus,
             opplastedeVedlegg = opplastedeVedlegg,
+            ettersendelser = fiksKlage.ettersendtInfoNAV.ettersendelser.map { it.toEttersendelseDto() },
+            timestampSendt = fiksKlage.sendtKvittering.sendtStatus.timestamp
         )
     }
 
@@ -142,7 +137,7 @@ class KlageServiceImpl(
 
         // TODO Hva forventes her i kontekst av klage?
         return JsonVedlegg()
-            .withType("klage")
+            .withType(resolveType(navEksternRefId, klageId))
             .withStatus(if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG")
             .withHendelseType(JsonVedlegg.HendelseType.BRUKER)
             .withHendelseReferanse(navEksternRefId.toString())
@@ -150,6 +145,9 @@ class KlageServiceImpl(
             .withFiler(allMetadata.map { JsonFiler().withFilnavn(it.filnavn) })
             .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
     }
+
+    private fun resolveType(navEksternRefId: UUID, klageId: UUID): String =
+        if (navEksternRefId == klageId) "klage" else "klage_ettersendelse"
 
     private fun KlageInput.toJson(): String = objectMapper.writeValueAsString(this)
 
@@ -188,6 +186,13 @@ class KlageServiceImpl(
             tilleggsinfo = null,
             datoLagtTil = tidspunktSendt,
         )
+
+
+    private fun FiksEttersendelseDto.toEttersendelseDto() = EttersendelseDto(
+        navEksternRefId = navEksternRefId,
+        vedlegg = vedlegg.map { it.toVedleggResponse(unixToLocalDateTime(timestampSendt)) },
+        timestampSendt = timestampSendt
+    )
 }
 
 private fun JsonVedleggSpesifikasjon.noFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()

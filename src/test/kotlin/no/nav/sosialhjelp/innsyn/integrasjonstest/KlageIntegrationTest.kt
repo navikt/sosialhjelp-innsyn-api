@@ -10,7 +10,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
-import no.nav.sosialhjelp.innsyn.klage.EttersendtInfoNAVDto
+import no.nav.sosialhjelp.innsyn.klage.FiksEttersendtInfoNAVDto
 import no.nav.sosialhjelp.innsyn.klage.FiksKlageClient
 import no.nav.sosialhjelp.innsyn.klage.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.FiksProtokoll
@@ -89,7 +89,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             )
         } returns JsonVedleggSpesifikasjon()
 
-        doGet(GET_KLAGE, listOf(digisosId, vedtakId))
+        doGet(GET_KLAGE, listOf(digisosId, klageId))
             .expectStatus()
             .isOk
             .expectBody(KlageDto::class.java)
@@ -194,7 +194,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
     companion object {
         private const val POST_KLAGE = "/api/v1/innsyn/{digisosId}/klage/send"
-        private const val GET_KLAGE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
+        private const val GET_KLAGE = "/api/v1/innsyn/{digisosId}/klage/{klageId}"
         private const val GET_KLAGER = "/api/v1/innsyn/{digisosId}/klager"
     }
 }
@@ -296,5 +296,5 @@ private fun createFiksKlageDto(
                     ),
                 statusListe = emptyList(),
             ),
-        ettersendtInfoNAV = EttersendtInfoNAVDto(ettersendelser = emptyList()),
+        ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )

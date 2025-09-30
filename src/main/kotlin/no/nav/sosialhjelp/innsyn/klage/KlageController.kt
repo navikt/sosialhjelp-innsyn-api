@@ -23,10 +23,10 @@ class KlageController(
     private val klageService: KlageService,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
-    @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{fiksDigisosId}/{navEksternRefId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun uploadDocuments(
         @PathVariable fiksDigisosId: UUID,
-        @PathVariable klageId: UUID,
+        @PathVariable navEksternRefId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): DocumentsForKlage {
         // TODO En eller annen form for sjekk av fiksDigisosId ?
@@ -35,7 +35,7 @@ class KlageController(
 
         return klageService.lastOppVedlegg(
             fiksDigisosId = fiksDigisosId,
-            klageId = klageId,
+            navEksternRefId = navEksternRefId,
             rawFiles = rawFiles,
         )
     }
@@ -64,15 +64,31 @@ class KlageController(
         )
     }
 
-    @GetMapping("/{fiksDigisosId}/klage/{vedtakId}")
+    @PostMapping("/{fiksDigisosId}/klage/{klageId}/ettersendelse/{ettersendelseId}")
+    suspend fun sendEttersendelse(
+        @PathVariable fiksDigisosId: UUID,
+        @PathVariable klageId: UUID,
+        @PathVariable ettersendelseId: UUID,
+    ) {
+        validateNotProd()
+        tilgangskontroll.sjekkTilgang()
+
+        klageService.sendEttersendelse(
+            fiksDigisosId = fiksDigisosId,
+            klageId = klageId,
+            ettersendelseId = ettersendelseId,
+        )
+    }
+
+    @GetMapping("/{fiksDigisosId}/klage/{klageId}")
     suspend fun hentKlage(
         @PathVariable fiksDigisosId: UUID,
-        @PathVariable vedtakId: UUID,
+        @PathVariable klageId: UUID,
     ): KlageDto? {
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return klageService.hentKlage(fiksDigisosId, vedtakId)
+        return klageService.hentKlage(fiksDigisosId, klageId)
     }
 
     @GetMapping("/{fiksDigisosId}/klager")
@@ -123,7 +139,14 @@ data class KlageDto(
     val digisosId: UUID,
     val klageId: UUID,
     val vedtakId: UUID,
-    val status: SendtStatusDto,
     val klagePdf: VedleggResponse,
     val opplastedeVedlegg: List<VedleggResponse> = emptyList(),
+    val ettersendelser: List<EttersendelseDto> = emptyList(),
+    val timestampSendt: Long,
+)
+
+data class EttersendelseDto(
+    val navEksternRefId: UUID,
+    val vedlegg: List<VedleggResponse> = emptyList(),
+    val timestampSendt: Long,
 )

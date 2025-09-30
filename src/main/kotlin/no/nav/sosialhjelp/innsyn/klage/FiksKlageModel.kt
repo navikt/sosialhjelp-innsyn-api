@@ -16,15 +16,15 @@ data class FiksKlageDto(
     val vedlegg: List<DokumentInfoDto>, // liste med opplastede vedlegg
     val trekkKlageInfo: TrekkKlageInfoDto?,
     val sendtKvittering: SendtKvitteringDto,
-    val ettersendtInfoNAV: EttersendtInfoNAVDto,
+    val ettersendtInfoNAV: FiksEttersendtInfoNAVDto,
     val trukket: Boolean,
 )
 
-data class EttersendtInfoNAVDto(
-    val ettersendelser: List<EttersendelseDto>,
+data class FiksEttersendtInfoNAVDto(
+    val ettersendelser: List<FiksEttersendelseDto>,
 )
 
-data class EttersendelseDto(
+data class FiksEttersendelseDto(
     val navEksternRefId: UUID,
     val vedleggMetadata: UUID,
     val vedlegg: List<DokumentInfoDto>,

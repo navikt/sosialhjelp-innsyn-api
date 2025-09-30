@@ -6,12 +6,14 @@ import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
+import no.nav.sosialhjelp.innsyn.klage.buildPart
 import no.nav.sosialhjelp.innsyn.utils.runTestWithToken
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.PdfGenerator
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.tika.Tika
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamResource
-import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -37,6 +38,7 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import java.io.ByteArrayInputStream
+import java.io.InputStream
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
@@ -62,7 +64,7 @@ class KlageEndpointToMockAltApiTest {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
-        sendKlage(digisosId, klageId, vedtakId)
+        sendKlage(digisosId, klageId, vedtakId).expectStatus().isOk
 
         hentKlager(digisosId)
             .let { klager ->
@@ -80,13 +82,13 @@ class KlageEndpointToMockAltApiTest {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
-        sendKlage(digisosId, klageId, vedtakId)
+        sendKlage(digisosId, klageId, vedtakId).expectStatus().isOk
 
-        hentKlage(digisosId, vedtakId)
+        hentKlage(digisosId, klageId)
             .also { klage ->
-                assertThat(klage?.klageId).isEqualTo(klageId)
-                assertThat(klage?.vedtakId).isEqualTo(vedtakId)
-                assertThat(klage?.digisosId).isEqualTo(digisosId)
+                assertThat(klage.klageId).isEqualTo(klageId)
+                assertThat(klage.vedtakId).isEqualTo(vedtakId)
+                assertThat(klage.digisosId).isEqualTo(digisosId)
             }
     }
 
@@ -96,16 +98,19 @@ class KlageEndpointToMockAltApiTest {
         val vedtakId = UUID.randomUUID()
 
         hentKlager(digisosId).also { assertThat(it).isEmpty() }
-        hentKlage(digisosId, vedtakId).also { assertThat(it).isNull() }
+        Assertions
+            .assertThatThrownBy {
+                hentKlage(digisosId, vedtakId).also { assertThat(it).isNull() }
+            }.isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
     fun `Hent alle klager for digisosId skal fungere`() {
         val digisosId = UUID.randomUUID()
 
-        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID())
-        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID())
-        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID())
+        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID()).expectStatus().isOk
+        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID()).expectStatus().isOk
+        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID()).expectStatus().isOk
 
         hentKlager(digisosId).also { assertThat(it).hasSize(3) }
     }
@@ -124,8 +129,8 @@ class KlageEndpointToMockAltApiTest {
 
             val files =
                 mapOf(
-                    "klage.pdf" to input.createKlagePdf().data.readBytes(),
-                    "klage2.pdf" to input.createKlagePdf().data.readBytes(),
+                    "klage.pdf" to input.createPdf("klage.pdf").data,
+                    "klage2.pdf" to input.createPdf("klage2.pdf").data,
                 )
 
             val docRefs =
@@ -137,9 +142,9 @@ class KlageEndpointToMockAltApiTest {
 
             sendKlage(digisosId, input.klageId, input.vedtakId, input)
 
-            val klage = hentKlage(digisosId, input.vedtakId)
+            val klage = hentKlage(digisosId, input.klageId)
 
-            getDocument(klage?.klagePdf?.url ?: error("Mangler klagePdf"))
+            getDocument(klage.klagePdf.url)
                 .toEntity<ByteArray>()
                 .block()
                 .also { response ->
@@ -160,17 +165,74 @@ class KlageEndpointToMockAltApiTest {
         }
     }
 
+    @Test
+    fun `Sende ettersendelse pa Klage skal fungere`() {
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val ettersendelseId = UUID.randomUUID()
+
+        sendKlage(digisosId, klageId, UUID.randomUUID()).expectStatus().isOk
+
+        val fileMap = mapOf("doc.pdf" to createRandomPdf("doc.pdf").data)
+
+        val docRefs =
+            lastOppDokument(
+                digisosId,
+                ettersendelseId,
+                fileMap,
+            ).documents
+                .map { it.filename }
+
+        sendEttersendelse(digisosId, klageId, ettersendelseId).expectStatus().isOk
+
+        hentKlage(digisosId, klageId)
+            .ettersendelser
+            .flatMap { ettersendelse ->
+                assertThat(ettersendelse.navEksternRefId).isEqualTo(ettersendelseId)
+                assertThat(ettersendelse.vedlegg).hasSize(1)
+                ettersendelse.vedlegg
+            }.forEach { vedlegg ->
+                getDocument(vedlegg.url)
+                    .toEntity<ByteArray>()
+                    .block()
+                    .also { response ->
+                        val contentDisposition = response?.headers?.contentDisposition ?: error("Mangler contentDisposition")
+                        assertThat(docRefs.contains(contentDisposition.filename))
+                        Tika().detect(response.body).also { assertThat(it).isEqualTo("application/pdf") }
+                    }
+            }
+    }
+
+    @Test
+    fun `Sende ettersendelse uten filer skal returnere 500`() {
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val ettersendelseId = UUID.randomUUID()
+
+        sendKlage(digisosId, klageId, UUID.randomUUID()).expectStatus().isOk
+        sendEttersendelse(digisosId, klageId, ettersendelseId).expectStatus().is5xxServerError
+    }
+
+    @Test
+    fun `Sende ettersendelse uten eksisterende klage skal returnere 500`() {
+        sendEttersendelse(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+        ).expectStatus()
+            .is5xxServerError
+    }
+
     private fun sendKlage(
         digisosId: UUID,
         klageId: UUID,
         vedtakId: UUID,
         klageInput: KlageInput? = null,
-    ) {
+    ): WebTestClient.ResponseSpec =
         webClient
             .post()
             .uri(POST, digisosId)
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .bodyValue(
                 klageInput
@@ -180,9 +242,18 @@ class KlageEndpointToMockAltApiTest {
                         tekst = "Dette er en testklage",
                     ),
             ).exchange()
-            .expectStatus()
-            .isOk
-    }
+
+    private fun sendEttersendelse(
+        digisosId: UUID,
+        klageId: UUID,
+        ettersendelseId: UUID,
+    ): WebTestClient.ResponseSpec =
+        webClient
+            .post()
+            .uri(ETTERSENDELSE, digisosId, klageId, ettersendelseId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .exchange()
 
     private fun hentKlager(digisosId: UUID): List<KlageRef> =
         webClient
@@ -201,11 +272,11 @@ class KlageEndpointToMockAltApiTest {
 
     private fun hentKlage(
         digisosId: UUID,
-        vedtakId: UUID,
-    ): KlageDto? =
+        klageId: UUID,
+    ): KlageDto =
         webClient
             .get()
-            .uri(GET_ONE, digisosId, vedtakId)
+            .uri(GET_ONE, digisosId, klageId)
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
@@ -214,15 +285,16 @@ class KlageEndpointToMockAltApiTest {
             .returnResult(KlageDto::class.java)
             .responseBody
             .blockFirst()
+            ?: error("Klage er null")
 
-    private suspend fun lastOppDokument(
+    private fun lastOppDokument(
         digisosId: UUID,
-        klageId: UUID,
-        fileMap: Map<String, ByteArray>,
+        navEksternRefId: UUID,
+        fileMap: Map<String, InputStream>,
     ): DocumentsForKlage =
         webClient
             .post()
-            .uri(UPLOAD, digisosId, klageId)
+            .uri(UPLOAD, digisosId, navEksternRefId)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .body(BodyInserters.fromMultipartData(buildBody(fileMap)))
             .exchange()
@@ -241,32 +313,21 @@ class KlageEndpointToMockAltApiTest {
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .retrieve()
 
-    private fun buildBody(fileMap: Map<String, ByteArray>): MultiValueMap<String, HttpEntity<*>> =
+    private fun buildBody(fileMap: Map<String, InputStream>): MultiValueMap<String, HttpEntity<*>> =
         MultipartBodyBuilder()
             .apply {
-                val metadata = createMetadata(fileMap)
-                part("metadata", metadata)
-                    .headers {
-                        it.contentType = MediaType.APPLICATION_JSON
-                        it.contentDisposition =
-                            ContentDisposition
-                                .builder("form-data")
-                                .name("files")
-                                .filename("metadata.json")
-                                .build()
-                    }
+                val metadata = createMetadata(fileMap.keys.toList())
 
-                fileMap.forEach { (filename, bytes) ->
-                    part(filename, InputStreamResource(ByteArrayInputStream(bytes)))
-                        .headers {
-                            it.contentType = MediaType.APPLICATION_OCTET_STREAM
-                            it.contentDisposition =
-                                ContentDisposition
-                                    .builder("form-data")
-                                    .name("files")
-                                    .filename(resolveFilenameUuid(filename, metadata).toString())
-                                    .build()
-                        }
+                buildPart("files", "metadata.json", MediaType.APPLICATION_JSON, metadata)
+
+                fileMap.forEach { (filename, inputStream) ->
+                    buildPart(
+                        "files",
+                        resolveFilenameUuid(filename, metadata).toString(),
+//                        MediaType.APPLICATION_OCTET_STREAM,
+                        MediaType.APPLICATION_PDF,
+                        InputStreamResource(inputStream),
+                    )
                 }
             }.build()
 
@@ -280,7 +341,7 @@ class KlageEndpointToMockAltApiTest {
             ?.uuid
             ?: error("Fant ikke filnavn '$filename'")
 
-    private fun createMetadata(fileMap: Map<String, ByteArray>): List<Metadata> =
+    private fun createMetadata(filenames: List<String>): List<Metadata> =
         listOf(
             Metadata(
                 type = "klage",
@@ -289,10 +350,10 @@ class KlageEndpointToMockAltApiTest {
                 hendelsereferanse = null,
                 innsendelsesfrist = null,
                 filer =
-                    fileMap
-                        .map { (filnavn, _) ->
+                    filenames
+                        .map {
                             OpplastetFilRef(
-                                filnavn = Filename(filnavn),
+                                filnavn = Filename(it),
                                 uuid = UUID.randomUUID(),
                             )
                         }.toMutableList(),
@@ -312,7 +373,8 @@ class KlageEndpointToMockAltApiTest {
         private const val POST = "/api/v1/innsyn/{digisosId}/klage/send"
         private const val GET_ALL = "/api/v1/innsyn/{digisosId}/klager"
         private const val GET_ONE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
-        private const val UPLOAD = "/api/v1/innsyn/{digisosId}/{klageId}/vedlegg"
+        private const val UPLOAD = "/api/v1/innsyn/{digisosId}/{navEksternRefId}/vedlegg"
+        private const val ETTERSENDELSE = "/api/v1/innsyn/{digisosId}/klage/{klageId}/ettersendelse/{ettersendelseId}"
     }
 }
 
@@ -333,7 +395,7 @@ data class OpplastetFilRef(
 
 object MockAltApiImage {
     private const val PATH = "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api"
-    private const val TAG = "2025.09.25-19.26-415c539"
+    private const val TAG = "2025.09.30-13.21-c76f3c0"
     val image: DockerImageName = DockerImageName.parse("$PATH:$TAG")
 }
 
@@ -344,15 +406,27 @@ class MockAltApiContainer : GenericContainer<MockAltApiContainer>(MockAltApiImag
     }
 }
 
-private fun KlageInput.createKlagePdf(): FilForOpplasting =
+private fun KlageInput.createPdf(filename: String): FilForOpplasting =
     PDDocument()
         .use { document -> generateKlagePdf(document, this) }
-        .let { pdf ->
+        .let { pdfBytes ->
             FilForOpplasting(
-                filnavn = Filename("klage.pdf"),
-                mimetype = "application/pdf",
-                storrelse = pdf.size.toLong(),
-                data = ByteArrayInputStream(pdf),
+                filnavn = Filename(filename),
+                mimetype = MediaType.APPLICATION_PDF_VALUE,
+                storrelse = pdfBytes.size.toLong(),
+                data = ByteArrayInputStream(pdfBytes),
+            )
+        }
+
+private fun createRandomPdf(filename: String): FilForOpplasting =
+    PDDocument()
+        .use { document -> generatePdf(document) }
+        .let { pdfBytes ->
+            FilForOpplasting(
+                filnavn = Filename(filename),
+                mimetype = MediaType.APPLICATION_PDF_VALUE,
+                storrelse = pdfBytes.size.toLong(),
+                data = ByteArrayInputStream(pdfBytes),
             )
         }
 
@@ -367,5 +441,12 @@ private fun generateKlagePdf(
             addBlankLine()
             addCenteredH4Bold("Klage ID: ${input.klageId}")
             addText(input.tekst)
+            finish()
+        }
+
+private fun generatePdf(document: PDDocument): ByteArray =
+    PdfGenerator(document)
+        .run {
+            addText("Dette er et vedlegg")
             finish()
         }

@@ -13,6 +13,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.PdfGenerator
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.tika.Tika
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -33,6 +34,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -40,10 +43,10 @@ import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
 
-// @Testcontainers(disabledWithoutDocker = true)
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash", "testcontainers"])
+@Testcontainers(disabledWithoutDocker = true)
 class KlageEndpointToMockAltApiTest {
     @Autowired
     private lateinit var webClient: WebTestClient
@@ -83,9 +86,9 @@ class KlageEndpointToMockAltApiTest {
 
         hentKlage(digisosId, klageId)
             .also { klage ->
-                assertThat(klage?.klageId).isEqualTo(klageId)
-                assertThat(klage?.vedtakId).isEqualTo(vedtakId)
-                assertThat(klage?.digisosId).isEqualTo(digisosId)
+                assertThat(klage.klageId).isEqualTo(klageId)
+                assertThat(klage.vedtakId).isEqualTo(vedtakId)
+                assertThat(klage.digisosId).isEqualTo(digisosId)
             }
     }
 
@@ -95,7 +98,10 @@ class KlageEndpointToMockAltApiTest {
         val vedtakId = UUID.randomUUID()
 
         hentKlager(digisosId).also { assertThat(it).isEmpty() }
-        hentKlage(digisosId, vedtakId).also { assertThat(it).isNull() }
+        Assertions
+            .assertThatThrownBy {
+                hentKlage(digisosId, vedtakId).also { assertThat(it).isNull() }
+            }.isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
@@ -138,7 +144,7 @@ class KlageEndpointToMockAltApiTest {
 
             val klage = hentKlage(digisosId, input.klageId)
 
-            getDocument(klage?.klagePdf?.url ?: error("Mangler klagePdf"))
+            getDocument(klage.klagePdf.url)
                 .toEntity<ByteArray>()
                 .block()
                 .also { response ->
@@ -355,14 +361,13 @@ class KlageEndpointToMockAltApiTest {
         )
 
     companion object {
-//        @Container
-//        private val container = MockAltApiContainer()
+        @Container
+        private val container = MockAltApiContainer()
 
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            System.setProperty("MOCK_PORT", "8989")
-//            System.setProperty("MOCK_PORT", container.getMappedPort(8989).toString())
+            System.setProperty("MOCK_PORT", container.getMappedPort(8989).toString())
         }
 
         private const val POST = "/api/v1/innsyn/{digisosId}/klage/send"
@@ -390,7 +395,7 @@ data class OpplastetFilRef(
 
 object MockAltApiImage {
     private const val PATH = "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api"
-    private const val TAG = "2025.09.25-19.26-415c539"
+    private const val TAG = "2025.09.30-13.21-c76f3c0"
     val image: DockerImageName = DockerImageName.parse("$PATH:$TAG")
 }
 

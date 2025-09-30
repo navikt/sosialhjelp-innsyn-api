@@ -89,7 +89,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             )
         } returns JsonVedleggSpesifikasjon()
 
-        doGet(GET_KLAGE, listOf(digisosId, vedtakId))
+        doGet(GET_KLAGE, listOf(digisosId, klageId))
             .expectStatus()
             .isOk
             .expectBody(KlageDto::class.java)
@@ -194,7 +194,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
     companion object {
         private const val POST_KLAGE = "/api/v1/innsyn/{digisosId}/klage/send"
-        private const val GET_KLAGE = "/api/v1/innsyn/{digisosId}/klage/{vedtakId}"
+        private const val GET_KLAGE = "/api/v1/innsyn/{digisosId}/klage/{klageId}"
         private const val GET_KLAGER = "/api/v1/innsyn/{digisosId}/klager"
     }
 }

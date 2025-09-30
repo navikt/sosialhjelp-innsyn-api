@@ -18,10 +18,10 @@ import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
+import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
-import org.springframework.web.reactive.function.BodyInserters
 
 interface FiksKlageClient {
     suspend fun sendKlage(
@@ -66,8 +66,7 @@ class FiksKlageClientImpl(
                             vedleggJson = files.vedleggJson,
                             klagePdf = pdfWithEncryptedData,
                         )
-                    }
-                    .also { body ->
+                    }.also { body ->
                         doSendKlage(
                             digisosId = digisosId,
                             klageId = klageId,
@@ -98,8 +97,7 @@ class FiksKlageClientImpl(
                         clientResponse.bodyToMono(String::class.java).map { errorBody ->
                             RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
                         }
-                    }
-                    .toBodilessEntity()
+                    }.toBodilessEntity()
                     .awaitSingleOrNull()
             }
         if (response?.statusCode?.is2xxSuccessful != true) {
@@ -111,7 +109,7 @@ class FiksKlageClientImpl(
         digisosId: UUID,
         klageId: UUID,
         ettersendelseId: UUID,
-        vedleggJson: JsonVedleggSpesifikasjon
+        vedleggJson: JsonVedleggSpesifikasjon,
     ) {
         MultipartBodyBuilder()
             .apply {
@@ -119,10 +117,9 @@ class FiksKlageClientImpl(
                     "vedlegg.json",
                     "vedlegg.json",
                     MediaType.APPLICATION_JSON,
-                    vedleggJson.toJson()
+                    vedleggJson.toJson(),
                 )
-            }
-            .build()
+            }.build()
             .also { body -> doSendEttersendelse(digisosId, klageId, ettersendelseId, body) }
     }
 
@@ -145,8 +142,7 @@ class FiksKlageClientImpl(
                         clientResponse.bodyToMono(String::class.java).map { errorBody ->
                             RuntimeException("Failed to send ettersendelse: ${clientResponse.statusCode()} - $errorBody")
                         }
-                    }
-                    .toBodilessEntity()
+                    }.toBodilessEntity()
                     .awaitSingleOrNull()
             }
         if (response?.statusCode?.is2xxSuccessful != true) {
@@ -192,19 +188,18 @@ private fun createBodyForUpload(
                 "klage.json",
                 "klage.json",
                 MediaType.APPLICATION_JSON,
-                klageJson
+                klageJson,
             )
 
             buildPart(
                 "vedlegg.json",
                 "vedlegg.json",
                 MediaType.APPLICATION_JSON,
-                vedleggJson
+                vedleggJson,
             )
 
             createMetadataAndPartBodyForKlagePdf(klagePdf)
-        }
-        .build()
+        }.build()
 
 private fun MultipartBodyBuilder.createMetadataAndPartBodyForKlagePdf(klagePdf: FilForOpplasting) {
     buildPart(
@@ -218,7 +213,7 @@ private fun MultipartBodyBuilder.createMetadataAndPartBodyForKlagePdf(klagePdf: 
         "klage.pdf",
         "klage.pdf",
         MediaType.APPLICATION_OCTET_STREAM,
-        body = InputStreamResource(klagePdf.data)
+        body = InputStreamResource(klagePdf.data),
     )
 }
 
@@ -226,7 +221,7 @@ fun MultipartBodyBuilder.buildPart(
     name: String,
     filename: String?,
     contentType: MediaType,
-    body: Any
+    body: Any,
 ) {
     part(name, body).headers {
         it.contentType = contentType

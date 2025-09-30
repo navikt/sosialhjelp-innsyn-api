@@ -42,7 +42,11 @@ interface KlageService {
         rawFiles: Flux<FilePart>,
     ): DocumentsForKlage
 
-    suspend fun sendEttersendelse(fiksDigisosId: UUID, klageId: UUID, ettersendelseId: UUID)
+    suspend fun sendEttersendelse(
+        fiksDigisosId: UUID,
+        klageId: UUID,
+        ettersendelseId: UUID,
+    )
 }
 
 @Service
@@ -71,17 +75,17 @@ class KlageServiceImpl(
     override suspend fun sendEttersendelse(
         fiksDigisosId: UUID,
         klageId: UUID,
-        ettersendelseId: UUID
+        ettersendelseId: UUID,
     ) {
         createJsonVedleggSpec(ettersendelseId, klageId)
             .also {
-                if(it.noFiles()) { error("Ingen vedlegg for ettersendelse av Klage") }
+                if (it.noFiles()) error("Ingen vedlegg for ettersendelse av Klage")
 
                 klageClient.sendEttersendelse(
                     digisosId = fiksDigisosId,
                     klageId = klageId,
                     ettersendelseId = ettersendelseId,
-                    vedleggJson = it
+                    vedleggJson = it,
                 )
             }
     }
@@ -99,7 +103,6 @@ class KlageServiceImpl(
         val klagePdf = fiksKlage.klageDokument.toVedleggResponse(fiksKlage.getTidspunktSendt())
         val opplastedeVedlegg = fiksKlage.vedlegg.map { it.toVedleggResponse(fiksKlage.getTidspunktSendt()) }
 
-
         return KlageDto(
             digisosId = fiksDigisosId,
             klageId = fiksKlage.klageId,
@@ -107,7 +110,7 @@ class KlageServiceImpl(
             klagePdf = klagePdf,
             opplastedeVedlegg = opplastedeVedlegg,
             ettersendelser = fiksKlage.ettersendtInfoNAV.ettersendelser.map { it.toEttersendelseDto() },
-            timestampSendt = fiksKlage.sendtKvittering.sendtStatus.timestamp
+            timestampSendt = fiksKlage.sendtKvittering.sendtStatus.timestamp,
         )
     }
 
@@ -123,9 +126,8 @@ class KlageServiceImpl(
 
     private suspend fun createJsonVedleggSpec(
         navEksternRefId: UUID,
-        klageId: UUID = navEksternRefId
+        klageId: UUID = navEksternRefId,
     ): JsonVedleggSpesifikasjon {
-
         val allMetadata =
             runCatching { mellomlagerService.getAllDocumentMetadataForRef(navEksternRefId) }
                 .getOrElse { ex ->
@@ -146,8 +148,10 @@ class KlageServiceImpl(
             .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
     }
 
-    private fun resolveType(navEksternRefId: UUID, klageId: UUID): String =
-        if (navEksternRefId == klageId) "klage" else "klage_ettersendelse"
+    private fun resolveType(
+        navEksternRefId: UUID,
+        klageId: UUID,
+    ): String = if (navEksternRefId == klageId) "klage" else "klage_ettersendelse"
 
     private fun KlageInput.toJson(): String = objectMapper.writeValueAsString(this)
 
@@ -187,12 +191,12 @@ class KlageServiceImpl(
             datoLagtTil = tidspunktSendt,
         )
 
-
-    private fun FiksEttersendelseDto.toEttersendelseDto() = EttersendelseDto(
-        navEksternRefId = navEksternRefId,
-        vedlegg = vedlegg.map { it.toVedleggResponse(unixToLocalDateTime(timestampSendt)) },
-        timestampSendt = timestampSendt
-    )
+    private fun FiksEttersendelseDto.toEttersendelseDto() =
+        EttersendelseDto(
+            navEksternRefId = navEksternRefId,
+            vedlegg = vedlegg.map { it.toVedleggResponse(unixToLocalDateTime(timestampSendt)) },
+            timestampSendt = timestampSendt,
+        )
 }
 
 private fun JsonVedleggSpesifikasjon.noFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()

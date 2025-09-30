@@ -1,11 +1,6 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import java.io.ByteArrayInputStream
-import java.io.InputStream
-import java.net.URI
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
@@ -39,11 +34,16 @@ import org.springframework.web.reactive.function.client.toEntity
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.utility.DockerImageName
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.net.URI
+import java.time.LocalDate
+import java.util.UUID
 
+// @Testcontainers(disabledWithoutDocker = true)
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash", "testcontainers"])
-//@Testcontainers(disabledWithoutDocker = true)
 class KlageEndpointToMockAltApiTest {
     @Autowired
     private lateinit var webClient: WebTestClient
@@ -161,7 +161,6 @@ class KlageEndpointToMockAltApiTest {
 
     @Test
     fun `Sende ettersendelse pa Klage skal fungere`() {
-
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
         val ettersendelseId = UUID.randomUUID()
@@ -170,14 +169,13 @@ class KlageEndpointToMockAltApiTest {
 
         val fileMap = mapOf("doc.pdf" to createRandomPdf("doc.pdf").data)
 
-        val docRefs = lastOppDokument(
-            digisosId,
-            ettersendelseId,
-            fileMap
-        )
-            .documents
-            .map { it.filename }
-
+        val docRefs =
+            lastOppDokument(
+                digisosId,
+                ettersendelseId,
+                fileMap,
+            ).documents
+                .map { it.filename }
 
         sendEttersendelse(digisosId, klageId, ettersendelseId).expectStatus().isOk
 
@@ -187,8 +185,7 @@ class KlageEndpointToMockAltApiTest {
                 assertThat(ettersendelse.navEksternRefId).isEqualTo(ettersendelseId)
                 assertThat(ettersendelse.vedlegg).hasSize(1)
                 ettersendelse.vedlegg
-            }
-            .forEach { vedlegg ->
+            }.forEach { vedlegg ->
                 getDocument(vedlegg.url)
                     .toEntity<ByteArray>()
                     .block()
@@ -202,7 +199,6 @@ class KlageEndpointToMockAltApiTest {
 
     @Test
     fun `Sende ettersendelse uten filer skal returnere 500`() {
-
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
         val ettersendelseId = UUID.randomUUID()
@@ -217,8 +213,8 @@ class KlageEndpointToMockAltApiTest {
             UUID.randomUUID(),
             UUID.randomUUID(),
             UUID.randomUUID(),
-        )
-            .expectStatus().is5xxServerError
+        ).expectStatus()
+            .is5xxServerError
     }
 
     private fun sendKlage(
@@ -226,8 +222,8 @@ class KlageEndpointToMockAltApiTest {
         klageId: UUID,
         vedtakId: UUID,
         klageInput: KlageInput? = null,
-    ): WebTestClient.ResponseSpec {
-        return webClient
+    ): WebTestClient.ResponseSpec =
+        webClient
             .post()
             .uri(POST, digisosId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -239,22 +235,19 @@ class KlageEndpointToMockAltApiTest {
                         vedtakId = vedtakId,
                         tekst = "Dette er en testklage",
                     ),
-            )
-            .exchange()
-    }
+            ).exchange()
 
     private fun sendEttersendelse(
         digisosId: UUID,
         klageId: UUID,
         ettersendelseId: UUID,
-    ): WebTestClient.ResponseSpec {
-        return webClient
+    ): WebTestClient.ResponseSpec =
+        webClient
             .post()
             .uri(ETTERSENDELSE, digisosId, klageId, ettersendelseId)
             .contentType(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
             .exchange()
-    }
 
     private fun hentKlager(digisosId: UUID): List<KlageRef> =
         webClient
@@ -327,11 +320,10 @@ class KlageEndpointToMockAltApiTest {
                         resolveFilenameUuid(filename, metadata).toString(),
 //                        MediaType.APPLICATION_OCTET_STREAM,
                         MediaType.APPLICATION_PDF,
-                        InputStreamResource(inputStream)
+                        InputStreamResource(inputStream),
                     )
                 }
-            }
-            .build()
+            }.build()
 
     private fun resolveFilenameUuid(
         filename: String,
@@ -433,7 +425,10 @@ private fun createRandomPdf(filename: String): FilForOpplasting =
             )
         }
 
-private fun generateKlagePdf(document: PDDocument, input: KlageInput,): ByteArray =
+private fun generateKlagePdf(
+    document: PDDocument,
+    input: KlageInput,
+): ByteArray =
     PdfGenerator(document)
         .run {
             addCenteredH1Bold("Klage på vedtak")
@@ -444,7 +439,7 @@ private fun generateKlagePdf(document: PDDocument, input: KlageInput,): ByteArra
             finish()
         }
 
-private fun generatePdf(document: PDDocument,): ByteArray =
+private fun generatePdf(document: PDDocument): ByteArray =
     PdfGenerator(document)
         .run {
             addText("Dette er et vedlegg")

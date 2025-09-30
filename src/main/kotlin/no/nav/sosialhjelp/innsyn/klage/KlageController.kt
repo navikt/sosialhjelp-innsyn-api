@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.util.UUID
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -148,5 +148,5 @@ data class KlageDto(
 data class EttersendelseDto(
     val navEksternRefId: UUID,
     val vedlegg: List<VedleggResponse> = emptyList(),
-    val timestampSendt: Long
+    val timestampSendt: Long,
 )

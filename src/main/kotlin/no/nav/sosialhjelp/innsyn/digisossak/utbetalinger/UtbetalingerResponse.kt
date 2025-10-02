@@ -22,6 +22,7 @@ data class NyeOgTidligereUtbetalingerResponse(
 )
 
 data class ManedUtbetaling(
+    val referanse: String,
     val tittel: String,
     val belop: BigDecimal,
     @JsonFormat(pattern = "yyyy-MM-dd")

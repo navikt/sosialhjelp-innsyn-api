@@ -5,8 +5,6 @@ import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
 import java.time.LocalDate
-import java.util.UUID
-import kotlin.uuid.Uuid
 
 data class SaksStatusResponse(
     val tittel: String,

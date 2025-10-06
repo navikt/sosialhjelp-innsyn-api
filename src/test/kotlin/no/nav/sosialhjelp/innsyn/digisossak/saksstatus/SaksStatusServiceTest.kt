@@ -13,8 +13,6 @@ import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.klage.FiksKlageClient
-import no.nav.sosialhjelp.innsyn.klage.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
 import no.nav.sosialhjelp.innsyn.klage.KlageService
 import org.assertj.core.api.Assertions.assertThat

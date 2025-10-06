@@ -6,8 +6,11 @@ import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.klage.KlageRef
+import no.nav.sosialhjelp.innsyn.klage.KlageService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 const val DEFAULT_SAK_TITTEL = "default_sak_tittel"
 
@@ -15,6 +18,7 @@ const val DEFAULT_SAK_TITTEL = "default_sak_tittel"
 class SaksStatusService(
     private val eventService: EventService,
     private val fiksClient: FiksClient,
+    private val klageService: KlageService,
 ) {
     private val log by logger()
 
@@ -30,12 +34,25 @@ class SaksStatusService(
             return emptyList()
         }
 
-        val responseList = model.saker.filter { it.saksStatus != SaksStatus.FEILREGISTRERT }.map { mapToResponse(it) }
+        val vedtakIds = model.saker.flatMap { it.vedtak }.map { it.id }
+        val klageRef =
+            klageService
+                .hentKlager(UUID.fromString(fiksDigisosId))
+                .takeIf { it.isNotEmpty() }
+                // Vi tilater kun å klage på det siste vedtaket i en sak, derfor henter vi første klage som matcher et vedtak på saken
+                ?.first {
+                    vedtakIds.contains(it.vedtakId.toString())
+                }?.let { KlageRef(it.klageId, it.vedtakId) }
+
+        val responseList = model.saker.filter { it.saksStatus != SaksStatus.FEILREGISTRERT }.map { mapToResponse(it, klageRef) }
         log.info("Hentet ${responseList.size} sak(er) ${responseList.map { it.status?.name ?: "UKJENT_STATUS" }}")
         return responseList
     }
 
-    private fun mapToResponse(sak: Sak): SaksStatusResponse {
+    private fun mapToResponse(
+        sak: Sak,
+        klageRef: KlageRef?,
+    ): SaksStatusResponse {
         val saksStatus =
             if (sak.vedtak.isEmpty()) {
                 sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
@@ -57,6 +74,8 @@ class SaksStatusService(
             vedtakfilUrlList,
             utfallVedtak,
             sak.referanse,
+            vedtakIdList = sak.vedtak.map { it.id },
+            klageRef,
         )
     }
 

@@ -36,13 +36,15 @@ class SaksStatusService(
 
         val vedtakIds = model.saker.flatMap { it.vedtak }.map { it.id }
         val klageRef =
-            klageService
-                .hentKlager(UUID.fromString(fiksDigisosId))
-                .takeIf { it.isNotEmpty() }
-                // Vi tilater kun å klage på det siste vedtaket i en sak, derfor henter vi første klage som matcher et vedtak på saken
-                ?.first {
-                    vedtakIds.contains(it.vedtakId.toString())
-                }?.let { KlageRef(it.klageId, it.vedtakId) }
+            runCatching {
+                klageService
+                    .hentKlager(UUID.fromString(fiksDigisosId))
+                    .takeIf { it.isNotEmpty() }
+                    // Vi tilater kun å klage på det siste vedtaket i en sak, derfor henter vi første klage som matcher et vedtak på saken
+                    ?.first {
+                        vedtakIds.contains(it.vedtakId.toString())
+                    }?.let { KlageRef(it.klageId, it.vedtakId) }
+            }.getOrNull() // TODO: Må håndtere feiling av klage-kall på en bedre måte
 
         val responseList = model.saker.filter { it.saksStatus != SaksStatus.FEILREGISTRERT }.map { mapToResponse(it, klageRef) }
         log.info("Hentet ${responseList.size} sak(er) ${responseList.map { it.status?.name ?: "UKJENT_STATUS" }}")

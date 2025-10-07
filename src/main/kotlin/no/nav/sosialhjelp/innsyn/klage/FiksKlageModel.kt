@@ -47,7 +47,7 @@ data class TrekkKlageInfoDto(
 )
 
 data class SendtKvitteringDto(
-    val sendtKanal: FiksProtokoll,
+    val sendtKanal: FiksProtokoll? = null,
     val meldingId: UUID,
     val sendtStatus: SendtStatusDto,
     val statusListe: List<SendtStatusDto>,

@@ -110,7 +110,7 @@ class KlageServiceImpl(
             vedtakId = fiksKlage.vedtakId,
             klagePdf = klagePdf,
             opplastedeVedlegg = opplastedeVedlegg,
-            ettersendelser = fiksKlage.ettersendtInfoNAV.ettersendelser.map { it.toEttersendelseDto() },
+            ettersendelser = fiksKlage.ettersendtInfoNAV?.ettersendelser?.map { it.toEttersendelseDto() } ?: emptyList(),
             timestampSendt = fiksKlage.sendtKvittering.sendtStatus.timestamp,
         )
     }

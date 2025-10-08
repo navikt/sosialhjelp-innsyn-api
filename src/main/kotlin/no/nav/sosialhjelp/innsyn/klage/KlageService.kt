@@ -29,7 +29,7 @@ interface KlageService {
         input: KlageInput,
     )
 
-    suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto>
+    suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef>
 
     suspend fun hentKlage(
         fiksDigisosId: UUID,
@@ -90,7 +90,10 @@ class KlageServiceImpl(
             }
     }
 
-    override suspend fun hentKlager(fiksDigisosId: UUID): List<FiksKlageDto> = klageClient.hentKlager(fiksDigisosId)
+    override suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef> =
+        klageClient.hentKlager(fiksDigisosId).map {
+            KlageRef(it.klageId, it.vedtakId)
+        }
 
     override suspend fun hentKlage(
         fiksDigisosId: UUID,

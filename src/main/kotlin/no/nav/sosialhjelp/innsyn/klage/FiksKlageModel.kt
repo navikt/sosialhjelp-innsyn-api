@@ -16,7 +16,7 @@ data class FiksKlageDto(
     val vedlegg: List<DokumentInfoDto>, // liste med opplastede vedlegg
     val trekkKlageInfo: TrekkKlageInfoDto?,
     val sendtKvittering: SendtKvitteringDto,
-    val ettersendtInfoNAV: FiksEttersendtInfoNAVDto,
+    val ettersendtInfoNAV: FiksEttersendtInfoNAVDto?,
     val trukket: Boolean,
 )
 

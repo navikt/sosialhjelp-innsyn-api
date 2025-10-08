@@ -98,14 +98,8 @@ class KlageController(
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return klageService.hentKlager(fiksDigisosId).map { it.toKlageRef() }
+        return klageService.hentKlager(fiksDigisosId)
     }
-
-    private fun FiksKlageDto.toKlageRef() =
-        KlageRef(
-            klageId = klageId,
-            vedtakId = vedtakId,
-        )
 
     private fun validateNotProd() {
         if (MiljoUtils.isRunningInProd()) throw IllegalStateException("KlageController should not be used in production environment")

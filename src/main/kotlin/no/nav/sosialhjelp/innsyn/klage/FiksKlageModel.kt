@@ -16,7 +16,7 @@ data class FiksKlageDto(
     val vedlegg: List<DokumentInfoDto>, // liste med opplastede vedlegg
     val trekkKlageInfo: TrekkKlageInfoDto?,
     val sendtKvittering: SendtKvitteringDto,
-    val ettersendtInfoNAV: FiksEttersendtInfoNAVDto,
+    val ettersendtInfoNAV: FiksEttersendtInfoNAVDto?,
     val trukket: Boolean,
 )
 
@@ -47,7 +47,7 @@ data class TrekkKlageInfoDto(
 )
 
 data class SendtKvitteringDto(
-    val sendtKanal: FiksProtokoll,
+    val sendtKanal: FiksProtokoll? = null,
     val meldingId: UUID,
     val sendtStatus: SendtStatusDto,
     val statusListe: List<SendtStatusDto>,

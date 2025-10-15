@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
@@ -41,15 +42,19 @@ class VedleggController(
     private val tilgangskontroll: TilgangskontrollService,
     private val eventService: EventService,
     private val fiksClient: FiksClient,
+    private val kommuneService: KommuneService,
 ) {
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): List<OppgaveOpplastingResponse> {
+        tilgangskontroll.sjekkTilgang()
+
+        kommuneService.validerMottakForKommune(fiksDigisosId)
+
         val allFiles = rawFiles.asFlow().toList()
         log.info("Forsøker å starte ettersendelse")
-        tilgangskontroll.sjekkTilgang()
 
         // Ekstraherer metadata.json
         val metadata =

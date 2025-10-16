@@ -10,6 +10,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -41,15 +42,19 @@ class VedleggController(
     private val tilgangskontroll: TilgangskontrollService,
     private val eventService: EventService,
     private val fiksClient: FiksClient,
+    private val kommuneService: KommuneService,
 ) {
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun sendVedlegg(
         @PathVariable fiksDigisosId: String,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): List<OppgaveOpplastingResponse> {
+        tilgangskontroll.sjekkTilgang()
+
+        kommuneService.validerMottakForKommune(fiksDigisosId)
+
         val allFiles = rawFiles.asFlow().toList()
         log.info("Forsøker å starte ettersendelse")
-        tilgangskontroll.sjekkTilgang()
 
         // Ekstraherer metadata.json
         val metadata =

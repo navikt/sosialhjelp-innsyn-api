@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksGoneException
+import no.nav.sosialhjelp.innsyn.kommuneinfo.MottakUtilgjengeligException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -131,6 +132,15 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(error, HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(MottakUtilgjengeligException::class)
+    fun handleMottakUtilgjengeligException(e: MottakUtilgjengeligException): ResponseEntity<FrontendErrorMessage> {
+        log.error("Kommune har deaktivert mottak", e)
+        return ResponseEntity(
+            FrontendErrorMessage(UNAVAILABLE_ERROR, "Kommune har deaktivert mottak"),
+            HttpStatus.SERVICE_UNAVAILABLE,
+        )
+    }
+
     companion object {
         private val log by logger()
 
@@ -143,5 +153,6 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         private const val PDL_ERROR = "pdl_error"
         private const val TILGANG_ERROR = "tilgang_error"
         private const val NOT_FOUND_ERROR = "not_found_error"
+        private const val UNAVAILABLE_ERROR = "unavailable_error"
     }
 }

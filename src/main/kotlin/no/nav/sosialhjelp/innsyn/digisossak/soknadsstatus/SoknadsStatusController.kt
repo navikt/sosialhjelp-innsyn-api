@@ -50,6 +50,7 @@ class SoknadsStatusController(
             soknadsalderIMinutter = soknadsalderIMinutter(utvidetSoknadsStatus.tidspunktSendt),
             navKontor = utvidetSoknadsStatus.navKontor,
             filUrl = utvidetSoknadsStatus.soknadUrl,
+            tittel = utvidetSoknadsStatus.tittel,
         )
     }
 }

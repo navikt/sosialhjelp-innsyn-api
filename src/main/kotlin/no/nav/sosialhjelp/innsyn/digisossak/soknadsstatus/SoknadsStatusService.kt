@@ -3,7 +3,10 @@ package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
+import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
@@ -48,8 +51,11 @@ class SoknadsStatusService(
                     }.takeIf { erInnsynDeaktivertForKommune },
             digisosSak.kommunenummer,
             digisosSak.originalSoknadNAV?.navEksternRefId,
+            tittel = hentNavn(model)
         )
     }
+    private fun hentNavn(model: InternalDigisosSoker): String? =
+        model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.mapNotNull { it.tittel }.takeIf { it.isNotEmpty() }?.joinToString { it }
 
     data class UtvidetSoknadsStatus(
         val status: SoknadsStatus,
@@ -58,6 +64,7 @@ class SoknadsStatusService(
         val soknadUrl: UrlResponse?,
         val kommunenummer: String?,
         val navEksternRefId: String?,
+        val tittel: String?,
     )
 
     companion object {

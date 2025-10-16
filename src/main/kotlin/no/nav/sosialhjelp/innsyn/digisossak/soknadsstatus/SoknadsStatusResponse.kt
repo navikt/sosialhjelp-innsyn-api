@@ -13,4 +13,5 @@ data class SoknadsStatusResponse(
     val soknadsalderIMinutter: Long?,
     val navKontor: String?,
     val filUrl: UrlResponse?,
+    val tittel: String?,
 )

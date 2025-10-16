@@ -6,6 +6,8 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import java.time.LocalDateTime
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
@@ -13,6 +15,8 @@ import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
+import no.nav.sosialhjelp.innsyn.kommuneinfo.MottakUtilgjengeligException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.runTestWithToken
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
@@ -26,9 +30,8 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
+import org.springframework.test.util.AssertionErrors.fail
 import reactor.core.publisher.Flux
-import java.time.LocalDateTime
-import kotlin.time.Duration.Companion.seconds
 
 internal class VedleggControllerTest {
     private val vedleggOpplastingService: VedleggOpplastingService = mockk()
@@ -39,6 +42,7 @@ internal class VedleggControllerTest {
     private val fiksClient: FiksClient = mockk()
     private val digisosSak: DigisosSak = mockk()
     private val model: InternalDigisosSoker = mockk()
+    private val kommuneService: KommuneService = mockk()
 
     private val controller =
         VedleggController(
@@ -48,6 +52,7 @@ internal class VedleggControllerTest {
             tilgangskontroll,
             eventService,
             fiksClient,
+            kommuneService,
         )
 
     private val id = "123"
@@ -77,6 +82,7 @@ internal class VedleggControllerTest {
 
         coEvery { tilgangskontroll.sjekkTilgang() } just Runs
         every { digisosSak.fiksDigisosId } returns "123"
+        coEvery { kommuneService.validerMottakForKommune(any()) } just Runs
     }
 
     @AfterEach
@@ -89,17 +95,17 @@ internal class VedleggControllerTest {
             coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns
-                listOf(
-                    InternalVedlegg(
-                        dokumenttype,
-                        tilleggsinfo,
-                        null,
-                        null,
-                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
-                        LocalDateTime.now(),
-                        null,
-                    ),
-                )
+                    listOf(
+                        InternalVedlegg(
+                            dokumenttype,
+                            tilleggsinfo,
+                            null,
+                            null,
+                            mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
+                            LocalDateTime.now(),
+                            null,
+                        ),
+                    )
 
             val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id)
 
@@ -125,26 +131,26 @@ internal class VedleggControllerTest {
             coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns
-                listOf(
-                    InternalVedlegg(
-                        dokumenttype,
-                        null,
-                        null,
-                        null,
-                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                        now,
-                        null,
-                    ),
-                    InternalVedlegg(
-                        dokumenttype,
-                        null,
-                        null,
-                        null,
-                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                        now,
-                        null,
-                    ),
-                )
+                    listOf(
+                        InternalVedlegg(
+                            dokumenttype,
+                            null,
+                            null,
+                            null,
+                            mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                            now,
+                            null,
+                        ),
+                        InternalVedlegg(
+                            dokumenttype,
+                            null,
+                            null,
+                            null,
+                            mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                            now,
+                            null,
+                        ),
+                    )
 
             val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id)
 
@@ -233,6 +239,37 @@ internal class VedleggControllerTest {
     fun `skal handtere passe langt filnavn med strek og seks tegn`() {
         val filnavn = "filnavn_som_er_passe_langt-123456.pdf"
         assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
+    }
+
+    @Test
+    fun `Hvis kommune har skrudd av mottak skal det kastes exception`() = runTestWithToken {
+
+        val metadata =
+            """
+            |[{
+            |    "type": "brukskonto",
+            |    "tilleggsinfo": "kontoutskrift",
+            |    "filer": [{
+            |        "filnavn": "test.jpg",
+            |        "uuid": "5beac991-8a6d-475f-a065-579eb7c4f424"
+            |    }]
+            |}]
+            |
+                """.trimMargin()
+
+        coEvery { kommuneService.validerMottakForKommune(any()) } throws
+                MottakUtilgjengeligException("Mottak utilgjengelig", kanMottaSoknader = true, harMidlertidigDeaktivertMottak = true)
+
+        val files =
+            Flux.just(
+                mockPart("metadata.json", metadata.toByteArray()),
+                mockPart("test.jpg", byteArrayOf()),
+                mockPart("roflmao.jpg", byteArrayOf()),
+            )
+
+        runCatching { controller.sendVedlegg(id, files) }
+            .onSuccess { fail("Forventet at kall kaster exception") }
+            .getOrElse { assertThat(it).isInstanceOf(MottakUtilgjengeligException::class.java) }
     }
 }
 

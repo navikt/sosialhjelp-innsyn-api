@@ -4,10 +4,13 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
@@ -52,6 +55,12 @@ internal class SoknadsStatusServiceTest {
             every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
             every { mockInternalDigisosSoker.tidspunktSendt } returns now
             every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns navEnhet
+            val mockSak: Sak =
+                mockk {
+                    every { tittel } returns "Livsopphold"
+                    every { saksStatus } returns SaksStatus.UNDER_BEHANDLING
+                }
+            every { mockInternalDigisosSoker.saker } returns mutableListOf(mockSak)
             coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
 
             val response = service.hentSoknadsStatus("123")
@@ -70,6 +79,12 @@ internal class SoknadsStatusServiceTest {
             coEvery { eventService.createModel(any()) } returns mockInternalDigisosSoker
             every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
             every { mockInternalDigisosSoker.tidspunktSendt } returns now
+            val mockSak: Sak =
+                mockk {
+                    every { tittel } returns "Livsopphold"
+                    every { saksStatus } returns SaksStatus.UNDER_BEHANDLING
+                }
+            every { mockInternalDigisosSoker.saker } returns mutableListOf(mockSak)
             every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns navEnhet
             coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns true
 
@@ -90,4 +105,54 @@ internal class SoknadsStatusServiceTest {
 
         assertThat(response).isEqualTo(1323) // (24-2)h * 60 m/h + 3 = 22*60+3
     }
+
+    @Test
+    fun `Tittel skal settes sammen av sakstitler`() =
+        runTest {
+            val now = LocalDateTime.now()
+            coEvery { eventService.createModel(any()) } returns mockInternalDigisosSoker
+            every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
+            every { mockInternalDigisosSoker.tidspunktSendt } returns now
+            val mockSak1: Sak =
+                mockk {
+                    every { tittel } returns "Livsopphold"
+                    every { saksStatus } returns SaksStatus.UNDER_BEHANDLING
+                }
+            val mockSak2: Sak =
+                mockk {
+                    every { tittel } returns "Tannlege"
+                    every { saksStatus } returns SaksStatus.UNDER_BEHANDLING
+                }
+            every { mockInternalDigisosSoker.saker } returns mutableListOf(mockSak1, mockSak2)
+            every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns navEnhet
+            coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns true
+
+            val response = service.hentSoknadsStatus("123")
+
+            assertThat(response).isNotNull
+            assertThat(response.tittel).isNotNull
+            assertThat(response.tittel).isEqualTo("Livsopphold, Tannlege")
+        }
+
+    @Test
+    fun `Tittel skal settes bli null hvis det ikke finnes saker som ikke er feilregistrert`() =
+        runTest {
+            val now = LocalDateTime.now()
+            coEvery { eventService.createModel(any()) } returns mockInternalDigisosSoker
+            every { mockInternalDigisosSoker.status } returns SoknadsStatus.UNDER_BEHANDLING
+            every { mockInternalDigisosSoker.tidspunktSendt } returns now
+            val mockSak: Sak =
+                mockk {
+                    every { tittel } returns "Livsopphold"
+                    every { saksStatus } returns SaksStatus.FEILREGISTRERT
+                }
+            every { mockInternalDigisosSoker.saker } returns mutableListOf(mockSak)
+            every { mockInternalDigisosSoker.soknadsmottaker?.navEnhetsnavn } returns navEnhet
+            coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns true
+
+            val response = service.hentSoknadsStatus("123")
+
+            assertThat(response).isNotNull
+            assertThat(response.tittel).isNull()
+        }
 }

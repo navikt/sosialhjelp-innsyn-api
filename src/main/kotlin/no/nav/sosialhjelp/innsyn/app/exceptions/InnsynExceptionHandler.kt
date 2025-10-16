@@ -137,7 +137,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         log.error("Kommune har deaktivert mottak", e)
         return ResponseEntity(
             FrontendErrorMessage(UNAVAILABLE_ERROR, "Kommune har deaktivert mottak"),
-            HttpStatus.SERVICE_UNAVAILABLE
+            HttpStatus.SERVICE_UNAVAILABLE,
         )
     }
 

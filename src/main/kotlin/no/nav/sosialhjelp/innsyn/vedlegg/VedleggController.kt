@@ -10,6 +10,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 
 @RestController
 @RequestMapping("/api/v1/innsyn")

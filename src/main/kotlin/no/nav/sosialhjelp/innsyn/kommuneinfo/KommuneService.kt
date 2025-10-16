@@ -55,7 +55,6 @@ class KommuneService(
     }
 
     suspend fun validerMottakForKommune(fiksDigisosId: String) {
-
         hentKommuneInfo(fiksDigisosId)
             ?.also {
                 if (!it.kanMottaSoknader || it.harMidlertidigDeaktivertMottak) {
@@ -78,4 +77,4 @@ data class MottakUtilgjengeligException(
     override val message: String,
     val kanMottaSoknader: Boolean,
     val harMidlertidigDeaktivertMottak: Boolean,
-): RuntimeException(message)
+) : RuntimeException(message)

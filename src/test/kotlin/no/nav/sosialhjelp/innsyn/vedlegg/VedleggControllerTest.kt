@@ -6,8 +6,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import java.time.LocalDateTime
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
@@ -32,6 +30,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.test.util.AssertionErrors.fail
 import reactor.core.publisher.Flux
+import java.time.LocalDateTime
+import kotlin.time.Duration.Companion.seconds
 
 internal class VedleggControllerTest {
     private val vedleggOpplastingService: VedleggOpplastingService = mockk()
@@ -95,17 +95,17 @@ internal class VedleggControllerTest {
             coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns
-                    listOf(
-                        InternalVedlegg(
-                            dokumenttype,
-                            tilleggsinfo,
-                            null,
-                            null,
-                            mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
-                            LocalDateTime.now(),
-                            null,
-                        ),
-                    )
+                listOf(
+                    InternalVedlegg(
+                        dokumenttype,
+                        tilleggsinfo,
+                        null,
+                        null,
+                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L), DokumentInfo(filnavn2, dokumentlagerId2, 42L)),
+                        LocalDateTime.now(),
+                        null,
+                    ),
+                )
 
             val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id)
 
@@ -131,26 +131,26 @@ internal class VedleggControllerTest {
             coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns
-                    listOf(
-                        InternalVedlegg(
-                            dokumenttype,
-                            null,
-                            null,
-                            null,
-                            mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                            now,
-                            null,
-                        ),
-                        InternalVedlegg(
-                            dokumenttype,
-                            null,
-                            null,
-                            null,
-                            mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
-                            now,
-                            null,
-                        ),
-                    )
+                listOf(
+                    InternalVedlegg(
+                        dokumenttype,
+                        null,
+                        null,
+                        null,
+                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                        now,
+                        null,
+                    ),
+                    InternalVedlegg(
+                        dokumenttype,
+                        null,
+                        null,
+                        null,
+                        mutableListOf(DokumentInfo(filnavn, dokumentlagerId, 123L)),
+                        now,
+                        null,
+                    ),
+                )
 
             val vedleggResponses: ResponseEntity<List<VedleggResponse>> = controller.hentVedlegg(id)
 
@@ -242,10 +242,10 @@ internal class VedleggControllerTest {
     }
 
     @Test
-    fun `Hvis kommune har skrudd av mottak skal det kastes exception`() = runTestWithToken {
-
-        val metadata =
-            """
+    fun `Hvis kommune har skrudd av mottak skal det kastes exception`() =
+        runTestWithToken {
+            val metadata =
+                """
             |[{
             |    "type": "brukskonto",
             |    "tilleggsinfo": "kontoutskrift",
@@ -257,20 +257,20 @@ internal class VedleggControllerTest {
             |
                 """.trimMargin()
 
-        coEvery { kommuneService.validerMottakForKommune(any()) } throws
+            coEvery { kommuneService.validerMottakForKommune(any()) } throws
                 MottakUtilgjengeligException("Mottak utilgjengelig", kanMottaSoknader = true, harMidlertidigDeaktivertMottak = true)
 
-        val files =
-            Flux.just(
-                mockPart("metadata.json", metadata.toByteArray()),
-                mockPart("test.jpg", byteArrayOf()),
-                mockPart("roflmao.jpg", byteArrayOf()),
-            )
+            val files =
+                Flux.just(
+                    mockPart("metadata.json", metadata.toByteArray()),
+                    mockPart("test.jpg", byteArrayOf()),
+                    mockPart("roflmao.jpg", byteArrayOf()),
+                )
 
-        runCatching { controller.sendVedlegg(id, files) }
-            .onSuccess { fail("Forventet at kall kaster exception") }
-            .getOrElse { assertThat(it).isInstanceOf(MottakUtilgjengeligException::class.java) }
-    }
+            runCatching { controller.sendVedlegg(id, files) }
+                .onSuccess { fail("Forventet at kall kaster exception") }
+                .getOrElse { assertThat(it).isInstanceOf(MottakUtilgjengeligException::class.java) }
+        }
 }
 
 fun mockPart(

@@ -12,7 +12,7 @@ data class SakResponse(
 )
 
 data class FilUrl(
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val dato: LocalDate?,
     val url: String,
     val id: String,

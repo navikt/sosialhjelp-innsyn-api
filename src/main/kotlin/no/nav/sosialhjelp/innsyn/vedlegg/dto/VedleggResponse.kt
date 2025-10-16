@@ -9,6 +9,6 @@ data class VedleggResponse(
     val url: String,
     val type: String,
     val tilleggsinfo: String?,
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @param:JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     val datoLagtTil: LocalDateTime,
 )

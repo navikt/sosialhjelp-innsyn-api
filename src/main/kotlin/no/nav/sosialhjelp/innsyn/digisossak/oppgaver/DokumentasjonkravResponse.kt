@@ -7,13 +7,13 @@ import java.time.LocalDate
 
 data class DokumentasjonkravResponse(
     val dokumentasjonkravElementer: List<DokumentasjonkravElement>,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val frist: LocalDate?,
     val dokumentasjonkravId: String,
 )
 
 data class DokumentasjonkravElement(
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val hendelsetidspunkt: LocalDate,
     val hendelsetype: JsonVedlegg.HendelseType?,
     // hendelsereferanse

@@ -10,10 +10,10 @@ enum class Result {
 }
 
 data class ScanResult(
-    @JsonAlias("Filename")
-    @JsonProperty("filename")
+    @param:JsonAlias("Filename")
+    @param:JsonProperty("filename")
     val filename: String,
-    @JsonAlias("Result")
-    @JsonProperty("result")
+    @param:JsonAlias("Result")
+    @param:JsonProperty("result")
     val result: Result,
 )

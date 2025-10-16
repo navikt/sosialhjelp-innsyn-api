@@ -37,7 +37,7 @@ interface PdlClientOld {
 class PdlClientOldImpl(
     private val pdlWebClient: WebClient,
     private val texasClient: TexasClient,
-    @Value("\${client.pdl_audience}")
+    @param:Value("\${client.pdl_audience}")
     private val pdlAudience: String,
 ) : PdlClientOld {
     private val pdlRetry =

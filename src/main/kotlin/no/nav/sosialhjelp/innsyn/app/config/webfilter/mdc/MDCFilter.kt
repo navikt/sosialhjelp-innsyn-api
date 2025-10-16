@@ -49,8 +49,7 @@ class MDCFilter : CoWebFilter() {
         ) {
             val digisosId = path.substringAfter(INNSYN_BASE_URL).substringBefore("/")
             put(DIGISOS_ID, digisosId)
-        } else if (path.matches(Regex("^$INNSYN_BASE_URL(.*)/detaljer"))
-        ) {
+        } else if (path.matches(Regex("^$INNSYN_BASE_URL(.*)/detaljer"))) {
             val digisosId = path.substringAfter("${INNSYN_BASE_URL}sak/").substringBefore("/")
             put(DIGISOS_ID, digisosId)
         }

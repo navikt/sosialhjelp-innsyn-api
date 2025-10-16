@@ -12,16 +12,12 @@ plugins {
     alias(libs.plugins.kotlin.plugin.spring)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.versions)
-    alias(libs.plugins.ktlint)
+    alias(libs.plugins.spotless)
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
-}
-
-ktlint {
-    this.version.set(libs.versions.ktlint)
 }
 
 dependencies {
@@ -165,3 +161,24 @@ tasks.withType<Test> {
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     this.archiveFileName.set("app.jar")
 }
+
+spotless {
+    format("misc") {
+        target("*.md", ".gitignore", "Dockerfile")
+
+        trimTrailingWhitespace()
+        leadingTabsToSpaces()
+        endWithNewline()
+    }
+
+    kotlin {
+        ktlint(libs.versions.ktlint.get())
+    }
+    kotlinGradle {
+        ktlint(libs.versions.ktlint.get())
+    }
+}
+
+val installHook = tasks.getByName<com.diffplug.gradle.spotless.SpotlessInstallPrePushHookTask>("spotlessInstallGitPrePushHook")
+
+tasks.build.get().dependsOn(installHook)

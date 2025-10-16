@@ -22,10 +22,11 @@ springdoc = "2.8.13"
 json_smart = "2.4.10"
 spring_security_test = "6.5.5"
 mock-oauth2-server = "3.0.0"
+spotless = "8.0.0"
 
 opentelemetry = "1.54.1"
 
-ktlint = "1.5.0"
+ktlint = "1.7.1"
 
 mockk = "1.14.6"
 okhttp3 = "5.1.0"
@@ -140,5 +141,5 @@ prometheus = [
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "13.1.0" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

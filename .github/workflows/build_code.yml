@@ -23,8 +23,14 @@ jobs:
       - uses: nais/login@v0
         with:
           team: 'teamdigisos'
+      - name: Run lint
+        run: ./gradlew spotlessCheck
+        shell: bash
       - name: Build kotlin, and run tests/lint
         uses: navikt/sosialhjelp-ci/actions/build-kotlin@v7
         with:
           java-version: '21'
+          lint: 'false'
+
+
 

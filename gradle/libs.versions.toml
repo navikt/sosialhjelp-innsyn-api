@@ -24,12 +24,12 @@ spring_security_test = "6.5.5"
 mock-oauth2-server = "3.0.0"
 spotless = "8.0.0"
 
-opentelemetry = "1.54.1"
+opentelemetry = "1.55.0"
 
 ktlint = "1.7.1"
 
 mockk = "1.14.6"
-okhttp3 = "5.1.0"
+okhttp3 = "5.2.1"
 spring_mockk = "4.0.2"
 resilience4j = "2.3.0"
 

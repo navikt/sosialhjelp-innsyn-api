@@ -1,12 +1,22 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.coEvery
+import io.mockk.just
+import io.mockk.runs
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.net.URI
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
 import no.nav.sosialhjelp.innsyn.klage.buildPart
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.runTestWithToken
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
@@ -37,11 +47,6 @@ import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.io.ByteArrayInputStream
-import java.io.InputStream
-import java.net.URI
-import java.time.LocalDate
-import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -51,11 +56,15 @@ class KlageEndpointToMockAltApiTest {
     @Autowired
     private lateinit var webClient: WebTestClient
 
+    @MockkBean
+    private lateinit var kommuneService: KommuneService
+
     private lateinit var token: String
 
     @BeforeEach
     fun setup() {
         token = MockOAuth2ServerHolder.server.issueToken("default").serialize()
+        coEvery { kommuneService.validerMottakForKommune(any<UUID>()) } just runs
     }
 
     @Test

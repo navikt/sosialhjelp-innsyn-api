@@ -21,9 +21,9 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 @EnableWebFluxSecurity
 @Profile("!test")
 class SecurityConfiguration(
-    @Value("\${idporten.issuer}")
+    @param:Value("\${idporten.issuer}")
     private val issuer: String,
-    @Value("\${idporten.audience}")
+    @param:Value("\${idporten.audience}")
     private val clientId: String,
 ) {
     @Bean

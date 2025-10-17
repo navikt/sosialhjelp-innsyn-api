@@ -7,14 +7,14 @@ import java.time.LocalDateTime
 
 data class OppgaveResponse(
     val oppgaveId: String,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val innsendelsesfrist: LocalDate?,
     val oppgaveElementer: List<OppgaveElement>,
 )
 
 data class OppgaveResponseBeta(
     val oppgaveId: String,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val innsendelsesfrist: LocalDate?,
     val dokumenttype: String,
     val tilleggsinformasjon: String?,

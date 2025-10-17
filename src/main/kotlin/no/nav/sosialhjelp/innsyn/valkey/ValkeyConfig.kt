@@ -20,8 +20,8 @@ import java.time.Duration
 @Profile("!mock-redis")
 @EnableCaching
 class ValkeyConfig(
-    @Value("\${innsyn.cache.time_to_live_seconds}") private val defaultTTL: Long,
-    @Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long,
+    @param:Value("\${innsyn.cache.time_to_live_seconds}") private val defaultTTL: Long,
+    @param:Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long,
 ) {
     @Bean
     fun cacheManager(connectionFactory: RedisConnectionFactory): CacheManager {

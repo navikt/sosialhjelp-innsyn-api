@@ -7,7 +7,7 @@ import java.time.LocalDate
 data class OppgaveOpplastingResponse(
     val type: String,
     val tilleggsinfo: String?,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val innsendelsesfrist: LocalDate?,
     val hendelsetype: JsonVedlegg.HendelseType?,
     val hendelsereferanse: String?,

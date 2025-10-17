@@ -5,7 +5,7 @@ import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import java.time.LocalDate
 
 data class VilkarResponse(
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val hendelsetidspunkt: LocalDate,
     val vilkarReferanse: String,
     val tittel: String?,

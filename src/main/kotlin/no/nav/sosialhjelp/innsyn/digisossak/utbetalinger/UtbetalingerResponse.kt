@@ -9,8 +9,8 @@ import java.time.LocalDate
 data class UtbetalingerResponse(
     val ar: Int,
     val maned: Int,
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Schema(deprecated = true, description = "Bruk ar og maned")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
+    @param:Schema(deprecated = true, description = "Bruk ar og maned")
     val foersteIManeden: LocalDate,
     val utbetalinger: List<ManedUtbetaling>,
 )
@@ -25,19 +25,19 @@ data class ManedUtbetaling(
     val referanse: String,
     val tittel: String,
     val belop: BigDecimal,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val utbetalingsdato: LocalDate?,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val forfallsdato: LocalDate?,
     val status: UtbetalingsStatus,
     val fiksDigisosId: String,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val fom: LocalDate?,
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @param:JsonFormat(pattern = "yyyy-MM-dd")
     val tom: LocalDate?,
     val mottaker: String?,
     val annenMottaker: Boolean,
-    @Schema(pattern = "^[0-9]{11}$")
+    @param:Schema(pattern = "^[0-9]{11}$")
     val kontonummer: String?,
     val utbetalingsmetode: String?,
 )

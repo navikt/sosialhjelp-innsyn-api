@@ -63,6 +63,20 @@ abstract class AbstractIntegrationTest {
             .expectStatus()
             .isOk
 
+    protected fun doPostFullResponse(
+        uri: String,
+        digisosId: UUID,
+        body: Any,
+    ): WebTestClient.ResponseSpec =
+        webClient
+            .post()
+            .uri(uri, digisosId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+            .bodyValue(body)
+            .exchange()
+
     protected fun doPostFiles(
         uri: String,
         body: Any,

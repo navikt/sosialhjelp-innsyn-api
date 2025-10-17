@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
+import java.util.UUID
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
@@ -52,6 +53,10 @@ class KommuneService(
     suspend fun erInnsynDeaktivertForKommune(fiksDigisosId: String): Boolean {
         val kommuneInfo = hentKommuneInfo(fiksDigisosId)
         return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
+    }
+
+    suspend fun validerMottakForKommune(fiksDigisosId: UUID) {
+        validerMottakForKommune(fiksDigisosId.toString())
     }
 
     suspend fun validerMottakForKommune(fiksDigisosId: String) {

@@ -82,7 +82,7 @@ internal class VedleggControllerTest {
 
         coEvery { tilgangskontroll.sjekkTilgang() } just Runs
         every { digisosSak.fiksDigisosId } returns "123"
-        coEvery { kommuneService.validerMottakForKommune(any()) } just Runs
+        coEvery { kommuneService.validerMottakForKommune(any<String>()) } just Runs
     }
 
     @AfterEach
@@ -257,7 +257,7 @@ internal class VedleggControllerTest {
             |
                 """.trimMargin()
 
-            coEvery { kommuneService.validerMottakForKommune(any()) } throws
+            coEvery { kommuneService.validerMottakForKommune(any<String>()) } throws
                 MottakUtilgjengeligException("Mottak utilgjengelig", kanMottaSoknader = true, harMidlertidigDeaktivertMottak = true)
 
             val files =

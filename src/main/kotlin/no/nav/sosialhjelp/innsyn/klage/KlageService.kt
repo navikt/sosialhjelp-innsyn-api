@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import java.io.ByteArrayInputStream
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
@@ -7,7 +10,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
@@ -19,9 +22,6 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import java.io.ByteArrayInputStream
-import java.time.LocalDateTime
-import java.util.UUID
 
 interface KlageService {
     suspend fun sendKlage(
@@ -53,13 +53,15 @@ interface KlageService {
 class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
-    private val fiksClient: FiksClient,
+    private val kommuneService: KommuneService,
     private val clientProperties: ClientProperties,
 ) : KlageService {
     override suspend fun sendKlage(
         fiksDigisosId: UUID,
         input: KlageInput,
     ) {
+        kommuneService.validerMottakForKommune(fiksDigisosId)
+
         klageClient.sendKlage(
             digisosId = fiksDigisosId,
             klageId = input.klageId,
@@ -77,6 +79,8 @@ class KlageServiceImpl(
         klageId: UUID,
         ettersendelseId: UUID,
     ) {
+        kommuneService.validerMottakForKommune(fiksDigisosId)
+
         createJsonVedleggSpec(ettersendelseId, klageId)
             .also {
                 if (it.noFiles()) error("Ingen vedlegg for ettersendelse av Klage")

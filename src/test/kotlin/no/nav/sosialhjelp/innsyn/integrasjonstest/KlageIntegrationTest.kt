@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.Runs
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.just
+import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
@@ -39,6 +41,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.KommuneInfo
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
+import org.springframework.http.HttpStatus
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
@@ -50,6 +56,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
     private lateinit var fiksKlageClient: FiksKlageClient
 
+    @MockkBean
+    private lateinit var kommuneInfoClient: KommuneInfoClient
+
     @Test
     fun `Sende klage skal lagres`() {
         val digisosId = UUID.randomUUID()
@@ -57,7 +66,22 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val vedtakId = UUID.randomUUID()
 
         coEvery { mellomlagerClient.getDocumentMetadataForRef(klageId) } returns
-            MellomlagerResponse.MellomlagringDto(klageId, emptyList())
+                MellomlagerResponse.MellomlagringDto(klageId, emptyList())
+
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+                KommuneInfo(
+                    kommunenummer = "1234",
+                    kanMottaSoknader = true,
+                    kanOppdatereStatus = true,
+                    harMidlertidigDeaktivertMottak = false,
+                    harMidlertidigDeaktivertOppdateringer = false,
+                    kontaktpersoner = null,
+                    harNksTilgang = true,
+                    behandlingsansvarlig = null,
+                )
+
+        coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
+
 
         coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just Runs
 
@@ -122,7 +146,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val digisosId = UUID.randomUUID()
 
         coEvery { fiksKlageClient.hentKlager(any()) } returns
-            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+                listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
         doGet(GET_KLAGER, listOf(digisosId))
             .expectBodyList(KlageRef::class.java)
@@ -154,19 +178,19 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val pdfFile = getFile()
 
         coEvery { mellomlagerClient.uploadDocuments(any(), any()) } returns
-            MellomlagerResponse.MellomlagringDto(
-                navEksternRefId = klageId,
-                mellomlagringMetadataList =
-                    listOf(
-                        element =
-                            MellomlagringDokumentInfo(
-                                filnavn = "$pdfUuidFilename.pdf",
-                                filId = UUID.randomUUID(),
-                                storrelse = pdfFile.length(),
-                                mimetype = "application/pdf",
-                            ),
-                    ),
-            )
+                MellomlagerResponse.MellomlagringDto(
+                    navEksternRefId = klageId,
+                    mellomlagringMetadataList =
+                        listOf(
+                            element =
+                                MellomlagringDokumentInfo(
+                                    filnavn = "$pdfUuidFilename.pdf",
+                                    filId = UUID.randomUUID(),
+                                    storrelse = pdfFile.length(),
+                                    mimetype = "application/pdf",
+                                ),
+                        ),
+                )
 
         val body = createBody(pdfFile, pdfUuidFilename)
 
@@ -185,6 +209,66 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                 assertThat(docRef.documentId).isInstanceOf(UUID::class.java)
             }
             ?: error("Forventet dokumentreferanser tilbake")
+    }
+
+    @Test
+    fun `innsending av klage gir 503 nar kommune har deaktivert mottak`() {
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val vedtakId = UUID.randomUUID()
+
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+                KommuneInfo(
+                    kommunenummer = "1234",
+                    kanMottaSoknader = false,
+                    kanOppdatereStatus = true,
+                    harMidlertidigDeaktivertMottak = false,
+                    harMidlertidigDeaktivertOppdateringer = false,
+                    kontaktpersoner = null,
+                    harNksTilgang = true,
+                    behandlingsansvarlig = null,
+                )
+
+        coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
+
+        doPostFullResponse(
+            uri = POST_KLAGE,
+            digisosId = digisosId,
+            body = KlageInput(
+                klageId = klageId,
+                vedtakId = vedtakId,
+                tekst = "Dette er en testklage",
+            ),
+        ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    }
+
+    @Test
+    fun `innsending av ettersendelse gir 503 nar kommune har deaktivert mottak`() {
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val ettersendelseId = UUID.randomUUID()
+
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+                KommuneInfo(
+                    kommunenummer = "1234",
+                    kanMottaSoknader = false,
+                    kanOppdatereStatus = true,
+                    harMidlertidigDeaktivertMottak = false,
+                    harMidlertidigDeaktivertOppdateringer = false,
+                    kontaktpersoner = null,
+                    harNksTilgang = true,
+                    behandlingsansvarlig = null,
+                )
+
+        coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
+
+        val path = "/api/v1/innsyn/{digisosId}/klage/${klageId}/ettersendelse/${ettersendelseId}"
+
+        doPostFullResponse(
+            uri = path,
+            digisosId = digisosId,
+            body = "{}",
+        ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
     }
 
     private fun getFile(filename: String = "sample_pdf.pdf"): File {
@@ -298,3 +382,14 @@ private fun createFiksKlageDto(
             ),
         ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )
+
+private fun createDigisosSak(
+    fiksDigisosId: UUID = UUID.randomUUID(),
+    kommunenummer: String = "1234",
+): DigisosSak {
+    val mockDigisosSak = mockk<DigisosSak>()
+    every { mockDigisosSak.fiksDigisosId } returns fiksDigisosId.toString()
+    every { mockDigisosSak.kommunenummer } returns kommunenummer
+    return mockDigisosSak
+}
+

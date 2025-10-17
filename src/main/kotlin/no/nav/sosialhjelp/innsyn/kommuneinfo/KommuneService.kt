@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class KommuneService(
@@ -52,6 +53,10 @@ class KommuneService(
     suspend fun erInnsynDeaktivertForKommune(fiksDigisosId: String): Boolean {
         val kommuneInfo = hentKommuneInfo(fiksDigisosId)
         return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
+    }
+
+    suspend fun validerMottakForKommune(fiksDigisosId: UUID) {
+        validerMottakForKommune(fiksDigisosId.toString())
     }
 
     suspend fun validerMottakForKommune(fiksDigisosId: String) {

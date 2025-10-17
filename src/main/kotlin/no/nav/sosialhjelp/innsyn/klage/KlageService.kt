@@ -7,7 +7,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
@@ -53,13 +53,15 @@ interface KlageService {
 class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
-    private val fiksClient: FiksClient,
+    private val kommuneService: KommuneService,
     private val clientProperties: ClientProperties,
 ) : KlageService {
     override suspend fun sendKlage(
         fiksDigisosId: UUID,
         input: KlageInput,
     ) {
+        kommuneService.validerMottakForKommune(fiksDigisosId)
+
         klageClient.sendKlage(
             digisosId = fiksDigisosId,
             klageId = input.klageId,
@@ -77,6 +79,8 @@ class KlageServiceImpl(
         klageId: UUID,
         ettersendelseId: UUID,
     ) {
+        kommuneService.validerMottakForKommune(fiksDigisosId)
+
         createJsonVedleggSpec(ettersendelseId, klageId)
             .also {
                 if (it.noFiles()) error("Ingen vedlegg for ettersendelse av Klage")

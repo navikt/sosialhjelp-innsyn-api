@@ -9,6 +9,8 @@ import io.mockk.just
 import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
@@ -25,6 +27,7 @@ import no.nav.sosialhjelp.innsyn.klage.MellomlagringDokumentInfo
 import no.nav.sosialhjelp.innsyn.klage.SendtKvitteringDto
 import no.nav.sosialhjelp.innsyn.klage.SendtStatus
 import no.nav.sosialhjelp.innsyn.klage.SendtStatusDto
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -32,6 +35,7 @@ import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
 import org.springframework.http.client.MultipartBodyBuilder
@@ -41,10 +45,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
-import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.KommuneInfo
-import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
-import org.springframework.http.HttpStatus
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
@@ -66,22 +66,21 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val vedtakId = UUID.randomUUID()
 
         coEvery { mellomlagerClient.getDocumentMetadataForRef(klageId) } returns
-                MellomlagerResponse.MellomlagringDto(klageId, emptyList())
+            MellomlagerResponse.MellomlagringDto(klageId, emptyList())
 
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
-                KommuneInfo(
-                    kommunenummer = "1234",
-                    kanMottaSoknader = true,
-                    kanOppdatereStatus = true,
-                    harMidlertidigDeaktivertMottak = false,
-                    harMidlertidigDeaktivertOppdateringer = false,
-                    kontaktpersoner = null,
-                    harNksTilgang = true,
-                    behandlingsansvarlig = null,
-                )
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = true,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
 
         coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
-
 
         coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just Runs
 
@@ -146,7 +145,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val digisosId = UUID.randomUUID()
 
         coEvery { fiksKlageClient.hentKlager(any()) } returns
-                listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
         doGet(GET_KLAGER, listOf(digisosId))
             .expectBodyList(KlageRef::class.java)
@@ -178,19 +177,19 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val pdfFile = getFile()
 
         coEvery { mellomlagerClient.uploadDocuments(any(), any()) } returns
-                MellomlagerResponse.MellomlagringDto(
-                    navEksternRefId = klageId,
-                    mellomlagringMetadataList =
-                        listOf(
-                            element =
-                                MellomlagringDokumentInfo(
-                                    filnavn = "$pdfUuidFilename.pdf",
-                                    filId = UUID.randomUUID(),
-                                    storrelse = pdfFile.length(),
-                                    mimetype = "application/pdf",
-                                ),
-                        ),
-                )
+            MellomlagerResponse.MellomlagringDto(
+                navEksternRefId = klageId,
+                mellomlagringMetadataList =
+                    listOf(
+                        element =
+                            MellomlagringDokumentInfo(
+                                filnavn = "$pdfUuidFilename.pdf",
+                                filId = UUID.randomUUID(),
+                                storrelse = pdfFile.length(),
+                                mimetype = "application/pdf",
+                            ),
+                    ),
+            )
 
         val body = createBody(pdfFile, pdfUuidFilename)
 
@@ -218,27 +217,28 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val vedtakId = UUID.randomUUID()
 
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
-                KommuneInfo(
-                    kommunenummer = "1234",
-                    kanMottaSoknader = false,
-                    kanOppdatereStatus = true,
-                    harMidlertidigDeaktivertMottak = false,
-                    harMidlertidigDeaktivertOppdateringer = false,
-                    kontaktpersoner = null,
-                    harNksTilgang = true,
-                    behandlingsansvarlig = null,
-                )
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = false,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
 
         coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
 
         doPostFullResponse(
             uri = POST_KLAGE,
             digisosId = digisosId,
-            body = KlageInput(
-                klageId = klageId,
-                vedtakId = vedtakId,
-                tekst = "Dette er en testklage",
-            ),
+            body =
+                KlageInput(
+                    klageId = klageId,
+                    vedtakId = vedtakId,
+                    tekst = "Dette er en testklage",
+                ),
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
     }
 
@@ -249,20 +249,20 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val ettersendelseId = UUID.randomUUID()
 
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
-                KommuneInfo(
-                    kommunenummer = "1234",
-                    kanMottaSoknader = false,
-                    kanOppdatereStatus = true,
-                    harMidlertidigDeaktivertMottak = false,
-                    harMidlertidigDeaktivertOppdateringer = false,
-                    kontaktpersoner = null,
-                    harNksTilgang = true,
-                    behandlingsansvarlig = null,
-                )
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = false,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
 
         coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
 
-        val path = "/api/v1/innsyn/{digisosId}/klage/${klageId}/ettersendelse/${ettersendelseId}"
+        val path = "/api/v1/innsyn/{digisosId}/klage/$klageId/ettersendelse/$ettersendelseId"
 
         doPostFullResponse(
             uri = path,
@@ -392,4 +392,3 @@ private fun createDigisosSak(
     every { mockDigisosSak.kommunenummer } returns kommunenummer
     return mockDigisosSak
 }
-

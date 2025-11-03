@@ -5,6 +5,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
+import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Service
@@ -30,7 +31,11 @@ class UtbetalingerService(
                         async { eventService.hentAlleUtbetalinger(it) }
                     }.awaitAll()
             }.associateBy { it.fiksDigisosId!! }
-                .mapValues { (_, digisosSoker) -> digisosSoker.utbetalinger }
+                .mapValues { (_, digisosSoker) ->
+                    digisosSoker.utbetalinger.filter { it.status != UtbetalingsStatus.ANNULLERT }.filter {
+                        it.utbetalingsDato != null || it.forfallsDato != null
+                    }
+                }
 
         return utbetalinger
     }

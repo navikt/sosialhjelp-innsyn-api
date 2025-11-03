@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v2/innsyn/utbetalinger")
-class UtbetalingerCntroller2(
+class UtbetalingerController2(
     private val tilgangskontroll: TilgangskontrollService,
     private val utbetalingerServiceNew: UtbetalingerService,
 ) {

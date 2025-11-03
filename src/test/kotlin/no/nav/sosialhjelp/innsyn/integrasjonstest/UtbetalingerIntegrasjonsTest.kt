@@ -96,7 +96,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `Utbetalinger uten både forfallsdato og utbetalingsdato skal filtreres bort`() {
+    fun `Utbetalinger uten bade forfallsdato og utbetalingsdato skal filtreres bort`() {
         val digisosSak = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = objectMapper.readValue(jsonDigisosSokerUtenDatoer, JsonDigisosSoker::class.java)
 

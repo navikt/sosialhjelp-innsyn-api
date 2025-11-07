@@ -32,9 +32,11 @@ class UtbetalingerService(
                     }.awaitAll()
             }.associateBy { it.fiksDigisosId!! }
                 .mapValues { (_, digisosSoker) ->
-                    digisosSoker.utbetalinger.filter { it.status != UtbetalingsStatus.ANNULLERT }.filter {
-                        it.utbetalingsDato != null || it.forfallsDato != null
-                    }
+                    digisosSoker.utbetalinger
+                        .filter { it.status != UtbetalingsStatus.ANNULLERT }
+                        .filter {
+                            it.utbetalingsDato != null || it.forfallsDato != null
+                        }
                 }
 
         return utbetalinger

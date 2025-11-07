@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: TilgangskontrollService,
+    private val vedleggService: VedleggService,
 ) {
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = ["application/json;charset=UTF-8"])
     @Deprecated("Gammelt endepunkt", replaceWith = ReplaceWith("getOppgaverBeta(fiksDigisosId)"))
@@ -36,6 +38,22 @@ class OppgaveController(
         tilgangskontroll.sjekkTilgang()
 
         val oppgaver = oppgaveService.hentOppgaverBeta(fiksDigisosId)
+        return if (oppgaver.isEmpty()) {
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } else {
+            ResponseEntity.ok(oppgaver)
+        }
+    }
+
+    @GetMapping("/{fiksDigisosId}/oppgaver/beta/{oppgaveId}/vedlegg", produces = ["application/json;charset=UTF-8"])
+    suspend fun getOppgaveBeta(
+        @PathVariable fiksDigisosId: String,
+        @PathVariable oppgaveId: String,
+    ): ResponseEntity<List<VedleggResponseBeta>> {
+        tilgangskontroll.sjekkTilgang()
+
+        val vedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, oppgaveId)
+
         return if (oppgaver.isEmpty()) {
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {

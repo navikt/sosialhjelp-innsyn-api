@@ -174,6 +174,7 @@ class EventService(
         val jsonDigisosSoker: JsonDigisosSoker =
             innsynService.hentJsonDigisosSoker(digisosSak)
                 ?: return model
+        model.fiksDigisosId = digisosSak.fiksDigisosId
         jsonDigisosSoker.hendelser
             .filterIsInstance<JsonUtbetaling>()
             .sortedBy { it.hendelsestidspunkt }

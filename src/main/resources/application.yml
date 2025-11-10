@@ -47,7 +47,7 @@ springdoc:
     enabled: ${SWAGGER_ENABLED}
   swagger-ui:
     path: swagger-ui.html
-  pathsToMatch: /**/api/v1/**
+  pathsToMatch: /**/api/**
 
 #Environment-variabler som settes av NAIS
 client:

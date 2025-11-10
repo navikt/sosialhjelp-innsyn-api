@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -10,27 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/innsyn")
-class OppgaveController(
+@RequestMapping("/api/v2/innsyn")
+class OppgaveControllerV2(
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: TilgangskontrollService,
+    private val vedleggService: VedleggService,
+    private val clientProperties: ClientProperties,
 ) {
     @GetMapping("/{fiksDigisosId}/oppgaver", produces = ["application/json;charset=UTF-8"])
-    @Deprecated("Gammelt endepunkt", replaceWith = ReplaceWith("getOppgaverBeta(fiksDigisosId)"))
-    suspend fun getOppgaver(
-        @PathVariable fiksDigisosId: String,
-    ): ResponseEntity<List<OppgaveResponse>> {
-        tilgangskontroll.sjekkTilgang()
-
-        val oppgaver = oppgaveService.hentOppgaver(fiksDigisosId)
-        return if (oppgaver.isEmpty()) {
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else {
-            ResponseEntity.ok(oppgaver)
-        }
-    }
-
-    @GetMapping("/{fiksDigisosId}/oppgaver/beta", produces = ["application/json;charset=UTF-8"])
     suspend fun getOppgaverBeta(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<OppgaveResponseBeta>> {
@@ -44,18 +33,44 @@ class OppgaveController(
         }
     }
 
-    @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}", produces = ["application/json;charset=UTF-8"])
-    suspend fun getOppgaveMedId(
+    @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}/vedlegg", produces = ["application/json;charset=UTF-8"])
+    suspend fun getVedleggForOppgave(
         @PathVariable fiksDigisosId: String,
         @PathVariable oppgaveId: String,
-    ): ResponseEntity<List<OppgaveResponse>> {
+    ): ResponseEntity<List<OppgaveVedleggFil>> {
         tilgangskontroll.sjekkTilgang()
 
-        val oppgaver = oppgaveService.hentOppgaverMedOppgaveId(fiksDigisosId, oppgaveId)
-        return if (oppgaver.isEmpty()) {
+        val vedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, oppgaveId)
+
+        return if (vedlegg.isEmpty()) {
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {
-            ResponseEntity.ok(oppgaver)
+            ResponseEntity.ok(
+                vedlegg.flatMap { vedlegg ->
+                    vedlegg.dokumentInfoList.map {
+                        OppgaveVedleggFil(
+                            hentDokumentlagerUrl(clientProperties, it.dokumentlagerDokumentId),
+                            it.filnavn,
+                            it.storrelse,
+                            vedlegg.tidspunktLastetOpp,
+                        )
+                    }
+                },
+            )
+        }
+    }
+
+    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
+    suspend fun getDokumentasjonkravBeta(
+        @PathVariable fiksDigisosId: String,
+    ): ResponseEntity<List<DokumentasjonkravDto>> {
+        tilgangskontroll.sjekkTilgang()
+
+        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravBeta(fiksDigisosId)
+        return if (dokumentasjonkrav.isEmpty()) {
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } else {
+            ResponseEntity.ok(dokumentasjonkrav)
         }
     }
 
@@ -70,51 +85,6 @@ class OppgaveController(
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {
             ResponseEntity.ok(vilkar)
-        }
-    }
-
-    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
-    @Deprecated("Gammelt endepunkt", replaceWith = ReplaceWith("getDokumentasjonkravBeta(fiksDigisosId)"))
-    suspend fun getDokumentasjonkrav(
-        @PathVariable fiksDigisosId: String,
-    ): ResponseEntity<List<DokumentasjonkravResponse>> {
-        tilgangskontroll.sjekkTilgang()
-
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkrav(fiksDigisosId)
-        return if (dokumentasjonkrav.isEmpty()) {
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else {
-            ResponseEntity.ok(dokumentasjonkrav)
-        }
-    }
-
-    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/beta", produces = ["application/json;charset=UTF-8"])
-    suspend fun getDokumentasjonkravBeta(
-        @PathVariable fiksDigisosId: String,
-    ): ResponseEntity<List<DokumentasjonkravDto>> {
-        tilgangskontroll.sjekkTilgang()
-
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravBeta(fiksDigisosId)
-        return if (dokumentasjonkrav.isEmpty()) {
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else {
-            ResponseEntity.ok(dokumentasjonkrav)
-        }
-    }
-
-    @GetMapping("/{fiksDigisosId}/dokumentasjonkrav/{dokumentasjonkravId}", produces = ["application/json;charset=UTF-8"])
-    @Deprecated("Gammelt endepunkt")
-    suspend fun getDokumentasjonkravMedId(
-        @PathVariable fiksDigisosId: String,
-        @PathVariable dokumentasjonkravId: String,
-    ): ResponseEntity<List<DokumentasjonkravResponse>> {
-        tilgangskontroll.sjekkTilgang()
-
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravMedId(fiksDigisosId, dokumentasjonkravId)
-        return if (dokumentasjonkrav.isEmpty()) {
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else {
-            ResponseEntity.ok(dokumentasjonkrav)
         }
     }
 

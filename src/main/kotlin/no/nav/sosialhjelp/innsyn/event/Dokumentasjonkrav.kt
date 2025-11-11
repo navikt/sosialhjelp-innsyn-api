@@ -34,12 +34,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
     val utbetalingerMedSakKnytning = saker.flatMap { it.utbetalinger }.filter { it.referanse in hendelse.utbetalingsreferanse }
     val utbetalingerUtenSakKnytning = utbetalinger.filter { it.referanse in hendelse.utbetalingsreferanse }
 
-    // TODO: Denne trigges hver gang en ferdigbehandlet søknad har et dokumentasjonskrav? Skrur av foreløpig
-//    if (status == SoknadsStatus.FERDIGBEHANDLET) {
-//        log.warn("Dokumentasjonkrav lagt til etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")
-//    }
     if (utbetalingerMedSakKnytning.isEmpty() && utbetalingerUtenSakKnytning.isEmpty()) {
-        log.warn("Fant ingen utbetalinger å knytte dokumentasjonkrav til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
+        log.debug("Fant ingen utbetalinger å knytte dokumentasjonkrav til. Utbetalingsreferanser: {}", hendelse.utbetalingsreferanse)
         return
     }
 

@@ -31,7 +31,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
     fjernFraUtbetalingerSomIkkeLengreErReferertTilIVilkaret(hendelse)
 
     if (utbetalinger.isEmpty()) {
-        log.warn("Fant ingen utbetalinger å knytte vilkår til. Utbetalingsreferanser: ${hendelse.utbetalingsreferanse}")
+        log.debug("Fant ingen utbetalinger å knytte vilkår til. Utbetalingsreferanser: {}", hendelse.utbetalingsreferanse)
         return
     }
     utbetalinger.forEach { it.vilkar.oppdaterEllerLeggTilVilkar(hendelse, vilkar) }

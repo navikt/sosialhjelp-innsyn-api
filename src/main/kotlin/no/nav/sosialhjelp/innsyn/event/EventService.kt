@@ -170,11 +170,10 @@ class EventService(
     }
 
     suspend fun hentAlleUtbetalinger(digisosSak: DigisosSak): InternalDigisosSoker {
-        val model = InternalDigisosSoker()
+        val model = InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)
         val jsonDigisosSoker: JsonDigisosSoker =
             innsynService.hentJsonDigisosSoker(digisosSak)
                 ?: return model
-        model.fiksDigisosId = digisosSak.fiksDigisosId
         jsonDigisosSoker.hendelser
             .filterIsInstance<JsonUtbetaling>()
             .sortedBy { it.hendelsestidspunkt }

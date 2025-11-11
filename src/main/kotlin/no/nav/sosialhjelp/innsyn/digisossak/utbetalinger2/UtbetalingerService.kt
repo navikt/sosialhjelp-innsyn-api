@@ -30,7 +30,7 @@ class UtbetalingerService(
                     .map {
                         async { eventService.hentAlleUtbetalinger(it) }
                     }.awaitAll()
-            }.associateBy { it.fiksDigisosId ?: error("FiksDigisosId er null") }
+            }.associateBy { it.fiksDigisosId ?: "".also { log.warn("Manglende fiksDigisosId på model") } }
                 .mapValues { (_, digisosSoker) ->
                     digisosSoker.utbetalinger
                         .filter { it.status != UtbetalingsStatus.ANNULLERT }

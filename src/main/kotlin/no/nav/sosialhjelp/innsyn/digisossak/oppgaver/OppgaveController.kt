@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
-import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

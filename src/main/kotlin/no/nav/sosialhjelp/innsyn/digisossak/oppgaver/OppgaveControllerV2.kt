@@ -25,12 +25,7 @@ class OppgaveControllerV2(
     ): ResponseEntity<List<OppgaveResponseBeta>> {
         tilgangskontroll.sjekkTilgang()
 
-        val oppgaver = oppgaveService.hentOppgaverBeta(fiksDigisosId)
-        return if (oppgaver.isEmpty()) {
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else {
-            ResponseEntity.ok(oppgaver)
-        }
+        return oppgaveService.hentOppgaverBeta(fiksDigisosId).responseOrNoContent()
     }
 
     @GetMapping("/{fiksDigisosId}/oppgaver/{oppgaveId}/vedlegg", produces = ["application/json;charset=UTF-8"])
@@ -40,24 +35,18 @@ class OppgaveControllerV2(
     ): ResponseEntity<List<OppgaveVedleggFil>> {
         tilgangskontroll.sjekkTilgang()
 
-        val vedlegg = vedleggService.hentEttersendteVedlegg(fiksDigisosId, oppgaveId)
-
-        return if (vedlegg.isEmpty()) {
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else {
-            ResponseEntity.ok(
-                vedlegg.flatMap { vedlegg ->
-                    vedlegg.dokumentInfoList.map {
-                        OppgaveVedleggFil(
-                            hentDokumentlagerUrl(clientProperties, it.dokumentlagerDokumentId),
-                            it.filnavn,
-                            it.storrelse,
-                            vedlegg.tidspunktLastetOpp,
-                        )
-                    }
-                },
-            )
-        }
+        return vedleggService
+            .hentEttersendteVedlegg(fiksDigisosId, oppgaveId)
+            .flatMap { vedlegg ->
+                vedlegg.dokumentInfoList.map {
+                    OppgaveVedleggFil(
+                        hentDokumentlagerUrl(clientProperties, it.dokumentlagerDokumentId),
+                        it.filnavn.removeUuidSuffix(),
+                        it.storrelse,
+                        vedlegg.tidspunktLastetOpp,
+                    )
+                }
+            }.responseOrNoContent()
     }
 
     @GetMapping("/{fiksDigisosId}/dokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
@@ -66,12 +55,7 @@ class OppgaveControllerV2(
     ): ResponseEntity<List<DokumentasjonkravDto>> {
         tilgangskontroll.sjekkTilgang()
 
-        val dokumentasjonkrav = oppgaveService.getDokumentasjonkravBeta(fiksDigisosId)
-        return if (dokumentasjonkrav.isEmpty()) {
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else {
-            ResponseEntity.ok(dokumentasjonkrav)
-        }
+        return oppgaveService.getDokumentasjonkravBeta(fiksDigisosId).responseOrNoContent()
     }
 
     @GetMapping("/{fiksDigisosId}/vilkar", produces = ["application/json;charset=UTF-8"])
@@ -80,12 +64,7 @@ class OppgaveControllerV2(
     ): ResponseEntity<List<VilkarResponse>> {
         tilgangskontroll.sjekkTilgang()
 
-        val vilkar = oppgaveService.getVilkar(fiksDigisosId)
-        return if (vilkar.isEmpty()) {
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else {
-            ResponseEntity.ok(vilkar)
-        }
+        return oppgaveService.getVilkar(fiksDigisosId).responseOrNoContent()
     }
 
     @GetMapping("/{fiksDigisosId}/harLeverteDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
@@ -105,4 +84,25 @@ class OppgaveControllerV2(
 
         return oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId)
     }
+
+    private fun String.removeUuidSuffix(): String {
+        val indexOfFileExtension = this.lastIndexOf(".")
+        if (indexOfFileExtension != -1 &&
+            indexOfFileExtension > LENGTH_OF_UUID_PART &&
+            this.substring(indexOfFileExtension - LENGTH_OF_UUID_PART).startsWith("-")
+        ) {
+            val extension = this.substring(indexOfFileExtension, this.length)
+            return this.take(indexOfFileExtension - LENGTH_OF_UUID_PART) + extension
+        }
+        return this
+    }
 }
+
+private const val LENGTH_OF_UUID_PART = 9
+
+private fun <T> List<T>.responseOrNoContent(): ResponseEntity<List<T>> =
+    if (this.isEmpty()) {
+        ResponseEntity(HttpStatus.NO_CONTENT)
+    } else {
+        ResponseEntity.ok(this)
+    }

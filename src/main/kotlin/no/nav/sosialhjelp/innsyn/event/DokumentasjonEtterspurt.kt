@@ -37,9 +37,6 @@ fun InternalDigisosSoker.apply(
                 )
             }.toMutableList()
 
-    if (status == SoknadsStatus.FERDIGBEHANDLET) {
-        log.warn("Dokumentasjon etterspurt etter at søknad er satt til ferdigbehandlet. fiksDigisosId: $fiksDigisosId")
-    }
     if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {
         val url = hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
         log.info("Hendelse: Dokumentasjon etterspurt. Vi trenger flere opplysninger til søknaden din.")

@@ -78,7 +78,7 @@ internal class HendelseServiceTest {
             )
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val hendelser = service.hentHendelseResponse("123", Token("token"))
 
@@ -113,7 +113,7 @@ internal class HendelseServiceTest {
             )
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val hendelser = service.hentHendelseResponse("123", Token("token"))
 
@@ -124,7 +124,7 @@ internal class HendelseServiceTest {
     fun `Hendelse for opplastet vedlegg`() =
         runTest(timeout = 5.seconds) {
             coEvery { eventService.createModel(any()) } returns InternalDigisosSoker()
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 listOf(
                     InternalVedlegg(DOKUMENTTYPE_1, null, null, null, mutableListOf(DOK_1), tidspunkt4, null),
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2, DOK_3), tidspunkt5, null),
@@ -145,7 +145,7 @@ internal class HendelseServiceTest {
     fun `Hendelse for opplastet vedlegg - tom fil-liste skal ikke resultere i hendelse`() =
         runTest(timeout = 5.seconds) {
             coEvery { eventService.createModel(any()) } returns InternalDigisosSoker()
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 listOf(
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(), tidspunkt5, null),
                 )
@@ -161,7 +161,7 @@ internal class HendelseServiceTest {
             val model = InternalDigisosSoker()
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 listOf(
                     InternalVedlegg(DOKUMENTTYPE_1, null, null, null, mutableListOf(DOK_1, DOK_2), tidspunkt4, null),
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2, DOK_3), tidspunkt5, null),
@@ -185,7 +185,7 @@ internal class HendelseServiceTest {
             val model = InternalDigisosSoker()
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 listOf(
                     InternalVedlegg(DOKUMENTTYPE_1, null, null, null, mutableListOf(DOK_1), tidspunkt4, null),
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2), tidspunkt4, null),
@@ -206,7 +206,7 @@ internal class HendelseServiceTest {
             val model = InternalDigisosSoker()
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 mutableListOf(
                     InternalVedlegg(DOKUMENTTYPE_1, null, null, null, mutableListOf(DOK_1), tidspunkt4, null),
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2), tidspunkt4.plus(1, ChronoUnit.MILLIS), null),
@@ -282,7 +282,7 @@ internal class HendelseServiceTest {
                 )
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val hendelser = service.hentHendelseResponse("123", Token("token"))
 
@@ -377,7 +377,7 @@ internal class HendelseServiceTest {
                 )
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val hendelser = service.hentHendelseResponse("123", Token("token"))
 

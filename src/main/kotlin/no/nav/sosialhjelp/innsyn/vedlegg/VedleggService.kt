@@ -59,6 +59,34 @@ class VedleggService(
     }
 
     suspend fun hentEttersendteVedlegg(
+        fiksDigisosId: String,
+        hendelseReferanse: String,
+    ): List<InternalVedlegg> {
+        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val ettersendteVedlegg =
+            digisosSak.ettersendtInfoNAV
+                ?.ettersendelser
+                ?.flatMap { ettersendelse ->
+                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, ettersendelse.vedleggMetadata)
+                    jsonVedleggSpesifikasjon.vedlegg
+                        .filter { it.hendelseReferanse == hendelseReferanse && LASTET_OPP_STATUS == it.status }
+                        .map { vedlegg ->
+                            InternalVedlegg(
+                                vedlegg.type,
+                                vedlegg.tilleggsinfo,
+                                vedlegg.hendelseType,
+                                vedlegg.hendelseReferanse,
+                                vedlegg.filer.map { fil -> ettersendelse.vedlegg.find { it.filnavn == fil.filnavn }!! }.toMutableList(),
+                                unixToLocalDateTime(ettersendelse.timestampSendt),
+                                null,
+                            )
+                        }
+                } ?: emptyList()
+
+        return kombinerAlleLikeVedlegg(ettersendteVedlegg)
+    }
+
+    suspend fun hentEttersendteVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
     ): List<InternalVedlegg> {

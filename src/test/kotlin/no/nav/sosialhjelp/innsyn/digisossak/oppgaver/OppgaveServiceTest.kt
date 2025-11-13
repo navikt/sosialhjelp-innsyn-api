@@ -93,7 +93,7 @@ internal class OppgaveServiceTest {
             model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true))
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.hentOppgaver("123")
 
@@ -112,7 +112,7 @@ internal class OppgaveServiceTest {
             model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.hentOppgaver("123")
 
@@ -138,7 +138,7 @@ internal class OppgaveServiceTest {
             )
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.hentOppgaver("123")
 
@@ -178,7 +178,7 @@ internal class OppgaveServiceTest {
             )
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 listOf(
                     InternalVedlegg(type, tillegg, null, null, mutableListOf(), tidspunktEtterKrav, null),
                     InternalVedlegg(type2, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
@@ -205,7 +205,7 @@ internal class OppgaveServiceTest {
             model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
 
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.hentOppgaver("123")
 
@@ -313,7 +313,7 @@ internal class OppgaveServiceTest {
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.getDokumentasjonkrav("123")
 
@@ -380,7 +380,7 @@ internal class OppgaveServiceTest {
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.getDokumentasjonkrav("123")
 
@@ -438,7 +438,7 @@ internal class OppgaveServiceTest {
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.getDokumentasjonkrav("123")
 
@@ -460,7 +460,7 @@ internal class OppgaveServiceTest {
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.getVilkar("123")
 
@@ -528,7 +528,7 @@ internal class OppgaveServiceTest {
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.getDokumentasjonkrav("123")
 
@@ -605,7 +605,7 @@ internal class OppgaveServiceTest {
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.getDokumentasjonkrav("123")
 
@@ -675,7 +675,7 @@ internal class OppgaveServiceTest {
                 ),
             )
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns emptyList()
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val responseList = service.getDokumentasjonkravMedId("123", dokumentasjonkravId2)
 
@@ -708,7 +708,7 @@ internal class OppgaveServiceTest {
                     ),
                 )
             coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any()) } returns
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 listOf(
                     InternalVedlegg(
                         dokumenttype,

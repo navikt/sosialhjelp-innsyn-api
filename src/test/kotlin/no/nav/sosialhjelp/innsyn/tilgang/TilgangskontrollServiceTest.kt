@@ -144,10 +144,10 @@ internal class TilgangskontrollServiceTest {
         runTestWithToken {
             every { clientResponse.hentPerson?.adressebeskyttelse } returns listOf(Adressebeskyttelse(Gradering.STRENGT_FORTROLIG))
             every { clientResponse.hentPerson?.navn } returns
-                    listOf(
-                        PdlNavn("KREATIV", "", ""),
-                        PdlNavn("NATA", "", "")
-                    )
+                listOf(
+                    PdlNavn("KREATIV", "", ""),
+                    PdlNavn("NATA", "", ""),
+                )
             coEvery { pdlClientOldMock.hentPerson(any(), any()) } returns clientResponse
 
             assertThat(service.hentTilgang(ident, Token("token")).fornavn).isEqualTo("Kreativ")

@@ -36,17 +36,21 @@ class SaksOversiktService(
                     gyldigeSoknader
                 }.map {
                     val model = eventService.createModel(it)
-                    val soknadSendtEvent = model.historikk.find { hendelse ->
-                        hendelse.hendelseType == HendelseTekstType.SOKNAD_SEND_TIL_KONTOR ||
-                            hendelse.hendelseType == HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN ||
-                            hendelse.hendelseType == HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN
-                    }
-                    val soknadOpprettet = soknadSendtEvent?.tidspunkt?.let { tidspunkt ->
-                        Date.from(tidspunkt.toInstant(ZoneOffset.UTC))
-                    } ?: run {
-                        log.warn("Ingen søknad opprettet hendelse funnet for fiksDigisosId=${it.fiksDigisosId}. Bruker sistEndret som fallback.")
-                        unixTimestampToDate(it.sistEndret)
-                    }
+                    val soknadSendtEvent =
+                        model.historikk.find { hendelse ->
+                            hendelse.hendelseType == HendelseTekstType.SOKNAD_SEND_TIL_KONTOR ||
+                                hendelse.hendelseType == HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN ||
+                                hendelse.hendelseType == HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN
+                        }
+                    val soknadOpprettet =
+                        soknadSendtEvent?.tidspunkt?.let { tidspunkt ->
+                            Date.from(tidspunkt.toInstant(ZoneOffset.UTC))
+                        } ?: run {
+                            log.warn(
+                                "Ingen søknad opprettet hendelse funnet for fiksDigisosId=${it.fiksDigisosId}. Bruker sistEndret som fallback.",
+                            )
+                            unixTimestampToDate(it.sistEndret)
+                        }
 
                     SaksListeResponse(
                         fiksDigisosId = it.fiksDigisosId,

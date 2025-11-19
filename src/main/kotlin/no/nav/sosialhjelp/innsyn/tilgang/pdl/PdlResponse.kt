@@ -56,6 +56,8 @@ data class PdlPersonOld(
 
 data class PdlNavn(
     val fornavn: String?,
+    val mellomnavn: String?,
+    val etternavn: String?,
 ) : Serializable
 
 data class Adressebeskyttelse(

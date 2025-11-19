@@ -43,7 +43,11 @@ class TilgangskontrollService(
         token: Token,
     ): PdlPersonOld? =
         try {
-            pdlClientOld.hentPerson(ident, token)?.hentPerson
+            pdlClientOld
+                .hentPerson(ident, token)
+                ?.hentPerson
+                // TODO Fjern før merging
+                .also { log.info("Hentet Person: $it") }
         } catch (e: PdlException) {
             log.warn("PDL kaster feil -> midlertidig ikke tilgang", e)
             null

@@ -13,4 +13,6 @@ data class SaksListeResponse(
     val kilde: String,
     val url: String?,
     val kommunenummer: String?,
+    @param:JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    val soknadOpprettet: Date,
 )

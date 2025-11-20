@@ -11,7 +11,7 @@ class UtbetalingerController2(
     private val tilgangskontroll: TilgangskontrollService,
     private val utbetalingerServiceNew: UtbetalingerService,
 ) {
-    private val logger = org.slf4j.LoggerFactory.getLogger(UtbetalingerController2::class.java)
+    private val log by logger()
 
     @GetMapping
     suspend fun hentUtbetalinger(): List<UtbetalingDto> {

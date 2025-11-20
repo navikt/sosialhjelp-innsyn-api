@@ -6,7 +6,7 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.unixTimestampToDate
+import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import org.springframework.stereotype.Component
 
 @Component
@@ -32,13 +32,13 @@ class SaksOversiktService(
                 }.map {
                     val soknadOpprettet =
                         it.originalSoknadNAV?.timestampSendt?.let { timestamp ->
-                            unixTimestampToDate(timestamp)
+                            unixToLocalDateTime(timestamp)
                         }
 
                     SaksListeResponse(
                         fiksDigisosId = it.fiksDigisosId,
                         soknadTittel = "saker.default_tittel",
-                        sistOppdatert = unixTimestampToDate(it.sistEndret),
+                        sistOppdatert = unixToLocalDateTime(it.sistEndret),
                         kilde = KILDE_INNSYN_API,
                         url = null,
                         kommunenummer = it.kommunenummer,

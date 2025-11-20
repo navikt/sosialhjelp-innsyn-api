@@ -138,8 +138,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         // Bakgrunnen for denne testen er en bug som oppsto fordi to soknader pekte til samme sak med samme utbetalinger.
         // Dette førte til at brukere så duplikate utbetalinger i innsyn
 
-        var fiksDigisosId1 = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        var fiksDigisosId2 = "3fa85f64-5717-4562-b3fc-2c963f66afa7"
+        val fiksDigisosId1 = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        val fiksDigisosId2 = "3fa85f64-5717-4562-b3fc-2c963f66afa7"
 
         val digisosSak1 = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val digisosSak2 = objectMapper.readValue(ok_digisossak_response2, DigisosSak::class.java)

@@ -13,7 +13,6 @@ class PdlClient(
     private val pdlGraphQlClientFactory: PdlGraphQlClientFactory,
 ) {
     /** Henter en person fra PDL */
-    @Cacheable("pdlPerson")
     @CircuitBreaker(name = "pdl")
     suspend fun getPerson(ident: String): PdlPerson =
         pdlGraphQlClientFactory

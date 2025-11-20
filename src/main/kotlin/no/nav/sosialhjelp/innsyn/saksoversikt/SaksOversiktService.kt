@@ -33,11 +33,6 @@ class SaksOversiktService(
                     val soknadOpprettet =
                         it.originalSoknadNAV?.timestampSendt?.let { timestamp ->
                             unixTimestampToDate(timestamp)
-                        } ?: run {
-                            log.warn(
-                                "Ingen timestampSendt funnet for fiksDigisosId=${it.fiksDigisosId}. Bruker sistEndret som fallback.",
-                            )
-                            unixTimestampToDate(it.sistEndret)
                         }
 
                     SaksListeResponse(

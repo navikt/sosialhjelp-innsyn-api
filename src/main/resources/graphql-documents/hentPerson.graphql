@@ -5,8 +5,6 @@ query($ident: ID!){
         }
         navn(historikk: false) {
             fornavn
-            mellomnavn
-            etternavn
         }
     }
 }

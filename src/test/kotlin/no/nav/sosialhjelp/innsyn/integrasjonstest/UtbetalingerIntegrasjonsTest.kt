@@ -10,6 +10,7 @@ import no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2.UtbetalingDto
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
+import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response2
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -130,5 +131,52 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         assertThat(allUtbetalinger).hasSize(2)
         assertThat(allUtbetalinger[0].referanse).isEqualTo("utbetalt-ref-1")
         assertThat(allUtbetalinger[1].referanse).isEqualTo("planlagt-ref-1")
+    }
+
+    @Test
+    fun `Duplikate utbetalinger med samme referanse skal filtreres bort`() {
+        // Bakgrunnen for denne testen er en bug som oppsto fordi to soknader pekte til samme sak med samme utbetalinger.
+        // Dette førte til at brukere så duplikate utbetalinger i innsyn
+
+        val fiksDigisosId1 = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        val fiksDigisosId2 = "3fa85f64-5717-4562-b3fc-2c963f66afa7"
+
+        val digisosSak1 = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val digisosSak2 = objectMapper.readValue(ok_digisossak_response2, DigisosSak::class.java)
+
+        val soker1 = objectMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
+        val soker2 = objectMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
+
+        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSak1, digisosSak2)
+        coEvery { fiksClient.hentDigisosSak(fiksDigisosId1) } returns digisosSak1
+        coEvery { fiksClient.hentDigisosSak(fiksDigisosId2) } returns digisosSak2
+
+        coEvery { fiksClient.hentDokument(fiksDigisosId1, any(), JsonDigisosSoker::class.java, any()) } returns
+            soker1
+        coEvery { fiksClient.hentDokument(fiksDigisosId2, any(), JsonDigisosSoker::class.java, any()) } returns
+            soker2
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = true,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
+
+        val response =
+            doGet("/api/v2/innsyn/utbetalinger", emptyList())
+                .expectStatus()
+                .isOk
+                .expectBodyList(UtbetalingDto::class.java)
+                .returnResult()
+                .responseBody
+
+        assertThat(response).isNotEmpty
+        val allUtbetalinger = response!!
+        assertThat(allUtbetalinger).hasSize(3)
     }
 }

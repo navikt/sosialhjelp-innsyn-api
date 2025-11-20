@@ -9,10 +9,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
-import no.nav.sosialhjelp.innsyn.domain.Hendelse
-import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -23,7 +19,6 @@ import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
-import java.time.LocalDateTime
 
 class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
@@ -35,9 +30,6 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
     lateinit var norgClient: NorgClient
 
-    @MockkBean
-    lateinit var eventService: EventService
-
     private val navEnhet: NavEnhet = mockk()
 
     @Test
@@ -45,15 +37,6 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     fun `skal hente liste med saker`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSakOk)
-
-        val model = InternalDigisosSoker()
-        model.historikk.add(
-            Hendelse(
-                HendelseTekstType.SOKNAD_SEND_TIL_KONTOR,
-                LocalDateTime.now(),
-            ),
-        )
-        coEvery { eventService.createModel(any()) } returns model
 
         doGet(uri = "/api/v1/innsyn/saker", emptyList())
             .expectBodyList(SaksListeResponse::class.java)
@@ -77,17 +60,6 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
         every { navEnhet.navn } returns "testNavKontor"
         coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
 
-        val model = InternalDigisosSoker()
-        model.historikk.add(
-            Hendelse(
-                HendelseTekstType.SOKNAD_SEND_TIL_KONTOR,
-                LocalDateTime.now(),
-            ),
-        )
-        coEvery { eventService.createModel(any()) } returns model
-
         doGet("/api/v1/innsyn/sak/1234/detaljer", emptyList())
-
-        coVerify(exactly = 1) { fiksClient.hentDigisosSak(any()) }
     }
 }

@@ -9,8 +9,6 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -21,9 +19,8 @@ internal class SaksOversiktServiceTest {
     private val fiksClient: FiksClient = mockk()
     private val unleashClient: Unleash = mockk()
     private val oppgaveService: OppgaveService = mockk()
-    private val eventService: EventService = mockk()
 
-    private val saksOversiktService = SaksOversiktService(fiksClient, unleashClient, oppgaveService, eventService)
+    private val saksOversiktService = SaksOversiktService(fiksClient, unleashClient, oppgaveService)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -36,6 +33,7 @@ internal class SaksOversiktServiceTest {
         every { digisosSak1.originalSoknadNAV } returns
             mockk {
                 every { navEksternRefId } returns "123"
+                every { timestampSendt } returns 1000L
             }
         every { digisosSak1.digisosSoker } returns null
 
@@ -45,13 +43,11 @@ internal class SaksOversiktServiceTest {
         every { digisosSak2.originalSoknadNAV } returns
             mockk {
                 every { navEksternRefId } returns "123"
+                every { timestampSendt } returns 500L
             }
         every { digisosSak2.digisosSoker } returns mockk()
 
         every { unleashClient.isEnabled(FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER, false) } returns false
-
-        // Mock EventService to return empty InternalDigisosSoker (no SOKNAD_SEND_TIL_KONTOR event)
-        coEvery { eventService.createModel(any()) } returns InternalDigisosSoker()
     }
 
     @Test

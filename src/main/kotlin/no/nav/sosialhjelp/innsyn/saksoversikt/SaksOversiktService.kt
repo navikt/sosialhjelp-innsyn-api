@@ -4,21 +4,16 @@ import io.getunleash.Unleash
 import no.nav.sosialhjelp.innsyn.app.featuretoggle.FAGSYSTEM_MED_INNSYN_I_PAPIRSOKNADER
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
-import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
-import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.KILDE_INNSYN_API
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixTimestampToDate
 import org.springframework.stereotype.Component
-import java.time.ZoneOffset
-import java.util.Date
 
 @Component
 class SaksOversiktService(
     private val fiksClient: FiksClient,
     private val unleashClient: Unleash,
     private val oppgaveService: OppgaveService,
-    private val eventService: EventService,
 ) {
     suspend fun hentAlleSaker(): List<SaksListeResponse> =
         hentAlleDigisosSakerFraFiks()
@@ -35,19 +30,12 @@ class SaksOversiktService(
                     log.info("Fant ${gyldigeSoknader.size} gyldige søknader. Ider: ${gyldigeSoknader.map { it.fiksDigisosId }}")
                     gyldigeSoknader
                 }.map {
-                    val model = eventService.createModel(it)
-                    val soknadSendtEvent =
-                        model.historikk.find { hendelse ->
-                            hendelse.hendelseType == HendelseTekstType.SOKNAD_SEND_TIL_KONTOR ||
-                                hendelse.hendelseType == HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN ||
-                                hendelse.hendelseType == HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN
-                        }
                     val soknadOpprettet =
-                        soknadSendtEvent?.tidspunkt?.let { tidspunkt ->
-                            Date.from(tidspunkt.toInstant(ZoneOffset.UTC))
+                        it.originalSoknadNAV?.timestampSendt?.let { timestamp ->
+                            unixTimestampToDate(timestamp)
                         } ?: run {
                             log.warn(
-                                "Ingen søknad opprettet hendelse funnet for fiksDigisosId=${it.fiksDigisosId}. Bruker sistEndret som fallback.",
+                                "Ingen timestampSendt funnet for fiksDigisosId=${it.fiksDigisosId}. Bruker sistEndret som fallback.",
                             )
                             unixTimestampToDate(it.sistEndret)
                         }

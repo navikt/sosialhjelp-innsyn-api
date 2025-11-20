@@ -33,6 +33,7 @@ internal class SaksOversiktServiceTest {
         every { digisosSak1.originalSoknadNAV } returns
             mockk {
                 every { navEksternRefId } returns "123"
+                every { timestampSendt } returns 1000L
             }
         every { digisosSak1.digisosSoker } returns null
 
@@ -42,6 +43,7 @@ internal class SaksOversiktServiceTest {
         every { digisosSak2.originalSoknadNAV } returns
             mockk {
                 every { navEksternRefId } returns "123"
+                every { timestampSendt } returns 500L
             }
         every { digisosSak2.digisosSoker } returns mockk()
 

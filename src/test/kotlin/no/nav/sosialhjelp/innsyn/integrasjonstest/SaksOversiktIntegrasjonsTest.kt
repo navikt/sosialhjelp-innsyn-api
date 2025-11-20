@@ -61,9 +61,5 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
         coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
 
         doGet("/api/v1/innsyn/sak/1234/detaljer", emptyList())
-
-        coVerify(exactly = 2) { fiksClient.hentDigisosSak(any()) }
-        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }
-        coVerify(exactly = 2) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
     }
 }

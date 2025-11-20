@@ -1,9 +1,12 @@
 package no.nav.sosialhjelp.innsyn.valkey
 
-import java.lang.RuntimeException
+import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.CachingConfigurer
 import org.springframework.cache.annotation.EnableCaching
+import org.springframework.cache.interceptor.CacheErrorHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -12,13 +15,10 @@ import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
-import org.springframework.data.redis.serializer.StringRedisSerializer
-import java.time.Duration
-import no.nav.sosialhjelp.innsyn.utils.logger
-import org.springframework.cache.Cache
-import org.springframework.cache.annotation.CachingConfigurer
-import org.springframework.cache.interceptor.CacheErrorHandler
 import org.springframework.data.redis.serializer.SerializationException
+import org.springframework.data.redis.serializer.StringRedisSerializer
+import java.lang.RuntimeException
+import java.time.Duration
 
 // TODO: Migrer til å bruke Valkey på ordentlig. Vi kommer ikke til å kunne bruke nye valkey-features før dette er gjort
 //   Vi bruker valkey, men behandler den som en redis-instans (bruker ikke valkey-features).
@@ -28,8 +28,7 @@ import org.springframework.data.redis.serializer.SerializationException
 class ValkeyConfig(
     @param:Value("\${innsyn.cache.time_to_live_seconds}") private val defaultTTL: Long,
     @param:Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long,
-): CachingConfigurer {
-
+) : CachingConfigurer {
     override fun errorHandler() = CustomCacheErrorHandler
 
     @Bean

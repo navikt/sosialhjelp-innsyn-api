@@ -22,11 +22,21 @@ import reactor.core.publisher.Flux
 import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendelseDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.MandatoryFilesForKlage
+import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
+import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 
 interface KlageService {
     suspend fun sendKlage(
         fiksDigisosId: UUID,
         input: KlageInput,
+        kommunenummer: String,
+        navEnhet: Soknadsmottaker,
     )
 
     suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef>
@@ -53,14 +63,14 @@ interface KlageService {
 class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
-    private val kommuneService: KommuneService,
     private val clientProperties: ClientProperties,
 ) : KlageService {
     override suspend fun sendKlage(
         fiksDigisosId: UUID,
         input: KlageInput,
+        kommunenummer: String,
+        navEnhet: Soknadsmottaker,
     ) {
-        kommuneService.validerMottakForKommune(fiksDigisosId)
 
         klageClient.sendKlage(
             digisosId = fiksDigisosId,
@@ -79,8 +89,6 @@ class KlageServiceImpl(
         klageId: UUID,
         ettersendelseId: UUID,
     ) {
-        kommuneService.validerMottakForKommune(fiksDigisosId)
-
         createJsonVedleggSpec(ettersendelseId, klageId)
             .also {
                 if (it.noFiles()) error("Ingen vedlegg for ettersendelse av Klage")

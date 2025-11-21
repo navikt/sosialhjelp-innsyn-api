@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.klage
+package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

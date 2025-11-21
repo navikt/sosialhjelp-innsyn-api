@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.klage
+package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.util.UUID

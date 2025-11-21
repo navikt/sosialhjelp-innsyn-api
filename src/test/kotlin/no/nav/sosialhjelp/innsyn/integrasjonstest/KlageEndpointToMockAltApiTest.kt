@@ -10,7 +10,7 @@ import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
-import no.nav.sosialhjelp.innsyn.klage.buildPart
+import no.nav.sosialhjelp.innsyn.klage.fiks.buildPart
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.runTestWithToken
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting

@@ -44,8 +44,7 @@ sealed class TexasClient(
         getToken(
             TokenEndpointType.BEHALF_OF,
             getTokenXParams(target, userToken),
-        )
-            .also { log.info("Fetching tokenX token from Texas") }
+        ).also { log.info("Fetching tokenX token from Texas") }
 
     private val texasWebClient =
         texasWebClientBuilder

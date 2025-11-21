@@ -33,8 +33,7 @@ class PdlConfig(
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
                         .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(30)) },
                 ),
-            )
-            .defaultHeader(IntegrationUtils.HEADER_BEHANDLINGSNUMMER, IntegrationUtils.BEHANDLINGSNUMMER_INNSYN)
+            ).defaultHeader(IntegrationUtils.HEADER_BEHANDLINGSNUMMER, IntegrationUtils.BEHANDLINGSNUMMER_INNSYN)
             .filter(authorizationFilter())
             .build()
 
@@ -42,14 +41,13 @@ class PdlConfig(
         ExchangeFilterFunction { request, next ->
             mono {
                 val tokenXToken = texasClient.getTokenXToken(clientProperties.pdlAudience, TokenUtils.getToken())
-                ClientRequest.from(request)
+                ClientRequest
+                    .from(request)
                     .header(HttpHeaders.AUTHORIZATION, tokenXToken.withBearer())
                     .build()
-            }
-                .flatMap { filteredRequest -> next.exchange(filteredRequest) }
+            }.flatMap { filteredRequest -> next.exchange(filteredRequest) }
         }
 
     @Bean
-    fun pdlHttpGraphQlClient(pdlWebClient: WebClient): HttpGraphQlClient =
-        HttpGraphQlClient.builder(pdlWebClient).build()
+    fun pdlHttpGraphQlClient(pdlWebClient: WebClient): HttpGraphQlClient = HttpGraphQlClient.builder(pdlWebClient).build()
 }

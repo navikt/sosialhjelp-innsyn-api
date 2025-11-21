@@ -21,8 +21,6 @@ class PdlService(
             .first()
             .fornavn
 
-    suspend fun getIdentsByIdent(ident: String): List<String> = pdlClient.getIdentsByIdent(ident)
-
     companion object {
         private val BEGRENSEDE_GRADERINGER =
             setOf(PdlGradering.FORTROLIG, PdlGradering.STRENGT_FORTROLIG, PdlGradering.STRENGT_FORTROLIG_UTLAND)

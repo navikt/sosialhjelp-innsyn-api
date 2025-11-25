@@ -59,8 +59,9 @@ class ValkeyConfig(
             .withCacheConfiguration("digisosSak", defaults)
             .withCacheConfiguration("kommuneinfo", defaults)
             .withCacheConfiguration("pdlPerson", defaults.entryTtl(Duration.ofDays(1)))
+            .withCacheConfiguration("pdlAdressebeskyttelse", defaults.entryTtl(Duration.ofHours(1)))
             .withCacheConfiguration("pdlHistoriskeIdenter", defaults.entryTtl(Duration.ofDays(1)))
-            .withCacheConfiguration("pdlPersonOld", defaults.entryTtl(Duration.ofDays(1)))
+            .withCacheConfiguration("pdlAdressebeskyttelseOld", defaults.entryTtl(Duration.ofHours(1)))
             .withCacheConfiguration("pdlHistoriskeIdenterOld", defaults.entryTtl(Duration.ofDays(1)))
             .build()
     }

@@ -1,26 +1,29 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlGradering
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
 class PdlService(
     private val pdlClient: PdlClient,
 ) {
-    suspend fun getAdressebeskyttelse(): Boolean =
+    @Cacheable("pdlAdressebeskyttelse")
+    suspend fun getAdressebeskyttelse(personId: String): Boolean =
         pdlClient
-            .getPerson(TokenUtils.getUserIdFromToken())
+            .getPerson(personId)
             .adressebeskyttelse
             .any { it.gradering in BEGRENSEDE_GRADERINGER }
 
-    suspend fun getFornavn(): String =
+    @Cacheable("pdlPerson")
+    suspend fun getFornavn(personId: String): String =
         pdlClient
-            .getPerson(TokenUtils.getUserIdFromToken())
+            .getPerson(personId)
             .navn
             .first()
             .fornavn
 
+    @Cacheable("pdlHistoriskeIdenter")
     suspend fun getIdentsByIdent(ident: String): List<String> = pdlClient.getIdentsByIdent(ident)
 
     companion object {

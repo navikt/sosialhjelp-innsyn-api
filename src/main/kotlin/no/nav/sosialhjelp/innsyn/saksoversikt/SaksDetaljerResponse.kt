@@ -4,6 +4,7 @@ import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class SaksDetaljerResponse(
     val fiksDigisosId: String,
@@ -16,6 +17,7 @@ data class SaksDetaljerResponse(
     val forelopigSvar: ForelopigSvar,
     val saker: List<Sak> = emptyList(),
     val forsteOppgaveFrist: LocalDate?,
+    val mottattTidspunkt: LocalDateTime?,
 ) {
     data class Sak(
         val antallVedtak: Int,

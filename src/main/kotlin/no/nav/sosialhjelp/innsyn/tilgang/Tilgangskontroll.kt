@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.tilgang
 
-import java.util.Locale
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.exceptions.TilgangskontrollException
@@ -11,6 +10,7 @@ import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlPersonOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.isKode6Or7
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
+import java.util.Locale
 
 @Component
 class TilgangskontrollService(

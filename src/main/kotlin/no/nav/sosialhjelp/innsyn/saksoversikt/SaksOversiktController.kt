@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
@@ -9,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
@@ -30,10 +29,7 @@ class SaksOversiktController(
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: TilgangskontrollService,
-    meterRegistry: MeterRegistry,
 ) {
-    private val antallSakerCounter: Counter = meterRegistry.counter("sosialhjelp.innsyn.antall_saker")
-
     @GetMapping("/saker")
     suspend fun hentAlleSaker(): ResponseEntity<List<SaksListeResponse>> {
         tilgangskontroll.sjekkTilgang()
@@ -45,12 +41,6 @@ class SaksOversiktController(
                 return ResponseEntity.status(503).build()
             }
 
-        antallSakerCounter.increment(alleSaker.size.toDouble())
-        if (alleSaker.isEmpty()) {
-            log.info("Fant ingen saker for bruker")
-        } else {
-            log.info("Hentet alle (${alleSaker.size}) søknader for bruker")
-        }
         return ResponseEntity.ok(alleSaker)
     }
 
@@ -65,6 +55,15 @@ class SaksOversiktController(
         val oppgaver = hentNyeOppgaver(model, sak.fiksDigisosId)
         val vilkar = hentNyeVilkar(model, sak.fiksDigisosId)
         val dokkrav = hentNyeDokumentasjonkrav(model, sak.fiksDigisosId)
+        val mottattTidspunkt =
+            model.historikk
+                .firstOrNull {
+                    it.hendelseType in
+                        listOf(
+                            HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN,
+                            HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN,
+                        )
+                }?.tidspunkt
 
         return SaksDetaljerResponse(
             fiksDigisosId = sak.fiksDigisosId,
@@ -89,6 +88,7 @@ class SaksOversiktController(
                     )
                 },
             forsteOppgaveFrist = (oppgaver.mapNotNull { it.innsendelsesfrist } + dokkrav.mapNotNull { it.frist }).minOrNull(),
+            mottattTidspunkt = mottattTidspunkt,
         )
     }
 

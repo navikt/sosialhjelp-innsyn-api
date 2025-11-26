@@ -20,7 +20,10 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
                 val navEnhetsnavn = soknadsmottaker?.navEnhetsnavn
 
                 if (navEnhetsnavn == null) {
-                    Hendelse(HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN, hendelse.hendelsestidspunkt.toLocalDateTime())
+                    Hendelse(
+                        HendelseTekstType.SOKNAD_MOTTATT_UTEN_KOMMUNENAVN,
+                        hendelse.hendelsestidspunkt.toLocalDateTime(),
+                    )
                 } else {
                     Hendelse(
                         HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN,
@@ -29,21 +32,25 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
                     )
                 }
             }
+
             JsonSoknadsStatus.Status.UNDER_BEHANDLING ->
                 Hendelse(
                     HendelseTekstType.SOKNAD_UNDER_BEHANDLING,
                     hendelse.hendelsestidspunkt.toLocalDateTime(),
                 )
+
             JsonSoknadsStatus.Status.FERDIGBEHANDLET ->
                 Hendelse(
                     HendelseTekstType.SOKNAD_FERDIGBEHANDLET,
                     hendelse.hendelsestidspunkt.toLocalDateTime(),
                 )
+
             JsonSoknadsStatus.Status.BEHANDLES_IKKE ->
                 Hendelse(
                     HendelseTekstType.SOKNAD_BEHANDLES_IKKE,
                     hendelse.hendelsestidspunkt.toLocalDateTime(),
                 )
+
             else -> throw RuntimeException("Statustype ${hendelse.status.value()} mangler mapping")
         }
 

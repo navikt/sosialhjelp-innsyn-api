@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
-import io.micrometer.core.instrument.MeterRegistry
 import io.mockk.Called
 import io.mockk.Runs
 import io.mockk.clearAllMocks
@@ -19,6 +18,8 @@ import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
 import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
+import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 internal class SaksOversiktControllerTest {
     private val saksOversiktService: SaksOversiktService = mockk()
@@ -40,10 +42,9 @@ internal class SaksOversiktControllerTest {
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val tilgangskontroll: TilgangskontrollService = mockk()
-    private val meterRegistry: MeterRegistry = mockk(relaxed = true)
 
     private val controller =
-        SaksOversiktController(saksOversiktService, fiksClient, eventService, oppgaveService, tilgangskontroll, meterRegistry)
+        SaksOversiktController(saksOversiktService, fiksClient, eventService, oppgaveService, tilgangskontroll)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -140,11 +141,22 @@ internal class SaksOversiktControllerTest {
             every { model1.utbetalinger } returns mutableListOf()
             every { model2.utbetalinger } returns mutableListOf()
 
+            val date = LocalDateTime.now()
+            every {
+                model1.historikk
+            } returns mutableListOf(Hendelse(hendelseType = HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN, date))
+
+            val date2 = LocalDateTime.now()
+            every {
+                model2.historikk
+            } returns mutableListOf(Hendelse(hendelseType = HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN, date2))
+
             val sak1 = controller.getSaksDetaljer("123")
 
             assertThat(sak1).isNotNull
             assertThat(sak1.soknadTittel).isEqualTo("")
             assertThat(sak1.antallNyeOppgaver).isEqualTo(6)
+            assertThat(sak1.mottattTidspunkt).isEqualTo(date)
 
             val sak2 = controller.getSaksDetaljer("456")
 
@@ -152,6 +164,7 @@ internal class SaksOversiktControllerTest {
             assertThat(sak2.soknadTittel).contains("Livsopphold", "Strøm")
             assertThat(sak2.status).isEqualTo(UNDER_BEHANDLING)
             assertThat(sak2.antallNyeOppgaver).isEqualTo(3)
+            assertThat(sak2.mottattTidspunkt).isEqualTo(date2)
         }
 
     @Test
@@ -167,6 +180,7 @@ internal class SaksOversiktControllerTest {
             every { model1.dokumentasjonkrav } returns mutableListOf()
             every { model1.saker } returns mutableListOf()
             every { model1.utbetalinger } returns mutableListOf()
+            every { model1.historikk } returns mutableListOf()
 
             val sak = controller.getSaksDetaljer(digisosSak1.fiksDigisosId)
 

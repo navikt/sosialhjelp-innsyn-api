@@ -19,7 +19,7 @@ class SessionMetadataController(
                 SessionMetadata(
                     fornavn = pdlService.getFornavn(it),
                     harAdressebeskyttelse = pdlService.getAdressebeskyttelse(it),
-                    personId = TokenUtils.getUserIdFromToken(),
+                    personId = it,
                 )
             }
 }

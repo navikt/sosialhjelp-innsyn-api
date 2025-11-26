@@ -13,11 +13,15 @@ class SessionMetadataController(
 ) {
     @GetMapping("/sessionMetadata")
     suspend fun getSessionMetadata(): SessionMetadata =
-        SessionMetadata(
-            fornavn = pdlService.getFornavn(),
-            harAdressebeskyttelse = pdlService.getAdressebeskyttelse(),
-            personId = TokenUtils.getUserIdFromToken(),
-        )
+        TokenUtils
+            .getUserIdFromToken()
+            .let {
+                SessionMetadata(
+                    fornavn = pdlService.getFornavn(it),
+                    harAdressebeskyttelse = pdlService.getAdressebeskyttelse(it),
+                    personId = it,
+                )
+            }
 }
 
 data class SessionMetadata(

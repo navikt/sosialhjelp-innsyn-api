@@ -47,6 +47,8 @@ class PdlClientOldImpl(
                 throw PdlException("Pdl - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
             }
 
+    // brukes kun for å sjekke tilgang
+    @Cacheable("pdlAdressebeskyttelseOld", key = "#ident")
     override suspend fun hentPerson(
         ident: String,
         token: Token,

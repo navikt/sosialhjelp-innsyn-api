@@ -32,7 +32,7 @@ class SaksOversiktService(
                     SaksListeResponse(
                         fiksDigisosId = it.fiksDigisosId,
                         soknadTittel = "saker.default_tittel",
-                        sistOppdatert = unixToLocalDateTime(it.sistEndret),
+                        sistOppdatert = unixToLocalDateTime(setOfNotNull(it.digisosSoker?.timestampSistOppdatert, it.sistEndret).max()),
                         kommunenummer = it.kommunenummer,
                         soknadOpprettet = soknadOpprettet,
                         isPapirSoknad = it.originalSoknadNAV == null,

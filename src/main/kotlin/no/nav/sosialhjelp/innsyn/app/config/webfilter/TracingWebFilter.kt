@@ -8,6 +8,7 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import java.net.URI
 
 interface TracingWebFilter : WebFilter
 
@@ -24,7 +25,8 @@ class DefaultTracingWebFilter : TracingWebFilter {
         if (request.uri.path.contains(Regex("(/internal|/v3/api-docs)"))) {
             return chain.filter(exchange)
         }
-        val fiksDigisosId = exchange.getAttribute<String>("fiksDigisosId")
+
+        val fiksDigisosId = request.uri.extractFiksDigisosId()
 
         if (fiksDigisosId != null) {
             val currentSpan = Span.current()
@@ -35,6 +37,11 @@ class DefaultTracingWebFilter : TracingWebFilter {
         }
 
         return chain.filter(exchange)
+    }
+
+    private fun URI.extractFiksDigisosId(): String? {
+        val uuidRegex = Regex("""[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}""")
+        return uuidRegex.find(path)?.value
     }
 }
 

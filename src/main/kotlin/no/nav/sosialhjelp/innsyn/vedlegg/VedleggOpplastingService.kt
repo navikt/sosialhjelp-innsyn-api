@@ -16,8 +16,8 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientFileExistsException
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
@@ -38,7 +38,7 @@ const val MAKS_TOTAL_FILSTORRELSE: Int = 1024 * 1024 * 10 // 10 MB
 
 @Component
 class VedleggOpplastingService(
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
     private val krypteringService: KrypteringService,
     private val virusScanner: VirusScanner,
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator,
@@ -86,8 +86,8 @@ class VedleggOpplastingService(
                     }
                 val vedleggSpesifikasjon = createJsonVedleggSpesifikasjon(metadata)
                 try {
-                    fiksClient.lastOppNyEttersendelse(etterKryptering, vedleggSpesifikasjon, fiksDigisosId)
-                } catch (ignored: FiksClientFileExistsException) {
+                    fiksService.uploadEttersendelse(etterKryptering, vedleggSpesifikasjon, fiksDigisosId)
+                } catch (_: FiksClientFileExistsException) {
                     // ignorerer når filen allerede er lastet opp
                 }
                 this.coroutineContext.cancelChildren(
@@ -108,7 +108,7 @@ class VedleggOpplastingService(
     ): FilForOpplasting {
         try {
             log.info("Starter generering av ettersendelse.pdf")
-            val currentDigisosSak = fiksClient.hentDigisosSak(digisosId)
+            val currentDigisosSak = fiksService.getSoknad(digisosId)
             val ettersendelsePdf = ettersendelsePdfGenerator.generate(metadata, currentDigisosSak.sokerFnr)
             return FilForOpplasting(
                 Filename("ettersendelse.pdf"),

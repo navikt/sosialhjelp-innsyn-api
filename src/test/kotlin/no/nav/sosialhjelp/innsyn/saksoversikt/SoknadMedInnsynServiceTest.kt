@@ -6,8 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -17,9 +16,9 @@ import java.time.ZoneOffset
 import kotlin.time.Duration.Companion.seconds
 
 internal class SoknadMedInnsynServiceTest {
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
     private val kommuneService: KommuneService = mockk()
-    private val soknadMedInnsynService = SoknadMedInnsynService(fiksClient, kommuneService)
+    private val soknadMedInnsynService = SoknadMedInnsynService(fiksService, kommuneService)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -38,7 +37,7 @@ internal class SoknadMedInnsynServiceTest {
         every { digisosSakEldreEnnEtAar.fiksDigisosId } returns "789"
         every { digisosSakEldreEnnEtAar.sistEndret } returns LocalDateTime.now().minusYears(2).toInstant(ZoneOffset.UTC).toEpochMilli()
 
-        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSak1, digisosSak2, digisosSakEldreEnnEtAar)
+        coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2, digisosSakEldreEnnEtAar)
     }
 
     @Test
@@ -48,7 +47,7 @@ internal class SoknadMedInnsynServiceTest {
             coEvery { kommuneService.erInnsynDeaktivertForKommune("456") } returns true
             coEvery { kommuneService.erInnsynDeaktivertForKommune("789") } returns false
 
-            val harSoknaderMedInnsyn = soknadMedInnsynService.harSoknaderMedInnsyn(Token("token"))
+            val harSoknaderMedInnsyn = soknadMedInnsynService.harSoknaderMedInnsyn()
             assertThat(harSoknaderMedInnsyn).isFalse
         }
 
@@ -59,7 +58,7 @@ internal class SoknadMedInnsynServiceTest {
             coEvery { kommuneService.erInnsynDeaktivertForKommune("456") } returns false
             coEvery { kommuneService.erInnsynDeaktivertForKommune("789") } returns true
 
-            val harSoknaderMedInnsyn = soknadMedInnsynService.harSoknaderMedInnsyn(Token("token"))
+            val harSoknaderMedInnsyn = soknadMedInnsynService.harSoknaderMedInnsyn()
 
             assertThat(harSoknaderMedInnsyn).isTrue
         }

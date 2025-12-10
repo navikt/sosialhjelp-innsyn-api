@@ -5,16 +5,16 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.seconds
 
 internal class SaksOversiktServiceTest {
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
 
-    private val saksOversiktService = SaksOversiktService(fiksClient)
+    private val saksOversiktService = SaksOversiktService(fiksService)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -45,7 +45,7 @@ internal class SaksOversiktServiceTest {
     @Test
     internal fun `skal mappe fra DigisosSak til SaksListeResponse`() =
         runTest(timeout = 5.seconds) {
-            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSak1, digisosSak2)
+            coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2)
 
             val alleSaker = saksOversiktService.hentAlleSaker()
 
@@ -60,7 +60,7 @@ internal class SaksOversiktServiceTest {
     internal fun `ikke returner 'tomme' saker`() =
         runTest(timeout = 5.seconds) {
             val tomDigisosSak = DigisosSak("123", "123", "123", "123", 123L, null, null, null, null)
-            coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(tomDigisosSak)
+            coEvery { fiksService.getAllSoknader() } returns listOf(tomDigisosSak)
 
             val alleSaker = saksOversiktService.hentAlleSaker()
 

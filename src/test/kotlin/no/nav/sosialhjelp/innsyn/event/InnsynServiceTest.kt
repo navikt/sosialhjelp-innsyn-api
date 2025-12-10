@@ -11,7 +11,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.seconds
 
 internal class InnsynServiceTest {
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
     private val kommuneService: KommuneService = mockk()
-    private val service = InnsynService(fiksClient, kommuneService)
+    private val service = InnsynService(fiksService, kommuneService)
     private val originalSoknad: OriginalSoknadNAV = mockk()
     private val digisosSoker: DigisosSoker = mockk()
     private val digisosSak: DigisosSak = mockk()
@@ -45,7 +45,7 @@ internal class InnsynServiceTest {
             val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
 
             coEvery {
-                fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any())
+                fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any())
             } returns mockJsonDigisosSoker
 
             val jsonDigisosSoker: JsonDigisosSoker? = service.hentJsonDigisosSoker(digisosSak)
@@ -66,7 +66,7 @@ internal class InnsynServiceTest {
     fun `Skal returnere originalSoknad`() =
         runTest(timeout = 5.seconds) {
             val mockJsonSoknad: JsonSoknad = mockk()
-            coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns mockJsonSoknad
+            coEvery { fiksService.getDocument(any(), any(), JsonSoknad::class.java, any()) } returns mockJsonSoknad
 
             val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad(digisosSak)
 
@@ -88,6 +88,6 @@ internal class InnsynServiceTest {
             coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns true
 
             assertThat(service.hentJsonDigisosSoker(digisosSak)).isNull()
-            coVerify(exactly = 0) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
+            coVerify(exactly = 0) { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) }
         }
 }

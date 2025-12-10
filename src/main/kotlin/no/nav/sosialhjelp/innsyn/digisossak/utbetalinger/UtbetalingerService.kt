@@ -1,8 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger
 
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.isNewerThanMonths
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
@@ -17,10 +16,10 @@ import java.time.YearMonth
 @Component
 class UtbetalingerService(
     private val eventService: EventService,
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
 ) {
     suspend fun hentUtbetalteUtbetalinger(months: Int): List<UtbetalingerResponse> {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker()
+        val digisosSaker = fiksService.getAllSoknader()
 
         if (digisosSaker.isEmpty()) {
             log.info("Fant ingen søknader for bruker")
@@ -39,7 +38,7 @@ class UtbetalingerService(
     }
 
     private suspend fun hentUtbetalinger(statusFilter: (status: UtbetalingsStatus) -> Boolean): List<ManedUtbetaling> {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker()
+        val digisosSaker = fiksService.getAllSoknader()
 
         if (digisosSaker.isEmpty()) {
             log.info("Fant ingen søknader for bruker")
@@ -178,11 +177,8 @@ class UtbetalingerService(
                     isDateNewerThanMonths(it.utbetalingsDato!!, months)
             }
 
-    suspend fun utbetalingExists(
-        token: Token,
-        months: Int,
-    ): Boolean {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker()
+    suspend fun utbetalingExists(months: Int): Boolean {
+        val digisosSaker = fiksService.getAllSoknader()
 
         if (digisosSaker.isEmpty()) {
             log.info("Fant ingen søknader for bruker")

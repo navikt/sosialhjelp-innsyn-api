@@ -11,7 +11,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
@@ -34,10 +34,10 @@ import kotlin.time.Duration.Companion.seconds
 internal class OppgaveServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
     private val clientProperties: ClientProperties = mockk()
     private val meterRegistry: MeterRegistry = mockk(relaxed = true)
-    private val service = OppgaveService(eventService, vedleggService, fiksClient, clientProperties, meterRegistry)
+    private val service = OppgaveService(eventService, vedleggService, fiksService, clientProperties, meterRegistry)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockEttersendtInfoNAV: EttersendtInfoNAV = mockk()
@@ -68,7 +68,7 @@ internal class OppgaveServiceTest {
     @BeforeEach
     fun init() {
         clearAllMocks()
-        coEvery { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        coEvery { fiksService.getSoknad(any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
         every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("socio;10.1.16", "mock-alt;1.0.0")
     }

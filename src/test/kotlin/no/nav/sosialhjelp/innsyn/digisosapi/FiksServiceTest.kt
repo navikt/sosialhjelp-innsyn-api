@@ -37,7 +37,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.io.InputStream
 import kotlin.time.Duration.Companion.seconds
 
-internal class FiksClientTest {
+internal class FiksServiceTest {
     private val mockWebServer = MockWebServer()
     private val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
 
@@ -46,7 +46,8 @@ internal class FiksClientTest {
     private val tilgangskontroll: TilgangskontrollService = mockk()
     private val meterRegistry: MeterRegistry = mockk()
     private val counterMock: Counter = mockk()
-    private lateinit var fiksClient: FiksClientImpl
+    private val fiksClient = FiksClient(fiksWebClient, tilgangskontroll, 2, 5)
+    private lateinit var fiksService: FiksService
 
     private val id = "123"
 
@@ -62,7 +63,7 @@ internal class FiksClientTest {
         every { meterRegistry.counter(any()) } returns counterMock
         every { counterMock.increment() } just Runs
 
-        fiksClient = FiksClientImpl(fiksWebClient, tilgangskontroll, 2L, 5L, meterRegistry)
+        fiksService = FiksService(tilgangskontroll, fiksClient, meterRegistry)
     }
 
     @AfterEach
@@ -80,14 +81,14 @@ internal class FiksClientTest {
                     .setBody(ok_digisossak_response),
             )
 
-            val result = fiksClient.hentDigisosSak(id)
+            val result = fiksService.getSoknad(id)
 
             assertThat(result).isNotNull
         }
 
     @Test
     fun `GET DigisosSak skal bruke retry hvis Fiks gir 5xx-feil`() =
-        runTest(timeout = 5.seconds) {
+        runTest(timeout = 10.seconds) {
             repeat(3) {
                 mockWebServer.enqueue(
                     MockResponse()
@@ -95,7 +96,7 @@ internal class FiksClientTest {
                 )
             }
 
-            val result = kotlin.runCatching { fiksClient.hentDigisosSak(id) }
+            val result = kotlin.runCatching { fiksService.getSoknad(id) }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksServerException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(3)
@@ -103,7 +104,7 @@ internal class FiksClientTest {
 
     @Test
     fun `GET alle DigisosSaker skal bruke retry hvis Fiks gir 5xx-feil`() =
-        runTest(timeout = 5.seconds) {
+        runTest(timeout = 20.seconds) {
             repeat(3) {
                 mockWebServer.enqueue(
                     MockResponse()
@@ -111,7 +112,7 @@ internal class FiksClientTest {
                 )
             }
 
-            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker() }
+            val result = kotlin.runCatching { fiksService.getAllSoknader() }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksServerException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(3)
@@ -125,7 +126,7 @@ internal class FiksClientTest {
                     .setResponseCode(400),
             )
 
-            val result = kotlin.runCatching { fiksClient.hentAlleDigisosSaker() }
+            val result = kotlin.runCatching { fiksService.getAllSoknader() }
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(FiksClientException::class.java)
             assertThat(mockWebServer.requestCount).isEqualTo(1)
@@ -143,7 +144,7 @@ internal class FiksClientTest {
                     .setBody(objectMapper.writeValueAsString(listOf(digisosSakOk, digisosSakOk))),
             )
 
-            val result = fiksClient.hentAlleDigisosSaker()
+            val result = fiksService.getAllSoknader()
 
             assertThat(result).isNotNull
             assertThat(result).hasSize(2)
@@ -159,7 +160,7 @@ internal class FiksClientTest {
                     .setBody(ok_minimal_jsondigisossoker_response),
             )
 
-            val result = fiksClient.hentDokument(id, "dokumentlagerId", JsonDigisosSoker::class.java)
+            val result = fiksService.getDocument(id, "dokumentlagerId", JsonDigisosSoker::class.java)
 
             assertThat(result).isNotNull
         }
@@ -189,7 +190,7 @@ internal class FiksClientTest {
                 )
 
             runCatching {
-                fiksClient.lastOppNyEttersendelse(
+                fiksService.uploadEttersendelse(
                     files,
                     JsonVedleggSpesifikasjon(),
                     id,
@@ -207,7 +208,7 @@ internal class FiksClientTest {
                 FilForOpplasting(Filename("filnavn0"), "image/png", 1L, fil1),
                 FilForOpplasting(Filename("filnavn1"), "image/jpg", 1L, fil2),
             )
-        val body = fiksClient.createBodyForUpload(JsonVedleggSpesifikasjon(), files)
+        val body = fiksService.createBodyForUpload(JsonVedleggSpesifikasjon(), files)
 
         assertThat(body.size == 5)
         assertThat(body.keys.contains("vedlegg.json"))

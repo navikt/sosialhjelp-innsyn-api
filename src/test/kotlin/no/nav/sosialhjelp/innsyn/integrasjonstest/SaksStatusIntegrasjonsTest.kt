@@ -8,7 +8,7 @@ import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -23,7 +23,7 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
     private val navEnhet: NavEnhet = mockk()
 
     @MockkBean
-    lateinit var fiksClient: FiksClientImpl
+    lateinit var fiksService: FiksService
 
     @MockkBean
     lateinit var kommuneService: KommuneService
@@ -38,9 +38,9 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
         val soknad = JsonSoknad()
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
 
-        coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSakOk
-        coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
-        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getSoknad(any()) } returns digisosSakOk
+        coEvery { fiksService.getDocument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
+        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
         coEvery { kommuneService.hentKommuneInfo(any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
         coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
         coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
@@ -48,8 +48,8 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
 
         doGet("/api/v1/innsyn/1234/saksStatus", emptyList())
 
-        coVerify(exactly = 1) { fiksClient.hentDigisosSak(any()) }
-        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) }
-        coVerify(exactly = 1) { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) }
+        coVerify(exactly = 1) { fiksService.getSoknad(any()) }
+        coVerify(exactly = 1) { fiksService.getDocument(any(), any(), JsonSoknad::class.java, any()) }
+        coVerify(exactly = 1) { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) }
     }
 }

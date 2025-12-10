@@ -4,18 +4,18 @@ import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import java.util.UUID
 
 @Component
 class KommuneService(
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
     private val kommuneInfoClient: KommuneInfoClient,
 ) {
     suspend fun hentKommuneInfo(fiksDigisosId: String): KommuneInfo? {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val kommunenummer: String = digisosSak.kommunenummer
 
         if (kommunenummer.isBlank()) {

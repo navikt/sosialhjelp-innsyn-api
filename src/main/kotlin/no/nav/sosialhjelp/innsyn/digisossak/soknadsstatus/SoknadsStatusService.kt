@@ -2,7 +2,7 @@ package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -18,17 +18,17 @@ import java.time.LocalDateTime
 @Component
 class SoknadsStatusService(
     private val eventService: EventService,
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
     private val kommuneService: KommuneService,
     private val clientProperties: ClientProperties,
 ) {
     suspend fun hentOriginalSoknad(fiksDigisosId: String): OriginalSoknadNAV? {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         return digisosSak.originalSoknadNAV
     }
 
     suspend fun hentSoknadsStatus(fiksDigisosId: String): UtvidetSoknadsStatus {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         val status = model.status
 

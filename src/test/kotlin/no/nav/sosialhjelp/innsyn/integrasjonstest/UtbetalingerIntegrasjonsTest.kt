@@ -5,7 +5,7 @@ import io.mockk.coEvery
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2.UtbetalingDto
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 
 class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
-    private lateinit var fiksClient: FiksClient
+    private lateinit var fiksService: FiksService
 
     @MockkBean(relaxed = true)
     private lateinit var kommuneInfoClient: KommuneInfoClient
@@ -27,9 +27,9 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val digisosSak = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = objectMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
 
-        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSak)
-        coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
-        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
+        coEvery { fiksService.getSoknad(any()) } returns digisosSak
+        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -65,9 +65,9 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val digisosSak = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = objectMapper.readValue(jsonDigisosSokerMedAnnullerteUtbetalinger, JsonDigisosSoker::class.java)
 
-        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSak)
-        coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
-        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
+        coEvery { fiksService.getSoknad(any()) } returns digisosSak
+        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -101,9 +101,9 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val digisosSak = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = objectMapper.readValue(jsonDigisosSokerUtenDatoer, JsonDigisosSoker::class.java)
 
-        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSak)
-        coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
-        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
+        coEvery { fiksService.getSoknad(any()) } returns digisosSak
+        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -147,13 +147,13 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker1 = objectMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
         val soker2 = objectMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
 
-        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSak1, digisosSak2)
-        coEvery { fiksClient.hentDigisosSak(fiksDigisosId1) } returns digisosSak1
-        coEvery { fiksClient.hentDigisosSak(fiksDigisosId2) } returns digisosSak2
+        coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2)
+        coEvery { fiksService.getSoknad(fiksDigisosId1) } returns digisosSak1
+        coEvery { fiksService.getSoknad(fiksDigisosId2) } returns digisosSak2
 
-        coEvery { fiksClient.hentDokument(fiksDigisosId1, any(), JsonDigisosSoker::class.java, any()) } returns
+        coEvery { fiksService.getDocument(fiksDigisosId1, any(), JsonDigisosSoker::class.java, any()) } returns
             soker1
-        coEvery { fiksClient.hentDokument(fiksDigisosId2, any(), JsonDigisosSoker::class.java, any()) } returns
+        coEvery { fiksService.getDocument(fiksDigisosId2, any(), JsonDigisosSoker::class.java, any()) } returns
             soker2
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(

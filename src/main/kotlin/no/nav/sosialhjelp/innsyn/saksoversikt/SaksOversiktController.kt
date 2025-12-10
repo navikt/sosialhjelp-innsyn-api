@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
@@ -13,7 +13,6 @@ import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
-import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -25,7 +24,7 @@ import java.time.LocalDate
 @RequestMapping("/api/v1/innsyn")
 class SaksOversiktController(
     private val saksOversiktService: SaksOversiktService,
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
     private val eventService: EventService,
     private val oppgaveService: OppgaveService,
     private val tilgangskontroll: TilgangskontrollService,
@@ -50,7 +49,7 @@ class SaksOversiktController(
     ): SaksDetaljerResponse {
         tilgangskontroll.sjekkTilgang()
 
-        val sak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val sak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createSaksoversiktModel(sak)
         val oppgaver = hentNyeOppgaver(model, sak.fiksDigisosId)
         val vilkar = hentNyeVilkar(model, sak.fiksDigisosId)
@@ -140,8 +139,4 @@ class SaksOversiktController(
             model.dokumentasjonkrav.isEmpty() -> emptyList()
             else -> oppgaveService.getDokumentasjonkrav(fiksDigisosId)
         }
-
-    companion object {
-        private val log by logger()
-    }
 }

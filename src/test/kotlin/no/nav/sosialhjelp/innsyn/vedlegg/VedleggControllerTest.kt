@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
@@ -39,7 +39,7 @@ internal class VedleggControllerTest {
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val tilgangskontroll: TilgangskontrollService = mockk()
     private val eventService: EventService = mockk()
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
     private val digisosSak: DigisosSak = mockk()
     private val model: InternalDigisosSoker = mockk()
     private val kommuneService: KommuneService = mockk()
@@ -51,7 +51,7 @@ internal class VedleggControllerTest {
             clientProperties,
             tilgangskontroll,
             eventService,
-            fiksClient,
+            fiksService,
             kommuneService,
         )
 
@@ -92,7 +92,7 @@ internal class VedleggControllerTest {
     @Test
     fun `skal mappe fra InternalVedleggList til VedleggResponseList`() =
         runTestWithToken {
-            coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
+            coEvery { fiksService.getSoknad(any()) } returns digisosSak
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns
                 listOf(
@@ -128,7 +128,7 @@ internal class VedleggControllerTest {
     fun `skal utelate duplikater i response`() =
         runTestWithToken {
             val now = LocalDateTime.now()
-            coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSak
+            coEvery { fiksService.getSoknad(any()) } returns digisosSak
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentAlleOpplastedeVedlegg(any(), any()) } returns
                 listOf(

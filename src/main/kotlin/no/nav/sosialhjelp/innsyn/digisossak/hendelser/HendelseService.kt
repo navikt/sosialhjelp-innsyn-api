@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
-import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -27,13 +26,10 @@ data class HendelseInfo(
 class HendelseService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
 ) {
-    suspend fun hentHendelseResponse(
-        fiksDigisosId: String,
-        token: Token,
-    ): List<HendelseResponse> {
-        val (hendelser, kommunenummer, enhetNummer, enhetNavn) = hentHendelser(fiksDigisosId, token)
+    suspend fun hentHendelseResponse(fiksDigisosId: String): List<HendelseResponse> {
+        val (hendelser, kommunenummer, enhetNummer, enhetNavn) = hentHendelser(fiksDigisosId)
         val responseList =
             hendelser.map {
                 HendelseResponse(
@@ -51,11 +47,8 @@ class HendelseService(
         return responseList
     }
 
-    suspend fun hentHendelser(
-        fiksDigisosId: String,
-        token: Token,
-    ): HendelseInfo {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+    suspend fun hentHendelser(fiksDigisosId: String): HendelseInfo {
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
 
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(digisosSak, model)

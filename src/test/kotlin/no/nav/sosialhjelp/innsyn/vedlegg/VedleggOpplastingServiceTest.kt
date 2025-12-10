@@ -14,7 +14,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.utils.runTestWithToken
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.EttersendelsePdfGenerator
 import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
@@ -36,7 +36,7 @@ import javax.imageio.ImageIO
 import kotlin.time.Duration.Companion.seconds
 
 internal class VedleggOpplastingServiceTest {
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
     private val krypteringService: KrypteringService = mockk()
     private val virusScanner: VirusScanner = mockk()
     private val ettersendelsePdfGenerator: EttersendelsePdfGenerator = mockk()
@@ -44,7 +44,7 @@ internal class VedleggOpplastingServiceTest {
     private val cacheManager: CacheManager = mockk()
     private val service =
         VedleggOpplastingService(
-            fiksClient,
+            fiksService,
             krypteringService,
             virusScanner,
             ettersendelsePdfGenerator,
@@ -78,7 +78,7 @@ internal class VedleggOpplastingServiceTest {
     fun init() {
         clearAllMocks()
 
-        coEvery { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        coEvery { fiksService.getSoknad(any()) } returns mockDigisosSak
         every { mockDigisosSak.fiksDigisosId } returns id
         coEvery { virusScanner.scan(any(), any(), any()) } just runs
         coEvery { dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate() } returns mockCertificate
@@ -91,7 +91,7 @@ internal class VedleggOpplastingServiceTest {
             coEvery {
                 krypteringService.krypter(any(), any(), any())
             } returns "some test data for my input stream".byteInputStream()
-            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } just runs
+            coEvery { fiksService.uploadEttersendelse(any(), any(), any()) } just runs
 
             val ettersendelsPdf = ByteArray(1)
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ettersendelsPdf
@@ -153,7 +153,7 @@ internal class VedleggOpplastingServiceTest {
             val vedleggSpesifikasjonSlot = slot<JsonVedleggSpesifikasjon>()
             coVerify(
                 exactly = 1,
-            ) { fiksClient.lastOppNyEttersendelse(capture(filerForOpplastingSlot), capture(vedleggSpesifikasjonSlot), any()) }
+            ) { fiksService.uploadEttersendelse(capture(filerForOpplastingSlot), capture(vedleggSpesifikasjonSlot), any()) }
             val filerForOpplasting = filerForOpplastingSlot.captured
             val vedleggSpesifikasjon = vedleggSpesifikasjonSlot.captured
 
@@ -209,7 +209,7 @@ internal class VedleggOpplastingServiceTest {
             coEvery {
                 krypteringService.krypter(any(), any(), any())
             } returns "some test data for my input stream".byteInputStream()
-            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } answers { nothing }
+            coEvery { fiksService.uploadEttersendelse(any(), any(), any()) } answers { nothing }
 
             val metadata =
                 mutableListOf(
@@ -244,7 +244,7 @@ internal class VedleggOpplastingServiceTest {
 
             val vedleggOpplastingResponseList = service.processFileUpload(id, metadata)
 
-            coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any()) }
+            coVerify(exactly = 0) { fiksService.uploadEttersendelse(any(), any(), any()) }
 
             assertThat(vedleggOpplastingResponseList[0].filer[0].filename == filnavn0.value)
             assertThat(vedleggOpplastingResponseList[0].filer[0].status.result == ValidationValues.OK)
@@ -260,7 +260,7 @@ internal class VedleggOpplastingServiceTest {
             coEvery {
                 krypteringService.krypter(any(), any(), any())
             } returns "some test data for my input stream".byteInputStream()
-            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } answers { nothing }
+            coEvery { fiksService.uploadEttersendelse(any(), any(), any()) } answers { nothing }
             every { ettersendelsePdfGenerator.generate(any(), any()) } returns ByteArray(1)
 
             val filnavn1 = Filename("test1.pdf")
@@ -289,7 +289,7 @@ internal class VedleggOpplastingServiceTest {
 
             val vedleggOpplastingResponseList = service.processFileUpload(id, metadata)
 
-            coVerify(exactly = 1) { fiksClient.lastOppNyEttersendelse(any(), any(), any()) }
+            coVerify(exactly = 1) { fiksService.uploadEttersendelse(any(), any(), any()) }
 
             assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1.value)
             assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.OK)
@@ -303,7 +303,7 @@ internal class VedleggOpplastingServiceTest {
             coEvery {
                 krypteringService.krypter(any(), any(), any())
             } returns "some test data for my input stream".byteInputStream()
-            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } answers { nothing }
+            coEvery { fiksService.uploadEttersendelse(any(), any(), any()) } answers { nothing }
 
             val filnavn1 = Filename("test1.pdf")
             val pdfFile = createPasswordProtectedPdfByteArray()
@@ -330,7 +330,7 @@ internal class VedleggOpplastingServiceTest {
 
             val vedleggOpplastingResponseList = service.processFileUpload(id, metadata)
 
-            coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any()) }
+            coVerify(exactly = 0) { fiksService.uploadEttersendelse(any(), any(), any()) }
 
             assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1.value)
             assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.PDF_IS_ENCRYPTED)
@@ -342,7 +342,7 @@ internal class VedleggOpplastingServiceTest {
             coEvery {
                 krypteringService.krypter(any(), any(), any())
             } returns "some test data for my input stream".byteInputStream()
-            coEvery { fiksClient.lastOppNyEttersendelse(any(), any(), any()) } answers { nothing }
+            coEvery { fiksService.uploadEttersendelse(any(), any(), any()) } answers { nothing }
 
             val filnavn1 = Filename("test1.jfif")
 
@@ -368,7 +368,7 @@ internal class VedleggOpplastingServiceTest {
 
             val vedleggOpplastingResponseList = service.processFileUpload(id, metadata)
 
-            coVerify(exactly = 0) { fiksClient.lastOppNyEttersendelse(any(), any(), any()) }
+            coVerify(exactly = 0) { fiksService.uploadEttersendelse(any(), any(), any()) }
 
             assertThat(vedleggOpplastingResponseList[0].filer[0].filename).isEqualTo(filnavn1.value)
             assertThat(vedleggOpplastingResponseList[0].filer[0].status.result).isEqualTo(ValidationValues.ILLEGAL_FILE_TYPE)

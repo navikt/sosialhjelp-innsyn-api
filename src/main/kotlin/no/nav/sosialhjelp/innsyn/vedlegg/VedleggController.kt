@@ -8,7 +8,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -41,7 +41,7 @@ class VedleggController(
     private val clientProperties: ClientProperties,
     private val tilgangskontroll: TilgangskontrollService,
     private val eventService: EventService,
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
     private val kommuneService: KommuneService,
 ) {
     @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -108,7 +108,7 @@ class VedleggController(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<VedleggResponse>> {
         tilgangskontroll.sjekkTilgang()
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
 
         val internalVedleggList: List<InternalVedlegg> = vedleggService.hentAlleOpplastedeVedlegg(digisosSak, model)

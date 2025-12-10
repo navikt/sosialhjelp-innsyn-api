@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.util.VersionUtil
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -23,14 +23,14 @@ import kotlin.comparisons.nullsLast
 class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
     private val clientProperties: ClientProperties,
     private val meterRegistry: MeterRegistry,
 ) {
     private val oppgaveTeller = Counter.builder("oppgave_teller")
 
     suspend fun hentOppgaverBeta(fiksDigisosId: String): List<OppgaveResponseBeta> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
             return emptyList()
@@ -62,7 +62,7 @@ class OppgaveService(
 
     @Deprecated("Gammel funksjon", replaceWith = ReplaceWith("hentOppgaverBeta(fiksDigisosId)"))
     suspend fun hentOppgaver(fiksDigisosId: String): List<OppgaveResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
             return emptyList()
@@ -116,7 +116,7 @@ class OppgaveService(
             .filter { it.tidspunktLastetOpp.isAfter(oppgave.tidspunktForKrav) }
 
     suspend fun getVilkar(fiksDigisosId: String): List<VilkarResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         if (model.vilkar.isEmpty()) {
             return emptyList()
@@ -156,7 +156,7 @@ class OppgaveService(
     }
 
     suspend fun getDokumentasjonkravBeta(fiksDigisosId: String): List<DokumentasjonkravDto> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         if (model.dokumentasjonkrav.isEmpty()) {
             return emptyList()
@@ -212,7 +212,7 @@ class OppgaveService(
 
     @Deprecated("Gammel funksjon", replaceWith = ReplaceWith("getDokumentasjonkravBeta(fiksDigisosId)"))
     suspend fun getDokumentasjonkrav(fiksDigisosId: String): List<DokumentasjonkravResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         if (model.dokumentasjonkrav.isEmpty()) {
             return emptyList()
@@ -285,7 +285,7 @@ class OppgaveService(
             .filter { it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) || dokumentasjonkrav.frist == null }
 
     suspend fun getHarLevertDokumentasjonkrav(fiksDigisosId: String): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         if (model.dokumentasjonkrav.isEmpty()) {
             return false
@@ -305,7 +305,7 @@ class OppgaveService(
     }
 
     suspend fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
             return false
@@ -342,7 +342,7 @@ class OppgaveService(
     }
 
     suspend fun sakHarStatusMottattOgIkkeHattSendt(fiksDigisosId: String): Boolean {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
         if (model.status != SoknadsStatus.MOTTATT) {
             return false

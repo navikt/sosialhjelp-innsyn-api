@@ -19,10 +19,9 @@ class SaksStatusController(
     suspend fun hentSaksStatuser(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<SaksStatusResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId, token)
+        val saksStatuser = saksStatusService.hentSaksStatuser(fiksDigisosId)
         return if (saksStatuser.isEmpty()) {
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else {

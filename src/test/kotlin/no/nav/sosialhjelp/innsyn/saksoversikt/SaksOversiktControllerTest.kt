@@ -10,7 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveElement
@@ -38,13 +38,13 @@ import java.time.LocalDateTime
 
 internal class SaksOversiktControllerTest {
     private val saksOversiktService: SaksOversiktService = mockk()
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
     private val eventService: EventService = mockk()
     private val oppgaveService: OppgaveService = mockk()
     private val tilgangskontroll: TilgangskontrollService = mockk()
 
     private val controller =
-        SaksOversiktController(saksOversiktService, fiksClient, eventService, oppgaveService, tilgangskontroll)
+        SaksOversiktController(saksOversiktService, fiksService, eventService, oppgaveService, tilgangskontroll)
 
     private val digisosSak1: DigisosSak = mockk()
     private val digisosSak2: DigisosSak = mockk()
@@ -108,8 +108,8 @@ internal class SaksOversiktControllerTest {
     @Test
     fun `skal mappe fra DigisosSak til SakResponse for detaljer`() =
         runTestWithToken {
-            coEvery { fiksClient.hentDigisosSak("123") } returns digisosSak1
-            coEvery { fiksClient.hentDigisosSak("456") } returns digisosSak2
+            coEvery { fiksService.getSoknad("123") } returns digisosSak1
+            coEvery { fiksService.getSoknad("456") } returns digisosSak2
             coEvery { eventService.createSaksoversiktModel(digisosSak1) } returns model1
             coEvery { eventService.createSaksoversiktModel(digisosSak2) } returns model2
 
@@ -170,7 +170,7 @@ internal class SaksOversiktControllerTest {
     @Test
     fun `hvis model ikke har noen oppgaver, skal ikke oppgaveService kalles`() =
         runTestWithToken {
-            coEvery { fiksClient.hentDigisosSak("123") } returns digisosSak1
+            coEvery { fiksService.getSoknad("123") } returns digisosSak1
             coEvery { eventService.createSaksoversiktModel(digisosSak1) } returns model1
 
             every { model1.status } returns MOTTATT

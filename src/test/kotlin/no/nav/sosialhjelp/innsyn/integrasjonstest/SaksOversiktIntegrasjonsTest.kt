@@ -8,7 +8,7 @@ import io.mockk.mockk
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClientImpl
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -19,10 +19,11 @@ import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.web.reactive.server.expectBodyList
 
 class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
-    lateinit var fiksClient: FiksClientImpl
+    lateinit var fiksService: FiksService
 
     @MockkBean
     lateinit var kommuneService: KommuneService
@@ -36,13 +37,13 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @WithMockUser
     fun `skal hente liste med saker`() {
         val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        coEvery { fiksClient.hentAlleDigisosSaker() } returns listOf(digisosSakOk)
+        coEvery { fiksService.getAllSoknader() } returns listOf(digisosSakOk)
 
         doGet(uri = "/api/v1/innsyn/saker", emptyList())
-            .expectBodyList(SaksListeResponse::class.java)
+            .expectBodyList<SaksListeResponse>()
             .hasSize(1)
 
-        coVerify(exactly = 1) { fiksClient.hentAlleDigisosSaker() }
+        coVerify(exactly = 1) { fiksService.getAllSoknader() }
     }
 
     @Test
@@ -52,13 +53,13 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
         val soknad = JsonSoknad()
 
-        coEvery { fiksClient.hentDigisosSak(any()) } returns digisosSakOk
+        coEvery { fiksService.getSoknad(any()) } returns digisosSakOk
         coEvery { kommuneService.hentKommuneInfo(any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
         coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
-        coEvery { fiksClient.hentDokument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
         coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
-        coEvery { fiksClient.hentDokument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
+        coEvery { fiksService.getDocument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
 
         doGet("/api/v1/innsyn/sak/1234/detaljer", emptyList())
     }

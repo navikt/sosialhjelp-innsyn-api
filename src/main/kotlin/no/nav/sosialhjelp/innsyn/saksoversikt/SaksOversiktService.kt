@@ -1,20 +1,20 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import org.springframework.stereotype.Component
 
 @Component
 class SaksOversiktService(
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
 ) {
     suspend fun hentAlleSaker(): List<SaksListeResponse> =
         hentAlleDigisosSakerFraFiks()
             .sortedByDescending { it.sistOppdatert }
 
     private suspend fun hentAlleDigisosSakerFraFiks(): List<SaksListeResponse> {
-        val digisosSaker = fiksClient.hentAlleDigisosSaker()
+        val digisosSaker = fiksService.getAllSoknader()
         val responseList =
             digisosSaker
                 // Ikke returner "tomme" søknader som som regel er feilregistreringer

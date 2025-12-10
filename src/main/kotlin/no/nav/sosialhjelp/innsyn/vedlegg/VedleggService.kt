@@ -6,7 +6,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.exceptions.NedlastingFilnavnMismatchException
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
@@ -18,7 +18,7 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 
 @Component
 class VedleggService(
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
 ) {
     suspend fun hentAlleOpplastedeVedlegg(
         digisosSak: DigisosSak,
@@ -62,7 +62,7 @@ class VedleggService(
         fiksDigisosId: String,
         hendelseReferanse: String,
     ): List<InternalVedlegg> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val ettersendteVedlegg =
             digisosSak.ettersendtInfoNAV
                 ?.ettersendelser
@@ -139,7 +139,7 @@ class VedleggService(
     private suspend fun hentVedleggSpesifikasjon(
         digisosSak: DigisosSak,
         dokumentlagerId: String,
-    ): JsonVedleggSpesifikasjon = fiksClient.hentDokument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java)
+    ): JsonVedleggSpesifikasjon = fiksService.getDocument(digisosSak.fiksDigisosId, dokumentlagerId, JsonVedleggSpesifikasjon::class.java)
 
     private fun matchDokumentInfoAndJsonFiler(
         dokumentInfoList: List<DokumentInfo>,

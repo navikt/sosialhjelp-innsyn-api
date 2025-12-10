@@ -23,10 +23,9 @@ class HendelseController(
     suspend fun hentHendelser(
         @PathVariable fiksDigisosId: String,
     ): ResponseEntity<List<HendelseResponse>> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val hendelser = hendelseService.hentHendelseResponse(fiksDigisosId, token)
+        val hendelser = hendelseService.hentHendelseResponse(fiksDigisosId)
         return ResponseEntity.ok(hendelser)
     }
 
@@ -34,10 +33,9 @@ class HendelseController(
     suspend fun hentHendelserBeta(
         @PathVariable fiksDigisosId: String,
     ): List<HendelseDto> {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        val hendelserInfo = hendelseService.hentHendelser(fiksDigisosId, token)
+        val hendelserInfo = hendelseService.hentHendelser(fiksDigisosId)
         return hendelserInfo.hendelser.mapNotNull { it.hendelseType.mapTilHendelseDto(it, hendelserInfo.enhetNavn) }
     }
 }

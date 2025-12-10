@@ -7,7 +7,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -23,11 +23,11 @@ import java.time.LocalDateTime
 
 internal class SoknadsStatusServiceTest {
     private val eventService: EventService = mockk()
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
     private val kommuneService: KommuneService = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
 
-    private val service = SoknadsStatusService(eventService, fiksClient, kommuneService, clientProperties)
+    private val service = SoknadsStatusService(eventService, fiksService, kommuneService, clientProperties)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockInternalDigisosSoker: InternalDigisosSoker = mockk()
@@ -38,7 +38,7 @@ internal class SoknadsStatusServiceTest {
     @BeforeEach
     fun init() {
         clearAllMocks()
-        coEvery { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        coEvery { fiksService.getSoknad(any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV } returns
             mockk {
                 every { soknadDokument.dokumentlagerDokumentId } returns dokumentlagerId

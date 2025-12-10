@@ -12,7 +12,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.Ettersendelse
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
 import org.assertj.core.api.Assertions.assertThat
@@ -26,9 +26,9 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class VedleggServiceTest {
     private val eventService: EventService = mockk()
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
 
-    private val service = VedleggService(fiksClient)
+    private val service = VedleggService(fiksService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon = mockk()
@@ -38,7 +38,7 @@ internal class VedleggServiceTest {
     internal fun setUp() {
         clearAllMocks()
 
-        coEvery { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        coEvery { fiksService.getSoknad(any()) } returns mockDigisosSak
         every { mockDigisosSak.originalSoknadNAV } returns originalSoknad
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns ettersendelser
         every { mockDigisosSak.fiksDigisosId } returns "fiksDigisosId"
@@ -46,25 +46,25 @@ internal class VedleggServiceTest {
         every { mockJsonVedleggSpesifikasjon.vedlegg } returns emptyList()
 
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
         } returns soknadVedleggSpesifikasjon
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_2, any())
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_2, any())
         } returns soknadVedleggSpesifikasjonMedStatusKrevesOgLastetOpp
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_1, any())
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_1, any())
         } returns ettersendteVedleggSpesifikasjon_1
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_2, any())
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_2, any())
         } returns ettersendteVedleggSpesifikasjon_2
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_3, any())
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_3, any())
         } returns ettersendteVedleggSpesifikasjon_3
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_4, any())
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_4, any())
         } returns ettersendteVedleggSpesifikasjon_4
         coEvery {
-            fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any())
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any())
         } returns ettersendteVedleggSpesifikasjon_5
     }
 
@@ -73,7 +73,7 @@ internal class VedleggServiceTest {
         runTest(timeout = 5.seconds) {
             coEvery { eventService.createModel(any()) } returns model
             coEvery {
-                fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+                fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
             } returns mockJsonVedleggSpesifikasjon
             every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
@@ -101,7 +101,7 @@ internal class VedleggServiceTest {
         runTest(timeout = 5.seconds) {
             coEvery { eventService.createModel(any()) } returns model
             coEvery {
-                fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+                fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
             } returns mockJsonVedleggSpesifikasjon
             every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns
                 listOf(
@@ -123,7 +123,7 @@ internal class VedleggServiceTest {
         runTest(timeout = 5.seconds) {
             coEvery { eventService.createModel(any()) } returns model
             coEvery {
-                fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+                fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
             } returns mockJsonVedleggSpesifikasjon
 
             val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
@@ -203,9 +203,9 @@ internal class VedleggServiceTest {
 
             coEvery { eventService.createModel(any()) } returns model
             coEvery {
-                fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+                fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
             } returns mockJsonVedleggSpesifikasjon
-            coEvery { fiksClient.hentDokument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any()) } returns
+            coEvery { fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any()) } returns
                 JsonVedleggSpesifikasjon()
                     .withVedlegg(
                         listOf(

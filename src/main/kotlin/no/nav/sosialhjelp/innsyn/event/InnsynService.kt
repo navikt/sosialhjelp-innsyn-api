@@ -3,14 +3,14 @@ package no.nav.sosialhjelp.innsyn.event
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 
 @Component
 class InnsynService(
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
     private val kommuneService: KommuneService,
 ) {
     suspend fun hentJsonDigisosSoker(digisosSak: DigisosSak): JsonDigisosSoker? {
@@ -25,7 +25,7 @@ class InnsynService(
                 }
 
             metadataId != null && sistOppdatert != null ->
-                fiksClient.hentDokument(
+                fiksService.getDocument(
                     digisosSak.fiksDigisosId,
                     metadataId,
                     JsonDigisosSoker::class.java,
@@ -40,7 +40,7 @@ class InnsynService(
         val originalMetadataId = digisosSak.originalSoknadNAV?.metadata
         return when {
             originalMetadataId != null ->
-                fiksClient.hentDokument(
+                fiksService.getDocument(
                     digisosSak.fiksDigisosId,
                     originalMetadataId,
                     JsonSoknad::class.java,

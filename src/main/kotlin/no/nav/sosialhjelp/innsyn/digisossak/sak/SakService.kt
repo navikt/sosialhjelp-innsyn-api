@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.sak
 
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -12,7 +12,7 @@ import kotlin.getValue
 @Component
 class SakService(
     private val eventService: EventService,
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
 ) {
     private val log by logger()
 
@@ -20,7 +20,7 @@ class SakService(
         fiksDigisosId: String,
         vedtakId: String,
     ): SakResponse {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
 
         if (model.saker.isEmpty()) {

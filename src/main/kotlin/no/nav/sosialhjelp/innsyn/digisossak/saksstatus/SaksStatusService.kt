@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.saksstatus
 
-import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
@@ -14,15 +13,12 @@ const val DEFAULT_SAK_TITTEL = "default_sak_tittel"
 @Component
 class SaksStatusService(
     private val eventService: EventService,
-    private val fiksClient: FiksClient,
+    private val fiksService: FiksService,
 ) {
     private val log by logger()
 
-    suspend fun hentSaksStatuser(
-        fiksDigisosId: String,
-        token: Token,
-    ): List<SaksStatusResponse> {
-        val digisosSak = fiksClient.hentDigisosSak(fiksDigisosId)
+    suspend fun hentSaksStatuser(fiksDigisosId: String): List<SaksStatusResponse> {
+        val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)
 
         if (model.saker.isEmpty()) {

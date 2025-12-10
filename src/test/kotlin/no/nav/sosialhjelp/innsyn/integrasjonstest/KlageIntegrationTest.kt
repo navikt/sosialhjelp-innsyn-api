@@ -11,7 +11,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.FiksEttersendtInfoNAVDto
@@ -51,7 +51,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     private lateinit var mellomlagerClient: MellomlagerClient
 
     @MockkBean
-    private lateinit var fiksClient: FiksClient
+    private lateinit var fiksService: FiksService
 
     @MockkBean
     private lateinit var fiksKlageClient: FiksKlageClient
@@ -80,7 +80,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                 behandlingsansvarlig = null,
             )
 
-        coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
 
         coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just Runs
 
@@ -104,7 +104,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
         coEvery {
-            fiksClient.hentDokument(
+            fiksService.getDocument(
                 any(),
                 any(),
                 JsonVedleggSpesifikasjon::class.java,
@@ -228,7 +228,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                 behandlingsansvarlig = null,
             )
 
-        coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
 
         doPostFullResponse(
             uri = POST_KLAGE,
@@ -260,7 +260,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                 behandlingsansvarlig = null,
             )
 
-        coEvery { fiksClient.hentDigisosSak(any()) } returns createDigisosSak()
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
 
         val path = "/api/v1/innsyn/{digisosId}/klage/$klageId/ettersendelse/$ettersendelseId"
 

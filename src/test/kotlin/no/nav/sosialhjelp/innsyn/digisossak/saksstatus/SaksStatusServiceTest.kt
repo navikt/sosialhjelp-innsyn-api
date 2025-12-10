@@ -5,8 +5,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -21,11 +20,9 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class SaksStatusServiceTest {
     private val eventService: EventService = mockk()
-    private val fiksClient: FiksClient = mockk()
+    private val fiksService: FiksService = mockk()
 
-    private val service = SaksStatusService(eventService, fiksClient)
-
-    private val token = Token("token")
+    private val service = SaksStatusService(eventService, fiksService)
 
     private val tittel = "tittel"
     private val referanse = "referanse"
@@ -36,9 +33,9 @@ internal class SaksStatusServiceTest {
 
     @BeforeEach
     fun init() {
-        clearMocks(eventService, fiksClient)
+        clearMocks(eventService, fiksService)
 
-        coEvery { fiksClient.hentDigisosSak(any()) } returns mockDigisosSak
+        coEvery { fiksService.getSoknad(any()) } returns mockDigisosSak
     }
 
     @Test
@@ -47,7 +44,7 @@ internal class SaksStatusServiceTest {
             val model = InternalDigisosSoker()
             coEvery { eventService.createModel(any()) } returns model
 
-            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
+            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
             assertThat(response).isEmpty()
         }
@@ -68,7 +65,7 @@ internal class SaksStatusServiceTest {
 
             coEvery { eventService.createModel(any()) } returns model
 
-            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
+            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
             assertThat(response).isNotNull
             assertThat(response).hasSize(1)
@@ -101,7 +98,7 @@ internal class SaksStatusServiceTest {
 
             coEvery { eventService.createModel(any()) } returns model
 
-            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
+            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
             assertThat(response).isNotNull
             assertThat(response).hasSize(1)
@@ -135,7 +132,7 @@ internal class SaksStatusServiceTest {
 
             coEvery { eventService.createModel(any()) } returns model
 
-            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
+            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
             assertThat(response).isNotNull
             assertThat(response).hasSize(1)
@@ -184,7 +181,7 @@ internal class SaksStatusServiceTest {
 
             coEvery { eventService.createModel(any()) } returns model
 
-            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123", token)
+            val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
 
             assertThat(response).isNotNull
             assertThat(response).hasSize(2)
@@ -252,11 +249,11 @@ internal class SaksStatusServiceTest {
 
             val digisosSak1 = DigisosSak("id1", "", "", "", 1L, null, null, null, null)
             coEvery {
-                fiksClient.hentDigisosSak("id1")
+                fiksService.getSoknad("id1")
             } returns digisosSak1
             val digisosSak2 = DigisosSak("id2", "", "", "", 1L, null, null, null, null)
             coEvery {
-                fiksClient.hentDigisosSak("id2")
+                fiksService.getSoknad("id2")
             } returns digisosSak2
 
             coEvery {
@@ -266,7 +263,7 @@ internal class SaksStatusServiceTest {
                 eventService.createModel(digisosSak2)
             } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiFalse))
 
-            assertThat(service.hentSaksStatuser("id1", Token("token")).first().skalViseVedtakInfoPanel).isEqualTo(true)
-            assertThat(service.hentSaksStatuser("id2", Token("token")).first().skalViseVedtakInfoPanel).isEqualTo(false)
+            assertThat(service.hentSaksStatuser("id1").first().skalViseVedtakInfoPanel).isEqualTo(true)
+            assertThat(service.hentSaksStatuser("id2").first().skalViseVedtakInfoPanel).isEqualTo(false)
         }
 }

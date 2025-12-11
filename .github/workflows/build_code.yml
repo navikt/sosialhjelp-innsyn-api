@@ -27,7 +27,7 @@ jobs:
         run: ./gradlew spotlessCheck
         shell: bash
       - name: Build kotlin, and run tests/lint
-        uses: navikt/sosialhjelp-ci/actions/build-kotlin@v7
+        uses: navikt/sosialhjelp-ci/actions/build-kotlin@v13
         with:
           java-version: '21'
           lint: 'false'

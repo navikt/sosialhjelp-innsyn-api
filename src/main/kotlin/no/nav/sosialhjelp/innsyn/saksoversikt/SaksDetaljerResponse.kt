@@ -18,6 +18,7 @@ data class SaksDetaljerResponse(
     val saker: List<Sak> = emptyList(),
     val forsteOppgaveFrist: LocalDate?,
     val mottattTidspunkt: LocalDateTime?,
+    val sisteDokumentasjonKravFrist: LocalDate?,
 ) {
     data class Sak(
         val antallVedtak: Int,

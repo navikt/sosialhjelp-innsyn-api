@@ -87,6 +87,7 @@ class SaksOversiktController(
                     )
                 },
             forsteOppgaveFrist = (oppgaver.mapNotNull { it.innsendelsesfrist } + dokkrav.mapNotNull { it.frist }).minOrNull(),
+            sisteDokumentasjonKravFrist = dokkrav.mapNotNull { it.frist }.minOrNull(),
             mottattTidspunkt = mottattTidspunkt,
         )
     }

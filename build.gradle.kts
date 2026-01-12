@@ -84,8 +84,8 @@ dependencies {
 // override spring managed dependencies
 extra["json-smart.version"] = libs.versions.json.smart
 
-val githubUser: String by project
-val githubPassword: String by project
+val githubUser: String? by project
+val githubPassword: String? by project
 
 repositories {
     mavenLocal()

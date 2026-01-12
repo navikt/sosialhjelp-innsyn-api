@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -46,7 +47,6 @@ import java.io.InputStream
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
-import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

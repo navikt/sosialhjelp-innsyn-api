@@ -404,7 +404,7 @@ data class OpplastetFilRef(
 
 object MockAltApiImage {
     private const val PATH = "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api"
-    private const val TAG = "2025.11.27-15.02-37deb56"
+    private const val TAG = "latest"
     val image: DockerImageName = DockerImageName.parse("$PATH:$TAG")
 }
 

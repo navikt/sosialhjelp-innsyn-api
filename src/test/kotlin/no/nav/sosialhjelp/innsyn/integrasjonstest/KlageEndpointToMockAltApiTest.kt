@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpEntity
@@ -47,6 +46,7 @@ import java.io.InputStream
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -404,7 +404,7 @@ data class OpplastetFilRef(
 
 object MockAltApiImage {
     private const val PATH = "europe-north1-docker.pkg.dev/nais-management-233d/teamdigisos/sosialhjelp-mock-alt-api"
-    private const val TAG = "latest"
+    private const val TAG = "2025.11.27-15.02-37deb56"
     val image: DockerImageName = DockerImageName.parse("$PATH:$TAG")
 }
 

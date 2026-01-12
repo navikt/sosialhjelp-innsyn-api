@@ -48,6 +48,8 @@ dependencies {
 
     // Jackson
     implementation(libs.jackson.module.kotlin)
+    // midlertidig eksplisitt innhenting av jackson 3
+    implementation("tools.jackson.module:jackson-module-kotlin:3.0.0")
 
     // Springdoc
     implementation(libs.springdoc.openapi.starter.common)
@@ -66,7 +68,7 @@ dependencies {
     implementation(libs.apache.pdfbox.jempbox)
 
     // Test
-    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.bundles.spring.boot.test)
     testImplementation(libs.springmockk)
     testImplementation(libs.mockk)
     testImplementation(libs.mockk.jvm)

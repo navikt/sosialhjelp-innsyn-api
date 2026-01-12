@@ -110,6 +110,7 @@ spring-boot = [
 spring-boot-test = [
     "spring-boot-starter-test",
     "spring-boot-starter-webflux-test",
+    "spring-boot-security-test",
 ]
 
 resilience4j = [
@@ -138,7 +139,6 @@ commons = [
 
 sosialhjelp-common = [
     "sosialhjelp-common-api",
-    "spring-boot-security-test",
 ]
 
 prometheus = [

@@ -25,14 +25,16 @@ class KlageUseCaseHandler(
             .onSuccess { klageMetricsService.registerSent() }
             .onFailure { klageMetricsService.registerSendError() }
             .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
+
+        TODO("Returner KlateDto")
     }
 
     fun hentAlleKlager(digisosId: UUID): List<KlageRef> {
-
+        TODO("Returner KlageRefs")
     }
 
     fun hentKlage(digisosId: UUID, klageId: UUID): KlageDto? {
-
+        TODO("Hente klage for klageId")
     }
 
     suspend fun lastOppVedlegg(
@@ -48,7 +50,7 @@ class KlageUseCaseHandler(
         klageId: UUID,
         ettersendelseId: UUID,
     ) {
-
+        TODO("Sende ettersendelse")
     }
 }
 

@@ -286,7 +286,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 private fun createBody(
     pdfFile: File,
     pdfUuidFilename: UUID,
-): MultiValueMap<String?, HttpEntity<*>?> =
+): MultiValueMap<String, HttpEntity<*>> =
     MultipartBodyBuilder()
         .apply {
             part("files", InputStreamResource(pdfFile.inputStream()))

@@ -49,7 +49,7 @@ dependencies {
     // Jackson
     implementation(libs.jackson.module.kotlin)
     // midlertidig eksplisitt innhenting av jackson 3
-    implementation("tools.jackson.module:jackson-module-kotlin:3.0.0")
+    implementation("tools.jackson.module:jackson-module-kotlin:3.0.3")
 
     // Springdoc
     implementation(libs.springdoc.openapi.starter.common)

@@ -15,8 +15,7 @@ val sosialhjelpJsonMapper: JsonMapper =
         .configure(SerializationFeature.INDENT_OUTPUT, true)
         .build()
 
-
-fun WebClient.Builder.configureCodecs() : WebClient.Builder {
+fun WebClient.Builder.configureCodecs(): WebClient.Builder {
     codecs {
         it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
         it.defaultCodecs().jacksonJsonDecoder(JacksonJsonDecoder(sosialhjelpJsonMapper))

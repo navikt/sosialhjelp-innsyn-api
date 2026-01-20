@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.io.IOException
-import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -30,6 +28,8 @@ import org.apache.tika.Tika
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.codec.multipart.FilePart
 import tools.jackson.module.kotlin.readValue
+import java.io.IOException
+import java.io.InputStream
 
 class DocumentUploadHelper {
     companion object {

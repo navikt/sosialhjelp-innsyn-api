@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -25,6 +24,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.netty.http.client.HttpClient
+import kotlin.coroutines.cancellation.CancellationException
 
 @Component
 class KommuneInfoClient(

@@ -29,9 +29,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.util.UUID
-import tools.jackson.module.kotlin.readValue
 
 @RestController
 @RequestMapping("/api/v1/innsyn")

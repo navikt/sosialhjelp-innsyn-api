@@ -1,5 +1,15 @@
 package no.nav.sosialhjelp.innsyn.utils
 
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.ErrorMessage
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import tools.jackson.databind.exc.MismatchedInputException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,16 +21,6 @@ import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.reflect.full.companionObject
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.ErrorMessage
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.web.reactive.function.client.WebClientResponseException
-import tools.jackson.databind.exc.MismatchedInputException
 
 const val COUNTER_SUFFIX_LENGTH = 4
 
@@ -31,11 +31,11 @@ fun hentUrlFraFilreferanse(
     when (filreferanse) {
         is JsonDokumentlagerFilreferanse ->
             clientProperties.fiksDokumentlagerEndpointUrl +
-                    "/dokumentlager/nedlasting/niva4/${filreferanse.id}?inline=true"
+                "/dokumentlager/nedlasting/niva4/${filreferanse.id}?inline=true"
 
         is JsonSvarUtFilreferanse ->
             clientProperties.fiksSvarUtEndpointUrl +
-                    "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
+                "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
 
         else -> throw RuntimeException(
             "Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse",

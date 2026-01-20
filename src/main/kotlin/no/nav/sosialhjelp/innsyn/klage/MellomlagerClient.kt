@@ -24,11 +24,11 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.security.cert.X509Certificate
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
-import tools.jackson.module.kotlin.jacksonObjectMapper
-import tools.jackson.module.kotlin.readValue
 
 interface MellomlagerClient {
     suspend fun getDocumentMetadataForRef(navEksternId: UUID): MellomlagerResponse

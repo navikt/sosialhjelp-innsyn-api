@@ -16,7 +16,7 @@ import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.saksoversikt.SaksListeResponse
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.expectBodyList
@@ -36,7 +36,7 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @Test
     @WithMockUser
     fun `skal hente liste med saker`() {
-        val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val digisosSakOk = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSakOk)
 
         doGet(uri = "/api/v1/innsyn/saker", emptyList())
@@ -49,8 +49,8 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @Test
     @WithMockUser("123")
     fun `skal hente saksdetaljer for sak`() {
-        val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
+        val digisosSakOk = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val soker = sosialhjelpJsonMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
         val soknad = JsonSoknad()
 
         coEvery { fiksService.getSoknad(any()) } returns digisosSakOk

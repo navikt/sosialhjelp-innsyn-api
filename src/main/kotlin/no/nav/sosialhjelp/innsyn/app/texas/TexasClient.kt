@@ -4,14 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.token.Token
+import no.nav.sosialhjelp.innsyn.utils.configureCodecs
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
-import org.springframework.http.codec.json.Jackson2JsonDecoder
-import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -48,13 +46,9 @@ sealed class TexasClient(
 
     private val texasWebClient =
         texasWebClientBuilder
-            .defaultHeaders {
-                it.contentType = MediaType.APPLICATION_JSON
-            }.codecs {
-                it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
-                it.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(objectMapper))
-                it.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(objectMapper))
-            }.build()
+            .defaultHeaders { it.contentType = MediaType.APPLICATION_JSON }
+            .configureCodecs()
+            .build()
 
     private val maskinportenParams: Map<String, String> = mapOf("identity_provider" to "maskinporten", "target" to "ks:fiks")
 

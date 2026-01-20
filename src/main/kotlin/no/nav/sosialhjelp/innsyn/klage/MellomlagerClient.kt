@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -10,7 +8,7 @@ import kotlinx.coroutines.withTimeout
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import org.springframework.context.annotation.Profile
@@ -26,6 +24,8 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.security.cert.X509Certificate
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
@@ -192,18 +192,19 @@ data class FilMetadata(
 )
 
 private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): String =
-    jacksonObjectMapper().writeValueAsString(
-        FilMetadata(
-            filnavn = objectFilForOpplasting.filnavn?.value ?: error("Filnavn mangler"),
-            mimetype = objectFilForOpplasting.mimetype ?: "application/octet-stream",
-            storrelse = objectFilForOpplasting.storrelse,
-        ),
-    )
+    jacksonObjectMapper()
+        .writeValueAsString(
+            FilMetadata(
+                filnavn = objectFilForOpplasting.filnavn?.value ?: error("Filnavn mangler"),
+                mimetype = objectFilForOpplasting.mimetype ?: "application/octet-stream",
+                storrelse = objectFilForOpplasting.storrelse,
+            ),
+        )
 
 private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): MultiValueMap<String, HttpEntity<*>> =
     MultipartBodyBuilder()
         .run {
-            filerForOpplasting.forEachIndexed { index, file ->
+            filerForOpplasting.forEach { file ->
                 part("metadata-part", createJsonFilMetadata(file))
                     .headers {
                         it.contentType = MediaType.APPLICATION_JSON
@@ -227,7 +228,7 @@ private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): Mul
             build()
         }
 
-private fun String.toFiksError() = objectMapper.readValue<MellomlagerResponse.FiksError>(this)
+private fun String.toFiksError() = sosialhjelpJsonMapper.readValue<MellomlagerResponse.FiksError>(this)
 
 sealed interface MellomlagerResponse {
     data class MellomlagringDto(

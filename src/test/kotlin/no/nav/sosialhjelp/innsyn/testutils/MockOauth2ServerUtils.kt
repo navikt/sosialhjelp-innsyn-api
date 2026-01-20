@@ -14,8 +14,7 @@ import java.util.Date
 
 @Component
 class TexasServer(
-    @Value("\${mock-oauth2-server.port}")
-    private val port: Int,
+    @param:Value("\${mock-oauth2-server.port}") port: Int,
 ) {
     private var mockWebServer: MockWebServer = MockWebServer()
 

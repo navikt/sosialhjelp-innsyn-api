@@ -9,7 +9,7 @@ import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
@@ -160,7 +160,7 @@ class KlageServiceImpl(
         klageId: UUID,
     ): String = if (navEksternRefId == klageId) "klage" else "klage_ettersendelse"
 
-    private fun KlageInput.toJson(): String = objectMapper.writeValueAsString(this)
+    private fun KlageInput.toJson(): String = sosialhjelpJsonMapper.writeValueAsString(this)
 
     private fun KlageInput.createKlagePdf(): FilForOpplasting =
         PDDocument()
@@ -207,12 +207,5 @@ class KlageServiceImpl(
 }
 
 private fun JsonVedleggSpesifikasjon.noFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()
-
-private fun JsonVedleggSpesifikasjon.validerAllMatch(filnavnList: List<String>) {
-    vedlegg
-        .flatMap { jsonVedlegg -> jsonVedlegg.filer }
-        .all { jsonFil -> filnavnList.contains(jsonFil.filnavn) }
-        .also { allMatched -> if (!allMatched) error("Fant ikke alle alle filer i Mellomlager") }
-}
 
 private fun FiksKlageDto.getTidspunktSendt() = sendtKvittering.sendtStatus.timestamp.let { unixToLocalDateTime(it) }

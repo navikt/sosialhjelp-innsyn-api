@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.vedlegg.virusscan
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.innsyn.app.exceptions.VirusScanException
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.mockPart
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -57,7 +57,7 @@ internal class VirusScannerTest {
                     .setResponseCode(200)
                     .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .setBody(
-                        objectMapper.writeValueAsString(
+                        sosialhjelpJsonMapper.writeValueAsString(
                             listOf(ScanResult("test", Result.FOUND), ScanResult("test", Result.FOUND)),
                         ),
                     ),
@@ -76,7 +76,7 @@ internal class VirusScannerTest {
                     .setResponseCode(200)
                     .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .setBody(
-                        objectMapper.writeValueAsString(
+                        sosialhjelpJsonMapper.writeValueAsString(
                             listOf(ScanResult("test", Result.OK)),
                         ),
                     ),
@@ -94,7 +94,7 @@ internal class VirusScannerTest {
                     .setResponseCode(200)
                     .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .setBody(
-                        objectMapper.writeValueAsString(
+                        sosialhjelpJsonMapper.writeValueAsString(
                             listOf(ScanResult("test", Result.FOUND)),
                         ),
                     ),
@@ -115,7 +115,7 @@ internal class VirusScannerTest {
                     .setResponseCode(200)
                     .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .setBody(
-                        objectMapper.writeValueAsString(
+                        sosialhjelpJsonMapper.writeValueAsString(
                             listOf(ScanResult("test", Result.ERROR)),
                         ),
                     ),
@@ -141,7 +141,7 @@ internal class VirusScannerTest {
                     .setResponseCode(200)
                     .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .setBody(
-                        objectMapper.writeValueAsString(
+                        sosialhjelpJsonMapper.writeValueAsString(
                             listOf(ScanResult("test", Result.OK)),
                         ),
                     ),

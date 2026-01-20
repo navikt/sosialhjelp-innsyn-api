@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingle
@@ -14,7 +13,7 @@ import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.OppgaveOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.util.UUID
 
@@ -67,7 +67,7 @@ class VedleggController(
                     val bytes = ByteArray(it.readableByteCount())
                     it.read(bytes)
                     DataBufferUtils.release(it)
-                    objectMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
+                    sosialhjelpJsonMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
                 }?.awaitSingleOrNull()
                 ?.filter { it.filer.isNotEmpty() } ?: error("Missing metadata.json")
 

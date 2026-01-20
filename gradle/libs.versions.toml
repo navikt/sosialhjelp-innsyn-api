@@ -6,10 +6,10 @@ coroutines = "1.10.2"
 sosialhjelp_common = "1.20250120.1009-d88048d"
 logback = "1.5.24"
 logstash = "8.1"
-filformat = "1.2025.11.24-10.39-532339dbe9f5"
+filformat = "1.2026.01.19-15.17-55bb3d1bca81"
 micrometer_registry = "1.16.2"
 prometheus = "0.16.0"
-jackson = "2.20.1"
+jackson = "3.0.3"
 commons_codec = "1.20.0"
 commons_io = "2.21.0"
 file_upload = "1.6.0"
@@ -69,7 +69,7 @@ logback-logstash = { module = "net.logstash.logback:logstash-logback-encoder", v
 
 sosialhjelp-filformat = { module = "no.nav.sbl.dialogarena:soknadsosialhjelp-filformat", version.ref = "filformat" }
 
-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson"}
 
 springdoc-openapi-starter-webflux-ui = { module = "org.springdoc:springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }
 springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "springdoc" }

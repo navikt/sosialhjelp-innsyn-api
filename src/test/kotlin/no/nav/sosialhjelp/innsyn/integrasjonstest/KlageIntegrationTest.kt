@@ -28,7 +28,7 @@ import no.nav.sosialhjelp.innsyn.klage.SendtKvitteringDto
 import no.nav.sosialhjelp.innsyn.klage.SendtStatus
 import no.nav.sosialhjelp.innsyn.klage.SendtStatusDto
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ByteArrayResource
@@ -330,7 +330,7 @@ private fun createMetadataJson(uuids: List<UUID>): String =
                 },
             innsendelsesfrist = null,
         ),
-    ).let { objectMapper.writeValueAsString(it) }
+    ).let { sosialhjelpJsonMapper.writeValueAsString(it) }
 
 data class OpplastetVedleggMetadataRequest(
     val type: String,

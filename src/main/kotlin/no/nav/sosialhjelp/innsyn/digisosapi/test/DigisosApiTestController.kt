@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.digisosapi.test
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpValidator
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -31,10 +31,10 @@ class DigisosApiTestController(
         fiksDigisosId: String?,
         @RequestBody body: String,
     ): String {
-        val json = objectMapper.writeValueAsString(objectMapper.readTree(body).at("/sak/soker"))
+        val json = sosialhjelpJsonMapper.writeValueAsString(sosialhjelpJsonMapper.readTree(body).at("/sak/soker"))
         JsonSosialhjelpValidator.ensureValidInnsyn(json)
 
-        val digisosApiWrapper = objectMapper.readValue(body, DigisosApiWrapper::class.java)
+        val digisosApiWrapper = sosialhjelpJsonMapper.readValue(body, DigisosApiWrapper::class.java)
         val digisosId = digisosApiTestService.oppdaterDigisosSak(fiksDigisosId, digisosApiWrapper)
         return if (digisosId?.contains("fiksDigisosId") == true) {
             digisosId // Allerede wrappet i json.

@@ -9,8 +9,7 @@ import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import java.io.IOException
-import java.sql.Timestamp
+import tools.jackson.databind.exc.MismatchedInputException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,7 +19,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.temporal.ChronoUnit
-import java.util.Date
 import java.util.Locale
 import kotlin.reflect.full.companionObject
 
@@ -58,8 +56,6 @@ fun String.toLocalDateTime(): LocalDateTime =
 fun String.toLocalDate(): LocalDate = LocalDate.parse(this, ISO_LOCAL_DATE)
 
 fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneId.of("Europe/Oslo"))
-
-fun unixTimestampToDate(tidspunkt: Long): Date = Timestamp.valueOf(unixToLocalDateTime(tidspunkt))
 
 fun formatLocalDateTime(dato: LocalDateTime): String {
     val datoFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy 'kl.' HH.mm", Locale.forLanguageTag("nb"))
@@ -112,11 +108,13 @@ fun messageUtenFnr(e: WebClientResponseException): String {
 fun toFiksErrorMessageUtenFnr(e: WebClientResponseException) = e.toFiksErrorMessage()?.feilmeldingUtenFnr ?: ""
 
 private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessage? =
-    try {
-        objectMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
-    } catch (e: IOException) {
-        null
-    }
+    runCatching { sosialhjelpJsonMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java) }
+        .getOrElse {
+            when (it) {
+                is MismatchedInputException -> null
+                else -> throw it
+            }
+        }
 
 val String.maskerFnr: String
     get() = this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")

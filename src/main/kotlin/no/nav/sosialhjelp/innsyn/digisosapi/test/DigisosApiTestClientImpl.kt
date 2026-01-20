@@ -16,7 +16,7 @@ import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.FilOpplastingResponse
 import no.nav.sosialhjelp.innsyn.digisosapi.toHttpEntity
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ContentDisposition
@@ -57,7 +57,7 @@ class DigisosApiTestClientImpl(
                 .post()
                 .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
                 .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
-                .body(BodyInserters.fromValue(objectMapper.writeValueAsString(digisosApiWrapper)))
+                .body(BodyInserters.fromValue(sosialhjelpJsonMapper.writeValueAsString(digisosApiWrapper)))
                 .retrieve()
                 .bodyToMono<String>()
                 .onErrorMap(WebClientResponseException::class.java) { e ->
@@ -81,7 +81,7 @@ class DigisosApiTestClientImpl(
             val vedleggMetadata = VedleggMetadata(file.filnavn?.value, file.mimetype, file.storrelse)
             bodyBuilder.part(
                 "vedleggSpesifikasjon:$fileId",
-                objectMapper.writeValueAsString(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
+                sosialhjelpJsonMapper.writeValueAsString(vedleggMetadata).toHttpEntity("vedleggSpesifikasjon:$fileId"),
             )
             bodyBuilder.part("dokument:$fileId", file.data).headers {
                 it.contentType = MediaType.APPLICATION_OCTET_STREAM

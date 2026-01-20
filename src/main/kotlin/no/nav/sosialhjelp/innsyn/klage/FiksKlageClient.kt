@@ -7,7 +7,7 @@ import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import org.springframework.core.io.InputStreamResource
@@ -206,7 +206,7 @@ private fun MultipartBodyBuilder.createMetadataAndPartBodyForKlagePdf(klagePdf: 
         "metadata",
         null,
         MediaType.APPLICATION_JSON,
-        objectMapper.writeValueAsString(klagePdf.createMetadataBody()),
+        sosialhjelpJsonMapper.writeValueAsString(klagePdf.createMetadataBody()),
     )
 
     buildPart(
@@ -247,4 +247,4 @@ data class MandatoryFilesForKlage(
     val klagePdf: FilForOpplasting,
 )
 
-private fun JsonVedleggSpesifikasjon.toJson(): String = objectMapper.writeValueAsString(this)
+private fun JsonVedleggSpesifikasjon.toJson(): String = sosialhjelpJsonMapper.writeValueAsString(this)

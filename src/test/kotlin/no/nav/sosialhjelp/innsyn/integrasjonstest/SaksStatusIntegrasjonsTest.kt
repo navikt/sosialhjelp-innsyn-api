@@ -15,7 +15,7 @@ import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
 
@@ -34,9 +34,9 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
     @Test
     @WithMockUser("123")
     fun `Skal hente saksstatus for fiksDigisoID`() {
-        val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val digisosSakOk = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soknad = JsonSoknad()
-        val soker = objectMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
+        val soker = sosialhjelpJsonMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getSoknad(any()) } returns digisosSakOk
         coEvery { fiksService.getDocument(any(), any(), JsonSoknad::class.java, any()) } returns soknad

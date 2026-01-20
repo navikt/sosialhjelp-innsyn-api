@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.coEvery
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -16,6 +14,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")

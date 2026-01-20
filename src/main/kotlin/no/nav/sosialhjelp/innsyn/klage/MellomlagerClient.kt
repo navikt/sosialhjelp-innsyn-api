@@ -204,7 +204,7 @@ private fun createJsonFilMetadata(objectFilForOpplasting: FilForOpplasting): Str
 private fun createBodyForUpload(filerForOpplasting: List<FilForOpplasting>): MultiValueMap<String, HttpEntity<*>> =
     MultipartBodyBuilder()
         .run {
-            filerForOpplasting.forEachIndexed { _, file ->
+            filerForOpplasting.forEach { file ->
                 part("metadata-part", createJsonFilMetadata(file))
                     .headers {
                         it.contentType = MediaType.APPLICATION_JSON

@@ -20,7 +20,7 @@ import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
@@ -135,13 +135,13 @@ internal class FiksServiceTest {
     @Test
     fun `GET alle DigisosSaker`() =
         runTest(timeout = 5.seconds) {
-            val digisosSakOk = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+            val digisosSakOk = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
 
             mockWebServer.enqueue(
                 MockResponse()
                     .setResponseCode(200)
                     .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .setBody(objectMapper.writeValueAsString(listOf(digisosSakOk, digisosSakOk))),
+                    .setBody(sosialhjelpJsonMapper.writeValueAsString(listOf(digisosSakOk, digisosSakOk))),
             )
 
             val result = fiksService.getAllSoknader()

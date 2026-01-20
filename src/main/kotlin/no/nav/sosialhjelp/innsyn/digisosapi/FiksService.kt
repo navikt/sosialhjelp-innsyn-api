@@ -20,7 +20,7 @@ import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.beans.factory.annotation.Value
@@ -142,7 +142,7 @@ class FiksService(
 
     fun serialize(metadata: Any): String {
         try {
-            return objectMapper.writeValueAsString(metadata)
+            return sosialhjelpJsonMapper.writeValueAsString(metadata)
         } catch (e: JsonProcessingException) {
             throw RuntimeException("Feil under serialisering av metadata", e)
         }
@@ -335,5 +335,5 @@ fun Any.toHttpEntity(
 
     headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
     headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
-    return HttpEntity(this, headerMap)
+    return HttpEntity(this, HttpHeaders(headerMap))
 }

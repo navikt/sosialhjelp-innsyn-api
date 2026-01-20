@@ -1,15 +1,5 @@
 package no.nav.sosialhjelp.innsyn.utils
 
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.ErrorMessage
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.web.reactive.function.client.WebClientResponseException
-import java.io.IOException
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
@@ -23,6 +13,16 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
 import kotlin.reflect.full.companionObject
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.ErrorMessage
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import tools.jackson.databind.exc.MismatchedInputException
 
 const val COUNTER_SUFFIX_LENGTH = 4
 
@@ -113,8 +113,8 @@ fun toFiksErrorMessageUtenFnr(e: WebClientResponseException) = e.toFiksErrorMess
 
 private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessage? =
     try {
-        objectMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
-    } catch (e: IOException) {
+        sosialhjelpJsonMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
+    } catch (e: MismatchedInputException) {
         null
     }
 

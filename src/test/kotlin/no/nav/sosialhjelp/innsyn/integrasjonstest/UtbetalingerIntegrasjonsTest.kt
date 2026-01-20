@@ -11,7 +11,7 @@ import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response2
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -24,8 +24,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
 
     @Test
     fun `Alle planlagte utbetalinger skal vises`() {
-        val digisosSak = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        val soker = objectMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
+        val digisosSak = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
         coEvery { fiksService.getSoknad(any()) } returns digisosSak
@@ -62,8 +62,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
 
     @Test
     fun `Annullerte utbetalinger skal filtreres bort`() {
-        val digisosSak = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        val soker = objectMapper.readValue(jsonDigisosSokerMedAnnullerteUtbetalinger, JsonDigisosSoker::class.java)
+        val digisosSak = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedAnnullerteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
         coEvery { fiksService.getSoknad(any()) } returns digisosSak
@@ -98,8 +98,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
 
     @Test
     fun `Utbetalinger uten bade forfallsdato og utbetalingsdato skal filtreres bort`() {
-        val digisosSak = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        val soker = objectMapper.readValue(jsonDigisosSokerUtenDatoer, JsonDigisosSoker::class.java)
+        val digisosSak = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerUtenDatoer, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
         coEvery { fiksService.getSoknad(any()) } returns digisosSak
@@ -141,11 +141,11 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val fiksDigisosId1 = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
         val fiksDigisosId2 = "3fa85f64-5717-4562-b3fc-2c963f66afa7"
 
-        val digisosSak1 = objectMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        val digisosSak2 = objectMapper.readValue(ok_digisossak_response2, DigisosSak::class.java)
+        val digisosSak1 = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+        val digisosSak2 = sosialhjelpJsonMapper.readValue(ok_digisossak_response2, DigisosSak::class.java)
 
-        val soker1 = objectMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
-        val soker2 = objectMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
+        val soker1 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
+        val soker2 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2)
         coEvery { fiksService.getSoknad(fiksDigisosId1) } returns digisosSak1

@@ -1,11 +1,5 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlClientOld
 import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
@@ -13,6 +7,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.kotlinModule
+import tools.jackson.module.kotlin.readValue
 
 @Configuration
 class PdlIntegrationTestConfig {
@@ -25,11 +24,11 @@ class PdlIntegrationTestConfig {
 }
 
 class HentPDLClientMock : PdlClientOld {
-    val mapper: ObjectMapper =
-        jacksonObjectMapper()
-            .registerKotlinModule()
-            .registerModule(JavaTimeModule())
+    val mapper: JsonMapper =
+        jacksonMapperBuilder()
+            .addModule(kotlinModule())
             .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+            .build()
 
     override suspend fun hentPerson(
         ident: String,

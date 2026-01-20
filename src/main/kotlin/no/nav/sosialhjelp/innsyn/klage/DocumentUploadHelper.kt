@@ -1,7 +1,10 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.module.kotlin.readValue
+import java.io.IOException
+import java.io.InputStream
+import java.time.LocalDate
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -11,7 +14,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.objectMapper
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.FilValidering
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
@@ -31,10 +34,7 @@ import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException
 import org.apache.tika.Tika
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.codec.multipart.FilePart
-import java.io.IOException
-import java.io.InputStream
-import java.time.LocalDate
-import java.util.UUID
+import tools.jackson.module.kotlin.readValue
 
 class DocumentUploadHelper {
     companion object {
@@ -77,7 +77,7 @@ class DocumentUploadHelper {
                 it.read(bytes)
                 DataBufferUtils.release(it)
 
-                objectMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
+                sosialhjelpJsonMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
             }?.awaitSingleOrNull()
             ?.filter { it.filer.isNotEmpty() }
             ?: error("Missing metadata.json for Klage upload")
@@ -249,13 +249,3 @@ data class OpplastetFilMetadata(
     val filnavn: String,
     val uuid: UUID,
 )
-
-private fun OpplastetVedleggMetadataRequest.toOpplastetVedleggMetadata() =
-    OpplastetVedleggMetadata(
-        type = type,
-        tilleggsinfo = tilleggsinfo,
-        hendelsetype = hendelsetype,
-        hendelsereferanse = hendelsereferanse,
-        filer = filer.map { OpplastetFil(Filename(it.filnavn), it.uuid) }.toMutableList(),
-        innsendelsesfrist = innsendelsesfrist,
-    )

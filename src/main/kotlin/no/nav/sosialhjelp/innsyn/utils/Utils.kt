@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.utils
 
-import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -10,7 +9,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.temporal.ChronoUnit
-import java.util.Date
 import java.util.Locale
 import kotlin.reflect.full.companionObject
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
@@ -33,11 +31,11 @@ fun hentUrlFraFilreferanse(
     when (filreferanse) {
         is JsonDokumentlagerFilreferanse ->
             clientProperties.fiksDokumentlagerEndpointUrl +
-                "/dokumentlager/nedlasting/niva4/${filreferanse.id}?inline=true"
+                    "/dokumentlager/nedlasting/niva4/${filreferanse.id}?inline=true"
 
         is JsonSvarUtFilreferanse ->
             clientProperties.fiksSvarUtEndpointUrl +
-                "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
+                    "/forsendelse/${filreferanse.id}/${filreferanse.nr}?inline=true"
 
         else -> throw RuntimeException(
             "Noe uventet feilet. JsonFilreferanse på annet format enn JsonDokumentlagerFilreferanse og JsonSvarUtFilreferanse",
@@ -58,8 +56,6 @@ fun String.toLocalDateTime(): LocalDateTime =
 fun String.toLocalDate(): LocalDate = LocalDate.parse(this, ISO_LOCAL_DATE)
 
 fun unixToLocalDateTime(tidspunkt: Long): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(tidspunkt), ZoneId.of("Europe/Oslo"))
-
-fun unixTimestampToDate(tidspunkt: Long): Date = Timestamp.valueOf(unixToLocalDateTime(tidspunkt))
 
 fun formatLocalDateTime(dato: LocalDateTime): String {
     val datoFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy 'kl.' HH.mm", Locale.forLanguageTag("nb"))
@@ -112,11 +108,13 @@ fun messageUtenFnr(e: WebClientResponseException): String {
 fun toFiksErrorMessageUtenFnr(e: WebClientResponseException) = e.toFiksErrorMessage()?.feilmeldingUtenFnr ?: ""
 
 private fun <T : WebClientResponseException> T.toFiksErrorMessage(): ErrorMessage? =
-    try {
-        sosialhjelpJsonMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java)
-    } catch (e: MismatchedInputException) {
-        null
-    }
+    runCatching { sosialhjelpJsonMapper.readValue(this.responseBodyAsByteArray, ErrorMessage::class.java) }
+        .getOrElse {
+            when (it) {
+                is MismatchedInputException -> null
+                else -> throw it
+            }
+        }
 
 val String.maskerFnr: String
     get() = this.replace(Regex("""\b[0-9]{11}\b"""), "[FNR]")

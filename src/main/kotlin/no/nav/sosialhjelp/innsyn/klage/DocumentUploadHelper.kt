@@ -1,10 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import java.io.IOException
 import java.io.InputStream
-import java.time.LocalDate
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -12,12 +9,10 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.FilValidering
-import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.MAKS_TOTAL_FILSTORRELSE
 import no.nav.sosialhjelp.innsyn.vedlegg.OppgaveValidering
 import no.nav.sosialhjelp.innsyn.vedlegg.OpplastetFil
@@ -234,18 +229,3 @@ class DocumentUploadHelper {
             }
         }
 }
-
-data class OpplastetVedleggMetadataRequest(
-    val type: String,
-    val tilleggsinfo: String?,
-    val hendelsetype: JsonVedlegg.HendelseType?,
-    val hendelsereferanse: String?,
-    val filer: List<OpplastetFilMetadata>,
-    @param:JsonFormat(pattern = "yyyy-MM-dd")
-    val innsendelsesfrist: LocalDate?,
-)
-
-data class OpplastetFilMetadata(
-    val filnavn: String,
-    val uuid: UUID,
-)

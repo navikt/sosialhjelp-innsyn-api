@@ -25,6 +25,7 @@ class PdlConfig(
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
                         .doOnConnected { it.addHandlerLast(ReadTimeoutHandler(30)) },
                 ),
-            ).defaultHeader(IntegrationUtils.HEADER_BEHANDLINGSNUMMER, IntegrationUtils.BEHANDLINGSNUMMER_INNSYN)
+            )
+            .defaultHeader(IntegrationUtils.HEADER_BEHANDLINGSNUMMER, IntegrationUtils.BEHANDLINGSNUMMER_INNSYN)
             .build()
 }

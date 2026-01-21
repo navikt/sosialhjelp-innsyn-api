@@ -21,9 +21,8 @@ class DigisosApiTestConfig(
     ) = webClientBuilder
         .clientConnector(ReactorClientHttpConnector(httpClient))
         .baseUrl(clientProperties.fiksDigisosEndpointUrl)
-        .codecs {
-            it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
-        }.defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
+        .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
+        .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonIdKommune)
         .defaultHeader(IntegrationUtils.HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonPassordKommune)
         .build()
 }

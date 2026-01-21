@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -13,7 +14,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_ALLE_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
-import no.nav.sosialhjelp.innsyn.utils.configureCodecs
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -24,7 +24,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.netty.http.client.HttpClient
-import kotlin.coroutines.cancellation.CancellationException
 
 @Component
 class KommuneInfoClient(
@@ -86,7 +85,7 @@ class KommuneInfoClient(
         webClientBuilder
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .clientConnector(ReactorClientHttpConnector(httpClient))
-            .configureCodecs()
+            .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
             .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .build()

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.token.Token
-import no.nav.sosialhjelp.innsyn.utils.configureCodecs
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -47,7 +46,7 @@ sealed class TexasClient(
     private val texasWebClient =
         texasWebClientBuilder
             .defaultHeaders { it.contentType = MediaType.APPLICATION_JSON }
-            .configureCodecs()
+            .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
             .build()
 
     private val maskinportenParams: Map<String, String> = mapOf("identity_provider" to "maskinporten", "target" to "ks:fiks")

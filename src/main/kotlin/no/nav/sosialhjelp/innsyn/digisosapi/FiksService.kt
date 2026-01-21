@@ -22,6 +22,7 @@ import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
@@ -168,6 +169,7 @@ class FiksService(
 class FiksClient(
     private val fiksWebClient: WebClient,
     private val tilgangskontroll: TilgangskontrollService,
+    private val cacheManager: CacheManager?,
 ) {
     @Cacheable("digisosSak", key = "#digisosId")
     suspend fun hentDigisosSak(digisosId: String): DigisosSak =
@@ -213,8 +215,11 @@ class FiksClient(
                         }
                     }.awaitSingleOrNull()
                     ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
-
-            digisosSaker.onEach { tilgangskontroll.verifyDigisosSakIsForCorrectUser(it) }
+            val cache = cacheManager?.getCache("digisosSak")
+            digisosSaker.onEach {
+                tilgangskontroll.verifyDigisosSakIsForCorrectUser(it)
+                cache?.put(it.fiksDigisosId, it)
+            }
         }
 
     suspend fun lastOppNyEttersendelse(

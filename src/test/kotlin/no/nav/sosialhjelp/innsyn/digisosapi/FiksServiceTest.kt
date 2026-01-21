@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -32,6 +33,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.springframework.cache.Cache
+import org.springframework.cache.CacheManager
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
@@ -47,7 +50,7 @@ internal class FiksServiceTest {
     private val tilgangskontroll: TilgangskontrollService = mockk()
     private val meterRegistry: MeterRegistry = mockk()
     private val counterMock: Counter = mockk()
-    private val fiksClient = FiksClient(fiksWebClient, tilgangskontroll)
+    private val fiksClient = FiksClient(fiksWebClient, tilgangskontroll, null)
     private lateinit var fiksService: FiksService
 
     private val id = "123"
@@ -151,6 +154,33 @@ internal class FiksServiceTest {
 
             assertThat(result).isNotNull
             assertThat(result).hasSize(2)
+        }
+
+    @Test
+    fun `GET alle DigisosSaker should populate cache for individual items`() =
+        runTest(timeout = 5.seconds) {
+            val digisosSak1 = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+            val digisosSak2 = digisosSak1.copy(fiksDigisosId = "456")
+
+            val cacheMock: Cache = mockk(relaxed = true)
+            val cacheManagerMock: CacheManager = mockk()
+            every { cacheManagerMock.getCache("digisosSak") } returns cacheMock
+
+            val fiksClientWithCache = FiksClient(fiksWebClient, tilgangskontroll, cacheManagerMock)
+            val fiksServiceWithCache = FiksService(tilgangskontroll, fiksClientWithCache, meterRegistry)
+
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .setBody(sosialhjelpJsonMapper.writeValueAsString(listOf(digisosSak1, digisosSak2))),
+            )
+
+            val result = fiksServiceWithCache.getAllSoknader()
+
+            assertThat(result).hasSize(2)
+            verify { cacheMock.put(digisosSak1.fiksDigisosId, digisosSak1) }
+            verify { cacheMock.put(digisosSak2.fiksDigisosId, digisosSak2) }
         }
 
     @Test

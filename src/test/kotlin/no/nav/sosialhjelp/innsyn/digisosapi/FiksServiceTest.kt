@@ -30,6 +30,7 @@ import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -46,7 +47,7 @@ internal class FiksServiceTest {
     private val tilgangskontroll: TilgangskontrollService = mockk()
     private val meterRegistry: MeterRegistry = mockk()
     private val counterMock: Counter = mockk()
-    private val fiksClient = FiksClient(fiksWebClient, tilgangskontroll, 2, 5)
+    private val fiksClient = FiksClient(fiksWebClient, tilgangskontroll)
     private lateinit var fiksService: FiksService
 
     private val id = "123"
@@ -87,6 +88,7 @@ internal class FiksServiceTest {
         }
 
     @Test
+    @Disabled("Skrudd av retry inntil videre pga overbelastning hos Fiks")
     fun `GET DigisosSak skal bruke retry hvis Fiks gir 5xx-feil`() =
         runTest(timeout = 10.seconds) {
             repeat(3) {
@@ -103,6 +105,7 @@ internal class FiksServiceTest {
         }
 
     @Test
+    @Disabled("Skrudd av retry inntil videre pga overbelastning hos Fiks")
     fun `GET alle DigisosSaker skal bruke retry hvis Fiks gir 5xx-feil`() =
         runTest(timeout = 20.seconds) {
             repeat(3) {

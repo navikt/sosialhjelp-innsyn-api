@@ -13,7 +13,6 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
-import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -23,14 +22,12 @@ import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.MultipartBodyBuilder
@@ -80,8 +77,18 @@ class FiksService(
         }
     }
 
-    suspend fun getSoknad(digisosId: String): DigisosSak =
-        fiksClient.hentDigisosSak(digisosId).also { tilgangskontrollService.verifyDigisosSakIsForCorrectUser(it) }
+    suspend fun getSoknad(digisosId: String): DigisosSak {
+        val key = "DigisosSak:$digisosId"
+        val mutex = requestLocks.computeIfAbsent(key) { Mutex() }
+
+        return try {
+            mutex.withLock {
+                fiksClient.hentDigisosSak(digisosId)
+            }
+        } finally {
+            requestLocks.remove(key)
+        }.also { tilgangskontrollService.verifyDigisosSakIsForCorrectUser(it) }
+    }
 
     suspend fun uploadEttersendelse(
         files: List<FilForOpplasting>,
@@ -161,8 +168,6 @@ class FiksService(
 class FiksClient(
     private val fiksWebClient: WebClient,
     private val tilgangskontroll: TilgangskontrollService,
-    @Value($$"${retry_fiks_max_attempts}") retryMaxAttempts: Long,
-    @Value($$"${retry_fiks_initial_delay}") retryInitialDelay: Long,
 ) {
     @Cacheable("digisosSak", key = "#digisosId")
     suspend fun hentDigisosSak(digisosId: String): DigisosSak =
@@ -177,7 +182,6 @@ class FiksClient(
                     .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .retrieve()
                     .bodyToMono<DigisosSak>()
-                    .retryWhen(fiksRetry)
                     .onErrorMap(WebClientResponseException::class.java) { e ->
                         val feilmelding = "Fiks - hentDigisosSak feilet - ${messageUtenFnr(e)}"
                         when {
@@ -201,7 +205,6 @@ class FiksClient(
                     .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .retrieve()
                     .bodyToMono<List<DigisosSak>>()
-                    .retryWhen(fiksRetry)
                     .onErrorMap(WebClientResponseException::class.java) { e ->
                         val feilmelding = "Fiks - hentAlleDigisosSaker feilet - ${messageUtenFnr(e)}"
                         when {
@@ -276,7 +279,6 @@ class FiksClient(
                     .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .retrieve()
                     .bodyToMono(requestedClass)
-                    .retryWhen(fiksRetry)
                     .onErrorMap(WebClientResponseException::class.java) { e ->
                         val feilmelding = "Fiks - hentDokument feilet - ${messageUtenFnr(e)}"
                         when {
@@ -292,16 +294,6 @@ class FiksClient(
     companion object {
         private val log by logger()
     }
-
-    private val fiksRetry =
-        retryBackoffSpec(maxAttempts = retryMaxAttempts, initialWaitIntervalMillis = retryInitialDelay)
-            .onRetryExhaustedThrow { _, retrySignal ->
-                throw FiksServerException(
-                    status = SERVICE_UNAVAILABLE.value(),
-                    message = "Fiks - retry har nådd max antall forsøk (=3)",
-                    cause = retrySignal.failure(),
-                )
-            }
 }
 
 class FiksGoneException(

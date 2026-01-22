@@ -13,7 +13,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_ALLE_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
-import no.nav.sosialhjelp.innsyn.utils.configureCodecs
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -86,7 +85,7 @@ class KommuneInfoClient(
         webClientBuilder
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .clientConnector(ReactorClientHttpConnector(httpClient))
-            .configureCodecs()
+            .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
             .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
             .build()

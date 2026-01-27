@@ -17,7 +17,6 @@ import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.MandatoryFilesForKlage
 import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
-import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse

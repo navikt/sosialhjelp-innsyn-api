@@ -30,6 +30,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${IDPORTEN_ISSUER:http://localhost:8888/default}
+  reactor:
+    context-propagation: limited
 nais:
   token:
     endpoint: http://localhost:${mock-oauth2-server.port}/maskinporten/token

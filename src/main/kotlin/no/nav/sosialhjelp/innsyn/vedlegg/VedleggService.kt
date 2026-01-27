@@ -1,10 +1,13 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.api.fiks.Ettersendelse
 import no.nav.sosialhjelp.innsyn.app.exceptions.NedlastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -66,8 +69,8 @@ class VedleggService(
         val ettersendteVedlegg =
             digisosSak.ettersendtInfoNAV
                 ?.ettersendelser
-                ?.flatMap { ettersendelse ->
-                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, ettersendelse.vedleggMetadata)
+                ?.hentVedleggSpesifikasjon(digisosSak)
+                ?.flatMap { (ettersendelse, jsonVedleggSpesifikasjon) ->
                     jsonVedleggSpesifikasjon.vedlegg
                         .filter { it.hendelseReferanse == hendelseReferanse && LASTET_OPP_STATUS == it.status }
                         .map { vedlegg ->
@@ -86,6 +89,16 @@ class VedleggService(
         return kombinerAlleLikeVedlegg(ettersendteVedlegg)
     }
 
+    private suspend fun List<Ettersendelse>.hentVedleggSpesifikasjon(digisosSak: DigisosSak) =
+        coroutineScope {
+            this@hentVedleggSpesifikasjon
+                .associateWith {
+                    async {
+                        hentVedleggSpesifikasjon(digisosSak, it.vedleggMetadata)
+                    }
+                }.mapValues { (_, value) -> value.await() }
+        }
+
     suspend fun hentEttersendteVedlegg(
         digisosSak: DigisosSak,
         model: InternalDigisosSoker,
@@ -93,9 +106,9 @@ class VedleggService(
         val alleVedlegg =
             digisosSak.ettersendtInfoNAV
                 ?.ettersendelser
-                ?.flatMap { ettersendelse ->
+                ?.hentVedleggSpesifikasjon(digisosSak)
+                ?.flatMap { (ettersendelse, jsonVedleggSpesifikasjon) ->
                     var filIndex = 0
-                    val jsonVedleggSpesifikasjon = hentVedleggSpesifikasjon(digisosSak, ettersendelse.vedleggMetadata)
                     jsonVedleggSpesifikasjon.vedlegg
                         .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                         .map { vedlegg ->

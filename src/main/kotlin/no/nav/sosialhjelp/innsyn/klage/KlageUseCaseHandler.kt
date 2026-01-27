@@ -19,9 +19,7 @@ class KlageUseCaseHandler(
         digisosId: UUID,
         input: KlageInput,
     ): KlageDto {
-        // TODO Er det nødvendig å sjekke om kommune har innsyn?
-        val (kommunenummer, navEnhet) = kommuneHandler.getMottakerInfo(digisosId)
-        kommuneHandler.validateKommuneConfig(kommunenummer)
+        // TODO Trengs det å validere at kommune har innsyn, etc?!
 
         val jsonKlage = jsonKlageGenerator.generateJsonKlage(
             fiksDigisosId = digisosId,

@@ -62,6 +62,7 @@ class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
     private val clientProperties: ClientProperties,
+    private val klageJsonGenerator: KlageJsonGenerator,
 ) : KlageService {
     override suspend fun sendKlage(
         fiksDigisosId: UUID,

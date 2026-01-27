@@ -5,11 +5,14 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.pdl.PdlService
 
 @Component
 class KlageUseCaseHandler(
     private val kommuneHandler: KommuneHandler,
     private val klageService: KlageService,
+    private val jsonKlageGenerator: KlageJsonGenerator,
+    private val pdlService: PdlService,
     meterRegistry: MeterRegistry,
 ) {
     private val klageMetricsService = KlageMetricsService(meterRegistry)
@@ -18,15 +21,21 @@ class KlageUseCaseHandler(
         digisosId: UUID,
         input: KlageInput,
     ): KlageDto {
+        // TODO Er det nødvendig å sjekke om kommune har innsyn?
         val (kommunenummer, navEnhet) = kommuneHandler.getMottakerInfo(digisosId)
         kommuneHandler.validateKommuneConfig(kommunenummer)
+
+        val jsonKlage = jsonKlageGenerator.generateJsonKlage(
+            fiksDigisosId = digisosId,
+            input = input
+        )
 
         runCatching { klageService.sendKlage(digisosId, input, kommunenummer, navEnhet) }
             .onSuccess { klageMetricsService.registerSent() }
             .onFailure { klageMetricsService.registerSendError() }
             .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
 
-        TODO("Returner KlateDto")
+        TODO("Returner KlageDto")
     }
 
     fun hentAlleKlager(digisosId: UUID): List<KlageRef> {

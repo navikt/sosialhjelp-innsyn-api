@@ -13,14 +13,14 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
+import no.nav.sosialhjelp.innsyn.klage.KlageDto
+import no.nav.sosialhjelp.innsyn.klage.KlageInput
+import no.nav.sosialhjelp.innsyn.klage.KlageRef
 import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendtInfoNAVDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksProtokoll
-import no.nav.sosialhjelp.innsyn.klage.KlageDto
-import no.nav.sosialhjelp.innsyn.klage.KlageInput
-import no.nav.sosialhjelp.innsyn.klage.KlageRef
 import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerClient
 import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerResponse
 import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagringDokumentInfo

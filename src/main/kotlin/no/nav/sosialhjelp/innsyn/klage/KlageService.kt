@@ -7,7 +7,15 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
+import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendelseDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.MandatoryFilesForKlage
+import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
+import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
@@ -22,14 +30,6 @@ import reactor.core.publisher.Flux
 import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
-import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendelseDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.MandatoryFilesForKlage
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
-import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 
 interface KlageService {
     suspend fun sendKlage(
@@ -71,7 +71,6 @@ class KlageServiceImpl(
         kommunenummer: String,
         navEnhet: Soknadsmottaker,
     ) {
-
         klageClient.sendKlage(
             digisosId = fiksDigisosId,
             klageId = input.klageId,

@@ -34,7 +34,7 @@ class KlageController(
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler.lastOppVedlegg(
-            fiksDigisosId = fiksDigisosId,
+            digisosId = fiksDigisosId,
             navEksternRefId = navEksternRefId,
             rawFiles = rawFiles,
         )

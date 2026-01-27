@@ -1,6 +1,9 @@
 package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
+import no.nav.sosialhjelp.innsyn.klage.DocumentForKlage
+import no.nav.sosialhjelp.innsyn.klage.DocumentUploadHelper
+import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.ValidationValues
 import no.nav.sosialhjelp.innsyn.vedlegg.calculateContentLength
@@ -8,9 +11,6 @@ import no.nav.sosialhjelp.innsyn.vedlegg.virusscan.VirusScanner
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import java.util.UUID
-import no.nav.sosialhjelp.innsyn.klage.DocumentForKlage
-import no.nav.sosialhjelp.innsyn.klage.DocumentUploadHelper
-import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 
 interface MellomlagerService {
     suspend fun getAllDocumentMetadataForRef(navEksternRef: UUID): List<MellomlagringDokumentInfo>

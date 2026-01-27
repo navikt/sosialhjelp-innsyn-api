@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import java.io.ByteArrayInputStream
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
@@ -14,8 +17,6 @@ import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.MandatoryFilesForKlage
 import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
-import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
-import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
@@ -27,9 +28,6 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import java.io.ByteArrayInputStream
-import java.time.LocalDateTime
-import java.util.UUID
 
 interface KlageService {
     suspend fun sendKlage(

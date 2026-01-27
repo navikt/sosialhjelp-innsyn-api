@@ -5,14 +5,12 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import java.util.UUID
-import no.nav.sosialhjelp.innsyn.pdl.PdlService
 
 @Component
 class KlageUseCaseHandler(
     private val kommuneHandler: KommuneHandler,
     private val klageService: KlageService,
     private val jsonKlageGenerator: JsonKlageGenerator,
-    private val pdlService: PdlService,
     meterRegistry: MeterRegistry,
 ) {
     private val klageMetricsService = KlageMetricsService(meterRegistry)
@@ -30,7 +28,9 @@ class KlageUseCaseHandler(
             input = input
         )
 
-        runCatching { klageService.sendKlage(jsonKlage) }
+        val klagePdf = KlagePdfGenerator.generatePdf(jsonKlage)
+
+        runCatching { klageService.sendKlage(jsonKlage, klagePdf) }
             .onSuccess { klageMetricsService.registerSent() }
             .onFailure { klageMetricsService.registerSendError() }
             .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }

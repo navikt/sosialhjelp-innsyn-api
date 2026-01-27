@@ -8,7 +8,6 @@ logback = "1.5.24"
 logstash = "8.1"
 filformat = "1.2026.01.19-15.17-55bb3d1bca81"
 micrometer_registry = "1.16.2"
-micrometerPropagation = "1.2.0"
 prometheus = "0.16.0"
 jackson = "3.0.3"
 commons_codec = "1.20.0"
@@ -63,8 +62,6 @@ resilience4j-spring-boot3 = { module = "io.github.resilience4j:resilience4j-spri
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
 
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer_registry" }
-# Automatisk propagering av context (spring security, tracing, osv)
-micrometer-context-propagation = { module = "io.micrometer:context-propagation", version.ref = "micrometerPropagation" }
 promotheus-simpleclient-common = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus" }
 prometheus-simpleclient-hotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus" }
 
@@ -150,7 +147,6 @@ prometheus = [
     "prometheus-simpleclient-hotspot",
     "promotheus-simpleclient-common",
     "micrometer-registry-prometheus",
-    "micrometer-context-propagation"
 ]
 
 [plugins]

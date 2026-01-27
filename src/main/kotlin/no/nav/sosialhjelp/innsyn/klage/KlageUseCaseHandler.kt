@@ -2,7 +2,6 @@ package no.nav.sosialhjelp.innsyn.klage
 
 import io.micrometer.core.instrument.MeterRegistry
 import java.util.UUID
-import no.nav.sosialhjelp.innsyn.prometheus.PrometheusMetricsService
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
@@ -15,9 +14,10 @@ class KlageUseCaseHandler(
 ) {
     private val klageMetricsService = KlageMetricsService(meterRegistry)
 
-    suspend fun sendKlage(digisosId: UUID, input: KlageInput): KlageDto {
-
-
+    suspend fun sendKlage(
+        digisosId: UUID,
+        input: KlageInput,
+    ): KlageDto {
         val (kommunenummer, navEnhet) = kommuneHandler.getMottakerInfo(digisosId)
         kommuneHandler.validateKommuneConfig(kommunenummer)
 
@@ -33,7 +33,10 @@ class KlageUseCaseHandler(
         TODO("Returner KlageRefs")
     }
 
-    fun hentKlage(digisosId: UUID, klageId: UUID): KlageDto? {
+    fun hentKlage(
+        digisosId: UUID,
+        klageId: UUID,
+    ): KlageDto? {
         TODO("Hente klage for klageId")
     }
 
@@ -41,9 +44,7 @@ class KlageUseCaseHandler(
         digisosId: UUID,
         navEksternRefId: UUID,
         rawFiles: Flux<FilePart>,
-    ): DocumentsForKlage {
-        return klageService.lastOppVedlegg(digisosId, navEksternRefId, rawFiles)
-    }
+    ): DocumentsForKlage = klageService.lastOppVedlegg(digisosId, navEksternRefId, rawFiles)
 
     fun sendEttersendelse(
         digisosId: UUID,
@@ -54,13 +55,7 @@ class KlageUseCaseHandler(
     }
 }
 
-class KlageIkkeSentException(message: String, cause: Throwable): RuntimeException(message, cause)
-
-private class KlageMetricsService(meterRegistry: MeterRegistry): PrometheusMetricsService(meterRegistry) {
-
-    private val klageSentCounter = createCounter("klage_sent_counter")
-    private val sendKlageErrorCounter = createCounter("send_klage_error_counter")
-
-    fun registerSent() = klageSentCounter.increment()
-    fun registerSendError() = sendKlageErrorCounter.increment()
-}
+class KlageIkkeSentException(
+    message: String,
+    cause: Throwable,
+) : RuntimeException(message, cause)

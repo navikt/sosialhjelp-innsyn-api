@@ -10,6 +10,9 @@ spring:
       password: pw
   session:
     store-type: redis
+  # Automatisk propagering av context (spring security, tracing, osv)
+  reactor:
+    context-propagation: auto
   webflux:
     base-path: '/sosialhjelp/innsyn-api'
     multipart:

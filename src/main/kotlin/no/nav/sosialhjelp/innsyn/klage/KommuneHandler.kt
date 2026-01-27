@@ -1,11 +1,11 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.util.UUID
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksClient
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class KommuneHandler(

@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.event
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
@@ -41,6 +42,7 @@ class EventService(
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
 ) {
+    @WithSpan("createModel")
     suspend fun createModel(digisosSak: DigisosSak): InternalDigisosSoker {
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak)
         val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak)
@@ -177,7 +179,7 @@ class EventService(
         jsonDigisosSoker.hendelser
             .filterIsInstance<JsonUtbetaling>()
             .sortedBy { it.hendelsestidspunkt }
-            .map { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
+            .forEach { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
         return model
     }
 

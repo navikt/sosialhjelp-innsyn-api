@@ -11,7 +11,7 @@ import no.nav.sosialhjelp.innsyn.pdl.PdlService
 class KlageUseCaseHandler(
     private val kommuneHandler: KommuneHandler,
     private val klageService: KlageService,
-    private val jsonKlageGenerator: KlageJsonGenerator,
+    private val jsonKlageGenerator: JsonKlageGenerator,
     private val pdlService: PdlService,
     meterRegistry: MeterRegistry,
 ) {
@@ -30,7 +30,7 @@ class KlageUseCaseHandler(
             input = input
         )
 
-        runCatching { klageService.sendKlage(digisosId, input, kommunenummer, navEnhet) }
+        runCatching { klageService.sendKlage(jsonKlage) }
             .onSuccess { klageMetricsService.registerSent() }
             .onFailure { klageMetricsService.registerSendError() }
             .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }

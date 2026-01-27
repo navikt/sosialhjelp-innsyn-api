@@ -17,7 +17,7 @@ class SessionMetadataController(
             .getUserIdFromToken()
             .let {
                 SessionMetadata(
-                    fornavn = pdlService.getFornavn(it),
+                    fornavn = pdlService.getNavn(it).fornavn,
                     harAdressebeskyttelse = pdlService.getAdressebeskyttelse(it),
                     personId = it,
                 )

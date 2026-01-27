@@ -9,16 +9,17 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
 import no.nav.sbl.soknadsosialhjelp.soknad.common.JsonKildeBruker
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
+import no.nav.sosialhjelp.innsyn.app.token.TokenUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import org.springframework.stereotype.Component
 
 @Component
-class KlageJsonGenerator(
+class JsonKlageGenerator(
     private val fiksService: FiksService,
     private val eventService: EventService,
+    private val pdlService: PdlService,
 ) {
 
     suspend fun generateJsonKlage(
@@ -36,28 +37,39 @@ class KlageJsonGenerator(
             personIdentifikator = createJsonPersonIdentifikator()
 
             navn = createJsonSokernavn()
-            mottaker = createSoknadsmottaker(internalDigisosSoker)
+            mottaker = createSoknadsmottaker(fiksDigisosId)
 
             autentisering = createJsonAutentisering()
         }
 
-
-    private fun createJsonSokernavn(internalDigisosSoker: InternalDigisosSoker): JsonSokernavn {
-
-        internalDigisosSoker.
-
-
+    private suspend fun createJsonSokernavn(): JsonSokernavn {
+        return pdlService.getNavn(getUserIdFromToken())
+            .let {
+                JsonSokernavn()
+                    .withKilde(JsonSokernavn.Kilde.SYSTEM)
+                    .withFornavn(it.fornavn)
+                    .withMellomnavn(it.mellomnavn)
+                    .withEtternavn(it.etternavn)
+            }
     }
 
-    private fun createSoknadsmottaker(fiksDigisosId: InternalDigisosSoker): JsonSoknadsmottaker {
-        TODO("Not yet implemented")
+    private suspend fun createSoknadsmottaker(fiksDigisosId: UUID): JsonSoknadsmottaker {
+        val internalSoknad = fiksService.getSoknad(fiksDigisosId.toString())
+        return eventService.createModel(internalSoknad)
+            .let {
+                JsonSoknadsmottaker()
+                    .withNavEnhetsnavn(it.soknadsmottaker?.navEnhetsnavn)
+                    .withEnhetsnummer(it.soknadsmottaker?.navEnhetsnummer)
+                    .withKommunenummer(internalSoknad.kommunenummer)
+            }
     }
 
     private suspend fun createJsonPersonIdentifikator() = JsonPersonIdentifikator()
         .withKilde(JsonPersonIdentifikator.Kilde.SYSTEM)
-        .withVerdi(TokenUtils.getUserIdFromToken())
+        .withVerdi(getUserIdFromToken())
 
     private fun createJsonAutentisering() = JsonAutentisering().apply {
+        // TODO Denne må settes fra informasjon i token
         autentiseringsTidspunkt = LocalDateTime.now().toString()
         autentisertDigitalt = true
     }

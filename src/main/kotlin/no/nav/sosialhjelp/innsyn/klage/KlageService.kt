@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.time.LocalDateTime
-import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
@@ -24,9 +22,14 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import tools.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDateTime
+import java.util.UUID
 
 interface KlageService {
-    suspend fun sendKlage(jsonKlage: JsonKlage, klagePdf: FilForOpplasting)
+    suspend fun sendKlage(
+        jsonKlage: JsonKlage,
+        klagePdf: FilForOpplasting,
+    )
 
     suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef>
 
@@ -59,7 +62,6 @@ class KlageServiceImpl(
         klagePdf: FilForOpplasting,
     ) {
         with(jsonKlage) {
-
             klageClient.sendKlage(
                 digisosId = UUID.fromString(digisosId),
                 klageId = UUID.fromString(klageId),

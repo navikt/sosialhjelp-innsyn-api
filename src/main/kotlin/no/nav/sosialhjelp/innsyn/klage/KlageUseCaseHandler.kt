@@ -21,10 +21,11 @@ class KlageUseCaseHandler(
     ): KlageDto {
         // TODO Trengs det å validere at kommune har innsyn, etc?!
 
-        val jsonKlage = jsonKlageGenerator.generateJsonKlage(
-            fiksDigisosId = digisosId,
-            input = input
-        )
+        val jsonKlage =
+            jsonKlageGenerator.generateJsonKlage(
+                fiksDigisosId = digisosId,
+                input = input,
+            )
 
         val klagePdf = KlagePdfGenerator.generatePdf(jsonKlage)
 

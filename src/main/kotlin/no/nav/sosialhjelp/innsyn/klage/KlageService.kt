@@ -1,13 +1,16 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import java.io.ByteArrayInputStream
+import java.time.LocalDateTime
+import java.util.UUID
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
-import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendelseDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
@@ -25,17 +28,10 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import java.io.ByteArrayInputStream
-import java.time.LocalDateTime
-import java.util.UUID
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 interface KlageService {
-    suspend fun sendKlage(
-        fiksDigisosId: UUID,
-        input: KlageInput,
-        kommunenummer: String,
-        navEnhet: Soknadsmottaker,
-    )
+    suspend fun sendKlage(jsonKlage: JsonKlage,)
 
     suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef>
 
@@ -62,24 +58,23 @@ class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
     private val clientProperties: ClientProperties,
-    private val klageJsonGenerator: KlageJsonGenerator,
 ) : KlageService {
     override suspend fun sendKlage(
-        fiksDigisosId: UUID,
-        input: KlageInput,
-        kommunenummer: String,
-        navEnhet: Soknadsmottaker,
+        jsonKlage: JsonKlage,
     ) {
-        klageClient.sendKlage(
-            digisosId = fiksDigisosId,
-            klageId = input.klageId,
-            vedtakId = input.vedtakId,
-            MandatoryFilesForKlage(
-                klageJson = input.toJson(),
-                klagePdf = input.createKlagePdf(),
-                vedleggJson = createJsonVedleggSpec(input.klageId),
-            ),
-        )
+        with(jsonKlage) {
+
+            klageClient.sendKlage(
+                digisosId = UUID.fromString(digisosId),
+                klageId = UUID.fromString(klageId),
+                vedtakId = UUID.fromString(vedtakId),
+                MandatoryFilesForKlage(
+                    klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage),
+                    klagePdf = createKlagePdf(),
+                    vedleggJson = createJsonVedleggSpec(UUID.fromString(klageId)),
+                ),
+            )
+        }
     }
 
     override suspend fun sendEttersendelse(

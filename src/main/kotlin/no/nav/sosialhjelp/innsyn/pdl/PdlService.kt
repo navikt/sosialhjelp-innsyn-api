@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlGradering
+import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
@@ -16,15 +17,11 @@ class PdlService(
             .any { it.gradering in BEGRENSEDE_GRADERINGER }
 
     @Cacheable("pdlPerson")
-    suspend fun getFornavn(personId: String): String =
+    suspend fun getNavn(personId: String): PdlNavn =
         pdlClient
             .getPerson(personId)
             .navn
             .first()
-            .fornavn
-
-    @Cacheable("pdlHistoriskeIdenter")
-    suspend fun getIdentsByIdent(ident: String): List<String> = pdlClient.getIdentsByIdent(ident)
 
     companion object {
         private val BEGRENSEDE_GRADERINGER =

@@ -3,6 +3,8 @@ package no.nav.sosialhjelp.innsyn.digisosapi
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
+import java.io.Serializable
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.sync.Mutex
@@ -40,9 +42,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
 import reactor.core.scheduler.Schedulers
-import java.io.Serializable
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.getValue
 
 @Component
 class FiksService(

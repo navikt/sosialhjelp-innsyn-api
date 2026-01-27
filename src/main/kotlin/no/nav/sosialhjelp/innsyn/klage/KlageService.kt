@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlinx.coroutines.flow.toList
@@ -21,17 +20,14 @@ import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
-import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
-import no.nav.sosialhjelp.innsyn.vedlegg.pdf.PdfGenerator
-import org.apache.pdfbox.pdmodel.PDDocument
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import tools.jackson.module.kotlin.jacksonObjectMapper
 
 interface KlageService {
-    suspend fun sendKlage(jsonKlage: JsonKlage,)
+    suspend fun sendKlage(jsonKlage: JsonKlage, klagePdf: FilForOpplasting)
 
     suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef>
 
@@ -61,6 +57,7 @@ class KlageServiceImpl(
 ) : KlageService {
     override suspend fun sendKlage(
         jsonKlage: JsonKlage,
+        klagePdf: FilForOpplasting,
     ) {
         with(jsonKlage) {
 
@@ -70,7 +67,7 @@ class KlageServiceImpl(
                 vedtakId = UUID.fromString(vedtakId),
                 MandatoryFilesForKlage(
                     klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage),
-                    klagePdf = createKlagePdf(),
+                    klagePdf = klagePdf,
                     vedleggJson = createJsonVedleggSpec(UUID.fromString(klageId)),
                 ),
             )
@@ -160,34 +157,6 @@ class KlageServiceImpl(
         navEksternRefId: UUID,
         klageId: UUID,
     ): String = if (navEksternRefId == klageId) "klage" else "klage_ettersendelse"
-
-    private fun KlageInput.toJson(): String = sosialhjelpJsonMapper.writeValueAsString(this)
-
-    private fun KlageInput.createKlagePdf(): FilForOpplasting =
-        PDDocument()
-            .use { document -> generateKlagePdf(document, this) }
-            .let { pdf ->
-                FilForOpplasting(
-                    filnavn = Filename("klage.pdf"),
-                    mimetype = "application/pdf",
-                    storrelse = pdf.size.toLong(),
-                    data = ByteArrayInputStream(pdf),
-                )
-            }
-
-    private fun generateKlagePdf(
-        document: PDDocument,
-        input: KlageInput,
-    ): ByteArray =
-        PdfGenerator(document)
-            .run {
-                addCenteredH1Bold("Klage på vedtak")
-                addCenteredH4Bold("Vedtak: ${input.vedtakId}")
-                addBlankLine()
-                addCenteredH4Bold("Klage ID: ${input.klageId}")
-                addText(input.tekst)
-                finish()
-            }
 
     private fun DokumentInfoDto.toVedleggResponse(tidspunktSendt: LocalDateTime) =
         VedleggResponse(

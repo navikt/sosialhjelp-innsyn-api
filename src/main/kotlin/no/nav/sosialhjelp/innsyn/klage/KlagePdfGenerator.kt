@@ -1,16 +1,15 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.io.ByteArrayInputStream
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.Filename
 import no.nav.sosialhjelp.innsyn.vedlegg.pdf.PdfGenerator
 import org.apache.pdfbox.pdmodel.PDDocument
+import java.io.ByteArrayInputStream
 
 object KlagePdfGenerator {
-
-    fun generatePdf(jsonKlage: JsonKlage): FilForOpplasting {
-        return PDDocument()
+    fun generatePdf(jsonKlage: JsonKlage): FilForOpplasting =
+        PDDocument()
             .use { document -> generateKlagePdf(document, jsonKlage) }
             .let { pdf ->
                 FilForOpplasting(
@@ -20,8 +19,6 @@ object KlagePdfGenerator {
                     data = ByteArrayInputStream(pdf),
                 )
             }
-    }
-
 
     private fun generateKlagePdf(
         document: PDDocument,
@@ -46,14 +43,11 @@ object KlagePdfGenerator {
             }
 }
 
-private fun JsonKlage.getFullName(): String {
-    return listOfNotNull(
+private fun JsonKlage.getFullName(): String =
+    listOfNotNull(
         navn.fornavn,
         navn.mellomnavn,
         navn.etternavn,
     ).joinToString(" ")
-}
 
-private fun JsonKlage.getMottakerInfo(): String {
-    return "${mottaker.navEnhetsnavn} (${mottaker.enhetsnummer})"
-}
+private fun JsonKlage.getMottakerInfo(): String = "${mottaker.navEnhetsnavn} (${mottaker.enhetsnummer})"

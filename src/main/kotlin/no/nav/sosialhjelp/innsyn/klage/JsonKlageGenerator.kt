@@ -1,7 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
 import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
@@ -14,6 +12,8 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+import java.util.UUID
 
 @Component
 class JsonKlageGenerator(
@@ -21,29 +21,27 @@ class JsonKlageGenerator(
     private val eventService: EventService,
     private val pdlService: PdlService,
 ) {
-
     suspend fun generateJsonKlage(
         input: KlageInput,
-        fiksDigisosId: UUID
-    ) =
-        JsonKlage().apply {
+        fiksDigisosId: UUID,
+    ) = JsonKlage().apply {
+        klageId = input.klageId.toString()
+        vedtakId = input.vedtakId.toString()
+        digisosId = fiksDigisosId.toString()
 
-            klageId = input.klageId.toString()
-            vedtakId = input.vedtakId.toString()
-            digisosId = fiksDigisosId.toString()
+        innsendingstidspunkt = createInnsendingstidspunktString()
+        begrunnelse = input.createKlageBegrunnelse()
+        personIdentifikator = createJsonPersonIdentifikator()
 
-            innsendingstidspunkt = createInnsendingstidspunktString()
-            begrunnelse = input.createKlageBegrunnelse()
-            personIdentifikator = createJsonPersonIdentifikator()
+        navn = createJsonSokernavn()
+        mottaker = createSoknadsmottaker(fiksDigisosId)
 
-            navn = createJsonSokernavn()
-            mottaker = createSoknadsmottaker(fiksDigisosId)
+        autentisering = createJsonAutentisering()
+    }
 
-            autentisering = createJsonAutentisering()
-        }
-
-    private suspend fun createJsonSokernavn(): JsonSokernavn {
-        return pdlService.getNavn(getUserIdFromToken())
+    private suspend fun createJsonSokernavn(): JsonSokernavn =
+        pdlService
+            .getNavn(getUserIdFromToken())
             .let {
                 JsonSokernavn()
                     .withKilde(JsonSokernavn.Kilde.SYSTEM)
@@ -51,11 +49,11 @@ class JsonKlageGenerator(
                     .withMellomnavn(it.mellomnavn)
                     .withEtternavn(it.etternavn)
             }
-    }
 
     private suspend fun createSoknadsmottaker(fiksDigisosId: UUID): JsonSoknadsmottaker {
         val internalSoknad = fiksService.getSoknad(fiksDigisosId.toString())
-        return eventService.createModel(internalSoknad)
+        return eventService
+            .createModel(internalSoknad)
             .let {
                 JsonSoknadsmottaker()
                     .withNavEnhetsnavn(it.soknadsmottaker?.navEnhetsnavn)
@@ -64,23 +62,22 @@ class JsonKlageGenerator(
             }
     }
 
-    private suspend fun createJsonPersonIdentifikator() = JsonPersonIdentifikator()
-        .withKilde(JsonPersonIdentifikator.Kilde.SYSTEM)
-        .withVerdi(getUserIdFromToken())
+    private suspend fun createJsonPersonIdentifikator() =
+        JsonPersonIdentifikator()
+            .withKilde(JsonPersonIdentifikator.Kilde.SYSTEM)
+            .withVerdi(getUserIdFromToken())
 
-    private fun createJsonAutentisering() = JsonAutentisering().apply {
-        // TODO Denne må settes fra informasjon i token
-        autentiseringsTidspunkt = LocalDateTime.now().toString()
-        autentisertDigitalt = true
-    }
+    private fun createJsonAutentisering() =
+        JsonAutentisering().apply {
+            // TODO Denne må settes fra informasjon i token
+            autentiseringsTidspunkt = LocalDateTime.now().toString()
+            autentisertDigitalt = true
+        }
 
-    private fun createInnsendingstidspunktString(): String {
-        return LocalDateTime.now().toString()
-    }
+    private fun createInnsendingstidspunktString(): String = LocalDateTime.now().toString()
 }
 
-private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse {
-    return JsonBegrunnelse()
+private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse =
+    JsonBegrunnelse()
         .withKilde(JsonKildeBruker.BRUKER)
         .withKlageTekst(tekst)
-}

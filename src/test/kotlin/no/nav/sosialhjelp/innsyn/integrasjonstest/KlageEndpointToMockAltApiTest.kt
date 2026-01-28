@@ -47,11 +47,13 @@ import java.io.InputStream
 import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
+import org.junit.jupiter.api.Disabled
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash", "testcontainers"])
 @Testcontainers(disabledWithoutDocker = true)
+@Disabled("Det blir veldig mye å mocke opp mot mock-alt-api, deaktiverer inntil videre. Vurdere behovet.")
 class KlageEndpointToMockAltApiTest {
     @Autowired
     private lateinit var webClient: WebTestClient

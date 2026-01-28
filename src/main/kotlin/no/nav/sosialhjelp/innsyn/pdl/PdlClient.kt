@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
-import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.awaitSingle
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
@@ -21,15 +20,4 @@ class PdlClient(
             .retrieve("hentPerson")
             .toEntity(PdlPerson::class.java)
             .awaitSingle()
-
-    /** Henter en liste med alle identer tilknyttet en person */
-    @CircuitBreaker(name = "pdl")
-    suspend fun getIdentsByIdent(ident: String): List<String> =
-        pdlGraphQlClientFactory
-            .getClient(TokenUtils.getToken())
-            .documentName("hentIdenter")
-            .variable("ident", TokenUtils.getUserIdFromToken())
-            .retrieve("hentIdenter.identer[*].ident")
-            .toEntityList(String::class.java)
-            .awaitLast()
 }

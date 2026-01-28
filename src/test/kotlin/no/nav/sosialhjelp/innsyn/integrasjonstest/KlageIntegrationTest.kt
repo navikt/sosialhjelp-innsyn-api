@@ -7,6 +7,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -49,11 +54,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.util.MultiValueMap
-import java.io.File
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
@@ -407,17 +407,18 @@ private fun createFiksKlageDto(
         ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )
 
-private fun createDigisosSak(
+fun createDigisosSak(
     fiksDigisosId: UUID = UUID.randomUUID(),
     kommunenummer: String = "1234",
 ): DigisosSak {
     val mockDigisosSak = mockk<DigisosSak>()
+
     every { mockDigisosSak.fiksDigisosId } returns fiksDigisosId.toString()
     every { mockDigisosSak.kommunenummer } returns kommunenummer
     return mockDigisosSak
 }
 
-private fun createPdlPerson(): PdlPerson =
+fun createPdlPerson(): PdlPerson =
     PdlPerson(
         adressebeskyttelse = listOf(PdlAdressebeskyttelse(PdlGradering.UGRADERT)),
         navn = listOf(PdlNavn("Ola", null, "Nordmann")),

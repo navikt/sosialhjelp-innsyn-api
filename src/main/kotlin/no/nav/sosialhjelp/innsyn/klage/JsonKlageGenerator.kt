@@ -1,11 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
-import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
 import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
@@ -20,6 +14,12 @@ import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.convertToOffsettDateTimeUTC
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 @Component
 class JsonKlageGenerator(

@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
-import java.util.UUID
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
@@ -8,6 +7,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class KommuneService(
@@ -42,11 +42,13 @@ class KommuneService(
                     log.warn("Kommune $kommunenummer har midlertidig deaktivert innsyn")
                 }
             }
-        }
-            .getOrElse {
-                if (it is FiksClientException || it is FiksServerException || it is FiksException) null
-                else throw it
+        }.getOrElse {
+            if (it is FiksClientException || it is FiksServerException || it is FiksException) {
+                null
+            } else {
+                throw it
             }
+        }
 
     suspend fun erInnsynDeaktivertForKommune(fiksDigisosId: String): Boolean {
         val kommuneInfo = hentKommuneInfo(fiksDigisosId)

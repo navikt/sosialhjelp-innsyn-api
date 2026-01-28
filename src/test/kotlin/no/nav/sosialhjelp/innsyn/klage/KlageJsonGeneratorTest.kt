@@ -16,7 +16,6 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
 
 class KlageJsonGeneratorTest {
@@ -53,7 +52,6 @@ class KlageJsonGeneratorTest {
         jsonKlageGenerator
             .generateJsonKlage(input, fiksDigisosId)
             .also { jsonKlage ->
-                val klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage)
                 assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
                 assertThat(jsonKlage.vedtakId).isEqualTo(input.vedtakId.toString())
                 assertThat(jsonKlage.digisosId).isEqualTo(fiksDigisosId.toString())

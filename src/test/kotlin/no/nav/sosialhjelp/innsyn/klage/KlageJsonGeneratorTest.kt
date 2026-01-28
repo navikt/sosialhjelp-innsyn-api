@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.klage
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.mockkObject
-import java.util.UUID
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -17,6 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.readValue
+import java.util.UUID
 
 class KlageJsonGeneratorTest {
     private val fiksService: FiksService = mockk()

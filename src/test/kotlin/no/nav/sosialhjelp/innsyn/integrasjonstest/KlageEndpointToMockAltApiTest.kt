@@ -64,7 +64,7 @@ class KlageEndpointToMockAltApiTest {
     @BeforeEach
     fun setup() {
         token = MockOAuth2ServerHolder.server.issueToken("default").serialize()
-        coEvery { kommuneService.validerMottakForKommune(any<UUID>()) } just runs
+        coEvery { kommuneService.validerMottakOgInnsynForKommune(any<UUID>()) } just runs
     }
 
     @Test

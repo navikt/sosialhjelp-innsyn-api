@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
+import java.util.UUID
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
@@ -7,7 +8,6 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 class KommuneService(
@@ -27,7 +27,7 @@ class KommuneService(
     }
 
     private suspend fun hentKommuneInfoFraFiks(kommunenummer: String): KommuneInfo? =
-        try {
+        runCatching {
             kommuneInfoClient.getKommuneInfo(kommunenummer).also {
                 if (it.harMidlertidigDeaktivertMottak) {
                     log.warn("Kommune $kommunenummer har midlertidig deaktivert mottak")
@@ -42,21 +42,41 @@ class KommuneService(
                     log.warn("Kommune $kommunenummer har midlertidig deaktivert innsyn")
                 }
             }
-        } catch (e: FiksClientException) {
-            null
-        } catch (e: FiksServerException) {
-            null
-        } catch (e: FiksException) {
-            null
         }
+            .getOrElse {
+                if (it is FiksClientException || it is FiksServerException || it is FiksException) null
+                else throw it
+            }
 
     suspend fun erInnsynDeaktivertForKommune(fiksDigisosId: String): Boolean {
         val kommuneInfo = hentKommuneInfo(fiksDigisosId)
         return kommuneInfo == null || !kommuneInfo.kanOppdatereStatus
     }
 
-    suspend fun validerMottakForKommune(fiksDigisosId: UUID) {
-        validerMottakForKommune(fiksDigisosId.toString())
+    suspend fun validerMottakOgInnsynForKommune(fiksDigisosId: UUID) {
+        val kommuneInfo =
+            hentKommuneInfo(fiksDigisosId.toString()) ?: error("KommuneInfo ikke funnet for digisosId: $fiksDigisosId")
+
+        // TODO Hva er business-logikken her?
+
+        when {
+            !kommuneInfo.kanMottaSoknader ->
+                throw MottakUtilgjengeligException(
+                    "Kan ikke motta",
+                    kanMottaSoknader = false,
+                    harMidlertidigDeaktivertMottak = kommuneInfo.harMidlertidigDeaktivertMottak,
+                )
+            kommuneInfo.harMidlertidigDeaktivertMottak ->
+                throw MottakUtilgjengeligException(
+                    "Midlertidig deaktivert mottak",
+                    kanMottaSoknader = true,
+                    harMidlertidigDeaktivertMottak = true,
+                )
+            !kommuneInfo.kanOppdatereStatus ->
+                error("Innsyn er deaktivert for kommune tilknyttet digisosId: $fiksDigisosId")
+            kommuneInfo.harMidlertidigDeaktivertOppdateringer ->
+                error("Innsyn er midlertidig deaktivert for kommune tilknyttet digisosId: $fiksDigisosId")
+        }
     }
 
     suspend fun validerMottakForKommune(fiksDigisosId: String) {

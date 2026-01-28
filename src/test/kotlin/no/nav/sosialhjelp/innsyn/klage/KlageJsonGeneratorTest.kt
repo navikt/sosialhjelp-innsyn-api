@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.klage
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.mockkObject
+import java.util.UUID
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -15,8 +16,8 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
-import java.util.UUID
 
 class KlageJsonGeneratorTest {
     private val fiksService: FiksService = mockk()
@@ -52,6 +53,7 @@ class KlageJsonGeneratorTest {
         jsonKlageGenerator
             .generateJsonKlage(input, fiksDigisosId)
             .also { jsonKlage ->
+                val klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage)
                 assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
                 assertThat(jsonKlage.vedtakId).isEqualTo(input.vedtakId.toString())
                 assertThat(jsonKlage.digisosId).isEqualTo(fiksDigisosId.toString())

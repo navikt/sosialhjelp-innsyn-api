@@ -6,10 +6,8 @@ class KlageMetricsService(
     meterRegistry: MeterRegistry,
 ) {
     fun registerSent() {
-        TODO("Not yet implemented")
     }
 
     fun registerSendError() {
-        TODO("Not yet implemented")
     }
 }

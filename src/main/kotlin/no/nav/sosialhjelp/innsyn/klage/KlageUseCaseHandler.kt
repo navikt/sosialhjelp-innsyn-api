@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
@@ -8,9 +9,9 @@ import java.util.UUID
 
 @Component
 class KlageUseCaseHandler(
-    private val kommuneHandler: KommuneHandler,
     private val klageService: KlageService,
     private val jsonKlageGenerator: JsonKlageGenerator,
+    private val kommuneService: KommuneService,
     meterRegistry: MeterRegistry,
 ) {
     private val klageMetricsService = KlageMetricsService(meterRegistry)
@@ -20,6 +21,7 @@ class KlageUseCaseHandler(
         input: KlageInput,
     ): KlageDto {
         // TODO Trengs det å validere at kommune har innsyn, etc?!
+        kommuneService.validerMottakOgInnsynForKommune(digisosId)
 
         val jsonKlage =
             jsonKlageGenerator.generateJsonKlage(
@@ -34,19 +36,15 @@ class KlageUseCaseHandler(
             .onFailure { klageMetricsService.registerSendError() }
             .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
 
-        TODO("Returner KlageDto")
+        return hentKlage(digisosId, input.klageId) ?: error("Fant ikke innsendt klage")
     }
 
-    fun hentAlleKlager(digisosId: UUID): List<KlageRef> {
-        TODO("Returner KlageRefs")
-    }
+    suspend fun hentAlleKlager(digisosId: UUID): List<KlageRef> = klageService.hentKlager(digisosId)
 
-    fun hentKlage(
+    suspend fun hentKlage(
         digisosId: UUID,
         klageId: UUID,
-    ): KlageDto? {
-        TODO("Hente klage for klageId")
-    }
+    ): KlageDto? = klageService.hentKlage(digisosId, klageId)
 
     suspend fun lastOppVedlegg(
         digisosId: UUID,
@@ -54,12 +52,13 @@ class KlageUseCaseHandler(
         rawFiles: Flux<FilePart>,
     ): DocumentsForKlage = klageService.lastOppVedlegg(digisosId, navEksternRefId, rawFiles)
 
-    fun sendEttersendelse(
+    suspend fun sendEttersendelse(
         digisosId: UUID,
         klageId: UUID,
         ettersendelseId: UUID,
     ) {
-        TODO("Sende ettersendelse")
+        kommuneService.validerMottakOgInnsynForKommune(digisosId)
+        klageService.sendEttersendelse(digisosId, klageId, ettersendelseId)
     }
 }
 

@@ -42,7 +42,6 @@ import org.springframework.web.reactive.function.client.toEntity
 import reactor.core.scheduler.Schedulers
 import java.io.Serializable
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.getValue
 
 @Component
 class FiksService(

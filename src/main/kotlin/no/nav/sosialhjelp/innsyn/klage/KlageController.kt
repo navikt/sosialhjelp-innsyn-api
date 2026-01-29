@@ -20,7 +20,7 @@ import java.util.UUID
 @RequestMapping("/api/v1/innsyn")
 @ConditionalOnBean(KlageService::class)
 class KlageController(
-    private val klageService: KlageService,
+    private val klageUseCaseHandler: KlageUseCaseHandler,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
     @PostMapping("/{fiksDigisosId}/{navEksternRefId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -33,8 +33,8 @@ class KlageController(
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return klageService.lastOppVedlegg(
-            fiksDigisosId = fiksDigisosId,
+        return klageUseCaseHandler.lastOppVedlegg(
+            digisosId = fiksDigisosId,
             navEksternRefId = navEksternRefId,
             rawFiles = rawFiles,
         )
@@ -58,8 +58,8 @@ class KlageController(
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        klageService.sendKlage(
-            fiksDigisosId = fiksDigisosId,
+        klageUseCaseHandler.sendKlage(
+            digisosId = fiksDigisosId,
             input = input,
         )
     }
@@ -73,11 +73,7 @@ class KlageController(
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        klageService.sendEttersendelse(
-            fiksDigisosId = fiksDigisosId,
-            klageId = klageId,
-            ettersendelseId = ettersendelseId,
-        )
+        klageUseCaseHandler.sendEttersendelse(fiksDigisosId, klageId, ettersendelseId)
     }
 
     @GetMapping("/{fiksDigisosId}/klage/{klageId}")
@@ -88,7 +84,7 @@ class KlageController(
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return klageService.hentKlage(fiksDigisosId, klageId)
+        return klageUseCaseHandler.hentKlage(fiksDigisosId, klageId)
     }
 
     @GetMapping("/{fiksDigisosId}/klager")
@@ -98,7 +94,7 @@ class KlageController(
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
-        return klageService.hentKlager(fiksDigisosId)
+        return klageUseCaseHandler.hentAlleKlager(fiksDigisosId)
     }
 
     private fun validateNotProd() {

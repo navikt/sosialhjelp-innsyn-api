@@ -10,7 +10,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.convertToOffsettDateTimeUTCString
+import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.convertToOffsetDateTimeUTCString
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import org.springframework.stereotype.Component
@@ -76,11 +76,11 @@ class JsonKlageGenerator(
     private fun createJsonAutentisering() =
         JsonAutentisering().apply {
             // TODO Denne må settes fra informasjon i token
-            autentiseringsTidspunkt = convertToOffsettDateTimeUTCString(nowWithMillis())
+            autentiseringsTidspunkt = convertToOffsetDateTimeUTCString(nowWithMillis())
             autentisertDigitalt = true
         }
 
-    private fun createInnsendingstidspunktString(): String = convertToOffsettDateTimeUTCString(nowWithMillis())
+    private fun createInnsendingstidspunktString(): String = convertToOffsetDateTimeUTCString(nowWithMillis())
 }
 
 private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse =
@@ -95,7 +95,7 @@ object TimestampUtil {
 
     fun nowWithMillis(): LocalDateTime = ZonedDateTime.now(ZoneId.of(ZONE_STRING)).toLocalDateTime().truncatedTo(ChronoUnit.MILLIS)
 
-    fun convertToOffsettDateTimeUTCString(localDateTime: LocalDateTime) = localDateTime.toUTCTimestampStringWithMillis()
+    fun convertToOffsetDateTimeUTCString(localDateTime: LocalDateTime) = localDateTime.toUTCTimestampStringWithMillis()
 
     private fun validateTimestamp(timestampString: String) {
         if (!Regex(TIMESTAMP_REGEX).matches(timestampString)) error("Tidspunkt $timestampString matcher ikke formatet")

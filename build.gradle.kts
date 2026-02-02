@@ -50,7 +50,6 @@ dependencies {
 
     // Jackson
     implementation(libs.jackson.module.kotlin)
-    implementation("tools.jackson.module:jackson-module-kotlin:3.0.3")
 
     // Springdoc
     implementation(libs.springdoc.openapi.starter.common)

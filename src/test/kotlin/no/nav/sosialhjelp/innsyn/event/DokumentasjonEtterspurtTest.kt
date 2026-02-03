@@ -443,4 +443,32 @@ internal class DokumentasjonEtterspurtTest {
             assertThat(oppgave.innsendelsesfrist).isEqualTo(innsendelsesfrist.toLocalDateTime())
             assertThat(oppgave.erFraInnsyn).isEqualTo(true)
         }
+
+    @Test
+    internal fun `soknadsstatus skal overrides til UNDER_BEHANDLING hvis soknad er FERDIGBEHANDLET men har aktiv sak`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
+                JsonDigisosSoker()
+                    .withAvsender(avsender)
+                    .withVersion("123")
+                    .withHendelser(
+                        listOf(
+                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_2),
+                            SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
+                            DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_4),
+                        ),
+                    )
+
+            val model = service.createModel(mockDigisosSak)
+
+            assertThat(model).isNotNull
+            assertThat(model.status).isEqualTo(SoknadsStatus.UNDER_BEHANDLING)
+            assertThat(model.saker).hasSize(1)
+            assertThat(model.oppgaver).hasSize(1)
+
+            val oppgave = model.oppgaver.last()
+            assertThat(oppgave.tittel).isEqualTo(DOKUMENTTYPE)
+            assertThat(oppgave.tilleggsinfo).isEqualTo(TILLEGGSINFO)
+        }
 }

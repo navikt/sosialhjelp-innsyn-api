@@ -169,6 +169,9 @@ class EventService(
         ) {
             model.applySoknadKrav(digisosSak, vedleggService, originalSoknadNAV.timestampSendt)
         }
+
+        // Override søknadsstatus if there are active saker when søknad is marked as ferdigbehandlet
+        overrideSoknadsstatusIfActivesakerExists(model)
     }
 
     suspend fun hentAlleUtbetalinger(digisosSak: DigisosSak): InternalDigisosSoker {
@@ -249,5 +252,23 @@ class EventService(
             unixToLocalDateTime(timestampSendt).toLocalDate().isAfter(LocalDate.now().minusDays(30))
 
         fun stripEnhetsnavnForKommune(navEnhetsnavn: String?): String? = navEnhetsnavn?.replace(" kommune", "")
+
+        /**
+         * Override søknadsstatus to UNDER_BEHANDLING if søknad is FERDIGBEHANDLET but there are active saker.
+         * This allows oppgaver from new saker to be visible even after søknad is marked as ferdigbehandlet.
+         */
+        private fun overrideSoknadsstatusIfActivesakerExists(model: InternalDigisosSoker) {
+            if (model.status == SoknadsStatus.FERDIGBEHANDLET && model.saker.isNotEmpty()) {
+                val hasActiveSaker =
+                    model.saker.any {
+                        it.saksStatus != null &&
+                            it.saksStatus == no.nav.sosialhjelp.innsyn.domain.SaksStatus.UNDER_BEHANDLING
+                    }
+                if (hasActiveSaker) {
+                    log.info("Overriding søknadsstatus from FERDIGBEHANDLET to UNDER_BEHANDLING due to active saker")
+                    model.status = SoknadsStatus.UNDER_BEHANDLING
+                }
+            }
+        }
     }
 }

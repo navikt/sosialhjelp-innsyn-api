@@ -4,6 +4,7 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
@@ -53,9 +54,18 @@ class SaksStatusService(
             vedtakfilUrlList,
             utfallVedtak,
             sak.referanse,
+            sak.vedtak.map(Vedtak::toVedtakDto),
         )
     }
 
     fun getSkalViseVedtakInfoPanel(sak: Sak): Boolean =
         sak.vedtak.lastOrNull()?.let { it.utfall in listOf(UtfallVedtak.DELVIS_INNVILGET, UtfallVedtak.INNVILGET) } ?: false
 }
+
+private fun Vedtak.toVedtakDto(): VedtakDto =
+    VedtakDto(
+        id = id,
+        utfall = utfall,
+        vedtaksFilUrl = vedtaksFilUrl,
+        dato = dato,
+    )

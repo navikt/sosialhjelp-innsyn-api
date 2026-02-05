@@ -10,7 +10,7 @@ metadata:
     texas.nais.io/enabled: "true"
 spec:
   image: {{image}}
-  port: 8080
+  port: 8083
   liveness:
     path: /sosialhjelp/innsyn-api/internal/isAlive
     initialDelay: 60

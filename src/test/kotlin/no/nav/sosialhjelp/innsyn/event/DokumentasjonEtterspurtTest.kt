@@ -364,10 +364,10 @@ internal class DokumentasjonEtterspurtTest {
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
             assertThat(model.saker).isEmpty()
             assertThat(model.oppgaver).isEmpty()
-            assertThat(model.historikk).hasSize(4)
+            assertThat(model.historikk).hasSize(5)
 
             val hendelse = model.historikk.last()
-            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_3.toLocalDateTime())
+            assertThat(hendelse.tidspunkt).isEqualTo(tidspunkt_4.toLocalDateTime())
         }
 
     @Test

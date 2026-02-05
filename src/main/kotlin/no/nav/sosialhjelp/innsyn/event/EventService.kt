@@ -21,6 +21,7 @@ import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
@@ -261,8 +262,8 @@ class EventService(
             if (model.status == SoknadsStatus.FERDIGBEHANDLET && model.saker.isNotEmpty()) {
                 val hasActiveSaker =
                     model.saker.any {
-                        it.saksStatus != null &&
-                            it.saksStatus == no.nav.sosialhjelp.innsyn.domain.SaksStatus.UNDER_BEHANDLING
+                        // En sak regnes som ferdigbehandlet hvis den har fått vedtak.
+                        it.vedtak.isEmpty() && it.saksStatus == SaksStatus.UNDER_BEHANDLING
                     }
                 if (hasActiveSaker) {
                     log.info("Overriding søknadsstatus from FERDIGBEHANDLET to UNDER_BEHANDLING due to active saker")

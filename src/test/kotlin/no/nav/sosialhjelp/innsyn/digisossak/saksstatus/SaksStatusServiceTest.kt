@@ -72,6 +72,8 @@ internal class SaksStatusServiceTest {
             assertThat(response[0].status).isEqualTo(SaksStatus.UNDER_BEHANDLING)
             assertThat(response[0].tittel).isEqualTo(tittel)
             assertThat(response[0].vedtaksfilUrlList).isNull()
+
+            assertThat(response[0].vedtak).isEmpty()
         }
 
     @Test
@@ -106,6 +108,8 @@ internal class SaksStatusServiceTest {
             assertThat(response[0].tittel).isEqualTo(tittel)
             assertThat(response[0].vedtaksfilUrlList).hasSize(1)
             assertThat(response[0].vedtaksfilUrlList?.get(0)?.url).isEqualTo(vedtaksfilUrl)
+            assertThat(response[0].vedtak).hasSize(1)
+            assertThat(response[0].vedtak.first().vedtaksFilUrl).isEqualTo(vedtaksfilUrl)
         }
 
     @Test
@@ -140,6 +144,9 @@ internal class SaksStatusServiceTest {
             assertThat(response[0].tittel).isEqualTo(DEFAULT_SAK_TITTEL)
             assertThat(response[0].vedtaksfilUrlList).hasSize(1)
             assertThat(response[0].vedtaksfilUrlList?.get(0)?.url).isEqualTo(vedtaksfilUrl)
+
+            assertThat(response[0].vedtak).hasSize(1)
+            assertThat(response[0].vedtak.first().vedtaksFilUrl).isEqualTo(vedtaksfilUrl)
         }
 
     @Test
@@ -190,6 +197,9 @@ internal class SaksStatusServiceTest {
 
             assertThat(response[0].vedtaksfilUrlList).hasSize(2)
             assertThat(response[1].vedtaksfilUrlList).isNull()
+
+            assertThat(response[0].vedtak).hasSize(2)
+            assertThat(response[1].vedtak).isEmpty()
         }
 
     @Test

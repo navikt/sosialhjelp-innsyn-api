@@ -12,6 +12,8 @@ data class SaksStatusResponse(
     val vedtaksfilUrlList: List<FilUrl>?,
     val utfallVedtak: UtfallVedtak?,
     val referanse: String?,
+    // TODO: Inneholder både vedtakslista og utfallet over. Kvitt oss med de to feltene når de ikke brukes mer.
+    val vedtak: List<VedtakDto>,
 )
 
 data class FilUrl(
@@ -19,4 +21,11 @@ data class FilUrl(
     val dato: LocalDate?,
     val url: String,
     val id: String,
+)
+
+data class VedtakDto(
+    val id: String,
+    var utfall: UtfallVedtak?,
+    var vedtaksFilUrl: String,
+    var dato: LocalDate?,
 )

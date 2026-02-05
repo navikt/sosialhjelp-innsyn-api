@@ -50,6 +50,7 @@ dependencies {
 
     // Jackson
     implementation(libs.jackson.module.kotlin)
+    implementation(libs.jackson.module.kotlin2)
 
     // Springdoc
     implementation(libs.springdoc.openapi.starter.common)

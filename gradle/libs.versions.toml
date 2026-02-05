@@ -11,6 +11,7 @@ micrometer_registry = "1.16.2"
 micrometerPropagation = "1.2.0"
 prometheus = "0.16.0"
 jackson = "3.0.4"
+jackson2 = "2.21.0"
 commons_codec = "1.21.0"
 commons_io = "2.21.0"
 file_upload = "1.6.0"
@@ -74,6 +75,8 @@ logback-logstash = { module = "net.logstash.logback:logstash-logback-encoder", v
 sosialhjelp-filformat = { module = "no.nav.sbl.dialogarena:soknadsosialhjelp-filformat", version.ref = "filformat" }
 
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson"}
+jackson-module-kotlin2 = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson2" }
+
 
 springdoc-openapi-starter-webflux-ui = { module = "org.springdoc:springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }
 springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "springdoc" }

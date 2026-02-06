@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage.fiks
 
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import java.util.UUID
 
 interface FiksKlageClient {
     suspend fun sendKlage(
@@ -51,15 +51,14 @@ class FiksKlageClientImpl(
             klageJson = files.klageJson,
             vedleggJson = files.vedleggJson,
             klagePdf = files.klagePdf,
-        )
-            .also { body ->
-                doSendKlage(
-                    digisosId = digisosId,
-                    klageId = klageId,
-                    vedtakId = vedtakId,
-                    body = body,
-                )
-            }
+        ).also { body ->
+            doSendKlage(
+                digisosId = digisosId,
+                klageId = klageId,
+                vedtakId = vedtakId,
+                body = body,
+            )
+        }
     }
 
     private suspend fun doSendKlage(

@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.MeterRegistry
 class KlageMetricsService(
     private val meterRegistry: MeterRegistry,
 ) {
-
     fun registerSent() {
         meterRegistry.counter("klage_sent").increment()
     }

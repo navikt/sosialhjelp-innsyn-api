@@ -49,7 +49,7 @@ fun InternalDigisosSoker.apply(
         )
     }
 
-    if (prevSize > 0 && oppgaver.size == 0 && status != SoknadsStatus.FERDIGBEHANDLET && status != SoknadsStatus.BEHANDLES_IKKE) {
+    if (prevSize > 0 && oppgaver.isEmpty() && status != SoknadsStatus.BEHANDLES_IKKE) {
         log.info(
             "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjon etterspurt. " +
                 "Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg.",

@@ -1,11 +1,5 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
-import java.security.Security
-import java.security.cert.X509Certificate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +12,12 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import org.slf4j.Logger
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
+import java.security.Security
+import java.security.cert.X509Certificate
 
 interface KrypteringService {
     val log: Logger
@@ -36,7 +36,9 @@ interface KrypteringService {
 
 @Profile("!(mock-alt|testcontainers)")
 @Component
-class KrypteringServiceImpl(private val dokumentlagerClient: DokumentlagerClient) : KrypteringService {
+class KrypteringServiceImpl(
+    private val dokumentlagerClient: DokumentlagerClient,
+) : KrypteringService {
     override val log by logger()
 
     override suspend fun krypter(
@@ -65,8 +67,10 @@ class KrypteringServiceImpl(private val dokumentlagerClient: DokumentlagerClient
         return kryptertInput
     }
 
-    override suspend fun krypter(databuffer: InputStream,coroutineScope: CoroutineScope): InputStream =
-        krypter(databuffer, certificate(), coroutineScope)
+    override suspend fun krypter(
+        databuffer: InputStream,
+        coroutineScope: CoroutineScope,
+    ): InputStream = krypter(databuffer, certificate(), coroutineScope)
 
     private suspend fun certificate() = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
@@ -96,6 +100,6 @@ class KrypteringServiceMock : KrypteringService {
 
     override suspend fun krypter(
         databuffer: InputStream,
-        coroutineScope: CoroutineScope
+        coroutineScope: CoroutineScope,
     ): InputStream = databuffer
 }

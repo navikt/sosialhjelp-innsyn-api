@@ -7,6 +7,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import no.ks.kryptering.CMSKrypteringImpl
+import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.slf4j.Logger
 import org.springframework.context.annotation.Profile
@@ -26,13 +27,19 @@ interface KrypteringService {
         certificate: X509Certificate,
         coroutineScope: CoroutineScope,
     ): InputStream
+
+    suspend fun krypter(
+        databuffer: InputStream,
+        coroutineScope: CoroutineScope,
+    ): InputStream
 }
 
 @Profile("!(mock-alt|testcontainers)")
 @Component
-class KrypteringServiceImpl : KrypteringService {
+class KrypteringServiceImpl(
+    private val dokumentlagerClient: DokumentlagerClient,
+) : KrypteringService {
     override val log by logger()
-    private val kryptering = CMSKrypteringImpl()
 
     override suspend fun krypter(
         databuffer: InputStream,
@@ -60,12 +67,23 @@ class KrypteringServiceImpl : KrypteringService {
         return kryptertInput
     }
 
+    override suspend fun krypter(
+        databuffer: InputStream,
+        coroutineScope: CoroutineScope,
+    ): InputStream = krypter(databuffer, certificate(), coroutineScope)
+
+    private suspend fun certificate() = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
+
     private fun krypterData(
         outputStream: OutputStream,
         inputStream: InputStream,
         certificate: X509Certificate,
     ) {
         kryptering.krypterData(outputStream, inputStream, certificate, Security.getProvider("BC"))
+    }
+
+    companion object {
+        private val kryptering = CMSKrypteringImpl()
     }
 }
 
@@ -77,6 +95,11 @@ class KrypteringServiceMock : KrypteringService {
     override suspend fun krypter(
         databuffer: InputStream,
         certificate: X509Certificate,
+        coroutineScope: CoroutineScope,
+    ): InputStream = databuffer
+
+    override suspend fun krypter(
+        databuffer: InputStream,
         coroutineScope: CoroutineScope,
     ): InputStream = databuffer
 }

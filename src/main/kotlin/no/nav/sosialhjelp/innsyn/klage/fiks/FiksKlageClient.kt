@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage.fiks
 
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
@@ -20,8 +22,6 @@ import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 interface FiksKlageClient {
     suspend fun sendKlage(
@@ -66,7 +66,8 @@ class FiksKlageClientImpl(
                             vedleggJson = files.vedleggJson,
                             klagePdf = pdfWithEncryptedData,
                         )
-                    }.also { body ->
+                    }
+                    .also { body ->
                         doSendKlage(
                             digisosId = digisosId,
                             klageId = klageId,
@@ -150,7 +151,7 @@ class FiksKlageClientImpl(
         }
     }
 
-    // Uten query param vil det alle klager for alle digisosIds returneres
+    // Uten query param vil alle klager for alle digisosIds for person returneres
     override suspend fun hentKlager(digisosId: UUID?): List<FiksKlageDto> {
         val uri = GET_KLAGER_PATH + if (digisosId != null) getKlagerQueryParam(digisosId) else ""
         return doHentKlager(uri)

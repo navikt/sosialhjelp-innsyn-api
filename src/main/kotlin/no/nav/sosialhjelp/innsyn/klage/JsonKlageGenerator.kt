@@ -32,6 +32,7 @@ class JsonKlageGenerator(
         fiksDigisosId: UUID,
     ) = JsonKlage().apply {
         klageId = input.klageId.toString()
+        // TODO Burde vedtaknummer også være en del av json/pdf?
         vedtakId = input.vedtakId.toString()
         digisosId = fiksDigisosId.toString()
 

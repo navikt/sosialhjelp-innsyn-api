@@ -2,11 +2,18 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
+import com.ninjasquad.springmockk.MockkSpyBean
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.UUID
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -49,11 +56,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.util.MultiValueMap
-import java.io.File
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.UUID
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
@@ -62,7 +64,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
     private lateinit var fiksService: FiksService
 
-    @MockkBean
+    @MockkSpyBean
     private lateinit var fiksKlageClient: FiksKlageClient
 
     @MockkBean
@@ -118,6 +120,8 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                     tekst = "Dette er en testklage",
                 ),
         )
+
+        coVerify(exactly = 1) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakId, any()) }
     }
 
     @Test
@@ -348,7 +352,7 @@ private fun createMetadataJson(uuids: List<UUID>): String =
             filer =
                 uuids.map { uuid ->
                     OpplastetFilMetadata(
-                        filnavn = uuid.toString() + ".pdf",
+                        filnavn = "$uuid.pdf",
                         uuid = uuid,
                     )
                 },

@@ -17,6 +17,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
 import java.util.UUID
+import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

@@ -2,8 +2,12 @@ package no.nav.sosialhjelp.innsyn.klage
 
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
@@ -19,6 +23,7 @@ import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -56,6 +61,7 @@ class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
     private val mellomlagerService: MellomlagerService,
     private val clientProperties: ClientProperties,
+    private val krypteringService: KrypteringService,
 ) : KlageService {
     override suspend fun sendKlage(
         jsonKlage: JsonKlage,
@@ -67,7 +73,7 @@ class KlageServiceImpl(
             vedtakId = UUID.fromString(jsonKlage.vedtakId),
             MandatoryFilesForKlage(
                 klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage),
-                klagePdf = klagePdf,
+                klagePdf = klagePdf.encryptData(),
                 vedleggJson = createJsonVedleggSpec(UUID.fromString(jsonKlage.klageId)),
             ),
         )
@@ -127,6 +133,15 @@ class KlageServiceImpl(
 
         return mellomlagerService.processDocumentUpload(navEksternRefId, allFiles)
     }
+
+    private suspend fun FilForOpplasting.encryptData(): FilForOpplasting =
+        withContext(Dispatchers.Default) {
+            withTimeout(60.seconds) {
+                krypteringService
+                    .krypter(data, this@withContext)
+                    .let { encrypted -> copy(data = encrypted) }
+            }
+        }
 
     private suspend fun createJsonVedleggSpec(
         navEksternRefId: UUID,

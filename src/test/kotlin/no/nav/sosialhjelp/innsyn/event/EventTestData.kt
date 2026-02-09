@@ -55,6 +55,7 @@ val tidspunkt_soknad_fixed: Long = tidspunkt_soknad_fixed_localDateTime.atZone(z
 val tidspunkt_1: String = now.minusHours(10).format(DateTimeFormatter.ISO_DATE_TIME)
 val tidspunkt_2: String = now.minusHours(9).format(DateTimeFormatter.ISO_DATE_TIME)
 val tidspunkt_3: String = now.minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)
+val tidspunkt_3_1: String = now.minusHours(8).format(DateTimeFormatter.ISO_DATE_TIME)
 val tidspunkt_4: String = now.minusHours(7).format(DateTimeFormatter.ISO_DATE_TIME)
 val tidspunkt_5: String = now.minusHours(6).format(DateTimeFormatter.ISO_DATE_TIME)
 val tidspunkt_6: String = now.minusHours(5).format(DateTimeFormatter.ISO_DATE_TIME)
@@ -113,6 +114,18 @@ val SAK1_SAKS_STATUS_UNDERBEHANDLING: JsonSaksStatus =
         .withStatus(JsonSaksStatus.Status.UNDER_BEHANDLING)
         .withTittel(TITTEL_1)
         .withReferanse(REFERANSE_1)
+
+val SAK1_VEDTAK: JsonVedtakFattet =
+    JsonVedtakFattet()
+        .withType(JsonHendelse.Type.VEDTAK_FATTET)
+        .withSaksreferanse(REFERANSE_1)
+        .withVedtaksfil(
+            JsonVedtaksfil().withReferanse(
+                JsonDokumentlagerFilreferanse()
+                    .withType(JsonFilreferanse.Type.DOKUMENTLAGER)
+                    .withId("0be7aa9c-5de0-450e-b8dc-75720c8053ae"),
+            ),
+        ).withUtfall(JsonVedtakFattet.Utfall.INNVILGET)
 
 val SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL: JsonSaksStatus =
     JsonSaksStatus()

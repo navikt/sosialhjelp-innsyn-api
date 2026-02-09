@@ -69,6 +69,7 @@ internal class DokumentasjonkravTest {
                             SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
                             SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
                             SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
+                            SAK1_VEDTAK.withHendelsestidspunkt(tidspunkt_3_1),
                             SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
                             UTBETALING.withHendelsestidspunkt(tidspunkt_5),
                             DOKUMENTASJONKRAV_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
@@ -81,7 +82,7 @@ internal class DokumentasjonkravTest {
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
             assertThat(model.saker).hasSize(1)
-            assertThat(model.historikk).hasSize(6)
+            assertThat(model.historikk).hasSize(7)
 
             assertThat(model.saker[0].utbetalinger).hasSize(1)
             val utbetaling = model.saker[0].utbetalinger[0]

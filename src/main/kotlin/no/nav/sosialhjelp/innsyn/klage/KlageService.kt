@@ -129,7 +129,7 @@ class KlageServiceImpl(
             klagePdf = klagePdf,
             opplastedeVedlegg = opplastedeVedlegg,
             ettersendelser = fiksKlage.ettersendtInfoNAV?.ettersendelser?.map { it.toEttersendelseDto() } ?: emptyList(),
-            timestampSendt = fiksKlage.sendtKvittering.sendtStatus.timestamp,
+            timestampSendt = fiksKlage.sendtKvittering.sendtStatus?.timestamp ?: 0L,
         )
     }
 
@@ -192,4 +192,5 @@ class KlageServiceImpl(
 
 private fun JsonVedleggSpesifikasjon.noFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()
 
-private fun FiksKlageDto.getTidspunktSendt() = sendtKvittering.sendtStatus.timestamp.let { unixToLocalDateTime(it) }
+private fun FiksKlageDto.getTidspunktSendt() = sendtKvittering.sendtStatus?.timestamp?.let { unixToLocalDateTime(it) }
+    ?: LocalDateTime.now()

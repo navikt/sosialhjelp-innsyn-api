@@ -1,8 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import java.time.LocalDateTime
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
@@ -29,6 +26,9 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import tools.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDateTime
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 interface KlageService {
     suspend fun sendKlage(
@@ -67,12 +67,12 @@ class KlageServiceImpl(
         jsonKlage: JsonKlage,
         klagePdf: FilForOpplasting,
     ) {
-
         withContext(Dispatchers.Default) {
             withTimeout(60.seconds) {
-
-                val encryptedPdf = krypteringService.krypter(klagePdf.data, this@withContext)
-                    .let { klagePdf.copy(data = it) }
+                val encryptedPdf =
+                    krypteringService
+                        .krypter(klagePdf.data, this@withContext)
+                        .let { klagePdf.copy(data = it) }
 
                 klageClient.sendKlage(
                     digisosId = UUID.fromString(jsonKlage.digisosId),

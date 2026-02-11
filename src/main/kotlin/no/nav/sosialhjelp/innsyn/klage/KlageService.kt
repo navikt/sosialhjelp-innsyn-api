@@ -73,7 +73,8 @@ class KlageServiceImpl(
             vedtakId = UUID.fromString(jsonKlage.vedtakId),
             MandatoryFilesForKlage(
                 klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage),
-                klagePdf = klagePdf.encryptData(),
+                klagePdf = klagePdf,
+//                klagePdf = klagePdf.encryptData(),
                 vedleggJson = createJsonVedleggSpec(UUID.fromString(jsonKlage.klageId)),
             ),
         )

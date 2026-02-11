@@ -84,7 +84,7 @@ class FiksMellomlagerClient(
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
         return withContext(Dispatchers.Default) {
-            withTimeout(10.seconds) {
+            withTimeout(15.seconds) {
                 val krypterteFiler = krypterFiler(certificate, filerForOpplasting, this)
                 logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
 

@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import java.time.LocalDateTime
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
@@ -26,9 +29,6 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import tools.jackson.module.kotlin.jacksonObjectMapper
-import java.time.LocalDateTime
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 interface KlageService {
     suspend fun sendKlage(
@@ -67,17 +67,25 @@ class KlageServiceImpl(
         jsonKlage: JsonKlage,
         klagePdf: FilForOpplasting,
     ) {
-        klageClient.sendKlage(
-            digisosId = UUID.fromString(jsonKlage.digisosId),
-            klageId = UUID.fromString(jsonKlage.klageId),
-            vedtakId = UUID.fromString(jsonKlage.vedtakId),
-            MandatoryFilesForKlage(
-                klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage),
-                klagePdf = klagePdf,
-//                klagePdf = klagePdf.encryptData(),
-                vedleggJson = createJsonVedleggSpec(UUID.fromString(jsonKlage.klageId)),
-            ),
-        )
+
+        withContext(Dispatchers.Default) {
+            withTimeout(60.seconds) {
+
+                val encryptedPdf = krypteringService.krypter(klagePdf.data, this@withContext)
+                    .let { klagePdf.copy(data = it) }
+
+                klageClient.sendKlage(
+                    digisosId = UUID.fromString(jsonKlage.digisosId),
+                    klageId = UUID.fromString(jsonKlage.klageId),
+                    vedtakId = UUID.fromString(jsonKlage.vedtakId),
+                    MandatoryFilesForKlage(
+                        klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage),
+                        klagePdf = encryptedPdf,
+                        vedleggJson = createJsonVedleggSpec(UUID.fromString(jsonKlage.klageId)),
+                    ),
+                )
+            }
+        }
     }
 
     override suspend fun sendEttersendelse(
@@ -134,15 +142,6 @@ class KlageServiceImpl(
 
         return mellomlagerService.processDocumentUpload(navEksternRefId, allFiles)
     }
-
-    private suspend fun FilForOpplasting.encryptData(): FilForOpplasting =
-        withContext(Dispatchers.Default) {
-            withTimeout(60.seconds) {
-                krypteringService
-                    .krypter(data, this@withContext)
-                    .let { encrypted -> copy(data = encrypted) }
-            }
-        }
 
     private suspend fun createJsonVedleggSpec(
         navEksternRefId: UUID,

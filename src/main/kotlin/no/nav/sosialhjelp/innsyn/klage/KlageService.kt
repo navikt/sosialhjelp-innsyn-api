@@ -192,5 +192,6 @@ class KlageServiceImpl(
 
 private fun JsonVedleggSpesifikasjon.noFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()
 
-private fun FiksKlageDto.getTidspunktSendt() = sendtKvittering.sendtStatus?.timestamp?.let { unixToLocalDateTime(it) }
-    ?: LocalDateTime.now()
+private fun FiksKlageDto.getTidspunktSendt() =
+    sendtKvittering.sendtStatus?.timestamp?.let { unixToLocalDateTime(it) }
+        ?: LocalDateTime.now()

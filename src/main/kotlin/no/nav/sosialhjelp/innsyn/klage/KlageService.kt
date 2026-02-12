@@ -63,7 +63,6 @@ class KlageServiceImpl(
     private val clientProperties: ClientProperties,
     private val krypteringService: KrypteringService,
 ) : KlageService {
-
     private val objectMapper = jacksonObjectMapper()
 
     override suspend fun sendKlage(

@@ -16,7 +16,7 @@ class PdlService(
             .adressebeskyttelse
             .any { it.gradering in BEGRENSEDE_GRADERINGER }
 
-    @Cacheable("pdlPersonNavn")
+    @Cacheable("pdlPerson")
     suspend fun getNavn(personId: String): PdlNavn =
         pdlClient
             .getPerson(personId)

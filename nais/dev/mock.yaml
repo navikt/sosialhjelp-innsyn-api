@@ -59,7 +59,7 @@ spec:
     - secret: sosialhjelp-innsyn-api-unleash-api-token
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: "mock-alt,log-console,mock-redis"
+      value: "mock-alt,log-kibana,mock-redis"
     - name: FIKS_DIGISOS_ENDPOINT_URL
       value: "http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/fiks"
     - name: FIKS_DOKUMENTLAGER_ENDPOINT_URL

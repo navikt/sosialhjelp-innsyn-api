@@ -63,6 +63,9 @@ class KlageServiceImpl(
     private val clientProperties: ClientProperties,
     private val krypteringService: KrypteringService,
 ) : KlageService {
+
+    private val objectMapper = jacksonObjectMapper()
+
     override suspend fun sendKlage(
         jsonKlage: JsonKlage,
         klagePdf: FilForOpplasting,
@@ -79,7 +82,7 @@ class KlageServiceImpl(
                     klageId = UUID.fromString(jsonKlage.klageId),
                     vedtakId = UUID.fromString(jsonKlage.vedtakId),
                     MandatoryFilesForKlage(
-                        klageJson = jacksonObjectMapper().writeValueAsString(jsonKlage),
+                        klageJson = objectMapper.writeValueAsString(jsonKlage),
                         klagePdf = encryptedPdf,
                         vedleggJson = createJsonVedleggSpec(UUID.fromString(jsonKlage.klageId)),
                     ),

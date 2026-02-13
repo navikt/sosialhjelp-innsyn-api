@@ -2,32 +2,43 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
-import io.mockk.Runs
+import com.ninjasquad.springmockk.MockkSpyBean
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
+import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
-import no.nav.sosialhjelp.innsyn.klage.DokumentInfoDto
-import no.nav.sosialhjelp.innsyn.klage.FiksEttersendtInfoNAVDto
-import no.nav.sosialhjelp.innsyn.klage.FiksKlageClient
-import no.nav.sosialhjelp.innsyn.klage.FiksKlageDto
-import no.nav.sosialhjelp.innsyn.klage.FiksProtokoll
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
+import no.nav.sosialhjelp.innsyn.klage.KlageMetricsService
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
-import no.nav.sosialhjelp.innsyn.klage.MellomlagerClient
-import no.nav.sosialhjelp.innsyn.klage.MellomlagerResponse
-import no.nav.sosialhjelp.innsyn.klage.MellomlagringDokumentInfo
-import no.nav.sosialhjelp.innsyn.klage.SendtKvitteringDto
-import no.nav.sosialhjelp.innsyn.klage.SendtStatus
-import no.nav.sosialhjelp.innsyn.klage.SendtStatusDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendtInfoNAVDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksProtokoll
+import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerClient
+import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerResponse
+import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagringDokumentInfo
+import no.nav.sosialhjelp.innsyn.klage.fiks.SendtKvitteringDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatus
+import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatusDto
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
+import no.nav.sosialhjelp.innsyn.pdl.PdlClient
+import no.nav.sosialhjelp.innsyn.pdl.dto.PdlAdressebeskyttelse
+import no.nav.sosialhjelp.innsyn.pdl.dto.PdlGradering
+import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
+import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -53,17 +64,30 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
     private lateinit var fiksService: FiksService
 
-    @MockkBean
+    @MockkSpyBean
     private lateinit var fiksKlageClient: FiksKlageClient
 
     @MockkBean
     private lateinit var kommuneInfoClient: KommuneInfoClient
+
+    @MockkBean
+    private lateinit var pdlClient: PdlClient
+
+    @MockkBean
+    private lateinit var eventService: EventService
+
+    @MockkBean(relaxed = true)
+    private lateinit var klageMetricsService: KlageMetricsService
 
     @Test
     fun `Sende klage skal lagres`() {
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
+
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+
+        coEvery { pdlClient.getPerson(any()) } returns createPdlPerson()
 
         coEvery { mellomlagerClient.getDocumentMetadataForRef(klageId) } returns
             MellomlagerResponse.MellomlagringDto(klageId, emptyList())
@@ -82,7 +106,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
 
-        coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just Runs
+        coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just runs
+        coEvery { fiksKlageClient.hentKlager(any()) } returns
+            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
         doPost(
             uri = POST_KLAGE,
@@ -94,6 +120,8 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                     tekst = "Dette er en testklage",
                 ),
         )
+
+        coVerify(exactly = 1) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakId, any()) }
     }
 
     @Test
@@ -324,7 +352,7 @@ private fun createMetadataJson(uuids: List<UUID>): String =
             filer =
                 uuids.map { uuid ->
                     OpplastetFilMetadata(
-                        filnavn = uuid.toString() + ".pdf",
+                        filnavn = "$uuid.pdf",
                         uuid = uuid,
                     )
                 },
@@ -383,12 +411,29 @@ private fun createFiksKlageDto(
         ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )
 
-private fun createDigisosSak(
+fun createDigisosSak(
     fiksDigisosId: UUID = UUID.randomUUID(),
     kommunenummer: String = "1234",
 ): DigisosSak {
     val mockDigisosSak = mockk<DigisosSak>()
+
     every { mockDigisosSak.fiksDigisosId } returns fiksDigisosId.toString()
     every { mockDigisosSak.kommunenummer } returns kommunenummer
     return mockDigisosSak
 }
+
+fun createPdlPerson(): PdlPerson =
+    PdlPerson(
+        adressebeskyttelse = listOf(PdlAdressebeskyttelse(PdlGradering.UGRADERT)),
+        navn = listOf(PdlNavn("Ola", null, "Nordmann")),
+    )
+
+private fun createModel(fiksDigisosId: UUID): InternalDigisosSoker =
+    InternalDigisosSoker(
+        fiksDigisosId = fiksDigisosId.toString(),
+        soknadsmottaker =
+            Soknadsmottaker(
+                navEnhetsnummer = "12345678",
+                navEnhetsnavn = "Nav Testenhet",
+            ),
+    )

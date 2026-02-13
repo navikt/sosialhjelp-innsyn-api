@@ -1,15 +1,12 @@
-package no.nav.sosialhjelp.innsyn.klage
+package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
-import no.nav.sosialhjelp.innsyn.digisosapi.DokumentlagerClient
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
-import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
@@ -21,7 +18,6 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 interface FiksKlageClient {
     suspend fun sendKlage(
@@ -43,8 +39,6 @@ interface FiksKlageClient {
 
 @Component
 class FiksKlageClientImpl(
-    private val krypteringService: KrypteringService,
-    private val dokumentlagerClient: DokumentlagerClient,
     private val fiksWebClient: WebClient,
 ) : FiksKlageClient {
     override suspend fun sendKlage(
@@ -53,28 +47,17 @@ class FiksKlageClientImpl(
         vedtakId: UUID,
         files: MandatoryFilesForKlage,
     ) {
-        val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
-
-        withContext(Dispatchers.Default) {
-            withTimeout(60.seconds) {
-                krypteringService
-                    .krypter(files.klagePdf.data, certificate, this@withContext)
-                    .let { encrypted -> files.klagePdf.copy(data = encrypted) }
-                    .let { pdfWithEncryptedData ->
-                        createBodyForUpload(
-                            klageJson = files.klageJson,
-                            vedleggJson = files.vedleggJson,
-                            klagePdf = pdfWithEncryptedData,
-                        )
-                    }.also { body ->
-                        doSendKlage(
-                            digisosId = digisosId,
-                            klageId = klageId,
-                            vedtakId = vedtakId,
-                            body = body,
-                        )
-                    }
-            }
+        createBodyForUpload(
+            klageJson = files.klageJson,
+            vedleggJson = files.vedleggJson,
+            klagePdf = files.klagePdf,
+        ).also { body ->
+            doSendKlage(
+                digisosId = digisosId,
+                klageId = klageId,
+                vedtakId = vedtakId,
+                body = body,
+            )
         }
     }
 
@@ -150,7 +133,7 @@ class FiksKlageClientImpl(
         }
     }
 
-    // Uten query param vil det alle klager for alle digisosIds returneres
+    // Uten query param vil alle klager for alle digisosIds for person returneres
     override suspend fun hentKlager(digisosId: UUID?): List<FiksKlageDto> {
         val uri = GET_KLAGER_PATH + if (digisosId != null) getKlagerQueryParam(digisosId) else ""
         return doHentKlager(uri)

@@ -1,8 +1,7 @@
 package no.nav.sosialhjelp.innsyn.valkey
 
-import java.time.Duration
 import org.springframework.context.annotation.Configuration
-
+import java.time.Duration
 
 @Configuration
 class DokumentCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {

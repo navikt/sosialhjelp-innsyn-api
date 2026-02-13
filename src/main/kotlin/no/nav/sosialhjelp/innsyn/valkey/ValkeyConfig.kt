@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.valkey
 
-import java.time.Duration
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
@@ -17,28 +16,27 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.SerializationException
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import java.time.Duration
 
 // TODO: Migrer til å bruke Valkey på ordentlig. Vi kommer ikke til å kunne bruke nye valkey-features før dette er gjort
 //   Vi bruker valkey, men behandler den som en redis-instans (bruker ikke valkey-features).
 @Configuration
 @Profile("!mock-redis")
 @EnableCaching
-class ValkeyConfig(
-) : CachingConfigurer {
+class ValkeyConfig : CachingConfigurer {
     override fun errorHandler() = CustomCacheErrorHandler
 
     @Bean
     fun cacheManager(
         connectionFactory: RedisConnectionFactory,
         cacheConfigs: List<InnsynApiCacheConfig>,
-    ): CacheManager {
-        return RedisCacheManager
+    ): CacheManager =
+        RedisCacheManager
             .builder(connectionFactory)
             .enableStatistics()
             .enableCreateOnMissingCache()
             .withInitialCacheConfigurations(cacheConfigs.associate { it.cacheName to it.getConfig() })
             .build()
-    }
 }
 
 private object CacheDefaults {

@@ -58,6 +58,8 @@ class ValkeyConfig(
             .withCacheConfiguration("navenhet", defaults.entryTtl(Duration.ofHours(1)))
             .withCacheConfiguration("digisosSak", defaults)
             .withCacheConfiguration("kommuneinfo", defaults)
+            // TODO Kan fjernes etter ny deploy
+            .withCacheConfiguration("pdlPerson", defaults.entryTtl(Duration.ofDays(1)))
             .withCacheConfiguration("pdlNavn", defaults.entryTtl(Duration.ofDays(1)))
             .withCacheConfiguration("pdlAdressebeskyttelse", defaults.entryTtl(Duration.ofHours(1)))
             .withCacheConfiguration("pdlHistoriskeIdenter", defaults.entryTtl(Duration.ofDays(1)))

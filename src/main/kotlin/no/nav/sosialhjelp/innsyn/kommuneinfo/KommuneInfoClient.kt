@@ -14,6 +14,7 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.valkey.KommuneInfoCacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
@@ -57,7 +58,7 @@ class KommuneInfoClient(
                 ?: emptyList()
         }
 
-    @Cacheable("kommuneinfo")
+    @Cacheable(KommuneInfoCacheConfig.CACHE_NAME)
     suspend fun getKommuneInfo(kommunenummer: String): KommuneInfo =
         withContext(Dispatchers.IO) {
             kotlin

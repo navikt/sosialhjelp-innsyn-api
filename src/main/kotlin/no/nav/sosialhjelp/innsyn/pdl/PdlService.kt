@@ -2,6 +2,8 @@ package no.nav.sosialhjelp.innsyn.pdl
 
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlGradering
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
+import no.nav.sosialhjelp.innsyn.valkey.AdressebeskyttelseCacheConfig
+import no.nav.sosialhjelp.innsyn.valkey.PdlNavnCacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
@@ -9,14 +11,14 @@ import org.springframework.stereotype.Service
 class PdlService(
     private val pdlClient: PdlClient,
 ) {
-    @Cacheable("pdlAdressebeskyttelse")
+    @Cacheable(AdressebeskyttelseCacheConfig.CACHE_NAME)
     suspend fun getAdressebeskyttelse(personId: String): Boolean =
         pdlClient
             .getPerson(personId)
             .adressebeskyttelse
             .any { it.gradering in BEGRENSEDE_GRADERINGER }
 
-    @Cacheable("pdlNavn")
+    @Cacheable(PdlNavnCacheConfig.CACHE_NAME)
     suspend fun getNavn(personId: String): PdlNavn =
         pdlClient
             .getPerson(personId)

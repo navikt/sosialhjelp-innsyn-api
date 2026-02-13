@@ -25,7 +25,6 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.valkey.DigisosSakCacheConfig
 import no.nav.sosialhjelp.innsyn.valkey.DokumentCacheConfig
-import no.nav.sosialhjelp.innsyn.valkey.InnsynApiCacheConfigs
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable

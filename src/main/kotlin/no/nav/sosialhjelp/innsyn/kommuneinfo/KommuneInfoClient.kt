@@ -24,6 +24,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.netty.http.client.HttpClient
 import kotlin.coroutines.cancellation.CancellationException
+import no.nav.sosialhjelp.innsyn.valkey.KommuneInfoCacheConfig
 
 @Component
 class KommuneInfoClient(
@@ -57,7 +58,7 @@ class KommuneInfoClient(
                 ?: emptyList()
         }
 
-    @Cacheable("kommuneinfo")
+    @Cacheable(KommuneInfoCacheConfig.CACHE_NAME)
     suspend fun getKommuneInfo(kommunenummer: String): KommuneInfo =
         withContext(Dispatchers.IO) {
             kotlin

@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.valkey
 
+import java.time.Duration
 import no.nav.sosialhjelp.innsyn.utils.logger
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CachingConfigurer
@@ -17,8 +17,6 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.SerializationException
 import org.springframework.data.redis.serializer.StringRedisSerializer
-import java.lang.RuntimeException
-import java.time.Duration
 
 // TODO: Migrer til å bruke Valkey på ordentlig. Vi kommer ikke til å kunne bruke nye valkey-features før dette er gjort
 //   Vi bruker valkey, men behandler den som en redis-instans (bruker ikke valkey-features).
@@ -26,47 +24,41 @@ import java.time.Duration
 @Profile("!mock-redis")
 @EnableCaching
 class ValkeyConfig(
-    @param:Value("\${innsyn.cache.time_to_live_seconds}") private val defaultTTL: Long,
-    @param:Value("\${innsyn.cache.dokument_cache_time_to_live_seconds}") private val dokumentTTL: Long,
 ) : CachingConfigurer {
     override fun errorHandler() = CustomCacheErrorHandler
 
     @Bean
-    fun cacheManager(connectionFactory: RedisConnectionFactory): CacheManager {
-        val valueSerializationPair =
-            JdkSerializationRedisSerializer().let {
-                RedisSerializationContext.fromSerializer(it).valueSerializationPair
-            }
-        val keySerializationPair =
-            StringRedisSerializer().let {
-                RedisSerializationContext.fromSerializer(it).keySerializationPair
-            }
-        val defaults =
-            RedisCacheConfiguration
-                .defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(defaultTTL))
-                .serializeValuesWith(valueSerializationPair)
-                .serializeKeysWith(keySerializationPair)
-
-        // Må eksplisitt konfigurere opp alle caches her for å få metrics på alle
+    fun cacheManager(
+        connectionFactory: RedisConnectionFactory,
+        cacheConfigs: List<InnsynApiCacheConfig>,
+    ): CacheManager {
         return RedisCacheManager
             .builder(connectionFactory)
             .enableStatistics()
-            .cacheDefaults(defaults)
             .enableCreateOnMissingCache()
-            .withCacheConfiguration("dokument", defaults.entryTtl(Duration.ofSeconds(dokumentTTL)))
-            .withCacheConfiguration("navenhet", defaults.entryTtl(Duration.ofHours(1)))
-            .withCacheConfiguration("digisosSak", defaults)
-            .withCacheConfiguration("kommuneinfo", defaults)
-            // TODO Kan fjernes etter ny deploy
-            .withCacheConfiguration("pdlPerson", defaults.entryTtl(Duration.ofDays(1)))
-            .withCacheConfiguration("pdlNavn", defaults.entryTtl(Duration.ofDays(1)))
-            .withCacheConfiguration("pdlAdressebeskyttelse", defaults.entryTtl(Duration.ofHours(1)))
-            .withCacheConfiguration("pdlHistoriskeIdenter", defaults.entryTtl(Duration.ofDays(1)))
-            .withCacheConfiguration("pdlAdressebeskyttelseOld", defaults.entryTtl(Duration.ofHours(1)))
-            .withCacheConfiguration("pdlHistoriskeIdenterOld", defaults.entryTtl(Duration.ofDays(1)))
+            .withInitialCacheConfigurations(cacheConfigs.associate { it.cacheName to it.getConfig() })
             .build()
     }
+}
+
+private object CacheDefaults {
+    val defaultTTL: Duration = Duration.ofMinutes(1L)
+    val keySerializationPair =
+        RedisSerializationContext.fromSerializer(StringRedisSerializer()).keySerializationPair
+    val valueSerializationPair =
+        RedisSerializationContext.fromSerializer(JdkSerializationRedisSerializer()).valueSerializationPair
+}
+
+abstract class InnsynApiCacheConfig(
+    val cacheName: String,
+    private val ttl: Duration? = null,
+) {
+    open fun getConfig(): RedisCacheConfiguration =
+        RedisCacheConfiguration
+            .defaultCacheConfig()
+            .entryTtl(ttl ?: CacheDefaults.defaultTTL)
+            .serializeValuesWith(CacheDefaults.valueSerializationPair)
+            .serializeKeysWith(CacheDefaults.keySerializationPair)
 }
 
 object CustomCacheErrorHandler : CacheErrorHandler {

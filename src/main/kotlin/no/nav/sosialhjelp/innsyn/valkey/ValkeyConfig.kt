@@ -33,6 +33,13 @@ class ValkeyConfig : CachingConfigurer {
     ): CacheManager =
         RedisCacheManager
             .builder(connectionFactory)
+            .cacheDefaults(
+                RedisCacheConfiguration
+                    .defaultCacheConfig()
+                    .entryTtl(CacheDefaults.defaultTTL)
+                    .serializeValuesWith(CacheDefaults.valueSerializationPair)
+                    .serializeKeysWith(CacheDefaults.keySerializationPair)
+            )
             .enableStatistics()
             .enableCreateOnMissingCache()
             .withInitialCacheConfigurations(cacheConfigs.associate { it.cacheName to it.getConfig() })

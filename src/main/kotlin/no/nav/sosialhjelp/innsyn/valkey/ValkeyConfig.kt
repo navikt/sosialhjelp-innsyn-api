@@ -38,9 +38,8 @@ class ValkeyConfig : CachingConfigurer {
                     .defaultCacheConfig()
                     .entryTtl(CacheDefaults.defaultTTL)
                     .serializeValuesWith(CacheDefaults.valueSerializationPair)
-                    .serializeKeysWith(CacheDefaults.keySerializationPair)
-            )
-            .enableStatistics()
+                    .serializeKeysWith(CacheDefaults.keySerializationPair),
+            ).enableStatistics()
             .enableCreateOnMissingCache()
             .withInitialCacheConfigurations(cacheConfigs.associate { it.cacheName to it.getConfig() })
             .build()

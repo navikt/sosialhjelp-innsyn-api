@@ -8,6 +8,8 @@ import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.valkey.AdressebeskyttelseOldCacheConfig
+import no.nav.sosialhjelp.innsyn.valkey.HistoriskeIdenterOldCacheConfig
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Profile
@@ -48,13 +50,13 @@ class PdlClientOldImpl(
             }
 
     // brukes kun for å sjekke tilgang
-    @Cacheable("pdlAdressebeskyttelseOld", key = "#ident")
+    @Cacheable(AdressebeskyttelseOldCacheConfig.CACHE_NAME, key = "#ident")
     override suspend fun hentPerson(
         ident: String,
         token: Token,
     ): PdlHentPerson? = hentFraPdl(ident, token)
 
-    @Cacheable("pdlHistoriskeIdenterOld", key = "#ident")
+    @Cacheable(HistoriskeIdenterOldCacheConfig.CACHE_NAME, key = "#ident")
     override suspend fun hentIdenter(
         ident: String,
         token: Token,

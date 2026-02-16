@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.valkey.NavEnhetCacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -28,7 +29,7 @@ class NorgClientImpl(
                 throw NorgException("Norg - retry har nådd max antall forsøk (=${spec.maxAttempts})", retrySignal.failure())
             }
 
-    @Cacheable("navenhet")
+    @Cacheable(NavEnhetCacheConfig.CACHE_NAME)
     override suspend fun hentNavEnhet(enhetsnr: String): NavEnhet = hentFraNorg(enhetsnr)
 
     private suspend fun hentFraNorg(enhetsnr: String): NavEnhet =

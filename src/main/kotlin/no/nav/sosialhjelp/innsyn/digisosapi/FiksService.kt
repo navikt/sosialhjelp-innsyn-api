@@ -21,6 +21,8 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
+import no.nav.sosialhjelp.innsyn.valkey.DigisosSakCacheConfig
+import no.nav.sosialhjelp.innsyn.valkey.DokumentCacheConfig
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
@@ -42,7 +44,6 @@ import org.springframework.web.reactive.function.client.toEntity
 import reactor.core.scheduler.Schedulers
 import java.io.Serializable
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.getValue
 
 @Component
 class FiksService(
@@ -171,7 +172,7 @@ class FiksClient(
     private val tilgangskontroll: TilgangskontrollService,
     private val cacheManager: CacheManager?,
 ) {
-    @Cacheable("digisosSak", key = "#digisosId")
+    @Cacheable(DigisosSakCacheConfig.CACHE_NAME, key = "#digisosId")
     suspend fun hentDigisosSak(digisosId: String): DigisosSak =
         withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente digisosSak fra /digisos/api/v1/soknader/$digisosId")
@@ -267,7 +268,7 @@ class FiksClient(
         toFiksErrorMessageUtenFnr(exception).startsWith("Ettersendelse med tilhørende navEksternRefId ") &&
             toFiksErrorMessageUtenFnr(exception).endsWith(" finnes allerde for oppgitt DigisosId $digisosId")
 
-    @Cacheable("dokument", key = "#cacheKey")
+    @Cacheable(DokumentCacheConfig.CACHE_NAME, key = "#cacheKey")
     suspend fun <T : Serializable> hentDokument(
         digisosId: String,
         dokumentlagerId: String,

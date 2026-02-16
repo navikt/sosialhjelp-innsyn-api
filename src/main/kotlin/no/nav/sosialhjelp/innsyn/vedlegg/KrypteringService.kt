@@ -34,7 +34,7 @@ interface KrypteringService {
     ): InputStream
 }
 
-@Profile("!(mock-alt|testcontainers)")
+@Profile("!(mock-alt|testcontainers|test)")
 @Component
 class KrypteringServiceImpl(
     private val dokumentlagerClient: DokumentlagerClient,
@@ -87,7 +87,7 @@ class KrypteringServiceImpl(
     }
 }
 
-@Profile("mock-alt", "testcontainers")
+@Profile("mock-alt", "testcontainers", "test")
 @Component
 class KrypteringServiceMock : KrypteringService {
     override val log by logger()

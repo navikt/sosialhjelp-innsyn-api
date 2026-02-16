@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.klage
+package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.util.UUID
@@ -47,15 +47,15 @@ data class TrekkKlageInfoDto(
 )
 
 data class SendtKvitteringDto(
-    val sendtKanal: FiksProtokoll,
-    val meldingId: UUID,
-    val sendtStatus: SendtStatusDto,
-    val statusListe: List<SendtStatusDto>,
+    val sendtKanal: FiksProtokoll?,
+    val meldingId: UUID?,
+    val sendtStatus: SendtStatusDto?,
+    val statusListe: List<SendtStatusDto>?,
 )
 
 data class SendtStatusDto(
-    val status: SendtStatus,
-    val timestamp: Long,
+    val status: SendtStatus?,
+    val timestamp: Long?,
 )
 
 enum class SendtStatus {

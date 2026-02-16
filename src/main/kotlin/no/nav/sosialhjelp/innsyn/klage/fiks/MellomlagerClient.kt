@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.klage
+package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,7 +84,7 @@ class FiksMellomlagerClient(
         val certificate = dokumentlagerClient.getDokumentlagerPublicKeyX509Certificate()
 
         return withContext(Dispatchers.Default) {
-            withTimeout(10.seconds) {
+            withTimeout(15.seconds) {
                 val krypterteFiler = krypterFiler(certificate, filerForOpplasting, this)
                 logger.info("*** DONE ENCRYPTING FILES, UPLOADING TO MELLOMLAGER")
 

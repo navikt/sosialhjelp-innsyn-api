@@ -1,6 +1,9 @@
-package no.nav.sosialhjelp.innsyn.klage
+package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
+import no.nav.sosialhjelp.innsyn.klage.DocumentForKlage
+import no.nav.sosialhjelp.innsyn.klage.DocumentUploadHelper
+import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.ValidationValues
 import no.nav.sosialhjelp.innsyn.vedlegg.calculateContentLength

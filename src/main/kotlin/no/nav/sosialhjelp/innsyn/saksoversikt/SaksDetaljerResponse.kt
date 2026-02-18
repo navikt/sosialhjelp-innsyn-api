@@ -19,6 +19,8 @@ data class SaksDetaljerResponse(
     val forsteOppgaveFrist: LocalDate?,
     val mottattTidspunkt: LocalDateTime?,
     val sisteDokumentasjonKravFrist: LocalDate?,
+    val soknadOpprettet: LocalDateTime?,
+    val sistOppdatert: LocalDateTime,
 ) {
     data class Sak(
         val antallVedtak: Int,

@@ -71,10 +71,21 @@ internal class SaksOversiktControllerTest {
         every { digisosSak1.fiksDigisosId } returns "123"
         every { digisosSak1.sistEndret } returns 0L
         every { digisosSak1.digisosSoker } returns null
+        every { digisosSak1.originalSoknadNAV } returns
+            mockk {
+                every { this@mockk.timestampSendt } returns 0L
+            }
 
         every { digisosSak2.fiksDigisosId } returns "456"
         every { digisosSak2.sistEndret } returns 1000L
-        every { digisosSak2.digisosSoker } returns mockk()
+        every { digisosSak2.digisosSoker } returns
+            mockk {
+                every { this@mockk.timestampSistOppdatert } returns 10L
+            }
+        every { digisosSak2.originalSoknadNAV } returns
+            mockk {
+                every { this@mockk.timestampSendt } returns 0L
+            }
 
         every { oppgaveResponseMock.oppgaveElementer } returns listOf(oppgaveElement1)
         every { oppgaveResponseMock.innsendelsesfrist } returns LocalDate.now()

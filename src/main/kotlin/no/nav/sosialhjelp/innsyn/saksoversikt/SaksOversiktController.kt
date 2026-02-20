@@ -13,6 +13,7 @@ import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
+import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -64,6 +65,11 @@ class SaksOversiktController(
                         )
                 }?.tidspunkt
 
+        val soknadOpprettet =
+            sak.originalSoknadNAV?.timestampSendt?.let { timestamp ->
+                unixToLocalDateTime(timestamp)
+            }
+        val sistOppdatert = unixToLocalDateTime(setOfNotNull(sak.digisosSoker?.timestampSistOppdatert, sak.sistEndret).max())
         return SaksDetaljerResponse(
             fiksDigisosId = sak.fiksDigisosId,
             soknadTittel = hentNavn(model),
@@ -89,6 +95,8 @@ class SaksOversiktController(
             forsteOppgaveFrist = (oppgaver.mapNotNull { it.innsendelsesfrist } + dokkrav.mapNotNull { it.frist }).minOrNull(),
             sisteDokumentasjonKravFrist = dokkrav.mapNotNull { it.frist }.minOrNull(),
             mottattTidspunkt = mottattTidspunkt,
+            sistOppdatert = sistOppdatert,
+            soknadOpprettet = soknadOpprettet,
         )
     }
 

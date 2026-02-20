@@ -25,6 +25,7 @@ spring:
 server:
   max-http-request-header-size: 16KB
   shutdown: graceful
+  port: 8083
 
 resilience4j:
   circuitbreaker:

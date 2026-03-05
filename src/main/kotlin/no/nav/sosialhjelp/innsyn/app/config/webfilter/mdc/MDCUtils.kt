@@ -28,8 +28,6 @@ object MDCUtils {
     }
 }
 
-
-
 // Kopierer MDC-context inn til reactor threads
 object MdcExchangeFilter : ExchangeFilterFunction {
     override fun filter(

@@ -16,7 +16,7 @@ class PdlConfig(
     @Bean
     fun pdlWebClient(
         webClientBuilder: WebClient.Builder,
-        defaultHttpClient: HttpClient
+        defaultHttpClient: HttpClient,
     ): WebClient =
         webClientBuilder
             .clientConnector(ReactorClientHttpConnector(defaultHttpClient))

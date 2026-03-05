@@ -2,12 +2,12 @@ package no.nav.sosialhjelp.innsyn.app.config
 
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
-import java.time.Duration.ofMinutes
-import java.time.Duration.ofSeconds
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import reactor.netty.http.client.HttpClient
 import reactor.netty.resources.ConnectionProvider
+import java.time.Duration.ofMinutes
+import java.time.Duration.ofSeconds
 
 @Configuration
 class HttpClientConfig {

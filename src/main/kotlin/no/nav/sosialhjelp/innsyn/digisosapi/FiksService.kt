@@ -254,11 +254,12 @@ class FiksClient(
                         }
                     }
                 }.subscribeOn(Schedulers.boundedElastic())
-                .block() ?: throw FiksClientException(
-                500,
-                "responseEntity er null selv om request ikke har kastet exception",
-                null,
-            )
+                .awaitSingleOrNull()
+                ?: throw FiksClientException(
+                    500,
+                    "responseEntity er null selv om request ikke har kastet exception",
+                    null,
+                )
         }
 
     private fun filErAlleredeLastetOpp(

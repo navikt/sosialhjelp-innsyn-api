@@ -49,8 +49,8 @@ class MDCFilter : CoWebFilter() {
         if (path.matches(
                 Regex(
                     "^$INNSYN_BASE_URL(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)" +
-                            "|saksStatus|soknadsStatus|vedlegg|vilkar|dokumentasjonkrav|dokumentasjonkrav/(.*)" +
-                            "|harLeverteDokumentasjonkrav|fagsystemHarDokumentasjonkrav)",
+                        "|saksStatus|soknadsStatus|vedlegg|vilkar|dokumentasjonkrav|dokumentasjonkrav/(.*)" +
+                        "|harLeverteDokumentasjonkrav|fagsystemHarDokumentasjonkrav)",
                 ),
             )
         ) {

@@ -21,6 +21,7 @@ class HttpClientConfig {
                 .pendingAcquireTimeout(ofSeconds(30))
                 .lifo()
                 .evictInBackground(ofMinutes(5))
+                .metrics(true)
                 .build()
         return HttpClient
             .create(provider)

@@ -15,10 +15,10 @@ class NorgConfig(
     @Bean
     fun norgWebClient(
         webClientBuilder: WebClient.Builder,
-        defaultHttpClient: HttpClient,
+        httpClient: HttpClient,
     ): WebClient =
         webClientBuilder
-            .clientConnector(ReactorClientHttpConnector(defaultHttpClient))
+            .clientConnector(ReactorClientHttpConnector(httpClient))
             .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
             .baseUrl(clientProperties.norgUrl)
             .filter(MdcExchangeFilter)

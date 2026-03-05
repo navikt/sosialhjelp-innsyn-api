@@ -16,10 +16,10 @@ class PdlConfig(
     @Bean
     fun pdlWebClient(
         webClientBuilder: WebClient.Builder,
-        defaultHttpClient: HttpClient,
+        httpClient: HttpClient,
     ): WebClient =
         webClientBuilder
-            .clientConnector(ReactorClientHttpConnector(defaultHttpClient))
+            .clientConnector(ReactorClientHttpConnector(httpClient))
             .baseUrl(clientProperties.pdlEndpointUrl)
             .defaultHeader(IntegrationUtils.HEADER_BEHANDLINGSNUMMER, IntegrationUtils.BEHANDLINGSNUMMER_INNSYN)
             .filter(MdcExchangeFilter)

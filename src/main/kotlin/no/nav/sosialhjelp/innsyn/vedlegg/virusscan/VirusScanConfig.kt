@@ -15,9 +15,9 @@ class VirusScanConfig(
     @Bean
     fun virusScanWebClient(
         webClientBuilder: WebClient.Builder,
-        defaultHttpClient: HttpClient,
+        httpClient: HttpClient,
     ) = webClientBuilder
-        .clientConnector(ReactorClientHttpConnector(defaultHttpClient))
+        .clientConnector(ReactorClientHttpConnector(httpClient))
         .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
         .baseUrl(clamAvUrl)
         .filter(MdcExchangeFilter)

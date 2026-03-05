@@ -12,7 +12,7 @@ import java.time.Duration.ofSeconds
 @Configuration
 class HttpClientConfig {
     @Bean
-    fun defaultHttpClient(): HttpClient =
+    fun httpClient(): HttpClient =
         HttpClient
             .create(defaultConnectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ofSeconds(30).toMillis().toInt())

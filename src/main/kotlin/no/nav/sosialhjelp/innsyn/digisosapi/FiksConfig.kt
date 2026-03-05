@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisosapi
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.config.webfilter.mdc.MdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
@@ -19,16 +20,18 @@ class FiksConfig(
     @Bean
     fun fiksWebClient(
         webClientBuilder: WebClient.Builder,
-        httpClient: HttpClient,
+        fiksHttpClient: HttpClient,
     ): WebClient =
         webClientBuilder
-            .clientConnector(ReactorClientHttpConnector(httpClient))
+            .clientConnector(ReactorClientHttpConnector(fiksHttpClient))
             .baseUrl(clientProperties.fiksDigisosEndpointUrl)
             .codecs {
                 it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)
                 it.defaultCodecs().jacksonJsonEncoder(JacksonJsonEncoder(sosialhjelpJsonMapper))
                 it.defaultCodecs().jacksonJsonDecoder(JacksonJsonDecoder(sosialhjelpJsonMapper))
-            }.defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
+            }
+            .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
+            .filter(MdcExchangeFilter)
             .build()
 }

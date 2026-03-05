@@ -3,6 +3,8 @@ package no.nav.sosialhjelp.innsyn.digisosapi
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
+import java.io.Serializable
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.sync.Mutex
@@ -42,8 +44,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
 import reactor.core.scheduler.Schedulers
-import java.io.Serializable
-import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class FiksService(
@@ -99,7 +99,7 @@ class FiksService(
     ) {
         log.info(
             "Starter sending til FIKS for ettersendelse med ${files.size} filer (inkludert ettersendelse.pdf)." +
-                " Validering, filnavn-endring, generering av ettersendelse.pdf og kryptering er OK.",
+                    " Validering, filnavn-endring, generering av ettersendelse.pdf og kryptering er OK.",
         )
 
         val body = createBodyForUpload(vedleggJson, files)
@@ -119,7 +119,7 @@ class FiksService(
         }
         log.info(
             "Sendte ettersendelse til kommune $kommunenummer i Fiks, " +
-                "fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCode})",
+                    "fikk navEksternRefId $navEksternRefId (statusCode: ${responseEntity.statusCode})",
         )
     }
 
@@ -253,12 +253,14 @@ class FiksClient(
                             else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                         }
                     }
-                }.subscribeOn(Schedulers.boundedElastic())
-                .block() ?: throw FiksClientException(
-                500,
-                "responseEntity er null selv om request ikke har kastet exception",
-                null,
-            )
+                }
+                .subscribeOn(Schedulers.boundedElastic())
+                .awaitSingleOrNull()
+                ?: throw FiksClientException(
+                    500,
+                    "responseEntity er null selv om request ikke har kastet exception",
+                    null,
+                )
         }
 
     private fun filErAlleredeLastetOpp(
@@ -266,7 +268,7 @@ class FiksClient(
         digisosId: String,
     ): Boolean =
         toFiksErrorMessageUtenFnr(exception).startsWith("Ettersendelse med tilhørende navEksternRefId ") &&
-            toFiksErrorMessageUtenFnr(exception).endsWith(" finnes allerde for oppgitt DigisosId $digisosId")
+                toFiksErrorMessageUtenFnr(exception).endsWith(" finnes allerde for oppgitt DigisosId $digisosId")
 
     @Cacheable(DokumentCacheConfig.CACHE_NAME, key = "#cacheKey")
     suspend fun <T : Serializable> hentDokument(

@@ -27,14 +27,21 @@ class MDCFilter : CoWebFilter() {
 
         addDigisosId(request)
         put(MDCUtils.PATH, request.uri.path)
+        put(MDCUtils.HTTP_METHOD, request.method.name())
+
         request.headers.getFirst(HttpHeaders.USER_AGENT)?.let { put(MDCUtils.USER_AGENT, it) }
         request.headers.getFirst(HttpHeaders.REFERER)?.let { put(MDCUtils.REFERER, it) }
+
         // Fødselsdato blir ekskludert fra vanlig logging. Inkluderes altså kun i secure logs. Se logback-spring.xml
         TokenUtils.getUserIdFromTokenOrNull()?.take(6)?.let { put("fodselsdato", it) }
-        withContext(MDCContext()) {
-            chain.filter(exchange)
+
+        try {
+            withContext(MDCContext()) {
+                chain.filter(exchange)
+            }
+        } finally {
+            clearMDC()
         }
-        return clearMDC()
     }
 
     private fun addDigisosId(request: ServerHttpRequest) {

@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.saksoversikt
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
-import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponseBeta
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
@@ -76,8 +75,8 @@ class SaksOversiktController(
             soknadTittel = hentNavn(model),
             status = model.status,
             antallNyeOppgaver =
-                oppgaver.size +
-                    hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId),
+                oppgaver.size,
+            antallNyeVilkarOgDokumentasjonKrav = hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId),
             dokumentasjonEtterspurt = oppgaver.isNotEmpty(),
             dokumentasjonkrav = dokkrav.sumOf { it.dokumentasjonkravElementer.size } > 0,
             vilkar = vilkar.isNotEmpty(),
@@ -93,7 +92,7 @@ class SaksOversiktController(
                         },
                     )
                 },
-            forsteOppgaveFrist = (oppgaver.mapNotNull { it.innsendelsesfrist } + dokkrav.mapNotNull { it.frist }).minOrNull(),
+            forsteOppgaveFrist = oppgaver.mapNotNull { it.innsendelsesfrist }.minOrNull(),
             sisteDokumentasjonKravFrist = dokkrav.mapNotNull { it.frist }.minOrNull(),
             mottattTidspunkt = mottattTidspunkt,
             sistOppdatert = sistOppdatert,

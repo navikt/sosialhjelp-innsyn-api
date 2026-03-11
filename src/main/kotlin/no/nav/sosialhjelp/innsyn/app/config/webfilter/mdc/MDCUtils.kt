@@ -1,11 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app.config.webfilter.mdc
 
 import org.slf4j.MDC
-import org.springframework.web.reactive.function.client.ClientRequest
-import org.springframework.web.reactive.function.client.ClientResponse
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
-import org.springframework.web.reactive.function.client.ExchangeFunction
-import reactor.core.publisher.Mono
 
 object MDCUtils {
     const val DIGISOS_ID = "digisosId"
@@ -26,14 +21,4 @@ object MDCUtils {
     fun clearMDC() {
         MDC.clear()
     }
-}
-
-// Kopierer MDC-context inn til reactor threads
-object MdcExchangeFilter : ExchangeFilterFunction {
-    override fun filter(
-        request: ClientRequest,
-        next: ExchangeFunction,
-    ): Mono<ClientResponse> = next.exchange(request).doOnNext { setContextMap() }
-
-    private fun setContextMap() = MDC.getCopyOfContextMap()?.also { MDC.setContextMap(it) }
 }

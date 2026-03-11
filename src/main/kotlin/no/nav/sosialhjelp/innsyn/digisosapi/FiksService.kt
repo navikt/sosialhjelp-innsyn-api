@@ -41,7 +41,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
-import reactor.core.scheduler.Schedulers
 import java.io.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
@@ -253,8 +252,7 @@ class FiksClient(
                             else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                         }
                     }
-                }.subscribeOn(Schedulers.boundedElastic())
-                .awaitSingleOrNull()
+                }.awaitSingleOrNull()
                 ?: throw FiksClientException(
                     500,
                     "responseEntity er null selv om request ikke har kastet exception",

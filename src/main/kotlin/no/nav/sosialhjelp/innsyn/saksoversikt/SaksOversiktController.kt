@@ -52,7 +52,7 @@ class SaksOversiktController(
 
         val sak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createSaksoversiktModel(sak)
-        val oppgaver = hentNyeOppgaver(model, sak.fiksDigisosId).filter { it.erFraInnsyn }
+        val oppgaver = hentNyeOppgaver(model, sak.fiksDigisosId)
         val vilkar = hentNyeVilkar(model, sak.fiksDigisosId)
         val dokkrav = hentNyeDokumentasjonkrav(model, sak.fiksDigisosId)
         val mottattTidspunkt =
@@ -75,7 +75,8 @@ class SaksOversiktController(
             soknadTittel = hentNavn(model),
             status = model.status,
             antallNyeOppgaver =
-                oppgaver.size,
+                oppgaver.filter { it.erFraInnsyn }.size +
+                    hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId),
             antallNyeVilkarOgDokumentasjonKrav = hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId),
             dokumentasjonEtterspurt = oppgaver.isNotEmpty(),
             dokumentasjonkrav = dokkrav.sumOf { it.dokumentasjonkravElementer.size } > 0,
@@ -92,7 +93,7 @@ class SaksOversiktController(
                         },
                     )
                 },
-            forsteOppgaveFrist = oppgaver.mapNotNull { it.innsendelsesfrist }.minOrNull(),
+            forsteOppgaveFrist = (oppgaver.mapNotNull { it.innsendelsesfrist } + dokkrav.mapNotNull { it.frist }).minOrNull(),
             sisteDokumentasjonKravFrist = dokkrav.mapNotNull { it.frist }.minOrNull(),
             mottattTidspunkt = mottattTidspunkt,
             sistOppdatert = sistOppdatert,

@@ -55,6 +55,7 @@ class SaksOversiktController(
         val oppgaver = hentNyeOppgaver(model, sak.fiksDigisosId)
         val vilkar = hentNyeVilkar(model, sak.fiksDigisosId)
         val dokkrav = hentNyeDokumentasjonkrav(model, sak.fiksDigisosId)
+        val antallNyeVilkarOgDokumentasjonkrav = hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId)
         val mottattTidspunkt =
             model.historikk
                 .firstOrNull {
@@ -76,8 +77,8 @@ class SaksOversiktController(
             status = model.status,
             antallNyeOppgaver =
                 oppgaver.filter { it.erFraInnsyn }.size +
-                    hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId),
-            antallNyeVilkarOgDokumentasjonKrav = hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId),
+                    antallNyeVilkarOgDokumentasjonkrav,
+            antallNyeVilkarOgDokumentasjonKrav = antallNyeVilkarOgDokumentasjonkrav,
             dokumentasjonEtterspurt = oppgaver.isNotEmpty(),
             dokumentasjonkrav = dokkrav.sumOf { it.dokumentasjonkravElementer.size } > 0,
             vilkar = vilkar.isNotEmpty(),

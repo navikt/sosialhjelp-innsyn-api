@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.config.webfilter.mdc.MdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,6 +21,5 @@ class PdlConfig(
             .clientConnector(ReactorClientHttpConnector(httpClient))
             .baseUrl(clientProperties.pdlEndpointUrl)
             .defaultHeader(IntegrationUtils.HEADER_BEHANDLINGSNUMMER, IntegrationUtils.BEHANDLINGSNUMMER_INNSYN)
-            .filter(MdcExchangeFilter)
             .build()
 }

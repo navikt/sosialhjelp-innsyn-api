@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.config.webfilter.mdc.MdcExchangeFilter
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
 import org.springframework.context.annotation.Bean
@@ -25,6 +24,5 @@ class MellomlagerConfig(
             .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
             .defaultHeader(HEADER_INTEGRASJON_ID, clientProperties.fiksIntegrasjonId)
             .defaultHeader(HEADER_INTEGRASJON_PASSORD, clientProperties.fiksIntegrasjonpassord)
-            .filter(MdcExchangeFilter)
             .build()
 }

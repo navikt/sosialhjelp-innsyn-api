@@ -3,8 +3,6 @@ package no.nav.sosialhjelp.innsyn.digisosapi
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
-import java.io.Serializable
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.sync.Mutex
@@ -43,6 +41,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
+import java.io.Serializable
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class FiksService(
@@ -252,8 +252,7 @@ class FiksClient(
                             else -> FiksServerException(e.statusCode.value(), feilmelding, e)
                         }
                     }
-                }
-                .awaitSingleOrNull()
+                }.awaitSingleOrNull()
                 ?: throw FiksClientException(
                     500,
                     "responseEntity er null selv om request ikke har kastet exception",

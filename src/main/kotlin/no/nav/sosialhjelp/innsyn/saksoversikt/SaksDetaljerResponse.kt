@@ -11,6 +11,7 @@ data class SaksDetaljerResponse(
     val soknadTittel: String,
     val status: SoknadsStatus,
     val antallNyeOppgaver: Int?,
+    val antallNyeVilkarOgDokumentasjonKrav: Int?,
     val dokumentasjonEtterspurt: Boolean,
     val dokumentasjonkrav: Boolean,
     val vilkar: Boolean,

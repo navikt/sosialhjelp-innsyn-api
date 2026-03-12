@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveElement
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponseBeta
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
 import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
@@ -56,6 +57,7 @@ internal class SaksOversiktControllerTest {
     private val sak2: Sak = mockk()
 
     private val oppgaveResponseMock: OppgaveResponse = mockk()
+    private val oppgaveResponseBetaMock: OppgaveResponseBeta = mockk()
     private val vilkarResponseMock: VilkarResponse = mockk()
     private val dokumentasjonkravResponseMock: DokumentasjonkravResponse = mockk()
 
@@ -89,11 +91,14 @@ internal class SaksOversiktControllerTest {
 
         every { oppgaveResponseMock.oppgaveElementer } returns listOf(oppgaveElement1)
         every { oppgaveResponseMock.innsendelsesfrist } returns LocalDate.now()
+        every { oppgaveResponseBetaMock.innsendelsesfrist } returns LocalDate.now()
+        every { oppgaveResponseBetaMock.erFraInnsyn } returns true
+        every { oppgaveResponseBetaMock.erLastetOpp } returns false
         every { dokumentasjonkravResponseMock.dokumentasjonkravElementer } returns listOf(dokumentasjonkravElement1)
         every { dokumentasjonkravResponseMock.frist } returns LocalDate.now()
 
-        coEvery { oppgaveService.hentOppgaver("123") } returns listOf(oppgaveResponseMock, oppgaveResponseMock) // 2 oppgaver
-        coEvery { oppgaveService.hentOppgaver("456") } returns listOf(oppgaveResponseMock) // 1 oppgave
+        coEvery { oppgaveService.hentOppgaverBeta("123") } returns listOf(oppgaveResponseBetaMock, oppgaveResponseBetaMock) // 2 oppgaver
+        coEvery { oppgaveService.hentOppgaverBeta("456") } returns listOf(oppgaveResponseBetaMock) // 1 oppgave
         coEvery { oppgaveService.getVilkar("123") } returns listOf(vilkarResponseMock, vilkarResponseMock) // 2 oppgaver
         coEvery { oppgaveService.getVilkar("456") } returns listOf(vilkarResponseMock) // 1 oppgave
         coEvery {

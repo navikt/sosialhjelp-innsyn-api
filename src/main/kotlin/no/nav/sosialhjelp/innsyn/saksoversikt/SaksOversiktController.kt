@@ -3,7 +3,7 @@ package no.nav.sosialhjelp.innsyn.saksoversikt
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
-import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
+import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponseBeta
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
@@ -55,6 +55,7 @@ class SaksOversiktController(
         val oppgaver = hentNyeOppgaver(model, sak.fiksDigisosId)
         val vilkar = hentNyeVilkar(model, sak.fiksDigisosId)
         val dokkrav = hentNyeDokumentasjonkrav(model, sak.fiksDigisosId)
+        val antallNyeVilkarOgDokumentasjonkrav = hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId)
         val mottattTidspunkt =
             model.historikk
                 .firstOrNull {
@@ -75,9 +76,10 @@ class SaksOversiktController(
             soknadTittel = hentNavn(model),
             status = model.status,
             antallNyeOppgaver =
-                oppgaver.sumOf { it.oppgaveElementer.size } +
-                    hentAntallNyeVilkarOgDokumentasjonkrav(model, sak.fiksDigisosId),
-            dokumentasjonEtterspurt = oppgaver.sumOf { it.oppgaveElementer.size } > 0,
+                oppgaver.filter { it.erFraInnsyn }.size +
+                    antallNyeVilkarOgDokumentasjonkrav,
+            antallNyeVilkarOgDokumentasjonKrav = antallNyeVilkarOgDokumentasjonkrav,
+            dokumentasjonEtterspurt = oppgaver.isNotEmpty(),
             dokumentasjonkrav = dokkrav.sumOf { it.dokumentasjonkravElementer.size } > 0,
             vilkar = vilkar.isNotEmpty(),
             forelopigSvar = model.forelopigSvar,
@@ -125,10 +127,10 @@ class SaksOversiktController(
     private suspend fun hentNyeOppgaver(
         model: InternalDigisosSoker,
         fiksDigisosId: String,
-    ): List<OppgaveResponse> =
+    ): List<OppgaveResponseBeta> =
         when {
             model.oppgaver.isEmpty() -> emptyList()
-            else -> oppgaveService.hentOppgaver(fiksDigisosId)
+            else -> oppgaveService.hentOppgaverBeta(fiksDigisosId).filter { !it.erLastetOpp }
         }
 
     private suspend fun hentNyeVilkar(

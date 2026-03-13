@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.saksoversikt
 
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.VedtakDto
 import no.nav.sosialhjelp.innsyn.domain.ForelopigSvar
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
@@ -25,6 +26,7 @@ data class SaksDetaljerResponse(
 ) {
     data class Sak(
         val antallVedtak: Int,
+        val vedtak: List<VedtakDto>,
         val status: SaksStatus,
     )
 }

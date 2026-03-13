@@ -7,6 +7,7 @@ import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponseBeta
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.VedtakDto
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
@@ -87,6 +88,7 @@ class SaksOversiktController(
                 model.saker.map { sak ->
                     SaksDetaljerResponse.Sak(
                         sak.vedtak.size,
+                        sak.vedtak.map { VedtakDto(it.id, it.utfall, it.vedtaksFilUrl, it.dato) },
                         if (sak.vedtak.isEmpty()) {
                             sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
                         } else {

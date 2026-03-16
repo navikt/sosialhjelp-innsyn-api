@@ -101,6 +101,7 @@ sealed class Oppgavehendelse {
 
     fun getOppgaveStatus(): Oppgavestatus =
         when (status) {
+            // OPPFYLT og IKKE_OPPFYLT er ugyldiggjort som statuser på vilkår
             Oppgavestatus.OPPFYLT, Oppgavestatus.IKKE_OPPFYLT -> Oppgavestatus.RELEVANT
             else -> status
         }
@@ -185,6 +186,8 @@ enum class UtfallVedtak {
 enum class Oppgavestatus {
     RELEVANT,
     ANNULLERT,
+
+    // OPPFYLT og IKKE_OPPFYLT er ugyldiggjort som statuser på vilkår.
     OPPFYLT,
     IKKE_OPPFYLT,
     LEVERT_TIDLIGERE,

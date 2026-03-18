@@ -18,12 +18,25 @@ class UtbetalingerController2(
     suspend fun hentUtbetalinger(): List<UtbetalingDto> {
         tilgangskontroll.sjekkTilgang()
 
+        val utbetalingerPerSoknad = utbetalingerServiceNew.hentUtbetalinger()
+
+        // Finn referanser som finnes på flere søknader
+        val referanserMedFlereSoknader =
+            utbetalingerPerSoknad
+                .flatMap { (fiksDigisosId, utbetalinger) ->
+                    utbetalinger.map { it.referanse to fiksDigisosId }
+                }.groupBy({ it.first }, { it.second })
+                .filter { it.value.distinct().size > 1 }
+                .keys
+
         val flatUtbetalinger =
-            utbetalingerServiceNew
-                .hentUtbetalinger()
+            utbetalingerPerSoknad
                 .flatMap { (fiksDigisosId, utbetalinger) ->
                     utbetalinger.map {
-                        it.toDto(fiksDigisosId)
+                        it.toDto(
+                            fiksDigisosId = fiksDigisosId,
+                            knyttetTilFlereSoknader = it.referanse in referanserMedFlereSoknader,
+                        )
                     }
                 }.distinctBy { it.referanse } // Fjerner eventuelle duplikater basert på referanse
 

@@ -134,9 +134,10 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `Duplikate utbetalinger med samme referanse skal filtreres bort`() {
+    fun `Duplikate utbetalinger med samme referanse skal filtreres bort og markeres som knyttet til flere soknader`() {
         // Bakgrunnen for denne testen er en bug som oppsto fordi to soknader pekte til samme sak med samme utbetalinger.
-        // Dette førte til at brukere så duplikate utbetalinger i innsyn
+        // Dette førte til at brukere så duplikate utbetalinger i innsyn.
+        // I tillegg ønsker vi å markere utbetalinger som er knyttet til flere søknader.
 
         val fiksDigisosId1 = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
         val fiksDigisosId2 = "3fa85f64-5717-4562-b3fc-2c963f66afa7"
@@ -144,8 +145,10 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val digisosSak1 = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val digisosSak2 = sosialhjelpJsonMapper.readValue(ok_digisossak_response2, DigisosSak::class.java)
 
+        // Søknad 1 har: planlagt-ref-1, planlagt-ref-2, utbetalt-ref-1
         val soker1 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
-        val soker2 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
+        // Søknad 2 har: utbetalt-ref-1 (delt), unik-soknad2-ref (unik)
+        val soker2 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerForSoknad2MedDeltOgUnikUtbetaling, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2)
         coEvery { fiksService.getSoknad(fiksDigisosId1) } returns digisosSak1
@@ -177,6 +180,18 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
 
         assertThat(response).isNotEmpty
         val allUtbetalinger = response!!
-        assertThat(allUtbetalinger).hasSize(3)
+
+        // Totalt 4 unike utbetalinger: planlagt-ref-1, planlagt-ref-2, utbetalt-ref-1, unik-soknad2-ref
+        assertThat(allUtbetalinger).hasSize(4)
+
+        // utbetalt-ref-1 finnes på begge søknadene, skal ha knyttetTilFlereSoknader = true
+        val deltUtbetaling = allUtbetalinger.find { it.referanse == "utbetalt-ref-1" }
+        assertThat(deltUtbetaling).isNotNull
+        assertThat(deltUtbetaling!!.knyttetTilFlereSoknader).isTrue()
+
+        // Utbetalinger som kun finnes på én søknad skal ha knyttetTilFlereSoknader = false
+        val unikeUtbetalinger = allUtbetalinger.filter { it.referanse != "utbetalt-ref-1" }
+        assertThat(unikeUtbetalinger).hasSize(3)
+        assertThat(unikeUtbetalinger).allMatch { !it.knyttetTilFlereSoknader }
     }
 }

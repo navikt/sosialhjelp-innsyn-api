@@ -134,10 +134,10 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `Duplikate utbetalinger med samme referanse skal filtreres bort og markeres som knyttet til flere soknader`() {
+    fun `Duplikate utbetalinger med samme referanse skal filtreres bort og inneholde liste over tilknyttede soknader`() {
         // Bakgrunnen for denne testen er en bug som oppsto fordi to soknader pekte til samme sak med samme utbetalinger.
         // Dette førte til at brukere så duplikate utbetalinger i innsyn.
-        // I tillegg ønsker vi å markere utbetalinger som er knyttet til flere søknader.
+        // I tillegg ønsker vi å vise hvilke søknader en utbetaling er knyttet til.
 
         val fiksDigisosId1 = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
         val fiksDigisosId2 = "3fa85f64-5717-4562-b3fc-2c963f66afa7"
@@ -184,14 +184,15 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         // Totalt 4 unike utbetalinger: planlagt-ref-1, planlagt-ref-2, utbetalt-ref-1, unik-soknad2-ref
         assertThat(allUtbetalinger).hasSize(4)
 
-        // utbetalt-ref-1 finnes på begge søknadene, skal ha knyttetTilFlereSoknader = true
+        // utbetalt-ref-1 finnes på begge søknadene, skal ha begge fiksDigisosId i tilknyttedeSoknader
         val deltUtbetaling = allUtbetalinger.find { it.referanse == "utbetalt-ref-1" }
         assertThat(deltUtbetaling).isNotNull
-        assertThat(deltUtbetaling!!.knyttetTilFlereSoknader).isTrue()
+        assertThat(deltUtbetaling!!.tilknyttedeSoknader).hasSize(2)
+        assertThat(deltUtbetaling.tilknyttedeSoknader).containsExactlyInAnyOrder(fiksDigisosId1, fiksDigisosId2)
 
-        // Utbetalinger som kun finnes på én søknad skal ha knyttetTilFlereSoknader = false
+        // Utbetalinger som kun finnes på én søknad skal ha kun én fiksDigisosId i tilknyttedeSoknader
         val unikeUtbetalinger = allUtbetalinger.filter { it.referanse != "utbetalt-ref-1" }
         assertThat(unikeUtbetalinger).hasSize(3)
-        assertThat(unikeUtbetalinger).allMatch { !it.knyttetTilFlereSoknader }
+        assertThat(unikeUtbetalinger).allMatch { it.tilknyttedeSoknader.size == 1 }
     }
 }

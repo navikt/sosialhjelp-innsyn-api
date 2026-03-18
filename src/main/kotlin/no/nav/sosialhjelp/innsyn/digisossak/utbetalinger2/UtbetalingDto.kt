@@ -28,12 +28,12 @@ data class UtbetalingDto(
     @param:Schema(pattern = "^[0-9]{11}$")
     val kontonummer: String?,
     val utbetalingsmetode: String?,
-    val knyttetTilFlereSoknader: Boolean = false,
+    val tilknyttedeSoknader: List<String> = emptyList(),
 )
 
 fun Utbetaling.toDto(
     fiksDigisosId: String,
-    knyttetTilFlereSoknader: Boolean = false,
+    tilknyttedeSoknader: List<String> = emptyList(),
 ) = UtbetalingDto(
     referanse = this.referanse,
     tittel = this.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
@@ -48,5 +48,5 @@ fun Utbetaling.toDto(
     annenMottaker = this.annenMottaker,
     kontonummer = this.kontonummer,
     utbetalingsmetode = this.utbetalingsmetode,
-    knyttetTilFlereSoknader = knyttetTilFlereSoknader,
+    tilknyttedeSoknader = tilknyttedeSoknader,
 )

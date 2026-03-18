@@ -20,14 +20,13 @@ class UtbetalingerController2(
 
         val utbetalingerPerSoknad = utbetalingerServiceNew.hentUtbetalinger()
 
-        // Finn referanser som finnes på flere søknader
-        val referanserMedFlereSoknader =
+        // Finn alle søknader (fiksDigisosId) per utbetalingsreferanse
+        val soknaderPerReferanse =
             utbetalingerPerSoknad
                 .flatMap { (fiksDigisosId, utbetalinger) ->
                     utbetalinger.map { it.referanse to fiksDigisosId }
                 }.groupBy({ it.first }, { it.second })
-                .filter { it.value.distinct().size > 1 }
-                .keys
+                .mapValues { it.value.distinct() }
 
         val flatUtbetalinger =
             utbetalingerPerSoknad
@@ -35,7 +34,7 @@ class UtbetalingerController2(
                     utbetalinger.map {
                         it.toDto(
                             fiksDigisosId = fiksDigisosId,
-                            knyttetTilFlereSoknader = it.referanse in referanserMedFlereSoknader,
+                            tilknyttedeSoknader = soknaderPerReferanse[it.referanse] ?: listOf(fiksDigisosId),
                         )
                     }
                 }.distinctBy { it.referanse } // Fjerner eventuelle duplikater basert på referanse

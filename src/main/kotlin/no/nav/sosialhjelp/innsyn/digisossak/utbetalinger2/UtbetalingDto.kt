@@ -28,7 +28,7 @@ data class UtbetalingDto(
     @param:Schema(pattern = "^[0-9]{11}$")
     val kontonummer: String?,
     val utbetalingsmetode: String?,
-    val knyttetTilFlereSoknader: Boolean? = false,
+    val knyttetTilFlereSoknader: Boolean = false,
 )
 
 fun Utbetaling.toDto(

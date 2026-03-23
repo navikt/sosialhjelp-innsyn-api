@@ -28,21 +28,25 @@ data class UtbetalingDto(
     @param:Schema(pattern = "^[0-9]{11}$")
     val kontonummer: String?,
     val utbetalingsmetode: String?,
+    val tilknyttedeSoknader: List<String> = emptyList(),
 )
 
-fun Utbetaling.toDto(fiksDigisosId: String) =
-    UtbetalingDto(
-        referanse = this.referanse,
-        tittel = this.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
-        belop = this.belop,
-        utbetalingsdato = this.utbetalingsDato,
-        forfallsdato = this.forfallsDato,
-        status = this.status,
-        fiksDigisosId = fiksDigisosId,
-        fom = this.fom,
-        tom = this.tom,
-        mottaker = this.mottaker,
-        annenMottaker = this.annenMottaker,
-        kontonummer = this.kontonummer,
-        utbetalingsmetode = this.utbetalingsmetode,
-    )
+fun Utbetaling.toDto(
+    fiksDigisosId: String,
+    tilknyttedeSoknader: List<String> = emptyList(),
+) = UtbetalingDto(
+    referanse = this.referanse,
+    tittel = this.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,
+    belop = this.belop,
+    utbetalingsdato = this.utbetalingsDato,
+    forfallsdato = this.forfallsDato,
+    status = this.status,
+    fiksDigisosId = fiksDigisosId,
+    fom = this.fom,
+    tom = this.tom,
+    mottaker = this.mottaker,
+    annenMottaker = this.annenMottaker,
+    kontonummer = this.kontonummer,
+    utbetalingsmetode = this.utbetalingsmetode,
+    tilknyttedeSoknader = tilknyttedeSoknader,
+)

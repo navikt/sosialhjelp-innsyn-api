@@ -30,8 +30,8 @@ data class Fagsystem(
 )
 
 data class Forvaltningsbrev(
-    var referanse: String,
-    var tittel: String,
+    val url: String,
+    val timestamp: LocalDateTime,
 )
 
 data class Soknadsmottaker(
@@ -48,6 +48,7 @@ data class Oppgave(
     var innsendelsesfrist: LocalDateTime?,
     var tidspunktForKrav: LocalDateTime,
     var erFraInnsyn: Boolean,
+    val forvaltningsbrev: Forvaltningsbrev? = null,
 )
 
 data class Sak(
@@ -151,6 +152,7 @@ data class UrlResponse(
 data class ForelopigSvar(
     val harMottattForelopigSvar: Boolean,
     val link: String?,
+    val timestamp: LocalDateTime? = null,
 )
 
 enum class SoknadsStatus {

@@ -7,8 +7,8 @@ import java.time.LocalDateTime
 
 @Service
 class BrevService(
-    val fiksService: FiksService,
-    val eventService: EventService,
+    private val fiksService: FiksService,
+    private val eventService: EventService,
 ) {
     suspend fun getBrev(id: String): List<Brev> {
         val digisosSak = fiksService.getSoknad(id)
@@ -28,7 +28,10 @@ class BrevService(
 
         val vedtaksbrev = model.saker.flatMap { it.vedtak }.map { Brev(Brev.BrevType.VEDTAK, it.vedtaksFilUrl, it.dato?.atStartOfDay()) }
         val dokEtterspurtBrev =
-            model.oppgaver.mapNotNull { it.forvaltningsbrev }.map { Brev(Brev.BrevType.DOKUMENTASJON_ETTERSPURT, it.url, it.timestamp) }
+            model.oppgaver
+                .mapNotNull { it.forvaltningsbrev }
+                .distinctBy { it.url }
+                .map { Brev(Brev.BrevType.DOKUMENTASJON_ETTERSPURT, it.url, it.timestamp) }
         return listOf(
             vedtaksbrev,
             dokEtterspurtBrev,

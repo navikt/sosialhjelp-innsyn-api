@@ -36,9 +36,9 @@ fun InternalDigisosSoker.apply(
                     hendelse.hendelsestidspunkt.toLocalDateTime(),
                     true,
                     forvaltningsbrev =
-                        hendelse.forvaltningsbrev?.let {
+                        hendelse.forvaltningsbrev?.let { forvaltningsbrev ->
                             Forvaltningsbrev(
-                                hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse),
+                                hentUrlFraFilreferanse(clientProperties, forvaltningsbrev.referanse),
                                 hendelse.hendelsestidspunkt.toLocalDateTime(),
                             )
                         },

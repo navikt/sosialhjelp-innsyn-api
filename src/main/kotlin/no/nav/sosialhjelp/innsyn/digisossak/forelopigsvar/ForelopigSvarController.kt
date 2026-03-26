@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisossak.forelopigsvar
 
-import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -17,9 +16,8 @@ class ForelopigSvarController(
     suspend fun hentForelopigSvarStatus(
         @PathVariable fiksDigisosId: String,
     ): ForelopigSvarResponse {
-        val token = TokenUtils.getToken()
         tilgangskontroll.sjekkTilgang()
 
-        return forelopigSvarService.hentForelopigSvar(fiksDigisosId, token)
+        return forelopigSvarService.hentForelopigSvar(fiksDigisosId)
     }
 }

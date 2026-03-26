@@ -206,3 +206,56 @@ val jsonDigisosSokerUtenDatoer =
         ]
     }
     """.trimIndent()
+
+// Testdata for søknad 2 med én delt utbetaling (utbetalt-ref-1) og én unik utbetaling (unik-soknad2-ref)
+val jsonDigisosSokerForSoknad2MedDeltOgUnikUtbetaling =
+    """
+    {
+        "version": "1.0.0",
+        "avsender": {
+            "systemnavn": "Testsystemet",
+            "systemversjon": "1.0.0"
+        },
+        "hendelser": [
+            {
+                "type": "soknadsStatus",
+                "hendelsestidspunkt": "2018-10-04T13:37:00.134Z",
+                "status": "MOTTATT"
+            },
+            {
+                "type": "utbetaling",
+                "hendelsestidspunkt": "2024-09-15T10:00:00.000Z",
+                "utbetalingsreferanse": "utbetalt-ref-1",
+                "saksreferanse": "SAK1",
+                "status": "UTBETALT",
+                "belop": 4500.00,
+                "beskrivelse": "Livsopphold",
+                "forfallsdato": "2024-09-20",
+                "utbetalingsdato": "2024-09-18",
+                "fom": "2024-09-01",
+                "tom": "2024-09-30",
+                "annenMottaker": false,
+                "mottaker": "Bruker",
+                "kontonummer": "12345678901",
+                "utbetalingsmetode": "bankoverføring"
+            },
+            {
+                "type": "utbetaling",
+                "hendelsestidspunkt": "2024-10-25T10:00:00.000Z",
+                "utbetalingsreferanse": "unik-soknad2-ref",
+                "saksreferanse": "SAK1",
+                "status": "UTBETALT",
+                "belop": 2500.00,
+                "beskrivelse": "Unik utbetaling for søknad 2",
+                "forfallsdato": "2024-10-30",
+                "utbetalingsdato": "2024-10-28",
+                "fom": "2024-10-01",
+                "tom": "2024-10-31",
+                "annenMottaker": false,
+                "mottaker": "Bruker",
+                "kontonummer": "12345678901",
+                "utbetalingsmetode": "bankoverføring"
+            }
+        ]
+    }
+    """.trimIndent()

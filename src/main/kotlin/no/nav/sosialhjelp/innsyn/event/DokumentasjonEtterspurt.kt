@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.event
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.domain.Forvaltningsbrev
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -34,6 +35,13 @@ fun InternalDigisosSoker.apply(
                     it.innsendelsesfrist.toLocalDateTime(),
                     hendelse.hendelsestidspunkt.toLocalDateTime(),
                     true,
+                    forvaltningsbrev =
+                        hendelse.forvaltningsbrev?.let { forvaltningsbrev ->
+                            Forvaltningsbrev(
+                                hentUrlFraFilreferanse(clientProperties, forvaltningsbrev.referanse),
+                                hendelse.hendelsestidspunkt.toLocalDateTime(),
+                            )
+                        },
                 )
             }.toMutableList()
 

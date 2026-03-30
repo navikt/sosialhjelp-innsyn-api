@@ -4,10 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
@@ -26,7 +30,9 @@ import no.nav.sosialhjelp.innsyn.valkey.DokumentCacheConfig
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.get
 import org.springframework.core.io.InputStreamResource
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -34,11 +40,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.http.codec.multipart.Part
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.reactive.function.client.awaitEntity
+import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.client.toEntity
 import java.io.Serializable
@@ -59,6 +68,18 @@ class FiksService(
     private val requestLocks = ConcurrentHashMap<String, Mutex>()
 
     suspend fun getAllSoknader(): List<DigisosSak> = fiksClient.hentAlleDigisosSaker()
+
+    suspend fun getAllInnsynsfiler(ids: Map<String, String>): List<JsonDigisosSoker> =
+        fiksClient.hentAlleDokumenter(
+            AlleDokumenterBody(
+                ids.map { (digisosId, dokumentlagerId) ->
+                    AlleDokumenterBody.Dokument(
+                        digisosId,
+                        dokumentlagerId,
+                    )
+                },
+            ),
+        )
 
     suspend fun <T : Serializable> getDocument(
         digisosId: String,
@@ -296,6 +317,45 @@ class FiksClient(
             dokument.also { log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
+    suspend fun hentAlleDokumenter(body: AlleDokumenterBody): List<JsonDigisosSoker> =
+        withContext(Dispatchers.IO) {
+            log.debug("Forsøker å hente ${body.dokumenter.size} dokument fra /digisos/api/v1/soknader/dokumenter")
+            fiksWebClient
+                .post()
+                .uri(FiksPaths.PATH_DOKUMENT_ALLE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .accept(MediaType.MULTIPART_MIXED)
+                .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
+                .retrieve()
+                .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
+                    clientResponse.bodyToMono<String>().map { errorBody ->
+                        RuntimeException("Failed to fetch documents: ${clientResponse.statusCode()} - $errorBody")
+                    }
+                }.bodyToFlow<Part>()
+                .flowOn(Dispatchers.IO)
+                .mapNotNull { part ->
+                    DataBufferUtils.join(part.content()).awaitSingleOrNull()?.let { dataBuffer ->
+                        try {
+                            val bytes = ByteArray(dataBuffer.readableByteCount()).also { dataBuffer.read(it) }
+                            sosialhjelpJsonMapper.readValue(bytes, JsonDigisosSoker::class.java)
+                        } finally {
+                            DataBufferUtils.release(dataBuffer)
+                        }
+                    }
+                }.toList()
+                .also {
+                    log.debug("Hentet ${it.size} dokument fra Fiks")
+                    val cache = cacheManager?.get(DokumentCacheConfig.CACHE_NAME)
+                    if (cache != null) {
+                        body.dokumenter.zip(it).forEach { (dokument, digisosSoker) ->
+                            val key = "${dokument.digisosId}:${dokument.dokumentlagerId}:${JsonDigisosSoker::class.java.name}"
+                            cache.put(key, digisosSoker)
+                        }
+                    }
+                }
+        }
+
     companion object {
         private val log by logger()
     }
@@ -333,4 +393,13 @@ fun Any.toHttpEntity(
     headerMap.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
     headerMap.add(HttpHeaders.CONTENT_TYPE, contentType)
     return HttpEntity(this, HttpHeaders(headerMap))
+}
+
+data class AlleDokumenterBody(
+    val dokumenter: List<Dokument>,
+) {
+    data class Dokument(
+        val digisosId: String,
+        val dokumentlagerId: String,
+    )
 }

@@ -28,8 +28,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getSoknad(any()) } returns digisosSak
-        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -66,8 +65,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedAnnullerteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getSoknad(any()) } returns digisosSak
-        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -102,8 +100,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerUtenDatoer, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getSoknad(any()) } returns digisosSak
-        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -151,13 +148,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker2 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerForSoknad2MedDeltOgUnikUtbetaling, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2)
-        coEvery { fiksService.getSoknad(fiksDigisosId1) } returns digisosSak1
-        coEvery { fiksService.getSoknad(fiksDigisosId2) } returns digisosSak2
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker1, soker2)
 
-        coEvery { fiksService.getDocument(fiksDigisosId1, any(), JsonDigisosSoker::class.java, any()) } returns
-            soker1
-        coEvery { fiksService.getDocument(fiksDigisosId2, any(), JsonDigisosSoker::class.java, any()) } returns
-            soker2
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",

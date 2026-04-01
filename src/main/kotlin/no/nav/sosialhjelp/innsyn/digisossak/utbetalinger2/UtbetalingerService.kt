@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2
 
+import io.getunleash.Unleash
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -37,6 +38,7 @@ private data class SoknadMedUtbetalinger(
 class UtbetalingerService(
     private val fiksService: FiksService,
     private val eventService: EventService,
+    private val unleash: Unleash,
 ) {
     private val log by logger()
 
@@ -91,6 +93,7 @@ class UtbetalingerService(
                 log.info("Fant ingen søknader for bruker")
                 return emptyMap()
             }
+            val newBulkApiEnabled = unleash.isEnabled("sosialhjelp.innsyn.fiks.bulk")
             val soknader =
                 digisosSaker
                     .mapNotNull { sak -> sak.digisosSoker?.metadata?.let { sak.fiksDigisosId to it } }

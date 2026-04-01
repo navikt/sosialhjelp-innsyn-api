@@ -1,5 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -29,19 +31,24 @@ class UtbetalingerService(
             fiksService
                 .getAllInnsynsfiler(
                     soknader,
-                ).map { digisosSoker ->
-                    val model = InternalDigisosSoker()
-                    digisosSoker.hendelser
-                        .filterIsInstance<JsonUtbetaling>()
-                        .sortedBy { it.hendelsestidspunkt }
-                        .forEach { model.apply(it) }
-                    model.utbetalinger
-                        .filter { it.status != UtbetalingsStatus.ANNULLERT }
-                        .filter {
-                            it.utbetalingsDato != null || it.forfallsDato != null
-                        }
-                }
+                ).parseAll()
 
         return soknader.keys.zip(utbetalinger).toMap()
+    }
+
+    @WithSpan
+    private fun List<JsonDigisosSoker>.parseAll() = map { it.parseDigisosSoker() }
+
+    private fun JsonDigisosSoker.parseDigisosSoker(): List<Utbetaling> {
+        val model = InternalDigisosSoker()
+        hendelser
+            .filterIsInstance<JsonUtbetaling>()
+            .sortedBy { it.hendelsestidspunkt }
+            .forEach { model.apply(it) }
+        return model.utbetalinger
+            .filter { it.status != UtbetalingsStatus.ANNULLERT }
+            .filter {
+                it.utbetalingsDato != null || it.forfallsDato != null
+            }
     }
 }

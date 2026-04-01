@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.digisosapi
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
+import jdk.jfr.ContentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
@@ -301,7 +302,7 @@ class FiksClient(
                 fiksWebClient
                     .get()
                     .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
-                    .accept(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.MULTIPART_MIXED)
                     .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .retrieve()
                     .bodyToMono(requestedClass)

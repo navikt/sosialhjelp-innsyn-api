@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
+import io.getunleash.Unleash
 import io.mockk.coEvery
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -13,6 +14,7 @@ import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response2
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
@@ -21,6 +23,16 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
 
     @MockkBean(relaxed = true)
     private lateinit var kommuneInfoClient: KommuneInfoClient
+
+    @MockkBean
+    private lateinit var unleash: Unleash
+
+    @BeforeEach
+    fun beforeEach() {
+        coEvery {
+            unleash.isEnabled("sosialhjelp.innsyn.fiks.bulk")
+        } returns true
+    }
 
     @Test
     fun `Alle planlagte utbetalinger skal vises`() {

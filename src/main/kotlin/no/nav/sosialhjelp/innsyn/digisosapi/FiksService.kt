@@ -5,9 +5,12 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import jdk.jfr.ContentType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -70,7 +73,7 @@ class FiksService(
 
     suspend fun getAllSoknader(): List<DigisosSak> = fiksClient.hentAlleDigisosSaker()
 
-    suspend fun getAllInnsynsfiler(ids: Map<String, String>): List<JsonDigisosSoker> =
+    suspend fun getAllInnsynsfiler(ids: Map<String, String>): Flow<IndexedValue<JsonDigisosSoker>> =
         fiksClient.hentAlleDokumenter(
             AlleDokumenterBody(
                 ids.map { (digisosId, dokumentlagerId) ->
@@ -318,8 +321,9 @@ class FiksClient(
             dokument.also { log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
-    suspend fun hentAlleDokumenter(body: AlleDokumenterBody): List<JsonDigisosSoker> =
-        withContext(Dispatchers.IO) {
+    suspend fun hentAlleDokumenter(body: AlleDokumenterBody): Flow<IndexedValue<JsonDigisosSoker>> {
+        val cache = cacheManager?.get(DokumentCacheConfig.CACHE_NAME)
+        return withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente ${body.dokumenter.size} dokument fra /digisos/api/v1/soknader/dokumenter")
             fiksWebClient
                 .post()
@@ -334,8 +338,8 @@ class FiksClient(
                         RuntimeException("Failed to fetch documents: ${clientResponse.statusCode()} - $errorBody")
                     }
                 }.bodyToFlow<Part>()
-                .flowOn(Dispatchers.IO)
                 .mapNotNull { part ->
+
                     DataBufferUtils.join(part.content()).awaitSingleOrNull()?.let { dataBuffer ->
                         try {
                             val bytes = ByteArray(dataBuffer.readableByteCount()).also { dataBuffer.read(it) }
@@ -344,18 +348,14 @@ class FiksClient(
                             DataBufferUtils.release(dataBuffer)
                         }
                     }
-                }.toList()
-                .also {
-                    log.debug("Hentet ${it.size} dokument fra Fiks")
-                    val cache = cacheManager?.get(DokumentCacheConfig.CACHE_NAME)
-                    if (cache != null) {
-                        body.dokumenter.zip(it).forEach { (dokument, digisosSoker) ->
-                            val key = "${dokument.digisosId}:${dokument.dokumentlagerId}:${JsonDigisosSoker::class.java.name}"
-                            cache.put(key, digisosSoker)
-                        }
-                    }
+                }.withIndex()
+                .onEach { (index, digisosSoker) ->
+                    val dokument = body.dokumenter[index]
+                    val key = "${dokument.digisosId}:${dokument.dokumentlagerId}:${JsonDigisosSoker::class.java.name}"
+                    cache?.put(key, digisosSoker)
                 }
         }
+    }
 
     companion object {
         private val log by logger()

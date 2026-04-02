@@ -17,6 +17,8 @@ jobs:
         with:
           app-id: ${{ secrets.REPO_TRIGGER_APP_ID }}
           private-key: ${{ secrets.REPO_TRIGGER_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: digisos-docker-compose
 
       - name: Trigger repository dispatch
         run: |

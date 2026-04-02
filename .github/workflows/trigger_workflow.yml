@@ -3,6 +3,9 @@ name: Trigger Repo B
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   dispatch:
     runs-on: ubuntu-latest

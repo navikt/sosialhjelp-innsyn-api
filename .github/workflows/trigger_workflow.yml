@@ -21,7 +21,7 @@ jobs:
       - name: Trigger repository dispatch
         run: |
           curl -X POST \
-            -H "Authorization: Bearer ${{ steps.app-token.outputs.token }}" \
+            -H "Authorization: Bearer ${{ steps.generate-token.outputs.token }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/navikt/digisos-docker-compose/dispatches \
             -d '{"event_type":"trigger-from-repo-a"}'

@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
+import io.getunleash.Unleash
 import io.mockk.coEvery
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -13,6 +14,7 @@ import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response2
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
@@ -22,14 +24,23 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean(relaxed = true)
     private lateinit var kommuneInfoClient: KommuneInfoClient
 
+    @MockkBean
+    private lateinit var unleash: Unleash
+
+    @BeforeEach
+    fun beforeEach() {
+        coEvery {
+            unleash.isEnabled("sosialhjelp.innsyn.fiks.bulk")
+        } returns true
+    }
+
     @Test
     fun `Alle planlagte utbetalinger skal vises`() {
         val digisosSak = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getSoknad(any()) } returns digisosSak
-        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -66,8 +77,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedAnnullerteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getSoknad(any()) } returns digisosSak
-        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -102,8 +112,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerUtenDatoer, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getSoknad(any()) } returns digisosSak
-        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -151,13 +160,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker2 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerForSoknad2MedDeltOgUnikUtbetaling, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2)
-        coEvery { fiksService.getSoknad(fiksDigisosId1) } returns digisosSak1
-        coEvery { fiksService.getSoknad(fiksDigisosId2) } returns digisosSak2
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker1, soker2)
 
-        coEvery { fiksService.getDocument(fiksDigisosId1, any(), JsonDigisosSoker::class.java, any()) } returns
-            soker1
-        coEvery { fiksService.getDocument(fiksDigisosId2, any(), JsonDigisosSoker::class.java, any()) } returns
-            soker2
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",

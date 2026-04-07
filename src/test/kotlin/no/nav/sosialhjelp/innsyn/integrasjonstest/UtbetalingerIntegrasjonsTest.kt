@@ -3,6 +3,8 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.Unleash
 import io.mockk.coEvery
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.withIndex
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
@@ -16,6 +18,7 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.test.web.reactive.server.expectBodyList
 
 class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
@@ -40,7 +43,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker).asFlow().withIndex()
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -57,7 +60,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
             doGet("/api/v2/innsyn/utbetalinger", emptyList())
                 .expectStatus()
                 .isOk
-                .expectBodyList(UtbetalingDto::class.java)
+                .expectBodyList<UtbetalingDto>()
                 .returnResult()
                 .responseBody
 
@@ -77,7 +80,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedAnnullerteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker).asFlow().withIndex()
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -94,7 +97,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
             doGet("/api/v2/innsyn/utbetalinger", emptyList())
                 .expectStatus()
                 .isOk
-                .expectBodyList(UtbetalingDto::class.java)
+                .expectBodyList<UtbetalingDto>()
                 .returnResult()
                 .responseBody
 
@@ -112,7 +115,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerUtenDatoer, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker)
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker).asFlow().withIndex()
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -129,7 +132,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
             doGet("/api/v2/innsyn/utbetalinger", emptyList())
                 .expectStatus()
                 .isOk
-                .expectBodyList(UtbetalingDto::class.java)
+                .expectBodyList<UtbetalingDto>()
                 .returnResult()
                 .responseBody
 
@@ -160,7 +163,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker2 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerForSoknad2MedDeltOgUnikUtbetaling, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2)
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker1, soker2)
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker1, soker2).asFlow().withIndex()
 
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
@@ -178,7 +181,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
             doGet("/api/v2/innsyn/utbetalinger", emptyList())
                 .expectStatus()
                 .isOk
-                .expectBodyList(UtbetalingDto::class.java)
+                .expectBodyList<UtbetalingDto>()
                 .returnResult()
                 .responseBody
 

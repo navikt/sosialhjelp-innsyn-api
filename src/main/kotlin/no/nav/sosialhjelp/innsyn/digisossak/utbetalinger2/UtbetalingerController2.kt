@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.asFlux
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -24,12 +25,12 @@ class UtbetalingerController2(
     private val logger by logger()
 
     @GetMapping
-    suspend fun hentUtbetalinger(): Flux<ServerSentEvent<UtbetalingDto>> {
+    suspend fun hentUtbetalinger(): List<UtbetalingDto> {
         tilgangskontroll.sjekkTilgang()
 
         val utbetalingerPerSoknad = utbetalingerServiceNew.hentUtbetalinger()
 
-        return utbetalingerPerSoknad.findSoknaderForPayment().map { ServerSentEvent.builder(it).build() }.asFlux()
+        return utbetalingerPerSoknad.findSoknaderForPayment().toList()
     }
 
     // Finn alle søknader (fiksDigisosId) per utbetalingsreferanse

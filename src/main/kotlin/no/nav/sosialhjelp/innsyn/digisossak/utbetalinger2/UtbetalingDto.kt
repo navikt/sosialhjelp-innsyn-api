@@ -8,6 +8,7 @@ import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class UtbetalingDto(
     val referanse: String,
@@ -28,12 +29,18 @@ data class UtbetalingDto(
     @param:Schema(pattern = "^[0-9]{11}$")
     val kontonummer: String?,
     val utbetalingsmetode: String?,
-    val tilknyttedeSoknader: List<String> = emptyList(),
+    val tilknyttedeSoknader: List<TilknyttetSoknadDto> = emptyList(),
+)
+
+data class TilknyttetSoknadDto(
+    val fiksDigisosId: String,
+    val soknadTittel: String,
+    val datoSendt: LocalDateTime?,
 )
 
 fun Utbetaling.toDto(
     fiksDigisosId: String,
-    tilknyttedeSoknader: List<String> = emptyList(),
+    tilknyttedeSoknader: List<TilknyttetSoknadDto> = emptyList(),
 ) = UtbetalingDto(
     referanse = this.referanse,
     tittel = this.beskrivelse ?: UTBETALING_DEFAULT_TITTEL,

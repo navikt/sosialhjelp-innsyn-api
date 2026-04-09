@@ -188,7 +188,7 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val deltUtbetaling = allUtbetalinger.find { it.referanse == "utbetalt-ref-1" }
         assertThat(deltUtbetaling).isNotNull
         assertThat(deltUtbetaling!!.tilknyttedeSoknader).hasSize(2)
-        assertThat(deltUtbetaling.tilknyttedeSoknader).containsExactlyInAnyOrder(fiksDigisosId1, fiksDigisosId2)
+        assertThat(deltUtbetaling.tilknyttedeSoknader.map { it.fiksDigisosId }).containsExactlyInAnyOrder(fiksDigisosId1, fiksDigisosId2)
 
         // Utbetalinger som kun finnes på én søknad skal ha kun én fiksDigisosId i tilknyttedeSoknader
         val unikeUtbetalinger = allUtbetalinger.filter { it.referanse != "utbetalt-ref-1" }

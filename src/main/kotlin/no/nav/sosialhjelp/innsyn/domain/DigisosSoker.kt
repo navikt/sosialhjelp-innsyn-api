@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.domain
 
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.digisossak.hendelser.HendelseDto
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -22,7 +23,10 @@ data class InternalDigisosSoker(
     var tidspunktSendt: LocalDateTime? = null,
     var vilkar: MutableList<Vilkar> = mutableListOf(),
     var dokumentasjonkrav: MutableList<Dokumentasjonkrav> = mutableListOf(),
-)
+){
+
+    fun getNavn() = saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString { it.tittel ?: DEFAULT_SAK_TITTEL }
+}
 
 data class Fagsystem(
     var systemnavn: String?,

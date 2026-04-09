@@ -57,3 +57,9 @@ fun Utbetaling.toDto(
     utbetalingsmetode = this.utbetalingsmetode,
     tilknyttedeSoknader = tilknyttedeSoknader,
 )
+
+fun UtbetalingMedSoknader.toDto() =
+    utbetaling.toDto(
+        fiksDigisosId = tilknyttedeSoknader.first().fiksDigisosId,
+        tilknyttedeSoknader = tilknyttedeSoknader.map { TilknyttetSoknadDto(it.fiksDigisosId, it.soknadTittel, it.datoSendt) },
+    )

@@ -181,7 +181,7 @@ class EventService(
             innsynService.hentJsonDigisosSoker(digisosSak)
                 ?: return model
         jsonDigisosSoker.hendelser
-            .filterIsInstance<JsonUtbetaling>()
+            .filter { it is JsonUtbetaling || it is JsonSaksStatus }
             .sortedBy { it.hendelsestidspunkt }
             .forEach { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
         return model

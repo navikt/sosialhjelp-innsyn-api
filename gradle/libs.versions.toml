@@ -34,7 +34,6 @@ ktlint = "1.7.1"
 mockk = "1.14.9"
 okhttp3 = "5.3.2"
 spring_mockk = "5.0.1"
-resilience4j = "2.4.0"
 
 testcontainers = "2.0.3"
 testcontainers-junit = "1.21.4"
@@ -56,10 +55,6 @@ spring-boot-starter-webclient = { module = "org.springframework.boot:spring-boot
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 spring-boot-security-test = { module = "org.springframework.security:spring-security-test", version.ref = "spring_security_test" }
 spring-boot-starter-webflux-test = { module = "org.springframework.boot:spring-boot-starter-webflux-test", version.ref = "spring-boot" }
-
-resilience4j-kotlin = { module = "io.github.resilience4j:resilience4j-kotlin", version.ref = "resilience4j" }
-resilience4j-circuitbreaker = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
-resilience4j-spring-boot3 = { module = "io.github.resilience4j:resilience4j-spring-boot3", version.ref = "resilience4j" }
 
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
 
@@ -119,12 +114,6 @@ spring-boot-test = [
     "spring-boot-starter-test",
     "spring-boot-starter-webflux-test",
     "spring-boot-security-test",
-]
-
-resilience4j = [
-    "resilience4j-kotlin",
-    "resilience4j-circuitbreaker",
-    "resilience4j-spring-boot3"
 ]
 
 logging = [

@@ -3,7 +3,7 @@ kotlin = "2.3.20"
 versions = "0.53.0"
 spring-boot = "4.0.5"
 coroutines = "1.10.2"
-sosialhjelp_common = "1.20250120.1009-d88048d"
+sosialhjelp_common = "1.20260204.1322-0cda8ef"
 logback = "1.5.32"
 logstash = "8.1"
 filformat = "1.2026.02.04-07.27-7f2f3515bd59"
@@ -15,7 +15,7 @@ jackson2 = "2.21.2"
 commons_codec = "1.21.0"
 commons_io = "2.21.0"
 file_upload = "1.6.0"
-tika = "3.2.3"
+tika = "3.3.0"
 pdf_box = "3.0.7"
 fiks_kryptering = "2.2.1"
 jemp_box = "1.8.17"
@@ -24,17 +24,16 @@ springdoc = "3.0.2"
 json_smart = "2.4.10"
 spring_security_test = "7.0.4"
 mock-oauth2-server = "3.0.1"
-spotless = "8.3.0"
+spotless = "8.4.0"
 
 opentelemetry = "1.60.1"
-opentelemetry-instrumentation = "2.25.0"
+opentelemetry-instrumentation = "2.26.1"
 
 ktlint = "1.7.1"
 
 mockk = "1.14.9"
 okhttp3 = "5.3.2"
 spring_mockk = "5.0.1"
-resilience4j = "2.3.0"
 
 testcontainers = "2.0.4"
 testcontainers-junit = "1.21.4"
@@ -56,10 +55,6 @@ spring-boot-starter-webclient = { module = "org.springframework.boot:spring-boot
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
 spring-boot-security-test = { module = "org.springframework.security:spring-security-test", version.ref = "spring_security_test" }
 spring-boot-starter-webflux-test = { module = "org.springframework.boot:spring-boot-starter-webflux-test", version.ref = "spring-boot" }
-
-resilience4j-kotlin = { module = "io.github.resilience4j:resilience4j-kotlin", version.ref = "resilience4j" }
-resilience4j-circuitbreaker = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
-resilience4j-spring-boot3 = { module = "io.github.resilience4j:resilience4j-spring-boot3", version.ref = "resilience4j" }
 
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
 
@@ -119,12 +114,6 @@ spring-boot-test = [
     "spring-boot-starter-test",
     "spring-boot-starter-webflux-test",
     "spring-boot-security-test",
-]
-
-resilience4j = [
-    "resilience4j-kotlin",
-    "resilience4j-circuitbreaker",
-    "resilience4j-spring-boot3"
 ]
 
 logging = [

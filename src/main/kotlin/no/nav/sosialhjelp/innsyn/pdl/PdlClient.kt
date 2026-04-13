@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.pdl
 
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import kotlinx.coroutines.reactor.awaitSingle
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
@@ -11,7 +10,6 @@ class PdlClient(
     private val pdlGraphQlClientFactory: PdlGraphQlClientFactory,
 ) {
     /** Henter en person fra PDL */
-    @CircuitBreaker(name = "pdl")
     suspend fun getPerson(ident: String): PdlPerson =
         pdlGraphQlClientFactory
             .getClient(TokenUtils.getToken())

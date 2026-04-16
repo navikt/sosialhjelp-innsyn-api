@@ -17,28 +17,6 @@ class UtbetalingerController2(
     @GetMapping
     suspend fun hentUtbetalinger(): List<UtbetalingDto> {
         tilgangskontroll.sjekkTilgang()
-
-        val utbetalingerPerSoknad = utbetalingerServiceNew.hentUtbetalinger()
-
-        // Finn alle søknader (fiksDigisosId) per utbetalingsreferanse
-        val soknaderPerReferanse =
-            utbetalingerPerSoknad
-                .flatMap { (fiksDigisosId, utbetalinger) ->
-                    utbetalinger.map { it.referanse to fiksDigisosId }
-                }.groupBy({ it.first }, { it.second })
-                .mapValues { it.value.distinct() }
-
-        val flatUtbetalinger =
-            utbetalingerPerSoknad
-                .flatMap { (fiksDigisosId, utbetalinger) ->
-                    utbetalinger.map {
-                        it.toDto(
-                            fiksDigisosId = fiksDigisosId,
-                            tilknyttedeSoknader = soknaderPerReferanse[it.referanse] ?: listOf(fiksDigisosId),
-                        )
-                    }
-                }.distinctBy { it.referanse } // Fjerner eventuelle duplikater basert på referanse
-
-        return flatUtbetalinger
+        return utbetalingerServiceNew.hentUtbetalinger().map { it.toDto() }
     }
 }

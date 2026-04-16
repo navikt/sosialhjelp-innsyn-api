@@ -23,8 +23,7 @@ data class InternalDigisosSoker(
     var tidspunktSendt: LocalDateTime? = null,
     var vilkar: MutableList<Vilkar> = mutableListOf(),
     var dokumentasjonkrav: MutableList<Dokumentasjonkrav> = mutableListOf(),
-){
-
+) {
     fun getNavn() = saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString { it.tittel ?: DEFAULT_SAK_TITTEL }
 }
 

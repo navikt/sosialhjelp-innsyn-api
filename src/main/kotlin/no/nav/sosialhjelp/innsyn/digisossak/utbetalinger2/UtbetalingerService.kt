@@ -47,6 +47,7 @@ class UtbetalingerService(
         val newBulkApiEnabled = unleash.isEnabled("sosialhjelp.innsyn.fiks.bulk")
         val soknader =
             if (newBulkApiEnabled) {
+                val idToSak = digisosSaker.associateBy { it.fiksDigisosId }
                 eventService.hentAlleUtbetalingerBulk(digisosSaker).map { model ->
                     val fiksDigisosId = model.fiksDigisosId ?: "".also { log.warn("Manglende fiksDigisosId på model") }
                     val utbetalinger =
@@ -54,8 +55,7 @@ class UtbetalingerService(
                             .filter { it.status != UtbetalingsStatus.ANNULLERT }
                             .filter { it.utbetalingsDato != null || it.forfallsDato != null }
                     val datoSendt =
-                        digisosSaker
-                            .find { it.fiksDigisosId == model.fiksDigisosId }
+                        idToSak[model.fiksDigisosId]
                             ?.originalSoknadNAV
                             ?.timestampSendt
                             ?.takeIf { it != 0L }

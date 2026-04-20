@@ -3,16 +3,13 @@ package no.nav.sosialhjelp.innsyn.digisosapi
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
-import jdk.jfr.ContentType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -24,6 +21,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -61,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap
 class FiksService(
     private val tilgangskontrollService: TilgangskontrollService,
     private val fiksClient: FiksClient,
+    private val kommuneService: KommuneService,
     meterRegistry: MeterRegistry,
 ) {
     private val opplastingsteller: Counter = meterRegistry.counter("filopplasting")
@@ -73,17 +72,25 @@ class FiksService(
 
     suspend fun getAllSoknader(): List<DigisosSak> = fiksClient.hentAlleDigisosSaker()
 
-    suspend fun getAllInnsynsfiler(ids: Map<String, String>): Map<String, JsonDigisosSoker> =
-        fiksClient.hentAlleDokumenter(
-            AlleDokumenterBody(
-                ids.map { (digisosId, dokumentlagerId) ->
-                    AlleDokumenterBody.Dokument(
-                        digisosId,
-                        dokumentlagerId,
-                    )
-                },
-            ),
+    suspend fun getAllInnsynsfiler(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> {
+        val kommuneDeaktivert =
+            supervisorScope {
+                saker
+                    .map { sak ->
+                        async(Dispatchers.IO) {
+                            sak.fiksDigisosId to
+                                kommuneService.erInnsynDeaktivertForKommune(
+                                    sak.fiksDigisosId,
+                                )
+                        }
+                    }.awaitAll()
+                    .toMap()
+            }
+        return fiksClient.hentAlleDokumenter(
+            saker,
+            kommuneDeaktivert,
         )
+    }
 
     suspend fun <T : Serializable> getDocument(
         digisosId: String,
@@ -305,7 +312,7 @@ class FiksClient(
                 fiksWebClient
                     .get()
                     .uri(FiksPaths.PATH_DOKUMENT, digisosId, dokumentlagerId)
-                    .accept(MediaType.MULTIPART_MIXED)
+                    .accept(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                     .retrieve()
                     .bodyToMono(requestedClass)
@@ -321,8 +328,27 @@ class FiksClient(
             dokument.also { log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
-    suspend fun hentAlleDokumenter(body: AlleDokumenterBody): Map<String, JsonDigisosSoker> {
+    suspend fun hentAlleDokumenter(
+        saker: List<DigisosSak>,
+        kommuneDeaktivert: Map<String, Boolean>,
+    ): Map<String, JsonDigisosSoker> {
         val cache = cacheManager?.get(DokumentCacheConfig.CACHE_NAME)
+        val sakMap = saker.associateBy { it.fiksDigisosId }
+        val ids =
+            saker
+                .filter {
+                    it.digisosSoker?.metadata != null && it.digisosSoker?.timestampSistOppdatert != null &&
+                        kommuneDeaktivert[it.fiksDigisosId] == false
+                }.associate { it.fiksDigisosId to it.digisosSoker?.metadata!! }
+        val body =
+            AlleDokumenterBody(
+                ids.map { (digisosId, dokumentlagerId) ->
+                    AlleDokumenterBody.Dokument(
+                        digisosId,
+                        dokumentlagerId,
+                    )
+                },
+            )
         return withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente ${body.dokumenter.size} dokument fra /digisos/api/v1/soknader/dokumenter")
             fiksWebClient
@@ -360,8 +386,11 @@ class FiksClient(
                 .onEach { entry ->
                     val (name, digisosSoker) = entry
                     val (fiksDigisosId, dokumentLagerId) = name.split("_", limit = 2)
-                    val key = "$fiksDigisosId:$dokumentLagerId:${JsonDigisosSoker::class.java.name}"
-                    cache?.put(key, digisosSoker)
+                    val timestampSistOppdatert = sakMap[fiksDigisosId]?.digisosSoker?.timestampSistOppdatert
+                    if (timestampSistOppdatert != null) {
+                        val key = "${dokumentLagerId}_$timestampSistOppdatert"
+                        cache?.put(key, digisosSoker)
+                    }
                 }.mapKeys { (key) ->
                     key.split("_").first()
                 }

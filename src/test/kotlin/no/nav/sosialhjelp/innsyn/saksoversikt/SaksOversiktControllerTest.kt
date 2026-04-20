@@ -154,6 +154,9 @@ internal class SaksOversiktControllerTest {
             every { model1.saker } returns mutableListOf()
             every { model2.saker } returns mutableListOf(sak1, sak2)
 
+            every { model1.getNavn() } returns ""
+            every { model2.getNavn() } returns "Livsopphold, Strøm"
+
             every { model1.utbetalinger } returns mutableListOf()
             every { model2.utbetalinger } returns mutableListOf()
 
@@ -195,6 +198,7 @@ internal class SaksOversiktControllerTest {
             every { model1.vilkar } returns mutableListOf()
             every { model1.dokumentasjonkrav } returns mutableListOf()
             every { model1.saker } returns mutableListOf()
+            every { model1.getNavn() } returns ""
             every { model1.utbetalinger } returns mutableListOf()
             every { model1.historikk } returns mutableListOf()
 

@@ -187,6 +187,20 @@ class EventService(
         return model
     }
 
+    suspend fun hentAlleUtbetalingerBulk(digisosSaker: List<DigisosSak>): List<InternalDigisosSoker> {
+        val digisosSokerMap = innsynService.hentJsonDigisosSokerBulk(digisosSaker)
+        return digisosSaker.map { digisosSak ->
+            val model = InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)
+            val digisosSoker = digisosSokerMap[digisosSak.fiksDigisosId]
+            digisosSoker
+                ?.hendelser
+                ?.filter { it is JsonUtbetaling || it is JsonSaksStatus }
+                ?.sortedBy { it.hendelsestidspunkt }
+                ?.forEach { model.applyHendelse(it, digisosSak.originalSoknadNAV == null) }
+            model
+        }
+    }
+
     private suspend fun InternalDigisosSoker.applyHendelse(
         hendelse: JsonHendelse,
         isPapirSoknad: Boolean,

@@ -3,8 +3,6 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.Unleash
 import io.mockk.coEvery
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.withIndex
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
@@ -43,7 +41,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedPlanlagteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker).asFlow().withIndex()
+        coEvery { fiksService.getSoknad(digisosSak.fiksDigisosId) } returns digisosSak
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns mapOf(digisosSak.fiksDigisosId to soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -80,7 +79,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerMedAnnullerteUtbetalinger, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker).asFlow().withIndex()
+        coEvery { fiksService.getSoknad(digisosSak.fiksDigisosId) } returns digisosSak
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns mapOf(digisosSak.fiksDigisosId to soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -115,7 +115,8 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(jsonDigisosSokerUtenDatoer, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak)
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker).asFlow().withIndex()
+        coEvery { fiksService.getSoknad(digisosSak.fiksDigisosId) } returns digisosSak
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns mapOf(digisosSak.fiksDigisosId to soker)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -163,7 +164,10 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val soker2 = sosialhjelpJsonMapper.readValue(jsonDigisosSokerForSoknad2MedDeltOgUnikUtbetaling, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSak1, digisosSak2)
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns listOf(soker1, soker2).asFlow().withIndex()
+        coEvery { fiksService.getSoknad(digisosSak1.fiksDigisosId) } returns digisosSak1
+        coEvery { fiksService.getSoknad(digisosSak2.fiksDigisosId) } returns digisosSak2
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns
+            mapOf(digisosSak1.fiksDigisosId to soker1, digisosSak2.fiksDigisosId to soker2)
 
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(

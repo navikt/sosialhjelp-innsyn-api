@@ -7,6 +7,7 @@ import jdk.jfr.ContentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
@@ -72,7 +73,7 @@ class FiksService(
 
     suspend fun getAllSoknader(): List<DigisosSak> = fiksClient.hentAlleDigisosSaker()
 
-    suspend fun getAllInnsynsfiler(ids: Map<String, String>): Flow<IndexedValue<JsonDigisosSoker>> =
+    suspend fun getAllInnsynsfiler(ids: Map<String, String>): Map<String, JsonDigisosSoker> =
         fiksClient.hentAlleDokumenter(
             AlleDokumenterBody(
                 ids.map { (digisosId, dokumentlagerId) ->
@@ -320,7 +321,7 @@ class FiksClient(
             dokument.also { log.debug("Hentet dokument (${requestedClass.simpleName}) fra Fiks, dokumentlagerId=$dokumentlagerId") }
         }
 
-    suspend fun hentAlleDokumenter(body: AlleDokumenterBody): Flow<IndexedValue<JsonDigisosSoker>> {
+    suspend fun hentAlleDokumenter(body: AlleDokumenterBody): Map<String, JsonDigisosSoker> {
         val cache = cacheManager?.get(DokumentCacheConfig.CACHE_NAME)
         return withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente ${body.dokumenter.size} dokument fra /digisos/api/v1/soknader/dokumenter")
@@ -338,20 +339,31 @@ class FiksClient(
                     }
                 }.bodyToFlow<Part>()
                 .mapNotNull { part ->
-
-                    DataBufferUtils.join(part.content()).awaitSingleOrNull()?.let { dataBuffer ->
-                        try {
-                            val bytes = ByteArray(dataBuffer.readableByteCount()).also { dataBuffer.read(it) }
-                            sosialhjelpJsonMapper.readValue(bytes, JsonDigisosSoker::class.java)
-                        } finally {
-                            DataBufferUtils.release(dataBuffer)
+                    // Kommer på format $fiksDigisosId_$dokumentLagerId
+                    val name = part.headers().contentDisposition.name
+                    val content =
+                        DataBufferUtils.join(part.content()).awaitSingleOrNull()?.let { dataBuffer ->
+                            try {
+                                val bytes = ByteArray(dataBuffer.readableByteCount()).also { dataBuffer.read(it) }
+                                sosialhjelpJsonMapper.readValue(bytes, JsonDigisosSoker::class.java)
+                            } finally {
+                                DataBufferUtils.release(dataBuffer)
+                            }
                         }
+                    if (name != null && content != null) {
+                        name to content
+                    } else {
+                        null
                     }
-                }.withIndex()
-                .onEach { (index, digisosSoker) ->
-                    val dokument = body.dokumenter[index]
-                    val key = "${dokument.digisosId}:${dokument.dokumentlagerId}:${JsonDigisosSoker::class.java.name}"
+                }.toList()
+                .toMap()
+                .onEach { entry ->
+                    val (name, digisosSoker) = entry
+                    val (fiksDigisosId, dokumentLagerId) = name.split("_", limit = 2)
+                    val key = "$fiksDigisosId:$dokumentLagerId:${JsonDigisosSoker::class.java.name}"
                     cache?.put(key, digisosSoker)
+                }.mapKeys { (key) ->
+                    key.split("_").first()
                 }
         }
     }

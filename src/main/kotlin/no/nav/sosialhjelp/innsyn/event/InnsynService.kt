@@ -1,5 +1,9 @@
 package no.nav.sosialhjelp.innsyn.event
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -34,6 +38,30 @@ class InnsynService(
 
             else -> null
         }
+    }
+
+    suspend fun hentJsonDigisosSokerBulk(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> {
+        val scope = CoroutineScope(Dispatchers.IO)
+        val kommuneDeaktivert =
+            saker
+                .map { sak ->
+                    scope.async {
+                        sak.fiksDigisosId to
+                            kommuneService.erInnsynDeaktivertForKommune(
+                                sak.fiksDigisosId,
+                            )
+                    }
+                }.awaitAll()
+                .toMap()
+
+        val ids =
+            saker
+                .filter {
+                    it.digisosSoker?.metadata != null && it.digisosSoker?.timestampSistOppdatert != null &&
+                        kommuneDeaktivert[it.fiksDigisosId] == false
+                }.associate { it.fiksDigisosId to it.digisosSoker?.metadata!! }
+
+        return fiksService.getAllInnsynsfiler(ids)
     }
 
     suspend fun hentOriginalSoknad(digisosSak: DigisosSak): JsonSoknad? {

@@ -360,8 +360,12 @@ class FiksClient(
                 .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
                 .retrieve()
                 .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
-                    clientResponse.bodyToMono<String>().map { errorBody ->
-                        RuntimeException("Failed to fetch documents: ${clientResponse.statusCode()} - $errorBody")
+                    clientResponse.createException().map { e ->
+                        val feilmelding = "Fiks - hentAlleDokumenter feilet - ${messageUtenFnr(e)}"
+                        when {
+                            e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
+                            else -> FiksServerException(e.statusCode.value(), feilmelding, e)
+                        }
                     }
                 }.bodyToFlow<Part>()
                 .mapNotNull { part ->

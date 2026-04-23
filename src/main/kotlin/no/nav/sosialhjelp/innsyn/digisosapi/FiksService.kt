@@ -18,6 +18,7 @@ import no.nav.sosialhjelp.innsyn.utils.lagNavEksternRefId
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import org.springframework.context.annotation.Lazy
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
@@ -34,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap
 class FiksService(
     private val tilgangskontrollService: TilgangskontrollService,
     private val fiksClient: FiksClient,
+    @param:Lazy
     private val kommuneService: KommuneService,
     meterRegistry: MeterRegistry,
 ) {

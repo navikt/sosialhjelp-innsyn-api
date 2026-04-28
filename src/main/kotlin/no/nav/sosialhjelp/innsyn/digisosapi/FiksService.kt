@@ -50,6 +50,9 @@ class FiksService(
     suspend fun getAllSoknader(): List<DigisosSak> = fiksClient.hentAlleDigisosSaker()
 
     suspend fun getAllInnsynsfiler(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> {
+        if (saker.isEmpty()) {
+            return emptyMap()
+        }
         val kommuneDeaktivert =
             supervisorScope {
                 saker

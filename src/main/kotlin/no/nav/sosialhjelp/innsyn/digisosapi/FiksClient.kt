@@ -185,6 +185,9 @@ class FiksClient(
                     it.digisosSoker?.metadata != null && it.digisosSoker?.timestampSistOppdatert != null &&
                         kommuneDeaktivert[it.fiksDigisosId] == false
                 }.associate { it.fiksDigisosId to it.digisosSoker?.metadata!! }
+        if (ids.isEmpty()) {
+            return emptyMap()
+        }
         val body =
             AlleDokumenterBody(
                 ids.map { (digisosId, dokumentlagerId) ->
@@ -194,6 +197,7 @@ class FiksClient(
                     )
                 },
             )
+
         return withContext(Dispatchers.IO) {
             log.debug("Forsøker å hente ${body.dokumenter.size} dokument fra /digisos/api/v1/soknader/dokumenter")
             fiksWebClient

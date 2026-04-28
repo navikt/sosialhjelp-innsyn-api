@@ -36,6 +36,8 @@ class InnsynService(
         }
     }
 
+    suspend fun hentJsonDigisosSokerBulk(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> = fiksService.getAllInnsynsfiler(saker)
+
     suspend fun hentOriginalSoknad(digisosSak: DigisosSak): JsonSoknad? {
         val originalMetadataId = digisosSak.originalSoknadNAV?.metadata
         return when {

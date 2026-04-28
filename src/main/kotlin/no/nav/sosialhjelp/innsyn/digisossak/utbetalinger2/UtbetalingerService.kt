@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2
 
+import io.getunleash.Unleash
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -30,8 +31,9 @@ private data class SoknadMedUtbetalinger(
 
 @Service("UtbetalingService2")
 class UtbetalingerService(
-    private val eventService: EventService,
     private val fiksService: FiksService,
+    private val eventService: EventService,
+    private val unleash: Unleash,
 ) {
     private val log by logger()
 
@@ -42,25 +44,43 @@ class UtbetalingerService(
             return emptyList()
         }
 
+        val newBulkApiEnabled = unleash.isEnabled("sosialhjelp.innsyn.fiks.bulk")
         val soknader =
-            coroutineScope {
-                digisosSaker
-                    .map { digisosSak -> async { digisosSak to eventService.hentAlleUtbetalinger(digisosSak) } }
-                    .awaitAll()
-            }.map { (digisosSak, model) ->
-                val fiksDigisosId = model.fiksDigisosId ?: "".also { log.warn("Manglende fiksDigisosId på model") }
-                val utbetalinger =
-                    model.utbetalinger
-                        .filter { it.status != UtbetalingsStatus.ANNULLERT }
-                        .filter { it.utbetalingsDato != null || it.forfallsDato != null }
-                val datoSendt =
-                    digisosSak.originalSoknadNAV
-                        ?.timestampSendt
-                        ?.takeIf { it != 0L }
-                        ?.let { unixToLocalDateTime(it) }
-                SoknadMedUtbetalinger(SoknadRef(fiksDigisosId, model.getNavn(), datoSendt), utbetalinger)
+            if (newBulkApiEnabled) {
+                val idToSak = digisosSaker.associateBy { it.fiksDigisosId }
+                eventService.hentAlleUtbetalingerBulk(digisosSaker).map { model ->
+                    val fiksDigisosId = model.fiksDigisosId ?: "".also { log.warn("Manglende fiksDigisosId på model") }
+                    val utbetalinger =
+                        model.utbetalinger
+                            .filter { it.status != UtbetalingsStatus.ANNULLERT }
+                            .filter { it.utbetalingsDato != null || it.forfallsDato != null }
+                    val datoSendt =
+                        idToSak[model.fiksDigisosId]
+                            ?.originalSoknadNAV
+                            ?.timestampSendt
+                            ?.takeIf { it != 0L }
+                            ?.let { unixToLocalDateTime(it) }
+                    SoknadMedUtbetalinger(SoknadRef(fiksDigisosId, model.getNavn(), datoSendt), utbetalinger)
+                }
+            } else {
+                coroutineScope {
+                    digisosSaker
+                        .map { digisosSak -> async { digisosSak to eventService.hentAlleUtbetalinger(digisosSak) } }
+                        .awaitAll()
+                }.map { (digisosSak, model) ->
+                    val fiksDigisosId = model.fiksDigisosId ?: "".also { log.warn("Manglende fiksDigisosId på model") }
+                    val utbetalinger =
+                        model.utbetalinger
+                            .filter { it.status != UtbetalingsStatus.ANNULLERT }
+                            .filter { it.utbetalingsDato != null || it.forfallsDato != null }
+                    val datoSendt =
+                        digisosSak.originalSoknadNAV
+                            ?.timestampSendt
+                            ?.takeIf { it != 0L }
+                            ?.let { unixToLocalDateTime(it) }
+                    SoknadMedUtbetalinger(SoknadRef(fiksDigisosId, model.getNavn(), datoSendt), utbetalinger)
+                }
             }
-
         val soknaderPerReferanse: Map<String, List<SoknadRef>> =
             soknader
                 .flatMap { soknad -> soknad.utbetalinger.map { it.referanse to soknad.soknadRef } }

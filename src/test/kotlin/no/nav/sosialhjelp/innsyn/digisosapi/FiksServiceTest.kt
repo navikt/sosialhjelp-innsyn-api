@@ -18,6 +18,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
+import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_minimal_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
@@ -49,6 +50,7 @@ internal class FiksServiceTest {
     private val krypteringService: KrypteringService = mockk()
     private val tilgangskontroll: TilgangskontrollService = mockk()
     private val meterRegistry: MeterRegistry = mockk()
+    private val kommuneService: KommuneService = mockk()
     private val counterMock: Counter = mockk()
     private val fiksClient = FiksClient(fiksWebClient, tilgangskontroll, null)
     private lateinit var fiksService: FiksService
@@ -65,9 +67,10 @@ internal class FiksServiceTest {
         coEvery { tilgangskontroll.verifyDigisosSakIsForCorrectUser(any()) } just Runs
 
         every { meterRegistry.counter(any()) } returns counterMock
+        coEvery { kommuneService.hentKommuneInfo(any()) } returns null
         every { counterMock.increment() } just Runs
 
-        fiksService = FiksService(tilgangskontroll, fiksClient, meterRegistry)
+        fiksService = FiksService(tilgangskontroll, fiksClient, kommuneService, meterRegistry)
     }
 
     @AfterEach
@@ -167,7 +170,7 @@ internal class FiksServiceTest {
             every { cacheManagerMock.getCache("digisosSak") } returns cacheMock
 
             val fiksClientWithCache = FiksClient(fiksWebClient, tilgangskontroll, cacheManagerMock)
-            val fiksServiceWithCache = FiksService(tilgangskontroll, fiksClientWithCache, meterRegistry)
+            val fiksServiceWithCache = FiksService(tilgangskontroll, fiksClientWithCache, kommuneService, meterRegistry)
 
             mockWebServer.enqueue(
                 MockResponse()

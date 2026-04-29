@@ -74,7 +74,7 @@ class SaksOversiktController(
         val sistOppdatert = unixToLocalDateTime(setOfNotNull(sak.digisosSoker?.timestampSistOppdatert, sak.sistEndret).max())
         return SaksDetaljerResponse(
             fiksDigisosId = sak.fiksDigisosId,
-            soknadTittel = hentNavn(model),
+            soknadTittel = model.getNavn(),
             status = model.status,
             antallNyeOppgaver =
                 oppgaver.filter { it.erFraInnsyn }.size +
@@ -103,9 +103,6 @@ class SaksOversiktController(
             soknadOpprettet = soknadOpprettet,
         )
     }
-
-    private fun hentNavn(model: InternalDigisosSoker): String =
-        model.saker.filter { SaksStatus.FEILREGISTRERT != it.saksStatus }.joinToString { it.tittel ?: DEFAULT_SAK_TITTEL }
 
     private suspend fun hentAntallNyeVilkarOgDokumentasjonkrav(
         model: InternalDigisosSoker,

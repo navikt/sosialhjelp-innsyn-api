@@ -30,9 +30,6 @@ dependencies {
     // Sosialhjelp-common
     implementation(libs.bundles.sosialhjelp.common)
 
-    // Resilience4j (Retry, CircuitBreaker, ...)
-    implementation(libs.bundles.resilience4j)
-
     // Micrometer/Prometheus
     implementation(libs.bundles.prometheus)
 

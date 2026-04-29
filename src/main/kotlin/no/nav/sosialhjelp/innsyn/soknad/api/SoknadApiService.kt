@@ -16,7 +16,7 @@ class SoknadApiService(
 // TODO Dette kan slettes når bruker ikke lenger kan se søknad i innsyn (hvor lenge?)
 
     @Cacheable(SkjuleOrginalSoknadCache.CACHE_NAME, key = "#fiksDigisosId")
-    fun skalSkjuleOrginalSoknad(fiksDigisosId: String): Boolean {
+    suspend fun skalSkjuleOrginalSoknad(fiksDigisosId: String): Boolean {
         logger.info("Skjekker om orginalsøknad skal skjules for digisosId: $fiksDigisosId")
         return soknadApiClient.skalSkjuleOrginalSoknad(fiksDigisosId)
     }

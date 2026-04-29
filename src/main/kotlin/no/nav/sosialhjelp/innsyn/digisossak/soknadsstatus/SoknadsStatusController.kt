@@ -25,7 +25,6 @@ class SoknadsStatusController(
     ): OriginalSoknadDto? {
         tilgangskontroll.sjekkTilgang()
 
-
         if (soknadApiService.skalSkjuleOrginalSoknad(fiksDigisosId)) return null
 
         val originalSoknad = soknadsStatusService.hentOriginalSoknad(fiksDigisosId)

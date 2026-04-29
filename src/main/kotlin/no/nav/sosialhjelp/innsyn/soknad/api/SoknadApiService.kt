@@ -6,8 +6,9 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
-class SoknadApiService(private val soknadApiClient: SoknadApiClient) {
-
+class SoknadApiService(
+    private val soknadApiClient: SoknadApiClient,
+) {
     // DSOS-649
 // Pga. en bug hvor nye søknader fikk feil telefonnummer fra register, så skal vi ikke
 // vise orginalsøknad for søknader som ble sendt inn i tidsrommet 28.04.26 14:32 til 29.04.26 12:30

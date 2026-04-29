@@ -8,10 +8,11 @@ import org.springframework.web.reactive.function.client.bodyToMono
 @Component
 class SoknadApiClient(
     clientProperties: ClientProperties,
-    webClientBuilder: WebClient.Builder
+    webClientBuilder: WebClient.Builder,
 ) {
     fun skalSkjuleOrginalSoknad(fiksDigisosId: String): Boolean =
-        webClient.get()
+        webClient
+            .get()
             .uri("/soknad/hide/$fiksDigisosId")
             .retrieve()
             .bodyToMono<Boolean>()
@@ -21,7 +22,4 @@ class SoknadApiClient(
         webClientBuilder
             .baseUrl(clientProperties.soknadApiUrl)
             .build()
-
-
-
 }

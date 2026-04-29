@@ -30,4 +30,5 @@ class ClientProperties {
     lateinit var tokendingsPrivateJwk: String
 
     lateinit var vilkarDokkravFagsystemVersjoner: List<String>
+    lateinit var soknadApiUrl: String
 }

@@ -52,6 +52,7 @@ spec:
         - host: teamdigisos-unleash-api.nav.cloud.nais.io
         - host: test.idporten.no
       rules:
+        - application: sosialhjelp-soknad-api-dev
         - application: clamav
           namespace: nais-system
         - application: norg2
@@ -100,3 +101,5 @@ spec:
       value: "http://clamav.nais-system/scan"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
+    - name: SOKNAD_API_URL
+      value: "http://sosialhjelp-soknad-api-dev/sosialhjelp/soknad-api"

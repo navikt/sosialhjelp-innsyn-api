@@ -64,3 +64,11 @@ class AdressebeskyttelseOldCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
         private val ttl: Duration = Duration.ofHours(1)
     }
 }
+
+@Configuration
+class SkjuleOrginalSoknadCache : InnsynApiCacheConfig(CACHE_NAME, ttl) {
+    companion object {
+        const val CACHE_NAME: String = "skjuleOrginalSoknad"
+        private val ttl: Duration = Duration.ofHours(5)
+    }
+}

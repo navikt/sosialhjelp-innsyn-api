@@ -21,6 +21,8 @@ class SoknadsStatusController(
     suspend fun hentOriginalSoknad(
         @PathVariable fiksDigisosId: String,
     ): OriginalSoknadDto? {
+        // Midlertidig ikke vis original søknad (soknad.pdf) fordi det potensielt ligger telefonnummer som ikke tilhører brukeren her.
+        return null
         tilgangskontroll.sjekkTilgang()
 
         val originalSoknad = soknadsStatusService.hentOriginalSoknad(fiksDigisosId)

@@ -103,3 +103,5 @@ spec:
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
     - name: SOKNAD_API_URL
       value: "http://sosialhjelp-soknad-api-dev/sosialhjelp/soknad-api"
+    - name: SOKNAD_API_AUDIENCE
+      value: "dev-gcp:teamdigisos:sosialhjelp-soknad-api-dev"

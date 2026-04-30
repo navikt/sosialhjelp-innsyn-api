@@ -31,4 +31,5 @@ class ClientProperties {
 
     lateinit var vilkarDokkravFagsystemVersjoner: List<String>
     var soknadApiUrl: String? = null
+    var soknadApiAudience: String? = null
 }

@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.soknad.api
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
+import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,12 +15,13 @@ import org.springframework.web.reactive.function.client.bodyToMono
 class SoknadApiConfiguration(
     private val clientProperties: ClientProperties,
     private val webClientBuilder: WebClient.Builder,
+    private val texasClient: TexasClient,
 ) {
     @Bean
     fun soknadApiClient(): SoknadApiClient? {
-        if (clientProperties.soknadApiUrl.isNullOrBlank()) {
+        if (clientProperties.soknadApiUrl.isNullOrBlank() || clientProperties.soknadApiAudience.isNullOrBlank()) {
             if (MiljoUtils.isRunningInProd()) {
-                error("SoknadApiClient mangler url. Dette er påkrevd i produksjon")
+                error("SoknadApiClient mangler url eller audience. Dette er påkrevd i produksjon")
             }
             return null
         }
@@ -27,18 +29,22 @@ class SoknadApiConfiguration(
             webClientBuilder
                 .baseUrl(clientProperties.soknadApiUrl!!)
                 .build(),
+            texasClient,
+            clientProperties.soknadApiAudience!!,
         )
     }
 }
 
 class SoknadApiClient(
     val webClient: WebClient,
+    val texasClient: TexasClient,
+    val target: String,
 ) {
     suspend fun skalSkjuleOriginalSoknad(fiksDigisosId: String): Boolean =
         webClient
             .get()
             .uri("/soknad/hide/$fiksDigisosId")
-            .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
+            .header(HttpHeaders.AUTHORIZATION, texasClient.getTokenXToken(target, TokenUtils.getToken()).withBearer())
             .retrieve()
             .bodyToMono<Boolean>()
             .awaitSingleOrNull() ?: true

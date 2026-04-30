@@ -5,6 +5,7 @@ import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
+import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -40,12 +41,18 @@ class SoknadApiClient(
     val texasClient: TexasClient,
     val target: String,
 ) {
+    private val logger by logger()
+
     suspend fun skalSkjuleOriginalSoknad(fiksDigisosId: String): Boolean =
-        webClient
-            .get()
-            .uri("/soknad/hide/$fiksDigisosId")
-            .header(HttpHeaders.AUTHORIZATION, texasClient.getTokenXToken(target, TokenUtils.getToken()).withBearer())
-            .retrieve()
-            .bodyToMono<Boolean>()
-            .awaitSingleOrNull() ?: true
+        runCatching {
+            webClient
+                .get()
+                .uri("/soknad/hide/$fiksDigisosId")
+                .header(HttpHeaders.AUTHORIZATION, texasClient.getTokenXToken(target, TokenUtils.getToken()).withBearer())
+                .retrieve()
+                .bodyToMono<Boolean>()
+                .awaitSingleOrNull() ?: true
+        }.onFailure {
+            logger.warn("Failed fetching /soknad/hide/$fiksDigisosId from soknad-api", it)
+        }.getOrDefault(true)
 }

@@ -1,9 +1,11 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.soknad.api.SoknadApiService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
+import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,13 +21,17 @@ class SoknadsStatusController(
     private val soknadApiService: SoknadApiService,
     private val clientProperties: ClientProperties,
 ) {
+    private val logger by logger()
+
     @GetMapping("{fiksDigisosId}/originalSoknad")
     suspend fun hentOriginalSoknad(
         @PathVariable fiksDigisosId: String,
     ): OriginalSoknadDto? {
         tilgangskontroll.sjekkTilgang()
 
-        if (soknadApiService.skalSkjuleOrginalSoknad(fiksDigisosId)) return null
+        if (soknadApiService.skalSkjuleOriginalSoknad(fiksDigisosId)) {
+            return null
+        }
 
         val originalSoknad = soknadsStatusService.hentOriginalSoknad(fiksDigisosId)
         return originalSoknad?.let {

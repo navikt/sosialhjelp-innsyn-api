@@ -29,12 +29,11 @@ class SoknadsStatusController(
     ): OriginalSoknadDto? {
         tilgangskontroll.sjekkTilgang()
 
-        if (soknadApiService.skalSkjuleOriginalSoknad(fiksDigisosId)) {
-            return null
-        }
-
         val originalSoknad = soknadsStatusService.hentOriginalSoknad(fiksDigisosId)
         return originalSoknad?.let {
+            if (soknadApiService.skalSkjuleOriginalSoknad(fiksDigisosId)) {
+                return OriginalSoknadDto("", skjult = true)
+            }
             val soknadDokument = it.soknadDokument
             OriginalSoknadDto(
                 hentDokumentlagerUrl(clientProperties, soknadDokument.dokumentlagerDokumentId),

@@ -56,6 +56,7 @@ spec:
           namespace: nais-system
         - application: norg2
           namespace: org
+        - application: sosialhjelp-soknad-api
     inbound:
       rules:
         - application: sosialhjelp-innsyn
@@ -101,3 +102,7 @@ spec:
       value: "http://clamav.nais-system/scan"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON"
+    - name: SOKNAD_API_URL
+      value: "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api"
+    - name: SOKNAD_API_AUDIENCE
+      value: "prod-gcp:teamdigisos:sosialhjelp-soknad-api"

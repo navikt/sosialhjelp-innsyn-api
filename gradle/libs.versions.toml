@@ -134,10 +134,6 @@ commons = [
     "commons-io"
 ]
 
-sosialhjelp-common = [
-    "sosialhjelp-common-api",
-]
-
 prometheus = [
     "prometheus-simpleclient-hotspot",
     "promotheus-simpleclient-common",

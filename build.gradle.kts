@@ -28,7 +28,7 @@ dependencies {
     implementation(libs.bundles.spring.boot)
 
     // Sosialhjelp-common
-    implementation(libs.bundles.sosialhjelp.common)
+    implementation(libs.sosialhjelp.common.api)
 
     // Micrometer/Prometheus
     implementation(libs.bundles.prometheus)
@@ -48,13 +48,6 @@ dependencies {
     // Jackson
     implementation(libs.jackson.module.kotlin)
     implementation(libs.jackson.module.kotlin2)
-
-    // TODO pga sårbarhet - når 3.parts-biblioteker har skiftet til tools.jackson kan denne fjernes
-    implementation("com.fasterxml.jackson.core:jackson-core") {
-        version {
-            strictly("2.21.1")
-        }
-    }
 
     // Springdoc
     implementation(libs.springdoc.openapi.starter.common)

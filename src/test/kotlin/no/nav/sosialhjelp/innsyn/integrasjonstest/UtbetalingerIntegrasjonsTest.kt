@@ -23,9 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.reactive.server.expectBodyList
 import java.util.UUID
 
-class UtbetalingerIntegrasjonsTest(
-) : AbstractIntegrationTest() {
-
+class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var innsynService: InnsynService
 
@@ -219,7 +217,6 @@ class UtbetalingerIntegrasjonsTest(
 
     @Test
     suspend fun `Bulk-innehenting skal deles opp i chunks`() {
-
         coEvery { fiksService.getAllInnsynsfiler(any()) } returns emptyMap()
 
         innsynService.hentJsonDigisosSokerBulk(createDigisosSaker(504))
@@ -227,14 +224,13 @@ class UtbetalingerIntegrasjonsTest(
         coVerify(exactly = 21) { fiksService.getAllInnsynsfiler(any()) }
     }
 
-    private fun createDigisosSaker(n: Int): List<DigisosSak> {
-        return buildList {
-            for(i in 1..n) {
-                sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+    private fun createDigisosSaker(n: Int): List<DigisosSak> =
+        buildList {
+            for (i in 1..n) {
+                sosialhjelpJsonMapper
+                    .readValue(ok_digisossak_response, DigisosSak::class.java)
                     .copy(fiksDigisosId = UUID.randomUUID().toString(), sokerFnr = i.toString())
                     .also { add(it) }
             }
-        }
-            .toList()
-    }
+        }.toList()
 }

@@ -1,5 +1,9 @@
 package no.nav.sosialhjelp.innsyn.event
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -36,7 +40,17 @@ class InnsynService(
         }
     }
 
-    suspend fun hentJsonDigisosSokerBulk(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> = fiksService.getAllInnsynsfiler(saker)
+    suspend fun hentJsonDigisosSokerBulk(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> {
+        return withContext(Dispatchers.IO) {
+            buildMap {
+                saker
+                    .chunked(CHUNK_SIZE)
+                    .map { chunk -> async { fiksService.getAllInnsynsfiler(chunk) } }
+                    .awaitAll()
+                    .forEach { putAll(it) }
+            }
+        }
+    }
 
     suspend fun hentOriginalSoknad(digisosSak: DigisosSak): JsonSoknad? {
         val originalMetadataId = digisosSak.originalSoknadNAV?.metadata
@@ -54,5 +68,6 @@ class InnsynService(
 
     companion object {
         private val log by logger()
+        const val CHUNK_SIZE = 25
     }
 }

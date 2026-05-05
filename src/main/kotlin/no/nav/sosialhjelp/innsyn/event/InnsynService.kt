@@ -40,8 +40,8 @@ class InnsynService(
         }
     }
 
-    suspend fun hentJsonDigisosSokerBulk(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> {
-        return withContext(Dispatchers.IO) {
+    suspend fun hentJsonDigisosSokerBulk(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> =
+        withContext(Dispatchers.IO) {
             buildMap {
                 saker
                     .chunked(CHUNK_SIZE)
@@ -50,7 +50,6 @@ class InnsynService(
                     .forEach { putAll(it) }
             }
         }
-    }
 
     suspend fun hentOriginalSoknad(digisosSak: DigisosSak): JsonSoknad? {
         val originalMetadataId = digisosSak.originalSoknadNAV?.metadata

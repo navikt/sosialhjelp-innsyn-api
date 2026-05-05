@@ -1,14 +1,17 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
+import com.ninjasquad.springmockk.MockkSpyBean
 import io.getunleash.Unleash
 import io.mockk.coEvery
+import io.mockk.coVerify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2.UtbetalingDto
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
+import no.nav.sosialhjelp.innsyn.event.InnsynService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response2
@@ -16,10 +19,17 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.reactive.server.expectBodyList
+import java.util.UUID
 
-class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
-    @MockkBean
+class UtbetalingerIntegrasjonsTest(
+) : AbstractIntegrationTest() {
+
+    @Autowired
+    private lateinit var innsynService: InnsynService
+
+    @MockkSpyBean
     private lateinit var fiksService: FiksService
 
     @MockkBean(relaxed = true)
@@ -205,5 +215,26 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         val unikeUtbetalinger = allUtbetalinger.filter { it.referanse != "utbetalt-ref-1" }
         assertThat(unikeUtbetalinger).hasSize(3)
         assertThat(unikeUtbetalinger).allMatch { it.tilknyttedeSoknader.size == 1 }
+    }
+
+    @Test
+    suspend fun `Bulk-innehenting skal deles opp i chunks`() {
+
+        coEvery { fiksService.getAllInnsynsfiler(any()) } returns emptyMap()
+
+        innsynService.hentJsonDigisosSokerBulk(createDigisosSaker(504))
+
+        coVerify(exactly = 21) { fiksService.getAllInnsynsfiler(any()) }
+    }
+
+    private fun createDigisosSaker(n: Int): List<DigisosSak> {
+        return buildList {
+            for(i in 1..n) {
+                sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
+                    .copy(fiksDigisosId = UUID.randomUUID().toString(), sokerFnr = i.toString())
+                    .also { add(it) }
+            }
+        }
+            .toList()
     }
 }

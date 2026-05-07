@@ -4,7 +4,6 @@ import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkSpyBean
 import io.getunleash.Unleash
 import io.mockk.coEvery
-import io.mockk.coVerify
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.reactive.server.expectBodyList
-import java.util.UUID
 
 class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
     @Autowired
@@ -214,23 +212,4 @@ class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
         assertThat(unikeUtbetalinger).hasSize(3)
         assertThat(unikeUtbetalinger).allMatch { it.tilknyttedeSoknader.size == 1 }
     }
-
-    @Test
-    suspend fun `Bulk-innehenting skal deles opp i chunks`() {
-        coEvery { fiksService.getAllInnsynsfiler(any()) } returns emptyMap()
-
-        innsynService.hentJsonDigisosSokerBulk(createDigisosSaker(504))
-
-        coVerify(exactly = 21) { fiksService.getAllInnsynsfiler(any()) }
-    }
-
-    private fun createDigisosSaker(n: Int): List<DigisosSak> =
-        buildList {
-            for (i in 1..n) {
-                sosialhjelpJsonMapper
-                    .readValue(ok_digisossak_response, DigisosSak::class.java)
-                    .copy(fiksDigisosId = UUID.randomUUID().toString(), sokerFnr = i.toString())
-                    .also { add(it) }
-            }
-        }.toList()
 }

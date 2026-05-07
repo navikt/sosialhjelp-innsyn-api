@@ -50,6 +50,8 @@ class FiksService(
     suspend fun getAllSoknader(): List<DigisosSak> = fiksClient.hentAlleDigisosSaker()
 
     suspend fun getAllInnsynsfiler(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> {
+        log.info("Tråd ${Thread.currentThread().name}: Henter alle innsynsfiler for ${saker.size} saker")
+
         if (saker.isEmpty()) {
             return emptyMap()
         }

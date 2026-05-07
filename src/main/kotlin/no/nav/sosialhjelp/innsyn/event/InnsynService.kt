@@ -51,8 +51,7 @@ class InnsynService(
                 .asFlow()
                 .flatMapMerge(concurrency = MAX_CONCURRENT_CHUNK_REQUESTS) { chunk ->
                     flow { emit(fiksService.getAllInnsynsfiler(chunk)) }
-                }
-                .fold(mutableMapOf<String, JsonDigisosSoker>()) { acc, chunkMap ->
+                }.fold(mutableMapOf<String, JsonDigisosSoker>()) { acc, chunkMap ->
                     acc.apply { putAll(chunkMap) }
                 }
         }

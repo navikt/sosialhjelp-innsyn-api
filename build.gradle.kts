@@ -71,6 +71,12 @@ dependencies {
         implementation("io.netty:netty-transport-native-unix-common:$nettyVersion") {
             because(nettyConstraintReason)
         }
+        implementation("io.netty:netty-codec-http3:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-transport-native-epoll:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
     }
 
     implementation(kotlin("stdlib"))

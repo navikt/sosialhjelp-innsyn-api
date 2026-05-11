@@ -21,51 +21,55 @@ java {
 }
 
 dependencies {
+    val nettyVersion = "4.2.13.Final"
+    val nettyConstraintReason =
+        "Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated"
+
     constraints {
-        implementation("io.netty:netty-buffer:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-buffer:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-codec:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-codec:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-codec-dns:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-codec-dns:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-codec-http:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-codec-http:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-codec-http2:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-codec-http2:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-codec-socks:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-codec-socks:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-common:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-common:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-handler:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-handler:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-handler-proxy:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-handler-proxy:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-resolver:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-resolver:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-resolver-dns:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-resolver-dns:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-transport:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-transport:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-transport-classes-epoll:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-transport-classes-epoll:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-transport-classes-kqueue:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-transport-classes-kqueue:$nettyVersion") {
+            because(nettyConstraintReason)
         }
-        implementation("io.netty:netty-transport-native-unix-common:4.2.13.Final") {
-            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        implementation("io.netty:netty-transport-native-unix-common:$nettyVersion") {
+            because(nettyConstraintReason)
         }
     }
 

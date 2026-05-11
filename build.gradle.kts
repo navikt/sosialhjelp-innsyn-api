@@ -21,6 +21,54 @@ java {
 }
 
 dependencies {
+    constraints {
+        implementation("io.netty:netty-buffer:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-codec:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-codec-dns:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-codec-http:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-codec-http2:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-codec-socks:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-common:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-handler:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-handler-proxy:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-resolver:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-resolver-dns:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-transport:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-transport-classes-epoll:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-transport-classes-kqueue:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+        implementation("io.netty:netty-transport-native-unix-common:4.2.13.Final") {
+            because("Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated")
+        }
+    }
+
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 

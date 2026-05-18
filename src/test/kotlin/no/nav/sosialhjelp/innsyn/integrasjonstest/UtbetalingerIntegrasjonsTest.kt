@@ -10,7 +10,6 @@ import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2.UtbetalingDto
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
-import no.nav.sosialhjelp.innsyn.event.InnsynService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response2
@@ -18,12 +17,9 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.reactive.server.expectBodyList
 
 class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
-    @Autowired
-    private lateinit var innsynService: InnsynService
 
     @MockkSpyBean
     private lateinit var fiksService: FiksService

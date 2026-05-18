@@ -13,9 +13,12 @@ import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
+import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 internal class InnsynServiceTest {
@@ -89,5 +92,44 @@ internal class InnsynServiceTest {
 
             assertThat(service.hentJsonDigisosSoker(digisosSak)).isNull()
             coVerify(exactly = 0) { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) }
+        }
+
+    @Test
+    suspend fun `Bulk-innehenting skal deles opp i chunks`() {
+        val antallSaker = 504
+        val digisosSaker = createDigisosSaker(antallSaker)
+
+        digisosSaker
+            .chunked(InnsynService.CHUNK_SIZE)
+            .forEach { saker -> coEvery { fiksService.getAllInnsynsfiler(saker) } returns saker.mapToJsonDigisosSoker() }
+
+        service
+            .hentJsonDigisosSokerBulk(digisosSaker)
+            .keys
+            .also { keys ->
+                assertThat(keys.size).isEqualTo(antallSaker)
+                digisosSaker
+                    .map { sak -> sak.fiksDigisosId }
+                    .containsAll(keys)
+            }
+
+        val add = if (digisosSaker.size % InnsynService.CHUNK_SIZE == 0) 0 else 1
+        coVerify(exactly = ((digisosSaker.size / InnsynService.CHUNK_SIZE) + add)) { fiksService.getAllInnsynsfiler(any()) }
+    }
+
+    private fun createDigisosSaker(n: Int): List<DigisosSak> =
+        buildList {
+            for (i in 1..n) {
+                sosialhjelpJsonMapper
+                    .readValue(ok_digisossak_response, DigisosSak::class.java)
+                    .copy(fiksDigisosId = UUID.randomUUID().toString(), sokerFnr = i.toString())
+                    .also { add(it) }
+            }
+        }.toList()
+
+    private fun List<DigisosSak>.mapToJsonDigisosSoker(): Map<String, JsonDigisosSoker> =
+        associate {
+            val jsonDigisosSoker: JsonDigisosSoker = mockk()
+            it.fiksDigisosId to jsonDigisosSoker
         }
 }

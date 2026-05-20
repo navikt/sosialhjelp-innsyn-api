@@ -50,7 +50,7 @@ jobs:
 
       - uses: nais/deploy/actions/deploy@v2
         env:
-          RESOURCE: nais/dev/${{ matrix.env }}
+          RESOURCE: nais/dev/${{ matrix.env }}.yaml
           CLUSTER: dev-gcp
           REF: ${{ github.sha }}
           PRINT_PAYLOAD: true

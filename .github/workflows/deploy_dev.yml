@@ -1,6 +1,11 @@
 name: 'Deploy to Development'
 run-name: Deploy '${{ github.ref_name }}' to '${{ github.event.inputs.config-file-name }}'
 on:
+  workflow_call:
+    inputs:
+      config-file-name:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       config-file-name:

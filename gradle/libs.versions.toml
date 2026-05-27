@@ -23,7 +23,7 @@ unleash = "12.2.1"
 springdoc = "3.0.3"
 json_smart = "2.4.10"
 spring_security_test = "7.0.5"
-mock-oauth2-server = "3.0.3"
+mock-oauth2-server = "4.0.0"
 spotless = "8.5.1"
 
 opentelemetry = "1.62.0"

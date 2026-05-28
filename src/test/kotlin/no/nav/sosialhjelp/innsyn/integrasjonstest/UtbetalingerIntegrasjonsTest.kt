@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.web.reactive.server.expectBodyList
 
 class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
-
     @MockkSpyBean
     private lateinit var fiksService: FiksService
 

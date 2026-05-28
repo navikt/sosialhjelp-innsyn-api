@@ -1,5 +1,12 @@
 package no.nav.sosialhjelp.innsyn.event
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.fold
+import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -36,7 +43,18 @@ class InnsynService(
         }
     }
 
-    suspend fun hentJsonDigisosSokerBulk(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> = fiksService.getAllInnsynsfiler(saker)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun hentJsonDigisosSokerBulk(saker: List<DigisosSak>): Map<String, JsonDigisosSoker> =
+        withContext(Dispatchers.IO) {
+            saker
+                .chunked(CHUNK_SIZE)
+                .asFlow()
+                .flatMapMerge(concurrency = MAX_CONCURRENT_CHUNK_REQUESTS) { chunk ->
+                    flow { emit(fiksService.getAllInnsynsfiler(chunk)) }
+                }.fold(mutableMapOf<String, JsonDigisosSoker>()) { acc, chunkMap ->
+                    acc.apply { putAll(chunkMap) }
+                }
+        }
 
     suspend fun hentOriginalSoknad(digisosSak: DigisosSak): JsonSoknad? {
         val originalMetadataId = digisosSak.originalSoknadNAV?.metadata
@@ -54,5 +72,7 @@ class InnsynService(
 
     companion object {
         private val log by logger()
+        const val CHUNK_SIZE = 25
+        const val MAX_CONCURRENT_CHUNK_REQUESTS = 10
     }
 }

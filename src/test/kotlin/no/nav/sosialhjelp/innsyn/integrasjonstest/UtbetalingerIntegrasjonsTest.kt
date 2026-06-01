@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
-import com.ninjasquad.springmockk.MockkSpyBean
 import io.getunleash.Unleash
 import io.mockk.coEvery
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.web.reactive.server.expectBodyList
 
 class UtbetalingerIntegrasjonsTest : AbstractIntegrationTest() {
-    @MockkSpyBean
+    @MockkBean
     private lateinit var fiksService: FiksService
 
     @MockkBean(relaxed = true)

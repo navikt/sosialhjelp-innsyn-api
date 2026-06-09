@@ -7,4 +7,5 @@ data class OriginalSoknadDto(
     val size: Long? = null,
     val filename: String? = null,
     val date: LocalDateTime? = null,
+    val skjult: Boolean = false,
 )

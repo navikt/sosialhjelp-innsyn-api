@@ -21,6 +21,64 @@ java {
 }
 
 dependencies {
+    val nettyVersion = "4.2.15.Final"
+    val nettyConstraintReason =
+        "Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated"
+
+    constraints {
+        implementation("io.netty:netty-buffer:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-codec:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-codec-dns:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-codec-http:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-codec-http2:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-codec-socks:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-common:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-handler:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-handler-proxy:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-resolver:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-resolver-dns:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-transport:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-transport-classes-epoll:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-transport-classes-kqueue:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-transport-native-unix-common:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-codec-http3:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+        implementation("io.netty:netty-transport-native-epoll:$nettyVersion") {
+            because(nettyConstraintReason)
+        }
+    }
+
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
@@ -28,7 +86,7 @@ dependencies {
     implementation(libs.bundles.spring.boot)
 
     // Sosialhjelp-common
-    implementation(libs.bundles.sosialhjelp.common)
+    implementation(libs.sosialhjelp.common.api)
 
     // Micrometer/Prometheus
     implementation(libs.bundles.prometheus)
@@ -48,13 +106,6 @@ dependencies {
     // Jackson
     implementation(libs.jackson.module.kotlin)
     implementation(libs.jackson.module.kotlin2)
-
-    // TODO pga sårbarhet - når 3.parts-biblioteker har skiftet til tools.jackson kan denne fjernes
-    implementation("com.fasterxml.jackson.core:jackson-core") {
-        version {
-            strictly("2.21.1")
-        }
-    }
 
     // Springdoc
     implementation(libs.springdoc.openapi.starter.common)

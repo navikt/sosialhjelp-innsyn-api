@@ -86,7 +86,7 @@ class KommuneService(
             ?.also {
                 if (!it.kanMottaSoknader || it.harMidlertidigDeaktivertMottak) {
                     throw MottakUtilgjengeligException(
-                        message = "Kommune har deaktivert mottak",
+                        message = "Kommune (${it.kommunenummer}) har deaktivert mottak",
                         kanMottaSoknader = it.kanMottaSoknader,
                         harMidlertidigDeaktivertMottak = it.harMidlertidigDeaktivertMottak,
                     )

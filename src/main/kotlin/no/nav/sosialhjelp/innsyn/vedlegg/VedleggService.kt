@@ -128,7 +128,13 @@ class VedleggService(
                             } else {
                                 dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex).toMutableList()
 
-                                val finnesIEttersendelse = vedlegg.filer.all { fil -> filtrerteEttersendelsesVedlegg.any { sanitizeFileName(it.filnavn) == sanitizeFileName(fil.filnavn) } }
+                                val finnesIEttersendelse =
+                                    vedlegg.filer.all { fil ->
+                                        filtrerteEttersendelsesVedlegg.any {
+                                            sanitizeFileName(it.filnavn) ==
+                                                sanitizeFileName(fil.filnavn)
+                                        }
+                                    }
                                 log.info("finnes det virkerlig i ettersendelse: $finnesIEttersendelse")
                                 if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
                                     val exception =

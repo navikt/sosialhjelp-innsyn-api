@@ -57,7 +57,7 @@ class VedleggService(
                         null,
                     )
                 }
-        return alleVedlegg
+        return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
     suspend fun hentEttersendteVedlegg(
@@ -85,7 +85,7 @@ class VedleggService(
                         }
                 } ?: emptyList()
 
-        return ettersendteVedlegg
+        return kombinerAlleLikeVedlegg(ettersendteVedlegg)
     }
 
     private suspend fun List<Ettersendelse>.hentVedleggSpesifikasjon(digisosSak: DigisosSak) =
@@ -122,16 +122,16 @@ class VedleggService(
                                 vedlegg.filer
                                     .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn.sanitize() } }
 
-                            val dokumentInfoList: List<DokumentInfo> =
+                            val dokumentInfoList: MutableList<DokumentInfo> =
                                 if (allFilesExists) {
-                                    metadataFilerFiks.findByFilename(vedlegg.filer.map { it.filnavn })
+                                    metadataFilerFiks.findByFilename(vedlegg.filer.map { it.filnavn }).toMutableList()
                                 } else {
                                     log.error(
                                         "Det er mismatch mellom nedlastede filer og metadata. " +
                                             "Det er JsonFiler som ikke finnes i ettersendelse metadata. ",
                                         // TODO Martin: Kan vi bruke type eller tilleggsinfo (eller annet) for mer kontekst?
                                     )
-                                    vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }
+                                    vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }.toMutableList()
                                 }
                             InternalVedlegg(
                                 vedlegg.type,
@@ -145,7 +145,7 @@ class VedleggService(
                         }
                 } ?: emptyList()
 
-        return alleVedlegg
+        return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
     private fun JsonVedleggSpesifikasjon.validateFiles(metadataFilerFiks: List<DokumentInfo>) {
@@ -190,7 +190,7 @@ data class InternalVedlegg(
     val tilleggsinfo: String?,
     val hendelseType: JsonVedlegg.HendelseType?,
     val hendelseReferanse: String?,
-    val dokumentInfoList: List<DokumentInfo>,
+    val dokumentInfoList: MutableList<DokumentInfo>,
     val tidspunktLastetOpp: LocalDateTime,
     val innsendelsesfrist: LocalDateTime?,
 )

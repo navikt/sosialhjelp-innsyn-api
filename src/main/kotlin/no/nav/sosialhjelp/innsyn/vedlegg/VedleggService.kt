@@ -12,7 +12,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
-import org.springframework.security.web.FilterChainProxy
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -22,7 +21,6 @@ const val VEDLEGG_KREVES_STATUS = "VedleggKreves"
 @Component
 class VedleggService(
     private val fiksService: FiksService,
-    private val filterChainProxy: FilterChainProxy,
 ) {
     suspend fun hentAlleOpplastedeVedlegg(
         digisosSak: DigisosSak,
@@ -59,7 +57,7 @@ class VedleggService(
                         null,
                     )
                 }
-        return kombinerAlleLikeVedlegg(alleVedlegg)
+        return alleVedlegg
     }
 
     suspend fun hentEttersendteVedlegg(
@@ -87,7 +85,7 @@ class VedleggService(
                         }
                 } ?: emptyList()
 
-        return kombinerAlleLikeVedlegg(ettersendteVedlegg)
+        return ettersendteVedlegg
     }
 
     private suspend fun List<Ettersendelse>.hentVedleggSpesifikasjon(digisosSak: DigisosSak) =
@@ -108,10 +106,8 @@ class VedleggService(
             digisosSak.ettersendtInfoNAV
                 ?.ettersendelser
                 ?.hentVedleggSpesifikasjon(digisosSak)
-                // ettersendelse = metadata om ettersendelser hos FIKS, jsonVedleggSpek = Vår referanse til filer som er lastet opp
                 ?.flatMap { (ettersendelse, jsonVedleggSpesifikasjon) ->
 
-                    // antall filer fiks metadata mener er lastet opp for denne ettersendelsen
                     val metadataFilerFiks =
                         ettersendelse.vedlegg
                             .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
@@ -122,15 +118,17 @@ class VedleggService(
                         .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                         .map { vedlegg ->
 
-                            val allFilesExists = vedlegg.filer
-                                .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn.sanitize() } }
+                            val allFilesExists =
+                                vedlegg.filer
+                                    .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn.sanitize() } }
 
                             val dokumentInfoList: List<DokumentInfo> =
-                                if (allFilesExists) metadataFilerFiks.findByFilename(vedlegg.filer.map { it.filnavn })
-                                else {
+                                if (allFilesExists) {
+                                    metadataFilerFiks.findByFilename(vedlegg.filer.map { it.filnavn })
+                                } else {
                                     log.error(
                                         "Det er mismatch mellom nedlastede filer og metadata. " +
-                                            "Det er JsonFiler som ikke finnes i ettersendelse metadata. "
+                                            "Det er JsonFiler som ikke finnes i ettersendelse metadata. ",
                                         // TODO Martin: Kan vi bruke type eller tilleggsinfo (eller annet) for mer kontekst?
                                     )
                                     vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }
@@ -147,17 +145,16 @@ class VedleggService(
                         }
                 } ?: emptyList()
 
-        return kombinerAlleLikeVedlegg(alleVedlegg)
+        return alleVedlegg
     }
 
     private fun JsonVedleggSpesifikasjon.validateFiles(metadataFilerFiks: List<DokumentInfo>) {
-        if(this.vedlegg.flatMap { it.filer }.size != metadataFilerFiks.size) {
+        if (this.vedlegg.flatMap { it.filer }.size != metadataFilerFiks.size) {
             log.error("Mismatch mellom antall filer i vedleggSpesifikasjon og antall filer i ettersendelse")
         }
     }
 
-    private fun List<DokumentInfo>.findByFilename(filenames: List<String>) =
-        filter { it.filnavn in filenames }
+    private fun List<DokumentInfo>.findByFilename(filenames: List<String>) = filter { it.filnavn in filenames }
 
     private suspend fun hentVedleggSpesifikasjon(
         digisosSak: DigisosSak,
@@ -188,13 +185,12 @@ class VedleggService(
     }
 }
 
-
 data class InternalVedlegg(
     val type: String,
     val tilleggsinfo: String?,
     val hendelseType: JsonVedlegg.HendelseType?,
     val hendelseReferanse: String?,
-    val dokumentInfoList: MutableList<DokumentInfo>,
+    val dokumentInfoList: List<DokumentInfo>,
     val tidspunktLastetOpp: LocalDateTime,
     val innsendelsesfrist: LocalDateTime?,
 )

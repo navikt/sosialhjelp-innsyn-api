@@ -89,7 +89,7 @@ fun kombinerAlleLikeVedlegg(alleVedlegg: List<InternalVedlegg>): List<InternalVe
                     areDatesWithinOneMinute(it.tidspunktLastetOpp, kombinert.tidspunktLastetOpp) &&
                         kombinert.type == it.type &&
                         kombinert.tilleggsinfo == it.tilleggsinfo
-                    )
+                )
             }
         if (funnet != null) {
             funnet.dokumentInfoList.addAll(it.dokumentInfoList)
@@ -106,4 +106,3 @@ fun areDatesWithinOneMinute(
 ): Boolean =
     (firstDate == null && secondDate == null) ||
         ChronoUnit.MINUTES.between(firstDate, secondDate).absoluteValue < 1
-

@@ -225,7 +225,7 @@ class VedleggOpplastingService(
                     "\r\nvalidatedFileType: ${fileType.name}," +
                     "\r\ntikaMediaType: $tikaMimeType," +
                     "\r\nmime: ${fil.headers().contentType}" +
-                    ",\r\nførste bytes: $firstBytes",
+                    ",\r\nførste bytes: ${firstBytes.toString()}",
             )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }
@@ -269,7 +269,7 @@ class VedleggOpplastingService(
         }
 }
 
-fun String.containsIllegalCharacters(): Boolean = sanitizeFileName(this).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
+fun String.containsIllegalCharacters(): Boolean = sanitize(this).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
 
 data class OppgaveValidering(
     val type: String,

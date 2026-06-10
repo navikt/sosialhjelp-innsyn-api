@@ -225,7 +225,7 @@ class VedleggOpplastingService(
                     "\r\nvalidatedFileType: ${fileType.name}," +
                     "\r\ntikaMediaType: $tikaMimeType," +
                     "\r\nmime: ${fil.headers().contentType}" +
-                    ",\r\nførste bytes: ${firstBytes.toString()}",
+                    ",\r\nførste bytes: $firstBytes",
             )
             return ValidationResult(ValidationValues.ILLEGAL_FILE_TYPE)
         }

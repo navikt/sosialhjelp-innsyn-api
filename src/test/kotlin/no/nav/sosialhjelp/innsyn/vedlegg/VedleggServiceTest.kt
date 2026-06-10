@@ -28,7 +28,7 @@ internal class VedleggServiceTest {
     private val eventService: EventService = mockk()
     private val fiksService: FiksService = mockk()
 
-    private val service = VedleggService(fiksService, filterChainProxy)
+    private val service = VedleggService(fiksService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon = mockk()

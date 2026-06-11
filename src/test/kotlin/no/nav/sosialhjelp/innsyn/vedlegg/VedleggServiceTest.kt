@@ -68,191 +68,191 @@ internal class VedleggServiceTest {
 
     @Test
     suspend fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() {
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery {
-                fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
-            } returns mockJsonVedleggSpesifikasjon
-            every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
+        coEvery { eventService.createModel(any()) } returns model
+        coEvery {
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+        } returns mockJsonVedleggSpesifikasjon
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
-            assertThat(list).isEmpty()
-        }
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
+        assertThat(list).isEmpty()
+    }
 
     @Test
     suspend fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() {
-            coEvery { eventService.createModel(any()) } returns model
-            every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
+        coEvery { eventService.createModel(any()) } returns model
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
 
-            assertThat(list).hasSize(2)
-            assertThat(list[0].type).isEqualTo(DOKUMENTTYPE)
-            assertThat(list[0].dokumentInfoList[0].filnavn).isEqualTo(SOKNAD_FILNAVN_1)
-            assertThat(list[1].type).isEqualTo(DOKUMENTTYPE_2)
-            assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(SOKNAD_FILNAVN_2)
-        }
+        assertThat(list).hasSize(2)
+        assertThat(list[0].type).isEqualTo(DOKUMENTTYPE)
+        assertThat(list[0].dokumentInfoList[0].filnavn).isEqualTo(SOKNAD_FILNAVN_1)
+        assertThat(list[1].type).isEqualTo(DOKUMENTTYPE_2)
+        assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(SOKNAD_FILNAVN_2)
+    }
 
     @Test
     suspend fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() {
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery {
-                fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
-            } returns mockJsonVedleggSpesifikasjon
-            every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns
-                listOf(
-                    Ettersendelse(
-                        navEksternRefId = "ref 3",
-                        vedleggMetadata = VEDLEGG_METADATA_ETTERSENDELSE_3,
-                        vedlegg = listOf(DokumentInfo(ETTERSENDELSE_FILNAVN_1, DOKUMENTLAGERID_1, 42)),
-                        timestampSendt = tid_1.toEpochMilli(),
-                    ),
-                )
+        coEvery { eventService.createModel(any()) } returns model
+        coEvery {
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+        } returns mockJsonVedleggSpesifikasjon
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns
+            listOf(
+                Ettersendelse(
+                    navEksternRefId = "ref 3",
+                    vedleggMetadata = VEDLEGG_METADATA_ETTERSENDELSE_3,
+                    vedlegg = listOf(DokumentInfo(ETTERSENDELSE_FILNAVN_1, DOKUMENTLAGERID_1, 42)),
+                    timestampSendt = tid_1.toEpochMilli(),
+                ),
+            )
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
 
-            assertThat(list).hasSize(0)
-        }
+        assertThat(list).hasSize(0)
+    }
 
     @Test
     suspend fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() {
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery {
-                fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
-            } returns mockJsonVedleggSpesifikasjon
+        coEvery { eventService.createModel(any()) } returns model
+        coEvery {
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+        } returns mockJsonVedleggSpesifikasjon
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
 
-            assertThat(list).hasSize(4)
-            assertThat(list[0].type).isEqualTo(DOKUMENTTYPE_3)
-            assertThat(list[0].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_1)
+        assertThat(list).hasSize(4)
+        assertThat(list[0].type).isEqualTo(DOKUMENTTYPE_3)
+        assertThat(list[0].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_1)
 
-            assertThat(list[1].type).isEqualTo(DOKUMENTTYPE_4)
-            assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_2)
+        assertThat(list[1].type).isEqualTo(DOKUMENTTYPE_4)
+        assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_2)
 
-            assertThat(list[2].type).isEqualTo(DOKUMENTTYPE_3)
-            assertThat(list[2].dokumentInfoList).hasSize(3)
-            assertThat(list[2].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_3)
-            assertThat(list[2].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_4)
-            assertThat(list[2].dokumentInfoList[2].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_4)
+        assertThat(list[2].type).isEqualTo(DOKUMENTTYPE_3)
+        assertThat(list[2].dokumentInfoList).hasSize(3)
+        assertThat(list[2].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_3)
+        assertThat(list[2].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_4)
+        assertThat(list[2].dokumentInfoList[2].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_4)
 
-            assertThat(list[3].type).isEqualTo(DOKUMENTTYPE)
-            assertThat(list[3].dokumentInfoList).hasSize(2)
-            assertThat(list[3].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_1)
-            assertThat(list[3].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_5)
-        }
+        assertThat(list[3].type).isEqualTo(DOKUMENTTYPE)
+        assertThat(list[3].dokumentInfoList).hasSize(2)
+        assertThat(list[3].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_1)
+        assertThat(list[3].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_5)
+    }
 
     @Test
     suspend fun `skal hente alle vedlegg for digisosSak`() {
-            coEvery { eventService.createModel(any()) } returns model
+        coEvery { eventService.createModel(any()) } returns model
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
 
-            assertThat(list).hasSize(6)
+        assertThat(list).hasSize(6)
 
-            // nano-presisjon lacking
-            val zoneIdOslo = ZoneId.of("Europe/Oslo")
-            assertThat(list[0].type).isEqualTo(DOKUMENTTYPE)
-            assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
+        // nano-presisjon lacking
+        val zoneIdOslo = ZoneId.of("Europe/Oslo")
+        assertThat(list[0].type).isEqualTo(DOKUMENTTYPE)
+        assertThat(list[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
-            assertThat(list[1].type).isEqualTo(DOKUMENTTYPE_2)
-            assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
+        assertThat(list[1].type).isEqualTo(DOKUMENTTYPE_2)
+        assertThat(list[1].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
-            assertThat(list[2].type).isEqualTo(DOKUMENTTYPE_3)
-            assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
+        assertThat(list[2].type).isEqualTo(DOKUMENTTYPE_3)
+        assertThat(list[2].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
 
-            assertThat(list[3].type).isEqualTo(DOKUMENTTYPE_4)
-            assertThat(list[3].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
+        assertThat(list[3].type).isEqualTo(DOKUMENTTYPE_4)
+        assertThat(list[3].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
 
-            assertThat(list[4].type).isEqualTo(DOKUMENTTYPE_3)
-            assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_2, zoneIdOslo))
+        assertThat(list[4].type).isEqualTo(DOKUMENTTYPE_3)
+        assertThat(list[4].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_2, zoneIdOslo))
 
-            assertThat(list[5].type).isEqualTo(DOKUMENTTYPE)
-            assertThat(list[5].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
-        }
+        assertThat(list[5].type).isEqualTo(DOKUMENTTYPE)
+        assertThat(list[5].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_1, zoneIdOslo))
+    }
 
     @Test
     suspend fun `skal hente soknadsvedlegg filtrert pa status for digisosSak`() {
-            every { mockDigisosSak.originalSoknadNAV } returns originalSoknadMedVedleggKrevesOgLastetOpp
-            val lastetOppList = service.hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, mockDigisosSak)
-            val vedleggKrevesList = service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, mockDigisosSak)
+        every { mockDigisosSak.originalSoknadNAV } returns originalSoknadMedVedleggKrevesOgLastetOpp
+        val lastetOppList = service.hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, mockDigisosSak)
+        val vedleggKrevesList = service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, mockDigisosSak)
 
-            assertThat(lastetOppList).hasSize(1)
-            assertThat(vedleggKrevesList).hasSize(1)
+        assertThat(lastetOppList).hasSize(1)
+        assertThat(vedleggKrevesList).hasSize(1)
 
-            // nano-presisjon lacking
-            val zoneIdOslo = ZoneId.of("Europe/Oslo")
-            assertThat(lastetOppList[0].type).isEqualTo(DOKUMENTTYPE)
-            assertThat(lastetOppList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
+        // nano-presisjon lacking
+        val zoneIdOslo = ZoneId.of("Europe/Oslo")
+        assertThat(lastetOppList[0].type).isEqualTo(DOKUMENTTYPE)
+        assertThat(lastetOppList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
 
-            assertThat(vedleggKrevesList[0].type).isEqualTo(DOKUMENTTYPE_2)
-            assertThat(vedleggKrevesList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
-        }
+        assertThat(vedleggKrevesList[0].type).isEqualTo(DOKUMENTTYPE_2)
+        assertThat(vedleggKrevesList[0].tidspunktLastetOpp).isEqualToIgnoringNanos(LocalDateTime.ofInstant(tid_soknad, zoneIdOslo))
+    }
 
     @Test
     suspend fun `Verifisere at antall JsonVedlegg ender i riktig antall internalVedlegg og at de opprinnelige filene finnes`() {
-            val model = InternalDigisosSoker()
+        val model = InternalDigisosSoker()
 
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery {
-                fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
-            } returns mockJsonVedleggSpesifikasjon
-            coEvery { fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any()) } returns
-                JsonVedleggSpesifikasjon()
-                    .withVedlegg(
-                        listOf(
-                            JsonVedlegg()
-                                .withFiler(
-                                    listOf(
-                                        JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_1).withSha512("1231231"),
-                                        JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_2).withSha512("adfgbjn"),
-                                    ),
-                                ).withStatus(LASTET_OPP_STATUS)
-                                .withType(DOKUMENTTYPE_3),
-                            JsonVedlegg()
-                                .withFiler(
-                                    listOf(
-                                        JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_3).withSha512("aasdcx"),
-                                        JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("qweqqa"),
-                                    ),
-                                ).withStatus(LASTET_OPP_STATUS)
-                                .withType(DOKUMENTTYPE_4),
-                        ),
-                    )
-
-            every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns
-                listOf(
-                    Ettersendelse(
-                        navEksternRefId = "ref 3",
-                        vedleggMetadata = VEDLEGG_METADATA_ETTERSENDELSE_5,
-                        vedlegg =
-                            listOf(
-                                DokumentInfo(ETTERSENDELSE_FILNAVN_1, DOKUMENTLAGERID_1, 1),
-                                // samme filnavn
-                                DokumentInfo(ETTERSENDELSE_FILNAVN_2, DOKUMENTLAGERID_2, 2),
-                                // samme filnavn
-                                DokumentInfo(ETTERSENDELSE_FILNAVN_3, DOKUMENTLAGERID_3, 3),
-                                DokumentInfo(ETTERSENDELSE_FILNAVN_4, DOKUMENTLAGERID_4, 4),
-                            ),
-                        timestampSendt = tid_1.toEpochMilli(),
+        coEvery { eventService.createModel(any()) } returns model
+        coEvery {
+            fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
+        } returns mockJsonVedleggSpesifikasjon
+        coEvery { fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any()) } returns
+            JsonVedleggSpesifikasjon()
+                .withVedlegg(
+                    listOf(
+                        JsonVedlegg()
+                            .withFiler(
+                                listOf(
+                                    JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_1).withSha512("1231231"),
+                                    JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_2).withSha512("adfgbjn"),
+                                ),
+                            ).withStatus(LASTET_OPP_STATUS)
+                            .withType(DOKUMENTTYPE_3),
+                        JsonVedlegg()
+                            .withFiler(
+                                listOf(
+                                    JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_3).withSha512("aasdcx"),
+                                    JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("qweqqa"),
+                                ),
+                            ).withStatus(LASTET_OPP_STATUS)
+                            .withType(DOKUMENTTYPE_4),
                     ),
                 )
 
-            val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
+        every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns
+            listOf(
+                Ettersendelse(
+                    navEksternRefId = "ref 3",
+                    vedleggMetadata = VEDLEGG_METADATA_ETTERSENDELSE_5,
+                    vedlegg =
+                        listOf(
+                            DokumentInfo(ETTERSENDELSE_FILNAVN_1, DOKUMENTLAGERID_1, 1),
+                            // samme filnavn
+                            DokumentInfo(ETTERSENDELSE_FILNAVN_2, DOKUMENTLAGERID_2, 2),
+                            // samme filnavn
+                            DokumentInfo(ETTERSENDELSE_FILNAVN_3, DOKUMENTLAGERID_3, 3),
+                            DokumentInfo(ETTERSENDELSE_FILNAVN_4, DOKUMENTLAGERID_4, 4),
+                        ),
+                    timestampSendt = tid_1.toEpochMilli(),
+                ),
+            )
 
-            assertThat(list).hasSize(2)
+        val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
 
-            assertThat(list[0].dokumentInfoList).hasSize(2)
-            assertThat(list[0].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_1)
-            assertThat(list[0].dokumentInfoList[0].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_1)
-            assertThat(list[0].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_2)
-            assertThat(list[0].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_2)
+        assertThat(list).hasSize(2)
 
-            assertThat(list[1].dokumentInfoList).hasSize(2)
-            assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_3)
-            assertThat(list[1].dokumentInfoList[0].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_3)
-            assertThat(list[1].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_4)
-            assertThat(list[1].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_4)
-        }
+        assertThat(list[0].dokumentInfoList).hasSize(2)
+        assertThat(list[0].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_1)
+        assertThat(list[0].dokumentInfoList[0].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_1)
+        assertThat(list[0].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_2)
+        assertThat(list[0].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_2)
+
+        assertThat(list[1].dokumentInfoList).hasSize(2)
+        assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_3)
+        assertThat(list[1].dokumentInfoList[0].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_3)
+        assertThat(list[1].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_4)
+        assertThat(list[1].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_4)
+    }
 }
 
 // filnavn lastes alltid opp med en del av UUID lagt til filnavnet - så dette er ikke reelle filnavn

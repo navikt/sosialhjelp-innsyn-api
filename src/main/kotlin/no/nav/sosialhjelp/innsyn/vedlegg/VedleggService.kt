@@ -117,8 +117,7 @@ class VedleggService(
                             alleVedlegg.validateFiles(metadataFilerFiks)
                             // TODO Verifisere at det finnes
                             log.info("Fant ${alleVedlegg.size} vedlegg i ettersendelse")
-                        }
-                        .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                        }.filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                         .map { vedlegg ->
 
                             val allFilesExists =
@@ -126,8 +125,9 @@ class VedleggService(
                                     .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn.sanitize() } }
 
                             val dokumentInfoList: MutableList<DokumentInfo> =
-                                if (allFilesExists) metadataFilerFiks.addByFilename(vedlegg.filer).toMutableList()
-                                else {
+                                if (allFilesExists) {
+                                    metadataFilerFiks.addByFilename(vedlegg.filer).toMutableList()
+                                } else {
                                     log.error(
                                         "Det er mismatch mellom nedlastede filer og metadata. " +
                                             "Det er JsonFiler som ikke finnes i ettersendelse metadata.",

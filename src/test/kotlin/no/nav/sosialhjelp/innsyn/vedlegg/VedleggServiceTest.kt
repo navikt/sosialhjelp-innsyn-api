@@ -4,7 +4,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
@@ -22,7 +21,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-import kotlin.time.Duration.Companion.seconds
 
 internal class VedleggServiceTest {
     private val eventService: EventService = mockk()
@@ -69,8 +67,7 @@ internal class VedleggServiceTest {
     }
 
     @Test
-    fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() =
-        runTest(timeout = 5.seconds) {
+    suspend fun `skal returnere emptylist hvis soknad har null vedlegg og ingen ettersendelser finnes`() {
             coEvery { eventService.createModel(any()) } returns model
             coEvery {
                 fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
@@ -82,8 +79,7 @@ internal class VedleggServiceTest {
         }
 
     @Test
-    fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() =
-        runTest(timeout = 5.seconds) {
+    suspend fun `skal kun returnere soknadens vedlegg hvis ingen ettersendelser finnes`() {
             coEvery { eventService.createModel(any()) } returns model
             every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns emptyList()
 
@@ -97,8 +93,7 @@ internal class VedleggServiceTest {
         }
 
     @Test
-    fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() =
-        runTest(timeout = 5.seconds) {
+    suspend fun `skal filtrere vekk vedlegg som ikke er LastetOpp`() {
             coEvery { eventService.createModel(any()) } returns model
             coEvery {
                 fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
@@ -119,8 +114,7 @@ internal class VedleggServiceTest {
         }
 
     @Test
-    fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() =
-        runTest(timeout = 5.seconds) {
+    suspend fun `skal kun returne ettersendte vedlegg hvis soknaden ikke har noen vedlegg`() {
             coEvery { eventService.createModel(any()) } returns model
             coEvery {
                 fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
@@ -148,8 +142,7 @@ internal class VedleggServiceTest {
         }
 
     @Test
-    fun `skal hente alle vedlegg for digisosSak`() =
-        runTest(timeout = 5.seconds) {
+    suspend fun `skal hente alle vedlegg for digisosSak`() {
             coEvery { eventService.createModel(any()) } returns model
 
             val list = service.hentAlleOpplastedeVedlegg(mockDigisosSak, model)
@@ -178,8 +171,7 @@ internal class VedleggServiceTest {
         }
 
     @Test
-    fun `skal hente soknadsvedlegg filtrert pa status for digisosSak`() =
-        runTest(timeout = 5.seconds) {
+    suspend fun `skal hente soknadsvedlegg filtrert pa status for digisosSak`() {
             every { mockDigisosSak.originalSoknadNAV } returns originalSoknadMedVedleggKrevesOgLastetOpp
             val lastetOppList = service.hentSoknadVedleggMedStatus(LASTET_OPP_STATUS, mockDigisosSak)
             val vedleggKrevesList = service.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, mockDigisosSak)
@@ -197,8 +189,7 @@ internal class VedleggServiceTest {
         }
 
     @Test
-    fun `like filnavn i DokumentInfoList vil resultere i at de returneres for hver JsonFil med riktig filnavn`() =
-        runTest(timeout = 5.seconds) {
+    suspend fun `Verifisere at antall JsonVedlegg ender i riktig antall internalVedlegg og at de opprinnelige filene finnes`() {
             val model = InternalDigisosSoker()
 
             coEvery { eventService.createModel(any()) } returns model
@@ -220,7 +211,7 @@ internal class VedleggServiceTest {
                             JsonVedlegg()
                                 .withFiler(
                                     listOf(
-                                        JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_2).withSha512("aasdcx"),
+                                        JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_3).withSha512("aasdcx"),
                                         JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("qweqqa"),
                                     ),
                                 ).withStatus(LASTET_OPP_STATUS)
@@ -239,7 +230,7 @@ internal class VedleggServiceTest {
                                 // samme filnavn
                                 DokumentInfo(ETTERSENDELSE_FILNAVN_2, DOKUMENTLAGERID_2, 2),
                                 // samme filnavn
-                                DokumentInfo(ETTERSENDELSE_FILNAVN_2, DOKUMENTLAGERID_3, 3),
+                                DokumentInfo(ETTERSENDELSE_FILNAVN_3, DOKUMENTLAGERID_3, 3),
                                 DokumentInfo(ETTERSENDELSE_FILNAVN_4, DOKUMENTLAGERID_4, 4),
                             ),
                         timestampSendt = tid_1.toEpochMilli(),
@@ -257,13 +248,14 @@ internal class VedleggServiceTest {
             assertThat(list[0].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_2)
 
             assertThat(list[1].dokumentInfoList).hasSize(2)
-            assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_2)
+            assertThat(list[1].dokumentInfoList[0].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_3)
             assertThat(list[1].dokumentInfoList[0].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_3)
             assertThat(list[1].dokumentInfoList[1].filnavn).isEqualTo(ETTERSENDELSE_FILNAVN_4)
             assertThat(list[1].dokumentInfoList[1].dokumentlagerDokumentId).isEqualTo(DOKUMENTLAGERID_4)
         }
 }
 
+// filnavn lastes alltid opp med en del av UUID lagt til filnavnet - så dette er ikke reelle filnavn
 private const val ETTERSENDELSE_FILNAVN_1 = "filnavn.pdf"
 private const val ETTERSENDELSE_FILNAVN_2 = "navn på fil.ocr"
 private const val ETTERSENDELSE_FILNAVN_3 = "denne filens navn.jpg"

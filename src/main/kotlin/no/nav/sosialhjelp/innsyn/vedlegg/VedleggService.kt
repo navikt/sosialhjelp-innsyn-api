@@ -112,9 +112,12 @@ class VedleggService(
                         ettersendelse.vedlegg
                             .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
 
-                    jsonVedleggSpesifikasjon.validateFiles(metadataFilerFiks)
-
                     jsonVedleggSpesifikasjon.vedlegg
+                        .also { alleVedlegg ->
+                            alleVedlegg.validateFiles(metadataFilerFiks)
+                            // TODO Verifisere at det finnes
+                            log.info("Fant ${alleVedlegg.size} vedlegg i ettersendelse")
+                        }
                         .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                         .map { vedlegg ->
 
@@ -123,16 +126,15 @@ class VedleggService(
                                     .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn.sanitize() } }
 
                             val dokumentInfoList: MutableList<DokumentInfo> =
-                                if (allFilesExists) {
-                                    metadataFilerFiks.findByFilename(vedlegg.filer.map { it.filnavn }).toMutableList()
-                                } else {
+                                if (allFilesExists) metadataFilerFiks.addByFilename(vedlegg.filer).toMutableList()
+                                else {
                                     log.error(
                                         "Det er mismatch mellom nedlastede filer og metadata. " +
-                                            "Det er JsonFiler som ikke finnes i ettersendelse metadata. ",
-                                        // TODO Martin: Kan vi bruke type eller tilleggsinfo (eller annet) for mer kontekst?
+                                            "Det er JsonFiler som ikke finnes i ettersendelse metadata.",
                                     )
                                     vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }.toMutableList()
                                 }
+
                             InternalVedlegg(
                                 vedlegg.type,
                                 vedlegg.tilleggsinfo,
@@ -148,13 +150,17 @@ class VedleggService(
         return kombinerAlleLikeVedlegg(alleVedlegg)
     }
 
-    private fun JsonVedleggSpesifikasjon.validateFiles(metadataFilerFiks: List<DokumentInfo>) {
-        if (this.vedlegg.flatMap { it.filer }.size != metadataFilerFiks.size) {
+    private fun List<JsonVedlegg>.validateFiles(metadataFilerFiks: List<DokumentInfo>) {
+        if (flatMap { it.filer }.size != metadataFilerFiks.size) {
             log.error("Mismatch mellom antall filer i vedleggSpesifikasjon og antall filer i ettersendelse")
         }
     }
 
-    private fun List<DokumentInfo>.findByFilename(filenames: List<String>) = filter { it.filnavn in filenames }
+    private fun List<DokumentInfo>.addByFilename(filer: List<JsonFiler>): List<DokumentInfo> {
+        val sanitizedFilenames = filer.map { it.filnavn.sanitize() }
+
+        return sanitizedFilenames.mapNotNull { filename -> this.find { it.filnavn.sanitize() == filename } }
+    }
 
     private suspend fun hentVedleggSpesifikasjon(
         digisosSak: DigisosSak,

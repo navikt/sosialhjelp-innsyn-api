@@ -151,9 +151,18 @@ class VedleggService(
     }
 
     private fun List<JsonVedlegg>.validateFiles(metadataFilerFiks: List<DokumentInfo>) {
-        if (flatMap { it.filer }.size != metadataFilerFiks.size) {
-            log.error("Mismatch mellom antall filer i vedleggSpesifikasjon og antall filer i ettersendelse")
-        }
+        flatMap { it.filer }
+            .size
+            .also { fileCount ->
+
+                if (fileCount != metadataFilerFiks.size) {
+                    log.error(
+                        "Mismatch mellom antall filer i vedleggSpesifikasjon ({}) og antall filer i ettersendelse ({})",
+                        fileCount,
+                        metadataFilerFiks.size,
+                    )
+                }
+            }
     }
 
     private fun List<DokumentInfo>.addByFilename(filer: List<JsonFiler>): List<DokumentInfo> {

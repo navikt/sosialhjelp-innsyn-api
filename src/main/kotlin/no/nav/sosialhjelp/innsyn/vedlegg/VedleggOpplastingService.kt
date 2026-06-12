@@ -269,7 +269,7 @@ class VedleggOpplastingService(
         }
 }
 
-fun String.containsIllegalCharacters(): Boolean = sanitizeFileName(this).contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
+fun String.containsIllegalCharacters(): Boolean = this.sanitize().contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
 
 data class OppgaveValidering(
     val type: String,

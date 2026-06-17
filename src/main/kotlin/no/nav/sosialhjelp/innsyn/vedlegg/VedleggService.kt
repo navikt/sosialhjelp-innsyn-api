@@ -8,7 +8,6 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.Ettersendelse
-import no.nav.sosialhjelp.innsyn.app.exceptions.NedlastingFilnavnMismatchException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -109,14 +108,14 @@ class VedleggService(
                 ?.hentVedleggSpesifikasjon(digisosSak)
                 ?.flatMap { (ettersendelse, jsonVedleggSpesifikasjon) ->
                     var filIndex = 0
+                    val filtrerteEttersendelsesVedlegg =
+                        ettersendelse.vedlegg
+                            .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
                     jsonVedleggSpesifikasjon.vedlegg
                         .filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                         .map { vedlegg ->
                             val currentFilIndex = filIndex
                             filIndex += vedlegg.filer.size
-                            val filtrerteEttersendelsesVedlegg =
-                                ettersendelse.vedlegg
-                                    .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
                             val dokumentInfoList: MutableList<DokumentInfo>
                             if (filIndex > filtrerteEttersendelsesVedlegg.size) {
                                 log.error(
@@ -128,11 +127,15 @@ class VedleggService(
                             } else {
                                 dokumentInfoList = filtrerteEttersendelsesVedlegg.subList(currentFilIndex, filIndex).toMutableList()
 
-                                if (!filenamesMatchInDokumentInfoAndFiles(dokumentInfoList, vedlegg.filer)) {
-                                    val exception =
-                                        NedlastingFilnavnMismatchException("Det er mismatch mellom nedlastede filer og metadata", null)
-                                    log.error("Mismatch", exception)
-                                }
+                                val filnavnManglerIEttersendelse =
+                                    vedlegg.filer.any { fil ->
+                                        filtrerteEttersendelsesVedlegg.none {
+                                            sanitizeFileName(
+                                                it.filnavn,
+                                            ) == sanitizeFileName(fil.filnavn)
+                                        }
+                                    }
+                                if (filnavnManglerIEttersendelse) log.error("Det er mismatch mellom nedlastede filer og metadata")
                             }
                             InternalVedlegg(
                                 vedlegg.type,
@@ -163,16 +166,6 @@ class VedleggService(
                 dokumentInfoList
                     .filter { it.filnavn == fil.filnavn }
             }
-
-    private fun filenamesMatchInDokumentInfoAndFiles(
-        dokumentInfoList: List<DokumentInfo>,
-        files: List<JsonFiler>,
-    ): Boolean =
-        dokumentInfoList.size == files.size &&
-            dokumentInfoList
-                .filterIndexed { idx, it ->
-                    sanitizeFileName(it.filnavn) == sanitizeFileName(files[idx].filnavn)
-                }.size == dokumentInfoList.size
 
     private fun hentInnsendelsesfristFraOppgave(
         model: InternalDigisosSoker,

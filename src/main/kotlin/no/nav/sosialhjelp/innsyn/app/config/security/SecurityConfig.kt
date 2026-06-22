@@ -81,7 +81,7 @@ class AcrValidator : OAuth2TokenValidator<Jwt> {
         return if (acr in listOf("Level4", "idporten-loa-high")) {
             OAuth2TokenValidatorResult.success()
         } else {
-            OAuth2TokenValidatorResult.failure(error(acr))
+            OAuth2TokenValidatorResult.failure(error(acr ?: "null"))
         }
     }
 }

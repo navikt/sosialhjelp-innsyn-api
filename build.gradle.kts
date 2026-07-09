@@ -21,7 +21,7 @@ java {
 }
 
 dependencies {
-    val nettyVersion = "4.2.15.Final"
+    val nettyVersion = "4.2.16.Final"
     val nettyConstraintReason =
         "Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated"
 

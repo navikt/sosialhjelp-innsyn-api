@@ -26,7 +26,7 @@ spring_security_test = "7.1.0"
 mock-oauth2-server = "5.0.2"
 spotless = "8.8.0"
 
-opentelemetry = "1.63.0"
+opentelemetry = "1.64.0"
 opentelemetry-instrumentation = "2.29.0"
 
 ktlint = "1.7.1"

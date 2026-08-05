@@ -43,7 +43,6 @@ dependencies {
     // Tracing
     implementation(platform(libs.opentelemetry.bom))
 
-//    implementation(libs.opentelemetry.api)
     implementation(libs.opentelemetry.annotations)
 
     // Filformat

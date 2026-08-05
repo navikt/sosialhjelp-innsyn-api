@@ -21,66 +21,12 @@ java {
 }
 
 dependencies {
-    val nettyVersion = "4.2.16.Final"
-    val nettyConstraintReason =
-        "Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated"
-
-    constraints {
-        implementation("io.netty:netty-buffer:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-codec:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-codec-dns:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-codec-http:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-codec-http2:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-codec-socks:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-common:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-handler:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-handler-proxy:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-resolver:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-resolver-dns:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-transport:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-transport-classes-epoll:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-transport-classes-kqueue:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-transport-native-unix-common:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-codec-http3:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-        implementation("io.netty:netty-transport-native-epoll:$nettyVersion") {
-            because(nettyConstraintReason)
-        }
-    }
 
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
+
+    // Mitigate high-severity transitive Netty vulnerabilities until upstream dependencies are updated
+    implementation(platform(libs.netty.bom))
 
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.spring.boot)
@@ -92,12 +38,11 @@ dependencies {
     implementation(libs.bundles.prometheus)
 
     // Logging
-    implementation(libs.bundles.logging)
+    implementation(libs.logback.logstash)
 
     // Tracing
     implementation(platform(libs.opentelemetry.bom))
 
-    implementation(libs.opentelemetry.api)
     implementation(libs.opentelemetry.annotations)
 
     // Filformat

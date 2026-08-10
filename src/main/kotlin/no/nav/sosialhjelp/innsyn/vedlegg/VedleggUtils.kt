@@ -37,7 +37,7 @@ value class Filename(
     fun containsIllegalCharacters(): Boolean = this.sanitize().contains("[^a-zæøåA-ZÆØÅ0-9 (),._–-]".toRegex())
 }
 
-fun sanitizeFileName(filename: String) = Normalizer.normalize(filename, Normalizer.Form.NFC).trim()
+fun String.sanitize() = Normalizer.normalize(this, Normalizer.Form.NFC).trim()
 
 fun mapToTikaFileType(tikaMediaType: String): TikaFileType =
     when {

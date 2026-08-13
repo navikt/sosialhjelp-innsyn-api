@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import java.util.UUID
 
 @Configuration
 class SoknadApiConfiguration(
@@ -43,7 +44,7 @@ class SoknadApiClient(
 ) {
     private val logger by logger()
 
-    suspend fun skalSkjuleOriginalSoknad(fiksDigisosId: String): Boolean =
+    suspend fun skalSkjuleOriginalSoknad(fiksDigisosId: UUID): Boolean =
         runCatching {
             webClient
                 .get()

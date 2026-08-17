@@ -4,6 +4,7 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.valkey.SkjuleOriginalSoknadCache
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class SoknadApiService(
@@ -17,7 +18,7 @@ class SoknadApiService(
         TODO Dette kan slettes når bruker ikke lenger kan se søknad i innsyn (hvor lenge?)
      */
     @Cacheable(SkjuleOriginalSoknadCache.CACHE_NAME, key = "#fiksDigisosId")
-    suspend fun skalSkjuleOriginalSoknad(fiksDigisosId: String): Boolean {
+    suspend fun skalSkjuleOriginalSoknad(fiksDigisosId: UUID): Boolean {
         logger.info("Sjekker om originalsøknad skal skjules for digisosId: $fiksDigisosId")
         return soknadApiClient?.skalSkjuleOriginalSoknad(fiksDigisosId) == true
     }

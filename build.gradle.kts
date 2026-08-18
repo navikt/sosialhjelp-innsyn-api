@@ -8,6 +8,7 @@ group = "no.nav.sosialhjelp"
 
 plugins {
     `jvm-test-suite`
+    id("nl.littlerobots.version-catalog-update") version "1.1.1"
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.plugin.spring)
     alias(libs.plugins.spring.boot)

@@ -8,11 +8,18 @@ group = "no.nav.sosialhjelp"
 
 plugins {
     `jvm-test-suite`
+    id("nl.littlerobots.version-catalog-update") version "1.1.1"
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.plugin.spring)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.versions)
     alias(libs.plugins.spotless)
+}
+
+buildscript {
+    dependencies {
+        classpath("org.apache.httpcomponents.client5:httpclient5:5.6.4")
+    }
 }
 
 java {

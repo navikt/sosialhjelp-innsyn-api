@@ -25,7 +25,7 @@ object TokenUtils {
         when (val authenticationToken = getAuthenticationToken()) {
             is JwtAuthenticationToken -> {
                 val creds = authenticationToken.credentials as OAuth2Token
-                creds.tokenValue.let { Token(it) }
+                Token(creds.tokenValue)
             }
 
             else -> null

@@ -101,7 +101,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleVirusScanError(e: VirusScanException): ResponseEntity<FrontendErrorMessage> {
         log.warn("Mulig virus funnet i vedlegg", e)
         val error = FrontendErrorMessage(FILOPPLASTING_ERROR, "Mulig virus funnet")
-        return ResponseEntity(error, HttpStatus.PAYLOAD_TOO_LARGE)
+        return ResponseEntity(error, HttpStatus.CONTENT_TOO_LARGE)
     }
 
     @ExceptionHandler(OpplastingFilnavnMismatchException::class)

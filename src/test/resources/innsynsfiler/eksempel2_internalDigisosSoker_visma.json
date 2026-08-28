@@ -1,0 +1,302 @@
+{
+  "fagsystem" : {
+    "systemnavn" : "Velferd",
+    "systemversjon" : "6.1.0"
+  },
+  "referanse" : "",
+  "fiksDigisosId" : "",
+  "status" : "FERDIGBEHANDLET",
+  "saker" : [ {
+    "referanse" : "15/2026",
+    "saksStatus" : "UNDER_BEHANDLING",
+    "tittel" : "Søknad om livsopphold, husleie - første opprinnelige vedtak",
+    "vedtak" : [ {
+      "id" : "0a98ffb4-28ed-408e-a7a1-4edf62566c7c",
+      "utfall" : "INNVILGET",
+      "vedtaksFilUrl" : "/dokumentlager/nedlasting/niva4/0a98ffb4-28ed-408e-a7a1-4edf62566c7c?inline=true",
+      "dato" : "2026-08-27"
+    }, {
+      "id" : "810b8697-8a2f-4b1f-b44e-e4f96030045b",
+      "utfall" : "INNVILGET",
+      "vedtaksFilUrl" : "/dokumentlager/nedlasting/niva4/810b8697-8a2f-4b1f-b44e-e4f96030045b?inline=true",
+      "dato" : "2026-08-27"
+    } ],
+    "utbetalinger" : [ {
+      "referanse" : "10010542",
+      "status" : "PLANLAGT_UTBETALING",
+      "belop" : 7550.0,
+      "beskrivelse" : "Bidrag livsopphold",
+      "forfallsDato" : "2026-10-27",
+      "utbetalingsDato" : null,
+      "stoppetDato" : null,
+      "fom" : "2026-10-27",
+      "tom" : "2026-11-26",
+      "mottaker" : "Salig Blomsterplante",
+      "annenMottaker" : false,
+      "kontonummer" : "69281060759",
+      "utbetalingsmetode" : "Bank",
+      "vilkar" : [ ],
+      "dokumentasjonkrav" : [ ],
+      "datoHendelse" : "2026-08-27T15:19:16"
+    }, {
+      "referanse" : "10010541",
+      "status" : "PLANLAGT_UTBETALING",
+      "belop" : 7550.0,
+      "beskrivelse" : "Bidrag livsopphold",
+      "forfallsDato" : "2026-09-25",
+      "utbetalingsDato" : null,
+      "stoppetDato" : null,
+      "fom" : "2026-09-27",
+      "tom" : "2026-10-26",
+      "mottaker" : "Salig Blomsterplante",
+      "annenMottaker" : false,
+      "kontonummer" : "69281060759",
+      "utbetalingsmetode" : "Bank",
+      "vilkar" : [ ],
+      "dokumentasjonkrav" : [ ],
+      "datoHendelse" : "2026-08-27T15:19:16"
+    }, {
+      "referanse" : "10010540",
+      "status" : "PLANLAGT_UTBETALING",
+      "belop" : 7550.0,
+      "beskrivelse" : "Bidrag livsopphold",
+      "forfallsDato" : "2026-08-27",
+      "utbetalingsDato" : null,
+      "stoppetDato" : null,
+      "fom" : "2026-08-27",
+      "tom" : "2026-09-26",
+      "mottaker" : "Salig Blomsterplante",
+      "annenMottaker" : false,
+      "kontonummer" : "69281060759",
+      "utbetalingsmetode" : "Bank",
+      "vilkar" : [ ],
+      "dokumentasjonkrav" : [ ],
+      "datoHendelse" : "2026-08-27T15:19:16"
+    } ]
+  }, {
+    "referanse" : "16/2026",
+    "saksStatus" : "UNDER_BEHANDLING",
+    "tittel" : "nødhjelp splittet ut fra opprinnelig vedtak - ikke knyttet til vedtaket, men samme søknad",
+    "vedtak" : [ {
+      "id" : "0f5006e4-462b-4ff0-a3a1-69c6b5530c3e",
+      "utfall" : "INNVILGET",
+      "vedtaksFilUrl" : "/dokumentlager/nedlasting/niva4/0f5006e4-462b-4ff0-a3a1-69c6b5530c3e?inline=true",
+      "dato" : "2026-08-27"
+    } ],
+    "utbetalinger" : [ {
+      "referanse" : "10010539",
+      "status" : "PLANLAGT_UTBETALING",
+      "belop" : 500.0,
+      "beskrivelse" : "Bidrag livsopphold",
+      "forfallsDato" : "2026-08-27",
+      "utbetalingsDato" : null,
+      "stoppetDato" : null,
+      "fom" : "2026-08-27",
+      "tom" : "2026-08-31",
+      "mottaker" : "Salig Blomsterplante",
+      "annenMottaker" : false,
+      "kontonummer" : "69281060759",
+      "utbetalingsmetode" : "Bank",
+      "vilkar" : [ ],
+      "dokumentasjonkrav" : [ ],
+      "datoHendelse" : "2026-08-27T15:15:17"
+    } ]
+  }, {
+    "referanse" : "17/2026",
+    "saksStatus" : "UNDER_BEHANDLING",
+    "tittel" : "Vedtak 3 splittet før ferdigstilling av søknad",
+    "vedtak" : [ {
+      "id" : "c67e108a-5f1c-493e-801f-398a832f1b6a",
+      "utfall" : "AVSLATT",
+      "vedtaksFilUrl" : "/dokumentlager/nedlasting/niva4/c67e108a-5f1c-493e-801f-398a832f1b6a?inline=true",
+      "dato" : "2026-08-27"
+    } ],
+    "utbetalinger" : [ ]
+  }, {
+    "referanse" : "18/2026",
+    "saksStatus" : "UNDER_BEHANDLING",
+    "tittel" : "default_sak_tittel",
+    "vedtak" : [ {
+      "id" : "987b54d2-f3ac-4215-8b4c-25c6ff538bf4",
+      "utfall" : "INNVILGET",
+      "vedtaksFilUrl" : "/dokumentlager/nedlasting/niva4/987b54d2-f3ac-4215-8b4c-25c6ff538bf4?inline=true",
+      "dato" : "2026-08-27"
+    } ],
+    "utbetalinger" : [ ]
+  } ],
+  "utbetalinger" : [ {
+    "referanse" : "10010539",
+    "status" : "PLANLAGT_UTBETALING",
+    "belop" : 500.0,
+    "beskrivelse" : "Bidrag livsopphold",
+    "forfallsDato" : "2026-08-27",
+    "utbetalingsDato" : null,
+    "stoppetDato" : null,
+    "fom" : "2026-08-27",
+    "tom" : "2026-08-31",
+    "mottaker" : "Salig Blomsterplante",
+    "annenMottaker" : false,
+    "kontonummer" : "69281060759",
+    "utbetalingsmetode" : "Bank",
+    "vilkar" : [ ],
+    "dokumentasjonkrav" : [ ],
+    "datoHendelse" : "2026-08-27T15:15:17"
+  }, {
+    "referanse" : "10010542",
+    "status" : "PLANLAGT_UTBETALING",
+    "belop" : 7550.0,
+    "beskrivelse" : "Bidrag livsopphold",
+    "forfallsDato" : "2026-10-27",
+    "utbetalingsDato" : null,
+    "stoppetDato" : null,
+    "fom" : "2026-10-27",
+    "tom" : "2026-11-26",
+    "mottaker" : "Salig Blomsterplante",
+    "annenMottaker" : false,
+    "kontonummer" : "69281060759",
+    "utbetalingsmetode" : "Bank",
+    "vilkar" : [ ],
+    "dokumentasjonkrav" : [ ],
+    "datoHendelse" : "2026-08-27T15:19:16"
+  }, {
+    "referanse" : "10010541",
+    "status" : "PLANLAGT_UTBETALING",
+    "belop" : 7550.0,
+    "beskrivelse" : "Bidrag livsopphold",
+    "forfallsDato" : "2026-09-25",
+    "utbetalingsDato" : null,
+    "stoppetDato" : null,
+    "fom" : "2026-09-27",
+    "tom" : "2026-10-26",
+    "mottaker" : "Salig Blomsterplante",
+    "annenMottaker" : false,
+    "kontonummer" : "69281060759",
+    "utbetalingsmetode" : "Bank",
+    "vilkar" : [ ],
+    "dokumentasjonkrav" : [ ],
+    "datoHendelse" : "2026-08-27T15:19:16"
+  }, {
+    "referanse" : "10010540",
+    "status" : "PLANLAGT_UTBETALING",
+    "belop" : 7550.0,
+    "beskrivelse" : "Bidrag livsopphold",
+    "forfallsDato" : "2026-08-27",
+    "utbetalingsDato" : null,
+    "stoppetDato" : null,
+    "fom" : "2026-08-27",
+    "tom" : "2026-09-26",
+    "mottaker" : "Salig Blomsterplante",
+    "annenMottaker" : false,
+    "kontonummer" : "69281060759",
+    "utbetalingsmetode" : "Bank",
+    "vilkar" : [ ],
+    "dokumentasjonkrav" : [ ],
+    "datoHendelse" : "2026-08-27T15:19:16"
+  } ],
+  "forvaltningsbrev" : [ ],
+  "soknadsmottaker" : null,
+  "tildeltNavKontor" : null,
+  "oppgaver" : [ ],
+  "historikk" : [ {
+    "hendelseType" : "SOKNAD_MOTTATT_UTEN_KOMMUNENAVN",
+    "tidspunkt" : "2026-08-27T14:45:09",
+    "url" : null,
+    "type" : null,
+    "tekstArgument" : null,
+    "saksReferanse" : null
+  }, {
+    "hendelseType" : "SOKNAD_UNDER_BEHANDLING",
+    "tidspunkt" : "2026-08-27T14:48:38",
+    "url" : null,
+    "type" : null,
+    "tekstArgument" : null,
+    "saksReferanse" : null
+  }, {
+    "hendelseType" : "SAK_UNDER_BEHANDLING_MED_TITTEL",
+    "tidspunkt" : "2026-08-27T14:49:12",
+    "url" : null,
+    "type" : null,
+    "tekstArgument" : "Søknad om livsopphold, husleie og nødhjelp",
+    "saksReferanse" : "15/2026"
+  }, {
+    "hendelseType" : "SAK_UNDER_BEHANDLING_MED_TITTEL",
+    "tidspunkt" : "2026-08-27T14:51:12",
+    "url" : null,
+    "type" : null,
+    "tekstArgument" : "nødhjelp",
+    "saksReferanse" : "16/2026"
+  }, {
+    "hendelseType" : "SAK_UNDER_BEHANDLING_MED_TITTEL",
+    "tidspunkt" : "2026-08-27T15:04:13",
+    "url" : null,
+    "type" : null,
+    "tekstArgument" : "Vedtak 3 splittet før ferdigstilling av søknad",
+    "saksReferanse" : "17/2026"
+  }, {
+    "hendelseType" : "SAK_FERDIGBEHANDLET_MED_TITTEL",
+    "tidspunkt" : "2026-08-27T15:07:25",
+    "url" : {
+      "linkTekst" : "VIS_BREVET_LENKETEKST",
+      "link" : "/dokumentlager/nedlasting/niva4/c67e108a-5f1c-493e-801f-398a832f1b6a?inline=true"
+    },
+    "type" : null,
+    "tekstArgument" : "Vedtak 3 splittet før ferdigstilling av søknad",
+    "saksReferanse" : "17/2026"
+  }, {
+    "hendelseType" : "SAK_FERDIGBEHANDLET_MED_TITTEL",
+    "tidspunkt" : "2026-08-27T15:13:23",
+    "url" : {
+      "linkTekst" : "VIS_BREVET_LENKETEKST",
+      "link" : "/dokumentlager/nedlasting/niva4/0f5006e4-462b-4ff0-a3a1-69c6b5530c3e?inline=true"
+    },
+    "type" : null,
+    "tekstArgument" : "nødhjelp splittet ut fra opprinnelig vedtak - ikke knyttet til vedtaket, men samme søknad",
+    "saksReferanse" : "16/2026"
+  }, {
+    "hendelseType" : "SOKNAD_FERDIGBEHANDLET",
+    "tidspunkt" : "2026-08-27T15:16:14",
+    "url" : null,
+    "type" : null,
+    "tekstArgument" : null,
+    "saksReferanse" : null
+  }, {
+    "hendelseType" : "SAK_FERDIGBEHANDLET_MED_TITTEL",
+    "tidspunkt" : "2026-08-27T15:17:24",
+    "url" : {
+      "linkTekst" : "VIS_BREVET_LENKETEKST",
+      "link" : "/dokumentlager/nedlasting/niva4/0a98ffb4-28ed-408e-a7a1-4edf62566c7c?inline=true"
+    },
+    "type" : null,
+    "tekstArgument" : "Søknad om livsopphold, husleie - første opprinnelige vedtak",
+    "saksReferanse" : "15/2026"
+  }, {
+    "hendelseType" : "SAK_FERDIGBEHANDLET_MED_TITTEL",
+    "tidspunkt" : "2026-08-27T15:23:24",
+    "url" : {
+      "linkTekst" : "VIS_BREVET_LENKETEKST",
+      "link" : "/dokumentlager/nedlasting/niva4/987b54d2-f3ac-4215-8b4c-25c6ff538bf4?inline=true"
+    },
+    "type" : null,
+    "tekstArgument" : "default_sak_tittel",
+    "saksReferanse" : "18/2026"
+  }, {
+    "hendelseType" : "SAK_FERDIGBEHANDLET_MED_TITTEL",
+    "tidspunkt" : "2026-08-27T15:28:24",
+    "url" : {
+      "linkTekst" : "VIS_BREVET_LENKETEKST",
+      "link" : "/dokumentlager/nedlasting/niva4/810b8697-8a2f-4b1f-b44e-e4f96030045b?inline=true"
+    },
+    "type" : null,
+    "tekstArgument" : "Søknad om livsopphold, husleie - første opprinnelige vedtak",
+    "saksReferanse" : "15/2026"
+  } ],
+  "forelopigSvar" : {
+    "harMottattForelopigSvar" : false,
+    "link" : null,
+    "timestamp" : null
+  },
+  "tidspunktSendt" : null,
+  "vilkar" : [ ],
+  "dokumentasjonkrav" : [ ],
+  "navn" : "Søknad om livsopphold, husleie - første opprinnelige vedtak, nødhjelp splittet ut fra opprinnelig vedtak - ikke knyttet til vedtaket, men samme søknad, Vedtak 3 splittet før ferdigstilling av søknad, default_sak_tittel"
+}

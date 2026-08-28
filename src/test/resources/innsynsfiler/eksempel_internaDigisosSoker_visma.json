@@ -1,0 +1,597 @@
+{
+    "fagsystem": {
+        "systemnavn": "Velferd",
+        "systemversjon": "4.9.5"
+    },
+    "referanse": "",
+    "fiksDigisosId": "",
+    "status": "FERDIGBEHANDLET",
+    "saker": [
+        {
+            "referanse": "1/2021",
+            "saksStatus": "UNDER_BEHANDLING",
+            "tittel": "systest ny fix versjon.. .                                                                                                                            ",
+            "vedtak": [
+                {
+                    "id": "31309b72-7196-4b97-9fd9-795ec7327307",
+                    "utfall": "INNVILGET",
+                    "vedtaksFilUrl": "/dokumentlager/nedlasting/niva4/31309b72-7196-4b97-9fd9-795ec7327307?inline=true",
+                    "dato": "2021-01-22"
+                },
+                {
+                    "id": "a6cf1c0f-9f41-45e4-b3fb-25791cd3b001",
+                    "utfall": "INNVILGET",
+                    "vedtaksFilUrl": "/dokumentlager/nedlasting/niva4/a6cf1c0f-9f41-45e4-b3fb-25791cd3b001?inline=true",
+                    "dato": "2021-01-22"
+                }
+            ],
+            "utbetalinger": [
+                {
+                    "referanse": "10001252",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-22",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-22",
+                    "tom": "2021-01-22",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001253",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-22",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-23",
+                    "tom": "2021-01-23",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001254",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-22",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-24",
+                    "tom": "2021-01-24",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001255",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-25",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-25",
+                    "tom": "2021-01-25",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001256",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-26",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-26",
+                    "tom": "2021-01-26",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001257",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-27",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-27",
+                    "tom": "2021-01-27",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001258",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-28",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-28",
+                    "tom": "2021-01-28",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001259",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-29",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-29",
+                    "tom": "2021-01-29",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001260",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-29",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-30",
+                    "tom": "2021-01-30",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                },
+                {
+                    "referanse": "10001261",
+                    "status": "PLANLAGT_UTBETALING",
+                    "belop": 101.0,
+                    "beskrivelse": "Bidrag livsopphold",
+                    "forfallsDato": "2021-01-29",
+                    "utbetalingsDato": null,
+                    "stoppetDato": null,
+                    "fom": "2021-01-31",
+                    "tom": "2021-01-31",
+                    "mottaker": "Kurt Corona",
+                    "annenMottaker": false,
+                    "kontonummer": "12345678903",
+                    "utbetalingsmetode": "Bank",
+                    "vilkar": [
+                    ],
+                    "dokumentasjonkrav": [
+                    ],
+                    "datoHendelse": "2021-01-22T11:42:56"
+                }
+            ]
+        },
+        {
+            "referanse": "2/2021",
+            "saksStatus": "UNDER_BEHANDLING",
+            "tittel": "split..                                                                                                                                               ",
+            "vedtak": [
+                {
+                    "id": "1b2012ab-022c-4af6-a4ef-98e09df4eb83",
+                    "utfall": "AVSLATT",
+                    "vedtaksFilUrl": "/dokumentlager/nedlasting/niva4/1b2012ab-022c-4af6-a4ef-98e09df4eb83?inline=true",
+                    "dato": "2021-01-22"
+                }
+            ],
+            "utbetalinger": [
+            ]
+        },
+        {
+            "referanse": "3/2021",
+            "saksStatus": "UNDER_BEHANDLING",
+            "tittel": "default_sak_tittel",
+            "vedtak": [
+                {
+                    "id": "f59f28a4-6c37-45b0-9e2a-c7d2537c2a32",
+                    "utfall": "AVSLATT",
+                    "vedtaksFilUrl": "/dokumentlager/nedlasting/niva4/f59f28a4-6c37-45b0-9e2a-c7d2537c2a32?inline=true",
+                    "dato": "2021-01-22"
+                }
+            ],
+            "utbetalinger": [
+            ]
+        }
+    ],
+    "utbetalinger": [
+        {
+            "referanse": "10001252",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-22",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-22",
+            "tom": "2021-01-22",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001253",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-22",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-23",
+            "tom": "2021-01-23",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001254",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-22",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-24",
+            "tom": "2021-01-24",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001255",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-25",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-25",
+            "tom": "2021-01-25",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001256",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-26",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-26",
+            "tom": "2021-01-26",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001257",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-27",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-27",
+            "tom": "2021-01-27",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001258",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-28",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-28",
+            "tom": "2021-01-28",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001259",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-29",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-29",
+            "tom": "2021-01-29",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001260",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-29",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-30",
+            "tom": "2021-01-30",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        },
+        {
+            "referanse": "10001261",
+            "status": "PLANLAGT_UTBETALING",
+            "belop": 101.0,
+            "beskrivelse": "Bidrag livsopphold",
+            "forfallsDato": "2021-01-29",
+            "utbetalingsDato": null,
+            "stoppetDato": null,
+            "fom": "2021-01-31",
+            "tom": "2021-01-31",
+            "mottaker": "Kurt Corona",
+            "annenMottaker": false,
+            "kontonummer": "12345678903",
+            "utbetalingsmetode": "Bank",
+            "vilkar": [
+            ],
+            "dokumentasjonkrav": [
+            ],
+            "datoHendelse": "2021-01-22T11:42:56"
+        }
+    ],
+    "forvaltningsbrev": [
+    ],
+    "soknadsmottaker": null,
+    "tildeltNavKontor": null,
+    "oppgaver": [
+    ],
+    "historikk": [
+        {
+            "hendelseType": "SOKNAD_MOTTATT_UTEN_KOMMUNENAVN",
+            "tidspunkt": "2021-01-22T09:47:31",
+            "url": null,
+            "type": null,
+            "tekstArgument": null,
+            "saksReferanse": null
+        },
+        {
+            "hendelseType": "SOKNAD_UNDER_BEHANDLING",
+            "tidspunkt": "2021-01-22T09:49:53",
+            "url": null,
+            "type": null,
+            "tekstArgument": null,
+            "saksReferanse": null
+        },
+        {
+            "hendelseType": "SAK_UNDER_BEHANDLING_MED_TITTEL",
+            "tidspunkt": "2021-01-22T09:50:34",
+            "url": null,
+            "type": null,
+            "tekstArgument": "systest ny fix versjon",
+            "saksReferanse": "1/2021"
+        },
+        {
+            "hendelseType": "SAK_UNDER_BEHANDLING_MED_TITTEL",
+            "tidspunkt": "2021-01-22T10:28:40",
+            "url": null,
+            "type": null,
+            "tekstArgument": "split",
+            "saksReferanse": "2/2021"
+        },
+        {
+            "hendelseType": "BREV_OM_SAKSBEANDLINGSTID",
+            "tidspunkt": "2021-01-22T10:28:53",
+            "url": {
+                "linkTekst": "VIS_BREVET_LENKETEKST",
+                "link": "/dokumentlager/nedlasting/niva4/50516e40-2620-45a6-a2e2-88636478fe8c?inline=true"
+            },
+            "type": null,
+            "tekstArgument": null,
+            "saksReferanse": null
+        },
+        {
+            "hendelseType": "ETTERSPOR_MER_DOKUMENTASJON",
+            "tidspunkt": "2021-01-22T10:28:53",
+            "url": {
+                "linkTekst": "VIS_BREVET_LENKETEKST",
+                "link": "/dokumentlager/nedlasting/niva4/10879afd-58ba-4f5e-8d73-2edf8f0edd34?inline=true"
+            },
+            "type": null,
+            "tekstArgument": null,
+            "saksReferanse": null
+        },
+        {
+            "hendelseType": "SOKNAD_FERDIGBEHANDLET",
+            "tidspunkt": "2021-01-22T11:40:52",
+            "url": null,
+            "type": null,
+            "tekstArgument": null,
+            "saksReferanse": null
+        },
+        {
+            "hendelseType": "ETTERSPOR_IKKE_MER_DOKUMENTASJON",
+            "tidspunkt": "2021-01-22T11:40:52",
+            "url": null,
+            "type": null,
+            "tekstArgument": null,
+            "saksReferanse": null
+        },
+        {
+            "hendelseType": "SAK_FERDIGBEHANDLET_MED_TITTEL",
+            "tidspunkt": "2021-01-22T11:41:04",
+            "url": {
+                "linkTekst": "VIS_BREVET_LENKETEKST",
+                "link": "/dokumentlager/nedlasting/niva4/31309b72-7196-4b97-9fd9-795ec7327307?inline=true"
+            },
+            "type": null,
+            "tekstArgument": "systest ny fix versjon.. .                                                                                                                            ",
+            "saksReferanse": "1/2021"
+        },
+        {
+            "hendelseType": "SAK_FERDIGBEHANDLET_MED_TITTEL",
+            "tidspunkt": "2021-01-22T11:42:03",
+            "url": {
+                "linkTekst": "VIS_BREVET_LENKETEKST",
+                "link": "/dokumentlager/nedlasting/niva4/1b2012ab-022c-4af6-a4ef-98e09df4eb83?inline=true"
+            },
+            "type": null,
+            "tekstArgument": "split..                                                                                                                                               ",
+            "saksReferanse": "2/2021"
+        },
+        {
+            "hendelseType": "SAK_FERDIGBEHANDLET_MED_TITTEL",
+            "tidspunkt": "2021-01-22T11:53:05",
+            "url": {
+                "linkTekst": "VIS_BREVET_LENKETEKST",
+                "link": "/dokumentlager/nedlasting/niva4/f59f28a4-6c37-45b0-9e2a-c7d2537c2a32?inline=true"
+            },
+            "type": null,
+            "tekstArgument": "default_sak_tittel",
+            "saksReferanse": "3/2021"
+        },
+        {
+            "hendelseType": "SAK_FERDIGBEHANDLET_MED_TITTEL",
+            "tidspunkt": "2021-01-22T12:27:12",
+            "url": {
+                "linkTekst": "VIS_BREVET_LENKETEKST",
+                "link": "/dokumentlager/nedlasting/niva4/a6cf1c0f-9f41-45e4-b3fb-25791cd3b001?inline=true"
+            },
+            "type": null,
+            "tekstArgument": "systest ny fix versjon.. .                                                                                                                            ",
+            "saksReferanse": "1/2021"
+        }
+    ],
+    "forelopigSvar": {
+        "harMottattForelopigSvar": true,
+        "link": "/dokumentlager/nedlasting/niva4/50516e40-2620-45a6-a2e2-88636478fe8c?inline=true",
+        "timestamp": "2021-01-22T10:28:53"
+    },
+    "tidspunktSendt": null,
+    "vilkar": [
+    ],
+    "dokumentasjonkrav": [
+    ],
+    "navn": "systest ny fix versjon.. .                                                                                                                            , split..                                                                                                                                               , default_sak_tittel"
+}

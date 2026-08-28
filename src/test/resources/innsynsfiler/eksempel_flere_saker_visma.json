@@ -1,0 +1,313 @@
+{
+	"sak": {
+		"soker": {
+			"version": "1.1.0",
+			"avsender": {
+				"systemnavn": "Velferd",
+				"systemversjon": "4.9.5"
+			},
+			"hendelser": [
+				{
+					"type": "soknadsStatus",
+					"hendelsestidspunkt": "2021-01-22T08:47:31.000Z",
+					"status": "MOTTATT"
+				},
+				{
+					"type": "soknadsStatus",
+					"hendelsestidspunkt": "2021-01-22T08:49:53.000Z",
+					"status": "UNDER_BEHANDLING"
+				},
+				{
+					"type": "saksStatus",
+					"hendelsestidspunkt": "2021-01-22T08:50:34.000Z",
+					"status": "UNDER_BEHANDLING",
+					"referanse": "1/2021",
+					"tittel": "systest ny fix versjon"
+				},
+				{
+					"type": "saksStatus",
+					"hendelsestidspunkt": "2021-01-22T09:28:40.000Z",
+					"status": "UNDER_BEHANDLING",
+					"referanse": "2/2021",
+					"tittel": "split"
+				},
+				{
+					"type": "forelopigSvar",
+					"hendelsestidspunkt": "2021-01-22T09:28:53.000Z",
+					"forvaltningsbrev": {
+						"referanse": {
+							"type": "dokumentlager",
+							"id": "50516e40-2620-45a6-a2e2-88636478fe8c"
+						}
+					},
+					"vedlegg": []
+				},
+				{
+					"type": "dokumentasjonEtterspurt",
+					"hendelsestidspunkt": "2021-01-22T09:28:53.000Z",
+					"forvaltningsbrev": {
+						"referanse": {
+							"type": "dokumentlager",
+							"id": "10879afd-58ba-4f5e-8d73-2edf8f0edd34"
+						}
+					},
+					"vedlegg": [],
+					"dokumenter": [
+						{
+							"dokumenttype": "Skattemelding/skatteoppgjør",
+							"innsendelsesfrist": "2021-01-22T00:00:00.000Z"
+						},
+						{
+							"dokumenttype": "Skattemelding/skatteoppgjør",
+							"innsendelsesfrist": "2021-01-22T00:00:00.000Z"
+						}
+					]
+				},
+				{
+					"type": "saksStatus",
+					"hendelsestidspunkt": "2021-01-22T10:37:45.000Z",
+					"status": "UNDER_BEHANDLING",
+					"referanse": "1/2021",
+					"tittel": "systest ny fix versjon..                                                                                                                              "
+				},
+				{
+					"type": "saksStatus",
+					"hendelsestidspunkt": "2021-01-22T10:38:14.000Z",
+					"status": "UNDER_BEHANDLING",
+					"referanse": "2/2021",
+					"tittel": "split..                                                                                                                                               "
+				},
+				{
+					"type": "saksStatus",
+					"hendelsestidspunkt": "2021-01-22T10:38:24.000Z",
+					"status": "UNDER_BEHANDLING",
+					"referanse": "1/2021",
+					"tittel": "systest ny fix versjon.. .                                                                                                                            "
+				},
+				{
+					"type": "soknadsStatus",
+					"hendelsestidspunkt": "2021-01-22T10:40:52.000Z",
+					"status": "FERDIGBEHANDLET"
+				},
+				{
+					"type": "dokumentasjonEtterspurt",
+					"hendelsestidspunkt": "2021-01-22T10:40:52.000Z",
+					"dokumenter": []
+				},
+				{
+					"type": "vedtakFattet",
+					"hendelsestidspunkt": "2021-01-22T10:41:04.000Z",
+					"saksreferanse": "1/2021",
+					"utfall": "INNVILGET",
+					"vedtaksfil": {
+						"referanse": {
+							"type": "dokumentlager",
+							"id": "31309b72-7196-4b97-9fd9-795ec7327307"
+						}
+					},
+					"vedlegg": []
+				},
+				{
+					"type": "vedtakFattet",
+					"hendelsestidspunkt": "2021-01-22T10:42:03.000Z",
+					"saksreferanse": "2/2021",
+					"utfall": "AVSLATT",
+					"vedtaksfil": {
+						"referanse": {
+							"type": "dokumentlager",
+							"id": "1b2012ab-022c-4af6-a4ef-98e09df4eb83"
+						}
+					},
+					"vedlegg": []
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001252",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-22",
+					"fom": "2021-01-22",
+					"tom": "2021-01-22",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001253",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-22",
+					"fom": "2021-01-23",
+					"tom": "2021-01-23",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001254",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-22",
+					"fom": "2021-01-24",
+					"tom": "2021-01-24",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001255",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-25",
+					"fom": "2021-01-25",
+					"tom": "2021-01-25",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001256",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-26",
+					"fom": "2021-01-26",
+					"tom": "2021-01-26",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001257",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-27",
+					"fom": "2021-01-27",
+					"tom": "2021-01-27",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001258",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-28",
+					"fom": "2021-01-28",
+					"tom": "2021-01-28",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001259",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-29",
+					"fom": "2021-01-29",
+					"tom": "2021-01-29",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001260",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-29",
+					"fom": "2021-01-30",
+					"tom": "2021-01-30",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "utbetaling",
+					"hendelsestidspunkt": "2021-01-22T10:42:56.000Z",
+					"utbetalingsreferanse": "10001261",
+					"saksreferanse": "1/2021",
+					"status": "PLANLAGT_UTBETALING",
+					"belop": 101,
+					"beskrivelse": "Bidrag livsopphold",
+					"forfallsdato": "2021-01-29",
+					"fom": "2021-01-31",
+					"tom": "2021-01-31",
+					"annenMottaker": false,
+					"mottaker": "Kurt Corona",
+					"kontonummer": "12345678903",
+					"utbetalingsmetode": "Bank"
+				},
+				{
+					"type": "vedtakFattet",
+					"hendelsestidspunkt": "2021-01-22T10:53:05.000Z",
+					"saksreferanse": "3/2021",
+					"utfall": "AVSLATT",
+					"vedtaksfil": {
+						"referanse": {
+							"type": "dokumentlager",
+							"id": "f59f28a4-6c37-45b0-9e2a-c7d2537c2a32"
+						}
+					},
+					"vedlegg": []
+				},
+				{
+					"type": "vedtakFattet",
+					"hendelsestidspunkt": "2021-01-22T11:27:12.000Z",
+					"saksreferanse": "1/2021",
+					"utfall": "INNVILGET",
+					"vedtaksfil": {
+						"referanse": {
+							"type": "dokumentlager",
+							"id": "a6cf1c0f-9f41-45e4-b3fb-25791cd3b001"
+						}
+					},
+					"vedlegg": []
+				}
+			]
+		}
+	},
+	"type": "no.nav.digisos.digisos.soker.v1"
+}

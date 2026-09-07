@@ -1,8 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage.fiks
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
@@ -17,6 +15,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.UUID
 
 interface FiksKlageClient {
@@ -67,25 +66,19 @@ class FiksKlageClientImpl(
         vedtakId: UUID,
         body: MultiValueMap<String, HttpEntity<*>>,
     ) {
-        val response =
-            withContext(Dispatchers.IO) {
-                fiksWebClient
-                    .post()
-                    .uri(SEND_INN_KLAGE_PATH, digisosId, klageId, klageId, vedtakId)
-                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .bodyValue(body)
-                    .retrieve()
-                    .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
-                        clientResponse.bodyToMono(String::class.java).map { errorBody ->
-                            RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
-                        }
-                    }.toBodilessEntity()
-                    .awaitSingleOrNull()
-            }
-        if (response?.statusCode?.is2xxSuccessful != true) {
-            throw RuntimeException("Failed to send klage, status code: ${response?.statusCode}")
-        }
+        fiksWebClient
+            .post()
+            .uri(SEND_INN_KLAGE_PATH, digisosId, klageId, klageId, vedtakId)
+            .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .bodyValue(body)
+            .retrieve()
+            .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
+                clientResponse.bodyToMono<String>().map { errorBody ->
+                    RuntimeException("Failed to send klage: ${clientResponse.statusCode()} - $errorBody")
+                }
+            }.toBodilessEntity()
+            .awaitSingleOrNull()
     }
 
     override suspend fun sendEttersendelse(
@@ -112,25 +105,19 @@ class FiksKlageClientImpl(
         ettersendelseId: UUID,
         body: MultiValueMap<String, HttpEntity<*>>,
     ) {
-        val response =
-            withContext(Dispatchers.IO) {
-                fiksWebClient
-                    .post()
-                    .uri(ETTERSENDELSE_PATH, digisosId, ettersendelseId, klageId)
-                    .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(body))
-                    .retrieve()
-                    .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
-                        clientResponse.bodyToMono(String::class.java).map { errorBody ->
-                            RuntimeException("Failed to send ettersendelse: ${clientResponse.statusCode()} - $errorBody")
-                        }
-                    }.toBodilessEntity()
-                    .awaitSingleOrNull()
-            }
-        if (response?.statusCode?.is2xxSuccessful != true) {
-            throw RuntimeException("Failed to send klage, status code: ${response?.statusCode}")
-        }
+        fiksWebClient
+            .post()
+            .uri(ETTERSENDELSE_PATH, digisosId, ettersendelseId, klageId)
+            .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(body))
+            .retrieve()
+            .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
+                clientResponse.bodyToMono(String::class.java).map { errorBody ->
+                    RuntimeException("Failed to send ettersendelse: ${clientResponse.statusCode()} - $errorBody")
+                }
+            }.toBodilessEntity()
+            .awaitSingleOrNull()
     }
 
     // Uten query param vil alle klager for alle digisosIds for person returneres

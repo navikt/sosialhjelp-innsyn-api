@@ -1,15 +1,12 @@
 package no.nav.sosialhjelp.innsyn.kommuneinfo
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_ALLE_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksPaths.PATH_KOMMUNEINFO
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_ID
 import no.nav.sosialhjelp.innsyn.utils.IntegrationUtils.HEADER_INTEGRASJON_PASSORD
@@ -33,54 +30,29 @@ class KommuneInfoClient(
     webClientBuilder: WebClient.Builder,
     httpClient: HttpClient,
 ) {
-    // TODO Sparer litt ved å cache på denne istedet
-    suspend fun getAll(): List<KommuneInfo> =
-        withContext(Dispatchers.IO) {
-            kotlin
-                .runCatching {
-                    kommuneInfoWebClient
-                        .get()
-                        .uri(PATH_ALLE_KOMMUNEINFO)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
-                        .retrieve()
-                        .awaitBody<List<KommuneInfo>>()
-                }.onFailure {
-                    if (it is CancellationException) currentCoroutineContext().ensureActive()
-                    log.warn("Fiks - hentKommuneInfoForAlle feilet", it)
-                    if (it is WebClientResponseException) {
-                        when {
-                            it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
-                            else -> throw FiksServerException(it.statusCode.value(), it.message, it)
-                        }
-                    }
-                }.getOrNull()
-                ?: emptyList()
-        }
-
     @Cacheable(KommuneInfoCacheConfig.CACHE_NAME)
     suspend fun getKommuneInfo(kommunenummer: String): KommuneInfo =
-        withContext(Dispatchers.IO) {
-            kotlin
-                .runCatching {
-                    kommuneInfoWebClient
-                        .get()
-                        .uri(PATH_KOMMUNEINFO, kommunenummer)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
-                        .retrieve()
-                        .awaitBody<KommuneInfo>()
-                }.onFailure {
-                    if (it is CancellationException) currentCoroutineContext().ensureActive()
-                    log.warn("Fiks - hentKommuneInfoForAlle feilet for kommune=$kommunenummer", it)
-                    if (it is WebClientResponseException) {
-                        when {
-                            it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
-                            else -> throw FiksServerException(it.statusCode.value(), it.message, it)
-                        }
+        kotlin
+            .runCatching {
+                kommuneInfoWebClient
+                    .get()
+                    .uri(PATH_KOMMUNEINFO, kommunenummer)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+                    .retrieve()
+                    .awaitBody<KommuneInfo>()
+            }.getOrElse {
+                if (it is CancellationException) currentCoroutineContext().ensureActive()
+                log.warn("Fiks - hentKommuneInfoForAlle feilet for kommune=$kommunenummer", it)
+                if (it is WebClientResponseException) {
+                    when {
+                        it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
+                        else -> throw FiksServerException(it.statusCode.value(), it.message, it)
                     }
-                }.getOrThrow()
-        }
+                } else {
+                    throw it
+                }
+            }
 
     private val kommuneInfoWebClient: WebClient =
         webClientBuilder

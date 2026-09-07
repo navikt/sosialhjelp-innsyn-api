@@ -164,27 +164,25 @@ class VedleggService(
                 }
             }
     }
+
     // TODO Hvilken fil er det som ikke matcher?
     private fun ettersendelsePdf(
         jsonVedlegg: List<JsonVedlegg>,
-        metadataFilerFiks: List<DokumentInfo>
-    ): String {
-        return runCatching {
+        metadataFilerFiks: List<DokumentInfo>,
+    ): String =
+        runCatching {
+            val filnavn = jsonVedlegg.flatMap { it.filer }.map { it.filnavn.sanitize() }
 
-        val filnavn = jsonVedlegg.flatMap { it.filer }.map { it.filnavn.sanitize() }
-
-         metadataFilerFiks
-            .filter { !filnavn.contains(it.filnavn.sanitize()) }
-            .let {
-                when {
-                    it.isEmpty() -> "Tom liste"
-                    it.size == 1 && it.first().filnavn.contains( "ettersendelse") -> "ettersendelse"
-                    else -> "Flere filer som ikke matcher - ettersendelse? ${it.find { fil -> fil.filnavn.contains("ettersendelse") }}"
+            metadataFilerFiks
+                .filter { !filnavn.contains(it.filnavn.sanitize()) }
+                .let {
+                    when {
+                        it.isEmpty() -> "Tom liste"
+                        it.size == 1 && it.first().filnavn.contains("ettersendelse") -> "ettersendelse"
+                        else -> "Flere filer som ikke matcher - ettersendelse? ${it.find { fil -> fil.filnavn.contains("ettersendelse") }}"
+                    }
                 }
-            }
-        }
-            .getOrElse { "error" }
-    }
+        }.getOrElse { "error" }
 
     private fun List<DokumentInfo>.addByFilename(filer: List<JsonFiler>): List<DokumentInfo> {
         val sanitizedFilenames = filer.map { it.filnavn.sanitize() }

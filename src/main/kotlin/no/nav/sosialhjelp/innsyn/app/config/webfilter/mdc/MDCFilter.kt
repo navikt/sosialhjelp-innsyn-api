@@ -20,6 +20,7 @@ class MDCFilter : CoWebFilter() {
         chain: CoWebFilterChain,
     ) {
         val request = exchange.request
+        clearMDC()
 
         if (request.uri.path.contains(Regex("(/internal|/v3/api-docs)"))) {
             return chain.filter(exchange)
@@ -45,24 +46,15 @@ class MDCFilter : CoWebFilter() {
     }
 
     private fun addDigisosId(request: ServerHttpRequest) {
-        val path = request.uri.path
-        if (path.matches(
-                Regex(
-                    "^$INNSYN_BASE_URL(.*)/(forelopigSvar|hendelser|kommune|oppgaver|oppgaver/(.*)" +
-                        "|saksStatus|soknadsStatus|vedlegg|vilkar|dokumentasjonkrav|dokumentasjonkrav/(.*)" +
-                        "|harLeverteDokumentasjonkrav|fagsystemHarDokumentasjonkrav)",
-                ),
-            )
-        ) {
-            val digisosId = path.substringAfter(INNSYN_BASE_URL).substringBefore("/")
-            put(DIGISOS_ID, digisosId)
-        } else if (path.matches(Regex("^$INNSYN_BASE_URL(.*)/detaljer"))) {
-            val digisosId = path.substringAfter("${INNSYN_BASE_URL}sak/").substringBefore("/")
+        val digisosId = DIGISOS_ID_PATH_REGEX.find(request.uri.path)?.groupValues?.get(1)
+        if (digisosId != null) {
             put(DIGISOS_ID, digisosId)
         }
     }
 
     companion object {
-        private const val INNSYN_BASE_URL = "/sosialhjelp/innsyn-api/api/v1/innsyn/"
+        private const val UUID_PATTERN = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+        private val DIGISOS_ID_PATH_REGEX =
+            Regex("(?:/sosialhjelp/innsyn-api)?/api/v[12]/innsyn/(?:sak/)?($UUID_PATTERN)(?:/|$)")
     }
 }

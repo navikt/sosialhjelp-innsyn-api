@@ -63,6 +63,6 @@ class MDCFilterTest {
 
         (filter as WebFilter).filter(MockServerWebExchange.from(MockServerHttpRequest.get(path)), chain).block()
 
-        assertThat(MDC.getCopyOfContextMap()).isNull()
+        assertThat(MDC.get(MDCUtils.DIGISOS_ID)).isEqualTo(staleDigisosId)
     }
 }

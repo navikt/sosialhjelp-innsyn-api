@@ -1,8 +1,10 @@
 package no.nav.sosialhjelp.innsyn.digisosapi
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
@@ -234,26 +236,28 @@ class FiksClient(
 }
 
 private suspend fun WebClient.ResponseSpec.multipartBodyDigisosSoker(): Map<String, JsonDigisosSoker> =
-    bodyToFlow<Part>()
-        .mapNotNull { part ->
-            // Kommer på format $fiksDigisosId_$dokumentLagerId
-            val name = part.headers().contentDisposition.name
-            val content =
-                DataBufferUtils.join(part.content()).awaitSingleOrNull()?.let { dataBuffer ->
-                    try {
-                        val bytes = ByteArray(dataBuffer.readableByteCount()).also { dataBuffer.read(it) }
-                        sosialhjelpJsonMapper.readValue(bytes, JsonDigisosSoker::class.java)
-                    } finally {
-                        DataBufferUtils.release(dataBuffer)
+    withContext(Dispatchers.IO) {
+        bodyToFlow<Part>()
+            .mapNotNull { part ->
+                // Kommer på format $fiksDigisosId_$dokumentLagerId
+                val name = part.headers().contentDisposition.name
+                val content =
+                    DataBufferUtils.join(part.content()).awaitSingleOrNull()?.let { dataBuffer ->
+                        try {
+                            val bytes = ByteArray(dataBuffer.readableByteCount()).also { dataBuffer.read(it) }
+                            sosialhjelpJsonMapper.readValue(bytes, JsonDigisosSoker::class.java)
+                        } finally {
+                            DataBufferUtils.release(dataBuffer)
+                        }
                     }
+                if (name != null && content != null) {
+                    name to content
+                } else {
+                    null
                 }
-            if (name != null && content != null) {
-                name to content
-            } else {
-                null
-            }
-        }.toList()
-        .toMap()
+            }.toList()
+            .toMap()
+    }
 
 class FiksGoneException(
     message: String?,

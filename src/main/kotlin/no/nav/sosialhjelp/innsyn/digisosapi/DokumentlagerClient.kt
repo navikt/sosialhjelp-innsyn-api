@@ -1,8 +1,9 @@
 package no.nav.sosialhjelp.innsyn.digisosapi
 
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
@@ -17,6 +18,7 @@ import java.io.ByteArrayInputStream
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+import kotlin.coroutines.cancellation.CancellationException
 
 interface DokumentlagerClient {
     suspend fun getDokumentlagerPublicKeyX509Certificate(): X509Certificate
@@ -55,9 +57,11 @@ class DokumentlagerClientImpl(
         log.info("Hentet public key for dokumentlager")
 
         return try {
-            val certificateFactory = CertificateFactory.getInstance("X.509")
-            (certificateFactory.generateCertificate(ByteArrayInputStream(publicKey)) as X509Certificate).also {
-                cachedPublicKey = it
+            withContext(Dispatchers.IO) {
+                val certificateFactory = CertificateFactory.getInstance("X.509")
+                (certificateFactory.generateCertificate(ByteArrayInputStream(publicKey)) as X509Certificate).also {
+                    cachedPublicKey = it
+                }
             }
         } catch (e: CertificateException) {
             throw IllegalStateException(e)

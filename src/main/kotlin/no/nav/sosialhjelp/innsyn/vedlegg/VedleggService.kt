@@ -179,8 +179,11 @@ class VedleggService(
                     when {
                         it.isEmpty() -> "Tom liste"
                         it.size == 1 -> {
-                            if (it.first().filnavn.sanitize().contains("ettersendelse", true)) "ettersendelse"
-                            else "En fil som ikke matcher - ikke ettersendelse"
+                            if (it.first().filnavn.sanitize().contains("ettersendelse", true)) {
+                                "ettersendelse"
+                            } else {
+                                "En fil som ikke matcher - ikke ettersendelse"
+                            }
                         }
                         else -> "Flere filer som ikke matcher - ettersendelse? ${it.find { fil -> fil.filnavn.contains("ettersendelse") }}"
                     }

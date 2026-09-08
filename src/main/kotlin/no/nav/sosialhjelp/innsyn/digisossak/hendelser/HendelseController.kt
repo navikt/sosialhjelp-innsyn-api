@@ -19,16 +19,6 @@ class HendelseController(
     private val hendelseService: HendelseService,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
-    @GetMapping("/{fiksDigisosId}/hendelser", produces = ["application/json;charset=UTF-8"])
-    suspend fun hentHendelser(
-        @PathVariable fiksDigisosId: String,
-    ): ResponseEntity<List<HendelseResponse>> {
-        tilgangskontroll.sjekkTilgang()
-
-        val hendelser = hendelseService.hentHendelseResponse(fiksDigisosId)
-        return ResponseEntity.ok(hendelser)
-    }
-
     @GetMapping("/{fiksDigisosId}/hendelser/beta")
     suspend fun hentHendelserBeta(
         @PathVariable fiksDigisosId: String,

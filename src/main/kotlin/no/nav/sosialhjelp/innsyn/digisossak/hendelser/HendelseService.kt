@@ -28,25 +28,6 @@ class HendelseService(
     private val vedleggService: VedleggService,
     private val fiksService: FiksService,
 ) {
-    suspend fun hentHendelseResponse(fiksDigisosId: String): List<HendelseResponse> {
-        val (hendelser, kommunenummer, enhetNummer, enhetNavn) = hentHendelser(fiksDigisosId)
-        val responseList =
-            hendelser.map {
-                HendelseResponse(
-                    it.tidspunkt.toString(),
-                    it.hendelseType.name,
-                    it.url,
-                    it.tekstArgument,
-                    it.saksReferanse,
-                    enhetNummer,
-                    enhetNavn,
-                    kommunenummer,
-                )
-            }
-        log.info("Hentet historikk med ${responseList.size} hendelser")
-        return responseList
-    }
-
     suspend fun hentHendelser(fiksDigisosId: String): HendelseInfo {
         val digisosSak = fiksService.getSoknad(fiksDigisosId)
         val model = eventService.createModel(digisosSak)

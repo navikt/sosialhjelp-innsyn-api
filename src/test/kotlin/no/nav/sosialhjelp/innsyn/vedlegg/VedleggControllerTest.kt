@@ -6,15 +6,12 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
-import no.nav.sosialhjelp.innsyn.kommuneinfo.MottakUtilgjengeligException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.runTestWithToken
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
@@ -28,13 +25,9 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
-import org.springframework.test.util.AssertionErrors.fail
-import reactor.core.publisher.Flux
 import java.time.LocalDateTime
-import kotlin.time.Duration.Companion.seconds
 
 internal class VedleggControllerTest {
-    private val vedleggOpplastingService: VedleggOpplastingService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val clientProperties: ClientProperties = mockk(relaxed = true)
     private val tilgangskontroll: TilgangskontrollService = mockk()
@@ -42,17 +35,14 @@ internal class VedleggControllerTest {
     private val fiksService: FiksService = mockk()
     private val digisosSak: DigisosSak = mockk()
     private val model: InternalDigisosSoker = mockk()
-    private val kommuneService: KommuneService = mockk()
 
     private val controller =
         VedleggController(
-            vedleggOpplastingService,
             vedleggService,
             clientProperties,
             tilgangskontroll,
             eventService,
             fiksService,
-            kommuneService,
         )
 
     private val id = "123"
@@ -65,24 +55,12 @@ internal class VedleggControllerTest {
     private val dokumentlagerId = "id1"
     private val dokumentlagerId2 = "id2"
 
-    private val metadataJson = """
-[{
-    "type": "brukskonto",
-    "tilleggsinfo": "kontoutskrift",
-    "filer": [{
-        "filnavn": "test.jpg",
-        "uuid": "5beac991-8a6d-475f-a065-579eb7c4f424",
-    }]
-}]
-    """
-
     @BeforeEach
     internal fun setUp() {
-        clearMocks(vedleggOpplastingService, vedleggService)
+        clearMocks(vedleggService)
 
         coEvery { tilgangskontroll.sjekkTilgang() } just Runs
         every { digisosSak.fiksDigisosId } returns "123"
-        coEvery { kommuneService.validerMottakForKommune(any<String>()) } just Runs
     }
 
     @AfterEach
@@ -166,56 +144,6 @@ internal class VedleggControllerTest {
         }
 
     @Test
-    fun `kaster exception dersom input til sendVedlegg ikke inneholder metadata-json`() =
-        runTestWithToken {
-            val files = Flux.just(mockPart("abc.jpg"), mockPart("rofglmao.jpg"))
-            runCatching { controller.sendVedlegg(id, files) }.let {
-                assertThat(it.isFailure)
-                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-            }
-        }
-
-    @Test
-    fun `skal ikke kaste exception dersom input til sendVedlegg inneholder gyldig metadata-json`() =
-        runTest(timeout = 5.seconds) {
-            coEvery { vedleggOpplastingService.processFileUpload(any(), any()) } returns emptyList()
-
-            val files = Flux.just(mockPart("metadata.json", metadataJson.toByteArray()), mockPart("test.jpg", byteArrayOf()))
-            assertThat(runCatching { controller.sendVedlegg(id, files) }.isSuccess)
-        }
-
-    @Test
-    fun `skal kaste exception hvis det er filer i metadata som ikke er i resten av filene`() =
-        runTestWithToken {
-            val metadata =
-                """
-            |[{
-            |    "type": "brukskonto",
-            |    "tilleggsinfo": "kontoutskrift",
-            |    "filer": [{
-            |        "filnavn": "test.jpg",
-            |        "uuid": "5beac991-8a6d-475f-a065-579eb7c4f424"
-            |    }]
-            |}]
-            |
-                """.trimMargin()
-
-            coEvery { tilgangskontroll.sjekkTilgang() } just Runs
-
-            val files =
-                Flux.just(
-                    mockPart("metadata.json", metadata.toByteArray()),
-                    mockPart("test.jpg", byteArrayOf()),
-                    mockPart("roflmao.jpg", byteArrayOf()),
-                )
-            runCatching { controller.sendVedlegg(id, files) }.let {
-                assertThat(it.isFailure)
-                assertThat(it.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
-                assertThat(it.exceptionOrNull()?.message).contains("Ikke alle filer i metadata.json ble funnet i forsendelsen")
-            }
-        }
-
-    @Test
     fun `skal fjerne UUID fra filnavn dersom dette er satt`() {
         val uuid = "12345678"
         val filnavn = "somefile-$uuid.pdf"
@@ -240,37 +168,6 @@ internal class VedleggControllerTest {
         val filnavn = "filnavn_som_er_passe_langt-123456.pdf"
         assertThat(controller.removeUUIDFromFilename(filnavn)).isEqualTo(filnavn)
     }
-
-    @Test
-    fun `Hvis kommune har skrudd av mottak skal det kastes exception`() =
-        runTestWithToken {
-            val metadata =
-                """
-            |[{
-            |    "type": "brukskonto",
-            |    "tilleggsinfo": "kontoutskrift",
-            |    "filer": [{
-            |        "filnavn": "test.jpg",
-            |        "uuid": "5beac991-8a6d-475f-a065-579eb7c4f424"
-            |    }]
-            |}]
-            |
-                """.trimMargin()
-
-            coEvery { kommuneService.validerMottakForKommune(any<String>()) } throws
-                MottakUtilgjengeligException("Mottak utilgjengelig", kanMottaSoknader = true, harMidlertidigDeaktivertMottak = true)
-
-            val files =
-                Flux.just(
-                    mockPart("metadata.json", metadata.toByteArray()),
-                    mockPart("test.jpg", byteArrayOf()),
-                    mockPart("roflmao.jpg", byteArrayOf()),
-                )
-
-            runCatching { controller.sendVedlegg(id, files) }
-                .onSuccess { fail("Forventet at kall kaster exception") }
-                .getOrElse { assertThat(it).isInstanceOf(MottakUtilgjengeligException::class.java) }
-        }
 }
 
 fun mockPart(

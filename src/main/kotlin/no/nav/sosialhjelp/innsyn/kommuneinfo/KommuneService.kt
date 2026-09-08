@@ -81,20 +81,6 @@ class KommuneService(
         }
     }
 
-    suspend fun validerMottakForKommune(fiksDigisosId: String) {
-        hentKommuneInfo(fiksDigisosId)
-            ?.also {
-                if (!it.kanMottaSoknader || it.harMidlertidigDeaktivertMottak) {
-                    throw MottakUtilgjengeligException(
-                        message = "Kommune (${it.kommunenummer}) har deaktivert mottak",
-                        kanMottaSoknader = it.kanMottaSoknader,
-                        harMidlertidigDeaktivertMottak = it.harMidlertidigDeaktivertMottak,
-                    )
-                }
-            }
-            ?: error("KommuneInfo ikke funnet for digisosId: $fiksDigisosId")
-    }
-
     companion object {
         private val log by logger()
     }

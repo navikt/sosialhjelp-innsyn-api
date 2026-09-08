@@ -1,8 +1,6 @@
 package no.nav.sosialhjelp.innsyn.navenhet
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils.retryBackoffSpec
 import no.nav.sosialhjelp.innsyn.app.exceptions.BadStateException
 import no.nav.sosialhjelp.innsyn.app.exceptions.NorgException
@@ -32,25 +30,24 @@ class NorgClientImpl(
     @Cacheable(NavEnhetCacheConfig.CACHE_NAME)
     override suspend fun hentNavEnhet(enhetsnr: String): NavEnhet = hentFraNorg(enhetsnr)
 
-    private suspend fun hentFraNorg(enhetsnr: String): NavEnhet =
-        withContext(Dispatchers.IO) {
-            log.debug("Forsøker å hente Nav-enhet $enhetsnr fra NORG2")
-            val navEnhet: NavEnhet =
-                norgWebClient
-                    .get()
-                    .uri("/enhet/{enhetsnr}", enhetsnr)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .bodyToMono<NavEnhet>()
-                    .retryWhen(norgRetry)
-                    .onErrorMap(WebClientResponseException::class.java) { e ->
-                        log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
-                        NorgException(e.message, e)
-                    }.awaitSingleOrNull()
-                    ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
+    private suspend fun hentFraNorg(enhetsnr: String): NavEnhet {
+        log.debug("Forsøker å hente Nav-enhet $enhetsnr fra NORG2")
+        val navEnhet: NavEnhet =
+            norgWebClient
+                .get()
+                .uri("/enhet/{enhetsnr}", enhetsnr)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono<NavEnhet>()
+                .retryWhen(norgRetry)
+                .onErrorMap(WebClientResponseException::class.java) { e ->
+                    log.warn("Noe feilet ved kall mot NORG2 ${e.statusCode}", e)
+                    NorgException(e.message, e)
+                }.awaitSingleOrNull()
+                ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
 
-            navEnhet.also { log.info("Hentet Nav-enhet $enhetsnr fra NORG2") }
-        }
+        return navEnhet.also { log.info("Hentet Nav-enhet $enhetsnr fra NORG2") }
+    }
 
     companion object {
         private val log by logger()

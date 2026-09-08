@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.digisosapi
 
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -19,6 +18,7 @@ import java.io.ByteArrayInputStream
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+import kotlin.coroutines.cancellation.CancellationException
 
 interface DokumentlagerClient {
     suspend fun getDokumentlagerPublicKeyX509Certificate(): X509Certificate
@@ -34,37 +34,37 @@ class DokumentlagerClientImpl(
     override suspend fun getDokumentlagerPublicKeyX509Certificate(): X509Certificate {
         cachedPublicKey?.let { return it }
 
-        return withContext(Dispatchers.IO) {
-            val publicKey =
-                runCatching {
-                    fiksWebClient
-                        .get()
-                        .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
-                        .accept(APPLICATION_JSON)
-                        .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
-                        .retrieve()
-                        .awaitBody<ByteArray>()
-                }.onFailure {
-                    if (it is CancellationException) currentCoroutineContext().ensureActive()
-                    if (it is WebClientResponseException) {
-                        log.warn("Fiks - getDokumentlagerPublicKey feilet - ${it.statusCode} ${it.statusText}", it)
-                        when {
-                            it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
-                            else -> throw FiksServerException(it.statusCode.value(), it.message, it)
-                        }
+        val publicKey =
+            runCatching {
+                fiksWebClient
+                    .get()
+                    .uri(FiksPaths.PATH_DOKUMENTLAGER_PUBLICKEY)
+                    .accept(APPLICATION_JSON)
+                    .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+                    .retrieve()
+                    .awaitBody<ByteArray>()
+            }.onFailure {
+                if (it is CancellationException) currentCoroutineContext().ensureActive()
+                if (it is WebClientResponseException) {
+                    log.warn("Fiks - getDokumentlagerPublicKey feilet - ${it.statusCode} ${it.statusText}", it)
+                    when {
+                        it.statusCode.is4xxClientError -> throw FiksClientException(it.statusCode.value(), it.message, it)
+                        else -> throw FiksServerException(it.statusCode.value(), it.message, it)
                     }
-                }.getOrThrow()
+                }
+            }.getOrThrow()
 
-            log.info("Hentet public key for dokumentlager")
+        log.info("Hentet public key for dokumentlager")
 
-            try {
+        return try {
+            withContext(Dispatchers.IO) {
                 val certificateFactory = CertificateFactory.getInstance("X.509")
                 (certificateFactory.generateCertificate(ByteArrayInputStream(publicKey)) as X509Certificate).also {
                     cachedPublicKey = it
                 }
-            } catch (e: CertificateException) {
-                throw IllegalStateException(e)
             }
+        } catch (e: CertificateException) {
+            throw IllegalStateException(e)
         }
     }
 

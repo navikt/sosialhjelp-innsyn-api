@@ -67,24 +67,6 @@ class OppgaveControllerV2(
         return oppgaveService.getVilkar(fiksDigisosId).responseOrNoContent()
     }
 
-    @GetMapping("/{fiksDigisosId}/harLeverteDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
-    suspend fun getHarLevertDokumentasjonkrav(
-        @PathVariable fiksDigisosId: String,
-    ): Boolean {
-        tilgangskontroll.sjekkTilgang()
-
-        return oppgaveService.getHarLevertDokumentasjonkrav(fiksDigisosId)
-    }
-
-    @GetMapping("/{fiksDigisosId}/fagsystemHarDokumentasjonkrav", produces = ["application/json;charset=UTF-8"])
-    suspend fun getfagsystemHarDokumentasjonkrav(
-        @PathVariable fiksDigisosId: String,
-    ): Boolean {
-        tilgangskontroll.sjekkTilgang()
-
-        return oppgaveService.getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId)
-    }
-
     private fun String.removeUuidSuffix(): String {
         val indexOfFileExtension = this.lastIndexOf(".")
         if (indexOfFileExtension != -1 &&

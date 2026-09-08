@@ -1,12 +1,9 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
-import com.fasterxml.jackson.core.util.VersionUtil
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
-import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
@@ -24,7 +21,6 @@ class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksService: FiksService,
-    private val clientProperties: ClientProperties,
     private val meterRegistry: MeterRegistry,
 ) {
     private val oppgaveTeller = Counter.builder("oppgave_teller")
@@ -228,63 +224,6 @@ class OppgaveService(
             .filter { it.type == dokumentasjonkrav.tittel }
             .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
             .filter { it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) || dokumentasjonkrav.frist == null }
-
-    suspend fun getHarLevertDokumentasjonkrav(fiksDigisosId: String): Boolean {
-        val digisosSak = fiksService.getSoknad(fiksDigisosId)
-        val model = eventService.createModel(digisosSak)
-        if (model.dokumentasjonkrav.isEmpty()) {
-            return false
-        }
-
-        val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, model)
-
-        return model.dokumentasjonkrav
-            .filter {
-                !it
-                    .isEmpty()
-                    .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-            }.filter { finnAlleredeLastetOpp(it, ettersendteVedlegg).isNotEmpty() }
-            .toList()
-            .isNotEmpty()
-    }
-
-    suspend fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String): Boolean {
-        val digisosSak = fiksService.getSoknad(fiksDigisosId)
-        val model = eventService.createModel(digisosSak)
-        if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
-            return false
-        }
-
-        val fagsystemer =
-            clientProperties.vilkarDokkravFagsystemVersjoner.mapNotNull {
-                try {
-                    val split = it.split(";")
-                    Fagsystem(split[0], split[1])
-                } catch (e: IndexOutOfBoundsException) {
-                    log.error("Kan ikke splitte fagsystem-versjon i app config $it")
-                    null
-                }
-            }
-
-        return fagsystemer
-            .filter { model.fagsystem!!.systemnavn.equals(it.systemnavn) }
-            .any { versionEqualsOrIsNewer(model.fagsystem!!.systemversjon!!, it.systemversjon!!) }
-    }
-
-    private fun versionEqualsOrIsNewer(
-        avsender: String,
-        godkjent: String,
-    ): Boolean {
-        val avsenderVersion = VersionUtil.parseVersion(avsender, null, null)
-        val godkjentVersion = VersionUtil.parseVersion(godkjent, null, null)
-
-        if (avsenderVersion.isUnknownVersion || godkjentVersion.isUnknownVersion) {
-            return false
-        }
-
-        return avsenderVersion >= godkjentVersion
-    }
 
     suspend fun sakHarStatusMottattOgIkkeHattSendt(fiksDigisosId: String): Boolean {
         val digisosSak = fiksService.getSoknad(fiksDigisosId)

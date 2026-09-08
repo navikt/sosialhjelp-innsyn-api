@@ -60,52 +60,6 @@ class OppgaveService(
         return oppgaveResponseList
     }
 
-    @Deprecated("Gammel funksjon", replaceWith = ReplaceWith("hentOppgaverBeta(fiksDigisosId)"))
-    suspend fun hentOppgaver(fiksDigisosId: String): List<OppgaveResponse> {
-        val digisosSak = fiksService.getSoknad(fiksDigisosId)
-        val model = eventService.createModel(digisosSak)
-        if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
-            return emptyList()
-        }
-
-        val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, model)
-
-        val oppgaveResponseList =
-            model.oppgaver
-                .filter { oppgave ->
-                    finnAlleredeLastetOpp(
-                        oppgave,
-                        ettersendteVedlegg,
-                    ).isEmpty()
-                }.groupBy { it.innsendelsesfrist?.toLocalDate() }
-                .map { (key, value) ->
-                    OppgaveResponse(
-                        innsendelsesfrist = key,
-                        // oppgaveId og innsendelsefrist er alltid 1-1
-                        oppgaveId = value[0].oppgaveId,
-                        oppgaveElementer =
-                            value.map {
-                                OppgaveElement(
-                                    it.tittel,
-                                    it.tilleggsinfo,
-                                    it.hendelsetype,
-                                    it.hendelsereferanse,
-                                    it.erFraInnsyn,
-                                )
-                            },
-                    )
-                }.sortedBy { it.innsendelsesfrist }
-        log.info("Hentet ${oppgaveResponseList.sumOf { it.oppgaveElementer.size }} oppgaver")
-        oppgaveTeller.tag("fiksDigisosId", fiksDigisosId).register(meterRegistry).increment(oppgaveResponseList.size.toDouble())
-        return oppgaveResponseList
-    }
-
-    suspend fun hentOppgaverMedOppgaveId(
-        fiksDigisosId: String,
-        oppgaveId: String,
-    ): List<OppgaveResponse> = hentOppgaver(fiksDigisosId).filter { it.oppgaveId == oppgaveId }
-
     private fun finnAlleredeLastetOpp(
         oppgave: Oppgave,
         vedleggListe: List<InternalVedlegg>,
@@ -264,15 +218,6 @@ class OppgaveService(
 
         log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList
-    }
-
-    suspend fun getDokumentasjonkravMedId(
-        fiksDigisosId: String,
-        dokumentasjonkravId: String,
-    ): List<DokumentasjonkravResponse> {
-        val dokumentasjonkrav = getDokumentasjonkrav(fiksDigisosId)
-
-        return dokumentasjonkrav.filter { it.dokumentasjonkravId == dokumentasjonkravId }
     }
 
     private fun finnAlleredeLastetOpp(

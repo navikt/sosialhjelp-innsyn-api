@@ -13,8 +13,6 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravElement
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.DokumentasjonkravResponse
-import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveElement
-import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponse
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveResponseBeta
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.OppgaveService
 import no.nav.sosialhjelp.innsyn.digisossak.oppgaver.VilkarResponse
@@ -56,12 +54,10 @@ internal class SaksOversiktControllerTest {
     private val sak1: Sak = mockk()
     private val sak2: Sak = mockk()
 
-    private val oppgaveResponseMock: OppgaveResponse = mockk()
     private val oppgaveResponseBetaMock: OppgaveResponseBeta = mockk()
     private val vilkarResponseMock: VilkarResponse = mockk()
     private val dokumentasjonkravResponseMock: DokumentasjonkravResponse = mockk()
 
-    private val oppgaveElement1: OppgaveElement = mockk()
     private val dokumentasjonkravElement1: DokumentasjonkravElement = mockk()
 
     @BeforeEach
@@ -89,8 +85,6 @@ internal class SaksOversiktControllerTest {
                 every { this@mockk.timestampSendt } returns 0L
             }
 
-        every { oppgaveResponseMock.oppgaveElementer } returns listOf(oppgaveElement1)
-        every { oppgaveResponseMock.innsendelsesfrist } returns LocalDate.now()
         every { oppgaveResponseBetaMock.innsendelsesfrist } returns LocalDate.now()
         every { oppgaveResponseBetaMock.erFraInnsyn } returns true
         every { oppgaveResponseBetaMock.erLastetOpp } returns false

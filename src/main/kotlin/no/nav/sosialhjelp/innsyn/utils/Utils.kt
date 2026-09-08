@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.utils
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
-import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.ErrorMessage
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import org.slf4j.Logger
@@ -21,8 +20,6 @@ import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.reflect.full.companionObject
-
-const val COUNTER_SUFFIX_LENGTH = 4
 
 fun hentUrlFraFilreferanse(
     clientProperties: ClientProperties,
@@ -63,33 +60,6 @@ fun formatLocalDateTime(dato: LocalDateTime): String {
 }
 
 fun soknadsalderIMinutter(tidspunktSendt: LocalDateTime?): Long = tidspunktSendt?.until(LocalDateTime.now(), ChronoUnit.MINUTES) ?: -1
-
-/**
- * Generer navEksternRefId for nytt opplastet vedlegg
- * HVIS digisosSak har ettersendelser, hent siste navEksternRefId og inkrementer
- * HVIS digisosSak ikke har ettersendelser -> hent originalSøknads navEksternRefId, legg på "0000" og inkrementer
- * HVIS digisosSak ikke har originalSøknad (dvs papirsøknad) -> bruk digisosId, legg på "0000" og inkrementer
- */
-fun lagNavEksternRefId(digisosSak: DigisosSak): String {
-    val previousId: String =
-        digisosSak.ettersendtInfoNAV
-            ?.ettersendelser
-            ?.map { it.navEksternRefId }
-            ?.maxByOrNull { it.takeLast(COUNTER_SUFFIX_LENGTH).toLong() }
-            ?: digisosSak.originalSoknadNAV?.navEksternRefId?.plus("0000")
-            ?: digisosSak.fiksDigisosId.plus("0000")
-
-    val nesteSuffix = lagIdSuffix(previousId)
-    return (previousId.dropLast(COUNTER_SUFFIX_LENGTH).plus(nesteSuffix))
-}
-
-/**
- * returnerer neste id-suffix som 4-sifret String
- */
-private fun lagIdSuffix(previousId: String): String {
-    val suffix = previousId.takeLast(COUNTER_SUFFIX_LENGTH).toLong() + 1
-    return suffix.toString().padStart(4, '0')
-}
 
 fun <R : Any> R.logger(): Lazy<Logger> = lazy { LoggerFactory.getLogger(unwrapCompanionClass(this.javaClass).name) }
 

@@ -16,26 +16,21 @@ import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
-import no.nav.sosialhjelp.innsyn.utils.toFiksErrorMessageUtenFnr
 import no.nav.sosialhjelp.innsyn.valkey.DigisosSakCacheConfig
 import no.nav.sosialhjelp.innsyn.valkey.DokumentCacheConfig
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.get
 import org.springframework.core.io.buffer.DataBufferUtils
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.Part
 import org.springframework.stereotype.Component
-import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToFlow
 import org.springframework.web.reactive.function.client.bodyToMono
-import org.springframework.web.reactive.function.client.toEntity
 import java.io.Serializable
 
 /*
@@ -98,49 +93,6 @@ class FiksClient(
             cache?.put(it.fiksDigisosId, it)
         }
     }
-
-    suspend fun lastOppNyEttersendelse(
-        body: MultiValueMap<String, HttpEntity<*>>,
-        kommunenummer: String,
-        digisosId: String,
-        navEksternRefId: String,
-    ): ResponseEntity<String> =
-        fiksWebClient
-            .post()
-            .uri(FiksPaths.PATH_LAST_OPP_ETTERSENDELSE, kommunenummer, digisosId, navEksternRefId)
-            .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
-            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .bodyValue(body)
-            .retrieve()
-            .toEntity<String>()
-            .onErrorMap(WebClientResponseException::class.java) { e ->
-                if (e.statusCode.value() == 400 && filErAlleredeLastetOpp(e, digisosId)) {
-                    val feilmeldingAlleredeFinnes =
-                        "Fiks - Opplasting av ettersendelse finnes allerede hos Fiks - ${messageUtenFnr(e)}"
-                    log.warn(feilmeldingAlleredeFinnes, e)
-                    FiksClientFileExistsException(feilmeldingAlleredeFinnes, e)
-                } else {
-                    val feilmelding =
-                        "Fiks - Opplasting av ettersendelse til digisosId=$digisosId feilet - ${messageUtenFnr(e)}"
-                    when {
-                        e.statusCode.value() == 410 -> FiksGoneException(feilmelding, e)
-                        e.statusCode.is4xxClientError -> FiksClientException(e.statusCode.value(), feilmelding, e)
-                        else -> FiksServerException(e.statusCode.value(), feilmelding, e)
-                    }
-                }
-            }.awaitSingleOrNull()
-            ?: throw FiksClientException(
-                500,
-                "responseEntity er null selv om request ikke har kastet exception",
-                null,
-            )
-
-    private fun filErAlleredeLastetOpp(
-        exception: WebClientResponseException,
-        digisosId: String,
-    ): Boolean =
-        toFiksErrorMessageUtenFnr(exception).startsWith("Ettersendelse med tilhørende navEksternRefId ") &&
-            toFiksErrorMessageUtenFnr(exception).endsWith(" finnes allerde for oppgitt DigisosId $digisosId")
 
     @Cacheable(DokumentCacheConfig.CACHE_NAME, key = "#cacheKey")
     suspend fun <T : Serializable> hentDokument(
@@ -258,13 +210,3 @@ private suspend fun WebClient.ResponseSpec.multipartBodyDigisosSoker(): Map<Stri
             }.toList()
             .toMap()
     }
-
-class FiksGoneException(
-    message: String?,
-    e: WebClientResponseException?,
-) : RuntimeException(message, e)
-
-class FiksClientFileExistsException(
-    message: String?,
-    e: WebClientResponseException?,
-) : RuntimeException(message, e)

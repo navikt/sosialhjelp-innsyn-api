@@ -2,13 +2,13 @@ package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
-import no.nav.sosialhjelp.innsyn.digisossak.utbetalinger.ManedUtbetaling
-import no.nav.sosialhjelp.innsyn.digisossak.utbetalinger.UtbetalingerService.Companion.UTBETALING_DEFAULT_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+
+private const val UTBETALING_DEFAULT_TITTEL = "default_utbetaling_tittel"
 
 data class UtbetalingDto(
     val referanse: String,

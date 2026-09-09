@@ -8,12 +8,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.EttersendtInfoNAV
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
-import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -35,9 +32,8 @@ internal class OppgaveServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksService: FiksService = mockk()
-    private val clientProperties: ClientProperties = mockk()
     private val meterRegistry: MeterRegistry = mockk(relaxed = true)
-    private val service = OppgaveService(eventService, vedleggService, fiksService, clientProperties, meterRegistry)
+    private val service = OppgaveService(eventService, vedleggService, fiksService, meterRegistry)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockEttersendtInfoNAV: EttersendtInfoNAV = mockk()
@@ -61,156 +57,12 @@ internal class OppgaveServiceTest {
     private val dokumentasjonkravId = "068e5c6516019eec95f19dd4fd78045aa25b634849538440ba49f7050cdbe4ce"
     private val dokumentasjonkravId2 = "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
 
-    private val dokumenttype = "tittel"
-    private val dok = DokumentInfo("tittel 1", dokumentasjonkravId, 11)
-    private val tidspunkt = LocalDateTime.now().plusHours(9)
-
     @BeforeEach
     fun init() {
         clearAllMocks()
         coEvery { fiksService.getSoknad(any()) } returns mockDigisosSak
         every { mockDigisosSak.ettersendtInfoNAV } returns mockEttersendtInfoNAV
-        every { clientProperties.vilkarDokkravFagsystemVersjoner } returns listOf("socio;10.1.16", "mock-alt;1.0.0")
     }
-
-    @Test
-    fun `Should return emptylist`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-
-            coEvery { eventService.createModel(any()) } returns model
-
-            val oppgaver = service.hentOppgaver("123")
-
-            assertThat(oppgaver).isNotNull
-            assertThat(oppgaver).isEmpty()
-        }
-
-    @Test
-    fun `Should return oppgave`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.oppgaver.add(Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true))
-
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
-
-            val responseList = service.hentOppgaver("123")
-
-            assertThat(responseList).isNotNull
-            assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
-            assertThat(responseList[0].oppgaveElementer).hasSize(1)
-            assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
-            assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg)
-            assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue
-        }
-
-    @Test
-    fun `Should return oppgave without tilleggsinformasjon`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
-
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
-
-            val responseList = service.hentOppgaver("123")
-
-            assertThat(responseList).isNotNull
-            assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
-            assertThat(responseList[0].oppgaveElementer).hasSize(1)
-            assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
-            assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isNull()
-            assertThat(responseList[0].oppgaveElementer[0].erFraInnsyn).isTrue
-        }
-
-    @Test
-    fun `Should return list of oppgaver sorted by frist`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.oppgaver.addAll(
-                listOf(
-                    Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
-                    Oppgave("oppgaveId2", type3, tillegg3, null, null, frist3, tidspunktForKrav, true),
-                    Oppgave("oppgaveId3", type4, tillegg4, null, null, frist4, tidspunktForKrav, true),
-                    Oppgave("oppgaveId4", type2, tillegg2, null, null, frist2, tidspunktForKrav, true),
-                ),
-            )
-
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
-
-            val responseList = service.hentOppgaver("123")
-
-            assertThat(responseList).isNotNull
-            assertThat(responseList.size == 4)
-            assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist.toLocalDate())
-            assertThat(responseList[0].oppgaveElementer).hasSize(1)
-            assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type)
-            assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg)
-
-            assertThat(responseList[1].innsendelsesfrist).isEqualTo(frist2.toLocalDate())
-            assertThat(responseList[1].oppgaveElementer).hasSize(1)
-            assertThat(responseList[1].oppgaveElementer[0].dokumenttype).isEqualTo(type2)
-            assertThat(responseList[1].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg2)
-
-            assertThat(responseList[2].innsendelsesfrist).isEqualTo(frist3.toLocalDate())
-            assertThat(responseList[2].oppgaveElementer).hasSize(1)
-            assertThat(responseList[2].oppgaveElementer[0].dokumenttype).isEqualTo(type3)
-            assertThat(responseList[2].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg3)
-
-            assertThat(responseList[3].innsendelsesfrist).isEqualTo(frist4.toLocalDate())
-            assertThat(responseList[3].oppgaveElementer).hasSize(1)
-            assertThat(responseList[3].oppgaveElementer[0].dokumenttype).isEqualTo(type4)
-            assertThat(responseList[3].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg4)
-        }
-
-    @Test
-    fun `Skal filtrere ut oppgaver der brukeren har lastet opp filer av samme type etter kravet ble gitt`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.oppgaver.addAll(
-                listOf(
-                    Oppgave("oppgaveId1", type, tillegg, null, null, frist, tidspunktForKrav, true),
-                    Oppgave("oppgaveId2", type2, null, null, null, frist2, tidspunktForKrav, true),
-                    Oppgave("oppgaveId3", type3, tillegg3, null, null, frist3, tidspunktForKrav, true),
-                ),
-            )
-
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
-                listOf(
-                    InternalVedlegg(type, tillegg, null, null, mutableListOf(), tidspunktEtterKrav, null),
-                    InternalVedlegg(type2, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
-                    InternalVedlegg(type3, tillegg3, null, null, mutableListOf(), tidspunktFoerKrav, null),
-                    InternalVedlegg(type3, null, null, null, mutableListOf(), tidspunktEtterKrav, null),
-                )
-
-            val responseList = service.hentOppgaver("123")
-
-            assertThat(responseList).isNotNull
-            assertThat(responseList.size == 1)
-
-            assertThat(responseList[0].innsendelsesfrist).isEqualTo(frist3.toLocalDate())
-            assertThat(responseList[0].oppgaveElementer).hasSize(1)
-            assertThat(responseList[0].oppgaveElementer[0].dokumenttype).isEqualTo(type3)
-            assertThat(responseList[0].oppgaveElementer[0].tilleggsinformasjon).isEqualTo(tillegg3)
-        }
-
-    @Test
-    fun `Should not return oppgaver when soknad is ferdig behandla`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.status = SoknadsStatus.FERDIGBEHANDLET
-            model.oppgaver.add(Oppgave("oppgaveId1", type, null, null, null, frist, tidspunktForKrav, true))
-
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
-
-            val responseList = service.hentOppgaver("123")
-
-            assertThat(responseList).isEmpty()
-        }
 
     @Test
     fun `Should return vilkar with tittel`() =
@@ -615,191 +467,6 @@ internal class OppgaveServiceTest {
             assertThat(responseList[2].dokumentasjonkravElementer).hasSize(2)
 
             assertThat(responseList[2].frist).isNull()
-        }
-
-    @Test
-    fun `Should only return Dokumentasjonkrav with the same frist`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-
-            model.dokumentasjonkrav.addAll(
-                listOf(
-                    Dokumentasjonkrav(
-                        dokumentasjonkravId,
-                        JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                        "dokumentasjonkrav1",
-                        "tittel",
-                        "",
-                        Oppgavestatus.RELEVANT,
-                        null,
-                        LocalDateTime.now(),
-                        frist.toLocalDate(),
-                        null,
-                    ),
-                    Dokumentasjonkrav(
-                        dokumentasjonkravId2,
-                        JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                        "dokumentasjonkrav3",
-                        "tittel",
-                        "",
-                        Oppgavestatus.RELEVANT,
-                        null,
-                        LocalDateTime.now(),
-                        null,
-                        null,
-                    ),
-                    Dokumentasjonkrav(
-                        dokumentasjonkravId,
-                        JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                        "dokumentasjonkrav2",
-                        "tittel",
-                        "",
-                        Oppgavestatus.RELEVANT,
-                        null,
-                        LocalDateTime.now(),
-                        frist2.toLocalDate(),
-                        null,
-                    ),
-                    Dokumentasjonkrav(
-                        dokumentasjonkravId2,
-                        JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                        "dokumentasjonkrav4",
-                        "tittel",
-                        "",
-                        Oppgavestatus.RELEVANT,
-                        null,
-                        LocalDateTime.now(),
-                        null,
-                        null,
-                    ),
-                ),
-            )
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
-
-            val responseList = service.getDokumentasjonkravMedId("123", dokumentasjonkravId2)
-
-            assertThat(responseList).isNotNull
-            assertThat(responseList.size == 1)
-
-            assertThat(responseList[0].dokumentasjonkravElementer).hasSize(2)
-
-            assertThat(responseList[0].frist).isNull()
-            assertThat(responseList[0].dokumentasjonkravId).isEqualTo(dokumentasjonkravId2)
-        }
-
-    @Test
-    fun `should return true if vedlegg for dokumentasjonkrav already uploaded`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.dokumentasjonkrav =
-                mutableListOf(
-                    Dokumentasjonkrav(
-                        dokumentasjonkravId,
-                        JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                        "dokumentasjonkrav1",
-                        "tittel",
-                        null,
-                        Oppgavestatus.RELEVANT,
-                        null,
-                        LocalDateTime.now(),
-                        LocalDate.now(),
-                        null,
-                    ),
-                )
-            coEvery { eventService.createModel(any()) } returns model
-            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
-                listOf(
-                    InternalVedlegg(
-                        dokumenttype,
-                        null,
-                        JsonVedlegg.HendelseType.DOKUMENTASJONKRAV,
-                        "dokumentasjonkrav1",
-                        mutableListOf(dok),
-                        tidspunkt,
-                        null,
-                    ),
-                )
-
-            val response = service.getHarLevertDokumentasjonkrav("123")
-
-            assertThat(response).isTrue
-        }
-
-    @Test
-    fun `should return true if fagsystemversjon equals client properties versjons`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.fagsystem = Fagsystem("socio", "10.1.16")
-            coEvery { eventService.createModel(any()) } returns model
-
-            var response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
-
-            assertThat(response).isTrue
-
-            model.fagsystem = Fagsystem("mock-alt", "1.0-MOCKVERSJON")
-
-            response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
-
-            assertThat(response).isTrue
-        }
-
-    @Test
-    @Suppress("ktlint:standard:max-line-length")
-    fun `should return false if fagsystemversjon is older client properties versjons or if fagsystem name is not configured for that version`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.fagsystem = Fagsystem("mock-alt", "0.0.3:0")
-            coEvery { eventService.createModel(any()) } returns model
-
-            var response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
-
-            assertThat(response).isFalse
-
-            model.fagsystem = Fagsystem("annet system", "1.0.0:MOCKVERSJON")
-
-            response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
-
-            assertThat(response).isFalse
-        }
-
-    @Test
-    fun `should skip incorrect config for fagsystemversjon and still return true when wanted version is correctly configured in list`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.fagsystem = Fagsystem("mock-alt", "1.0.1:MOCKVERSJON")
-            coEvery { eventService.createModel(any()) } returns model
-            every {
-                clientProperties.vilkarDokkravFagsystemVersjoner
-            } returns listOf("ugyldigFormatertFagsystemConfig--0.1.1", "mock-alt;1.0.0:MOCKVERSJON")
-
-            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
-
-            assertThat(response).isTrue
-        }
-
-    @Test
-    fun `should return true if fagsystemversjon is newer than configured for that system`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.fagsystem = Fagsystem("mock-alt", "1.0.1")
-            coEvery { eventService.createModel(any()) } returns model
-
-            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
-
-            assertThat(response).isTrue
-        }
-
-    @Test
-    fun `should return false if fagsystemversjon of another fagsystem is newer than configured for another fagsystem`() =
-        runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
-            model.fagsystem = Fagsystem("socio", "1.2.0:MOCKVERSJON")
-            coEvery { eventService.createModel(any()) } returns model
-
-            val response = service.getFagsystemHarVilkarOgDokumentasjonkrav("123")
-
-            assertThat(response).isFalse
         }
 
     @Test

@@ -1,8 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app.texas
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.beans.factory.annotation.Value
@@ -59,44 +57,43 @@ sealed class TexasClient(
     protected suspend fun getToken(
         tokenEndpointType: TokenEndpointType,
         params: Map<String, String>,
-    ): Token =
-        withContext(Dispatchers.IO) {
-            val url =
-                when (tokenEndpointType) {
-                    TokenEndpointType.M2M -> tokenEndpoint
-                    TokenEndpointType.BEHALF_OF -> tokenXEndpoint
-                    TokenEndpointType.INTROSPECTION -> error("Cannot get token for introspection. Use introspectToken instead.")
-                }
-            val response =
-                try {
-                    texasWebClient
-                        .post()
-                        .uri(url)
-                        .bodyValue(params)
-                        .retrieve()
-                        .awaitBody<TokenResponse.Success>()
-                        .also {
-                            log.debug("Hentet {}-token fra Texas", tokenEndpointType)
-                        }
-                } catch (e: WebClientResponseException) {
-                    val error =
-                        e.getResponseBodyAs(TokenErrorResponse::class.java) ?: TokenErrorResponse(
-                            "Unknown error: ${e.responseBodyAsString}",
-                            e.message,
-                        )
-
-                    TokenResponse.Error(error, e.statusCode)
-                }
-
-            when (response) {
-                is TokenResponse.Success -> Token(response.accessToken)
-                is TokenResponse.Error -> {
-                    error(
-                        "Feil ved henting av $tokenEndpointType-token fra Texas. Statuscode: ${response.status}. Error: ${response.error}",
+    ): Token {
+        val url =
+            when (tokenEndpointType) {
+                TokenEndpointType.M2M -> tokenEndpoint
+                TokenEndpointType.BEHALF_OF -> tokenXEndpoint
+                TokenEndpointType.INTROSPECTION -> error("Cannot get token for introspection. Use introspectToken instead.")
+            }
+        val response =
+            try {
+                texasWebClient
+                    .post()
+                    .uri(url)
+                    .bodyValue(params)
+                    .retrieve()
+                    .awaitBody<TokenResponse.Success>()
+                    .also {
+                        log.debug("Hentet {}-token fra Texas", tokenEndpointType)
+                    }
+            } catch (e: WebClientResponseException) {
+                val error =
+                    e.getResponseBodyAs(TokenErrorResponse::class.java) ?: TokenErrorResponse(
+                        "Unknown error: ${e.responseBodyAsString}",
+                        e.message,
                     )
-                }
+
+                TokenResponse.Error(error, e.statusCode)
+            }
+
+        return when (response) {
+            is TokenResponse.Success -> Token(response.accessToken)
+            is TokenResponse.Error -> {
+                error(
+                    "Feil ved henting av $tokenEndpointType-token fra Texas. Statuscode: ${response.status}. Error: ${response.error}",
+                )
             }
         }
+    }
 }
 
 @Component

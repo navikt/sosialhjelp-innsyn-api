@@ -1,108 +1,34 @@
 package no.nav.sosialhjelp.innsyn.vedlegg
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
-import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
-import no.nav.sosialhjelp.innsyn.vedlegg.dto.OppgaveOpplastingResponse
-import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggOpplastingResponse
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Flux
-import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.util.UUID
 
 @RestController
 @RequestMapping("/api/v1/innsyn")
 class VedleggController(
-    private val vedleggOpplastingService: VedleggOpplastingService,
     private val vedleggService: VedleggService,
     private val clientProperties: ClientProperties,
     private val tilgangskontroll: TilgangskontrollService,
     private val eventService: EventService,
     private val fiksService: FiksService,
-    private val kommuneService: KommuneService,
 ) {
-    @PostMapping("/{fiksDigisosId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    suspend fun sendVedlegg(
-        @PathVariable fiksDigisosId: String,
-        @RequestPart("files") rawFiles: Flux<FilePart>,
-    ): List<OppgaveOpplastingResponse> {
-        tilgangskontroll.sjekkTilgang()
-
-        kommuneService.validerMottakForKommune(fiksDigisosId)
-
-        val allFiles = rawFiles.asFlow().toList()
-        log.info("Forsøker å starte ettersendelse")
-
-        // Ekstraherer metadata.json
-        val metadata =
-            allFiles
-                .firstOrNull { it.filename() == "metadata.json" }
-                ?.content()
-                ?.let {
-                    DataBufferUtils.join(it)
-                }?.map {
-                    val bytes = ByteArray(it.readableByteCount())
-                    it.read(bytes)
-                    DataBufferUtils.release(it)
-                    sosialhjelpJsonMapper.readValue<List<OpplastetVedleggMetadata>>(bytes)
-                }?.awaitSingleOrNull()
-                ?.filter { it.filer.isNotEmpty() } ?: error("Missing metadata.json")
-
-        val files =
-            allFiles
-                .filterNot { it.filename() == "metadata.json" }
-                .also {
-                    check(it.isNotEmpty()) { "Ingen filer i forsendelse" }
-                    check(it.size <= 30) { "Over 30 filer i forsendelse: ${it.size} filer" }
-                }
-
-        val allDeclaredFilesHasAMatch =
-            metadata.all { metadata ->
-                metadata.filer.all { metadataFile ->
-                    metadataFile.uuid.toString() in files.map { it.filename().substringBefore(".") }
-                }
-            }
-        require(allDeclaredFilesHasAMatch) {
-            "Ikke alle filer i metadata.json ble funnet i forsendelsen"
-        }
-
-        // Set hver fil på sitt tilhørende metadata-objekt
-        files.onEach { file ->
-            metadata
-                .flatMap { it.filer }
-                .find {
-                    file.filename().contains(it.uuid.toString())
-                }?.also {
-                    it.fil = file
-                }
-        }
-
-        return vedleggOpplastingService.processFileUpload(fiksDigisosId, metadata).mapToResponse()
-    }
-
     @GetMapping("/{fiksDigisosId}/vedlegg", produces = ["application/json;charset=UTF-8"])
     suspend fun hentVedlegg(
         @PathVariable fiksDigisosId: String,
@@ -146,8 +72,6 @@ class VedleggController(
     }
 
     companion object {
-        private val log by logger()
-
         private const val LENGTH_OF_UUID_PART = 9
     }
 }
@@ -180,18 +104,6 @@ data class OpplastetFil(
     lateinit var validering: FilValidering
     lateinit var tikaMimeType: String
 }
-
-private fun List<OppgaveValidering>.mapToResponse() =
-    map {
-        OppgaveOpplastingResponse(
-            it.type,
-            it.tilleggsinfo,
-            it.innsendelsesfrist,
-            it.hendelsetype,
-            it.hendelsereferanse,
-            it.filer.map { fil -> VedleggOpplastingResponse(fil.filename, fil.status.result) },
-        )
-    }
 
 suspend fun FilePart.calculateContentLength(): Long {
     val dataBuffer = DataBufferUtils.join(content()).awaitSingle()

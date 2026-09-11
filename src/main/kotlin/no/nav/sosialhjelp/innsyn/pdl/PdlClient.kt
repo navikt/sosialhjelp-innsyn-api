@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.pdl
 import kotlinx.coroutines.reactor.awaitSingle
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
+import org.springframework.graphql.client.toEntity
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,6 +17,6 @@ class PdlClient(
             .documentName("hentPerson")
             .variable("ident", ident)
             .retrieve("hentPerson")
-            .toEntity(PdlPerson::class.java)
+            .toEntity<PdlPerson>()
             .awaitSingle()
 }

@@ -1,12 +1,9 @@
 package no.nav.sosialhjelp.innsyn.digisossak.oppgaver
 
-import com.fasterxml.jackson.core.util.VersionUtil
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
-import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
@@ -24,7 +21,6 @@ class OppgaveService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksService: FiksService,
-    private val clientProperties: ClientProperties,
     private val meterRegistry: MeterRegistry,
 ) {
     private val oppgaveTeller = Counter.builder("oppgave_teller")
@@ -59,52 +55,6 @@ class OppgaveService(
         oppgaveTeller.tag("fiksDigisosId", fiksDigisosId).register(meterRegistry).increment(oppgaveResponseList.size.toDouble())
         return oppgaveResponseList
     }
-
-    @Deprecated("Gammel funksjon", replaceWith = ReplaceWith("hentOppgaverBeta(fiksDigisosId)"))
-    suspend fun hentOppgaver(fiksDigisosId: String): List<OppgaveResponse> {
-        val digisosSak = fiksService.getSoknad(fiksDigisosId)
-        val model = eventService.createModel(digisosSak)
-        if (model.status == SoknadsStatus.FERDIGBEHANDLET || model.oppgaver.isEmpty()) {
-            return emptyList()
-        }
-
-        val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, model)
-
-        val oppgaveResponseList =
-            model.oppgaver
-                .filter { oppgave ->
-                    finnAlleredeLastetOpp(
-                        oppgave,
-                        ettersendteVedlegg,
-                    ).isEmpty()
-                }.groupBy { it.innsendelsesfrist?.toLocalDate() }
-                .map { (key, value) ->
-                    OppgaveResponse(
-                        innsendelsesfrist = key,
-                        // oppgaveId og innsendelsefrist er alltid 1-1
-                        oppgaveId = value[0].oppgaveId,
-                        oppgaveElementer =
-                            value.map {
-                                OppgaveElement(
-                                    it.tittel,
-                                    it.tilleggsinfo,
-                                    it.hendelsetype,
-                                    it.hendelsereferanse,
-                                    it.erFraInnsyn,
-                                )
-                            },
-                    )
-                }.sortedBy { it.innsendelsesfrist }
-        log.info("Hentet ${oppgaveResponseList.sumOf { it.oppgaveElementer.size }} oppgaver")
-        oppgaveTeller.tag("fiksDigisosId", fiksDigisosId).register(meterRegistry).increment(oppgaveResponseList.size.toDouble())
-        return oppgaveResponseList
-    }
-
-    suspend fun hentOppgaverMedOppgaveId(
-        fiksDigisosId: String,
-        oppgaveId: String,
-    ): List<OppgaveResponse> = hentOppgaver(fiksDigisosId).filter { it.oppgaveId == oppgaveId }
 
     private fun finnAlleredeLastetOpp(
         oppgave: Oppgave,
@@ -266,15 +216,6 @@ class OppgaveService(
         return dokumentasjonkravResponseList
     }
 
-    suspend fun getDokumentasjonkravMedId(
-        fiksDigisosId: String,
-        dokumentasjonkravId: String,
-    ): List<DokumentasjonkravResponse> {
-        val dokumentasjonkrav = getDokumentasjonkrav(fiksDigisosId)
-
-        return dokumentasjonkrav.filter { it.dokumentasjonkravId == dokumentasjonkravId }
-    }
-
     private fun finnAlleredeLastetOpp(
         dokumentasjonkrav: Dokumentasjonkrav,
         vedleggListe: List<InternalVedlegg>,
@@ -283,63 +224,6 @@ class OppgaveService(
             .filter { it.type == dokumentasjonkrav.tittel }
             .filter { it.tilleggsinfo == dokumentasjonkrav.beskrivelse }
             .filter { it.tidspunktLastetOpp.isAfter(dokumentasjonkrav.datoLagtTil) || dokumentasjonkrav.frist == null }
-
-    suspend fun getHarLevertDokumentasjonkrav(fiksDigisosId: String): Boolean {
-        val digisosSak = fiksService.getSoknad(fiksDigisosId)
-        val model = eventService.createModel(digisosSak)
-        if (model.dokumentasjonkrav.isEmpty()) {
-            return false
-        }
-
-        val ettersendteVedlegg =
-            vedleggService.hentEttersendteVedlegg(digisosSak, model)
-
-        return model.dokumentasjonkrav
-            .filter {
-                !it
-                    .isEmpty()
-                    .also { isEmpty -> if (isEmpty) log.error("Tittel og beskrivelse på dokumentasjonkrav er tomt") }
-            }.filter { finnAlleredeLastetOpp(it, ettersendteVedlegg).isNotEmpty() }
-            .toList()
-            .isNotEmpty()
-    }
-
-    suspend fun getFagsystemHarVilkarOgDokumentasjonkrav(fiksDigisosId: String): Boolean {
-        val digisosSak = fiksService.getSoknad(fiksDigisosId)
-        val model = eventService.createModel(digisosSak)
-        if (model.fagsystem == null || model.fagsystem!!.systemversjon == null || model.fagsystem!!.systemnavn == null) {
-            return false
-        }
-
-        val fagsystemer =
-            clientProperties.vilkarDokkravFagsystemVersjoner.mapNotNull {
-                try {
-                    val split = it.split(";")
-                    Fagsystem(split[0], split[1])
-                } catch (e: IndexOutOfBoundsException) {
-                    log.error("Kan ikke splitte fagsystem-versjon i app config $it")
-                    null
-                }
-            }
-
-        return fagsystemer
-            .filter { model.fagsystem!!.systemnavn.equals(it.systemnavn) }
-            .any { versionEqualsOrIsNewer(model.fagsystem!!.systemversjon!!, it.systemversjon!!) }
-    }
-
-    private fun versionEqualsOrIsNewer(
-        avsender: String,
-        godkjent: String,
-    ): Boolean {
-        val avsenderVersion = VersionUtil.parseVersion(avsender, null, null)
-        val godkjentVersion = VersionUtil.parseVersion(godkjent, null, null)
-
-        if (avsenderVersion.isUnknownVersion || godkjentVersion.isUnknownVersion) {
-            return false
-        }
-
-        return avsenderVersion >= godkjentVersion
-    }
 
     suspend fun sakHarStatusMottattOgIkkeHattSendt(fiksDigisosId: String): Boolean {
         val digisosSak = fiksService.getSoknad(fiksDigisosId)

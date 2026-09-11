@@ -3,7 +3,6 @@
     <springProfile name="log-kibana">
         <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <excludeMdcKeyName>fodselsdato</excludeMdcKeyName>
                 <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                     <maxDepthPerThrowable>30</maxDepthPerThrowable>
                 </throwableConverter>
@@ -40,7 +39,6 @@
     <springProfile name="secure-log">
         <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <excludeMdcKeyName>fodselsdato</excludeMdcKeyName>
                 <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                     <maxDepthPerThrowable>30</maxDepthPerThrowable>
                 </throwableConverter>

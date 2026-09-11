@@ -8,10 +8,12 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.Ettersendelse
+import no.nav.sosialhjelp.innsyn.app.config.webfilter.mdc.MDCUtils.NAV_EKSTERN_REF_ID
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
+import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -107,44 +109,45 @@ class VedleggService(
                 ?.ettersendelser
                 ?.hentVedleggSpesifikasjon(digisosSak)
                 ?.flatMap { (ettersendelse, jsonVedleggSpesifikasjon) ->
+                    MDC.putCloseable(NAV_EKSTERN_REF_ID, ettersendelse.navEksternRefId).use {
+                        val metadataFilerFiks =
+                            ettersendelse.vedlegg
+                                .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
 
-                    val metadataFilerFiks =
-                        ettersendelse.vedlegg
-                            .filter { ettersendelseVedlegg -> ettersendelseVedlegg.filnavn != "ettersendelse.pdf" }
+                        jsonVedleggSpesifikasjon.vedlegg
+                            .also { alleVedlegg ->
+                                alleVedlegg.validateFiles(metadataFilerFiks)
+                                // TODO Verifisere at det finnes
+                                log.info("Fant ${alleVedlegg.size} vedlegg i ettersendelse")
+                            }.filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
+                            .map { vedlegg ->
 
-                    jsonVedleggSpesifikasjon.vedlegg
-                        .also { alleVedlegg ->
-                            alleVedlegg.validateFiles(metadataFilerFiks)
-                            // TODO Verifisere at det finnes
-                            log.info("Fant ${alleVedlegg.size} vedlegg i ettersendelse")
-                        }.filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
-                        .map { vedlegg ->
+                                val allFilesExists =
+                                    vedlegg.filer
+                                        .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn.sanitize() } }
 
-                            val allFilesExists =
-                                vedlegg.filer
-                                    .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn.sanitize() } }
+                                val dokumentInfoList: MutableList<DokumentInfo> =
+                                    if (allFilesExists) {
+                                        metadataFilerFiks.addByFilename(vedlegg.filer).toMutableList()
+                                    } else {
+                                        log.error(
+                                            "Det er mismatch mellom nedlastede filer og metadata. " +
+                                                "Det er JsonFiler som ikke finnes i ettersendelse metadata.",
+                                        )
+                                        vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }.toMutableList()
+                                    }
 
-                            val dokumentInfoList: MutableList<DokumentInfo> =
-                                if (allFilesExists) {
-                                    metadataFilerFiks.addByFilename(vedlegg.filer).toMutableList()
-                                } else {
-                                    log.error(
-                                        "Det er mismatch mellom nedlastede filer og metadata. " +
-                                            "Det er JsonFiler som ikke finnes i ettersendelse metadata.",
-                                    )
-                                    vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }.toMutableList()
-                                }
-
-                            InternalVedlegg(
-                                vedlegg.type,
-                                vedlegg.tilleggsinfo,
-                                vedlegg.hendelseType,
-                                vedlegg.hendelseReferanse,
-                                dokumentInfoList,
-                                unixToLocalDateTime(ettersendelse.timestampSendt),
-                                hentInnsendelsesfristFraOppgave(model, vedlegg),
-                            )
-                        }
+                                InternalVedlegg(
+                                    vedlegg.type,
+                                    vedlegg.tilleggsinfo,
+                                    vedlegg.hendelseType,
+                                    vedlegg.hendelseReferanse,
+                                    dokumentInfoList,
+                                    unixToLocalDateTime(ettersendelse.timestampSendt),
+                                    hentInnsendelsesfristFraOppgave(model, vedlegg),
+                                )
+                            }
+                    }
                 } ?: emptyList()
 
         return kombinerAlleLikeVedlegg(alleVedlegg)
@@ -154,16 +157,41 @@ class VedleggService(
         flatMap { it.filer }
             .size
             .also { fileCount ->
-
                 if (fileCount != metadataFilerFiks.size) {
                     log.error(
-                        "Mismatch mellom antall filer i vedleggSpesifikasjon ({}) og antall filer i ettersendelse ({})",
+                        "Mismatch mellom antall filer i vedleggSpesifikasjon ({}) og antall filer i ettersendelse ({})" +
+                            ": EttersendelsePdf? ${ettersendelsePdf(this, metadataFilerFiks)}",
                         fileCount,
                         metadataFilerFiks.size,
                     )
                 }
             }
     }
+
+    // TODO Hvilken fil er det som ikke matcher?
+    private fun ettersendelsePdf(
+        jsonVedlegg: List<JsonVedlegg>,
+        metadataFilerFiks: List<DokumentInfo>,
+    ): String =
+        runCatching {
+            val filnavn = jsonVedlegg.flatMap { it.filer }.map { it.filnavn.sanitize() }
+
+            metadataFilerFiks
+                .filter { !filnavn.contains(it.filnavn.sanitize()) }
+                .let {
+                    when {
+                        it.isEmpty() -> "Tom liste"
+                        it.size == 1 -> {
+                            if (it.first().filnavn.sanitize().contains("ettersendelse", true)) {
+                                "ettersendelse"
+                            } else {
+                                "En fil som ikke matcher - ikke ettersendelse"
+                            }
+                        }
+                        else -> "Flere filer som ikke matcher - ettersendelse? ${it.find { fil -> fil.filnavn.contains("ettersendelse") }}"
+                    }
+                }
+        }.getOrElse { "error" }
 
     private fun List<DokumentInfo>.addByFilename(filer: List<JsonFiler>): List<DokumentInfo> {
         val sanitizedFilenames = filer.map { it.filnavn.sanitize() }

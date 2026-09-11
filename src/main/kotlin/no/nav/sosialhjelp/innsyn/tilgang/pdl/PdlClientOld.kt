@@ -1,8 +1,6 @@
 package no.nav.sosialhjelp.innsyn.tilgang.pdl
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.innsyn.app.client.RetryUtils
 import no.nav.sosialhjelp.innsyn.app.exceptions.PdlException
 import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
@@ -66,27 +64,25 @@ class PdlClientOldImpl(
         ident: String,
         token: Token,
     ): PdlHentPerson? =
-        withContext(Dispatchers.IO) {
+        try {
             val query = getHentPersonResource().replace("[\n\r]", "")
-            try {
-                val pdlPersonResponse =
-                    pdlWebClient
-                        .post()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(AUTHORIZATION, tokenXtoken(token).withBearer())
-                        .bodyValue(PdlRequest(query, Variables(ident)))
-                        .retrieve()
-                        .bodyToMono<PdlPersonResponse>()
-                        .retryWhen(pdlRetry)
-                        .awaitSingleOrNull()
+            val pdlPersonResponse =
+                pdlWebClient
+                    .post()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(AUTHORIZATION, tokenXtoken(token).withBearer())
+                    .bodyValue(PdlRequest(query, Variables(ident)))
+                    .retrieve()
+                    .bodyToMono<PdlPersonResponse>()
+                    .retryWhen(pdlRetry)
+                    .awaitSingleOrNull()
 
-                checkForPdlApiErrors(pdlPersonResponse)
+            checkForPdlApiErrors(pdlPersonResponse)
 
-                pdlPersonResponse?.data
-            } catch (e: WebClientResponseException) {
-                log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
-                throw PdlException(e.message)
-            }
+            pdlPersonResponse?.data
+        } catch (e: WebClientResponseException) {
+            log.error("PDL - noe feilet, status=${e.statusCode} ${e.statusText}", e)
+            throw PdlException(e.message)
         }
 
     private suspend fun hentIdenterFraPdl(

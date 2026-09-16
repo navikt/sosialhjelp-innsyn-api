@@ -40,6 +40,9 @@ dependencies {
 
     // Sosialhjelp-common
     implementation(libs.sosialhjelp.common.api)
+    implementation(libs.sosialhjelp.digisos.hendelser)
+    implementation(libs.sosialhjelp.filformat.kmp)
+    implementation(libs.kotlinx.datetime)
 
     // Micrometer/Prometheus
     implementation(libs.bundles.prometheus)

@@ -1,6 +1,10 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
@@ -16,6 +20,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
+import no.nav.sosialhjelp.filformat.vedlegg.Vedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
@@ -30,11 +35,13 @@ import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import kotlin.time.Duration.Companion.milliseconds
 
 @Component
 class EventService(
@@ -42,6 +49,7 @@ class EventService(
     private val innsynService: InnsynService,
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
+    private val shadowFoldService: ShadowFoldService,
 ) {
     @WithSpan("createModel")
     suspend fun createModel(digisosSak: DigisosSak): InternalDigisosSoker {
@@ -80,7 +88,39 @@ class EventService(
 
         applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak)
 
+        shadowCompare(digisosSak, jsonDigisosSoker, jsonSoknad, model)
+
         return model
+    }
+
+    private suspend fun shadowCompare(
+        digisosSak: DigisosSak,
+        jsonDigisosSoker: JsonDigisosSoker?,
+        jsonSoknad: JsonSoknad?,
+        model: InternalDigisosSoker,
+    ) {
+        if (!shadowFoldService.isEnabled()) return
+
+        try {
+            val vedlegg =
+                withTimeoutOrNull(SHADOW_VEDLEGG_TIMEOUT) {
+                    vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak).map {
+                        Vedlegg(type = it.type, tilleggsinfo = it.tilleggsinfo)
+                    }
+                }
+            if (vedlegg == null) {
+                shadowFoldService.recordFetchTimeout(digisosSak)
+                return
+            }
+
+            withContext(Dispatchers.Default) {
+                shadowFoldService.compare(digisosSak, jsonDigisosSoker, jsonSoknad, vedlegg, model)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            shadowFoldService.recordFetchFailure(digisosSak, e)
+        }
     }
 
     fun logTekniskSperre(
@@ -100,7 +140,7 @@ class EventService(
                     jsonDigisosSoker
                         ?.hendelser
                         ?.filterIsInstance<JsonUtbetaling>()
-                        ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
+                        ?.filter { it.utbetalingsreferanse == utbetaling.referanse }
                         ?.forEach {
                             eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
                             opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
@@ -221,6 +261,7 @@ class EventService(
     }
 
     companion object {
+        private val SHADOW_VEDLEGG_TIMEOUT = 500.milliseconds
         private val log by logger()
 
         /**

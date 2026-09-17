@@ -35,7 +35,7 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
     @WithMockUser("123")
     fun `Skal hente saksstatus for fiksDigisoID`() {
         val digisosSakOk = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
-        val soknad = JsonSoknad()
+        val soknad: JsonSoknad = mockk()
         val soker = sosialhjelpJsonMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getSoknad(any()) } returns digisosSakOk

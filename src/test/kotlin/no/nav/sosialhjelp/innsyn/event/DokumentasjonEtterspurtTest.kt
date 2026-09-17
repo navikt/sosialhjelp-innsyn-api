@@ -58,24 +58,20 @@ internal class DokumentasjonEtterspurtTest {
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         coEvery { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-
-        resetHendelser()
     }
 
     @Test
     fun `dokumentliste er satt OG vedtaksbrev er satt - skal gi oppgaver og historikk`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            DOKUMENTASJONETTERSPURT.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
 
             val model = service.createModel(mockDigisosSak)
 
@@ -101,16 +97,14 @@ internal class DokumentasjonEtterspurtTest {
     internal fun `dokumentliste er satt OG forvaltningsbrev mangler - skal gi oppgaver men ikke historikk`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            DOKUMENTASJONETTERSPURT_UTEN_FORVALTNINGSBREV.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
 
             val model = service.createModel(mockDigisosSak)
 
@@ -131,16 +125,14 @@ internal class DokumentasjonEtterspurtTest {
     fun `dokumentliste er tom OG forvaltningsbrev er satt - skal verken gi oppgaver eller historikk`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
 
             val model = service.createModel(mockDigisosSak)
 
@@ -155,15 +147,13 @@ internal class DokumentasjonEtterspurtTest {
     fun `oppgaver skal hentes fra soknaden dersom det ikke finnes dokumentasjonEtterspurt`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
@@ -251,16 +241,14 @@ internal class DokumentasjonEtterspurtTest {
     internal fun `dokumentasjonEtterspurt overstyrer gjenstaende vedleggskrav fra soknad`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            DOKUMENTASJONETTERSPURT.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
@@ -293,17 +281,15 @@ internal class DokumentasjonEtterspurtTest {
     internal fun `ny dokumentasjonEtterspurt uten oppgaver skal overstyre og gi hendelse i historikk`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
-                            DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            DOKUMENTASJONETTERSPURT.copy(hendelsestidspunkt = tidspunkt_3),
+                            DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.copy(hendelsestidspunkt = tidspunkt_4),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
@@ -334,17 +320,15 @@ internal class DokumentasjonEtterspurtTest {
     internal fun `ny dokumentasjonEtterspurt uten oppgaver skal ikke gi hendelse i historikk ved soknadstatus ferdigbehandlet`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_2),
-                            DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
-                            DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.copy(hendelsestidspunkt = tidspunkt_2),
+                            DOKUMENTASJONETTERSPURT.copy(hendelsestidspunkt = tidspunkt_3),
+                            DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.copy(hendelsestidspunkt = tidspunkt_4),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
@@ -374,17 +358,15 @@ internal class DokumentasjonEtterspurtTest {
     internal fun `ny dokumentasjonEtterspurt uten oppgaver skal ikke gi hendelse i historikk ved soknadstatus behandles_ikke`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_BEHANDLES_IKKE.withHendelsestidspunkt(tidspunkt_2),
-                            DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_3),
-                            DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.withHendelsestidspunkt(tidspunkt_4),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_BEHANDLES_IKKE.copy(hendelsestidspunkt = tidspunkt_2),
+                            DOKUMENTASJONETTERSPURT.copy(hendelsestidspunkt = tidspunkt_3),
+                            DOKUMENTASJONETTERSPURT_TOM_DOKUMENT_LISTE.copy(hendelsestidspunkt = tidspunkt_4),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
@@ -421,16 +403,14 @@ internal class DokumentasjonEtterspurtTest {
 
             every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunktSendt31dagerSiden
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunktMottatt),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunktUnderBehandling),
-                            DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunktDokumentasjonEtterspurt),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunktMottatt),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunktUnderBehandling),
+                            DOKUMENTASJONETTERSPURT.copy(hendelsestidspunkt = tidspunktDokumentasjonEtterspurt),
                         ),
-                    )
+                )
 
             val model = service.createModel(mockDigisosSak)
 
@@ -448,17 +428,15 @@ internal class DokumentasjonEtterspurtTest {
     internal fun `soknadsstatus skal overrides til UNDER_BEHANDLING hvis soknad er FERDIGBEHANDLET men har aktiv sak`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_2),
-                            SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
-                            DOKUMENTASJONETTERSPURT.withHendelsestidspunkt(tidspunkt_4),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.copy(hendelsestidspunkt = tidspunkt_2),
+                            SAK1_SAKS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_3),
+                            DOKUMENTASJONETTERSPURT.copy(hendelsestidspunkt = tidspunkt_4),
                         ),
-                    )
+                )
 
             val model = service.createModel(mockDigisosSak)
 

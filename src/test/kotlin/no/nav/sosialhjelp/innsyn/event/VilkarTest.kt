@@ -49,27 +49,23 @@ internal class VilkarTest {
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         coEvery { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-
-        resetHendelser()
     }
 
     @Test
     fun `vilkar ETTER utbetaling`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
-                            UTBETALING.withHendelsestidspunkt(tidspunkt_5),
-                            VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_6),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            SAK1_VEDTAK_FATTET_INNVILGET.copy(hendelsestidspunkt = tidspunkt_3),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.copy(hendelsestidspunkt = tidspunkt_4),
+                            UTBETALING.copy(hendelsestidspunkt = tidspunkt_5),
+                            VILKAR_OPPFYLT.copy(hendelsestidspunkt = tidspunkt_6),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -91,16 +87,14 @@ internal class VilkarTest {
     fun `vilkar UTEN utbetaling`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            VILKAR_OPPFYLT.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -115,19 +109,17 @@ internal class VilkarTest {
     fun `vilkar FOR utbetaling - vilkar knyttes ikke til noen utbetaling`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
-                            VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                            UTBETALING.withHendelsestidspunkt(tidspunkt_6),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            SAK1_VEDTAK_FATTET_INNVILGET.copy(hendelsestidspunkt = tidspunkt_3),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.copy(hendelsestidspunkt = tidspunkt_4),
+                            VILKAR_OPPFYLT.copy(hendelsestidspunkt = tidspunkt_5),
+                            UTBETALING.copy(hendelsestidspunkt = tidspunkt_6),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -144,19 +136,17 @@ internal class VilkarTest {
     fun `vilkar og utbetaling har samme hendelsestidspunkt`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_4),
-                            VILKAR_OPPFYLT.withHendelsestidspunkt(tidspunkt_5),
-                            UTBETALING.withHendelsestidspunkt(tidspunkt_5),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            SAK1_VEDTAK_FATTET_INNVILGET.copy(hendelsestidspunkt = tidspunkt_3),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.copy(hendelsestidspunkt = tidspunkt_4),
+                            VILKAR_OPPFYLT.copy(hendelsestidspunkt = tidspunkt_5),
+                            UTBETALING.copy(hendelsestidspunkt = tidspunkt_5),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)

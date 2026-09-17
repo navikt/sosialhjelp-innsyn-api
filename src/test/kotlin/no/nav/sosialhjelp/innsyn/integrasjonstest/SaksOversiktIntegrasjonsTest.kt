@@ -51,7 +51,7 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     fun `skal hente saksdetaljer for sak`() {
         val digisosSakOk = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         val soker = sosialhjelpJsonMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
-        val soknad = JsonSoknad()
+        val soknad: JsonSoknad = mockk()
 
         coEvery { fiksService.getSoknad(any()) } returns digisosSakOk
         coEvery { kommuneService.hentKommuneInfo(any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()

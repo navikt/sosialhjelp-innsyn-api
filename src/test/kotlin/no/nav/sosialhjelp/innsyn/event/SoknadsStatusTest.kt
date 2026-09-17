@@ -51,8 +51,6 @@ internal class SoknadsStatusTest {
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         coEvery { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-
-        resetHendelser()
     }
 
     @Test
@@ -76,14 +74,12 @@ internal class SoknadsStatusTest {
     fun `soknadsStatus MOTTATT`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -100,7 +96,7 @@ internal class SoknadsStatusTest {
     @Test
     fun `soknadsStatus SENDT innsynDeaktivert`() =
         runTest(timeout = 5.seconds) {
-            every { mockJsonSoknad.mottaker } returns null
+            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
@@ -114,12 +110,9 @@ internal class SoknadsStatusTest {
     @Test
     fun `soknadsStatus SENDT papirsoknad`() =
         runTest(timeout = 5.seconds) {
-            every { mockJsonSoknad.mottaker } returns null
+            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(emptyList())
+                JSON_DIGISOS_SOKER.copy(hendelser = emptyList())
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -132,16 +125,14 @@ internal class SoknadsStatusTest {
     @Test
     fun `soknadsStatus MOTTATT papirsoknad`() =
         runTest(timeout = 5.seconds) {
-            every { mockJsonSoknad.mottaker } returns null
+            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -159,15 +150,13 @@ internal class SoknadsStatusTest {
     fun `soknadsStatus UNDER_BEHANDLING`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -186,16 +175,14 @@ internal class SoknadsStatusTest {
     fun `soknadsStatus FERDIGBEHANDLET`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            SOKNADS_STATUS_FERDIGBEHANDLET.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            SOKNADS_STATUS_FERDIGBEHANDLET.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -214,15 +201,13 @@ internal class SoknadsStatusTest {
     fun `soknadsStatus BEHANDLES_IKKE`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_BEHANDLES_IKKE.withHendelsestidspunkt(tidspunkt_2),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_BEHANDLES_IKKE.copy(hendelsestidspunkt = tidspunkt_2),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -240,7 +225,7 @@ internal class SoknadsStatusTest {
     @Test
     fun `modell inneholder referanse`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns JsonDigisosSoker()
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns JSON_DIGISOS_SOKER
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -252,7 +237,7 @@ internal class SoknadsStatusTest {
     @Test
     fun `soknadsStatus inneholder tidspunktSendt`() =
         runTest(timeout = 5.seconds) {
-            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns JsonDigisosSoker()
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns JSON_DIGISOS_SOKER
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)

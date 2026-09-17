@@ -197,27 +197,21 @@ internal class VedleggServiceTest {
             fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_SOKNAD_1, any())
         } returns mockJsonVedleggSpesifikasjon
         coEvery { fiksService.getDocument<JsonVedleggSpesifikasjon>(any(), VEDLEGG_METADATA_ETTERSENDELSE_5, any()) } returns
-            JsonVedleggSpesifikasjon()
-                .withVedlegg(
+            JsonVedleggSpesifikasjon(
+                vedlegg =
                     listOf(
-                        JsonVedlegg()
-                            .withFiler(
-                                listOf(
-                                    JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_1).withSha512("1231231"),
-                                    JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_2).withSha512("adfgbjn"),
-                                ),
-                            ).withStatus(LASTET_OPP_STATUS)
-                            .withType(DOKUMENTTYPE_3),
-                        JsonVedlegg()
-                            .withFiler(
-                                listOf(
-                                    JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_3).withSha512("aasdcx"),
-                                    JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("qweqqa"),
-                                ),
-                            ).withStatus(LASTET_OPP_STATUS)
-                            .withType(DOKUMENTTYPE_4),
+                        JsonVedlegg(
+                            type = DOKUMENTTYPE_3,
+                            status = LASTET_OPP_STATUS,
+                            filer = listOf(JsonFiler(ETTERSENDELSE_FILNAVN_1, "1231231"), JsonFiler(ETTERSENDELSE_FILNAVN_2, "adfgbjn")),
+                        ),
+                        JsonVedlegg(
+                            type = DOKUMENTTYPE_4,
+                            status = LASTET_OPP_STATUS,
+                            filer = listOf(JsonFiler(ETTERSENDELSE_FILNAVN_3, "aasdcx"), JsonFiler(ETTERSENDELSE_FILNAVN_4, "qweqqa")),
+                        ),
                     ),
-                )
+            )
 
         every { mockDigisosSak.ettersendtInfoNAV?.ettersendelser } returns
             listOf(
@@ -357,119 +351,58 @@ private val originalSoknadMedVedleggKrevesOgLastetOpp =
     )
 
 private val soknadVedleggSpesifikasjon =
-    JsonVedleggSpesifikasjon()
-        .withVedlegg(
-            listOf(
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(SOKNAD_FILNAVN_1).withSha512("1234fasd"),
-                        ),
-                    ).withStatus(LASTET_OPP_STATUS)
-                    .withType(DOKUMENTTYPE),
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(SOKNAD_FILNAVN_2).withSha512("sfg234"),
-                        ),
-                    ).withStatus(LASTET_OPP_STATUS)
-                    .withType(DOKUMENTTYPE_2),
-            ),
-        )
+    JsonVedleggSpesifikasjon(
+        listOf(
+            vedlegg(DOKUMENTTYPE, LASTET_OPP_STATUS, JsonFiler(SOKNAD_FILNAVN_1, "1234fasd")),
+            vedlegg(DOKUMENTTYPE_2, LASTET_OPP_STATUS, JsonFiler(SOKNAD_FILNAVN_2, "sfg234")),
+        ),
+    )
 
 private val soknadVedleggSpesifikasjonMedStatusKrevesOgLastetOpp =
-    JsonVedleggSpesifikasjon()
-        .withVedlegg(
-            listOf(
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(SOKNAD_FILNAVN_1).withSha512("1234fasd"),
-                        ),
-                    ).withStatus(LASTET_OPP_STATUS)
-                    .withType(DOKUMENTTYPE),
-                JsonVedlegg()
-                    .withFiler(listOf())
-                    .withStatus("VedleggKreves")
-                    .withType(DOKUMENTTYPE_2),
-            ),
-        )
+    JsonVedleggSpesifikasjon(
+        listOf(vedlegg(DOKUMENTTYPE, LASTET_OPP_STATUS, JsonFiler(SOKNAD_FILNAVN_1, "1234fasd")), vedlegg(DOKUMENTTYPE_2, "VedleggKreves")),
+    )
 
 private val ettersendteVedleggSpesifikasjon_1 =
-    JsonVedleggSpesifikasjon()
-        .withVedlegg(
-            listOf(
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_1).withSha512("g25b3"),
-                        ),
-                    ).withStatus(LASTET_OPP_STATUS)
-                    .withType(DOKUMENTTYPE_3),
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_2).withSha512("4avc65a8"),
-                        ),
-                    ).withStatus(LASTET_OPP_STATUS)
-                    .withType(DOKUMENTTYPE_4),
-            ),
-        )
+    JsonVedleggSpesifikasjon(
+        listOf(
+            vedlegg(DOKUMENTTYPE_3, LASTET_OPP_STATUS, JsonFiler(ETTERSENDELSE_FILNAVN_1, "g25b3")),
+            vedlegg(DOKUMENTTYPE_4, LASTET_OPP_STATUS, JsonFiler(ETTERSENDELSE_FILNAVN_2, "4avc65a8")),
+        ),
+    )
 
 private val ettersendteVedleggSpesifikasjon_2 =
-    JsonVedleggSpesifikasjon()
-        .withVedlegg(
-            listOf(
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_3).withSha512("aadsfwr"),
-                            JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("uiuusss"),
-                        ),
-                    ).withStatus(LASTET_OPP_STATUS)
-                    .withType(DOKUMENTTYPE_3),
+    JsonVedleggSpesifikasjon(
+        listOf(
+            vedlegg(
+                DOKUMENTTYPE_3,
+                LASTET_OPP_STATUS,
+                JsonFiler(ETTERSENDELSE_FILNAVN_3, "aadsfwr"),
+                JsonFiler(ETTERSENDELSE_FILNAVN_4, "uiuusss"),
             ),
-        )
+        ),
+    )
 
 private val ettersendteVedleggSpesifikasjon_3 =
-    JsonVedleggSpesifikasjon()
-        .withVedlegg(
-            listOf(
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_3).withSha512("aadsfwr"),
-                        ),
-                    ).withStatus("VedleggAlleredeSendt")
-                    .withType(DOKUMENTTYPE_3),
-            ),
-        )
+    JsonVedleggSpesifikasjon(listOf(vedlegg(DOKUMENTTYPE_3, "VedleggAlleredeSendt", JsonFiler(ETTERSENDELSE_FILNAVN_3, "aadsfwr"))))
 
 private val ettersendteVedleggSpesifikasjon_4 =
-    JsonVedleggSpesifikasjon()
-        .withVedlegg(
-            listOf(
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_4).withSha512("1231231"),
-                        ),
-                    ).withStatus(LASTET_OPP_STATUS)
-                    .withType(DOKUMENTTYPE_3),
-            ),
-        )
+    JsonVedleggSpesifikasjon(listOf(vedlegg(DOKUMENTTYPE_3, LASTET_OPP_STATUS, JsonFiler(ETTERSENDELSE_FILNAVN_4, "1231231"))))
 
 private val ettersendteVedleggSpesifikasjon_5 =
-    JsonVedleggSpesifikasjon()
-        .withVedlegg(
-            listOf(
-                JsonVedlegg()
-                    .withFiler(
-                        listOf(
-                            JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_1).withSha512("1231231"),
-                            JsonFiler().withFilnavn(ETTERSENDELSE_FILNAVN_5).withSha512("9786468"),
-                        ),
-                    ).withStatus(LASTET_OPP_STATUS)
-                    .withType(DOKUMENTTYPE),
+    JsonVedleggSpesifikasjon(
+        listOf(
+            vedlegg(
+                DOKUMENTTYPE,
+                LASTET_OPP_STATUS,
+                JsonFiler(ETTERSENDELSE_FILNAVN_1, "1231231"),
+                JsonFiler(ETTERSENDELSE_FILNAVN_5, "9786468"),
             ),
-        )
+        ),
+    )
+
+private fun vedlegg(
+    type: String,
+    status: String,
+    vararg filer: JsonFiler,
+) = JsonVedlegg(type = type, status = status, filer = filer.toList())

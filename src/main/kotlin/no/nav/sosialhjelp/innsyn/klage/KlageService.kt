@@ -6,17 +6,15 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonFiler
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendelseDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.MandatoryFilesForKlage
 import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
+import no.nav.sosialhjelp.innsyn.upload.UploadClient
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -62,6 +60,7 @@ class KlageServiceImpl(
     private val mellomlagerService: MellomlagerService,
     private val clientProperties: ClientProperties,
     private val krypteringService: KrypteringService,
+    private val uploadClient: UploadClient,
 ) : KlageService {
     private val objectMapper = jacksonObjectMapper()
 
@@ -83,7 +82,7 @@ class KlageServiceImpl(
                     MandatoryFilesForKlage(
                         klageJson = objectMapper.writeValueAsString(jsonKlage),
                         klagePdf = encryptedPdf,
-                        vedleggJson = createJsonVedleggSpec(UUID.fromString(jsonKlage.klageId)),
+                        vedleggJson = fetchJsonVedleggSpec(UUID.fromString(jsonKlage.klageId)),
                     ),
                 )
             }
@@ -95,7 +94,7 @@ class KlageServiceImpl(
         klageId: UUID,
         ettersendelseId: UUID,
     ) {
-        createJsonVedleggSpec(ettersendelseId, klageId)
+        fetchJsonVedleggSpec(ettersendelseId, klageId)
             .also {
                 if (it.noFiles()) error("Ingen vedlegg for ettersendelse av Klage")
 
@@ -145,34 +144,10 @@ class KlageServiceImpl(
         return mellomlagerService.processDocumentUpload(navEksternRefId, allFiles)
     }
 
-    private suspend fun createJsonVedleggSpec(
+    private suspend fun fetchJsonVedleggSpec(
         navEksternRefId: UUID,
         klageId: UUID = navEksternRefId,
-    ): JsonVedleggSpesifikasjon {
-        val allMetadata =
-            runCatching { mellomlagerService.getAllDocumentMetadataForRef(navEksternRefId) }
-                .getOrElse { ex ->
-                    when (ex) {
-                        is NotFoundException -> emptyList()
-                        else -> throw ex
-                    }
-                }
-
-        // TODO Hva forventes her i kontekst av klage?
-        return JsonVedlegg()
-            .withType(resolveType(navEksternRefId, klageId))
-            .withStatus(if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG")
-            .withHendelseType(JsonVedlegg.HendelseType.BRUKER)
-            .withHendelseReferanse(navEksternRefId.toString())
-            .withKlageId(klageId.toString())
-            .withFiler(allMetadata.map { JsonFiler().withFilnavn(it.filnavn) })
-            .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
-    }
-
-    private fun resolveType(
-        navEksternRefId: UUID,
-        klageId: UUID,
-    ): String = if (navEksternRefId == klageId) "klage" else "klage_ettersendelse"
+    ): JsonVedleggSpesifikasjon = uploadClient.getVedleggJson(navEksternRefId, klageId)
 
     private fun DokumentInfoDto.toVedleggResponse(tidspunktSendt: LocalDateTime) =
         VedleggResponse(

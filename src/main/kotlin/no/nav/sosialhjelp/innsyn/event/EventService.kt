@@ -63,7 +63,7 @@ class EventService(
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
             model.fiksDigisosId = digisosSak.fiksDigisosId
 
-            if (jsonSoknad != null && jsonSoknad.mottaker != null) {
+            if (jsonSoknad != null) {
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
                 model.historikk.add(
                     Hendelse(

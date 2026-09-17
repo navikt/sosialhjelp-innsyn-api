@@ -25,8 +25,8 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
             referanse = hendelse.utbetalingsreferanse,
             status =
                 UtbetalingsStatus.valueOf(
-                    hendelse.status?.value()
-                        ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.value(),
+                    hendelse.status?.name
+                        ?: JsonUtbetaling.Status.PLANLAGT_UTBETALING.name,
                 ),
             belop = BigDecimal.valueOf(hendelse.belop ?: 0.0),
             beskrivelse = hendelse.beskrivelse,
@@ -59,4 +59,4 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     utbetalinger.add(utbetaling)
 }
 
-private fun isAnnenMottaker(hendelse: JsonUtbetaling) = hendelse.annenMottaker == null || hendelse.annenMottaker
+private fun isAnnenMottaker(hendelse: JsonUtbetaling) = hendelse.annenMottaker == true

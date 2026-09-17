@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.valkey
 
 import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CachingConfigurer
@@ -12,8 +13,8 @@ import org.springframework.context.annotation.Profile
 import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
-import org.springframework.data.redis.serializer.RedisSerializationContext
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer
+import org.springframework.data.redis.serializer.RedisSerializationContext.fromSerializer
 import org.springframework.data.redis.serializer.SerializationException
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.Duration
@@ -23,7 +24,7 @@ import java.time.Duration
 @Configuration
 @Profile("!mock-redis")
 @EnableCaching
-class ValkeyConfig : CachingConfigurer {
+class CacheConfig : CachingConfigurer {
     override fun errorHandler() = CustomCacheErrorHandler
 
     @Bean
@@ -48,9 +49,9 @@ class ValkeyConfig : CachingConfigurer {
 private object CacheDefaults {
     val defaultTTL: Duration = Duration.ofMinutes(1L)
     val keySerializationPair =
-        RedisSerializationContext.fromSerializer(StringRedisSerializer()).keySerializationPair
+        fromSerializer(StringRedisSerializer()).keySerializationPair
     val valueSerializationPair =
-        RedisSerializationContext.fromSerializer(JdkSerializationRedisSerializer()).valueSerializationPair
+        fromSerializer(GenericJacksonJsonRedisSerializer(sosialhjelpJsonMapper)).valueSerializationPair
 }
 
 abstract class InnsynApiCacheConfig(

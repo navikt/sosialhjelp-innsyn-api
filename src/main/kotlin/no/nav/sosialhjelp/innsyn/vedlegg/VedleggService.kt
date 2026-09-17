@@ -134,7 +134,7 @@ class VedleggService(
                                             "Det er mismatch mellom nedlastede filer og metadata. " +
                                                 "Det er JsonFiler som ikke finnes i ettersendelse metadata.",
                                         )
-                                        vedlegg.filer.map { DokumentInfo(it.filnavn ?: "", "Error", -1) }.toMutableList()
+                                        vedlegg.filer.map { DokumentInfo(it.filnavn ?: "ingen-filnavn", "Error", -1) }.toMutableList()
                                     }
 
                                 InternalVedlegg(

@@ -50,7 +50,7 @@ class VedleggService(
                 .filter { vedlegg -> vedlegg.status == status }
                 .map { vedlegg ->
                     InternalVedlegg(
-                        vedlegg.type,
+                        vedlegg.type ?: error("Vedlegg mangler type"),
                         vedlegg.tilleggsinfo,
                         vedlegg.hendelseType,
                         vedlegg.hendelseReferanse,
@@ -76,7 +76,7 @@ class VedleggService(
                         .filter { it.hendelseReferanse == hendelseReferanse && LASTET_OPP_STATUS == it.status }
                         .map { vedlegg ->
                             InternalVedlegg(
-                                vedlegg.type,
+                                vedlegg.type ?: error("Vedlegg mangler type"),
                                 vedlegg.tilleggsinfo,
                                 vedlegg.hendelseType,
                                 vedlegg.hendelseReferanse,
@@ -124,7 +124,7 @@ class VedleggService(
 
                                 val allFilesExists =
                                     vedlegg.filer
-                                        .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn.sanitize() } }
+                                        .all { fil -> metadataFilerFiks.any { it.filnavn.sanitize() == fil.filnavn?.sanitize() } }
 
                                 val dokumentInfoList: MutableList<DokumentInfo> =
                                     if (allFilesExists) {
@@ -134,11 +134,11 @@ class VedleggService(
                                             "Det er mismatch mellom nedlastede filer og metadata. " +
                                                 "Det er JsonFiler som ikke finnes i ettersendelse metadata.",
                                         )
-                                        vedlegg.filer.map { DokumentInfo(it.filnavn, "Error", -1) }.toMutableList()
+                                        vedlegg.filer.map { DokumentInfo(it.filnavn ?: "", "Error", -1) }.toMutableList()
                                     }
 
                                 InternalVedlegg(
-                                    vedlegg.type,
+                                    vedlegg.type ?: error("Vedlegg mangler type"),
                                     vedlegg.tilleggsinfo,
                                     vedlegg.hendelseType,
                                     vedlegg.hendelseReferanse,
@@ -174,7 +174,7 @@ class VedleggService(
         metadataFilerFiks: List<DokumentInfo>,
     ): String =
         runCatching {
-            val filnavn = jsonVedlegg.flatMap { it.filer }.map { it.filnavn.sanitize() }
+            val filnavn = jsonVedlegg.flatMap { it.filer }.map { it.filnavn?.sanitize() }
 
             metadataFilerFiks
                 .filter { !filnavn.contains(it.filnavn.sanitize()) }
@@ -194,7 +194,7 @@ class VedleggService(
         }.getOrElse { "error" }
 
     private fun List<DokumentInfo>.addByFilename(filer: List<JsonFiler>): List<DokumentInfo> {
-        val sanitizedFilenames = filer.map { it.filnavn.sanitize() }
+        val sanitizedFilenames = filer.map { it.filnavn?.sanitize() }
 
         return sanitizedFilenames.mapNotNull { filename -> this.find { it.filnavn.sanitize() == filename } }
     }

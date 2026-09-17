@@ -95,7 +95,7 @@ class FiksClient(
     }
 
     @Cacheable(DokumentCacheConfig.CACHE_NAME, key = "#cacheKey")
-    suspend fun <T : Serializable> hentDokument(
+    suspend fun <T> hentDokument(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,

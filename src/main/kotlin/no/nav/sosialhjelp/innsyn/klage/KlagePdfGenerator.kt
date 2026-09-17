@@ -36,7 +36,7 @@ object KlagePdfGenerator {
                 addCenteredH4Bold("Personidentifikator: ${jsonKlage.personIdentifikator.verdi}")
                 addCenteredH4Bold("Navn: ${jsonKlage.getFullName()}")
                 addBlankLine()
-                addText(jsonKlage.begrunnelse.klageTekst)
+                addText(jsonKlage.begrunnelse?.klageTekst ?: "")
                 addBlankLine()
                 addCenteredH4Bold("Digitalt Autentisert: ${jsonKlage.autentisering.autentiseringsTidspunkt}")
                 finish()

@@ -71,6 +71,8 @@ client:
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
   soknad_api_url: ${SOKNAD_API_URL:}
   soknad_api_audience: ${SOKNAD_API_AUDIENCE:}
+  upload_endpoint_url: ${UPLOAD_ENDPOINT_URL:}
+  upload_audience: ${UPLOAD_AUDIENCE:}
 
 nais:
   token:

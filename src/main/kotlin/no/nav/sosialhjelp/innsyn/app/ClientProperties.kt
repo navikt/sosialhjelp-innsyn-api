@@ -30,6 +30,10 @@ class ClientProperties {
     lateinit var tokendingsPrivateJwk: String
 
     lateinit var vilkarDokkravFagsystemVersjoner: List<String>
+
+    lateinit var uploadEndpointUrl: String
+    lateinit var uploadAudience: String
+
     var soknadApiUrl: String? = null
     var soknadApiAudience: String? = null
 }

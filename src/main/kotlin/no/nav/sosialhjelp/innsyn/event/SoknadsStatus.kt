@@ -50,8 +50,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
                     HendelseTekstType.SOKNAD_BEHANDLES_IKKE,
                     hendelse.hendelsestidspunkt.toLocalDateTime(),
                 )
-
-            else -> throw RuntimeException("Statustype ${hendelse.status.name} mangler mapping")
         }
 
     log.info(

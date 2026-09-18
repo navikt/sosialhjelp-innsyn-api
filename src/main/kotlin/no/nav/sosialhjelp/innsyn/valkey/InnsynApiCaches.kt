@@ -1,10 +1,15 @@
 package no.nav.sosialhjelp.innsyn.valkey
 
+import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.KommuneInfo
+import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
+import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
+import no.nav.sosialhjelp.innsyn.tilgang.pdl.PdlHentPerson
 import org.springframework.context.annotation.Configuration
 import java.time.Duration
 
 @Configuration
-class DokumentCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
+class DokumentCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl = ttl) {
     companion object {
         const val CACHE_NAME: String = "dokument"
         private val ttl: Duration = Duration.ofHours(1)
@@ -12,7 +17,7 @@ class DokumentCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
 }
 
 @Configuration
-class NavEnhetCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
+class NavEnhetCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<NavEnhet>(), ttl) {
     companion object {
         const val CACHE_NAME: String = "navenhet"
         private val ttl: Duration = Duration.ofHours(1)
@@ -20,21 +25,21 @@ class NavEnhetCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
 }
 
 @Configuration
-class DigisosSakCacheConfig : InnsynApiCacheConfig(CACHE_NAME) {
+class DigisosSakCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<DigisosSak>()) {
     companion object {
         const val CACHE_NAME: String = "digisosSak"
     }
 }
 
 @Configuration
-class KommuneInfoCacheConfig : InnsynApiCacheConfig(CACHE_NAME) {
+class KommuneInfoCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<KommuneInfo>()) {
     companion object {
         const val CACHE_NAME: String = "kommuneinfo"
     }
 }
 
 @Configuration
-class PdlNavnCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
+class PdlNavnCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<PdlNavn>(), ttl) {
     companion object {
         const val CACHE_NAME: String = "pdlNavn"
         private val ttl: Duration = Duration.ofDays(1)
@@ -42,7 +47,7 @@ class PdlNavnCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
 }
 
 @Configuration
-class AdressebeskyttelseCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
+class AdressebeskyttelseCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<Boolean>(), ttl) {
     companion object {
         const val CACHE_NAME: String = "pdlAdressebeskyttelse"
         private val ttl: Duration = Duration.ofHours(1)
@@ -50,7 +55,7 @@ class AdressebeskyttelseCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
 }
 
 @Configuration
-class HistoriskeIdenterOldCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
+class HistoriskeIdenterOldCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<List<String>>(), ttl) {
     companion object {
         const val CACHE_NAME: String = "pdlHistoriskeIdenterOld"
         private val ttl: Duration = Duration.ofDays(1)
@@ -58,7 +63,7 @@ class HistoriskeIdenterOldCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
 }
 
 @Configuration
-class AdressebeskyttelseOldCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
+class AdressebeskyttelseOldCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<PdlHentPerson>(), ttl) {
     companion object {
         const val CACHE_NAME: String = "pdlAdressebeskyttelseOld"
         private val ttl: Duration = Duration.ofHours(1)
@@ -66,7 +71,7 @@ class AdressebeskyttelseOldCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl) {
 }
 
 @Configuration
-class SkjuleOriginalSoknadCache : InnsynApiCacheConfig(CACHE_NAME, ttl) {
+class SkjuleOriginalSoknadCache : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<Boolean>(), ttl) {
     companion object {
         const val CACHE_NAME: String = "skjuleOriginalSoknad"
         private val ttl: Duration = Duration.ofHours(5)

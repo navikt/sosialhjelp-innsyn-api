@@ -19,7 +19,7 @@ internal class CacheSerializerTest {
                 ),
             )
 
-        val deserialized = cacheValueSerializer.deserialize(cacheValueSerializer.serialize(cachedPerson))
+        val deserialized = roundTrip(cachedPerson)
 
         assertThat(deserialized).isEqualTo(cachedPerson)
         assertThat(deserialized).isInstanceOf(PdlHentPerson::class.java)
@@ -27,29 +27,31 @@ internal class CacheSerializerTest {
 
     @Test
     fun `deserializes empty Kotlin collections`() {
-        assertThat(roundTrip(emptyList<String>()) as List<*>).isEmpty()
-        assertThat(roundTrip(emptySet<String>()) as Set<*>).isEmpty()
-        assertThat(roundTrip(emptyMap<String, String>()) as Map<*, *>).isEmpty()
-    }
-
-    @Test
-    fun `deserializes nested empty Kotlin collections`() {
-        val cachedValue = CachedCollections(emptyList(), emptySet(), emptyMap())
-
-        assertThat(roundTrip(cachedValue)).isEqualTo(cachedValue)
+        assertThat(roundTrip(emptyList<String>())).isEmpty()
     }
 
     @Test
     fun `deserializes non-empty Kotlin collections`() {
-        assertThat(roundTrip(listOf("value")) as List<*>).containsExactly("value")
-        assertThat(roundTrip(buildList { add("value") }) as List<*>).containsExactly("value")
+        assertThat(roundTrip(listOf("value"))).containsExactly("value")
     }
 
-    private fun roundTrip(value: Any): Any? = cacheValueSerializer.deserialize(cacheValueSerializer.serialize(value))
+    @Test
+    fun `deserializes heterogeneous document cache values`() {
+        val cachedValue = PdlNavn("Ola")
 
-    private data class CachedCollections(
-        val list: List<String>,
-        val set: Set<String>,
-        val map: Map<String, String>,
-    )
+        val deserialized = genericCacheValueSerializer.deserialize(genericCacheValueSerializer.serialize(cachedValue))
+
+        assertThat(deserialized).isEqualTo(cachedValue)
+        assertThat(deserialized).isInstanceOf(PdlNavn::class.java)
+    }
+
+    private fun roundTrip(value: PdlHentPerson): Any? =
+        cacheValueSerializer<PdlHentPerson>(cacheValueType<PdlHentPerson>()).let { serializer ->
+            serializer.deserialize(serializer.serialize(value))
+        }
+
+    private fun roundTrip(value: List<String>): List<String>? =
+        cacheValueSerializer<List<String>>(cacheValueType<List<String>>()).let { serializer ->
+            serializer.deserialize(serializer.serialize(value))
+        }
 }

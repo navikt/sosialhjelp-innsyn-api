@@ -8,5 +8,5 @@ object IntegrationUtils {
 
     const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
 
-    const val BEHANDLINGSNUMMER_INNSYN = "B478"
+    const val BEHANDLINGSNUMMER_INNSYN = "D114"
 }

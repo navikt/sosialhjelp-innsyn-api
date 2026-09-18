@@ -1,7 +1,7 @@
 package no.nav.sosialhjelp.innsyn.valkey
 
+import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.CachingConfigurer
@@ -17,7 +17,22 @@ import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializ
 import org.springframework.data.redis.serializer.RedisSerializationContext.fromSerializer
 import org.springframework.data.redis.serializer.SerializationException
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.springframework.util.ClassUtils
+import tools.jackson.core.TreeNode
+import tools.jackson.databind.DatabindContext
+import tools.jackson.databind.DefaultTyping
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.JavaType
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator
+import tools.jackson.databind.jsontype.NamedType
+import tools.jackson.databind.jsontype.PolymorphicTypeValidator
+import tools.jackson.databind.jsontype.TypeIdResolver
+import tools.jackson.databind.jsontype.impl.ClassNameIdResolver
+import tools.jackson.databind.jsontype.impl.DefaultTypeResolverBuilder
+import tools.jackson.module.kotlin.kotlinModule
 import java.time.Duration
+import java.util.LinkedHashMap
+import java.util.LinkedHashSet
 
 // TODO: Migrer til å bruke Valkey på ordentlig. Vi kommer ikke til å kunne bruke nye valkey-features før dette er gjort
 //   Vi bruker valkey, men behandler den som en redis-instans (bruker ikke valkey-features).
@@ -46,12 +61,87 @@ class CacheConfig : CachingConfigurer {
             .build()
 }
 
+private val cacheTypeValidator =
+    BasicPolymorphicTypeValidator
+        .builder()
+        .allowIfSubType("no.nav.")
+        .allowIfSubType("java.util.")
+        .allowIfSubType("java.time.")
+        .build()
+
+internal val cacheValueSerializer =
+    GenericJacksonJsonRedisSerializer
+        .builder {
+            JsonSosialhjelpObjectMapper
+                .createJsonMapperBuilder()
+                .addModule(kotlinModule())
+        }.customize {
+            it.configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false)
+            it.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            it.setDefaultTyping(CacheTypeResolverBuilder(cacheTypeValidator))
+        }.enableSpringCacheNullValueSupport()
+        .build()
+
+private class CacheTypeResolverBuilder(
+    typeValidator: PolymorphicTypeValidator,
+) : DefaultTypeResolverBuilder(typeValidator, DefaultTyping.NON_FINAL, "@class") {
+    override fun withDefaultImpl(defaultImpl: Class<*>): DefaultTypeResolverBuilder = this
+
+    override fun useForType(javaType: JavaType): Boolean {
+        if (javaType.isJavaLangObject) return true
+
+        if (javaType.isEnumType || ClassUtils.isPrimitiveOrWrapper(javaType.rawClass)) return false
+
+        if (javaType.isFinal && !javaType.rawClass.name.startsWith("kotlin.") && javaType.rawClass.packageName.startsWith("java")) {
+            return false
+        }
+
+        return !TreeNode::class.java.isAssignableFrom(javaType.rawClass)
+    }
+
+    override fun idResolver(
+        context: DatabindContext,
+        baseType: JavaType,
+        subtypeValidator: PolymorphicTypeValidator,
+        subtypes: Collection<NamedType>,
+        forSerialization: Boolean,
+        forDeserialization: Boolean,
+    ): TypeIdResolver = NormalizingClassNameIdResolver(baseType, subtypes, subtypeValidator)
+}
+
+private class NormalizingClassNameIdResolver(
+    baseType: JavaType,
+    subtypes: Collection<NamedType>,
+    typeValidator: PolymorphicTypeValidator,
+) : ClassNameIdResolver(baseType, subtypes, typeValidator) {
+    override fun _idFrom(
+        context: DatabindContext,
+        value: Any,
+        valueType: Class<*>,
+    ): String = super._idFrom(context, value, normalizedCollectionType(value, valueType))
+
+    private fun normalizedCollectionType(
+        value: Any,
+        valueType: Class<*>,
+    ): Class<*> =
+        if (!valueType.name.startsWith("kotlin.")) {
+            valueType
+        } else {
+            when (value) {
+                is Map<*, *> -> LinkedHashMap::class.java
+                is Set<*> -> LinkedHashSet::class.java
+                is Collection<*> -> ArrayList::class.java
+                else -> valueType
+            }
+        }
+}
+
 private object CacheDefaults {
     val defaultTTL: Duration = Duration.ofMinutes(1L)
     val keySerializationPair =
         fromSerializer(StringRedisSerializer()).keySerializationPair
     val valueSerializationPair =
-        fromSerializer(GenericJacksonJsonRedisSerializer(sosialhjelpJsonMapper)).valueSerializationPair
+        fromSerializer(cacheValueSerializer).valueSerializationPair
 }
 
 abstract class InnsynApiCacheConfig(

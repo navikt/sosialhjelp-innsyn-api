@@ -17,7 +17,7 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.messageUtenFnr
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.valkey.DigisosSakCacheConfig
-import no.nav.sosialhjelp.innsyn.valkey.DokumentCacheConfig
+import no.nav.sosialhjelp.innsyn.valkey.JsonDigisosSokerCacheConfig
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.get
@@ -86,7 +86,7 @@ class FiksClient(
                     }
                 }.awaitSingleOrNull()
                 ?: throw FiksClientException(500, "digisosSak er null selv om request ikke har kastet exception", null)
-        val cache = cacheManager?.getCache("digisosSak")
+        val cache = cacheManager?.getCache(DigisosSakCacheConfig.CACHE_NAME)
 
         return digisosSaker.onEach {
             tilgangskontroll.verifyDigisosSakIsForCorrectUser(it)
@@ -94,7 +94,7 @@ class FiksClient(
         }
     }
 
-    @Cacheable(DokumentCacheConfig.CACHE_NAME, key = "#cacheKey")
+    @Cacheable(cacheResolver = "dokumentCacheResolver", key = "#cacheKey")
     suspend fun <T> hentDokument(
         digisosId: String,
         dokumentlagerId: String,
@@ -175,7 +175,7 @@ class FiksClient(
     }
 
     private suspend fun Map<String, JsonDigisosSoker>.updateCache(sakMap: Map<String, DigisosSak>): Map<String, JsonDigisosSoker> {
-        val cache = cacheManager?.get(DokumentCacheConfig.CACHE_NAME)
+        val cache = cacheManager?.get(JsonDigisosSokerCacheConfig.CACHE_NAME)
         return onEach { (name, digisosSoker) ->
             val (fiksDigisosId, dokumentLagerId) = name.split("_", limit = 2)
             val timestampSistOppdatert = sakMap[fiksDigisosId]?.digisosSoker?.timestampSistOppdatert

@@ -35,16 +35,6 @@ internal class CacheSerializerTest {
         assertThat(roundTrip(listOf("value"))).containsExactly("value")
     }
 
-    @Test
-    fun `deserializes heterogeneous document cache values`() {
-        val cachedValue = PdlNavn("Ola")
-
-        val deserialized = genericCacheValueSerializer.deserialize(genericCacheValueSerializer.serialize(cachedValue))
-
-        assertThat(deserialized).isEqualTo(cachedValue)
-        assertThat(deserialized).isInstanceOf(PdlNavn::class.java)
-    }
-
     private fun roundTrip(value: PdlHentPerson): Any? =
         cacheValueSerializer<PdlHentPerson>(cacheValueType<PdlHentPerson>()).let { serializer ->
             serializer.deserialize(serializer.serialize(value))

@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.valkey
 
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
@@ -9,9 +12,25 @@ import org.springframework.context.annotation.Configuration
 import java.time.Duration
 
 @Configuration
-class DokumentCacheConfig : InnsynApiCacheConfig(CACHE_NAME, ttl = ttl) {
+class JsonDigisosSokerCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<JsonDigisosSoker>(), ttl) {
     companion object {
-        const val CACHE_NAME: String = "dokument"
+        const val CACHE_NAME: String = "dokumentJsonDigisosSoker"
+        private val ttl: Duration = Duration.ofHours(1)
+    }
+}
+
+@Configuration
+class JsonSoknadCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<JsonSoknad>(), ttl) {
+    companion object {
+        const val CACHE_NAME: String = "dokumentJsonSoknad"
+        private val ttl: Duration = Duration.ofHours(1)
+    }
+}
+
+@Configuration
+class JsonVedleggSpesifikasjonCacheConfig : InnsynApiCacheConfig(CACHE_NAME, cacheValueType<JsonVedleggSpesifikasjon>(), ttl) {
+    companion object {
+        const val CACHE_NAME: String = "dokumentJsonVedleggSpesifikasjon"
         private val ttl: Duration = Duration.ofHours(1)
     }
 }

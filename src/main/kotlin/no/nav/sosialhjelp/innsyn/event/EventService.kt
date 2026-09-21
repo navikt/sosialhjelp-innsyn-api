@@ -63,7 +63,7 @@ class EventService(
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
             model.fiksDigisosId = digisosSak.fiksDigisosId
 
-            if (jsonSoknad != null && jsonSoknad.mottaker != null) {
+            if (jsonSoknad != null) {
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
                 model.historikk.add(
                     Hendelse(
@@ -216,7 +216,7 @@ class EventService(
             is JsonVilkar -> apply(hendelse)
             is JsonDokumentasjonkrav -> apply(hendelse)
             is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
-            else -> throw RuntimeException("Hendelsetype ${hendelse.type.value()} mangler mapping")
+            else -> throw RuntimeException("Hendelsetype ${hendelse.type.name} mangler mapping")
         }
     }
 

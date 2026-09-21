@@ -55,8 +55,6 @@ internal class TildeltNavKontorTest {
         every { mockDigisosSak.ettersendtInfoNAV } returns null
         coEvery { innsynService.hentOriginalSoknad(any()) } returns mockJsonSoknad
         coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
-
-        resetHendelser()
     }
 
     @Test
@@ -65,15 +63,13 @@ internal class TildeltNavKontorTest {
             coEvery { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
             every { mockNavEnhet.navn } returns enhetNavn
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            TILDELT_NAV_KONTOR.copy(hendelsestidspunkt = tidspunkt_2),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -92,15 +88,13 @@ internal class TildeltNavKontorTest {
         runTest(timeout = 5.seconds) {
             coEvery { norgClient.hentNavEnhet(NAVKONTOR) } throws NorgException("noe feilet", null)
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            TILDELT_NAV_KONTOR.copy(hendelsestidspunkt = tidspunkt_2),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -120,15 +114,13 @@ internal class TildeltNavKontorTest {
             coEvery { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
             every { mockNavEnhet.navn } returns enhetNavn
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            TILDELT_NAV_KONTOR.copy(hendelsestidspunkt = tidspunkt_2),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -147,16 +139,14 @@ internal class TildeltNavKontorTest {
             coEvery { norgClient.hentNavEnhet(NAVKONTOR) } returns mockNavEnhet
             every { mockNavEnhet.navn } returns enhetNavn
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
-                            TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            TILDELT_NAV_KONTOR.copy(hendelsestidspunkt = tidspunkt_2),
+                            TILDELT_NAV_KONTOR.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -177,16 +167,14 @@ internal class TildeltNavKontorTest {
             every { mockNavEnhet.navn } returns enhetNavn
             every { mockNavEnhet2.navn } returns enhetNavn2
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
-                            TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            TILDELT_NAV_KONTOR.copy(hendelsestidspunkt = tidspunkt_2),
+                            TILDELT_NAV_KONTOR_2.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -207,15 +195,13 @@ internal class TildeltNavKontorTest {
             every { mockNavEnhet.navn } returns enhetNavn
             every { mockDigisosSak.originalSoknadNAV } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            TILDELT_NAV_KONTOR.copy(hendelsestidspunkt = tidspunkt_2),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -238,16 +224,14 @@ internal class TildeltNavKontorTest {
             every { mockNavEnhet2.navn } returns enhetNavn2
             every { mockDigisosSak.originalSoknadNAV } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            TILDELT_NAV_KONTOR.withHendelsestidspunkt(tidspunkt_2),
-                            TILDELT_NAV_KONTOR_2.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            TILDELT_NAV_KONTOR.copy(hendelsestidspunkt = tidspunkt_2),
+                            TILDELT_NAV_KONTOR_2.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)

@@ -22,7 +22,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
             referanse = hendelse.dokumentasjonkravreferanse,
             tittel = hendelse.tittel,
             beskrivelse = hendelse.beskrivelse,
-            status = Oppgavestatus.valueOf(hendelse.status.value()),
+            status = hendelse.status?.let { Oppgavestatus.valueOf(it.name) } ?: error("Ugyldig status for dokumentasjonkrav: null"),
             datoLagtTil = hendelse.hendelsestidspunkt.toLocalDateTime(),
             frist = hendelse.frist?.toLocalDateTime()?.toLocalDate(),
             utbetalingsReferanse = hendelse.utbetalingsreferanse,

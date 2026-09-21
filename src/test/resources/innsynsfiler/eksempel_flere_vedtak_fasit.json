@@ -1,0 +1,96 @@
+{
+  "sak": {
+    "soker": {
+      "version": "1.0.0",
+      "avsender": {
+        "systemnavn": "Oslo kommune / Fasit",
+        "systemversjon": "sha-c6fead599294194b000b0f2c3ef6df10b07626e4"
+      },
+      "hendelser": [
+        {
+          "status": "MOTTATT",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-16T08:06:17.987Z"
+        },
+        {
+          "navKontor": "0314",
+          "type": "tildeltNavKontor",
+          "hendelsestidspunkt": "2026-09-16T08:06:17.998Z"
+        },
+        {
+          "status": "UNDER_BEHANDLING",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-16T08:08:28.915Z"
+        },
+        {
+          "referanse": "2026/000070",
+          "tittel": "Test KS (2026/000070)",
+          "status": "UNDER_BEHANDLING",
+          "type": "saksStatus",
+          "hendelsestidspunkt": "2026-09-16T08:08:28.917Z"
+        },
+        {
+          "saksreferanse": "2026/000070",
+          "utfall": "AVSLATT",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "dokumentlager",
+              "id": "9cda126d-6186-4c99-8035-a152efb04e2b"
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-16T08:09:35.958Z"
+        },
+        {
+          "status": "FERDIGBEHANDLET",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-16T08:09:35.962Z"
+        },
+        {
+          "referanse": "2026/000072",
+          "tittel": "Test sak 2 (2026/000072)",
+          "status": "UNDER_BEHANDLING",
+          "type": "saksStatus",
+          "hendelsestidspunkt": "2026-09-16T08:29:10.538Z"
+        },
+        {
+          "referanse": "2026/000072",
+          "tittel": "Test sak - egen sak (2026/000072)",
+          "status": "UNDER_BEHANDLING",
+          "type": "saksStatus",
+          "hendelsestidspunkt": "2026-09-16T08:30:21.830Z"
+        },
+        {
+          "saksreferanse": "2026/000070",
+          "utfall": "INNVILGET",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "dokumentlager",
+              "id": "5f49b857-e3df-4d6e-b780-791db1f700cc"
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-16T08:34:35.027Z"
+        },
+        {
+          "utbetalingsreferanse": "694",
+          "saksreferanse": "2026/000073",
+          "status": "PLANLAGT_UTBETALING",
+          "belop": 20000,
+          "beskrivelse": "Husleierestanse",
+          "forfallsdato": "2026-05-01",
+          "fom": "2026-05-01",
+          "tom": "2026-06-30",
+          "annenMottaker": false,
+          "mottaker": "Dyp Alderstrygd",
+          "utbetalingsmetode": "Bankoverføring",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-16T08:34:35.034Z"
+        }
+      ]
+    }
+  },
+  "type": "no.nav.digisos.digisos.soker.v1"
+}

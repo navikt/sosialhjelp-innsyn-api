@@ -53,6 +53,7 @@ spec:
         - host: test.idporten.no
       rules:
         - application: sosialhjelp-soknad-api-dev
+        - application: sosialhjelp-upload-dev
         - application: clamav
           namespace: nais-system
         - application: norg2
@@ -105,3 +106,7 @@ spec:
       value: "http://sosialhjelp-soknad-api-dev/sosialhjelp/soknad-api"
     - name: SOKNAD_API_AUDIENCE
       value: "dev-gcp:teamdigisos:sosialhjelp-soknad-api-dev"
+    - name: UPLOAD_API_URL
+      value: "http://sosialhjelp-upload-dev"
+    - name: UPLOAD_API_AUDIENCE
+      value: "dev-gcp:teamdigisos:sosialhjelp-upload-dev"

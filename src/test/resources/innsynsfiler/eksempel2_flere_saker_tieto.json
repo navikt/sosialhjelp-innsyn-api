@@ -1,0 +1,269 @@
+{
+  "sak": {
+    "soker": {
+      "version": "1.0.0",
+      "avsender": {
+        "systemnavn": "Socio",
+        "systemversjon": "11.7.0 Beta"
+      },
+      "hendelser": [
+        {
+          "status": "MOTTATT",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-22T08:17:07.988Z"
+        },
+        {
+          "navKontor": "1638",
+          "type": "tildeltNavKontor",
+          "hendelsestidspunkt": "2026-09-22T08:17:07.988Z"
+        },
+        {
+          "status": "UNDER_BEHANDLING",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-22T08:18:32.970Z"
+        },
+        {
+          "referanse": "4522098",
+          "tittel": "test endringsvedtak",
+          "status": "UNDER_BEHANDLING",
+          "type": "saksStatus",
+          "hendelsestidspunkt": "2026-09-22T08:18:32.970Z"
+        },
+        {
+          "referanse": "4522099",
+          "tittel": "Ingen cowboy hatt",
+          "status": "UNDER_BEHANDLING",
+          "type": "saksStatus",
+          "hendelsestidspunkt": "2026-09-22T08:20:16.302Z"
+        },
+        {
+          "saksreferanse": "4522099",
+          "utfall": "AVSLATT",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "svarut",
+              "id": "181f3d49-18fe-452c-af3a-6191ef67982e",
+              "nr": 1,
+              "journalId": 201704102,
+              "dokumentId": 118173
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-22T08:28:46.251Z"
+        },
+        {
+          "saksreferanse": "4522098",
+          "utfall": "INNVILGET",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "svarut",
+              "id": "ddc87abd-2522-4ad4-be78-386b3f6f4157",
+              "nr": 1,
+              "journalId": 201704103,
+              "dokumentId": 118175
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.029Z"
+        },
+        {
+          "status": "FERDIGBEHANDLET",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.029Z"
+        },
+        {
+          "utbetalingsreferanse": "9264",
+          "saksreferanse": "4522098",
+          "status": "STOPPET",
+          "belop": 1923.29,
+          "beskrivelse": "Livsopphold",
+          "forfallsdato": "2026-09-22",
+          "fom": "2026-09-22",
+          "tom": "2026-09-30",
+          "annenMottaker": false,
+          "kontonummer": "47250777295",
+          "utbetalingsmetode": "Bankgiro",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.060Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1775",
+          "utbetalingsreferanse": [
+            "9264"
+          ],
+          "beskrivelse": "Arbeidssøker",
+          "status": "RELEVANT",
+          "frist": "2026-09-22T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522098",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.085Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1776",
+          "utbetalingsreferanse": [
+            "9264"
+          ],
+          "beskrivelse": "Levere dok. betalt husleie",
+          "status": "RELEVANT",
+          "frist": "2026-09-22T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522098",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.094Z"
+        },
+        {
+          "utbetalingsreferanse": "9265",
+          "saksreferanse": "4522098",
+          "status": "STOPPET",
+          "belop": 6500,
+          "beskrivelse": "Livsopphold",
+          "forfallsdato": "2026-10-22",
+          "fom": "2026-10-01",
+          "tom": "2026-10-31",
+          "annenMottaker": false,
+          "kontonummer": "47250777295",
+          "utbetalingsmetode": "Bankgiro",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.101Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1777",
+          "utbetalingsreferanse": [
+            "9265"
+          ],
+          "beskrivelse": "Arbeidssøker",
+          "status": "RELEVANT",
+          "frist": "2026-10-22T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522098",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.117Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1778",
+          "utbetalingsreferanse": [
+            "9265"
+          ],
+          "beskrivelse": "Levere dok. betalt husleie",
+          "status": "RELEVANT",
+          "frist": "2026-10-22T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522098",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.123Z"
+        },
+        {
+          "utbetalingsreferanse": "9266",
+          "saksreferanse": "4522098",
+          "status": "STOPPET",
+          "belop": 6500,
+          "beskrivelse": "Livsopphold",
+          "forfallsdato": "2026-11-20",
+          "fom": "2026-11-01",
+          "tom": "2026-11-30",
+          "annenMottaker": false,
+          "kontonummer": "47250777295",
+          "utbetalingsmetode": "Bankgiro",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.131Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1779",
+          "utbetalingsreferanse": [
+            "9266"
+          ],
+          "beskrivelse": "Arbeidssøker",
+          "status": "RELEVANT",
+          "frist": "2026-11-20T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522098",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.149Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1780",
+          "utbetalingsreferanse": [
+            "9266"
+          ],
+          "beskrivelse": "Levere dok. betalt husleie",
+          "status": "RELEVANT",
+          "frist": "2026-11-20T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522098",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.172Z"
+        },
+        {
+          "utbetalingsreferanse": "9267",
+          "saksreferanse": "4522098",
+          "status": "STOPPET",
+          "belop": 4701.37,
+          "beskrivelse": "Livsopphold",
+          "forfallsdato": "2026-12-22",
+          "fom": "2026-12-01",
+          "tom": "2026-12-22",
+          "annenMottaker": false,
+          "kontonummer": "47250777295",
+          "utbetalingsmetode": "Bankgiro",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.186Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1781",
+          "utbetalingsreferanse": [
+            "9267"
+          ],
+          "beskrivelse": "Arbeidssøker",
+          "status": "RELEVANT",
+          "frist": "2026-12-22T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522098",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.201Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1782",
+          "utbetalingsreferanse": [
+            "9267"
+          ],
+          "beskrivelse": "Levere dok. betalt husleie",
+          "status": "RELEVANT",
+          "frist": "2026-12-22T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522098",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:29:09.224Z"
+        },
+        {
+          "referanse": "4522100",
+          "tittel": "Stoppet pga endring i livssituasjon",
+          "status": "UNDER_BEHANDLING",
+          "orginalSak": "4522098",
+          "type": "saksStatus",
+          "hendelsestidspunkt": "2026-09-22T08:30:36.184Z"
+        },
+        {
+          "saksreferanse": "4522098",
+          "utfall": "INNVILGET",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "svarut",
+              "id": "eb8c7a3c-f15a-4c5c-86c2-b883e62db5cb",
+              "nr": 1,
+              "journalId": 201704104,
+              "dokumentId": 118177
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-22T08:33:23.147Z"
+        }
+      ]
+    }
+  },
+  "type": "no.nav.digisos.digisos.soker.v1",
+  "LevelString": "1"
+}

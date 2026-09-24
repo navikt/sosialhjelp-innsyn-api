@@ -41,7 +41,7 @@ class InnsynsFilConverterTest {
         runTest {
             val digisosSak = mockk<DigisosSak>(relaxed = true)
 
-            val rootNode = sosialhjelpJsonMapper.readTree(INNSYNSFIL2_VISMA_JSON)
+            val rootNode = sosialhjelpJsonMapper.readTree(INNSYNSFIL_TIETO_JSON)
             val sokerNode = checkNotNull(rootNode.path("sak").path("soker").takeIf { !it.isMissingNode && !it.isNull })
             val jsonDigisosSoker =
                 sosialhjelpJsonMapper.treeToValue(sokerNode, JsonDigisosSoker::class.java)
@@ -62,50 +62,53 @@ class InnsynsFilConverterTest {
     companion object {
         val INNSYNSFIL_VISMA_JSON = File("src\\test\\resources\\innsynsfiler\\eksempel_flere_saker_visma.json").readText()
         val INNSYNSFIL2_VISMA_JSON = File("src\\test\\resources\\innsynsfiler\\eksempel2_flere_saker_visma.json").readText()
+        val INNSYNSFIL_TIETO_JSON = File("src\\test\\resources\\innsynsfiler\\eksempel1_flere_vedtak_tieto.json").readText()
+        val INNSYNSFIL2_TIETO_JSON = File("src\\test\\resources\\innsynsfiler\\eksempel2_flere_saker_tieto.json").readText()
+        val INNSYNSFIL_FASIT_JSON = File("src\\test\\resources\\innsynsfiler\\eksempel_flere_vedtak_fasit.json").readText()
     }
 }
 
-private fun createDigisosSak(): DigisosSak {
-    return DigisosSak(
-        fiksDigisosId = UUID.randomUUID().toString(),
-        sokerFnr = "1234561212345",
-        fiksOrgId = "12345678",
-        kommunenummer = "0301",
-        sistEndret = 1234567890L,
-        originalSoknadNAV = createOrginalSoknadNav(),
-        digisosSoker = createDigisosSoker(),
-        ettersendtInfoNAV = createEttersendtInfoNav(),
-        tilleggsinformasjon = createTilleggsinformasjon(),
-    )
-}
-
-private fun createOrginalSoknadNav(): OriginalSoknadNAV {
-    return OriginalSoknadNAV(
-        navEksternRefId = UUID.randomUUID().toString(),
-        soknadDokument = TODO(),
-        timestampSendt = 1234567890L,
-        metadata = TODO(),
-        vedleggMetadata = TODO(),
-        vedlegg = TODO(),
-    )
-}
-
-private fun createDigisosSoker(): DigisosSoker {
-    return DigisosSoker(
-        metadata = TODO(),
-        dokumenter = TODO(),
-        timestampSistOppdatert = TODO()
-    )
-}
-
-private fun createEttersendtInfoNav(): EttersendtInfoNAV {
-    return EttersendtInfoNAV(
-        ettersendelser = TODO()
-    )
-}
-
-private fun createTilleggsinformasjon(): Tilleggsinformasjon {
-    return Tilleggsinformasjon(
-        enhetsnummer = TODO()
-    )
-}
+//private fun createDigisosSak(): DigisosSak {
+//    return DigisosSak(
+//        fiksDigisosId = UUID.randomUUID().toString(),
+//        sokerFnr = "1234561212345",
+//        fiksOrgId = "12345678",
+//        kommunenummer = "0301",
+//        sistEndret = 1234567890L,
+//        originalSoknadNAV = createOrginalSoknadNav(),
+//        digisosSoker = createDigisosSoker(),
+//        ettersendtInfoNAV = createEttersendtInfoNav(),
+//        tilleggsinformasjon = createTilleggsinformasjon(),
+//    )
+//}
+//
+//private fun createOrginalSoknadNav(): OriginalSoknadNAV {
+//    return OriginalSoknadNAV(
+//        navEksternRefId = UUID.randomUUID().toString(),
+//        soknadDokument = TODO(),
+//        timestampSendt = 1234567890L,
+//        metadata = TODO(),
+//        vedleggMetadata = TODO(),
+//        vedlegg = TODO(),
+//    )
+//}
+//
+//private fun createDigisosSoker(): DigisosSoker {
+//    return DigisosSoker(
+//        metadata = TODO(),
+//        dokumenter = TODO(),
+//        timestampSistOppdatert = TODO()
+//    )
+//}
+//
+//private fun createEttersendtInfoNav(): EttersendtInfoNAV {
+//    return EttersendtInfoNAV(
+//        ettersendelser = TODO()
+//    )
+//}
+//
+//private fun createTilleggsinformasjon(): Tilleggsinformasjon {
+//    return Tilleggsinformasjon(
+//        enhetsnummer = TODO()
+//    )
+//}

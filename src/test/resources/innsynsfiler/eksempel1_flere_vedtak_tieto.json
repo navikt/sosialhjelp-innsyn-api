@@ -1,0 +1,133 @@
+{
+  "sak": {
+    "soker": {
+      "version": "1.0.0",
+      "avsender": {
+        "systemnavn": "Socio",
+        "systemversjon": "11.7.0 Beta"
+      },
+      "hendelser": [
+        {
+          "status": "MOTTATT",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-21T07:57:45.944Z"
+        },
+        {
+          "navKontor": "1638",
+          "type": "tildeltNavKontor",
+          "hendelsestidspunkt": "2026-09-21T07:57:45.944Z"
+        },
+        {
+          "dokumenter": [
+            {
+              "dokumenttype": "Husleiekontrakt",
+              "tilleggsinformasjon": "For å behandle søknaden trenger vi husleiekontrakt.",
+              "innsendelsesfrist": "2026-10-30T00:00:00.001Z"
+            }
+          ],
+          "forvaltningsbrev": {
+            "referanse": {
+              "type": "svarut",
+              "id": "7d29a27a-d95f-42af-8889-6b0315a16f6a",
+              "nr": 1,
+              "journalId": 201704094,
+              "dokumentId": 118158
+            }
+          },
+          "vedlegg": [],
+          "type": "dokumentasjonEtterspurt",
+          "hendelsestidspunkt": "2026-09-22T07:57:52.385Z"
+        },
+        {
+          "saksreferanse": "4522096",
+          "utfall": "INNVILGET",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "svarut",
+              "id": "8b3707a3-84db-4b2b-951f-3d23ea43d249",
+              "nr": 1,
+              "journalId": 201704098,
+              "dokumentId": 118166
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-22T08:01:29.618Z"
+        },
+        {
+          "status": "FERDIGBEHANDLET",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-22T08:01:29.618Z"
+        },
+        {
+          "utbetalingsreferanse": "9263",
+          "saksreferanse": "4522096",
+          "status": "PLANLAGT_UTBETALING",
+          "belop": 213.7,
+          "beskrivelse": "Livsopphold",
+          "forfallsdato": "2026-09-22",
+          "fom": "2026-09-22",
+          "tom": "2026-09-22",
+          "annenMottaker": false,
+          "mottaker": "Hei, Rosa ",
+          "kontonummer": "47250777295",
+          "utbetalingsmetode": "Bankgiro",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-22T08:01:29.692Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1771",
+          "utbetalingsreferanse": [
+            "9263"
+          ],
+          "beskrivelse": "Arbeidssøker",
+          "status": "RELEVANT",
+          "frist": "2026-09-22T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522096",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:01:29.752Z"
+        },
+        {
+          "dokumentasjonkravreferanse": "1772",
+          "utbetalingsreferanse": [
+            "9263"
+          ],
+          "beskrivelse": "Levere dok. betalt husleie",
+          "status": "RELEVANT",
+          "frist": "2026-09-22T00:00:00.000Z",
+          "tittel": "",
+          "saksreferanse": "4522096",
+          "type": "dokumentasjonkrav",
+          "hendelsestidspunkt": "2026-09-22T08:01:29.783Z"
+        },
+        {
+          "referanse": "4522097",
+          "tittel": "Endring av vedtak",
+          "status": "UNDER_BEHANDLING",
+          "orginalSak": "4522096",
+          "type": "saksStatus",
+          "hendelsestidspunkt": "2026-09-22T08:02:58.586Z"
+        },
+        {
+          "saksreferanse": "4522096",
+          "utfall": "INNVILGET",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "svarut",
+              "id": "1d6bb22e-da27-452d-b1a7-638da5c86fd1",
+              "nr": 1,
+              "journalId": 201704099,
+              "dokumentId": 118168
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-22T08:06:09.761Z"
+        }
+      ]
+    }
+  },
+  "type": "no.nav.digisos.digisos.soker.v1",
+  "LevelString": "1"
+}

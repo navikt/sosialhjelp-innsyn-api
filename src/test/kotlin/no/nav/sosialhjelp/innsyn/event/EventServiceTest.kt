@@ -9,6 +9,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
@@ -48,8 +49,9 @@ internal class EventServiceTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
+    private val shadowFoldService: ShadowFoldService = mockk(relaxed = true)
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, shadowFoldService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
@@ -107,6 +109,66 @@ internal class EventServiceTest {
      ...
      [ ] komplett case
      */
+
+    @Test
+    fun `does not fetch shadow data when shadow toggle is disabled`() =
+        runTest {
+            every { shadowFoldService.isEnabled() } returns false
+            every { mockDigisosSak.originalSoknadNAV } returns null
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
+            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
+
+            EventService(clientProperties, innsynService, vedleggService, norgClient, shadowFoldService).createModel(mockDigisosSak)
+
+            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(any(), any()) }
+        }
+
+    @Test
+    fun `returns model when shadow fetch fails`() =
+        runTest {
+            every { shadowFoldService.isEnabled() } returns true
+            every { mockDigisosSak.originalSoknadNAV } returns null
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
+            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(any(), any()) } throws IllegalStateException("Fiks failed")
+
+            val model =
+                EventService(
+                    clientProperties,
+                    innsynService,
+                    vedleggService,
+                    norgClient,
+                    shadowFoldService,
+                ).createModel(mockDigisosSak)
+
+            assertThat(model).isNotNull
+            verify { shadowFoldService.recordFetchFailure(mockDigisosSak, any()) }
+        }
+
+    @Test
+    fun `returns model and records timeout when shadow fetch is slow`() =
+        runTest {
+            every { shadowFoldService.isEnabled() } returns true
+            every { mockDigisosSak.originalSoknadNAV } returns null
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
+            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(any(), any()) } coAnswers {
+                delay(Long.MAX_VALUE)
+                emptyList()
+            }
+
+            val model =
+                EventService(
+                    clientProperties,
+                    innsynService,
+                    vedleggService,
+                    norgClient,
+                    shadowFoldService,
+                ).createModel(mockDigisosSak)
+
+            assertThat(model).isNotNull
+            verify { shadowFoldService.recordFetchTimeout(mockDigisosSak) }
+        }
 
     @Test
     fun `ingen innsyn OG ingen soknad, men med sendTidspunkt`() =

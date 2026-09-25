@@ -7,6 +7,7 @@ file_upload = "1.6.0"
 filformat = "1.20260917.61"
 jackson = "3.2.2"
 jackson2 = "2.22.2"
+joda_time = "0.6.2"
 jemp_box = "1.8.17"
 kotlin = "2.4.20"
 logstash = "9.0"
@@ -21,6 +22,8 @@ opentelemetry-instrumentation = "2.31.1"
 pdf_box = "3.0.8"
 prometheus = "0.16.0"
 sosialhjelp_common = "1.20260813.0659-99ef888"
+sosialhjelp_hendelser = "1.0.0"
+filformat_kmp = "1.20260909.60"
 spotless = "8.10.2"
 spring-boot = "4.1.1"
 spring_mockk = "5.0.1"
@@ -48,6 +51,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "coroutines" }
 kotlinx-coroutines-slf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "joda_time" }
 logback-logstash = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash" }
 # Automatisk propagering av context (spring security, tracing, osv)
 micrometer-context-propagation = { module = "io.micrometer:context-propagation", version.ref = "micrometerPropagation" }
@@ -62,6 +66,8 @@ opentelemetry-bom = { module = "io.opentelemetry:opentelemetry-bom", version.ref
 prometheus-simpleclient-hotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus" }
 promotheus-simpleclient-common = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus" }
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
+sosialhjelp-digisos-hendelser = { module = "no.nav.sosialhjelp:digisos-hendelser", version.ref = "sosialhjelp_hendelser" }
+sosialhjelp-filformat-kmp = { module = "no.nav.sosialhjelp.filformat:soknadsosialhjelp-filformat-kmp", version.ref = "filformat_kmp" }
 sosialhjelp-filformat = { module = "no.nav.sbl.dialogarena:soknadsosialhjelp-filformat", version.ref = "filformat" }
 spring-boot-security-test = { module = "org.springframework.security:spring-security-test", version.ref = "spring_security_test" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }

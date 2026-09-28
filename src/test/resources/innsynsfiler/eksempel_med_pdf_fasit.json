@@ -1,0 +1,142 @@
+{
+  "sak": {
+    "soker": {
+      "version": "1.0.0",
+      "avsender": {
+        "systemnavn": "Oslo kommune / Fasit",
+        "systemversjon": "sha-ba25c91514e20e40bb06c262ab8f4632d264395d"
+      },
+      "hendelser": [
+        {
+          "status": "MOTTATT",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-24T06:48:54.550Z"
+        },
+        {
+          "navKontor": "0316",
+          "type": "tildeltNavKontor",
+          "hendelsestidspunkt": "2026-09-24T06:48:54.573Z"
+        },
+        {
+          "status": "UNDER_BEHANDLING",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-24T07:03:07.248Z"
+        },
+        {
+          "referanse": "2026/000080",
+          "tittel": "Test digisos (2026/000080)",
+          "status": "UNDER_BEHANDLING",
+          "type": "saksStatus",
+          "hendelsestidspunkt": "2026-09-24T07:03:07.261Z"
+        },
+        {
+          "saksreferanse": "2026/000080",
+          "utfall": "INNVILGET",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "dokumentlager",
+              "id": "dbf3049f-ad4c-4019-9f11-133dd7d9491d"
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-24T07:07:30.982Z"
+        },
+        {
+          "status": "FERDIGBEHANDLET",
+          "type": "soknadsStatus",
+          "hendelsestidspunkt": "2026-09-24T07:07:30.988Z"
+        },
+        {
+          "utbetalingsreferanse": "727",
+          "saksreferanse": "2026/000080",
+          "status": "PLANLAGT_UTBETALING",
+          "belop": 3461.54,
+          "beskrivelse": "Husleie",
+          "forfallsdato": "2026-09-24",
+          "fom": "2026-09-24",
+          "tom": "2026-09-30",
+          "annenMottaker": false,
+          "mottaker": "Ordknapp Brudekjole",
+          "utbetalingsmetode": "Bankoverføring",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-24T07:07:31.001Z"
+        },
+        {
+          "utbetalingsreferanse": "728",
+          "saksreferanse": "2026/000080",
+          "status": "PLANLAGT_UTBETALING",
+          "belop": 11947.84,
+          "beskrivelse": "Husleie",
+          "forfallsdato": "2026-10-01",
+          "fom": "2026-10-01",
+          "tom": "2026-10-24",
+          "annenMottaker": false,
+          "mottaker": "Ordknapp Brudekjole",
+          "utbetalingsmetode": "Bankoverføring",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-24T07:07:31.001Z"
+        },
+        {
+          "utbetalingsreferanse": "729",
+          "saksreferanse": "2026/000080",
+          "status": "PLANLAGT_UTBETALING",
+          "belop": 4710,
+          "beskrivelse": "Basisbeløp",
+          "forfallsdato": "2026-09-24",
+          "fom": "2026-09-24",
+          "tom": "2026-09-30",
+          "annenMottaker": false,
+          "mottaker": "Ordknapp Brudekjole",
+          "utbetalingsmetode": "Bankoverføring",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-24T07:07:31.001Z"
+        },
+        {
+          "utbetalingsreferanse": "730",
+          "saksreferanse": "2026/000080",
+          "status": "PLANLAGT_UTBETALING",
+          "belop": 16257.02,
+          "beskrivelse": "Basisbeløp",
+          "forfallsdato": "2026-10-01",
+          "fom": "2026-10-01",
+          "tom": "2026-10-24",
+          "annenMottaker": false,
+          "mottaker": "Ordknapp Brudekjole",
+          "utbetalingsmetode": "Bankoverføring",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-24T07:07:31.001Z"
+        },
+        {
+          "saksreferanse": "2026/000080",
+          "utfall": "INNVILGET",
+          "vedtaksfil": {
+            "referanse": {
+              "type": "dokumentlager",
+              "id": "9d661867-5631-40ba-be91-ca2f271f9d40"
+            }
+          },
+          "vedlegg": [],
+          "type": "vedtakFattet",
+          "hendelsestidspunkt": "2026-09-25T07:59:02.803Z"
+        },
+        {
+          "utbetalingsreferanse": "760",
+          "saksreferanse": "2026/000081",
+          "status": "PLANLAGT_UTBETALING",
+          "belop": 20000,
+          "beskrivelse": "Husleierestanse",
+          "forfallsdato": "2026-09-01",
+          "fom": "2026-09-01",
+          "tom": "2026-09-30",
+          "annenMottaker": false,
+          "mottaker": "Ordknapp Brudekjole",
+          "utbetalingsmetode": "Bankoverføring",
+          "type": "utbetaling",
+          "hendelsestidspunkt": "2026-09-25T07:59:02.852Z"
+        }
+      ]
+    }
+  },
+  "type": "no.nav.digisos.digisos.soker.v1"
+}

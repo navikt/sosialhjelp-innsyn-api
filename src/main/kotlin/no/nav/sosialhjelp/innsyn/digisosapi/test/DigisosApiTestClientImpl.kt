@@ -137,8 +137,18 @@ class DigisosApiTestClientImpl(
             val digisosSoker = soknad.digisosSoker ?: throw BadStateException("Soknad mangler digisosSoker")
             fiksWebClient
                 .get()
-                .uri("/digisos/api/v1/soknader/$fiksDigisosId/dokumenter/${digisosSoker.metadata}")
-                .accept(MediaType.APPLICATION_JSON)
+                .uri { uriBuilder ->
+                    uriBuilder
+                        .pathSegment(
+                            "digisos",
+                            "api",
+                            "v1",
+                            "soknader",
+                            "{fiksDigisosId}",
+                            "dokumenter",
+                            "{metadata}",
+                        ).build(fiksDigisosId, digisosSoker.metadata)
+                }.accept(MediaType.APPLICATION_JSON)
                 .header(AUTHORIZATION, token.withBearer())
                 .retrieve()
                 .bodyToMono(String::class.java)

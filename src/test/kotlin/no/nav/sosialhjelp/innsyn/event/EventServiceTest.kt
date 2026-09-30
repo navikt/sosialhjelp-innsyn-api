@@ -48,8 +48,9 @@ internal class EventServiceTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
+    private val hendelseFoldService: HendelseFoldService = mockk(relaxed = true)
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, hendelseFoldService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
@@ -120,6 +121,9 @@ internal class EventServiceTest {
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
             assertThat(model.historikk).hasSize(0)
+            coVerify(exactly = 1) {
+                hendelseFoldService.launchFold(mockDigisosSak, null, null, model, any())
+            }
         }
 
     @Test

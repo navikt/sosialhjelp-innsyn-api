@@ -16,6 +16,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
+import no.nav.sosialhjelp.filformat.vedlegg.Vedlegg
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
@@ -30,6 +31,7 @@ import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
+import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.slf4j.Logger
 import org.springframework.stereotype.Component
@@ -42,6 +44,7 @@ class EventService(
     private val innsynService: InnsynService,
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
+    private val hendelseFoldService: HendelseFoldService,
 ) {
     @WithSpan("createModel")
     suspend fun createModel(digisosSak: DigisosSak): InternalDigisosSoker {
@@ -80,6 +83,12 @@ class EventService(
 
         applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak)
 
+        hendelseFoldService.launchFold(digisosSak, jsonDigisosSoker, jsonSoknad, model) {
+            vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak).map {
+                Vedlegg(type = it.type, tilleggsinfo = it.tilleggsinfo)
+            }
+        }
+
         return model
     }
 
@@ -100,7 +109,7 @@ class EventService(
                     jsonDigisosSoker
                         ?.hendelser
                         ?.filterIsInstance<JsonUtbetaling>()
-                        ?.filter { it.utbetalingsreferanse.equals(utbetaling.referanse) }
+                        ?.filter { it.utbetalingsreferanse == utbetaling.referanse }
                         ?.forEach {
                             eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
                             opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)

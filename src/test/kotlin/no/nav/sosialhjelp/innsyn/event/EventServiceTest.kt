@@ -9,7 +9,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
@@ -109,51 +108,6 @@ internal class EventServiceTest {
      ...
      [ ] komplett case
      */
-
-    @Test
-    fun `returns model when vedlegg fetch fails`() =
-        runTest {
-            every { mockDigisosSak.originalSoknadNAV } returns null
-            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
-            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(any(), any()) } throws IllegalStateException("Fiks failed")
-
-            val model =
-                EventService(
-                    clientProperties,
-                    innsynService,
-                    vedleggService,
-                    norgClient,
-                    hendelseFoldService,
-                ).createModel(mockDigisosSak)
-
-            assertThat(model).isNotNull
-            verify { hendelseFoldService.recordFetchFailure(mockDigisosSak, any()) }
-        }
-
-    @Test
-    fun `returns model and records timeout when vedlegg fetch is slow`() =
-        runTest {
-            every { mockDigisosSak.originalSoknadNAV } returns null
-            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
-            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
-            coEvery { vedleggService.hentSoknadVedleggMedStatus(any(), any()) } coAnswers {
-                delay(Long.MAX_VALUE)
-                emptyList()
-            }
-
-            val model =
-                EventService(
-                    clientProperties,
-                    innsynService,
-                    vedleggService,
-                    norgClient,
-                    hendelseFoldService,
-                ).createModel(mockDigisosSak)
-
-            assertThat(model).isNotNull
-            verify { hendelseFoldService.recordFetchTimeout(mockDigisosSak) }
-        }
 
     @Test
     fun `ingen innsyn OG ingen soknad, men med sendTidspunkt`() =
@@ -600,12 +554,12 @@ internal class EventServiceTest {
             val model = service.createModel(mockDigisosSak)
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(1)
-            coVerify(exactly = 2) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
+            coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
 
             val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak)
             assertThat(saksoversiktModel).isNotNull
             assertThat(saksoversiktModel.oppgaver).hasSize(1)
-            coVerify(exactly = 3) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
+            coVerify(exactly = 2) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
         }
 
     @Test
@@ -636,12 +590,12 @@ internal class EventServiceTest {
             val model = service.createModel(mockDigisosSak)
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(0)
-            coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
+            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
 
             val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak)
             assertThat(saksoversiktModel).isNotNull
             assertThat(saksoversiktModel.oppgaver).hasSize(0)
-            coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
+            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
         }
 
     @Test

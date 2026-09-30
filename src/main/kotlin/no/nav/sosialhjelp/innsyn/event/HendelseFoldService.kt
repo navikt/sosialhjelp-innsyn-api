@@ -2,7 +2,18 @@ package no.nav.sosialhjelp.innsyn.event
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.Instant
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
@@ -15,17 +26,51 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.stereotype.Component
+import kotlin.coroutines.ContinuationInterceptor
+import kotlin.time.Duration.Companion.milliseconds
 
 @Component
 class HendelseFoldService(
     private val meterRegistry: MeterRegistry,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) {
-    fun recordFetchTimeout(digisosSak: DigisosSak) {
+    private val scope = CoroutineScope(SupervisorJob() + dispatcher + CoroutineName("hendelse-fold"))
+
+    @PreDestroy
+    fun shutdown() = scope.cancel("HendelseFoldService shutting down")
+
+    suspend fun launchFold(
+        digisosSak: DigisosSak,
+        jsonDigisosSoker: JsonDigisosSoker?,
+        jsonSoknad: JsonSoknad?,
+        oldModel: InternalDigisosSoker,
+        hentVedlegg: suspend () -> List<Vedlegg>,
+    ): Job {
+        val callerContext = currentCoroutineContext().minusKey(Job).minusKey(ContinuationInterceptor)
+        return scope.launch(callerContext) {
+            val vedlegg =
+                try {
+                    withTimeoutOrNull(VEDLEGG_TIMEOUT) { hentVedlegg() }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    recordFetchFailure(digisosSak, e)
+                    return@launch
+                }
+            if (vedlegg == null) {
+                recordFetchTimeout(digisosSak)
+                return@launch
+            }
+            fold(digisosSak, jsonDigisosSoker, jsonSoknad, vedlegg, oldModel)
+        }
+    }
+
+    private fun recordFetchTimeout(digisosSak: DigisosSak) {
         meterRegistry.counter("hendelser_fold_total", "result", "timeout").increment()
         log.info("Hendelser fold vedlegg-fetch timed out fiksDigisosId={}", digisosSak.fiksDigisosId)
     }
 
-    fun recordFetchFailure(
+    private fun recordFetchFailure(
         digisosSak: DigisosSak,
         error: Throwable,
     ) {
@@ -97,10 +142,6 @@ class HendelseFoldService(
         }
     }
 
-    /**
-     * First-pass comparison of selected fields only. A match means that none of these fields differ,
-     * not that the old and folded models are equivalent. A canonical full-model diff follows separately.
-     */
     private fun differences(
         oldModel: InternalDigisosSoker,
         result: no.nav.sosialhjelp.digisos.hendelser.fold.FoldResult,
@@ -154,5 +195,6 @@ class HendelseFoldService(
 
     companion object {
         private val log by logger()
+        private val VEDLEGG_TIMEOUT = 500.milliseconds
     }
 }

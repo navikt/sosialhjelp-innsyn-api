@@ -1,10 +1,6 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
@@ -41,7 +37,6 @@ import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import kotlin.time.Duration.Companion.milliseconds
 
 @Component
 class EventService(
@@ -88,37 +83,13 @@ class EventService(
 
         applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak)
 
-        foldHendelser(digisosSak, jsonDigisosSoker, jsonSoknad, model)
+        hendelseFoldService.launchFold(digisosSak, jsonDigisosSoker, jsonSoknad, model) {
+            vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak).map {
+                Vedlegg(type = it.type, tilleggsinfo = it.tilleggsinfo)
+            }
+        }
 
         return model
-    }
-
-    private suspend fun foldHendelser(
-        digisosSak: DigisosSak,
-        jsonDigisosSoker: JsonDigisosSoker?,
-        jsonSoknad: JsonSoknad?,
-        model: InternalDigisosSoker,
-    ) {
-        try {
-            val vedlegg =
-                withTimeoutOrNull(HENDELSE_FOLD_VEDLEGG_TIMEOUT) {
-                    vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak).map {
-                        Vedlegg(type = it.type, tilleggsinfo = it.tilleggsinfo)
-                    }
-                }
-            if (vedlegg == null) {
-                hendelseFoldService.recordFetchTimeout(digisosSak)
-                return
-            }
-
-            withContext(Dispatchers.Default) {
-                hendelseFoldService.fold(digisosSak, jsonDigisosSoker, jsonSoknad, vedlegg, model)
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Throwable) {
-            hendelseFoldService.recordFetchFailure(digisosSak, e)
-        }
     }
 
     fun logTekniskSperre(
@@ -259,7 +230,6 @@ class EventService(
     }
 
     companion object {
-        private val HENDELSE_FOLD_VEDLEGG_TIMEOUT = 500.milliseconds
         private val log by logger()
 
         /**

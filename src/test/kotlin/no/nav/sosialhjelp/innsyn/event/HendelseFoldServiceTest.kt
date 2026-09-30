@@ -11,6 +11,8 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.DokumentInfo
+import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -29,17 +31,23 @@ internal class HendelseFoldServiceTest {
     private fun TestScope.service() = HendelseFoldService(meterRegistry, StandardTestDispatcher(testScheduler))
 
     @Test
-    fun `records match for a paper application with equivalent model`() =
+    fun `does not fetch vedlegg for a paper application`() =
         runTest {
-            service().launchFold(digisosSak, null, null, InternalDigisosSoker()) { emptyList() }.join()
+            var fetched = false
+            service()
+                .launchFold(digisosSak, null, null, InternalDigisosSoker()) {
+                    fetched = true
+                    emptyList()
+                }.join()
 
+            assertThat(fetched).isFalse()
             assertThat(resultCount("match")).isEqualTo(1.0)
         }
 
     @Test
     fun `records error when vedlegg fetch fails`() =
         runTest {
-            service().launchFold(digisosSak, null, null, InternalDigisosSoker()) { error("Fiks failed") }.join()
+            service().launchFold(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) { error("Fiks failed") }.join()
 
             assertThat(resultCount("error")).isEqualTo(1.0)
             assertThat(resultCount("match")).isEqualTo(0.0)
@@ -48,7 +56,7 @@ internal class HendelseFoldServiceTest {
     @Test
     fun `records timeout when vedlegg fetch is slow`() =
         runTest {
-            service().launchFold(digisosSak, null, null, InternalDigisosSoker()) { awaitCancellation() }.join()
+            service().launchFold(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) { awaitCancellation() }.join()
 
             assertThat(resultCount("timeout")).isEqualTo(1.0)
         }
@@ -59,7 +67,7 @@ internal class HendelseFoldServiceTest {
             var observedName: String? = null
             withContext(CoroutineName("caller")) {
                 service()
-                    .launchFold(digisosSak, null, null, InternalDigisosSoker()) {
+                    .launchFold(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) {
                         observedName = currentCoroutineContext()[CoroutineName]?.name
                         emptyList()
                     }
@@ -87,4 +95,21 @@ internal class HendelseFoldServiceTest {
             .tag("result", result)
             .counter()
             ?.count() ?: 0.0
+
+    private fun recentDigitalDigisosSak(): DigisosSak =
+        mockk {
+            every { fiksDigisosId } returns "fiks-id"
+            every { kommunenummer } returns "0301"
+            every { originalSoknadNAV } returns
+                OriginalSoknadNAV(
+                    navEksternRefId = "ref",
+                    metadata = "metadata",
+                    vedleggMetadata = "vedlegg-metadata",
+                    soknadDokument = DokumentInfo("soknad.pdf", "soknad-dokument", 0),
+                    vedlegg = emptyList(),
+                    timestampSendt = System.currentTimeMillis(),
+                )
+            every { digisosSoker } returns null
+            every { sistEndret } returns 0L
+        }
 }

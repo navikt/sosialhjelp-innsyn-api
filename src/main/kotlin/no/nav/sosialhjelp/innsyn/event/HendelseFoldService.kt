@@ -12,8 +12,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Instant
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
@@ -28,6 +30,7 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.stereotype.Component
 import kotlin.coroutines.ContinuationInterceptor
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.measureTimedValue
 import kotlin.time.toJavaDuration
@@ -35,7 +38,7 @@ import kotlin.time.toJavaDuration
 @Component
 class HendelseFoldService(
     private val meterRegistry: MeterRegistry,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + dispatcher + CoroutineName("hendelse-fold"))
 
@@ -51,20 +54,7 @@ class HendelseFoldService(
     ): Job {
         val callerContext = currentCoroutineContext().minusKey(Job).minusKey(ContinuationInterceptor)
         return scope.launch(callerContext) {
-            val vedlegg =
-                try {
-                    withTimeoutOrNull(VEDLEGG_TIMEOUT) { hentVedlegg() }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Throwable) {
-                    recordFetchFailure(digisosSak, e)
-                    return@launch
-                }
-            if (vedlegg == null) {
-                recordFetchTimeout(digisosSak)
-                return@launch
-            }
-            fold(digisosSak, jsonDigisosSoker, jsonSoknad, vedlegg, oldModel)
+            fold(digisosSak, jsonDigisosSoker, jsonSoknad, oldModel, hentVedlegg, callerContext)
         }
     }
 
@@ -86,8 +76,9 @@ class HendelseFoldService(
         digisosSak: DigisosSak,
         jsonDigisosSoker: JsonDigisosSoker?,
         jsonSoknad: JsonSoknad?,
-        vedlegg: List<Vedlegg>,
         oldModel: InternalDigisosSoker,
+        hentVedlegg: suspend () -> List<Vedlegg>,
+        callerContext: CoroutineContext,
     ) {
         try {
             val (result, duration) =
@@ -116,8 +107,19 @@ class HendelseFoldService(
                             mottakerEnhetsnummer = jsonSoknad?.mottaker?.enhetsnummer,
                             mottakerEnhetsnavn = jsonSoknad?.mottaker?.navEnhetsnavn,
                         ),
-                        vedlegg,
-                    )
+                    ) {
+                        runBlocking(callerContext) {
+                            try {
+                                withTimeout(VEDLEGG_TIMEOUT) { hentVedlegg() }
+                            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                                throw VedleggFetchTimeout(e)
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Throwable) {
+                                throw VedleggFetchFailure(e)
+                            }
+                        }
+                    }
                 }
             meterRegistry.timer("hendelser_fold_duration").record(duration.toJavaDuration())
 
@@ -137,6 +139,10 @@ class HendelseFoldService(
                     differences,
                 )
             }
+        } catch (e: VedleggFetchTimeout) {
+            recordFetchTimeout(digisosSak)
+        } catch (e: VedleggFetchFailure) {
+            recordFetchFailure(digisosSak, e.cause ?: e)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
@@ -200,4 +206,12 @@ class HendelseFoldService(
         private val log by logger()
         private val VEDLEGG_TIMEOUT = 500.milliseconds
     }
+
+    private class VedleggFetchTimeout(
+        cause: Throwable,
+    ) : RuntimeException(cause)
+
+    private class VedleggFetchFailure(
+        cause: Throwable,
+    ) : RuntimeException(cause)
 }

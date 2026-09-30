@@ -172,22 +172,22 @@ class HendelseFoldService(
             if (oldModel.referanse != soknad.navEksternRefId) add("referanse")
             if (oldModel.fagsystem?.systemnavn != soknad.fagsystem?.systemnavn) add("fagsystem.systemnavn")
             if (oldModel.fagsystem?.systemversjon != soknad.fagsystem?.systemversjon) add("fagsystem.systemversjon")
-            if (oldModel.saker.map {
-                    Triple(
-                        it.referanse,
-                        it.saksStatus ?: SaksStatus.UNDER_BEHANDLING,
-                        it.tittel ?: DEFAULT_SAK_TITTEL,
-                    )
-                } !=
-                soknad.saker.map {
-                    Triple(
-                        it.referanse,
-                        it.saksStatus?.let { status -> SaksStatus.valueOf(status.name) } ?: SaksStatus.UNDER_BEHANDLING,
-                        it.tittel ?: DEFAULT_SAK_TITTEL,
-                    )
+            val oldSaker = oldModel.saker.associateBy { it.referanse }
+            val foldedSaker = soknad.saker.associateBy { it.referanse }
+            oldSaker.keys.filterNot { it in foldedSaker }.forEach { add("saker.manglerINy") }
+            foldedSaker.keys.filterNot { it in oldSaker }.forEach { referanse ->
+                val sak = foldedSaker.getValue(referanse)
+                add(if (sak.erSyntetisk()) "saker.syntetisk" else "saker.manglerIGammel")
+            }
+            oldSaker.keys.intersect(foldedSaker.keys).forEach { referanse ->
+                val oldSak = oldSaker.getValue(referanse)
+                val foldedSak = foldedSaker.getValue(referanse)
+                if ((oldSak.saksStatus ?: SaksStatus.UNDER_BEHANDLING) !=
+                    (foldedSak.saksStatus?.let { SaksStatus.valueOf(it.name) } ?: SaksStatus.UNDER_BEHANDLING)
+                ) {
+                    add("saker.status")
                 }
-            ) {
-                add("saker")
+                if ((oldSak.tittel ?: DEFAULT_SAK_TITTEL) != (foldedSak.tittel ?: DEFAULT_SAK_TITTEL)) add("saker.tittel")
             }
             if (oldModel.saker.flatMap { it.vedtak }.map { Triple(it.id, it.utfall?.name, it.dato?.toString()) } !=
                 (soknad.saker.flatMap { it.vedtak } + soknad.vedtakUtenSak).map {
@@ -221,7 +221,12 @@ class HendelseFoldService(
             ) {
                 add("vilkar")
             }
-            if (oldModel.dokumentasjonkrav.map { it.referanse to it.status.name }.sortedBy { it.first } !=
+            if (oldModel.dokumentasjonkrav.any { it.saksreferanse == null }) add("dokumentasjonkrav.utenSak")
+            if (oldModel.dokumentasjonkrav
+                    .filter {
+                        it.saksreferanse != null
+                    }.map { it.referanse to it.status.name }
+                    .sortedBy { it.first } !=
                 soknad.saker.flatMap { it.dokumentasjonkrav }.map { it.referanse to it.status.name }.sortedBy { it.first }
             ) {
                 add("dokumentasjonkrav")
@@ -234,6 +239,9 @@ class HendelseFoldService(
             "SOKNAD" -> "SOKNAD_VEDLEGG_KREVES"
             else -> this
         }
+
+    private fun no.nav.sosialhjelp.digisos.hendelser.domain.Sak.erSyntetisk(): Boolean =
+        saksStatus == null && tittel == null && vedtak.isEmpty() && utbetalinger.isEmpty()
 
     companion object {
         private val log by logger()

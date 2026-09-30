@@ -14,15 +14,19 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
+import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
+import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -129,7 +133,7 @@ internal class HendelseFoldServiceTest {
             service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
             assertThat(resultCount("mismatch")).isEqualTo(1.0)
-            assertThat(fieldDifferenceCount("saker")).isEqualTo(1.0)
+            assertThat(fieldDifferenceCount("saker.tittel")).isEqualTo(1.0)
         }
 
     @Test
@@ -163,6 +167,64 @@ internal class HendelseFoldServiceTest {
 
             assertThat(resultCount("match")).isEqualTo(1.0)
             assertThat(fieldDifferenceCount("utbetalinger")).isZero()
+        }
+
+    @Test
+    fun `classifies sak created for unknown vilkar sak reference as synthetic`() =
+        runTest {
+            val soker =
+                JsonDigisosSoker(
+                    version = "1",
+                    avsender = JsonAvsender("test", "1"),
+                    hendelser =
+                        listOf(
+                            JsonVilkar(
+                                vilkarreferanse = "vilkar-1",
+                                hendelsestidspunkt = "2026-01-01T12:00:00Z",
+                                saksreferanse = "ukjent-sak",
+                                status = JsonVilkar.Status.RELEVANT,
+                            ),
+                        ),
+                )
+            val oldModel =
+                InternalDigisosSoker(
+                    fagsystem = Fagsystem("test", "1"),
+                    vilkar = mutableListOf(oldVilkar("vilkar-1", "ukjent-sak")),
+                )
+
+            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+
+            assertThat(fieldDifferenceCount("saker.syntetisk")).isEqualTo(1.0)
+            assertThat(fieldDifferenceCount("saker")).isZero()
+            assertThat(fieldDifferenceCount("vilkar")).isZero()
+        }
+
+    @Test
+    fun `classifies document requirement without sak reference`() =
+        runTest {
+            val oldModel =
+                InternalDigisosSoker(
+                    dokumentasjonkrav =
+                        mutableListOf(
+                            Dokumentasjonkrav(
+                                dokumentasjonkravId = "id-1",
+                                hendelsetype = null,
+                                referanse = "krav-1",
+                                tittel = null,
+                                beskrivelse = null,
+                                status = Oppgavestatus.RELEVANT,
+                                utbetalingsReferanse = null,
+                                datoLagtTil = LocalDateTime.MIN,
+                                frist = null,
+                                saksreferanse = null,
+                            ),
+                        ),
+                )
+
+            service().launchFold(digisosSak, null, null, oldModel) { emptyList() }.join()
+
+            assertThat(fieldDifferenceCount("dokumentasjonkrav.utenSak")).isEqualTo(1.0)
+            assertThat(fieldDifferenceCount("dokumentasjonkrav")).isZero()
         }
 
     private fun resultCount(result: String): Double =
@@ -227,4 +289,18 @@ internal class HendelseFoldServiceTest {
             dokumentasjonkrav = mutableListOf(),
             datoHendelse = LocalDateTime.MIN,
         )
+
+    private fun oldVilkar(
+        referanse: String,
+        saksreferanse: String,
+    ) = Vilkar(
+        referanse = referanse,
+        tittel = null,
+        beskrivelse = null,
+        status = Oppgavestatus.RELEVANT,
+        utbetalingsReferanse = null,
+        datoLagtTil = LocalDateTime.MIN,
+        datoSistEndret = LocalDateTime.MIN,
+        saksReferanse = saksreferanse,
+    )
 }

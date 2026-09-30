@@ -20,6 +20,7 @@ import kotlinx.datetime.Instant
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.digisos.hendelser.domain.DokumentRef
 import no.nav.sosialhjelp.digisos.hendelser.fold.SoknadMetadata
 import no.nav.sosialhjelp.digisos.hendelser.fold.fold
 import no.nav.sosialhjelp.filformat.digisos.soker.DigisosSoker
@@ -171,7 +172,10 @@ class HendelseFoldService(
             if (oldModel.saker.flatMap { it.vedtak }.map { Triple(it.id, it.utfall?.name, it.dato?.toString()) } !=
                 (soknad.saker.flatMap { it.vedtak } + soknad.vedtakUtenSak).map {
                     Triple(
-                        it.dokument.toString(),
+                        when (val dokument = it.dokument) {
+                            is DokumentRef.Dokumentlager -> dokument.id
+                            is DokumentRef.SvarUt -> dokument.id
+                        },
                         it.utfall?.name,
                         it.dato?.toString(),
                     )

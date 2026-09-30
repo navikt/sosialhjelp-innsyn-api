@@ -49,7 +49,7 @@ class EventService(
     private val innsynService: InnsynService,
     private val vedleggService: VedleggService,
     private val norgClient: NorgClient,
-    private val shadowFoldService: ShadowFoldService,
+    private val hendelseFoldService: HendelseFoldService,
 ) {
     @WithSpan("createModel")
     suspend fun createModel(digisosSak: DigisosSak): InternalDigisosSoker {
@@ -88,12 +88,12 @@ class EventService(
 
         applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak)
 
-        shadowCompare(digisosSak, jsonDigisosSoker, jsonSoknad, model)
+        foldHendelser(digisosSak, jsonDigisosSoker, jsonSoknad, model)
 
         return model
     }
 
-    private suspend fun shadowCompare(
+    private suspend fun foldHendelser(
         digisosSak: DigisosSak,
         jsonDigisosSoker: JsonDigisosSoker?,
         jsonSoknad: JsonSoknad?,
@@ -101,23 +101,23 @@ class EventService(
     ) {
         try {
             val vedlegg =
-                withTimeoutOrNull(SHADOW_VEDLEGG_TIMEOUT) {
+                withTimeoutOrNull(HENDELSE_FOLD_VEDLEGG_TIMEOUT) {
                     vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak).map {
                         Vedlegg(type = it.type, tilleggsinfo = it.tilleggsinfo)
                     }
                 }
             if (vedlegg == null) {
-                shadowFoldService.recordFetchTimeout(digisosSak)
+                hendelseFoldService.recordFetchTimeout(digisosSak)
                 return
             }
 
             withContext(Dispatchers.Default) {
-                shadowFoldService.compare(digisosSak, jsonDigisosSoker, jsonSoknad, vedlegg, model)
+                hendelseFoldService.fold(digisosSak, jsonDigisosSoker, jsonSoknad, vedlegg, model)
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
-            shadowFoldService.recordFetchFailure(digisosSak, e)
+            hendelseFoldService.recordFetchFailure(digisosSak, e)
         }
     }
 
@@ -259,7 +259,7 @@ class EventService(
     }
 
     companion object {
-        private val SHADOW_VEDLEGG_TIMEOUT = 500.milliseconds
+        private val HENDELSE_FOLD_VEDLEGG_TIMEOUT = 500.milliseconds
         private val log by logger()
 
         /**

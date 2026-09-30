@@ -49,9 +49,9 @@ internal class EventServiceTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
-    private val shadowFoldService: ShadowFoldService = mockk(relaxed = true)
+    private val hendelseFoldService: HendelseFoldService = mockk(relaxed = true)
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, shadowFoldService)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, hendelseFoldService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
@@ -111,7 +111,7 @@ internal class EventServiceTest {
      */
 
     @Test
-    fun `returns model when shadow fetch fails`() =
+    fun `returns model when vedlegg fetch fails`() =
         runTest {
             every { mockDigisosSak.originalSoknadNAV } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
@@ -124,15 +124,15 @@ internal class EventServiceTest {
                     innsynService,
                     vedleggService,
                     norgClient,
-                    shadowFoldService,
+                    hendelseFoldService,
                 ).createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
-            verify { shadowFoldService.recordFetchFailure(mockDigisosSak, any()) }
+            verify { hendelseFoldService.recordFetchFailure(mockDigisosSak, any()) }
         }
 
     @Test
-    fun `returns model and records timeout when shadow fetch is slow`() =
+    fun `returns model and records timeout when vedlegg fetch is slow`() =
         runTest {
             every { mockDigisosSak.originalSoknadNAV } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
@@ -148,11 +148,11 @@ internal class EventServiceTest {
                     innsynService,
                     vedleggService,
                     norgClient,
-                    shadowFoldService,
+                    hendelseFoldService,
                 ).createModel(mockDigisosSak)
 
             assertThat(model).isNotNull
-            verify { shadowFoldService.recordFetchTimeout(mockDigisosSak) }
+            verify { hendelseFoldService.recordFetchTimeout(mockDigisosSak) }
         }
 
     @Test

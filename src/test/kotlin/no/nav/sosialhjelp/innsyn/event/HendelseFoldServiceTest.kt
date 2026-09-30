@@ -9,9 +9,9 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-internal class ShadowFoldServiceTest {
+internal class HendelseFoldServiceTest {
     private val meterRegistry = SimpleMeterRegistry()
-    private val service = ShadowFoldService(meterRegistry)
+    private val service = HendelseFoldService(meterRegistry)
     private val digisosSak: DigisosSak =
         mockk {
             every { fiksDigisosId } returns "fiks-id"
@@ -24,14 +24,14 @@ internal class ShadowFoldServiceTest {
     @Test
     fun `records match for a paper application with equivalent model`() =
         runTest {
-            service.compare(digisosSak, null, null, emptyList(), InternalDigisosSoker())
+            service.fold(digisosSak, null, null, emptyList(), InternalDigisosSoker())
 
             assertThat(resultCount("match")).isEqualTo(1.0)
         }
 
     private fun resultCount(result: String): Double =
         meterRegistry
-            .find("hendelser_shadow_compare_total")
+            .find("hendelser_fold_total")
             .tag("result", result)
             .counter()
             ?.count() ?: 0.0

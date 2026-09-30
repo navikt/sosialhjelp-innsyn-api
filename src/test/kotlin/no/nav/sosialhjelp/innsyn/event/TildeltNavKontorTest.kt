@@ -26,9 +26,9 @@ internal class TildeltNavKontorTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
-    private val shadowFoldService: ShadowFoldService = mockk(relaxed = true)
+    private val hendelseFoldService: HendelseFoldService = mockk(relaxed = true)
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, shadowFoldService)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, hendelseFoldService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()

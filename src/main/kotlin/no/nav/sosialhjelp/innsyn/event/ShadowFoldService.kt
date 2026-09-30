@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.event
 
-import io.getunleash.Unleash
 import io.micrometer.core.instrument.MeterRegistry
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import kotlinx.coroutines.CancellationException
@@ -13,7 +12,6 @@ import no.nav.sosialhjelp.digisos.hendelser.fold.fold
 import no.nav.sosialhjelp.filformat.digisos.soker.DigisosSoker
 import no.nav.sosialhjelp.filformat.filformatJson
 import no.nav.sosialhjelp.filformat.vedlegg.Vedlegg
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.HENDELSER_SHADOW
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
@@ -21,11 +19,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class ShadowFoldService(
-    private val unleash: Unleash,
     private val meterRegistry: MeterRegistry,
 ) {
-    fun isEnabled(): Boolean = unleash.isEnabled(HENDELSER_SHADOW)
-
     fun recordFetchTimeout(digisosSak: DigisosSak) {
         meterRegistry.counter("hendelser_shadow_compare_total", "result", "timeout").increment()
         log.info("Hendelser shadow vedlegg-fetch timed out fiksDigisosId={}", digisosSak.fiksDigisosId)
@@ -47,8 +42,6 @@ class ShadowFoldService(
         vedlegg: List<Vedlegg>,
         oldModel: InternalDigisosSoker,
     ) {
-        if (!isEnabled()) return
-
         try {
             meterRegistry.timer("hendelser_shadow_fold_duration").record(
                 Runnable { compareModels(digisosSak, jsonDigisosSoker, jsonSoknad, vedlegg, oldModel) },

@@ -99,8 +99,6 @@ class EventService(
         jsonSoknad: JsonSoknad?,
         model: InternalDigisosSoker,
     ) {
-        if (!shadowFoldService.isEnabled()) return
-
         try {
             val vedlegg =
                 withTimeoutOrNull(SHADOW_VEDLEGG_TIMEOUT) {

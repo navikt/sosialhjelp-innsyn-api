@@ -111,22 +111,8 @@ internal class EventServiceTest {
      */
 
     @Test
-    fun `does not fetch shadow data when shadow toggle is disabled`() =
-        runTest {
-            every { shadowFoldService.isEnabled() } returns false
-            every { mockDigisosSak.originalSoknadNAV } returns null
-            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
-            coEvery { innsynService.hentOriginalSoknad(any()) } returns null
-
-            EventService(clientProperties, innsynService, vedleggService, norgClient, shadowFoldService).createModel(mockDigisosSak)
-
-            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(any(), any()) }
-        }
-
-    @Test
     fun `returns model when shadow fetch fails`() =
         runTest {
-            every { shadowFoldService.isEnabled() } returns true
             every { mockDigisosSak.originalSoknadNAV } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
             coEvery { innsynService.hentOriginalSoknad(any()) } returns null
@@ -148,7 +134,6 @@ internal class EventServiceTest {
     @Test
     fun `returns model and records timeout when shadow fetch is slow`() =
         runTest {
-            every { shadowFoldService.isEnabled() } returns true
             every { mockDigisosSak.originalSoknadNAV } returns null
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns null
             coEvery { innsynService.hentOriginalSoknad(any()) } returns null
@@ -615,12 +600,12 @@ internal class EventServiceTest {
             val model = service.createModel(mockDigisosSak)
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(1)
-            coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
+            coVerify(exactly = 2) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
 
             val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak)
             assertThat(saksoversiktModel).isNotNull
             assertThat(saksoversiktModel.oppgaver).hasSize(1)
-            coVerify(exactly = 2) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
+            coVerify(exactly = 3) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
         }
 
     @Test
@@ -651,12 +636,12 @@ internal class EventServiceTest {
             val model = service.createModel(mockDigisosSak)
             assertThat(model).isNotNull
             assertThat(model.oppgaver).hasSize(0)
-            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
+            coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
 
             val saksoversiktModel = service.createSaksoversiktModel(mockDigisosSak)
             assertThat(saksoversiktModel).isNotNull
             assertThat(saksoversiktModel.oppgaver).hasSize(0)
-            coVerify(exactly = 0) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
+            coVerify(exactly = 1) { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) }
         }
 
     @Test

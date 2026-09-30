@@ -26,7 +26,9 @@ import no.nav.sosialhjelp.digisos.hendelser.fold.fold
 import no.nav.sosialhjelp.filformat.digisos.soker.DigisosSoker
 import no.nav.sosialhjelp.filformat.filformatJson
 import no.nav.sosialhjelp.filformat.vedlegg.Vedlegg
+import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.stereotype.Component
@@ -41,7 +43,8 @@ class HendelseFoldService(
     private val meterRegistry: MeterRegistry,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + dispatcher + CoroutineName("hendelse-fold"))
+    private val scope =
+        CoroutineScope(SupervisorJob() + dispatcher.limitedParallelism(MAX_CONCURRENT_FOLDS) + CoroutineName("hendelse-fold"))
 
     @PreDestroy
     fun shutdown() = scope.cancel("HendelseFoldService shutting down")
@@ -69,7 +72,11 @@ class HendelseFoldService(
         error: Throwable,
     ) {
         meterRegistry.counter("hendelser_fold_total", "result", "error").increment()
-        log.warn("Hendelser fold vedlegg-fetch failed fiksDigisosId={}", digisosSak.fiksDigisosId, error)
+        log.warn(
+            "Hendelser fold vedlegg-fetch failed fiksDigisosId={} errorType={}",
+            digisosSak.fiksDigisosId,
+            error::class.simpleName,
+        )
     }
 
     @WithSpan("hendelseFold")
@@ -103,6 +110,7 @@ class HendelseFoldService(
                             navEksternRefId = originalSoknad?.navEksternRefId,
                             originalSoknadDokumentlagerId = originalSoknad?.soknadDokument?.dokumentlagerDokumentId,
                             vedleggMetadataDokumentlagerId = originalSoknad?.vedleggMetadata,
+                            // fold falls back to digisosSoker.avsender when these are null.
                             fagsystemNavn = null,
                             fagsystemVersjon = null,
                             mottakerEnhetsnummer = jsonSoknad?.mottaker?.enhetsnummer,
@@ -148,7 +156,7 @@ class HendelseFoldService(
             throw e
         } catch (e: Throwable) {
             meterRegistry.counter("hendelser_fold_total", "result", "error").increment()
-            log.warn("Hendelser fold failed fiksDigisosId={}", digisosSak.fiksDigisosId, e)
+            log.warn("Hendelser fold failed fiksDigisosId={} errorType={}", digisosSak.fiksDigisosId, e::class.simpleName)
         }
     }
 
@@ -164,8 +172,20 @@ class HendelseFoldService(
             if (oldModel.referanse != soknad.navEksternRefId) add("referanse")
             if (oldModel.fagsystem?.systemnavn != soknad.fagsystem?.systemnavn) add("fagsystem.systemnavn")
             if (oldModel.fagsystem?.systemversjon != soknad.fagsystem?.systemversjon) add("fagsystem.systemversjon")
-            if (oldModel.saker.map { it.referanse to it.saksStatus?.name } !=
-                soknad.saker.map { it.referanse to it.saksStatus?.name }
+            if (oldModel.saker.map {
+                    Triple(
+                        it.referanse,
+                        it.saksStatus ?: SaksStatus.UNDER_BEHANDLING,
+                        it.tittel ?: DEFAULT_SAK_TITTEL,
+                    )
+                } !=
+                soknad.saker.map {
+                    Triple(
+                        it.referanse,
+                        it.saksStatus?.let { status -> SaksStatus.valueOf(status.name) } ?: SaksStatus.UNDER_BEHANDLING,
+                        it.tittel ?: DEFAULT_SAK_TITTEL,
+                    )
+                }
             ) {
                 add("saker")
             }
@@ -209,6 +229,7 @@ class HendelseFoldService(
     companion object {
         private val log by logger()
         private val VEDLEGG_TIMEOUT = 500.milliseconds
+        private const val MAX_CONCURRENT_FOLDS = 4
     }
 
     private class VedleggFetchTimeout(

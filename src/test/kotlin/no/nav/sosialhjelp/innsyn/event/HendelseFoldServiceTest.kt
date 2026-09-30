@@ -10,10 +10,16 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
+import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -89,10 +95,49 @@ internal class HendelseFoldServiceTest {
             assertThat(resultCount("match")).isEqualTo(1.0)
         }
 
+    @Test
+    fun `records saker difference when title differs`() =
+        runTest {
+            val oldModel =
+                InternalDigisosSoker(
+                    fagsystem = Fagsystem("test", "1"),
+                    saker =
+                        mutableListOf(
+                            Sak("sak-1", SaksStatus.UNDER_BEHANDLING, "Old title", mutableListOf(), mutableListOf()),
+                        ),
+                )
+            val soker =
+                JsonDigisosSoker(
+                    version = "1",
+                    avsender = JsonAvsender("test", "1"),
+                    hendelser =
+                        listOf(
+                            JsonSaksStatus(
+                                referanse = "sak-1",
+                                hendelsestidspunkt = "2026-01-01T12:00:00Z",
+                                tittel = "New title",
+                                status = JsonSaksStatus.Status.UNDER_BEHANDLING,
+                            ),
+                        ),
+                )
+
+            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+
+            assertThat(resultCount("mismatch")).isEqualTo(1.0)
+            assertThat(fieldDifferenceCount("saker")).isEqualTo(1.0)
+        }
+
     private fun resultCount(result: String): Double =
         meterRegistry
             .find("hendelser_fold_total")
             .tag("result", result)
+            .counter()
+            ?.count() ?: 0.0
+
+    private fun fieldDifferenceCount(path: String): Double =
+        meterRegistry
+            .find("hendelser_fold_field_diff_total")
+            .tag("path", path)
             .counter()
             ?.count() ?: 0.0
 

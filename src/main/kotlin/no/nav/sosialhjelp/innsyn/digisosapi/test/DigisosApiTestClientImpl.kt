@@ -52,8 +52,11 @@ class DigisosApiTestClientImpl(
 
         return digisosApiTestWebClient
             .post()
-            .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$id")
-            .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+            .uri { builder ->
+                builder
+                    .pathSegment("digisos", "api", "v1", "11415cd1-e26d-499a-8421-751457dfcbd5", "{id}")
+                    .build(id ?: "null")
+            }.header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
             .body(BodyInserters.fromValue(sosialhjelpJsonMapper.writeValueAsString(digisosApiWrapper)))
             .retrieve()
             .bodyToMono<String>()
@@ -94,8 +97,17 @@ class DigisosApiTestClientImpl(
         val opplastingResponseList =
             digisosApiTestWebClient
                 .post()
-                .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/$soknadId/filer")
-                .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+                .uri { builder ->
+                    builder
+                        .pathSegment(
+                            "digisos",
+                            "api",
+                            "v1",
+                            "11415cd1-e26d-499a-8421-751457dfcbd5",
+                            "{soknadId}",
+                            "filer",
+                        ).build(soknadId)
+                }.header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .retrieve()
@@ -121,8 +133,11 @@ class DigisosApiTestClientImpl(
             val soknad =
                 fiksWebClient
                     .get()
-                    .uri("/digisos/api/v1/soknader/$fiksDigisosId")
-                    .accept(MediaType.APPLICATION_JSON)
+                    .uri { builder ->
+                        builder
+                            .pathSegment("digisos", "api", "v1", "soknader", "{fiksDigisosId}")
+                            .build(fiksDigisosId)
+                    }.accept(MediaType.APPLICATION_JSON)
                     .header(AUTHORIZATION, token.withBearer())
                     .retrieve()
                     .bodyToMono(DigisosSak::class.java)
@@ -168,8 +183,12 @@ class DigisosApiTestClientImpl(
         val response =
             digisosApiTestWebClient
                 .post()
-                .uri("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny?sokerFnr=$testbrukerNatalie")
-                .header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+                .uri { builder ->
+                    builder
+                        .pathSegment("digisos", "api", "v1", "11415cd1-e26d-499a-8421-751457dfcbd5", "ny")
+                        .queryParam("sokerFnr", "{testbrukerNatalie}")
+                        .build(testbrukerNatalie)
+                }.header(AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
                 .body(BodyInserters.fromValue(""))
                 .retrieve()
                 .bodyToMono<String>()

@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
 import no.nav.sosialhjelp.api.fiks.OriginalSoknadNAV
@@ -20,8 +21,12 @@ import no.nav.sosialhjelp.innsyn.domain.Fagsystem
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
+import no.nav.sosialhjelp.innsyn.domain.Utbetaling
+import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDateTime
 
 internal class HendelseFoldServiceTest {
     private val meterRegistry = SimpleMeterRegistry()
@@ -127,6 +132,39 @@ internal class HendelseFoldServiceTest {
             assertThat(fieldDifferenceCount("saker")).isEqualTo(1.0)
         }
 
+    @Test
+    fun `does not report payment difference when payments are grouped by sak in a different order`() =
+        runTest {
+            val soker =
+                JsonDigisosSoker(
+                    version = "1",
+                    avsender = JsonAvsender("test", "1"),
+                    hendelser =
+                        listOf(
+                            JsonSaksStatus("sak-1", "2026-01-01T12:00:00Z", null, JsonSaksStatus.Status.UNDER_BEHANDLING),
+                            JsonSaksStatus("sak-2", "2026-01-01T12:01:00Z", null, JsonSaksStatus.Status.UNDER_BEHANDLING),
+                            utbetaling("utbetaling-2", "sak-2", "2026-01-01T12:02:00Z"),
+                            utbetaling("utbetaling-1", "sak-1", "2026-01-01T12:03:00Z"),
+                        ),
+                )
+            val oldModel =
+                InternalDigisosSoker(
+                    fagsystem = Fagsystem("test", "1"),
+                    saker =
+                        mutableListOf(
+                            Sak("sak-1", SaksStatus.UNDER_BEHANDLING, null, mutableListOf(), mutableListOf()),
+                            Sak("sak-2", SaksStatus.UNDER_BEHANDLING, null, mutableListOf(), mutableListOf()),
+                        ),
+                    // The legacy model retains update order across saker, unlike the folded model.
+                    utbetalinger = mutableListOf(oldUtbetaling("utbetaling-2"), oldUtbetaling("utbetaling-1")),
+                )
+
+            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+
+            assertThat(resultCount("match")).isEqualTo(1.0)
+            assertThat(fieldDifferenceCount("utbetalinger")).isZero()
+        }
+
     private fun resultCount(result: String): Double =
         meterRegistry
             .find("hendelser_fold_total")
@@ -157,4 +195,36 @@ internal class HendelseFoldServiceTest {
             every { digisosSoker } returns null
             every { sistEndret } returns 0L
         }
+
+    private fun utbetaling(
+        referanse: String,
+        saksreferanse: String,
+        tidspunkt: String,
+    ) = JsonUtbetaling(
+        utbetalingsreferanse = referanse,
+        hendelsestidspunkt = tidspunkt,
+        saksreferanse = saksreferanse,
+        status = JsonUtbetaling.Status.UTBETALT,
+        belop = 100.0,
+    )
+
+    private fun oldUtbetaling(referanse: String) =
+        Utbetaling(
+            referanse = referanse,
+            status = UtbetalingsStatus.UTBETALT,
+            belop = BigDecimal(100),
+            beskrivelse = null,
+            forfallsDato = null,
+            utbetalingsDato = null,
+            stoppetDato = null,
+            fom = null,
+            tom = null,
+            mottaker = null,
+            annenMottaker = false,
+            kontonummer = null,
+            utbetalingsmetode = null,
+            vilkar = mutableListOf(),
+            dokumentasjonkrav = mutableListOf(),
+            datoHendelse = LocalDateTime.MIN,
+        )
 }

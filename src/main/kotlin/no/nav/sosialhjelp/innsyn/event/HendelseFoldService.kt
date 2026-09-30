@@ -203,27 +203,36 @@ class HendelseFoldService(
             ) {
                 add("vedtak")
             }
-            if (oldModel.utbetalinger.map { Pair(it.referanse, it.status.name) } !=
-                (soknad.utbetalingerUtenSak + soknad.saker.flatMap { it.utbetalinger }).map { Pair(it.referanse, it.status.name) }
+            if (oldModel.utbetalinger.map { it.referanse to it.status.name }.sortedBy { it.first } !=
+                (soknad.utbetalingerUtenSak + soknad.saker.flatMap { it.utbetalinger })
+                    .map { it.referanse to it.status.name }
+                    .sortedBy { it.first }
             ) {
                 add("utbetalinger")
             }
-            if (oldModel.oppgaver.map { Pair(it.oppgaveId, it.hendelsetype?.name) } !=
-                soknad.dokumentasjonEtterspurt.map { Pair(it.referanse, it.kilde.name) }
+            if (oldModel.oppgaver.map { it.oppgaveId to it.hendelsetype?.name.normalizedOppgaveKilde() }.sortedBy { it.first } !=
+                soknad.dokumentasjonEtterspurt.map { it.referanse to it.kilde.name }.sortedBy { it.first }
             ) {
                 add("oppgaver")
             }
-            if (oldModel.vilkar.map { Pair(it.referanse, it.status.name) } !=
-                soknad.saker.flatMap { it.vilkar }.map { Pair(it.referanse, it.status.name) }
+            if (oldModel.vilkar.any { it.saksReferanse == null }) add("vilkar.utenSak")
+            if (oldModel.vilkar.filter { it.saksReferanse != null }.map { it.referanse to it.status.name }.sortedBy { it.first } !=
+                soknad.saker.flatMap { it.vilkar }.map { it.referanse to it.status.name }.sortedBy { it.first }
             ) {
                 add("vilkar")
             }
-            if (oldModel.dokumentasjonkrav.map { Pair(it.referanse, it.status.name) } !=
-                soknad.saker.flatMap { it.dokumentasjonkrav }.map { Pair(it.referanse, it.status.name) }
+            if (oldModel.dokumentasjonkrav.map { it.referanse to it.status.name }.sortedBy { it.first } !=
+                soknad.saker.flatMap { it.dokumentasjonkrav }.map { it.referanse to it.status.name }.sortedBy { it.first }
             ) {
                 add("dokumentasjonkrav")
             }
             if (oldModel.forelopigSvar.harMottattForelopigSvar != (soknad.forelopigSvar != null)) add("forelopigSvar")
+        }
+
+    private fun String?.normalizedOppgaveKilde(): String? =
+        when (this) {
+            "SOKNAD" -> "SOKNAD_VEDLEGG_KREVES"
+            else -> this
         }
 
     companion object {

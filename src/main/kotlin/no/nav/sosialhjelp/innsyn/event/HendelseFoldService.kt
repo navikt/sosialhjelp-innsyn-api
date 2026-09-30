@@ -19,6 +19,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.digisos.hendelser.fold.SoknadMetadata
+import no.nav.sosialhjelp.digisos.hendelser.fold.fold
 import no.nav.sosialhjelp.filformat.digisos.soker.DigisosSoker
 import no.nav.sosialhjelp.filformat.filformatJson
 import no.nav.sosialhjelp.filformat.vedlegg.Vedlegg
@@ -28,6 +29,8 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.stereotype.Component
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.measureTimedValue
+import kotlin.time.toJavaDuration
 
 @Component
 class HendelseFoldService(
@@ -87,8 +90,8 @@ class HendelseFoldService(
         oldModel: InternalDigisosSoker,
     ) {
         try {
-            meterRegistry.timer("hendelser_fold_duration").record(
-                Runnable {
+            val (result, duration) =
+                measureTimedValue {
                     val digisosSoker =
                         jsonDigisosSoker?.let {
                             filformatJson.decodeFromString<DigisosSoker>(
@@ -96,44 +99,44 @@ class HendelseFoldService(
                             )
                         }
                     val originalSoknad = digisosSak.originalSoknadNAV
-                    val result =
-                        no.nav.sosialhjelp.digisos.hendelser.fold.fold(
-                            digisosSoker,
-                            SoknadMetadata(
-                                fiksDigisosId = digisosSak.fiksDigisosId,
-                                kommunenummer = digisosSak.kommunenummer,
-                                erPapirsoknad = originalSoknad == null,
-                                sistEndret =
-                                    Instant.fromEpochMilliseconds(digisosSak.digisosSoker?.timestampSistOppdatert ?: digisosSak.sistEndret),
-                                timestampSendt = originalSoknad?.timestampSendt?.takeIf { it != 0L }?.let(Instant::fromEpochMilliseconds),
-                                navEksternRefId = originalSoknad?.navEksternRefId,
-                                originalSoknadDokumentlagerId = originalSoknad?.soknadDokument?.dokumentlagerDokumentId,
-                                vedleggMetadataDokumentlagerId = originalSoknad?.vedleggMetadata,
-                                fagsystemNavn = null,
-                                fagsystemVersjon = null,
-                                mottakerEnhetsnummer = jsonSoknad?.mottaker?.enhetsnummer,
-                                mottakerEnhetsnavn = jsonSoknad?.mottaker?.navEnhetsnavn,
-                            ),
-                            vedlegg,
-                        )
-                    val differences = differences(oldModel, result, digisosSak.fiksDigisosId)
-                    meterRegistry
-                        .counter(
-                            "hendelser_fold_total",
-                            "result",
-                            if (differences.isEmpty()) "match" else "mismatch",
-                        ).increment()
-                    differences.forEach { meterRegistry.counter("hendelser_fold_field_diff_total", "path", it).increment() }
-                    if (differences.isNotEmpty()) {
-                        log.info(
-                            "Hendelser fold mismatch fiksDigisosId={} kommunenummer={} fields={}",
-                            digisosSak.fiksDigisosId,
-                            digisosSak.kommunenummer,
-                            differences,
-                        )
-                    }
-                },
-            )
+                    fold(
+                        digisosSoker,
+                        SoknadMetadata(
+                            fiksDigisosId = digisosSak.fiksDigisosId,
+                            kommunenummer = digisosSak.kommunenummer,
+                            erPapirsoknad = originalSoknad == null,
+                            sistEndret =
+                                Instant.fromEpochMilliseconds(digisosSak.digisosSoker?.timestampSistOppdatert ?: digisosSak.sistEndret),
+                            timestampSendt = originalSoknad?.timestampSendt?.takeIf { it != 0L }?.let(Instant::fromEpochMilliseconds),
+                            navEksternRefId = originalSoknad?.navEksternRefId,
+                            originalSoknadDokumentlagerId = originalSoknad?.soknadDokument?.dokumentlagerDokumentId,
+                            vedleggMetadataDokumentlagerId = originalSoknad?.vedleggMetadata,
+                            fagsystemNavn = null,
+                            fagsystemVersjon = null,
+                            mottakerEnhetsnummer = jsonSoknad?.mottaker?.enhetsnummer,
+                            mottakerEnhetsnavn = jsonSoknad?.mottaker?.navEnhetsnavn,
+                        ),
+                        vedlegg,
+                    )
+                }
+            meterRegistry.timer("hendelser_fold_duration").record(duration.toJavaDuration())
+
+            val differences = differences(oldModel, result, digisosSak.fiksDigisosId)
+            meterRegistry
+                .counter(
+                    "hendelser_fold_total",
+                    "result",
+                    if (differences.isEmpty()) "match" else "mismatch",
+                ).increment()
+            differences.forEach { meterRegistry.counter("hendelser_fold_field_diff_total", "path", it).increment() }
+            if (differences.isNotEmpty()) {
+                log.info(
+                    "Hendelser fold mismatch fiksDigisosId={} kommunenummer={} fields={}",
+                    digisosSak.fiksDigisosId,
+                    digisosSak.kommunenummer,
+                    differences,
+                )
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {

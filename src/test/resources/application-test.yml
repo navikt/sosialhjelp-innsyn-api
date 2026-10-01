@@ -17,6 +17,8 @@ client:
   unleash_server_api_token: "localtoken"
   soknad_api_url: "http://localhost:59999"
   soknad_api_audience: "dummyAudience"
+  upload_api_url: "http://localhost:57777"
+  upload_api_audience: "dummyAudience"
 
 IDPORTEN_ISSUER: http://localhost:${mock-oauth2-server.port}/default
 IDPORTEN_CLIENT_ID: testclient

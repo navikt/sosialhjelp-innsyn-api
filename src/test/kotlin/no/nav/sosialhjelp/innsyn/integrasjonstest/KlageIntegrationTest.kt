@@ -39,6 +39,7 @@ import no.nav.sosialhjelp.innsyn.pdl.dto.PdlAdressebeskyttelse
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlGradering
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
+import no.nav.sosialhjelp.innsyn.upload.UploadClient
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -76,6 +77,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
     private lateinit var eventService: EventService
 
+    @MockkBean
+    private lateinit var uploadClient: UploadClient
+
     @MockkBean(relaxed = true)
     private lateinit var klageMetricsService: KlageMetricsService
 
@@ -89,8 +93,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         coEvery { pdlClient.getPerson(any()) } returns createPdlPerson()
 
-        coEvery { mellomlagerClient.getDocumentMetadataForRef(klageId) } returns
-            MellomlagerResponse.MellomlagringDto(klageId, emptyList())
+        coEvery { uploadClient.getVedleggJson(klageId, klageId) } returns JsonVedleggSpesifikasjon()
 
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(

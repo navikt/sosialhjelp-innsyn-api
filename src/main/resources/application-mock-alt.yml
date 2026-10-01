@@ -38,6 +38,8 @@ client:
   unleash_server_api_url: ${UNLEASH_SERVER_API_URL:http://${mock-alt-api-host}:8989/sosialhjelp/mock-alt-api/internal/unleash}
   unleash_server_api_token: ${UNLEASH_SERVER_API_TOKEN:token}
   vilkar_dokkrav_fagsystem_versjoner: ${VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER}
+  upload_endpoint_url: ${UPLOAD_ENDPOINT_URL:http://sosialhjelp-upload-mock}
+  upload_audience: ${UPLOAD_AUDIENCE:dev-gcp:teamdigisos:sosialhjelp-upload-mock}
 
 idporten:
   issuer: ${IDPORTEN_ISSUER:http://localhost:8888/default}

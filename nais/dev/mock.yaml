@@ -45,6 +45,7 @@ spec:
         - application: sosialhjelp-soknad-api-mock
         - application: sosialhjelp-idporten-mock
         - application: sosialhjelp-texas-mock
+        - application: sosialhjelp-upload-mock
     inbound:
       rules:
         - application: sosialhjelp-mock-alt-api-mock
@@ -92,3 +93,7 @@ spec:
       value: http://sosialhjelp-texas-mock/api/v1/token
     - name: NAIS_TOKEN_EXCHANGE_ENDPOINT
       value: http://sosialhjelp-texas-mock/api/v1/token/exchange
+    - name: UPLOAD_API_URL
+      value: "http://sosialhjelp-upload-mock"
+    - name: UPLOAD_API_AUDIENCE
+      value: "dev-gcp:teamdigisos:sosialhjelp-upload-mock"

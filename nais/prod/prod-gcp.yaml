@@ -57,6 +57,7 @@ spec:
         - application: norg2
           namespace: org
         - application: sosialhjelp-soknad-api
+        - application: sosialhjelp-upload
     inbound:
       rules:
         - application: sosialhjelp-innsyn
@@ -106,3 +107,7 @@ spec:
       value: "http://sosialhjelp-soknad-api/sosialhjelp/soknad-api"
     - name: SOKNAD_API_AUDIENCE
       value: "prod-gcp:teamdigisos:sosialhjelp-soknad-api"
+    - name: UPLOAD_API_URL
+      value: "http://sosialhjelp-upload"
+    - name: UPLOAD_API_AUDIENCE
+      value: "prod-gcp:teamdigisos:sosialhjelp-upload"

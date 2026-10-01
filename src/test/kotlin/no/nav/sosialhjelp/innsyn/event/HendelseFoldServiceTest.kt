@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
@@ -170,7 +171,7 @@ internal class HendelseFoldServiceTest {
         }
 
     @Test
-    fun `classifies sak created for unknown vilkar sak reference as synthetic`() =
+    fun `does not synthesize sak for unknown vilkar sak reference`() =
         runTest {
             val soker =
                 JsonDigisosSoker(
@@ -194,14 +195,27 @@ internal class HendelseFoldServiceTest {
 
             service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
-            assertThat(fieldDifferenceCount("saker.syntetisk")).isEqualTo(1.0)
+            assertThat(fieldDifferenceCount("saker.syntetisk")).isZero()
             assertThat(fieldDifferenceCount("saker")).isZero()
             assertThat(fieldDifferenceCount("vilkar")).isZero()
         }
 
     @Test
-    fun `classifies document requirement without sak reference`() =
+    fun `matches document requirement without sak reference`() =
         runTest {
+            val soker =
+                JsonDigisosSoker(
+                    version = "1",
+                    avsender = JsonAvsender("test", "1"),
+                    hendelser =
+                        listOf(
+                            JsonDokumentasjonkrav(
+                                dokumentasjonkravreferanse = "krav-1",
+                                hendelsestidspunkt = "2026-01-01T12:00:00Z",
+                                status = JsonDokumentasjonkrav.Status.RELEVANT,
+                            ),
+                        ),
+                )
             val oldModel =
                 InternalDigisosSoker(
                     dokumentasjonkrav =
@@ -221,10 +235,57 @@ internal class HendelseFoldServiceTest {
                         ),
                 )
 
-            service().launchFold(digisosSak, null, null, oldModel) { emptyList() }.join()
+            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
-            assertThat(fieldDifferenceCount("dokumentasjonkrav.utenSak")).isEqualTo(1.0)
             assertThat(fieldDifferenceCount("dokumentasjonkrav")).isZero()
+        }
+
+    @Test
+    fun `reports vilkar difference when sak reference differs`() =
+        runTest {
+            val soker =
+                JsonDigisosSoker(
+                    version = "1",
+                    avsender = JsonAvsender("test", "1"),
+                    hendelser =
+                        listOf(
+                            JsonVilkar(
+                                vilkarreferanse = "vilkar-1",
+                                hendelsestidspunkt = "2026-01-01T12:00:00Z",
+                                saksreferanse = "sak-2",
+                                status = JsonVilkar.Status.RELEVANT,
+                            ),
+                        ),
+                )
+            val oldModel = InternalDigisosSoker(vilkar = mutableListOf(oldVilkar("vilkar-1", "sak-1")))
+
+            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+
+            assertThat(fieldDifferenceCount("vilkar")).isEqualTo(1.0)
+        }
+
+    @Test
+    fun `reports document requirement difference when sak reference differs`() =
+        runTest {
+            val soker =
+                JsonDigisosSoker(
+                    version = "1",
+                    avsender = JsonAvsender("test", "1"),
+                    hendelser =
+                        listOf(
+                            JsonDokumentasjonkrav(
+                                dokumentasjonkravreferanse = "krav-1",
+                                hendelsestidspunkt = "2026-01-01T12:00:00Z",
+                                saksreferanse = "sak-2",
+                                status = JsonDokumentasjonkrav.Status.RELEVANT,
+                            ),
+                        ),
+                )
+            val oldModel = InternalDigisosSoker(dokumentasjonkrav = mutableListOf(oldDokumentasjonkrav("krav-1", "sak-1")))
+
+            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+
+            assertThat(fieldDifferenceCount("dokumentasjonkrav")).isEqualTo(1.0)
         }
 
     private fun resultCount(result: String): Double =
@@ -292,7 +353,7 @@ internal class HendelseFoldServiceTest {
 
     private fun oldVilkar(
         referanse: String,
-        saksreferanse: String,
+        saksreferanse: String?,
     ) = Vilkar(
         referanse = referanse,
         tittel = null,
@@ -302,5 +363,21 @@ internal class HendelseFoldServiceTest {
         datoLagtTil = LocalDateTime.MIN,
         datoSistEndret = LocalDateTime.MIN,
         saksReferanse = saksreferanse,
+    )
+
+    private fun oldDokumentasjonkrav(
+        referanse: String,
+        saksreferanse: String?,
+    ) = Dokumentasjonkrav(
+        dokumentasjonkravId = "id-$referanse",
+        hendelsetype = null,
+        referanse = referanse,
+        tittel = null,
+        beskrivelse = null,
+        status = Oppgavestatus.RELEVANT,
+        utbetalingsReferanse = null,
+        datoLagtTil = LocalDateTime.MIN,
+        frist = null,
+        saksreferanse = saksreferanse,
     )
 }

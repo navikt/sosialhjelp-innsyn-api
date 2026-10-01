@@ -215,19 +215,19 @@ class HendelseFoldService(
             ) {
                 add("oppgaver")
             }
-            if (oldModel.vilkar.any { it.saksReferanse == null }) add("vilkar.utenSak")
-            if (oldModel.vilkar.filter { it.saksReferanse != null }.map { it.referanse to it.status.name }.sortedBy { it.first } !=
-                soknad.saker.flatMap { it.vilkar }.map { it.referanse to it.status.name }.sortedBy { it.first }
+            if (oldModel.vilkar.map { Triple(it.referanse, it.saksReferanse, it.status.name) }.sortedBy { it.first } !=
+                (soknad.saker.flatMap { it.vilkar } + soknad.vilkarUtenSak)
+                    .map { Triple(it.referanse, it.saksReferanse, it.status.name) }
+                    .sortedBy { it.first }
             ) {
                 add("vilkar")
             }
-            if (oldModel.dokumentasjonkrav.any { it.saksreferanse == null }) add("dokumentasjonkrav.utenSak")
             if (oldModel.dokumentasjonkrav
-                    .filter {
-                        it.saksreferanse != null
-                    }.map { it.referanse to it.status.name }
+                    .map { Triple(it.referanse, it.saksreferanse, it.status.name) }
                     .sortedBy { it.first } !=
-                soknad.saker.flatMap { it.dokumentasjonkrav }.map { it.referanse to it.status.name }.sortedBy { it.first }
+                (soknad.saker.flatMap { it.dokumentasjonkrav } + soknad.dokumentasjonkravUtenSak)
+                    .map { Triple(it.referanse, it.saksReferanse, it.status.name) }
+                    .sortedBy { it.first }
             ) {
                 add("dokumentasjonkrav")
             }

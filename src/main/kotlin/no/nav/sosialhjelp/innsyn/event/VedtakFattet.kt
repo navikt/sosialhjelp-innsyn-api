@@ -47,7 +47,7 @@ fun InternalDigisosSoker.apply(
         // Opprett ny Sak
         sakForReferanse =
             Sak(
-                referanse = hendelse.saksreferanse ?: "default",
+                referanse = hendelse.saksreferanse,
                 saksStatus = SaksStatus.UNDER_BEHANDLING,
                 tittel = DEFAULT_SAK_TITTEL,
                 vedtak = mutableListOf(),

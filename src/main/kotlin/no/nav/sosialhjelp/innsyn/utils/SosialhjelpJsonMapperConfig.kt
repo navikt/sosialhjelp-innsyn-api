@@ -4,8 +4,9 @@ import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.kotlinModule
 
-val sosialhjelpJsonMapper: JsonMapper =
+fun sosialhjelpJsonMapperBuilder(): JsonMapper.Builder =
     JsonSosialhjelpObjectMapper
         .createJsonMapperBuilder()
         .addModule(kotlinModule())
-        .build()
+
+val sosialhjelpJsonMapper: JsonMapper = sosialhjelpJsonMapperBuilder().build()

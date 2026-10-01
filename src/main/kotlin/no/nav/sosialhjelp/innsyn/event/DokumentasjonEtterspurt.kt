@@ -45,16 +45,18 @@ fun InternalDigisosSoker.apply(
                 )
             }.toMutableList()
 
-    if (hendelse.dokumenter.isNotEmpty() && hendelse.forvaltningsbrev != null) {
-        val url = hentUrlFraFilreferanse(clientProperties, hendelse.forvaltningsbrev.referanse)
-        log.info("Hendelse: Dokumentasjon etterspurt. Vi trenger flere opplysninger til søknaden din.")
-        historikk.add(
-            Hendelse(
-                HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON,
-                hendelse.hendelsestidspunkt.toLocalDateTime(),
-                UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, url),
-            ),
-        )
+    if (hendelse.dokumenter.isNotEmpty()) {
+        hendelse.forvaltningsbrev?.let {
+            val url = hentUrlFraFilreferanse(clientProperties, it.referanse)
+            log.info("Hendelse: Dokumentasjon etterspurt. Vi trenger flere opplysninger til søknaden din.")
+            historikk.add(
+                Hendelse(
+                    HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON,
+                    hendelse.hendelsestidspunkt.toLocalDateTime(),
+                    UrlResponse(HendelseTekstType.VIS_BREVET_LENKETEKST, url),
+                ),
+            )
+        }
     }
 
     if (prevSize > 0 && oppgaver.isEmpty() && status != SoknadsStatus.BEHANDLES_IKKE) {

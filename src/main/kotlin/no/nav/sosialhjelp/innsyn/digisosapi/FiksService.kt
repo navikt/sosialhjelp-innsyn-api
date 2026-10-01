@@ -54,7 +54,7 @@ class FiksService(
         )
     }
 
-    suspend fun <T : Serializable> getDocument(
+    suspend fun <T> getDocument(
         digisosId: String,
         dokumentlagerId: String,
         requestedClass: Class<out T>,

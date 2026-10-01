@@ -48,8 +48,9 @@ internal class EventServiceTest {
     private val innsynService: InnsynService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val norgClient: NorgClient = mockk()
+    private val hendelseFoldService: HendelseFoldService = mockk(relaxed = true)
 
-    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient)
+    private val service = EventService(clientProperties, innsynService, vedleggService, norgClient, hendelseFoldService)
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonSoknad: JsonSoknad = mockk()
@@ -79,8 +80,6 @@ internal class EventServiceTest {
         coEvery { norgClient.hentNavEnhet(enhetsnr) } returns mockNavEnhet
         every { digisosSak.fiksDigisosId } returns "fiksDigisosId"
         every { digisosSak.kommunenummer } returns "1234"
-
-        resetHendelser()
     }
 
     /* Test-caser:
@@ -122,6 +121,9 @@ internal class EventServiceTest {
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
             assertThat(model.historikk).hasSize(0)
+            coVerify(exactly = 1) {
+                hendelseFoldService.launchFold(mockDigisosSak, null, null, model, any())
+            }
         }
 
     @Test
@@ -143,16 +145,14 @@ internal class EventServiceTest {
         fun `saksStatus UTEN vedtakFattet`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_SAKS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_3),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -179,16 +179,14 @@ internal class EventServiceTest {
         fun `saksStatus UTEN tittel eller status`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.withHendelsestidspunkt(tidspunkt_3),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.copy(hendelsestidspunkt = tidspunkt_3),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -215,17 +213,15 @@ internal class EventServiceTest {
         fun `saksStatus FOR vedtakFattet`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
-                                SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_SAKS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_3),
+                                SAK1_VEDTAK_FATTET_INNVILGET.copy(hendelsestidspunkt = tidspunkt_4),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -257,16 +253,14 @@ internal class EventServiceTest {
         fun `vedtakFattet UTEN saksStatus`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_VEDTAK_FATTET_INNVILGET.copy(hendelsestidspunkt = tidspunkt_3),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -298,17 +292,15 @@ internal class EventServiceTest {
         fun `vedtakFattet FOR saksStatus`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_3),
-                                SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_4),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_VEDTAK_FATTET_INNVILGET.copy(hendelsestidspunkt = tidspunkt_3),
+                                SAK1_SAKS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_4),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -340,18 +332,16 @@ internal class EventServiceTest {
         fun `saksStatus med 2 vedtakFattet`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
-                                SAK1_VEDTAK_FATTET_INNVILGET.withHendelsestidspunkt(tidspunkt_4),
-                                SAK1_VEDTAK_FATTET_AVSLATT.withHendelsestidspunkt(tidspunkt_5),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_SAKS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_3),
+                                SAK1_VEDTAK_FATTET_INNVILGET.copy(hendelsestidspunkt = tidspunkt_4),
+                                SAK1_VEDTAK_FATTET_AVSLATT.copy(hendelsestidspunkt = tidspunkt_5),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -380,17 +370,15 @@ internal class EventServiceTest {
         fun `saksStatus uten tittel eller status med vedtakFattet uten utfall`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.withHendelsestidspunkt(tidspunkt_3),
-                                SAK1_VEDTAK_FATTET_UTEN_UTFALL.withHendelsestidspunkt(tidspunkt_4),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_UTEN_SAKS_STATUS_ELLER_TITTEL.copy(hendelsestidspunkt = tidspunkt_3),
+                                SAK1_VEDTAK_FATTET_UTEN_UTFALL.copy(hendelsestidspunkt = tidspunkt_4),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -420,16 +408,14 @@ internal class EventServiceTest {
         internal fun `saksStatus ikke_innsyn`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(tidspunkt_3),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_SAKS_STATUS_IKKEINNSYN.copy(hendelsestidspunkt = tidspunkt_3),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -454,17 +440,15 @@ internal class EventServiceTest {
         internal fun `saksStatus endres fra under_behandling til ikke_innsyn`() =
             runTest(timeout = 5.seconds) {
                 coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                    JsonDigisosSoker()
-                        .withAvsender(avsender)
-                        .withVersion("123")
-                        .withHendelser(
+                    JSON_DIGISOS_SOKER.copy(
+                        hendelser =
                             listOf(
-                                SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                                SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                                SAK1_SAKS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_3),
-                                SAK1_SAKS_STATUS_IKKEINNSYN.withHendelsestidspunkt(tidspunkt_4),
+                                SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                                SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                                SAK1_SAKS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_3),
+                                SAK1_SAKS_STATUS_IKKEINNSYN.copy(hendelsestidspunkt = tidspunkt_4),
                             ),
-                        )
+                    )
                 coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
                 val model = service.createModel(mockDigisosSak)
@@ -490,16 +474,14 @@ internal class EventServiceTest {
     fun `forelopigSvar skal gi historikk`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
-                            SOKNADS_STATUS_UNDERBEHANDLING.withHendelsestidspunkt(tidspunkt_2),
-                            FORELOPIGSVAR.withHendelsestidspunkt(tidspunkt_3),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
+                            SOKNADS_STATUS_UNDERBEHANDLING.copy(hendelsestidspunkt = tidspunkt_2),
+                            FORELOPIGSVAR.copy(hendelsestidspunkt = tidspunkt_3),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
 
             val model = service.createModel(mockDigisosSak)
@@ -519,9 +501,7 @@ internal class EventServiceTest {
     fun `At soknad sendt hendelse blir lagt til og at linkTekst er Vis soknaden`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
+                JSON_DIGISOS_SOKER
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
             every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns "asdf"
 
@@ -538,9 +518,7 @@ internal class EventServiceTest {
     fun `At soknad sendt hendelse blir lagt til selv om soknad pdf ikke eksisterer`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
+                JSON_DIGISOS_SOKER
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
             every { mockDigisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
 
@@ -557,14 +535,12 @@ internal class EventServiceTest {
     fun `skal legge til dokumentasjonkrav fra soknaden`() =
         runTest(timeout = 5.seconds) {
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
@@ -595,14 +571,12 @@ internal class EventServiceTest {
             val tidspunktSendt31dagerSiden = ZonedDateTime.now().minusDays(31).toEpochSecond() * 1000L
             every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunktSendt31dagerSiden
             coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
-                JsonDigisosSoker()
-                    .withAvsender(avsender)
-                    .withVersion("123")
-                    .withHendelser(
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
                         listOf(
-                            SOKNADS_STATUS_MOTTATT.withHendelsestidspunkt(tidspunkt_1),
+                            SOKNADS_STATUS_MOTTATT.copy(hendelsestidspunkt = tidspunkt_1),
                         ),
-                    )
+                )
             coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns
                 listOf(
                     InternalVedlegg(
@@ -694,14 +668,15 @@ internal class EventServiceTest {
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.UTBETALT)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(20).toString())
-                .withUtbetalingsdato(LocalDate.now().toString())
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.UTBETALT,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(20).toString(),
+                utbetalingsdato = LocalDate.now().toString(),
+            )
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -739,14 +714,15 @@ internal class EventServiceTest {
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.UTBETALT)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(20).toString())
-                .withUtbetalingsdato(LocalDate.now().toString())
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.UTBETALT,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(20).toString(),
+                utbetalingsdato = LocalDate.now().toString(),
+            )
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -782,14 +758,15 @@ internal class EventServiceTest {
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.UTBETALT)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(20).toString())
-                .withUtbetalingsdato(LocalDate.now().toString())
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.UTBETALT,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(20).toString(),
+                utbetalingsdato = LocalDate.now().toString(),
+            )
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -825,23 +802,25 @@ internal class EventServiceTest {
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse1 =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(20).toString())
-                .withUtbetalingsdato(null)
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(1).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).minusDays(1).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.PLANLAGT_UTBETALING,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(20).toString(),
+                utbetalingsdato = null,
+            )
         val nyUtbetalingHendelse2 =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.UTBETALT)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(20).toString())
-                .withUtbetalingsdato(LocalDate.now().toString())
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.UTBETALT,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(20).toString(),
+                utbetalingsdato = LocalDate.now().toString(),
+            )
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -877,14 +856,15 @@ internal class EventServiceTest {
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.UTBETALT)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(2).toString())
-                .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.UTBETALT,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(2).toString(),
+                utbetalingsdato = LocalDate.now().minusDays(2).toString(),
+            )
         val hendelser = listOf(nyUtbetalingHendelse)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -924,23 +904,25 @@ internal class EventServiceTest {
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse1 =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(4).toString())
-                .withUtbetalingsdato(null)
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.PLANLAGT_UTBETALING,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(4).toString(),
+                utbetalingsdato = null,
+            )
         val nyUtbetalingHendelse2 =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.UTBETALT)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(4).toString())
-                .withUtbetalingsdato(LocalDate.now().minusDays(2).toString())
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.UTBETALT,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(4).toString(),
+                utbetalingsdato = LocalDate.now().minusDays(2).toString(),
+            )
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -980,23 +962,25 @@ internal class EventServiceTest {
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse1 =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(4).toString())
-                .withUtbetalingsdato(null)
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).minusDays(8).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.PLANLAGT_UTBETALING,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(4).toString(),
+                utbetalingsdato = null,
+            )
         val nyUtbetalingHendelse2 =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.STOPPET)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(4).toString())
-                .withUtbetalingsdato(null)
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.STOPPET,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(4).toString(),
+                utbetalingsdato = null,
+            )
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs
@@ -1034,23 +1018,25 @@ internal class EventServiceTest {
         val utbetalinger = mutableListOf(nyUtbetaling)
         every { model.utbetalinger } returns utbetalinger
         val nyUtbetalingHendelse1 =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.PLANLAGT_UTBETALING)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(20).toString())
-                .withUtbetalingsdato(null)
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.PLANLAGT_UTBETALING,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(20).toString(),
+                utbetalingsdato = null,
+            )
         val nyUtbetalingHendelse2 =
-            JsonUtbetaling()
-                .withUtbetalingsreferanse("referanse")
-                .withStatus(JsonUtbetaling.Status.UTBETALT)
-                .withBelop(10.0)
-                .withBeskrivelse("Nødhjelp")
-                .withForfallsdato(LocalDate.now().minusDays(20).toString())
-                .withUtbetalingsdato(LocalDate.now().toString())
-                .withHendelsestidspunkt(ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME))
+            JsonUtbetaling(
+                utbetalingsreferanse = "referanse",
+                hendelsestidspunkt = ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ISO_DATE_TIME),
+                status = JsonUtbetaling.Status.UTBETALT,
+                belop = 10.0,
+                beskrivelse = "Nødhjelp",
+                forfallsdato = LocalDate.now().minusDays(20).toString(),
+                utbetalingsdato = LocalDate.now().toString(),
+            )
         val hendelser = listOf(nyUtbetalingHendelse1, nyUtbetalingHendelse2)
         every { jsonDigisosSoker.hendelser } returns hendelser
         every { log.info(any()) } just Runs

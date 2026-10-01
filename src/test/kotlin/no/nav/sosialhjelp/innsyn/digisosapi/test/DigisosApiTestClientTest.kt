@@ -8,11 +8,13 @@ import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.app.token.Token
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.DigisosApiWrapper
 import no.nav.sosialhjelp.innsyn.digisosapi.test.dto.SakWrapper
+import no.nav.sosialhjelp.innsyn.responses.ok_digisossak_response
 import no.nav.sosialhjelp.innsyn.responses.ok_komplett_jsondigisossoker_response
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.client.WebClient
 import kotlin.time.Duration.Companion.seconds
@@ -46,5 +48,99 @@ internal class DigisosApiTestClientTest {
                 sosialhjelpJsonMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
 
             digisosApiTestClient.oppdaterDigisosSak("123123", DigisosApiWrapper(SakWrapper(jsonDigisosSoker), ""))
+        }
+
+    @Test
+    fun `Create digisos sak keeps applicant value in one query parameter`() =
+        runTest(timeout = 5.seconds) {
+            val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
+            val digisosApiWebClient = WebClient.create(mockWebServer.url("/").toString())
+            val texasClient: TexasClient = mockk()
+            val digisosApiTestClient = DigisosApiTestClientImpl(fiksWebClient, digisosApiWebClient, texasClient)
+
+            coEvery { texasClient.getMaskinportenToken() } returns Token("token")
+            mockWebServer.enqueue(MockResponse().setBody("\"new-id\""))
+
+            assertEquals("new-id", digisosApiTestClient.opprettDigisosSak())
+
+            val request = mockWebServer.takeRequest()
+            assertEquals("/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/ny", request.requestUrl?.encodedPath)
+            assertEquals(setOf("sokerFnr"), request.requestUrl?.queryParameterNames)
+            assertEquals(1, request.requestUrl?.querySize)
+        }
+
+    @Test
+    fun `Post digisos sak encodes dynamic identifier`() =
+        runTest(timeout = 5.seconds) {
+            val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
+            val digisosApiWebClient = WebClient.create(mockWebServer.url("/").toString())
+            val texasClient: TexasClient = mockk()
+            val digisosApiTestClient = DigisosApiTestClientImpl(fiksWebClient, digisosApiWebClient, texasClient)
+            val maliciousId = "sak/id?x=1#fragment"
+
+            coEvery { texasClient.getMaskinportenToken() } returns Token("token")
+            mockWebServer.enqueue(MockResponse().setResponseCode(202).setBody("ok"))
+            val jsonDigisosSoker =
+                sosialhjelpJsonMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
+
+            digisosApiTestClient.oppdaterDigisosSak(
+                maliciousId,
+                DigisosApiWrapper(SakWrapper(jsonDigisosSoker), ""),
+            )
+
+            assertEquals(
+                "/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/sak%2Fid%3Fx%3D1%23fragment",
+                mockWebServer.takeRequest().path,
+            )
+        }
+
+    @Test
+    fun `Upload files encodes dynamic identifier`() =
+        runTest(timeout = 5.seconds) {
+            val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
+            val digisosApiWebClient = WebClient.create(mockWebServer.url("/").toString())
+            val texasClient: TexasClient = mockk()
+            val digisosApiTestClient = DigisosApiTestClientImpl(fiksWebClient, digisosApiWebClient, texasClient)
+            val maliciousId = "sak/id?x=1#fragment"
+
+            coEvery { texasClient.getMaskinportenToken() } returns Token("token")
+            mockWebServer.enqueue(MockResponse().setHeader("Content-Type", "application/json").setBody("[]"))
+
+            assertEquals(emptyList<String>(), digisosApiTestClient.lastOppNyeFilerTilFiks(emptyList(), maliciousId))
+
+            assertEquals(
+                "/digisos/api/v1/11415cd1-e26d-499a-8421-751457dfcbd5/sak%2Fid%3Fx%3D1%23fragment/filer",
+                mockWebServer.takeRequest().path,
+            )
+        }
+
+    @Test
+    fun `hent innsynsfil encodes dynamic path segments`() =
+        runTest(timeout = 5.seconds) {
+            val fiksWebClient = WebClient.create(mockWebServer.url("/").toString())
+            val digisosApiWebClient = WebClient.create(mockWebServer.url("/").toString())
+            val texasClient: TexasClient = mockk()
+            val digisosApiTestClient = DigisosApiTestClientImpl(fiksWebClient, digisosApiWebClient, texasClient)
+            val metadata = "foo/bar?x=1#fragment"
+
+            mockWebServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(ok_digisossak_response.replace("3fa85f64-5717-4562-b3fc-2c963f66afa1", metadata)),
+            )
+            mockWebServer.enqueue(MockResponse().setBody("innsynsfil"))
+
+            val maliciousId = "sak/id?x=1#fragment"
+            val result = digisosApiTestClient.hentInnsynsfil(maliciousId, Token("token"))
+
+            assertEquals("innsynsfil", result)
+            assertEquals(
+                "/digisos/api/v1/soknader/sak%2Fid%3Fx%3D1%23fragment",
+                mockWebServer.takeRequest().path,
+            )
+            assertEquals(
+                "/digisos/api/v1/soknader/sak%2Fid%3Fx%3D1%23fragment/dokumenter/foo%2Fbar%3Fx%3D1%23fragment",
+                mockWebServer.takeRequest().path,
+            )
         }
 }

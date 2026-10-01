@@ -30,31 +30,29 @@ class JsonKlageGenerator(
     suspend fun generateJsonKlage(
         input: KlageInput,
         fiksDigisosId: UUID,
-    ) = JsonKlage().apply {
-        klageId = input.klageId.toString()
+    ) = JsonKlage(
+        klageId = input.klageId.toString(),
         // TODO Burde vedtaknummer også være en del av json/pdf?
-        vedtakId = input.vedtakId.toString()
-        digisosId = fiksDigisosId.toString()
-
-        innsendingstidspunkt = createInnsendingstidspunktString()
-        begrunnelse = input.createKlageBegrunnelse()
-        personIdentifikator = createJsonPersonIdentifikator()
-
-        navn = createJsonSokernavn()
-        mottaker = createSoknadsmottaker(fiksDigisosId)
-
-        autentisering = createJsonAutentisering()
-    }
+        vedtakId = input.vedtakId.toString(),
+        digisosId = fiksDigisosId.toString(),
+        innsendingstidspunkt = createInnsendingstidspunktString(),
+        begrunnelse = input.createKlageBegrunnelse(),
+        personIdentifikator = createJsonPersonIdentifikator(),
+        navn = createJsonSokernavn(),
+        mottaker = createSoknadsmottaker(fiksDigisosId),
+        autentisering = createJsonAutentisering(),
+    )
 
     private suspend fun createJsonSokernavn(): JsonSokernavn =
         pdlService
             .getNavn(getUserIdFromToken())
             .let {
-                JsonSokernavn()
-                    .withKilde(JsonSokernavn.Kilde.SYSTEM)
-                    .withFornavn(it.fornavn)
-                    .withMellomnavn(it.mellomnavn)
-                    .withEtternavn(it.etternavn)
+                JsonSokernavn(
+                    kilde = JsonSokernavn.Kilde.SYSTEM,
+                    fornavn = it.fornavn,
+                    mellomnavn = it.mellomnavn ?: "",
+                    etternavn = it.etternavn,
+                )
             }
 
     private suspend fun createSoknadsmottaker(fiksDigisosId: UUID): JsonSoknadsmottaker {
@@ -62,32 +60,31 @@ class JsonKlageGenerator(
         return eventService
             .createModel(internalSoknad)
             .let {
-                JsonSoknadsmottaker()
-                    .withNavEnhetsnavn(it.soknadsmottaker?.navEnhetsnavn)
-                    .withEnhetsnummer(it.soknadsmottaker?.navEnhetsnummer)
-                    .withKommunenummer(internalSoknad.kommunenummer)
+                JsonSoknadsmottaker(
+                    navEnhetsnavn = it.soknadsmottaker?.navEnhetsnavn,
+                    enhetsnummer = it.soknadsmottaker?.navEnhetsnummer,
+                    kommunenummer = internalSoknad.kommunenummer,
+                )
             }
     }
 
     private suspend fun createJsonPersonIdentifikator() =
-        JsonPersonIdentifikator()
-            .withKilde(JsonPersonIdentifikator.Kilde.SYSTEM)
-            .withVerdi(getUserIdFromToken())
+        JsonPersonIdentifikator(
+            kilde = JsonPersonIdentifikator.Kilde.SYSTEM,
+            verdi = getUserIdFromToken(),
+        )
 
     private fun createJsonAutentisering() =
-        JsonAutentisering().apply {
+        JsonAutentisering(
             // TODO Denne må settes fra informasjon i token
-            autentiseringsTidspunkt = convertToOffsetDateTimeUTCString(nowWithMillis())
-            autentisertDigitalt = true
-        }
+            autentiseringsTidspunkt = convertToOffsetDateTimeUTCString(nowWithMillis()),
+            autentisertDigitalt = true,
+        )
 
     private fun createInnsendingstidspunktString(): String = convertToOffsetDateTimeUTCString(nowWithMillis())
 }
 
-private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse =
-    JsonBegrunnelse()
-        .withKilde(JsonKildeBruker.BRUKER)
-        .withKlageTekst(tekst)
+private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = tekst)
 
 object TimestampUtil {
     private const val ZONE_STRING = "Europe/Oslo"

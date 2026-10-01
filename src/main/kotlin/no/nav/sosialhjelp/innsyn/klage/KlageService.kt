@@ -159,14 +159,14 @@ class KlageServiceImpl(
                 }
 
         // TODO Hva forventes her i kontekst av klage?
-        return JsonVedlegg()
-            .withType(resolveType(navEksternRefId, klageId))
-            .withStatus(if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG")
-            .withHendelseType(JsonVedlegg.HendelseType.BRUKER)
-            .withHendelseReferanse(navEksternRefId.toString())
-            .withKlageId(klageId.toString())
-            .withFiler(allMetadata.map { JsonFiler().withFilnavn(it.filnavn) })
-            .let { JsonVedleggSpesifikasjon().withVedlegg(listOf(it)) }
+        return JsonVedlegg(
+            type = resolveType(navEksternRefId, klageId),
+            status = if (allMetadata.isNotEmpty()) "LASTET_OPP" else "INGEN_VEDLEGG",
+            hendelseType = JsonVedlegg.HendelseType.BRUKER,
+            hendelseReferanse = navEksternRefId.toString(),
+            klageId = klageId.toString(),
+            filer = allMetadata.map { JsonFiler(filnavn = it.filnavn) },
+        ).let { JsonVedleggSpesifikasjon(vedlegg = listOf(it)) }
     }
 
     private fun resolveType(

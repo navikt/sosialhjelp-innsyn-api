@@ -36,7 +36,7 @@ object KlagePdfGenerator {
                 addCenteredH4Bold("Personidentifikator: ${jsonKlage.personIdentifikator.verdi}")
                 addCenteredH4Bold("Navn: ${jsonKlage.getFullName()}")
                 addBlankLine()
-                addText(jsonKlage.begrunnelse.klageTekst)
+                addText(jsonKlage.begrunnelse?.klageTekst ?: "<Begrunnelse ikke oppgitt>")
                 addBlankLine()
                 addCenteredH4Bold("Digitalt Autentisert: ${jsonKlage.autentisering.autentiseringsTidspunkt}")
                 finish()
@@ -46,7 +46,7 @@ object KlagePdfGenerator {
 private fun JsonKlage.getFullName(): String =
     listOfNotNull(
         navn.fornavn,
-        navn.mellomnavn,
+        navn.mellomnavn.takeIf { it.isNotBlank() },
         navn.etternavn,
     ).joinToString(" ")
 

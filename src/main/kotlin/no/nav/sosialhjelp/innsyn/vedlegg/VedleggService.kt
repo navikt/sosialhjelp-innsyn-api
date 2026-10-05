@@ -159,39 +159,13 @@ class VedleggService(
             .also { fileCount ->
                 if (fileCount != metadataFilerFiks.size) {
                     log.error(
-                        "Mismatch mellom antall filer i vedleggSpesifikasjon ({}) og antall filer i ettersendelse ({})" +
-                            ": EttersendelsePdf? ${ettersendelsePdf(this, metadataFilerFiks)}",
+                        "Mismatch mellom antall filer i vedleggSpesifikasjon ({}) og antall filer i ettersendelse ({})",
                         fileCount,
                         metadataFilerFiks.size,
                     )
                 }
             }
     }
-
-    // TODO Hvilken fil er det som ikke matcher?
-    private fun ettersendelsePdf(
-        jsonVedlegg: List<JsonVedlegg>,
-        metadataFilerFiks: List<DokumentInfo>,
-    ): String =
-        runCatching {
-            val filnavn = jsonVedlegg.flatMap { it.filer }.map { it.filnavn?.sanitize() }
-
-            metadataFilerFiks
-                .filter { !filnavn.contains(it.filnavn.sanitize()) }
-                .let {
-                    when {
-                        it.isEmpty() -> "Tom liste"
-                        it.size == 1 -> {
-                            if (it.first().filnavn.sanitize().contains("ettersendelse", true)) {
-                                "ettersendelse"
-                            } else {
-                                "En fil som ikke matcher - ikke ettersendelse"
-                            }
-                        }
-                        else -> "Flere filer som ikke matcher - ettersendelse? ${it.find { fil -> fil.filnavn.contains("ettersendelse") }}"
-                    }
-                }
-        }.getOrElse { "error" }
 
     private fun List<DokumentInfo>.addByFilename(filer: List<JsonFiler>): List<DokumentInfo> {
         val sanitizedFilenames = filer.map { it.filnavn?.sanitize() }

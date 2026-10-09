@@ -10,9 +10,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -21,6 +21,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.digisos.hendelser.domain.DokumentRef
+import no.nav.sosialhjelp.digisos.hendelser.fold.FoldResult
 import no.nav.sosialhjelp.digisos.hendelser.fold.SoknadMetadata
 import no.nav.sosialhjelp.digisos.hendelser.fold.fold
 import no.nav.sosialhjelp.filformat.digisos.soker.DigisosSoker
@@ -37,6 +38,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.measureTimedValue
 import kotlin.time.toJavaDuration
+import kotlin.uuid.Uuid
 
 @Component
 class HendelseFoldService(
@@ -91,44 +93,7 @@ class HendelseFoldService(
         try {
             val (result, duration) =
                 measureTimedValue {
-                    val digisosSoker =
-                        jsonDigisosSoker?.let {
-                            filformatJson.decodeFromString<DigisosSoker>(
-                                sosialhjelpJsonMapper.writeValueAsString(it),
-                            )
-                        }
-                    val originalSoknad = digisosSak.originalSoknadNAV
-                    fold(
-                        digisosSoker,
-                        SoknadMetadata(
-                            fiksDigisosId = digisosSak.fiksDigisosId,
-                            kommunenummer = digisosSak.kommunenummer,
-                            erPapirsoknad = originalSoknad == null,
-                            sistEndret =
-                                Instant.fromEpochMilliseconds(digisosSak.digisosSoker?.timestampSistOppdatert ?: digisosSak.sistEndret),
-                            timestampSendt = originalSoknad?.timestampSendt?.takeIf { it != 0L }?.let(Instant::fromEpochMilliseconds),
-                            navEksternRefId = originalSoknad?.navEksternRefId,
-                            originalSoknadDokumentlagerId = originalSoknad?.soknadDokument?.dokumentlagerDokumentId,
-                            vedleggMetadataDokumentlagerId = originalSoknad?.vedleggMetadata,
-                            // fold falls back to digisosSoker.avsender when these are null.
-                            fagsystemNavn = null,
-                            fagsystemVersjon = null,
-                            mottakerEnhetsnummer = jsonSoknad?.mottaker?.enhetsnummer,
-                            mottakerEnhetsnavn = jsonSoknad?.mottaker?.navEnhetsnavn,
-                        ),
-                    ) {
-                        runBlocking(callerContext) {
-                            try {
-                                withTimeout(VEDLEGG_TIMEOUT) { hentVedlegg() }
-                            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                                throw VedleggFetchTimeout(e)
-                            } catch (e: CancellationException) {
-                                throw e
-                            } catch (e: Throwable) {
-                                throw VedleggFetchFailure(e)
-                            }
-                        }
-                    }
+                    doFold(jsonDigisosSoker, digisosSak, jsonSoknad, callerContext, hentVedlegg)
                 }
             meterRegistry.timer("hendelser_fold_duration").record(duration.toJavaDuration())
 
@@ -160,9 +125,56 @@ class HendelseFoldService(
         }
     }
 
+    fun doFold(
+        jsonDigisosSoker: JsonDigisosSoker?,
+        digisosSak: DigisosSak,
+        jsonSoknad: JsonSoknad?,
+        callerContext: CoroutineContext,
+        hentVedlegg: suspend () -> List<Vedlegg>,
+    ): FoldResult {
+        val digisosSoker =
+            jsonDigisosSoker?.let {
+                filformatJson.decodeFromString<DigisosSoker>(
+                    sosialhjelpJsonMapper.writeValueAsString(it),
+                )
+            }
+        val originalSoknad = digisosSak.originalSoknadNAV
+        return fold(
+            digisosSoker,
+            SoknadMetadata(
+                fiksDigisosId = digisosSak.fiksDigisosId,
+                kommunenummer = digisosSak.kommunenummer,
+                erPapirsoknad = originalSoknad == null,
+                sistEndret =
+                    Instant.fromEpochMilliseconds(digisosSak.digisosSoker?.timestampSistOppdatert ?: digisosSak.sistEndret),
+                timestampSendt = originalSoknad?.timestampSendt?.takeIf { it != 0L }?.let(Instant::fromEpochMilliseconds),
+                navEksternRefId = originalSoknad?.navEksternRefId,
+                originalSoknadDokumentlagerId = originalSoknad?.soknadDokument?.dokumentlagerDokumentId?.let { Uuid.parse(it) },
+                vedleggMetadataDokumentlagerId = originalSoknad?.vedleggMetadata,
+                // fold falls back to digisosSoker.avsender when these are null.
+                fagsystemNavn = null,
+                fagsystemVersjon = null,
+                mottakerEnhetsnummer = jsonSoknad?.mottaker?.enhetsnummer,
+                mottakerEnhetsnavn = jsonSoknad?.mottaker?.navEnhetsnavn,
+            ),
+        ) {
+            runBlocking(callerContext) {
+                try {
+                    withTimeout(VEDLEGG_TIMEOUT) { hentVedlegg() }
+                } catch (e: TimeoutCancellationException) {
+                    throw VedleggFetchTimeout(e)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    throw VedleggFetchFailure(e)
+                }
+            }
+        }
+    }
+
     private fun differences(
         oldModel: InternalDigisosSoker,
-        result: no.nav.sosialhjelp.digisos.hendelser.fold.FoldResult,
+        result: FoldResult,
         fiksDigisosId: String,
     ): Set<String> =
         buildSet {
@@ -197,7 +209,7 @@ class HendelseFoldService(
                             is DokumentRef.SvarUt -> dokument.id
                         },
                         it.utfall?.name,
-                        it.dato?.toString(),
+                        it.dato.toString(),
                     )
                 }
             ) {

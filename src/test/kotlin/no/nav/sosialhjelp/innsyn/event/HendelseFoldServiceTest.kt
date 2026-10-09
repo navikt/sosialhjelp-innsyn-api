@@ -304,14 +304,14 @@ internal class HendelseFoldServiceTest {
 
     private fun recentDigitalDigisosSak(): DigisosSak =
         mockk {
-            every { fiksDigisosId } returns "fiks-id"
+            every { fiksDigisosId } returns "7f657409-6628-4a02-bc0f-4e051299234c"
             every { kommunenummer } returns "0301"
             every { originalSoknadNAV } returns
                 OriginalSoknadNAV(
                     navEksternRefId = "ref",
                     metadata = "metadata",
                     vedleggMetadata = "vedlegg-metadata",
-                    soknadDokument = DokumentInfo("soknad.pdf", "soknad-dokument", 0),
+                    soknadDokument = DokumentInfo("soknad.pdf", "cbc62f21-4283-4d9b-b308-a6aff5554256", 0),
                     vedlegg = emptyList(),
                     timestampSendt = System.currentTimeMillis(),
                 )

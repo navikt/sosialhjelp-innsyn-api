@@ -1,8 +1,8 @@
 {
   "collection": "nav-pilot",
-  "version": "2026.09.30-060130-a873eab",
+  "version": "2026.10.08-225212-8936779",
   "scope": "repo",
-  "source_sha": "a873eab96bbe29df8c1f5d50fea2c2c151d44820",
+  "source_sha": "d2507a1d049b9037940df784bde4028deacd49de",
   "installed_at": "2026-06-04T12:42:47Z",
   "files": [
     {
@@ -15,16 +15,18 @@
     },
     {
       "path": ".github/agents/code-review.agent.md",
-      "hash": "5a019cbf3eda9ce2",
-      "revision": "a873eab96bbe29df8c1f5d50fea2c2c151d44820"
+      "hash": "811b2a6765ff86de",
+      "revision": "d2507a1d049b9037940df784bde4028deacd49de"
     },
     {
       "path": ".github/agents/forfatter.agent.md",
-      "hash": "aee2b3b98fa5ec39"
+      "hash": "81d4560449214a21",
+      "revision": "d2507a1d049b9037940df784bde4028deacd49de"
     },
     {
       "path": ".github/agents/kafka.agent.md",
-      "hash": "c2616223f6228f8e"
+      "hash": "743153095326cb24",
+      "revision": "d2507a1d049b9037940df784bde4028deacd49de"
     },
     {
       "path": ".github/agents/nav-pilot-opus.agent.md",
@@ -32,8 +34,8 @@
     },
     {
       "path": ".github/agents/nav-pilot.agent.md",
-      "hash": "c2ec92805bae041b",
-      "revision": "a873eab96bbe29df8c1f5d50fea2c2c151d44820"
+      "hash": "8c6cbe9101b541c5",
+      "revision": "d2507a1d049b9037940df784bde4028deacd49de"
     },
     {
       "path": ".github/agents/research.agent.md",
@@ -42,12 +44,17 @@
     },
     {
       "path": ".github/agents/rust.agent.md",
-      "hash": "877fab8c93fa0ae6"
+      "hash": "e1cb55806cd87d8c",
+      "revision": "d2507a1d049b9037940df784bde4028deacd49de"
     },
     {
       "path": ".github/agents/security-champion.agent.md",
-      "hash": "09850437ed89c7bb",
-      "revision": "a873eab96bbe29df8c1f5d50fea2c2c151d44820"
+      "hash": "65fed295fcdd5bd1",
+      "revision": "d2507a1d049b9037940df784bde4028deacd49de"
+    },
+    {
+      "path": ".github/agents/worker.agent.md",
+      "hash": "43c860f99cd1337e"
     },
     {
       "path": ".github/hooks/ask-first-aria.py",
@@ -221,7 +228,8 @@
     },
     {
       "path": ".github/skills/nav-dekoratoren/",
-      "hash": "fd8cf68c2c9bfbc5"
+      "hash": "4b5d432477529d66",
+      "revision": "d2507a1d049b9037940df784bde4028deacd49de"
     },
     {
       "path": ".github/skills/nav-plan/",

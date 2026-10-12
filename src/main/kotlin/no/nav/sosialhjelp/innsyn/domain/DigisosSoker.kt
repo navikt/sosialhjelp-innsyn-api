@@ -66,7 +66,7 @@ data class Vedtak(
     val id: String,
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,
-    var dato: LocalDate?,
+    var dato: LocalDate,
 )
 
 data class Utbetaling(

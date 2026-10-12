@@ -24,7 +24,6 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.digisos.hendelser.domain.DokumentRef
 import no.nav.sosialhjelp.digisos.hendelser.fold.FoldResult
 import no.nav.sosialhjelp.digisos.hendelser.fold.SoknadMetadata
-import no.nav.sosialhjelp.digisos.hendelser.fold.fold as foldHendelser
 import no.nav.sosialhjelp.filformat.digisos.soker.DigisosSoker
 import no.nav.sosialhjelp.filformat.filformatJson
 import no.nav.sosialhjelp.filformat.vedlegg.Vedlegg
@@ -39,6 +38,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 import kotlin.time.toJavaDuration
 import kotlin.uuid.Uuid
+import no.nav.sosialhjelp.digisos.hendelser.fold.fold as foldHendelser
 
 @Component
 class HendelseFoldService(

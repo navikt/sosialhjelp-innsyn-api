@@ -4,6 +4,7 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilreferanse
 import no.nav.sosialhjelp.api.fiks.ErrorMessage
+import no.nav.sosialhjelp.digisos.hendelser.domain.DokumentRef
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -43,6 +44,15 @@ fun hentDokumentlagerUrl(
     clientProperties: ClientProperties,
     dokumentlagerId: String,
 ): String = clientProperties.fiksDokumentlagerEndpointUrl + "/dokumentlager/nedlasting/niva4/$dokumentlagerId?inline=true"
+
+fun hentDokumentUrl(
+    clientProperties: ClientProperties,
+    dokument: DokumentRef,
+): String =
+    when (dokument) {
+        is DokumentRef.Dokumentlager -> hentDokumentlagerUrl(clientProperties, dokument.id.toString())
+        is DokumentRef.SvarUt -> "${clientProperties.fiksSvarUtEndpointUrl}/forsendelse/${dokument.id}/${dokument.nr}?inline=true"
+    }
 
 fun String.toLocalDateTime(): LocalDateTime =
     ZonedDateTime

@@ -15,6 +15,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.datetime.Instant
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
@@ -23,7 +24,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.digisos.hendelser.domain.DokumentRef
 import no.nav.sosialhjelp.digisos.hendelser.fold.FoldResult
 import no.nav.sosialhjelp.digisos.hendelser.fold.SoknadMetadata
-import no.nav.sosialhjelp.digisos.hendelser.fold.fold
+import no.nav.sosialhjelp.digisos.hendelser.fold.fold as foldHendelser
 import no.nav.sosialhjelp.filformat.digisos.soker.DigisosSoker
 import no.nav.sosialhjelp.filformat.filformatJson
 import no.nav.sosialhjelp.filformat.vedlegg.Vedlegg
@@ -34,9 +35,8 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.stereotype.Component
 import kotlin.coroutines.ContinuationInterceptor
-import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.measureTimedValue
+import kotlin.time.TimeSource
 import kotlin.time.toJavaDuration
 import kotlin.uuid.Uuid
 
@@ -45,13 +45,14 @@ class HendelseFoldService(
     private val meterRegistry: MeterRegistry,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
+    private val foldDispatcher = dispatcher.limitedParallelism(MAX_CONCURRENT_FOLDS)
     private val scope =
-        CoroutineScope(SupervisorJob() + dispatcher.limitedParallelism(MAX_CONCURRENT_FOLDS) + CoroutineName("hendelse-fold"))
+        CoroutineScope(SupervisorJob() + foldDispatcher + CoroutineName("hendelse-fold"))
 
     @PreDestroy
     fun shutdown() = scope.cancel("HendelseFoldService shutting down")
 
-    suspend fun launchFold(
+    suspend fun launchFoldAndDiff(
         digisosSak: DigisosSak,
         jsonDigisosSoker: JsonDigisosSoker?,
         jsonSoknad: JsonSoknad?,
@@ -60,7 +61,21 @@ class HendelseFoldService(
     ): Job {
         val callerContext = currentCoroutineContext().minusKey(Job).minusKey(ContinuationInterceptor)
         return scope.launch(callerContext) {
-            fold(digisosSak, jsonDigisosSoker, jsonSoknad, oldModel, hentVedlegg, callerContext)
+            foldAndDiff(digisosSak, jsonDigisosSoker, jsonSoknad, oldModel, hentVedlegg)
+        }
+    }
+
+    suspend fun fold(
+        digisosSak: DigisosSak,
+        jsonDigisosSoker: JsonDigisosSoker?,
+        jsonSoknad: JsonSoknad?,
+        hentVedlegg: suspend () -> List<Vedlegg> = { emptyList() },
+    ): FoldResult {
+        val callerContext = currentCoroutineContext().minusKey(ContinuationInterceptor)
+        return withContext(foldDispatcher) {
+            buildAndFold(jsonDigisosSoker, digisosSak, jsonSoknad) {
+                runBlocking(callerContext) { hentVedlegg() }
+            }
         }
     }
 
@@ -82,20 +97,28 @@ class HendelseFoldService(
     }
 
     @WithSpan("hendelseFold")
-    fun fold(
+    private suspend fun foldAndDiff(
         digisosSak: DigisosSak,
         jsonDigisosSoker: JsonDigisosSoker?,
         jsonSoknad: JsonSoknad?,
         oldModel: InternalDigisosSoker,
         hentVedlegg: suspend () -> List<Vedlegg>,
-        callerContext: CoroutineContext,
     ) {
         try {
-            val (result, duration) =
-                measureTimedValue {
-                    doFold(jsonDigisosSoker, digisosSak, jsonSoknad, callerContext, hentVedlegg)
+            val started = TimeSource.Monotonic.markNow()
+            val result =
+                fold(digisosSak, jsonDigisosSoker, jsonSoknad) {
+                    try {
+                        withTimeout(VEDLEGG_TIMEOUT) { hentVedlegg() }
+                    } catch (e: TimeoutCancellationException) {
+                        throw VedleggFetchTimeout(e)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Throwable) {
+                        throw VedleggFetchFailure(e)
+                    }
                 }
-            meterRegistry.timer("hendelser_fold_duration").record(duration.toJavaDuration())
+            meterRegistry.timer("hendelser_fold_duration").record(started.elapsedNow().toJavaDuration())
 
             val differences = differences(oldModel, result, digisosSak.fiksDigisosId)
             meterRegistry
@@ -125,12 +148,11 @@ class HendelseFoldService(
         }
     }
 
-    fun doFold(
+    private fun buildAndFold(
         jsonDigisosSoker: JsonDigisosSoker?,
         digisosSak: DigisosSak,
         jsonSoknad: JsonSoknad?,
-        callerContext: CoroutineContext,
-        hentVedlegg: suspend () -> List<Vedlegg>,
+        hentVedlegg: () -> List<Vedlegg>,
     ): FoldResult {
         val digisosSoker =
             jsonDigisosSoker?.let {
@@ -139,7 +161,7 @@ class HendelseFoldService(
                 )
             }
         val originalSoknad = digisosSak.originalSoknadNAV
-        return fold(
+        return foldHendelser(
             digisosSoker,
             SoknadMetadata(
                 fiksDigisosId = digisosSak.fiksDigisosId,
@@ -157,19 +179,7 @@ class HendelseFoldService(
                 mottakerEnhetsnummer = jsonSoknad?.mottaker?.enhetsnummer,
                 mottakerEnhetsnavn = jsonSoknad?.mottaker?.navEnhetsnavn,
             ),
-        ) {
-            runBlocking(callerContext) {
-                try {
-                    withTimeout(VEDLEGG_TIMEOUT) { hentVedlegg() }
-                } catch (e: TimeoutCancellationException) {
-                    throw VedleggFetchTimeout(e)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Throwable) {
-                    throw VedleggFetchFailure(e)
-                }
-            }
-        }
+        ) { hentVedlegg() }
     }
 
     private fun differences(

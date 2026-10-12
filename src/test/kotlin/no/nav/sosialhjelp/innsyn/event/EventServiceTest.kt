@@ -122,7 +122,7 @@ internal class EventServiceTest {
             assertThat(model.status).isEqualTo(SoknadsStatus.SENDT)
             assertThat(model.historikk).hasSize(0)
             coVerify(exactly = 1) {
-                hendelseFoldService.launchFold(mockDigisosSak, null, null, model, any())
+                hendelseFoldService.launchFoldAndDiff(mockDigisosSak, null, null, model, any())
             }
         }
 

@@ -211,7 +211,7 @@ class HendelseFoldService(
                 }
                 if ((oldSak.tittel ?: DEFAULT_SAK_TITTEL) != (foldedSak.tittel ?: DEFAULT_SAK_TITTEL)) add("saker.tittel")
             }
-            if (oldModel.saker.flatMap { it.vedtak }.map { Triple(it.id, it.utfall?.name, it.dato?.toString()) } !=
+            if (oldModel.saker.flatMap { it.vedtak }.map { Triple(it.id, it.utfall?.name, it.dato.toString()) } !=
                 (soknad.saker.flatMap { it.vedtak } + soknad.vedtakUtenSak).map {
                     Triple(
                         when (val dokument = it.dokument) {

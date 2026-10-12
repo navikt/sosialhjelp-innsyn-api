@@ -26,7 +26,7 @@ class BrevService(
                 }
             }
 
-        val vedtaksbrev = model.saker.flatMap { it.vedtak }.map { Brev(Brev.BrevType.VEDTAK, it.vedtaksFilUrl, it.dato?.atStartOfDay()) }
+        val vedtaksbrev = model.saker.flatMap { it.vedtak }.map { Brev(Brev.BrevType.VEDTAK, it.vedtaksFilUrl, it.dato.atStartOfDay()) }
         val dokEtterspurtBrev =
             model.oppgaver
                 .mapNotNull { it.forvaltningsbrev }

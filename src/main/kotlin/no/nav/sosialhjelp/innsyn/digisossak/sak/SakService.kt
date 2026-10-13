@@ -32,20 +32,16 @@ class SakService(
         val model =
             hendelseFoldService.fold(digisosSak, jsonDigisosSoker, jsonSoknad)
 
-        if (model.soknad.saker.isEmpty()) {
-            throw NotFoundException("Ingen saker funnet for fiksDigisosId $fiksDigisosId")
-        }
-
         val sak =
             model.soknad.saker.find { sak -> sak.vedtak.any { it.dokument.id.toJavaUuid() == vedtakId } }
-                ?: throw NotFoundException("Sak med vedtakId $vedtakId ikke funnet for fiksDigisosId $fiksDigisosId")
 
         val vedtak =
-            sak.vedtak.find { it.dokument.id.toJavaUuid() == vedtakId }
+            sak?.vedtak?.find { it.dokument.id.toJavaUuid() == vedtakId }
+                ?: model.soknad.vedtakUtenSak.find { it.dokument.id.toJavaUuid() == vedtakId }
                 ?: throw NotFoundException("Vedtak med id $vedtakId ikke funnet for fiksDigisosId $fiksDigisosId")
 
         return SakResponse(
-            sak.tittel ?: DEFAULT_SAK_TITTEL,
+            sak?.tittel ?: DEFAULT_SAK_TITTEL,
             vedtak.dato.toJavaLocalDate(),
             FilUrl(hentDokumentUrl(clientProperties, vedtak.dokument), vedtakId.toString()),
             model.soknad.mottaker?.navn,

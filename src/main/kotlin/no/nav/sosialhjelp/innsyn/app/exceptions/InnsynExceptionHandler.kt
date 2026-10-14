@@ -35,9 +35,9 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         exchange: ServerWebExchange,
     ): Mono<ResponseEntity<Any>> {
-        log.error(ex.message, ex)
+        log.warn(ex.message, ex)
         val error = FrontendErrorMessage(UNEXPECTED_ERROR, ex.message)
-        return Mono.just(ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR))
+        return Mono.just(ResponseEntity(error, HttpStatus.BAD_REQUEST))
     }
 
     @ExceptionHandler(FiksNotFoundException::class)

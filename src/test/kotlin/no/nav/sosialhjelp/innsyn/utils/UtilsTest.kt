@@ -2,9 +2,12 @@ package no.nav.sosialhjelp.innsyn.utils
 
 import io.mockk.clearAllMocks
 import no.nav.sosialhjelp.api.fiks.ErrorMessage
+import no.nav.sosialhjelp.digisos.hendelser.domain.DokumentRef
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.uuid.Uuid
 
 internal class UtilsTest {
     @BeforeEach
@@ -77,5 +80,23 @@ internal class UtilsTest {
         assertThat(res)
             .doesNotContain(fnr)
             .contains("cache key=adressebeskyttelse-[FNR]")
+    }
+
+    @Test
+    fun `lager SvarUt-url for SvarUt-dokument`() {
+        val clientProperties =
+            ClientProperties().apply {
+                fiksSvarUtEndpointUrl = "https://svarut.example.com"
+            }
+
+        val url =
+            hentDokumentUrl(
+                clientProperties,
+                DokumentRef.SvarUt(Uuid.parse("7f657409-6628-4a02-bc0f-4e051299234c"), 42),
+            )
+
+        assertThat(url).isEqualTo(
+            "https://svarut.example.com/forsendelse/7f657409-6628-4a02-bc0f-4e051299234c/42?inline=true",
+        )
     }
 }

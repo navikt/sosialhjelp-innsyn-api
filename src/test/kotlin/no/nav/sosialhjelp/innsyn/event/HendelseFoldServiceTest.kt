@@ -51,7 +51,7 @@ internal class HendelseFoldServiceTest {
         runTest {
             var fetched = false
             service()
-                .launchFold(digisosSak, null, null, InternalDigisosSoker()) {
+                .launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker()) {
                     fetched = true
                     emptyList()
                 }.join()
@@ -63,7 +63,7 @@ internal class HendelseFoldServiceTest {
     @Test
     fun `records error when vedlegg fetch fails`() =
         runTest {
-            service().launchFold(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) { error("Fiks failed") }.join()
+            service().launchFoldAndDiff(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) { error("Fiks failed") }.join()
 
             assertThat(resultCount("error")).isEqualTo(1.0)
             assertThat(resultCount("match")).isEqualTo(0.0)
@@ -72,7 +72,7 @@ internal class HendelseFoldServiceTest {
     @Test
     fun `records timeout when vedlegg fetch is slow`() =
         runTest {
-            service().launchFold(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) { awaitCancellation() }.join()
+            service().launchFoldAndDiff(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) { awaitCancellation() }.join()
 
             assertThat(resultCount("timeout")).isEqualTo(1.0)
         }
@@ -83,7 +83,7 @@ internal class HendelseFoldServiceTest {
             var observedName: String? = null
             withContext(CoroutineName("caller")) {
                 service()
-                    .launchFold(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) {
+                    .launchFoldAndDiff(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) {
                         observedName = currentCoroutineContext()[CoroutineName]?.name
                         emptyList()
                     }
@@ -93,11 +93,26 @@ internal class HendelseFoldServiceTest {
         }
 
     @Test
+    fun `propagates caller context to fold`() =
+        runTest {
+            var observedName: String? = null
+
+            withContext(CoroutineName("caller")) {
+                service().fold(recentDigitalDigisosSak(), null, null) {
+                    observedName = currentCoroutineContext()[CoroutineName]?.name
+                    emptyList()
+                }
+            }
+
+            assertThat(observedName).isEqualTo("caller")
+        }
+
+    @Test
     fun `fold is not cancelled when the caller completes`() =
         runTest {
             val job =
                 withContext(CoroutineName("request")) {
-                    service().launchFold(digisosSak, null, null, InternalDigisosSoker()) { emptyList() }
+                    service().launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker()) { emptyList() }
                 }
 
             job.join()
@@ -131,7 +146,7 @@ internal class HendelseFoldServiceTest {
                         ),
                 )
 
-            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
             assertThat(resultCount("mismatch")).isEqualTo(1.0)
             assertThat(fieldDifferenceCount("saker.tittel")).isEqualTo(1.0)
@@ -164,7 +179,7 @@ internal class HendelseFoldServiceTest {
                     utbetalinger = mutableListOf(oldUtbetaling("utbetaling-2"), oldUtbetaling("utbetaling-1")),
                 )
 
-            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
             assertThat(resultCount("match")).isEqualTo(1.0)
             assertThat(fieldDifferenceCount("utbetalinger")).isZero()
@@ -193,7 +208,7 @@ internal class HendelseFoldServiceTest {
                     vilkar = mutableListOf(oldVilkar("vilkar-1", "ukjent-sak")),
                 )
 
-            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
             assertThat(fieldDifferenceCount("saker.syntetisk")).isZero()
             assertThat(fieldDifferenceCount("saker")).isZero()
@@ -235,7 +250,7 @@ internal class HendelseFoldServiceTest {
                         ),
                 )
 
-            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
             assertThat(fieldDifferenceCount("dokumentasjonkrav")).isZero()
         }
@@ -259,7 +274,7 @@ internal class HendelseFoldServiceTest {
                 )
             val oldModel = InternalDigisosSoker(vilkar = mutableListOf(oldVilkar("vilkar-1", "sak-1")))
 
-            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
             assertThat(fieldDifferenceCount("vilkar")).isEqualTo(1.0)
         }
@@ -283,7 +298,7 @@ internal class HendelseFoldServiceTest {
                 )
             val oldModel = InternalDigisosSoker(dokumentasjonkrav = mutableListOf(oldDokumentasjonkrav("krav-1", "sak-1")))
 
-            service().launchFold(digisosSak, soker, null, oldModel) { emptyList() }.join()
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
             assertThat(fieldDifferenceCount("dokumentasjonkrav")).isEqualTo(1.0)
         }
@@ -304,14 +319,14 @@ internal class HendelseFoldServiceTest {
 
     private fun recentDigitalDigisosSak(): DigisosSak =
         mockk {
-            every { fiksDigisosId } returns "fiks-id"
+            every { fiksDigisosId } returns "7f657409-6628-4a02-bc0f-4e051299234c"
             every { kommunenummer } returns "0301"
             every { originalSoknadNAV } returns
                 OriginalSoknadNAV(
                     navEksternRefId = "ref",
                     metadata = "metadata",
                     vedleggMetadata = "vedlegg-metadata",
-                    soknadDokument = DokumentInfo("soknad.pdf", "soknad-dokument", 0),
+                    soknadDokument = DokumentInfo("soknad.pdf", "cbc62f21-4283-4d9b-b308-a6aff5554256", 0),
                     vedlegg = emptyList(),
                     timestampSendt = System.currentTimeMillis(),
                 )

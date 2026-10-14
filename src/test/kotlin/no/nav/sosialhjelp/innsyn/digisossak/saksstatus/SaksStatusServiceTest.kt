@@ -209,35 +209,35 @@ internal class SaksStatusServiceTest {
                 Vedtak(
                     utfall = UtfallVedtak.INNVILGET,
                     vedtaksFilUrl = "en link til noe",
-                    dato = null,
+                    dato = LocalDate.of(2024, 1, 15),
                     id = id,
                 )
             val vedtak2 =
                 Vedtak(
                     utfall = UtfallVedtak.DELVIS_INNVILGET,
                     vedtaksFilUrl = "en link til noe",
-                    dato = null,
+                    dato = LocalDate.of(2024, 1, 15),
                     id = id,
                 )
             val vedtak3 =
                 Vedtak(
                     utfall = UtfallVedtak.AVVIST,
                     vedtaksFilUrl = "en link til noe",
-                    dato = null,
+                    dato = LocalDate.of(2024, 1, 15),
                     id = id,
                 )
             val vedtak4 =
                 Vedtak(
                     utfall = UtfallVedtak.AVSLATT,
                     vedtaksFilUrl = "en link til noe",
-                    dato = null,
+                    dato = LocalDate.of(2024, 1, 15),
                     id = id,
                 )
             val vedtak5 =
                 Vedtak(
                     utfall = null,
                     vedtaksFilUrl = "en link til noe",
-                    dato = null,
+                    dato = LocalDate.of(2024, 1, 15),
                     id = id,
                 )
             val sakSomSkalGiTrue =

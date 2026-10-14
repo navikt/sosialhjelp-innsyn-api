@@ -17,7 +17,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
-import java.io.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
 @Component

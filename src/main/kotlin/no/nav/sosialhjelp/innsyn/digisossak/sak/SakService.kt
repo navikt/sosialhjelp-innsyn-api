@@ -1,48 +1,51 @@
 package no.nav.sosialhjelp.innsyn.digisossak.sak
 
+import kotlinx.datetime.toJavaLocalDate
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
+import no.nav.sosialhjelp.digisos.hendelser.domain.toLocalDateOslo
+import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
-import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.utils.logger
+import no.nav.sosialhjelp.innsyn.event.HendelseFoldService
+import no.nav.sosialhjelp.innsyn.event.InnsynService
+import no.nav.sosialhjelp.innsyn.utils.hentDokumentUrl
 import org.springframework.stereotype.Component
-import kotlin.collections.ifEmpty
-import kotlin.getValue
+import java.util.UUID
+import kotlin.uuid.toJavaUuid
 
 @Component
 class SakService(
-    private val eventService: EventService,
     private val fiksService: FiksService,
+    private val hendelseFoldService: HendelseFoldService,
+    private val innsynService: InnsynService,
+    private val clientProperties: ClientProperties,
 ) {
-    private val log by logger()
-
     suspend fun hentSakForVedtak(
-        fiksDigisosId: String,
-        vedtakId: String,
+        fiksDigisosId: UUID,
+        vedtakId: UUID,
     ): SakResponse {
-        val digisosSak = fiksService.getSoknad(fiksDigisosId)
-        val model = eventService.createModel(digisosSak)
-
-        if (model.saker.isEmpty()) {
-            throw NotFoundException("Ingen saker funnet for fiksDigisosId $fiksDigisosId")
-        }
+        val digisosSak = fiksService.getSoknad(fiksDigisosId.toString())
+        val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak)
+        val jsonSoknad: JsonSoknad? = innsynService.hentOriginalSoknad(digisosSak)
+        val model =
+            hendelseFoldService.fold(digisosSak, jsonDigisosSoker, jsonSoknad)
 
         val sak =
-            model.saker.find { it.vedtak.any { vedtak -> vedtak.id == vedtakId } }
-                ?: throw NotFoundException("Sak med vedtakId $vedtakId ikke funnet for fiksDigisosId $fiksDigisosId")
+            model.soknad.saker.find { sak -> sak.vedtak.any { it.dokument.id.toJavaUuid() == vedtakId } }
 
-        val vedtakfilUrlList =
-            sak.vedtak
-                .map {
-                    log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
-                    FilUrl(it.dato, it.vedtaksFilUrl, it.id)
-                }.ifEmpty { null }
+        val vedtak =
+            sak?.vedtak?.find { it.dokument.id.toJavaUuid() == vedtakId }
+                ?: model.soknad.vedtakUtenSak.find { it.dokument.id.toJavaUuid() == vedtakId }
+                ?: throw NotFoundException("Vedtak med id $vedtakId ikke funnet for fiksDigisosId $fiksDigisosId")
 
         return SakResponse(
-            sak.tittel ?: DEFAULT_SAK_TITTEL,
-            vedtakfilUrlList,
-            sak.vedtak.lastOrNull()?.utfall,
-            model.soknadsmottaker?.navEnhetsnavn,
+            sak?.tittel ?: DEFAULT_SAK_TITTEL,
+            vedtak.dato.toJavaLocalDate(),
+            FilUrl(hentDokumentUrl(clientProperties, vedtak.dokument), vedtakId.toString()),
+            model.soknad.mottaker?.navn,
+            model.soknad.tidspunktSendt?.toLocalDateOslo()?.toJavaLocalDate(),
         )
     }
 }

@@ -83,7 +83,7 @@ class EventService(
 
         applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak)
 
-        hendelseFoldService.launchFold(digisosSak, jsonDigisosSoker, jsonSoknad, model) {
+        hendelseFoldService.launchFoldAndDiff(digisosSak, jsonDigisosSoker, jsonSoknad, model) {
             vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak).map {
                 Vedlegg(type = it.type, tilleggsinfo = it.tilleggsinfo)
             }

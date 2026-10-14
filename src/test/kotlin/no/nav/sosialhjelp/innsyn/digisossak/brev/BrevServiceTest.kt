@@ -114,33 +114,6 @@ internal class BrevServiceTest {
     }
 
     @Test
-    suspend fun `Skal returnere vedtaksbrev med null timestamp når dato er null`() {
-        val model =
-            InternalDigisosSoker(
-                saker =
-                    mutableListOf(
-                        Sak(
-                            referanse = "ref1",
-                            saksStatus = SaksStatus.FERDIGBEHANDLET,
-                            tittel = "Livsopphold",
-                            vedtak =
-                                mutableListOf(
-                                    Vedtak(id = "v1", utfall = null, vedtaksFilUrl = "https://nav.no/vedtak", dato = null),
-                                ),
-                            utbetalinger = mutableListOf(),
-                        ),
-                    ),
-            )
-        coEvery { eventService.createModel(any()) } returns model
-
-        val result = service.getBrev("123")
-
-        assertThat(result).hasSize(1)
-        assertThat(result[0].type).isEqualTo(Brev.BrevType.VEDTAK)
-        assertThat(result[0].timestamp).isNull()
-    }
-
-    @Test
     suspend fun `Skal returnere vedtaksbrev fra alle vedtak på tvers av saker`() {
         val model =
             InternalDigisosSoker(
@@ -152,8 +125,18 @@ internal class BrevServiceTest {
                             tittel = "Livsopphold",
                             vedtak =
                                 mutableListOf(
-                                    Vedtak(id = "v1", utfall = null, vedtaksFilUrl = "https://nav.no/vedtak/1", dato = null),
-                                    Vedtak(id = "v2", utfall = null, vedtaksFilUrl = "https://nav.no/vedtak/2", dato = null),
+                                    Vedtak(
+                                        id = "v1",
+                                        utfall = null,
+                                        vedtaksFilUrl = "https://nav.no/vedtak/1",
+                                        dato = LocalDate.of(2024, 1, 15),
+                                    ),
+                                    Vedtak(
+                                        id = "v2",
+                                        utfall = null,
+                                        vedtaksFilUrl = "https://nav.no/vedtak/2",
+                                        dato = LocalDate.of(2024, 1, 15),
+                                    ),
                                 ),
                             utbetalinger = mutableListOf(),
                         ),
@@ -163,7 +146,12 @@ internal class BrevServiceTest {
                             tittel = "Tannlege",
                             vedtak =
                                 mutableListOf(
-                                    Vedtak(id = "v3", utfall = null, vedtaksFilUrl = "https://nav.no/vedtak/3", dato = null),
+                                    Vedtak(
+                                        id = "v3",
+                                        utfall = null,
+                                        vedtaksFilUrl = "https://nav.no/vedtak/3",
+                                        dato = LocalDate.of(2024, 1, 15),
+                                    ),
                                 ),
                             utbetalinger = mutableListOf(),
                         ),

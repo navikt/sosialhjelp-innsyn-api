@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
+import kotlin.time.measureTimedValue
 import kotlin.time.toJavaDuration
 import kotlin.uuid.Uuid
 import no.nav.sosialhjelp.digisos.hendelser.fold.fold as foldHendelser
@@ -104,21 +105,21 @@ class HendelseFoldService(
         oldModel: InternalDigisosSoker,
         hentVedlegg: suspend () -> List<Vedlegg>,
     ) {
-        try {
-            val started = TimeSource.Monotonic.markNow()
-            val result =
-                fold(digisosSak, jsonDigisosSoker, jsonSoknad) {
-                    try {
-                        withTimeout(VEDLEGG_TIMEOUT) { hentVedlegg() }
-                    } catch (e: TimeoutCancellationException) {
-                        throw VedleggFetchTimeout(e)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Throwable) {
-                        throw VedleggFetchFailure(e)
+        runCatching {
+            val (result, duration) =
+                measureTimedValue {
+                    fold(digisosSak, jsonDigisosSoker, jsonSoknad) {
+                        runCatching { withTimeout(VEDLEGG_TIMEOUT) { hentVedlegg() } }.getOrElse {
+                            when (it) {
+                                is TimeoutCancellationException -> throw VedleggFetchTimeout(it)
+                                is CancellationException -> throw it
+                                else -> throw VedleggFetchFailure(it)
+                            }
+                        }
                     }
                 }
-            meterRegistry.timer("hendelser_fold_duration").record(started.elapsedNow().toJavaDuration())
+
+            meterRegistry.timer("hendelser_fold_duration").record(duration.toJavaDuration())
 
             val differences = differences(oldModel, result, digisosSak.fiksDigisosId)
             meterRegistry
@@ -136,15 +137,16 @@ class HendelseFoldService(
                     differences,
                 )
             }
-        } catch (e: VedleggFetchTimeout) {
-            recordFetchTimeout(digisosSak)
-        } catch (e: VedleggFetchFailure) {
-            recordFetchFailure(digisosSak, e.cause ?: e)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Throwable) {
-            meterRegistry.counter("hendelser_fold_total", "result", "error").increment()
-            log.warn("Hendelser fold failed fiksDigisosId={} errorType={}", digisosSak.fiksDigisosId, e::class.simpleName)
+        }.onFailure {
+            when (it) {
+                is VedleggFetchFailure -> recordFetchFailure(digisosSak, it.cause ?: it)
+                is VedleggFetchTimeout -> recordFetchTimeout(digisosSak)
+                is CancellationException -> throw it
+                else -> {
+                    meterRegistry.counter("hendelser_fold_total", "result", "error").increment()
+                    log.warn("Hendelser fold failed fiksDigisosId={} errorType={}", digisosSak.fiksDigisosId, it::class.simpleName)
+                }
+            }
         }
     }
 

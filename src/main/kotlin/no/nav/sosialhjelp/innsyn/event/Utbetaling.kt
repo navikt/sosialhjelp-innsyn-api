@@ -6,19 +6,9 @@ import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDate
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
-private val log = LoggerFactory.getLogger(JsonUtbetaling::class.java.name)
-
 fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
-    if (hendelse.fom == null) log.info("utbetalingens start-periode (fom) er null")
-    if (hendelse.tom == null) log.info("utbetalingens slutt-periode (tom) er null")
-    if (hendelse.status == null) log.info("utbetalingsstatus er null")
-    if (hendelse.status == JsonUtbetaling.Status.PLANLAGT_UTBETALING) log.info("utbetalingsstatus er PLANLAGT_UTBETALING")
-
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Utbetaling. Status: ${hendelse.status?.name ?: "null"}")
-
     val gammelUtbetaling = utbetalinger.firstOrNull { it.referanse == hendelse.utbetalingsreferanse }
     val utbetaling =
         Utbetaling(

@@ -29,14 +29,11 @@ import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.logger
-import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
-import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 @Component
 class EventService(
@@ -92,43 +89,6 @@ class EventService(
         return model
     }
 
-    fun logTekniskSperre(
-        jsonDigisosSoker: JsonDigisosSoker?,
-        model: InternalDigisosSoker,
-        digisosSak: DigisosSak,
-        log: Logger,
-    ) {
-        model.utbetalinger
-            .filter { it.forfallsDato?.isBefore(LocalDate.now().minusDays(1)) ?: false }
-            .forEach { utbetaling ->
-                val sluttdato = utbetaling.utbetalingsDato ?: utbetaling.stoppetDato ?: LocalDate.now()
-                val forfallsDato = utbetaling.forfallsDato
-                if (forfallsDato != null) {
-                    val eventListe = mutableListOf<String>()
-                    var opprettelsesdato = LocalDate.now()
-                    jsonDigisosSoker
-                        ?.hendelser
-                        ?.filterIsInstance<JsonUtbetaling>()
-                        ?.filter { it.utbetalingsreferanse == utbetaling.referanse }
-                        ?.forEach {
-                            eventListe.add("{\"tidspunkt\": \"${it.hendelsestidspunkt}\", \"status\": \"${it.status}\"}")
-                            opprettelsesdato = minOf(it.hendelsestidspunkt.toLocalDateTime().toLocalDate(), opprettelsesdato)
-                        }
-                    val startdato = maxOf(forfallsDato, opprettelsesdato)
-                    val overdueDays = ChronoUnit.DAYS.between(startdato, sluttdato)
-                    val tilbakevirkende = opprettelsesdato.isAfter(forfallsDato)
-                    log.info(
-                        "Utbetaling på overtid: {\"referanse\": \"${utbetaling.referanse}\", " +
-                            "\"digisosId\": \"${digisosSak.fiksDigisosId}\", " +
-                            "\"status\": \"${utbetaling.status.name}\", " +
-                            "\"tilbakevirkende\": \"$tilbakevirkende\", \"overdueDays\": \"$overdueDays\", " +
-                            "\"utbetalingsDato\": \"${utbetaling.utbetalingsDato}\", \"forfallsdato\": \"${forfallsDato}\", " +
-                            "\"kommunenummer\": \"${digisosSak.kommunenummer}\", \"eventer\": $eventListe}",
-                    )
-                }
-            }
-    }
-
     fun setTidspunktSendtIfNotZero(
         model: InternalDigisosSoker,
         timestampSendt: Long,
@@ -151,7 +111,6 @@ class EventService(
         }
 
         applyHendelserOgSoknadKrav(jsonDigisosSoker, model, digisosSak)
-        logTekniskSperre(jsonDigisosSoker, model, digisosSak, log)
 
         return model
     }

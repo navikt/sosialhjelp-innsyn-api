@@ -42,10 +42,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonDokumentasjonkrav) {
     val union = utbetalingerMedSakKnytning.union(utbetalingerUtenSakKnytning)
     union.forEach { it.dokumentasjonkrav.oppdaterEllerLeggTilDokumentasjonkrav(dokumentasjonkrav) }
 
-    log.info(
-        "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjonskrav." +
-            " Beskrivelse: Dine oppgaver er oppdatert, les mer i vedtaket.",
-    )
     historikk.add(
         Hendelse(
             HendelseTekstType.DOKUMENTASJONKRAV,

@@ -9,9 +9,6 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.LoggerFactory
-
-private val log = LoggerFactory.getLogger(JsonForelopigSvar::class.java.name)
 
 fun InternalDigisosSoker.apply(
     hendelse: JsonForelopigSvar,
@@ -24,9 +21,6 @@ fun InternalDigisosSoker.apply(
             hendelse.hendelsestidspunkt.toLocalDateTime(),
         )
 
-    log.info(
-        "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Forelopig svar. Du har fått et brev om saksbehandlingstiden for søknaden din.",
-    )
     historikk.add(
         Hendelse(
             HendelseTekstType.BREV_OM_SAKSBEANDLINGSTID,

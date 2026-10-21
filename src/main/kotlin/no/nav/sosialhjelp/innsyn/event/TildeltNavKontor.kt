@@ -10,10 +10,7 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.LoggerFactory
 import kotlin.coroutines.cancellation.CancellationException
-
-private val log = LoggerFactory.getLogger(JsonTildeltNavKontor::class.java.name)
 
 suspend fun InternalDigisosSoker.apply(
     hendelse: JsonTildeltNavKontor,
@@ -59,13 +56,6 @@ suspend fun InternalDigisosSoker.apply(
             }
         }
 
-    log.info(
-        "Hendelse: " +
-            "Tidspunkt: ${hendelse.hendelsestidspunkt} " +
-            "Tildelt Navkontor. " +
-            "Beskrivelse: ${hendelseTekstType.name} " +
-            "NavEnhetsnavn: ${soknadsmottaker?.navEnhetsnavn}}",
-    )
     historikk.add(
         Hendelse(
             hendelseTekstType,

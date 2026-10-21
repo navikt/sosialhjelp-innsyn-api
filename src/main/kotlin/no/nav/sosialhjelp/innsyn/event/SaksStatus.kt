@@ -7,9 +7,6 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.LoggerFactory
-
-private val log = LoggerFactory.getLogger(JsonSaksStatus::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
     val sakForReferanse = saker.firstOrNull { it.referanse == hendelse.referanse }
@@ -49,11 +46,6 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
                         ),
                     )
                 }
-            }
-            if (sakForReferanse.saksStatus == SaksStatus.UNDER_BEHANDLING &&
-                (prevStatus == SaksStatus.IKKE_INNSYN || prevStatus == SaksStatus.BEHANDLES_IKKE)
-            ) {
-                log.info("Sak har gått fra status ${prevStatus.name} til status ${SaksStatus.UNDER_BEHANDLING.name}.")
             }
         }
     } else {
@@ -97,5 +89,4 @@ fun InternalDigisosSoker.apply(hendelse: JsonSaksStatus) {
             )
         }
     }
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Sakstatus: ${hendelse.status?.name ?: "null"}")
 }

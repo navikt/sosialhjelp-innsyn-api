@@ -13,9 +13,6 @@ import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.sha256
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.LoggerFactory
-
-private val log = LoggerFactory.getLogger(JsonDokumentasjonEtterspurt::class.java.name)
 
 fun InternalDigisosSoker.apply(
     hendelse: JsonDokumentasjonEtterspurt,
@@ -48,7 +45,6 @@ fun InternalDigisosSoker.apply(
     if (hendelse.dokumenter.isNotEmpty()) {
         hendelse.forvaltningsbrev?.let {
             val url = hentUrlFraFilreferanse(clientProperties, it.referanse)
-            log.info("Hendelse: Dokumentasjon etterspurt. Vi trenger flere opplysninger til søknaden din.")
             historikk.add(
                 Hendelse(
                     HendelseTekstType.ETTERSPOR_MER_DOKUMENTASJON,
@@ -60,10 +56,6 @@ fun InternalDigisosSoker.apply(
     }
 
     if (prevSize > 0 && oppgaver.isEmpty() && status != SoknadsStatus.BEHANDLES_IKKE) {
-        log.info(
-            "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Dokumentasjon etterspurt. " +
-                "Vi har sett på opplysningene dine og vil gi beskjed om vi trenger noe mer fra deg.",
-        )
         historikk.add(Hendelse(HendelseTekstType.ETTERSPOR_IKKE_MER_DOKUMENTASJON, hendelse.hendelsestidspunkt.toLocalDateTime(), null))
     }
 }

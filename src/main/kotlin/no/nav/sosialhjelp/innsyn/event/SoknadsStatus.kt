@@ -7,9 +7,6 @@ import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService.Companion.stripEnhetsnavnForKommune
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
-import org.slf4j.LoggerFactory
-
-private val log = LoggerFactory.getLogger(JsonSoknadsStatus::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
     status = SoknadsStatus.valueOf(hendelse.status.name)
@@ -52,11 +49,5 @@ fun InternalDigisosSoker.apply(hendelse: JsonSoknadsStatus) {
                 )
         }
 
-    log.info(
-        "Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} " +
-            "Søknadsstatus: ${hendelse.status} " +
-            "Tittel: ${hendelseMedTittel.hendelseType} " +
-            "NavEnhetsnavn: ${hendelseMedTittel.tekstArgument ?: ""}",
-    )
     historikk.add(hendelseMedTittel)
 }

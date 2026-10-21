@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 private val log = LoggerFactory.getLogger(JsonVilkar::class.java.name)
 
 fun InternalDigisosSoker.apply(hendelse: JsonVilkar) {
-    log.info("Hendelse: Tidspunkt: ${hendelse.hendelsestidspunkt} Vilkar. Status: ${hendelse.status?.name ?: "null"}")
     val vilkar =
         Vilkar(
             referanse = hendelse.vilkarreferanse,

@@ -183,7 +183,6 @@ class EventService(
             is JsonUtbetaling -> apply(hendelse)
             is JsonVilkar -> apply(hendelse)
             is JsonDokumentasjonkrav -> apply(hendelse)
-            is JsonRammevedtak -> apply(hendelse) // Gjør ingenting as of now
             else -> throw RuntimeException("Hendelsetype ${hendelse.type.name} mangler mapping")
         }
     }

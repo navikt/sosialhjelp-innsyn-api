@@ -93,7 +93,7 @@ spec:
       value: http://sosialhjelp-texas-mock/api/v1/token
     - name: NAIS_TOKEN_EXCHANGE_ENDPOINT
       value: http://sosialhjelp-texas-mock/api/v1/token/exchange
-    - name: UPLOAD_API_URL
+    - name: UPLOAD_ENDPOINT_URL
       value: "http://sosialhjelp-upload-mock"
-    - name: UPLOAD_API_AUDIENCE
+    - name: UPLOAD_AUDIENCE
       value: "dev-gcp:teamdigisos:sosialhjelp-upload-mock"

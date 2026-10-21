@@ -106,7 +106,7 @@ spec:
       value: "http://sosialhjelp-soknad-api-dev/sosialhjelp/soknad-api"
     - name: SOKNAD_API_AUDIENCE
       value: "dev-gcp:teamdigisos:sosialhjelp-soknad-api-dev"
-    - name: UPLOAD_API_URL
+    - name: UPLOAD_ENDPOINT_URL
       value: "http://sosialhjelp-upload-dev"
-    - name: UPLOAD_API_AUDIENCE
+    - name: UPLOAD_AUDIENCE
       value: "dev-gcp:teamdigisos:sosialhjelp-upload-dev"

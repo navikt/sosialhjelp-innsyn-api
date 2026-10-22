@@ -114,7 +114,9 @@ class HendelseIntegrationTest : AbstractIntegrationTest() {
 
         val videresendt = hendelser.filterIsInstance<HendelseDto.Videresendt>().single()
         assertThat(videresendt.navKontor).isEqualTo("Nav Alna")
-        assertThat(videresendt.papirsoknad).isFalse()
+
+        val mottatt = hendelser.filterIsInstance<HendelseDto.Mottatt>().single()
+        assertThat(mottatt.navKontor).isEqualTo("Nav Sagene")
 
         val sendt = hendelser.filterIsInstance<HendelseDto.Sendt>().single()
         assertThat(sendt.navKontor).isEqualTo("Nav Sagene")

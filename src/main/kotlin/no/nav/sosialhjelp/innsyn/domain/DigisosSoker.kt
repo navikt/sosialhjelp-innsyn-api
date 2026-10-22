@@ -215,7 +215,7 @@ enum class HendelseTekstType : HendelseDtoMapper {
         override fun mapTilHendelseDto(
             hendelse: Hendelse,
             enhetNavn: String?,
-        ): HendelseDto = HendelseDto.Sendt(hendelse.tidspunkt, enhetNavn, hendelse.url?.link)
+        ): HendelseDto = HendelseDto.Sendt(hendelse.tidspunkt, hendelse.tekstArgument, hendelse.url?.link)
     },
     SOKNAD_UNDER_BEHANDLING {
         override fun mapTilHendelseDto(
@@ -227,13 +227,13 @@ enum class HendelseTekstType : HendelseDtoMapper {
         override fun mapTilHendelseDto(
             hendelse: Hendelse,
             enhetNavn: String?,
-        ): HendelseDto = HendelseDto.Mottatt(hendelse.tidspunkt, enhetNavn)
+        ): HendelseDto = HendelseDto.Mottatt(hendelse.tidspunkt, hendelse.tekstArgument)
     },
     SOKNAD_MOTTATT_UTEN_KOMMUNENAVN {
         override fun mapTilHendelseDto(
             hendelse: Hendelse,
             enhetNavn: String?,
-        ): HendelseDto = HendelseDto.Mottatt(hendelse.tidspunkt, enhetNavn)
+        ): HendelseDto = HendelseDto.Mottatt(hendelse.tidspunkt, enhetNavn) // TODO Tekstargument er null - så ?
     },
     SOKNAD_FERDIGBEHANDLET {
         override fun mapTilHendelseDto(

@@ -95,8 +95,8 @@ dependencies {
 // override spring managed dependencies
 extra["json-smart.version"] = libs.versions.json.smart
 
-val githubUser: String? by project
-val githubPassword: String? by project
+val githubUser: String? = project.findProperty("githubUser") as String?
+val githubPassword: String? = project.findProperty("githubPassword") as String?
 
 repositories {
     mavenLocal()
@@ -135,28 +135,6 @@ tasks.withType<KotlinCompile> {
     compilerOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = JvmTarget.JVM_21
-    }
-}
-
-testing {
-    suites {
-        val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter()
-
-            targets {
-                all {
-                    testTask.configure {
-                        testLogging {
-                            events = setOf(TestLogEvent.SKIPPED, TestLogEvent.FAILED)
-                            exceptionFormat = TestExceptionFormat.FULL
-                            showCauses = true
-                            showExceptions = true
-                            showStackTraces = true
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 

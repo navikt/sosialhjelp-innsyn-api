@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.event
 import io.micrometer.core.instrument.MeterRegistry
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import jakarta.annotation.PreDestroy
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import kotlinx.datetime.Instant
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -34,8 +32,9 @@ import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.springframework.stereotype.Component
 import kotlin.coroutines.ContinuationInterceptor
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.TimeSource
+import kotlin.time.Instant
 import kotlin.time.measureTimedValue
 import kotlin.time.toJavaDuration
 import kotlin.uuid.Uuid
@@ -198,7 +197,7 @@ class HendelseFoldService(
             if (oldModel.fagsystem?.systemversjon != soknad.fagsystem?.systemversjon) add("fagsystem.systemversjon")
             val oldSaker = oldModel.saker.associateBy { it.referanse }
             val foldedSaker = soknad.saker.associateBy { it.referanse }
-            oldSaker.keys.filterNot { it in foldedSaker }.forEach { add("saker.manglerINy") }
+            oldSaker.keys.filterNot { it in foldedSaker }.forEach { _ -> add("saker.manglerINy") }
             foldedSaker.keys.filterNot { it in oldSaker }.forEach { referanse ->
                 val sak = foldedSaker.getValue(referanse)
                 add(if (sak.erSyntetisk()) "saker.syntetisk" else "saker.manglerIGammel")

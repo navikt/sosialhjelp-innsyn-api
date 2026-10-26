@@ -7,7 +7,7 @@ file_upload = "1.6.0"
 filformat = "1.20260929.62"
 jackson = "3.2.3"
 jackson2 = "2.22.3"
-joda_time = "0.6.2"
+kotlin_time = "0.8.0"
 jemp_box = "1.8.17"
 kotlin = "2.4.20"
 logstash = "9.0"
@@ -21,8 +21,8 @@ opentelemetry = "1.67.0"
 opentelemetry-instrumentation = "2.32.0"
 pdf_box = "3.0.8"
 prometheus = "0.16.0"
-sosialhjelp_common = "3.0.0"
-sosialhjelp_hendelser = "3.0.0"
+sosialhjelp_common = "3.0.1"
+sosialhjelp_hendelser = "3.0.1"
 filformat_kmp = "1.20260909.60"
 spotless = "8.10.3"
 spring-boot = "4.1.1"
@@ -51,7 +51,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "coroutines" }
 kotlinx-coroutines-slf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "joda_time" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin_time" }
 logback-logstash = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash" }
 # Automatisk propagering av context (spring security, tracing, osv)
 micrometer-context-propagation = { module = "io.micrometer:context-propagation", version.ref = "micrometerPropagation" }

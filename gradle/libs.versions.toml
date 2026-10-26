@@ -33,7 +33,7 @@ testcontainers = "2.0.5"
 testcontainers-junit = "1.21.4"
 tika = "4.0.0"
 unleash = "12.3.0"
-versions = "0.64.0"
+versions = "0.66.0"
 ktlint = "1.7.1"
 json_smart = "2.4.10"
 
@@ -124,4 +124,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
-versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }
+versions = { id = "io.github.ben-manes.versions", version.ref = "versions" }

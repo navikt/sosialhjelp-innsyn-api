@@ -47,7 +47,10 @@ class JsonKlageGenerator(
     )
 
     // TODO Vil få vedtaksreferanse fra frontend når den er implementert - skal ikke være nødvendig å gå om fiks igjen
-    private suspend fun getVedtaksreferanse(digisosId: UUID, filreferanseId: UUID): String {
+    private suspend fun getVedtaksreferanse(
+        digisosId: UUID,
+        filreferanseId: UUID,
+    ): String {
         val digisosSak = fiksService.getSoknad(digisosId.toString())
         val innsynsfilModel = eventService.createModel(digisosSak)
         return innsynsfilModel.saker.findRelatertSak(filreferanseId.toString())

@@ -78,7 +78,7 @@ class KlageServiceImpl(
                 klageClient.sendKlage(
                     digisosId = UUID.fromString(jsonKlage.digisosId),
                     klageId = UUID.fromString(jsonKlage.klageId),
-                    vedtakId = UUID.fromString(jsonKlage.vedtakId),
+                    vedtakId = UUID.fromString(jsonKlage.filreferanseId),
                     MandatoryFilesForKlage(
                         klageJson = objectMapper.writeValueAsString(jsonKlage),
                         klagePdf = encryptedPdf,

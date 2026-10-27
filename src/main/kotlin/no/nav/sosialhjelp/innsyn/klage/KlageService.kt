@@ -96,7 +96,7 @@ class KlageServiceImpl(
     ) {
         fetchJsonVedleggSpec(ettersendelseId, klageId)
             .also {
-                if (it.noFiles()) error("Ingen vedlegg for ettersendelse av Klage")
+                if (it.hasNoFiles()) error("Ingen vedlegg for ettersendelse av Klage")
 
                 klageClient.sendEttersendelse(
                     digisosId = fiksDigisosId,
@@ -162,12 +162,15 @@ class KlageServiceImpl(
     private fun FiksEttersendelseDto.toEttersendelseDto() =
         EttersendelseDto(
             navEksternRefId = navEksternRefId,
-            vedlegg = vedlegg.map { it.toVedleggResponse(unixToLocalDateTime(timestampSendt)) },
+            vedlegg =
+                vedlegg
+                    .filter { it.filnavn != "ettersendelse.pdf" }
+                    .map { it.toVedleggResponse(unixToLocalDateTime(timestampSendt)) },
             timestampSendt = timestampSendt,
         )
 }
 
-private fun JsonVedleggSpesifikasjon.noFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()
+private fun JsonVedleggSpesifikasjon.hasNoFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()
 
 private fun FiksKlageDto.getTidspunktSendt() =
     sendtKvittering.sendtStatus?.timestamp?.let { unixToLocalDateTime(it) }

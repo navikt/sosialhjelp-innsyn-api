@@ -30,7 +30,7 @@ object KlagePdfGenerator {
                 addCenteredH4Bold("Sendt inn: ${jsonKlage.innsendingstidspunkt}")
                 addCenteredH4Bold("DigisosId: ${jsonKlage.digisosId}")
                 addCenteredH4Bold("KlageId: ${jsonKlage.klageId}")
-                addCenteredH4Bold("Vedtak: ${jsonKlage.vedtakId}")
+                addCenteredH4Bold("Vedtaksreferanse: ${jsonKlage.vedtaksreferanse}")
                 addBlankLine()
                 addCenteredH4Bold("Sendt til: ${jsonKlage.getMottakerInfo()}")
                 addCenteredH4Bold("Personidentifikator: ${jsonKlage.personIdentifikator.verdi}")

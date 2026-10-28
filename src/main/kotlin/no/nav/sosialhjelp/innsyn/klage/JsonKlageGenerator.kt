@@ -9,6 +9,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
+import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.convertToOffsetDateTimeUTCString
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
@@ -33,7 +34,9 @@ class JsonKlageGenerator(
     ) = JsonKlage(
         klageId = input.klageId.toString(),
         // TODO Burde vedtaknummer også være en del av json/pdf?
-        vedtakId = input.vedtakId.toString(),
+        // TODO Endre API'et (navnet på input-parameter) etter hvert også
+        filreferanseId = input.vedtakId.toString(),
+        vedtaksreferanse = getVedtaksreferanse(fiksDigisosId, input.vedtakId),
         digisosId = fiksDigisosId.toString(),
         innsendingstidspunkt = createInnsendingstidspunktString(),
         begrunnelse = input.createKlageBegrunnelse(),
@@ -42,6 +45,16 @@ class JsonKlageGenerator(
         mottaker = createSoknadsmottaker(fiksDigisosId),
         autentisering = createJsonAutentisering(),
     )
+
+    // TODO Vil få vedtaksreferanse fra frontend når den er implementert - skal ikke være nødvendig å gå om fiks igjen
+    private suspend fun getVedtaksreferanse(
+        digisosId: UUID,
+        filreferanseId: UUID,
+    ): String {
+        val digisosSak = fiksService.getSoknad(digisosId.toString())
+        val innsynsfilModel = eventService.createModel(digisosSak)
+        return innsynsfilModel.saker.findRelatertSak(filreferanseId.toString())
+    }
 
     private suspend fun createJsonSokernavn(): JsonSokernavn =
         pdlService
@@ -83,6 +96,10 @@ class JsonKlageGenerator(
 
     private fun createInnsendingstidspunktString(): String = convertToOffsetDateTimeUTCString(nowWithMillis())
 }
+
+// TODO Denne skal finne vedtak på vedtaksreferanse når implementert
+private fun MutableList<Sak>.findRelatertSak(filreferanseId: String) =
+    find { sak -> sak.vedtak.any { it.id == filreferanseId } }?.referanse ?: "Fant ikke sak med vedtakId $filreferanseId"
 
 private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = tekst)
 

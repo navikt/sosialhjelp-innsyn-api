@@ -3,12 +3,14 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkSpyBean
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
+import io.mockk.*
+import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
+import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
+import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
+import no.nav.sbl.soknadsosialhjelp.soknad.common.JsonKildeBruker
+import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
+import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -17,22 +19,9 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
-import no.nav.sosialhjelp.innsyn.klage.KlageDto
-import no.nav.sosialhjelp.innsyn.klage.KlageInput
-import no.nav.sosialhjelp.innsyn.klage.KlageMetricsService
-import no.nav.sosialhjelp.innsyn.klage.KlageRef
-import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendtInfoNAVDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksProtokoll
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerClient
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerResponse
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagringDokumentInfo
-import no.nav.sosialhjelp.innsyn.klage.fiks.SendtKvitteringDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatus
-import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatusDto
+import no.nav.sosialhjelp.innsyn.klage.*
+import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
+import no.nav.sosialhjelp.innsyn.klage.fiks.*
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlAdressebeskyttelse
@@ -119,7 +108,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = klageId,
-                    vedtakId = vedtakId,
+                    vedtaksreferanse = "vedtaksreferanse",
                     tekst = "Dette er en testklage",
                 ),
         )
@@ -136,8 +125,8 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
         coEvery {
             fiksService.getDocument(
-                any(),
-                any(),
+                any<UUID>(),
+                any<UUID>(),
                 JsonVedleggSpesifikasjon::class.java,
                 any(),
             )
@@ -151,7 +140,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .responseBody
             ?.also { dto ->
                 assertThat { dto.klageId == klageId }
-                assertThat { dto.vedtakId == vedtakId }
+                assertThat { dto.vedtaksreferanse == "vedtaksreferanse" }
             }
             ?: error("Forventet klage tilbake")
     }
@@ -267,7 +256,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = klageId,
-                    vedtakId = vedtakId,
+                    vedtaksreferanse = "vedtaksreferanse",
                     tekst = "Dette er en testklage",
                 ),
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
@@ -413,6 +402,30 @@ private fun createFiksKlageDto(
             ),
         ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )
+
+fun createKlageJson(fiksKlageDto: FiksKlageDto): JsonKlage {
+    return JsonKlage(
+        klageId = fiksKlageDto.klageId.toString(),
+        filreferanseId = fiksKlageDto.vedtakId.toString(),
+        vedtaksreferanse = "vedtaksreferanse",
+        digisosId = fiksKlageDto.digisosId.toString(),
+        innsendingstidspunkt = LocalDateTime.now().toString(),
+        begrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, "Dette er en klage"),
+        personIdentifikator = JsonPersonIdentifikator(kilde = JsonPersonIdentifikator.Kilde.SYSTEM, verdi = "12345678901"),
+        navn =  JsonSokernavn(kilde = JsonSokernavn.Kilde.SYSTEM, fornavn = "Ola", mellomnavn = "", etternavn = "Nordmann"),
+        mottaker =
+            JsonSoknadsmottaker(
+                kommunenummer = "1234",
+                enhetsnummer = "12345678",
+                navEnhetsnavn = "Nav Testenhet",
+            ),
+        autentisering =
+            JsonAutentisering(
+                true,
+                autentiseringsTidspunkt = TimestampUtil.convertToOffsetDateTimeUTCString(nowWithMillis()),
+            ),
+    )
+}
 
 fun createDigisosSak(
     fiksDigisosId: UUID = UUID.randomUUID(),

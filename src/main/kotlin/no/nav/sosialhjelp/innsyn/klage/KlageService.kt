@@ -5,15 +5,12 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendelseDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.MandatoryFilesForKlage
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
+import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
+import no.nav.sosialhjelp.innsyn.klage.fiks.*
 import no.nav.sosialhjelp.innsyn.upload.UploadClient
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
@@ -23,7 +20,6 @@ import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
@@ -61,8 +57,9 @@ class KlageServiceImpl(
     private val clientProperties: ClientProperties,
     private val krypteringService: KrypteringService,
     private val uploadClient: UploadClient,
+    private val fiksService: FiksService,
 ) : KlageService {
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
     override suspend fun sendKlage(
         jsonKlage: JsonKlage,
@@ -120,13 +117,19 @@ class KlageServiceImpl(
             klageClient.hentKlager(digisosId = fiksDigisosId).find { it.klageId == klageId }
                 ?: return null
 
+        val klageJson = fiksService.getDocument(
+            fiksDigisosId,
+            fiksKlage.klageMetadata,
+            JsonKlage::class.java
+        )
+
         val klagePdf = fiksKlage.klageDokument.toVedleggResponse(fiksKlage.getTidspunktSendt())
         val opplastedeVedlegg = fiksKlage.vedlegg.map { it.toVedleggResponse(fiksKlage.getTidspunktSendt()) }
 
         return KlageDto(
             digisosId = fiksDigisosId,
             klageId = fiksKlage.klageId,
-            vedtakId = fiksKlage.vedtakId,
+            vedtaksreferanse = klageJson.vedtaksreferanse,
             klagePdf = klagePdf,
             opplastedeVedlegg = opplastedeVedlegg,
             ettersendelser = fiksKlage.ettersendtInfoNAV?.ettersendelser?.map { it.toEttersendelseDto() } ?: emptyList(),

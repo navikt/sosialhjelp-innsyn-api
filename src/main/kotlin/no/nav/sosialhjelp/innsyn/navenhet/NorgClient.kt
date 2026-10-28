@@ -46,7 +46,7 @@ class NorgClientImpl(
                 }.awaitSingleOrNull()
                 ?: throw BadStateException("Ingen feil, men heller ingen NavEnhet")
 
-        return navEnhet.also { log.info("Hentet Nav-enhet $enhetsnr fra NORG2") }
+        return navEnhet.also { log.debug("Hentet Nav-enhet $enhetsnr fra NORG2") }
     }
 
     companion object {

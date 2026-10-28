@@ -32,7 +32,6 @@ class SoknadsStatusService(
         val model = eventService.createModel(digisosSak)
         val status = model.status
 
-        log.info("Hentet nåværende søknadsstatus=${status.name}")
         val erInnsynDeaktivertForKommune = kommuneService.erInnsynDeaktivertForKommune(fiksDigisosId)
         val dokumentlagerId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 

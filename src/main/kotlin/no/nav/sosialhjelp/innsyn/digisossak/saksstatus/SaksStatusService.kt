@@ -23,7 +23,6 @@ class SaksStatusService(
         val model = eventService.createModel(digisosSak)
 
         if (model.saker.isEmpty()) {
-            log.info("Fant ingen saker")
             return emptyList()
         }
 
@@ -42,7 +41,6 @@ class SaksStatusService(
         val vedtakfilUrlList =
             sak.vedtak
                 .map {
-                    log.info("Hentet url til vedtaksfil: ${it.vedtaksFilUrl}")
                     FilUrl(it.dato, it.vedtaksFilUrl, it.id)
                 }.ifEmpty { null }
         val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak)

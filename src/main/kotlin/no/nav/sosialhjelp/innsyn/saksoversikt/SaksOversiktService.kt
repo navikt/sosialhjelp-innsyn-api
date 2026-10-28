@@ -18,12 +18,8 @@ class SaksOversiktService(
         val responseList =
             digisosSaker
                 // Ikke returner "tomme" søknader som som regel er feilregistreringer
-                .partition { it.originalSoknadNAV == null && it.digisosSoker == null }
-                .let { (tommeSoknader, gyldigeSoknader) ->
-                    log.info("Fant ${tommeSoknader.size} tomme søknader. Ider: ${tommeSoknader.map { it.fiksDigisosId }}")
-                    log.info("Fant ${gyldigeSoknader.size} gyldige søknader. Ider: ${gyldigeSoknader.map { it.fiksDigisosId }}")
-                    gyldigeSoknader
-                }.map {
+                .filterNot { it.originalSoknadNAV == null && it.digisosSoker == null }
+                .map {
                     val soknadOpprettet =
                         it.originalSoknadNAV?.timestampSendt?.let { timestamp ->
                             unixToLocalDateTime(timestamp)

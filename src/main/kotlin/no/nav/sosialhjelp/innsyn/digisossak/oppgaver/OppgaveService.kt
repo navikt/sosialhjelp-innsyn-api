@@ -51,7 +51,6 @@ class OppgaveService(
                         opplastetDato = alleredeLastetOpp.firstOrNull()?.tidspunktLastetOpp,
                     )
                 }.sortedWith(compareBy<OppgaveResponseBeta> { it.erLastetOpp }.thenBy { it.innsendelsesfrist })
-        log.info("Hentet ${oppgaveResponseList.size} oppgaver")
         oppgaveTeller.tag("fiksDigisosId", fiksDigisosId).register(meterRegistry).increment(oppgaveResponseList.size.toDouble())
         return oppgaveResponseList
     }
@@ -70,15 +69,6 @@ class OppgaveService(
         val model = eventService.createModel(digisosSak)
         if (model.vilkar.isEmpty()) {
             return emptyList()
-        }
-
-        // Logger om fagsystemene har tatt i bruk nye statuser
-        val antallWithNewStatus =
-            model.vilkar
-                .filter { it.status == Oppgavestatus.RELEVANT || it.status == Oppgavestatus.ANNULLERT }
-                .size
-        if (antallWithNewStatus > 0) {
-            log.info("Hentet $antallWithNewStatus vilkar med nye statuser (RELEVANT / ANNULERT).")
         }
 
         val vilkarResponseList =
@@ -101,7 +91,6 @@ class OppgaveService(
                     )
                 }.sortedBy { it.hendelsetidspunkt }
 
-        log.info("Hentet ${vilkarResponseList.size} vilkar")
         return vilkarResponseList
     }
 
@@ -114,16 +103,6 @@ class OppgaveService(
 
         val ettersendteVedlegg =
             vedleggService.hentEttersendteVedlegg(digisosSak, model)
-
-        // Logger om fagsystemene har tatt i bruk nye statuser
-        val antallWithNewStatus =
-            model.dokumentasjonkrav
-                .count {
-                    it.status in listOf(Oppgavestatus.RELEVANT, Oppgavestatus.ANNULLERT, Oppgavestatus.LEVERT_TIDLIGERE)
-                }
-        if (antallWithNewStatus > 0) {
-            log.info("Hentet $antallWithNewStatus dokumentasjonkrav med nye statuser (RELEVANT / ANNULERT / LEVERT_TIDLIGERE).")
-        }
 
         val dokumentasjonkravResponseList =
             model.dokumentasjonkrav
@@ -156,7 +135,6 @@ class OppgaveService(
                     }.thenBy(nullsLast()) { it.frist },
                 ).toList()
 
-        log.info("Hentet ${dokumentasjonkravResponseList.size} dokumentasjonkrav")
         return dokumentasjonkravResponseList
     }
 
@@ -170,16 +148,6 @@ class OppgaveService(
 
         val ettersendteVedlegg =
             vedleggService.hentEttersendteVedlegg(digisosSak, model)
-
-        // Logger om fagsystemene har tatt i bruk nye statuser
-        val antallWithNewStatus =
-            model.dokumentasjonkrav
-                .count {
-                    it.status in listOf(Oppgavestatus.RELEVANT, Oppgavestatus.ANNULLERT, Oppgavestatus.LEVERT_TIDLIGERE)
-                }
-        if (antallWithNewStatus > 0) {
-            log.info("Hentet $antallWithNewStatus dokumentasjonkrav med nye statuser (RELEVANT / ANNULERT / LEVERT_TIDLIGERE).")
-        }
 
         val dokumentasjonkravResponseList =
             model.dokumentasjonkrav
@@ -212,7 +180,6 @@ class OppgaveService(
                 }.sortedWith(compareBy(nullsLast()) { it.frist })
                 .toList()
 
-        log.info("Hentet ${dokumentasjonkravResponseList.sumOf { it.dokumentasjonkravElementer.size }} dokumentasjonkrav")
         return dokumentasjonkravResponseList
     }
 

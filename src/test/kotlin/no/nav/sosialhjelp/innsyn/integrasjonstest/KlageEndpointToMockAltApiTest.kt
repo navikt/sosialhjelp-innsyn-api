@@ -75,7 +75,7 @@ class KlageEndpointToMockAltApiTest {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
-        sendKlage(digisosId, klageId, vedtakId).expectStatus().isOk
+        sendKlage(digisosId, klageId, "vedtaksreferanse").expectStatus().isOk
 
         hentKlager(digisosId)
             .let { klager ->
@@ -91,14 +91,13 @@ class KlageEndpointToMockAltApiTest {
     fun `Hente klage med vedtakId skal returnere riktig`() {
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
 
-        sendKlage(digisosId, klageId, vedtakId).expectStatus().isOk
+        sendKlage(digisosId, klageId, "vedtaksreferanse").expectStatus().isOk
 
         hentKlage(digisosId, klageId)
             .also { klage ->
                 assertThat(klage.klageId).isEqualTo(klageId)
-                assertThat(klage.vedtakId).isEqualTo(vedtakId)
+                assertThat(klage.vedtaksreferanse).isEqualTo("vedtaksreferanse")
                 assertThat(klage.digisosId).isEqualTo(digisosId)
             }
     }
@@ -119,9 +118,9 @@ class KlageEndpointToMockAltApiTest {
     fun `Hent alle klager for digisosId skal fungere`() {
         val digisosId = UUID.randomUUID()
 
-        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID()).expectStatus().isOk
-        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID()).expectStatus().isOk
-        sendKlage(digisosId, UUID.randomUUID(), UUID.randomUUID()).expectStatus().isOk
+        sendKlage(digisosId, UUID.randomUUID(), "vedtaksreferanse").expectStatus().isOk
+        sendKlage(digisosId, UUID.randomUUID(), "vedtaksreferanse2").expectStatus().isOk
+        sendKlage(digisosId, UUID.randomUUID(), "vedtaksreferanse3").expectStatus().isOk
 
         hentKlager(digisosId).also { assertThat(it).hasSize(3) }
     }
@@ -134,7 +133,7 @@ class KlageEndpointToMockAltApiTest {
             val input =
                 KlageInput(
                     klageId = UUID.randomUUID(),
-                    vedtakId = UUID.randomUUID(),
+                    vedtaksreferanse = "vedtaksreferanse",
                     tekst = "Min klage lyder slik",
                 )
 
@@ -151,7 +150,7 @@ class KlageEndpointToMockAltApiTest {
                     files,
                 )
 
-            sendKlage(digisosId, input.klageId, input.vedtakId, input)
+            sendKlage(digisosId, input.klageId, input.vedtaksreferanse, input)
 
             val klage = hentKlage(digisosId, input.klageId)
 
@@ -182,7 +181,7 @@ class KlageEndpointToMockAltApiTest {
         val klageId = UUID.randomUUID()
         val ettersendelseId = UUID.randomUUID()
 
-        sendKlage(digisosId, klageId, UUID.randomUUID()).expectStatus().isOk
+        sendKlage(digisosId, klageId, "vedtaksreferanse").expectStatus().isOk
 
         val fileMap = mapOf("doc.pdf" to createRandomPdf("doc.pdf").data)
 
@@ -220,7 +219,7 @@ class KlageEndpointToMockAltApiTest {
         val klageId = UUID.randomUUID()
         val ettersendelseId = UUID.randomUUID()
 
-        sendKlage(digisosId, klageId, UUID.randomUUID()).expectStatus().isOk
+        sendKlage(digisosId, klageId, "vedtaksreferanse").expectStatus().isOk
         sendEttersendelse(digisosId, klageId, ettersendelseId).expectStatus().is5xxServerError
     }
 
@@ -237,7 +236,7 @@ class KlageEndpointToMockAltApiTest {
     private fun sendKlage(
         digisosId: UUID,
         klageId: UUID,
-        vedtakId: UUID,
+        vedtaksreferanse: String,
         klageInput: KlageInput? = null,
     ): WebTestClient.ResponseSpec =
         webClient
@@ -249,7 +248,7 @@ class KlageEndpointToMockAltApiTest {
                 klageInput
                     ?: KlageInput(
                         klageId = klageId,
-                        vedtakId = vedtakId,
+                        vedtaksreferanse = vedtaksreferanse,
                         tekst = "Dette er en testklage",
                     ),
             ).exchange()
@@ -448,7 +447,7 @@ private fun generateKlagePdf(
     PdfGenerator(document)
         .run {
             addCenteredH1Bold("Klage på vedtak")
-            addCenteredH4Bold("Vedtak: ${input.vedtakId}")
+            addCenteredH4Bold("Vedtak: ${input.vedtaksreferanse}")
             addBlankLine()
             addCenteredH4Bold("Klage ID: ${input.klageId}")
             addText(input.tekst)

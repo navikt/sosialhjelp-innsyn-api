@@ -5,12 +5,14 @@ import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkSpyBean
 import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
+import io.mockk.*
+import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
+import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
+import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
+import no.nav.sbl.soknadsosialhjelp.soknad.common.JsonKildeBruker
+import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
+import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
@@ -131,7 +133,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = klageId,
-                    vedtakId = vedtakId,
+                    vedtaksreferanse = "vedtaksreferanse",
                     tekst = "Dette er en testklage",
                 ),
         )
@@ -148,8 +150,8 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
         coEvery {
             fiksService.getDocument(
-                any(),
-                any(),
+                any<UUID>(),
+                any<UUID>(),
                 JsonVedleggSpesifikasjon::class.java,
                 any(),
             )
@@ -163,7 +165,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .responseBody
             ?.also { dto ->
                 assertThat { dto.klageId == klageId }
-                assertThat { dto.vedtakId == vedtakId }
+                assertThat { dto.vedtaksreferanse == "vedtaksreferanse" }
             }
             ?: error("Forventet klage tilbake")
     }
@@ -304,7 +306,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = klageId,
-                    vedtakId = vedtakId,
+                    vedtaksreferanse = "vedtaksreferanse",
                     tekst = "Dette er en testklage",
                 ),
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
@@ -450,6 +452,30 @@ private fun createFiksKlageDto(
             ),
         ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )
+
+fun createKlageJson(fiksKlageDto: FiksKlageDto): JsonKlage {
+    return JsonKlage(
+        klageId = fiksKlageDto.klageId.toString(),
+        filreferanseId = fiksKlageDto.vedtakId.toString(),
+        vedtaksreferanse = "vedtaksreferanse",
+        digisosId = fiksKlageDto.digisosId.toString(),
+        innsendingstidspunkt = LocalDateTime.now().toString(),
+        begrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, "Dette er en klage"),
+        personIdentifikator = JsonPersonIdentifikator(kilde = JsonPersonIdentifikator.Kilde.SYSTEM, verdi = "12345678901"),
+        navn =  JsonSokernavn(kilde = JsonSokernavn.Kilde.SYSTEM, fornavn = "Ola", mellomnavn = "", etternavn = "Nordmann"),
+        mottaker =
+            JsonSoknadsmottaker(
+                kommunenummer = "1234",
+                enhetsnummer = "12345678",
+                navEnhetsnavn = "Nav Testenhet",
+            ),
+        autentisering =
+            JsonAutentisering(
+                true,
+                autentiseringsTidspunkt = TimestampUtil.convertToOffsetDateTimeUTCString(nowWithMillis()),
+            ),
+    )
+}
 
 fun createDigisosSak(
     fiksDigisosId: UUID = UUID.randomUUID(),

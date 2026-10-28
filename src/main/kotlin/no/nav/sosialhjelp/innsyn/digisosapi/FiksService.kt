@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -52,6 +53,13 @@ class FiksService(
             kommuneDeaktivert,
         )
     }
+
+    suspend fun <T> getDocument(
+        digisosId: UUID,
+        dokumentlagerId: UUID,
+        requestedClass: Class<out T>,
+        cacheKey: String = dokumentlagerId.toString(),
+    ): T = getDocument(digisosId.toString(), dokumentlagerId.toString(), requestedClass, cacheKey)
 
     suspend fun <T> getDocument(
         digisosId: String,

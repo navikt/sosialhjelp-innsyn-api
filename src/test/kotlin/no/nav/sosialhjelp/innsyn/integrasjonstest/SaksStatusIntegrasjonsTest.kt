@@ -18,6 +18,7 @@ import no.nav.sosialhjelp.innsyn.testutils.IntegrasjonstestStubber
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
+import java.util.UUID
 
 internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
     private val navEnhet: NavEnhet = mockk()
@@ -39,8 +40,8 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
         val soker = sosialhjelpJsonMapper.readValue(ok_komplett_jsondigisossoker_response, JsonDigisosSoker::class.java)
 
         coEvery { fiksService.getSoknad(any()) } returns digisosSakOk
-        coEvery { fiksService.getDocument(any(), any(), JsonSoknad::class.java, any()) } returns soknad
-        coEvery { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonSoknad::class.java, any()) } returns soknad
+        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonDigisosSoker::class.java, any()) } returns soker
         coEvery { kommuneService.hentKommuneInfo(any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
         coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
         coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
@@ -49,7 +50,7 @@ internal class SaksStatusIntegrasjonsTest : AbstractIntegrationTest() {
         doGet("/api/v1/innsyn/1234/saksStatus", emptyList())
 
         coVerify(exactly = 1) { fiksService.getSoknad(any()) }
-        coVerify(exactly = 1) { fiksService.getDocument(any(), any(), JsonSoknad::class.java, any()) }
-        coVerify(exactly = 1) { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) }
+        coVerify(exactly = 1) { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonSoknad::class.java, any()) }
+        coVerify(exactly = 1) { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonDigisosSoker::class.java, any()) }
     }
 }

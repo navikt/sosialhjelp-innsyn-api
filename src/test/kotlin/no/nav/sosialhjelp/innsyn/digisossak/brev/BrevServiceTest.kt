@@ -98,7 +98,7 @@ internal class BrevServiceTest {
                             referanse = "ref1",
                             saksStatus = SaksStatus.FERDIGBEHANDLET,
                             tittel = "Livsopphold",
-                            vedtak = mutableListOf(Vedtak(id = "v1", utfall = null, vedtaksFilUrl = vedtaksFilUrl, dato = dato)),
+                            vedtak = mutableListOf(Vedtak(vedtaksreferanse = "vedtaksreferanse", filreferanseId = "v1", utfall = null, vedtaksFilUrl = vedtaksFilUrl, dato = dato)),
                             utbetalinger = mutableListOf(),
                         ),
                     ),
@@ -126,13 +126,15 @@ internal class BrevServiceTest {
                             vedtak =
                                 mutableListOf(
                                     Vedtak(
-                                        id = "v1",
+                                        vedtaksreferanse = "vedtaksreferanse",
+                                        filreferanseId = "v1",
                                         utfall = null,
                                         vedtaksFilUrl = "https://nav.no/vedtak/1",
                                         dato = LocalDate.of(2024, 1, 15),
                                     ),
                                     Vedtak(
-                                        id = "v2",
+                                        vedtaksreferanse = "vedtaksreferanse",
+                                        filreferanseId = "v2",
                                         utfall = null,
                                         vedtaksFilUrl = "https://nav.no/vedtak/2",
                                         dato = LocalDate.of(2024, 1, 15),
@@ -147,7 +149,8 @@ internal class BrevServiceTest {
                             vedtak =
                                 mutableListOf(
                                     Vedtak(
-                                        id = "v3",
+                                        vedtaksreferanse = "vedtaksreferanse",
+                                        filreferanseId = "v3",
                                         utfall = null,
                                         vedtaksFilUrl = "https://nav.no/vedtak/3",
                                         dato = LocalDate.of(2024, 1, 15),
@@ -277,7 +280,7 @@ internal class BrevServiceTest {
                             tittel = "Livsopphold",
                             vedtak =
                                 mutableListOf(
-                                    Vedtak(id = "v1", utfall = null, vedtaksFilUrl = "https://nav.no/vedtak", dato = oldest),
+                                    Vedtak(vedtaksreferanse = "vedtaksreferanse", filreferanseId = "v1", utfall = null, vedtaksFilUrl = "https://nav.no/vedtak", dato = oldest),
                                 ),
                             utbetalinger = mutableListOf(),
                         ),

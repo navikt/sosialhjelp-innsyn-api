@@ -88,10 +88,11 @@ internal class SaksStatusServiceTest {
                     vedtak =
                         mutableListOf(
                             Vedtak(
+                                vedtaksreferanse = "vedtaksreferanse",
                                 utfall = UtfallVedtak.INNVILGET,
                                 vedtaksFilUrl = vedtaksfilUrl,
                                 dato = LocalDate.now(),
-                                id = "",
+                                filreferanseId = "",
                             ),
                         ),
                     utbetalinger = mutableListOf(),
@@ -124,10 +125,11 @@ internal class SaksStatusServiceTest {
                     vedtak =
                         mutableListOf(
                             Vedtak(
+                                vedtaksreferanse = "vedtaksreferanse",
                                 utfall = UtfallVedtak.INNVILGET,
                                 vedtaksFilUrl = vedtaksfilUrl,
                                 dato = LocalDate.now(),
-                                id = id,
+                                filreferanseId = id,
                             ),
                         ),
                     utbetalinger = mutableListOf(),
@@ -162,16 +164,18 @@ internal class SaksStatusServiceTest {
                         vedtak =
                             mutableListOf(
                                 Vedtak(
+                                    vedtaksreferanse = "vedtaksreferanse",
                                     utfall = UtfallVedtak.INNVILGET,
                                     vedtaksFilUrl = vedtaksfilUrl,
                                     dato = LocalDate.now(),
-                                    id = id,
+                                    filreferanseId = id,
                                 ),
                                 Vedtak(
+                                    vedtaksreferanse = "vedtaksreferanse",
                                     utfall = UtfallVedtak.INNVILGET,
                                     vedtaksFilUrl = vedtaksfilUrl,
                                     dato = LocalDate.now(),
-                                    id = id,
+                                    filreferanseId = id,
                                 ),
                             ),
                         utbetalinger = mutableListOf(),
@@ -207,38 +211,43 @@ internal class SaksStatusServiceTest {
         runTest(timeout = 5.seconds) {
             val vedtak1 =
                 Vedtak(
+                    vedtaksreferanse = "vedtaksreferanse",
                     utfall = UtfallVedtak.INNVILGET,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    id = id,
+                    filreferanseId = id,
                 )
             val vedtak2 =
                 Vedtak(
+                    vedtaksreferanse = "vedtaksreferanse",
                     utfall = UtfallVedtak.DELVIS_INNVILGET,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    id = id,
+                    filreferanseId = id,
                 )
             val vedtak3 =
                 Vedtak(
+                    vedtaksreferanse = "vedtaksreferanse",
                     utfall = UtfallVedtak.AVVIST,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    id = id,
+                    filreferanseId = id,
                 )
             val vedtak4 =
                 Vedtak(
+                    vedtaksreferanse = "vedtaksreferanse",
                     utfall = UtfallVedtak.AVSLATT,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    id = id,
+                    filreferanseId = id,
                 )
             val vedtak5 =
                 Vedtak(
+                    vedtaksreferanse = "vedtaksreferanse",
                     utfall = null,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    id = id,
+                    filreferanseId = id,
                 )
             val sakSomSkalGiTrue =
                 Sak(

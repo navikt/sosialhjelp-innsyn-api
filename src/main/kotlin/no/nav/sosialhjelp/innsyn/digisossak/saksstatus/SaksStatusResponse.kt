@@ -24,7 +24,7 @@ data class FilUrl(
 )
 
 data class VedtakDto(
-    val id: String,
+    val filreferanseId: String,
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,
     var dato: LocalDate,

@@ -80,7 +80,7 @@ class KlageServiceImpl(
                 klageClient.sendKlage(
                     digisosId = UUID.fromString(jsonKlage.digisosId),
                     klageId = UUID.fromString(jsonKlage.klageId),
-                    vedtakId = UUID.fromString(jsonKlage.filreferanseId),
+                    vedtakId = UUID.fromString(jsonKlage.vedtakReferanse.filreferanseId),
                     MandatoryFilesForKlage(
                         klageJson = objectMapper.writeValueAsString(jsonKlage),
                         klagePdf = encryptedPdf,
@@ -135,7 +135,7 @@ class KlageServiceImpl(
         return KlageDto(
             digisosId = fiksDigisosId,
             klageId = fiksKlage.klageId,
-            vedtaksreferanse = klageJson.vedtaksreferanse,
+            vedtakFilreferanseId = fiksKlage.vedtakId,
             klagePdf = klagePdf,
             opplastedeVedlegg = opplastedeVedlegg,
             ettersendelser = fiksKlage.ettersendtInfoNAV?.ettersendelser?.map { it.toEttersendelseDto() } ?: emptyList(),
@@ -169,8 +169,8 @@ class KlageServiceImpl(
         )
 
     private fun FiksEttersendelseDto.toEttersendelseDto() =
-        EttersendelseDto(
-            navEksternRefId = navEksternRefId,
+        KlageEttersendelseDto(
+            klageId = navEksternRefId,
             vedlegg =
                 vedlegg
                     .filter { it.filnavn != "ettersendelse.pdf" }

@@ -24,12 +24,8 @@ fun InternalDigisosSoker.apply(
     val utfall = utfallString?.let { UtfallVedtak.valueOf(it) }
     val vedtaksfilUrl = hentUrlFraFilreferanse(clientProperties, hendelse.vedtaksfil.referanse)
 
-    val filreferanseId =
-        when (val referanse = hendelse.vedtaksfil.referanse) {
-            is JsonDokumentlagerFilreferanse -> referanse.id
-            is JsonSvarUtFilreferanse -> referanse.id
-            else -> error("Ikke støttet referansetype ${referanse.type}")
-        }
+    val filreferanseId = hendelse.getFilreferanse()
+
     val vedtakFattet =
         Vedtak(
             filreferanseId,
@@ -76,3 +72,10 @@ fun InternalDigisosSoker.apply(
         )
     }
 }
+
+private fun JsonVedtakFattet.getFilreferanse() =
+    when (val ref = vedtaksfil.referanse) {
+        is JsonDokumentlagerFilreferanse -> ref.id
+        is JsonSvarUtFilreferanse -> ref.id
+        else -> error("Ikke støttet referansetype ${ref.type}")
+    }

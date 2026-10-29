@@ -23,10 +23,10 @@ class KlageController(
     private val klageUseCaseHandler: KlageUseCaseHandler,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
-    @PostMapping("/{fiksDigisosId}/{navEksternRefId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun uploadDocuments(
         @PathVariable fiksDigisosId: UUID,
-        @PathVariable navEksternRefId: UUID,
+        @PathVariable klageId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): DocumentsForKlage {
         // TODO En eller annen form for sjekk av fiksDigisosId ?
@@ -35,7 +35,7 @@ class KlageController(
 
         return klageUseCaseHandler.lastOppVedlegg(
             digisosId = fiksDigisosId,
-            navEksternRefId = navEksternRefId,
+            navEksternRefId = klageId,
             rawFiles = rawFiles,
         )
     }
@@ -114,29 +114,27 @@ data class DocumentForKlage(
 
 data class KlageInput(
     val klageId: UUID,
-    val vedtaksreferanse: String,
+    val vedtakFilreferanseId: UUID,
     val tekst: String,
 )
 
 data class KlageRef(
     val klageId: UUID,
-    val vedtakId: UUID,
+    val vedtakFilreferanseId: UUID,
 )
 
-// TODO Hva skal legges ved i denne? Kun json, pdf,?
-// TODO Denne trenger URL til klage.pdf
 data class KlageDto(
     val digisosId: UUID,
     val klageId: UUID,
-    val vedtaksreferanse: String,
+    val vedtakFilreferanseId: UUID,
     val klagePdf: VedleggResponse,
     val opplastedeVedlegg: List<VedleggResponse> = emptyList(),
-    val ettersendelser: List<EttersendelseDto> = emptyList(),
+    val ettersendelser: List<KlageEttersendelseDto> = emptyList(),
     val timestampSendt: Long,
 )
 
-data class EttersendelseDto(
-    val navEksternRefId: UUID,
+data class KlageEttersendelseDto(
+    val klageId: UUID,
     val vedlegg: List<VedleggResponse> = emptyList(),
     val timestampSendt: Long,
 )

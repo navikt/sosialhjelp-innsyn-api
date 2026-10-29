@@ -12,6 +12,7 @@ import io.mockk.runs
 import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
 import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
+import no.nav.sbl.soknadsosialhjelp.klage.JsonVedtakReferanse
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
 import no.nav.sbl.soknadsosialhjelp.soknad.common.JsonKildeBruker
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
@@ -100,9 +101,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     fun `Sende klage skal lagres`() {
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
 
-        coEvery { eventService.createModel(any()) } returns createModel(digisosId, vedtakId)
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId, vedtakFilreferanseId)
 
         coEvery { pdlClient.getPerson(any()) } returns createPdlPerson()
 
@@ -123,7 +124,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
 
         coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just runs
-        val fiksKlageDto = createFiksKlageDto(klageId, vedtakId, digisosId)
+        val fiksKlageDto = createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId)
         coEvery { fiksKlageClient.hentKlager(any()) } returns listOf(fiksKlageDto)
         coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonKlage::class.java, any()) } returns
             createKlageJson(fiksKlageDto)
@@ -134,21 +135,21 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = klageId,
-                    vedtaksreferanse = "vedtaksreferanse",
+                    vedtakFilreferanseId = vedtakFilreferanseId,
                     tekst = "Dette er en testklage",
                 ),
         )
 
-        coVerify(exactly = 1) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakId, any()) }
+        coVerify(exactly = 1) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakFilreferanseId, any()) }
     }
 
     @Test
     fun `Hente lagret klage skal returnere riktig klage`() {
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
 
-        val fiksKlageDto = createFiksKlageDto(klageId, vedtakId, digisosId)
+        val fiksKlageDto = createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId)
         coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(fiksKlageDto)
         coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonKlage::class.java, any()) } returns
             createKlageJson(fiksKlageDto)
@@ -169,7 +170,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .responseBody
             ?.also { dto ->
                 assertThat { dto.klageId == klageId }
-                assertThat { dto.vedtaksreferanse == "vedtaksreferanse" }
+                assertThat { dto.vedtakFilreferanseId == vedtakFilreferanseId }
             }
             ?: error("Forventet klage tilbake")
     }
@@ -190,11 +191,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `Hente alle klager skal returnere alle klager for digisosId`() {
         val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
         val digisosId = UUID.randomUUID()
 
         coEvery { fiksKlageClient.hentKlager(any()) } returns
-            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+            listOf(createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId))
 
         doGet(GET_KLAGER, listOf(digisosId))
             .expectBodyList(KlageRef::class.java)
@@ -203,7 +204,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .also { klager ->
                 klager!!.forEach { klage ->
                     assertThat(klage.klageId).isEqualTo(klageId)
-                    assertThat(klage.vedtakId).isEqualTo(vedtakId)
+                    assertThat(klage.vedtakFilreferanseId).isEqualTo(vedtakFilreferanseId)
                 }
             }
     }
@@ -261,10 +262,6 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `innsending av klage gir 503 nar kommune har deaktivert mottak`() {
-        val digisosId = UUID.randomUUID()
-        val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
-
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -281,11 +278,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         doPostFullResponse(
             uri = POST_KLAGE,
-            digisosId = digisosId,
+            digisosId = UUID.randomUUID(),
             body =
                 KlageInput(
-                    klageId = klageId,
-                    vedtaksreferanse = "vedtaksreferanse",
+                    klageId = UUID.randomUUID(),
+                    vedtakFilreferanseId = UUID.randomUUID(),
                     tekst = "Dette er en testklage",
                 ),
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
@@ -318,6 +315,37 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             digisosId = digisosId,
             body = "{}",
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    }
+
+    @Test
+    fun `Klage-input med ugyldig vedtaksreferanse kaster feil`() {
+        val digisosId = UUID.randomUUID()
+
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = true,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
+
+        doPostFullResponse(
+            uri = POST_KLAGE,
+            digisosId = digisosId,
+            body =
+                KlageInput(
+                    klageId = UUID.randomUUID(),
+                    vedtakFilreferanseId = UUID.randomUUID(),
+                    tekst = "Dette er en testklage",
+                ),
+        ).expectStatus()
+            .isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     private fun getFile(filename: String = "sample_pdf.pdf"): File {
@@ -435,8 +463,11 @@ private fun createFiksKlageDto(
 fun createKlageJson(fiksKlageDto: FiksKlageDto): JsonKlage =
     JsonKlage(
         klageId = fiksKlageDto.klageId.toString(),
-        filreferanseId = fiksKlageDto.vedtakId.toString(),
-        vedtaksreferanse = "vedtaksreferanse",
+        vedtakReferanse =
+            JsonVedtakReferanse(
+                filreferanseId = fiksKlageDto.vedtakId.toString(),
+                referanse = "vedtaksreferanse",
+            ),
         digisosId = fiksKlageDto.digisosId.toString(),
         innsendingstidspunkt = LocalDateTime.now().toString(),
         begrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, "Dette er en klage"),

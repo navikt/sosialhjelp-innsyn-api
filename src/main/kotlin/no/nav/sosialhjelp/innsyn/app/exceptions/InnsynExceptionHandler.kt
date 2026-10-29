@@ -4,6 +4,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.innsyn.klage.VedtakNotValidException
 import no.nav.sosialhjelp.innsyn.klage.KlageIkkeTilgjengeligException
 import no.nav.sosialhjelp.innsyn.klage.KlageMottakerManglerException
 import no.nav.sosialhjelp.innsyn.kommuneinfo.MottakUtilgjengeligException
@@ -132,6 +133,15 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(
             FrontendErrorMessage(FrontendErrorType.UNAVAILABLE_ERROR, "Kommune har deaktivert mottak"),
             HttpStatus.SERVICE_UNAVAILABLE,
+        )
+    }
+
+    @ExceptionHandler(VedtakNotValidException::class)
+    fun handleNotValidVedtaksreferanseException(e: VedtakNotValidException): ResponseEntity<FrontendErrorMessage> {
+        log.error("Ugyldig Vedtak: ${e.message}", e)
+        return ResponseEntity(
+            FrontendErrorMessage(NOT_FOUND_ERROR, e.message),
+            HttpStatus.BAD_REQUEST,
         )
     }
 

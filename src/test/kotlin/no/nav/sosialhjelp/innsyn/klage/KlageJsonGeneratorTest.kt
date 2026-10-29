@@ -44,14 +44,15 @@ class KlageJsonGeneratorTest {
     @Test
     suspend fun `Generere json for klage`() {
         val fiksDigisosId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
 
         coEvery { eventService.createModel(any()) } returns
-            createModel(fiksDigisosId)
+            createModel(fiksDigisosId, vedtakFilreferanseId)
 
         val input =
             KlageInput(
                 klageId = UUID.randomUUID(),
-                vedtaksreferanse = "vedtaksreferanse",
+                vedtakFilreferanseId = vedtakFilreferanseId,
                 tekst = "Dette er en klage",
             )
 
@@ -59,7 +60,7 @@ class KlageJsonGeneratorTest {
             .generateJsonKlage(input, fiksDigisosId)
             .also { jsonKlage ->
                 assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
-                assertThat(jsonKlage.vedtaksreferanse).isEqualTo(input.vedtaksreferanse)
+                assertThat(jsonKlage.vedtakReferanse.filreferanseId).isEqualTo(input.vedtakFilreferanseId.toString())
                 assertThat(jsonKlage.digisosId).isEqualTo(fiksDigisosId.toString())
                 assertThat(jsonKlage.begrunnelse?.klageTekst).isEqualTo(input.tekst)
             }
@@ -78,7 +79,7 @@ class KlageJsonGeneratorTest {
 
 private fun createModel(
     digisosId: UUID,
-    enhetsnummer: String = "12345678",
+    vedtakFilreferanseId: UUID,
 ): InternalDigisosSoker =
     InternalDigisosSoker(
         fiksDigisosId = digisosId.toString(),
@@ -96,7 +97,7 @@ private fun createModel(
                 vedtak =
                     mutableListOf(
                         Vedtak(
-                            UUID.randomUUID().toString(),
+                            vedtakFilreferanseId.toString(),
                             "vedtaksreferanse",
                             UtfallVedtak.DELVIS_INNVILGET,
                             vedtaksFilUrl = "",

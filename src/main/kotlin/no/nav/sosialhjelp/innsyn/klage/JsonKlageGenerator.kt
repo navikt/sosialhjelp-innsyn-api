@@ -33,22 +33,21 @@ class JsonKlageGenerator(
     suspend fun generateJsonKlage(
         input: KlageInput,
         fiksDigisosId: UUID,
-    ) =
-        validateAndGetVedtak(fiksDigisosId, input.vedtaksreferanse)
-            .let { vedtak ->
-                JsonKlage(
-                    klageId = input.klageId.toString(),
-                    filreferanseId = vedtak.filreferanseId,
-                    vedtaksreferanse = vedtak.vedtaksreferanse,
-                    digisosId = fiksDigisosId.toString(),
-                    innsendingstidspunkt = createInnsendingstidspunktString(),
-                    begrunnelse = input.createKlageBegrunnelse(),
-                    personIdentifikator = createJsonPersonIdentifikator(),
-                    navn = createJsonSokernavn(),
-                    mottaker = createSoknadsmottaker(fiksDigisosId),
-                    autentisering = createJsonAutentisering(),
-                )
-            }
+    ) = validateAndGetVedtak(fiksDigisosId, input.vedtaksreferanse)
+        .let { vedtak ->
+            JsonKlage(
+                klageId = input.klageId.toString(),
+                filreferanseId = vedtak.filreferanseId,
+                vedtaksreferanse = vedtak.vedtaksreferanse,
+                digisosId = fiksDigisosId.toString(),
+                innsendingstidspunkt = createInnsendingstidspunktString(),
+                begrunnelse = input.createKlageBegrunnelse(),
+                personIdentifikator = createJsonPersonIdentifikator(),
+                navn = createJsonSokernavn(),
+                mottaker = createSoknadsmottaker(fiksDigisosId),
+                autentisering = createJsonAutentisering(),
+            )
+        }
 
     private suspend fun validateAndGetVedtak(
         digisosId: UUID,

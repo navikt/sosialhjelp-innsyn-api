@@ -5,7 +5,14 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonSvarUtFilrefe
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
 import no.nav.sosialhjelp.innsyn.digisossak.saksstatus.DEFAULT_SAK_TITTEL
-import no.nav.sosialhjelp.innsyn.domain.*
+import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
+import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
+import no.nav.sosialhjelp.innsyn.domain.UrlResponse
+import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 

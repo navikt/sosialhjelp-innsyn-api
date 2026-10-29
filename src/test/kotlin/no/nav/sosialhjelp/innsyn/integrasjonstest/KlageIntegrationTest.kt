@@ -3,7 +3,12 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkSpyBean
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
 import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
 import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
@@ -17,11 +22,30 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.klage.*
+import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
+import no.nav.sosialhjelp.innsyn.klage.KlageDto
+import no.nav.sosialhjelp.innsyn.klage.KlageInput
+import no.nav.sosialhjelp.innsyn.klage.KlageMetricsService
+import no.nav.sosialhjelp.innsyn.klage.KlageRef
+import no.nav.sosialhjelp.innsyn.klage.TimestampUtil
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
-import no.nav.sosialhjelp.innsyn.klage.fiks.*
+import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendtInfoNAVDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.FiksProtokoll
+import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerClient
+import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerResponse
+import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagringDokumentInfo
+import no.nav.sosialhjelp.innsyn.klage.fiks.SendtKvitteringDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatus
+import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatusDto
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlAdressebeskyttelse
@@ -78,7 +102,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
-        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId, vedtakId)
 
         coEvery { pdlClient.getPerson(any()) } returns createPdlPerson()
 
@@ -99,8 +123,10 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
 
         coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just runs
-        coEvery { fiksKlageClient.hentKlager(any()) } returns
-            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+        val fiksKlageDto = createFiksKlageDto(klageId, vedtakId, digisosId)
+        coEvery { fiksKlageClient.hentKlager(any()) } returns listOf(fiksKlageDto)
+        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonKlage::class.java, any()) } returns
+            createKlageJson(fiksKlageDto)
 
         doPost(
             uri = POST_KLAGE,
@@ -122,11 +148,14 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val klageId = UUID.randomUUID()
         val vedtakId = UUID.randomUUID()
 
-        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+        val fiksKlageDto = createFiksKlageDto(klageId, vedtakId, digisosId)
+        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(fiksKlageDto)
+        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonKlage::class.java, any()) } returns
+            createKlageJson(fiksKlageDto)
         coEvery {
             fiksService.getDocument(
-                any<UUID>(),
-                any<UUID>(),
+                any<String>(),
+                any<String>(),
                 JsonVedleggSpesifikasjon::class.java,
                 any(),
             )
@@ -403,8 +432,8 @@ private fun createFiksKlageDto(
         ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )
 
-fun createKlageJson(fiksKlageDto: FiksKlageDto): JsonKlage {
-    return JsonKlage(
+fun createKlageJson(fiksKlageDto: FiksKlageDto): JsonKlage =
+    JsonKlage(
         klageId = fiksKlageDto.klageId.toString(),
         filreferanseId = fiksKlageDto.vedtakId.toString(),
         vedtaksreferanse = "vedtaksreferanse",
@@ -412,7 +441,7 @@ fun createKlageJson(fiksKlageDto: FiksKlageDto): JsonKlage {
         innsendingstidspunkt = LocalDateTime.now().toString(),
         begrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, "Dette er en klage"),
         personIdentifikator = JsonPersonIdentifikator(kilde = JsonPersonIdentifikator.Kilde.SYSTEM, verdi = "12345678901"),
-        navn =  JsonSokernavn(kilde = JsonSokernavn.Kilde.SYSTEM, fornavn = "Ola", mellomnavn = "", etternavn = "Nordmann"),
+        navn = JsonSokernavn(kilde = JsonSokernavn.Kilde.SYSTEM, fornavn = "Ola", mellomnavn = "", etternavn = "Nordmann"),
         mottaker =
             JsonSoknadsmottaker(
                 kommunenummer = "1234",
@@ -425,7 +454,6 @@ fun createKlageJson(fiksKlageDto: FiksKlageDto): JsonKlage {
                 autentiseringsTidspunkt = TimestampUtil.convertToOffsetDateTimeUTCString(nowWithMillis()),
             ),
     )
-}
 
 fun createDigisosSak(
     fiksDigisosId: UUID = UUID.randomUUID(),
@@ -444,7 +472,10 @@ fun createPdlPerson(): PdlPerson =
         navn = listOf(PdlNavn("Ola", null, "Nordmann")),
     )
 
-private fun createModel(fiksDigisosId: UUID): InternalDigisosSoker =
+private fun createModel(
+    fiksDigisosId: UUID,
+    filreferanseId: UUID = UUID.randomUUID(),
+): InternalDigisosSoker =
     InternalDigisosSoker(
         fiksDigisosId = fiksDigisosId.toString(),
         soknadsmottaker =
@@ -452,4 +483,23 @@ private fun createModel(fiksDigisosId: UUID): InternalDigisosSoker =
                 navEnhetsnummer = "12345678",
                 navEnhetsnavn = "Nav Testenhet",
             ),
-    )
+    ).apply {
+        saker.add(
+            Sak(
+                "saksreferanse",
+                SaksStatus.FERDIGBEHANDLET,
+                tittel = "tittel på sak",
+                vedtak =
+                    mutableListOf(
+                        Vedtak(
+                            filreferanseId.toString(),
+                            "vedtaksreferanse",
+                            UtfallVedtak.DELVIS_INNVILGET,
+                            vedtaksFilUrl = "",
+                            dato = LocalDate.now(),
+                        ),
+                    ),
+                utbetalinger = mutableListOf(),
+            ),
+        )
+    }

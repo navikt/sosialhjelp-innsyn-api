@@ -6,7 +6,11 @@ import io.mockk.mockkObject
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
@@ -16,6 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.readValue
+import java.time.LocalDate
 import java.util.UUID
 
 class KlageJsonGeneratorTest {
@@ -68,4 +73,23 @@ private fun createModel(digisosId: UUID): InternalDigisosSoker =
                 navEnhetsnummer = "12345678",
                 navEnhetsnavn = "En navEnhet",
             ),
-    )
+    ).apply {
+        saker.add(
+            Sak(
+                "saksreferanse",
+                SaksStatus.FERDIGBEHANDLET,
+                tittel = "tittel på sak",
+                vedtak =
+                    mutableListOf(
+                        Vedtak(
+                            UUID.randomUUID().toString(),
+                            "vedtaksreferanse",
+                            UtfallVedtak.DELVIS_INNVILGET,
+                            vedtaksFilUrl = "",
+                            dato = LocalDate.now(),
+                        ),
+                    ),
+                utbetalinger = mutableListOf(),
+            ),
+        )
+    }

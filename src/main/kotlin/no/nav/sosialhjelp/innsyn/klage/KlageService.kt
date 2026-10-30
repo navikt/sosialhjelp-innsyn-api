@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
@@ -23,7 +24,6 @@ import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
@@ -62,7 +62,7 @@ class KlageServiceImpl(
     private val krypteringService: KrypteringService,
     private val uploadClient: UploadClient,
 ) : KlageService {
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
     override suspend fun sendKlage(
         jsonKlage: JsonKlage,
@@ -78,7 +78,7 @@ class KlageServiceImpl(
                 klageClient.sendKlage(
                     digisosId = UUID.fromString(jsonKlage.digisosId),
                     klageId = UUID.fromString(jsonKlage.klageId),
-                    vedtakId = UUID.fromString(jsonKlage.filreferanseId),
+                    vedtakId = UUID.fromString(jsonKlage.vedtakReferanse.filreferanseId),
                     MandatoryFilesForKlage(
                         klageJson = objectMapper.writeValueAsString(jsonKlage),
                         klagePdf = encryptedPdf,
@@ -117,8 +117,7 @@ class KlageServiceImpl(
         klageId: UUID,
     ): KlageDto? {
         val fiksKlage =
-            klageClient.hentKlager(digisosId = fiksDigisosId).find { it.klageId == klageId }
-                ?: return null
+            klageClient.hentKlager(digisosId = fiksDigisosId).find { it.klageId == klageId } ?: return null
 
         val klagePdf = fiksKlage.klageDokument.toVedleggResponse(fiksKlage.getTidspunktSendt())
         val opplastedeVedlegg = fiksKlage.vedlegg.map { it.toVedleggResponse(fiksKlage.getTidspunktSendt()) }
@@ -160,8 +159,8 @@ class KlageServiceImpl(
         )
 
     private fun FiksEttersendelseDto.toEttersendelseDto() =
-        EttersendelseDto(
-            navEksternRefId = navEksternRefId,
+        KlageEttersendelseDto(
+            navEksternRefId = klageId,
             vedlegg =
                 vedlegg
                     .filter { it.filnavn != "ettersendelse.pdf" }

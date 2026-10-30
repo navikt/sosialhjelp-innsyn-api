@@ -6,7 +6,11 @@ import io.mockk.mockkObject
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
@@ -15,7 +19,9 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import tools.jackson.module.kotlin.readValue
+import java.time.LocalDate
 import java.util.UUID
 
 class KlageJsonGeneratorTest {
@@ -38,9 +44,33 @@ class KlageJsonGeneratorTest {
     @Test
     suspend fun `Generere json for klage`() {
         val fiksDigisosId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
 
-        coEvery { eventService.createModel(any()) } returns
-            createModel(fiksDigisosId)
+        coEvery { eventService.createModel(any()) } returns createModel(fiksDigisosId, vedtakFilreferanseId)
+
+        val input =
+            KlageInput(
+                klageId = UUID.randomUUID(),
+                vedtakId = vedtakFilreferanseId,
+                tekst = "Dette er en klage",
+            )
+
+        jsonKlageGenerator
+            .generateJsonKlage(input, fiksDigisosId)
+            .also { jsonKlage ->
+                assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
+                assertThat(jsonKlage.vedtakReferanse.filreferanseId).isEqualTo(input.vedtakId.toString())
+                assertThat(jsonKlage.digisosId).isEqualTo(fiksDigisosId.toString())
+                assertThat(jsonKlage.begrunnelse?.klageTekst).isEqualTo(input.tekst)
+            }
+    }
+
+    @Test
+    suspend fun `FilreferanseId finnes ikke i Sak`() {
+        val fiksDigisosId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
+
+        coEvery { eventService.createModel(any()) } returns createModel(fiksDigisosId, vedtakFilreferanseId)
 
         val input =
             KlageInput(
@@ -49,18 +79,14 @@ class KlageJsonGeneratorTest {
                 tekst = "Dette er en klage",
             )
 
-        jsonKlageGenerator
-            .generateJsonKlage(input, fiksDigisosId)
-            .also { jsonKlage ->
-                assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
-                assertThat(jsonKlage.filreferanseId).isEqualTo(input.vedtakId.toString())
-                assertThat(jsonKlage.digisosId).isEqualTo(fiksDigisosId.toString())
-                assertThat(jsonKlage.begrunnelse?.klageTekst).isEqualTo(input.tekst)
-            }
+        assertThrows<VedtakNotValidException> { jsonKlageGenerator.generateJsonKlage(input, fiksDigisosId) }
     }
 }
 
-private fun createModel(digisosId: UUID): InternalDigisosSoker =
+private fun createModel(
+    digisosId: UUID,
+    vedtakFilreferanseId: UUID,
+): InternalDigisosSoker =
     InternalDigisosSoker(
         fiksDigisosId = digisosId.toString(),
         soknadsmottaker =
@@ -68,4 +94,30 @@ private fun createModel(digisosId: UUID): InternalDigisosSoker =
                 navEnhetsnummer = "12345678",
                 navEnhetsnavn = "En navEnhet",
             ),
-    )
+    ).apply {
+        saker.add(
+            Sak(
+                "saksreferanse",
+                SaksStatus.FERDIGBEHANDLET,
+                tittel = "tittel på sak",
+                vedtak =
+                    mutableListOf(
+                        Vedtak(
+                            vedtakFilreferanseId.toString(),
+                            "saksreferanse",
+                            UtfallVedtak.DELVIS_INNVILGET,
+                            vedtaksFilUrl = "",
+                            dato = LocalDate.now(),
+                        ),
+                        Vedtak(
+                            UUID.randomUUID().toString(),
+                            "vedtaksreferanse",
+                            UtfallVedtak.DELVIS_INNVILGET,
+                            vedtaksFilUrl = "",
+                            dato = LocalDate.now(),
+                        ),
+                    ),
+                utbetalinger = mutableListOf(),
+            ),
+        )
+    }

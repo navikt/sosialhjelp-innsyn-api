@@ -18,6 +18,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.core.io.ClassPathResource
 import org.springframework.test.web.reactive.server.expectBodyList
 import java.time.Instant
 import java.util.UUID
@@ -54,40 +55,12 @@ class HendelseIntegrationTest : AbstractIntegrationTest() {
         every { alna.navn } returns "Nav Alna"
 
         val json =
-            """
-            {
-              "sak": {
-                "soker": {
-                  "version": "1.0.0",
-                  "avsender": {
-                    "systemnavn": "Oslo kommune / Fasit",
-                    "systemversjon": "sha-74b47b8cf9a172b2da55dd5e03b4359ffbe810c9"
-                  },
-                  "hendelser": [
-                    {
-                      "status": "MOTTATT",
-                      "type": "soknadsStatus",
-                      "hendelsestidspunkt": "2026-10-14T08:13:38.016Z"
-                    },
-                    {
-                      "navKontor": "0314",
-                      "type": "tildeltNavKontor",
-                      "hendelsestidspunkt": "2026-10-14T08:13:38.029Z"
-                    },
-                    {
-                      "navKontor": "0326",
-                      "type": "tildeltNavKontor",
-                      "hendelsestidspunkt": "2026-10-14T08:13:38.118Z"
-                    }
-                  ]
-                }
-              },
-              "type": "no.nav.digisos.digisos.soker.v1"
+            ClassPathResource("innsynsfileksempler/videresending-sagene-til-alna.json").inputStream.use {
+                sosialhjelpJsonMapper.readTree(it)
             }
-            """.trimIndent()
         val jsonDigisosSoker =
             sosialhjelpJsonMapper.treeToValue(
-                sosialhjelpJsonMapper.readTree(json).path("sak").path("soker"),
+                json.path("sak").path("soker"),
                 JsonDigisosSoker::class.java,
             )
 

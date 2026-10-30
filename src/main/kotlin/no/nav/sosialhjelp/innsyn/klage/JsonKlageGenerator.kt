@@ -3,6 +3,7 @@ package no.nav.sosialhjelp.innsyn.klage
 import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
 import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
+import no.nav.sbl.soknadsosialhjelp.klage.JsonVedtakReferanse
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
 import no.nav.sbl.soknadsosialhjelp.soknad.common.JsonKildeBruker
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
@@ -10,6 +11,8 @@ import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.convertToOffsetDateTimeUTCString
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
@@ -31,29 +34,26 @@ class JsonKlageGenerator(
     suspend fun generateJsonKlage(
         input: KlageInput,
         fiksDigisosId: UUID,
-    ) = JsonKlage(
-        klageId = input.klageId.toString(),
-        // TODO Burde vedtaknummer også være en del av json/pdf?
-        // TODO Endre API'et (navnet på input-parameter) etter hvert også
-        filreferanseId = input.vedtakId.toString(),
-        vedtaksreferanse = getVedtaksreferanse(fiksDigisosId, input.vedtakId),
-        digisosId = fiksDigisosId.toString(),
-        innsendingstidspunkt = createInnsendingstidspunktString(),
-        begrunnelse = input.createKlageBegrunnelse(),
-        personIdentifikator = createJsonPersonIdentifikator(),
-        navn = createJsonSokernavn(),
-        mottaker = createSoknadsmottaker(fiksDigisosId),
-        autentisering = createJsonAutentisering(),
-    )
+    ): JsonKlage {
+        val digisosSak = fiksService.getSoknad(fiksDigisosId.toString())
+        val innsynfilModel = eventService.createModel(digisosSak)
+        val vedtak = innsynfilModel.saker.findVedtakForReferanse(input.vedtakId)
 
-    // TODO Vil få vedtaksreferanse fra frontend når den er implementert - skal ikke være nødvendig å gå om fiks igjen
-    private suspend fun getVedtaksreferanse(
-        digisosId: UUID,
-        filreferanseId: UUID,
-    ): String {
-        val digisosSak = fiksService.getSoknad(digisosId.toString())
-        val innsynsfilModel = eventService.createModel(digisosSak)
-        return innsynsfilModel.saker.findRelatertSak(filreferanseId.toString())
+        return JsonKlage(
+            klageId = input.klageId.toString(),
+            vedtakReferanse =
+                JsonVedtakReferanse(
+                    filreferanseId = vedtak.vedtakId,
+                    referanse = vedtak.referanse,
+                ),
+            digisosId = fiksDigisosId.toString(),
+            innsendingstidspunkt = createInnsendingstidspunktString(),
+            begrunnelse = input.createKlageBegrunnelse(),
+            personIdentifikator = createJsonPersonIdentifikator(),
+            navn = createJsonSokernavn(),
+            mottaker = innsynfilModel.soknadsmottaker.createSoknadsmottaker(digisosSak.kommunenummer),
+            autentisering = createJsonAutentisering(),
+        )
     }
 
     private suspend fun createJsonSokernavn(): JsonSokernavn =
@@ -67,39 +67,33 @@ class JsonKlageGenerator(
                     etternavn = it.etternavn,
                 )
             }
-
-    private suspend fun createSoknadsmottaker(fiksDigisosId: UUID): JsonSoknadsmottaker {
-        val internalSoknad = fiksService.getSoknad(fiksDigisosId.toString())
-        return eventService
-            .createModel(internalSoknad)
-            .let {
-                JsonSoknadsmottaker(
-                    navEnhetsnavn = it.soknadsmottaker?.navEnhetsnavn,
-                    enhetsnummer = it.soknadsmottaker?.navEnhetsnummer,
-                    kommunenummer = internalSoknad.kommunenummer,
-                )
-            }
-    }
-
-    private suspend fun createJsonPersonIdentifikator() =
-        JsonPersonIdentifikator(
-            kilde = JsonPersonIdentifikator.Kilde.SYSTEM,
-            verdi = getUserIdFromToken(),
-        )
-
-    private fun createJsonAutentisering() =
-        JsonAutentisering(
-            // TODO Denne må settes fra informasjon i token
-            autentiseringsTidspunkt = convertToOffsetDateTimeUTCString(nowWithMillis()),
-            autentisertDigitalt = true,
-        )
-
-    private fun createInnsendingstidspunktString(): String = convertToOffsetDateTimeUTCString(nowWithMillis())
 }
 
-// TODO Denne skal finne vedtak på vedtaksreferanse når implementert
-private fun MutableList<Sak>.findRelatertSak(filreferanseId: String) =
-    find { sak -> sak.vedtak.any { it.id == filreferanseId } }?.referanse ?: "Fant ikke sak med vedtakId $filreferanseId"
+private fun Soknadsmottaker?.createSoknadsmottaker(kommunenummer: String): JsonSoknadsmottaker =
+    JsonSoknadsmottaker(
+        navEnhetsnavn = this?.navEnhetsnavn,
+        enhetsnummer = this?.navEnhetsnummer,
+        kommunenummer = kommunenummer,
+    )
+
+private suspend fun createJsonPersonIdentifikator() =
+    JsonPersonIdentifikator(
+        kilde = JsonPersonIdentifikator.Kilde.SYSTEM,
+        verdi = getUserIdFromToken(),
+    )
+
+private fun createJsonAutentisering() =
+    JsonAutentisering(
+        // TODO Denne må settes fra informasjon i token
+        autentiseringsTidspunkt = convertToOffsetDateTimeUTCString(nowWithMillis()),
+        autentisertDigitalt = true,
+    )
+
+private fun createInnsendingstidspunktString(): String = convertToOffsetDateTimeUTCString(nowWithMillis())
+
+private fun MutableList<Sak>.findVedtakForReferanse(vedtakFilreferanseId: UUID): Vedtak =
+    flatMap { it.vedtak }.find { it.vedtakId == vedtakFilreferanseId.toString() }
+        ?: throw VedtakNotValidException("Fant ikke vedtak med vedtaksreferanse $vedtakFilreferanseId")
 
 private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = tekst)
 
@@ -127,3 +121,7 @@ object TimestampUtil {
             .toString()
             .also { validateTimestamp(it) }
 }
+
+data class VedtakNotValidException(
+    override val message: String,
+) : RuntimeException(message)

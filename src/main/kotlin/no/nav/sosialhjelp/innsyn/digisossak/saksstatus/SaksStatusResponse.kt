@@ -24,6 +24,7 @@ data class FilUrl(
 )
 
 data class VedtakDto(
+    // referanse til vedtaksbrev
     val id: String,
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,

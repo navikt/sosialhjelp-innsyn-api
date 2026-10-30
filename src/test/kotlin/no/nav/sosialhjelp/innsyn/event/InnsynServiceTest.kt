@@ -48,7 +48,7 @@ internal class InnsynServiceTest {
             val mockJsonDigisosSoker: JsonDigisosSoker = mockk()
 
             coEvery {
-                fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any())
+                fiksService.getDocument(any<String>(), any<String>(), JsonDigisosSoker::class.java, any())
             } returns mockJsonDigisosSoker
 
             val jsonDigisosSoker: JsonDigisosSoker? = service.hentJsonDigisosSoker(digisosSak)
@@ -69,7 +69,7 @@ internal class InnsynServiceTest {
     fun `Skal returnere originalSoknad`() =
         runTest(timeout = 5.seconds) {
             val mockJsonSoknad: JsonSoknad = mockk()
-            coEvery { fiksService.getDocument(any(), any(), JsonSoknad::class.java, any()) } returns mockJsonSoknad
+            coEvery { fiksService.getDocument(any<String>(), any<String>(), JsonSoknad::class.java, any()) } returns mockJsonSoknad
 
             val jsonSoknad: JsonSoknad? = service.hentOriginalSoknad(digisosSak)
 
@@ -91,7 +91,7 @@ internal class InnsynServiceTest {
             coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns true
 
             assertThat(service.hentJsonDigisosSoker(digisosSak)).isNull()
-            coVerify(exactly = 0) { fiksService.getDocument(any(), any(), JsonDigisosSoker::class.java, any()) }
+            coVerify(exactly = 0) { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonDigisosSoker::class.java, any()) }
         }
 
     @Test

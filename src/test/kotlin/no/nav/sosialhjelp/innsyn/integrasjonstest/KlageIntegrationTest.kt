@@ -9,19 +9,34 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
+import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
+import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
+import no.nav.sbl.soknadsosialhjelp.klage.JsonVedtakReferanse
+import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
+import no.nav.sbl.soknadsosialhjelp.soknad.common.JsonKildeBruker
+import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
+import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import no.nav.sosialhjelp.innsyn.klage.KlageMetricsService
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
+import no.nav.sosialhjelp.innsyn.klage.TimestampUtil
+import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
 import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendtInfoNAVDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
@@ -57,6 +72,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import kotlin.time.Clock
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
@@ -87,9 +103,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     fun `Sende klage skal lagres`() {
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
 
-        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId, vedtakFilreferanseId)
 
         coEvery { pdlClient.getPerson(any()) } returns createPdlPerson()
 
@@ -110,8 +126,10 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
 
         coEvery { fiksKlageClient.sendKlage(any(), any(), any(), any()) } just runs
-        coEvery { fiksKlageClient.hentKlager(any()) } returns
-            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+        val fiksKlageDto = createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId)
+        coEvery { fiksKlageClient.hentKlager(any()) } returns listOf(fiksKlageDto)
+        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonKlage::class.java, any()) } returns
+            createKlageJson(fiksKlageDto)
 
         doPost(
             uri = POST_KLAGE,
@@ -119,25 +137,28 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = klageId,
-                    vedtakId = vedtakId,
+                    vedtakId = vedtakFilreferanseId,
                     tekst = "Dette er en testklage",
                 ),
         )
 
-        coVerify(exactly = 1) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakId, any()) }
+        coVerify(exactly = 1) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakFilreferanseId, any()) }
     }
 
     @Test
     fun `Hente lagret klage skal returnere riktig klage`() {
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
 
-        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+        val fiksKlageDto = createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId)
+        coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(fiksKlageDto)
+        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonKlage::class.java, any()) } returns
+            createKlageJson(fiksKlageDto)
         coEvery {
             fiksService.getDocument(
-                any(),
-                any(),
+                any<String>(),
+                any<String>(),
                 JsonVedleggSpesifikasjon::class.java,
                 any(),
             )
@@ -151,7 +172,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .responseBody
             ?.also { dto ->
                 assertThat { dto.klageId == klageId }
-                assertThat { dto.vedtakId == vedtakId }
+                assertThat { dto.vedtakId == vedtakFilreferanseId }
             }
             ?: error("Forventet klage tilbake")
     }
@@ -172,11 +193,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `Hente alle klager skal returnere alle klager for digisosId`() {
         val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
         val digisosId = UUID.randomUUID()
 
         coEvery { fiksKlageClient.hentKlager(any()) } returns
-            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
+            listOf(createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId))
 
         doGet(GET_KLAGER, listOf(digisosId))
             .expectBodyList(KlageRef::class.java)
@@ -185,7 +206,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .also { klager ->
                 klager!!.forEach { klage ->
                     assertThat(klage.klageId).isEqualTo(klageId)
-                    assertThat(klage.vedtakId).isEqualTo(vedtakId)
+                    assertThat(klage.vedtakId).isEqualTo(vedtakFilreferanseId)
                 }
             }
     }
@@ -243,10 +264,6 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `innsending av klage gir 503 nar kommune har deaktivert mottak`() {
-        val digisosId = UUID.randomUUID()
-        val klageId = UUID.randomUUID()
-        val vedtakId = UUID.randomUUID()
-
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -263,11 +280,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         doPostFullResponse(
             uri = POST_KLAGE,
-            digisosId = digisosId,
+            digisosId = UUID.randomUUID(),
             body =
                 KlageInput(
-                    klageId = klageId,
-                    vedtakId = vedtakId,
+                    klageId = UUID.randomUUID(),
+                    vedtakId = UUID.randomUUID(),
                     tekst = "Dette er en testklage",
                 ),
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
@@ -300,6 +317,37 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             digisosId = digisosId,
             body = "{}",
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
+    }
+
+    @Test
+    fun `Klage-input med ugyldig vedtaksreferanse kaster feil`() {
+        val digisosId = UUID.randomUUID()
+
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = true,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
+
+        doPostFullResponse(
+            uri = POST_KLAGE,
+            digisosId = digisosId,
+            body =
+                KlageInput(
+                    klageId = UUID.randomUUID(),
+                    vedtakId = UUID.randomUUID(),
+                    tekst = "Dette er en testklage",
+                ),
+        ).expectStatus()
+            .isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
     private fun getFile(filename: String = "sample_pdf.pdf"): File {
@@ -414,6 +462,32 @@ private fun createFiksKlageDto(
         ettersendtInfoNAV = FiksEttersendtInfoNAVDto(ettersendelser = emptyList()),
     )
 
+fun createKlageJson(fiksKlageDto: FiksKlageDto): JsonKlage =
+    JsonKlage(
+        klageId = fiksKlageDto.klageId.toString(),
+        vedtakReferanse =
+            JsonVedtakReferanse(
+                filreferanseId = fiksKlageDto.vedtakId.toString(),
+                referanse = "vedtaksreferanse",
+            ),
+        digisosId = fiksKlageDto.digisosId.toString(),
+        innsendingstidspunkt = LocalDateTime.now().toString(),
+        begrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, "Dette er en klage"),
+        personIdentifikator = JsonPersonIdentifikator(kilde = JsonPersonIdentifikator.Kilde.SYSTEM, verdi = "12345678901"),
+        navn = JsonSokernavn(kilde = JsonSokernavn.Kilde.SYSTEM, fornavn = "Ola", mellomnavn = "", etternavn = "Nordmann"),
+        mottaker =
+            JsonSoknadsmottaker(
+                kommunenummer = "1234",
+                enhetsnummer = "12345678",
+                navEnhetsnavn = "Nav Testenhet",
+            ),
+        autentisering =
+            JsonAutentisering(
+                true,
+                autentiseringsTidspunkt = TimestampUtil.convertToOffsetDateTimeUTCString(nowWithMillis()),
+            ),
+    )
+
 fun createDigisosSak(
     fiksDigisosId: UUID = UUID.randomUUID(),
     kommunenummer: String = "1234",
@@ -422,6 +496,14 @@ fun createDigisosSak(
 
     every { mockDigisosSak.fiksDigisosId } returns fiksDigisosId.toString()
     every { mockDigisosSak.kommunenummer } returns kommunenummer
+    every { mockDigisosSak.digisosSoker } returns
+        DigisosSoker(
+            metadata = UUID.randomUUID().toString(),
+            dokumenter = emptyList(),
+            timestampSistOppdatert = Clock.System.now().toEpochMilliseconds(),
+        )
+    every { mockDigisosSak.sistEndret } returns Clock.System.now().toEpochMilliseconds()
+
     return mockDigisosSak
 }
 
@@ -431,7 +513,10 @@ fun createPdlPerson(): PdlPerson =
         navn = listOf(PdlNavn("Ola", null, "Nordmann")),
     )
 
-private fun createModel(fiksDigisosId: UUID): InternalDigisosSoker =
+private fun createModel(
+    fiksDigisosId: UUID,
+    filreferanseId: UUID = UUID.randomUUID(),
+): InternalDigisosSoker =
     InternalDigisosSoker(
         fiksDigisosId = fiksDigisosId.toString(),
         soknadsmottaker =
@@ -439,4 +524,23 @@ private fun createModel(fiksDigisosId: UUID): InternalDigisosSoker =
                 navEnhetsnummer = "12345678",
                 navEnhetsnavn = "Nav Testenhet",
             ),
-    )
+    ).apply {
+        saker.add(
+            Sak(
+                "saksreferanse",
+                SaksStatus.FERDIGBEHANDLET,
+                tittel = "tittel på sak",
+                vedtak =
+                    mutableListOf(
+                        Vedtak(
+                            filreferanseId.toString(),
+                            "vedtaksreferanse",
+                            UtfallVedtak.DELVIS_INNVILGET,
+                            vedtaksFilUrl = "",
+                            dato = LocalDate.now(),
+                        ),
+                    ),
+                utbetalinger = mutableListOf(),
+            ),
+        )
+    }

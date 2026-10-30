@@ -9,7 +9,6 @@ import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendelseDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
@@ -62,7 +61,6 @@ class KlageServiceImpl(
     private val clientProperties: ClientProperties,
     private val krypteringService: KrypteringService,
     private val uploadClient: UploadClient,
-    private val fiksService: FiksService,
 ) : KlageService {
     private val objectMapper = JsonSosialhjelpObjectMapper.createObjectMapper()
 
@@ -119,15 +117,7 @@ class KlageServiceImpl(
         klageId: UUID,
     ): KlageDto? {
         val fiksKlage =
-            klageClient.hentKlager(digisosId = fiksDigisosId).find { it.klageId == klageId }
-                ?: return null
-
-        val klageJson =
-            fiksService.getDocument(
-                fiksDigisosId,
-                fiksKlage.klageMetadata,
-                JsonKlage::class.java,
-            )
+            klageClient.hentKlager(digisosId = fiksDigisosId).find { it.klageId == klageId } ?: return null
 
         val klagePdf = fiksKlage.klageDokument.toVedleggResponse(fiksKlage.getTidspunktSendt())
         val opplastedeVedlegg = fiksKlage.vedlegg.map { it.toVedleggResponse(fiksKlage.getTidspunktSendt()) }
@@ -170,7 +160,7 @@ class KlageServiceImpl(
 
     private fun FiksEttersendelseDto.toEttersendelseDto() =
         KlageEttersendelseDto(
-            klageId = navEksternRefId,
+            klageId = klageId,
             vedlegg =
                 vedlegg
                     .filter { it.filnavn != "ettersendelse.pdf" }

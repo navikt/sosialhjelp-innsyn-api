@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.expectBodyList
-import java.util.UUID
 
 class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
@@ -70,10 +69,10 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
         coEvery { fiksService.getSoknad(any()) } returns digisosSakOk
         coEvery { kommuneService.hentKommuneInfo(any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
         coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
-        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { fiksService.getDocument(any<String>(), any<String>(), JsonDigisosSoker::class.java, any()) } returns soker
         coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
-        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonSoknad::class.java, any()) } returns soknad
+        coEvery { fiksService.getDocument(any<String>(), any<String>(), JsonSoknad::class.java, any()) } returns soknad
 
         doGet("/api/v1/innsyn/sak/1234/detaljer", emptyList())
     }

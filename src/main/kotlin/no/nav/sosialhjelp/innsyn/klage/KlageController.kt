@@ -50,6 +50,16 @@ class KlageController(
         // TODO Slette eventuelle vedlegg i mellomlageret?
     }
 
+    @GetMapping("/{fiksDigisosId}/klage/tilgjengelig")
+    suspend fun kanSendeKlage(
+        @PathVariable fiksDigisosId: UUID,
+    ): KlageTilgjengeligDto {
+        validateNotProd()
+        tilgangskontroll.sjekkTilgang()
+
+        return KlageTilgjengeligDto(klageUseCaseHandler.kanSendeKlage(fiksDigisosId))
+    }
+
     @PostMapping("/{fiksDigisosId}/klage/send")
     suspend fun sendKlage(
         @PathVariable fiksDigisosId: UUID,

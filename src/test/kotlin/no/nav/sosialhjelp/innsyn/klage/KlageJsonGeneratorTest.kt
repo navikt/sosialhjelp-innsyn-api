@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import tools.jackson.module.kotlin.readValue
 import java.util.UUID
 
@@ -58,14 +59,27 @@ class KlageJsonGeneratorTest {
                 assertThat(jsonKlage.begrunnelse?.klageTekst).isEqualTo(input.tekst)
             }
     }
+
+    @Test
+    suspend fun `Mangler enhetsnummer gir exception`() {
+        val id = UUID.randomUUID()
+        coEvery { eventService.createModel(any()) } returns createModel(id, enhetsnummer = " ")
+
+        assertThrows<KlageMottakerManglerException> {
+            jsonKlageGenerator.generateJsonKlage(KlageInput(UUID.randomUUID(), UUID.randomUUID(), "tekst"), id)
+        }
+    }
 }
 
-private fun createModel(digisosId: UUID): InternalDigisosSoker =
+private fun createModel(
+    digisosId: UUID,
+    enhetsnummer: String = "12345678",
+): InternalDigisosSoker =
     InternalDigisosSoker(
         fiksDigisosId = digisosId.toString(),
         soknadsmottaker =
             Soknadsmottaker(
-                navEnhetsnummer = "12345678",
+                navEnhetsnummer = enhetsnummer,
                 navEnhetsnavn = "En navEnhet",
             ),
     )

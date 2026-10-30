@@ -118,7 +118,7 @@ class VedleggService(
                             .also { alleVedlegg ->
                                 alleVedlegg.validateFiles(metadataFilerFiks)
                                 // TODO Verifisere at det finnes
-                                log.info("Fant ${alleVedlegg.size} vedlegg i ettersendelse")
+                                log.debug("Fant ${alleVedlegg.size} vedlegg i ettersendelse")
                             }.filter { vedlegg -> LASTET_OPP_STATUS == vedlegg.status }
                             .map { vedlegg ->
 

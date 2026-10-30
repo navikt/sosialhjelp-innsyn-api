@@ -5,7 +5,12 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
-import no.nav.sosialhjelp.innsyn.domain.*
+import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
+import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.SaksStatus
+import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
+import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
@@ -50,7 +55,8 @@ class KlageJsonGeneratorTest {
                 tekst = "Dette er en klage",
             )
 
-        jsonKlageGenerator.generateJsonKlage(input, fiksDigisosId)
+        jsonKlageGenerator
+            .generateJsonKlage(input, fiksDigisosId)
             .also { jsonKlage ->
                 assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
                 assertThat(jsonKlage.vedtakReferanse.filreferanseId).isEqualTo(input.vedtakFilreferanseId.toString())

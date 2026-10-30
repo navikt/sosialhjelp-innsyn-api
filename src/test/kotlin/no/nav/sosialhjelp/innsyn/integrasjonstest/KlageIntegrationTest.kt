@@ -3,12 +3,7 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkSpyBean
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
+import io.mockk.*
 import no.nav.sbl.soknadsosialhjelp.klage.JsonAutentisering
 import no.nav.sbl.soknadsosialhjelp.klage.JsonBegrunnelse
 import no.nav.sbl.soknadsosialhjelp.klage.JsonKlage
@@ -20,33 +15,14 @@ import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
+import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.Sak
-import no.nav.sosialhjelp.innsyn.domain.SaksStatus
-import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
-import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
-import no.nav.sosialhjelp.innsyn.domain.Vedtak
+import no.nav.sosialhjelp.innsyn.domain.*
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
-import no.nav.sosialhjelp.innsyn.klage.KlageDto
-import no.nav.sosialhjelp.innsyn.klage.KlageInput
-import no.nav.sosialhjelp.innsyn.klage.KlageMetricsService
-import no.nav.sosialhjelp.innsyn.klage.KlageRef
-import no.nav.sosialhjelp.innsyn.klage.TimestampUtil
+import no.nav.sosialhjelp.innsyn.klage.*
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
-import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendtInfoNAVDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.FiksProtokoll
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerClient
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerResponse
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagringDokumentInfo
-import no.nav.sosialhjelp.innsyn.klage.fiks.SendtKvitteringDto
-import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatus
-import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatusDto
+import no.nav.sosialhjelp.innsyn.klage.fiks.*
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneInfoClient
 import no.nav.sosialhjelp.innsyn.pdl.PdlClient
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlAdressebeskyttelse
@@ -71,6 +47,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
+import kotlin.time.Clock
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
     @MockkBean
@@ -494,6 +471,14 @@ fun createDigisosSak(
 
     every { mockDigisosSak.fiksDigisosId } returns fiksDigisosId.toString()
     every { mockDigisosSak.kommunenummer } returns kommunenummer
+    every { mockDigisosSak.digisosSoker } returns
+        DigisosSoker(
+            metadata = UUID.randomUUID().toString(),
+            dokumenter = emptyList(),
+            timestampSistOppdatert = Clock.System.now().toEpochMilliseconds(),
+        )
+    every { mockDigisosSak.sistEndret } returns Clock.System.now().toEpochMilliseconds()
+
     return mockDigisosSak
 }
 

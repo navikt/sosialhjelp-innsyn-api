@@ -10,8 +10,8 @@ import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
-import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
+import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.convertToOffsetDateTimeUTCString
@@ -51,7 +51,7 @@ class JsonKlageGenerator(
             begrunnelse = input.createKlageBegrunnelse(),
             personIdentifikator = createJsonPersonIdentifikator(),
             navn = createJsonSokernavn(),
-            mottaker = innsynfilModel.createSoknadsmottaker(digisosSak.kommunenummer),
+            mottaker = innsynfilModel.soknadsmottaker.createSoknadsmottaker(digisosSak.kommunenummer),
             autentisering = createJsonAutentisering(),
         )
     }
@@ -69,10 +69,10 @@ class JsonKlageGenerator(
             }
 }
 
-private fun InternalDigisosSoker.createSoknadsmottaker(kommunenummer: String): JsonSoknadsmottaker =
+private fun Soknadsmottaker?.createSoknadsmottaker(kommunenummer: String): JsonSoknadsmottaker =
     JsonSoknadsmottaker(
-        navEnhetsnavn = soknadsmottaker?.navEnhetsnavn,
-        enhetsnummer = soknadsmottaker?.navEnhetsnummer,
+        navEnhetsnavn = this?.navEnhetsnavn,
+        enhetsnummer = this?.navEnhetsnummer,
         kommunenummer = kommunenummer,
     )
 

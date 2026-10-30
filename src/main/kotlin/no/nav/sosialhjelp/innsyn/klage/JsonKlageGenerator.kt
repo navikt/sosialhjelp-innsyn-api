@@ -37,13 +37,13 @@ class JsonKlageGenerator(
     ): JsonKlage {
         val digisosSak = fiksService.getSoknad(fiksDigisosId.toString())
         val innsynfilModel = eventService.createModel(digisosSak)
-        val vedtak = innsynfilModel.saker.findVedtakForReferanse(input.vedtakFilreferanseId)
+        val vedtak = innsynfilModel.saker.findVedtakForReferanse(input.vedtakId)
 
         return JsonKlage(
             klageId = input.klageId.toString(),
             vedtakReferanse =
                 JsonVedtakReferanse(
-                    filreferanseId = vedtak.filreferanseId,
+                    filreferanseId = vedtak.vedtakId,
                     referanse = vedtak.referanse,
                 ),
             digisosId = fiksDigisosId.toString(),
@@ -92,7 +92,7 @@ private fun createJsonAutentisering() =
 private fun createInnsendingstidspunktString(): String = convertToOffsetDateTimeUTCString(nowWithMillis())
 
 private fun MutableList<Sak>.findVedtakForReferanse(vedtakFilreferanseId: UUID): Vedtak =
-    flatMap { it.vedtak }.find { it.filreferanseId == vedtakFilreferanseId.toString() }
+    flatMap { it.vedtak }.find { it.vedtakId == vedtakFilreferanseId.toString() }
         ?: throw VedtakNotValidException("Fant ikke vedtak med vedtaksreferanse $vedtakFilreferanseId")
 
 private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = tekst)

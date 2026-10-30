@@ -137,7 +137,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = klageId,
-                    vedtakFilreferanseId = vedtakFilreferanseId,
+                    vedtakId = vedtakFilreferanseId,
                     tekst = "Dette er en testklage",
                 ),
         )
@@ -172,7 +172,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .responseBody
             ?.also { dto ->
                 assertThat { dto.klageId == klageId }
-                assertThat { dto.vedtakFilreferanseId == vedtakFilreferanseId }
+                assertThat { dto.vedtakId == vedtakFilreferanseId }
             }
             ?: error("Forventet klage tilbake")
     }
@@ -206,7 +206,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .also { klager ->
                 klager!!.forEach { klage ->
                     assertThat(klage.klageId).isEqualTo(klageId)
-                    assertThat(klage.vedtakFilreferanseId).isEqualTo(vedtakFilreferanseId)
+                    assertThat(klage.vedtakId).isEqualTo(vedtakFilreferanseId)
                 }
             }
     }
@@ -284,7 +284,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = UUID.randomUUID(),
-                    vedtakFilreferanseId = UUID.randomUUID(),
+                    vedtakId = UUID.randomUUID(),
                     tekst = "Dette er en testklage",
                 ),
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
@@ -343,7 +343,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             body =
                 KlageInput(
                     klageId = UUID.randomUUID(),
-                    vedtakFilreferanseId = UUID.randomUUID(),
+                    vedtakId = UUID.randomUUID(),
                     tekst = "Dette er en testklage",
                 ),
         ).expectStatus()

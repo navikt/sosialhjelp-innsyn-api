@@ -51,7 +51,7 @@ class KlageJsonGeneratorTest {
         val input =
             KlageInput(
                 klageId = UUID.randomUUID(),
-                vedtakFilreferanseId = vedtakFilreferanseId,
+                vedtakId = vedtakFilreferanseId,
                 tekst = "Dette er en klage",
             )
 
@@ -59,7 +59,7 @@ class KlageJsonGeneratorTest {
             .generateJsonKlage(input, fiksDigisosId)
             .also { jsonKlage ->
                 assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
-                assertThat(jsonKlage.vedtakReferanse.filreferanseId).isEqualTo(input.vedtakFilreferanseId.toString())
+                assertThat(jsonKlage.vedtakReferanse.filreferanseId).isEqualTo(input.vedtakId.toString())
                 assertThat(jsonKlage.digisosId).isEqualTo(fiksDigisosId.toString())
                 assertThat(jsonKlage.begrunnelse?.klageTekst).isEqualTo(input.tekst)
             }
@@ -75,7 +75,7 @@ class KlageJsonGeneratorTest {
         val input =
             KlageInput(
                 klageId = UUID.randomUUID(),
-                vedtakFilreferanseId = UUID.randomUUID(),
+                vedtakId = UUID.randomUUID(),
                 tekst = "Dette er en klage",
             )
 

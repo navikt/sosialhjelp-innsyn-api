@@ -125,7 +125,7 @@ class KlageServiceImpl(
         return KlageDto(
             digisosId = fiksDigisosId,
             klageId = fiksKlage.klageId,
-            vedtakFilreferanseId = fiksKlage.vedtakId,
+            vedtakId = fiksKlage.vedtakId,
             klagePdf = klagePdf,
             opplastedeVedlegg = opplastedeVedlegg,
             ettersendelser = fiksKlage.ettersendtInfoNAV?.ettersendelser?.map { it.toEttersendelseDto() } ?: emptyList(),
@@ -160,7 +160,7 @@ class KlageServiceImpl(
 
     private fun FiksEttersendelseDto.toEttersendelseDto() =
         KlageEttersendelseDto(
-            klageId = klageId,
+            navEksternRefId = klageId,
             vedlegg =
                 vedlegg
                     .filter { it.filnavn != "ettersendelse.pdf" }

@@ -102,7 +102,7 @@ internal class BrevServiceTest {
                                 mutableListOf(
                                     Vedtak(
                                         referanse = "vedtaksreferanse",
-                                        filreferanseId = "v1",
+                                        vedtakId = "v1",
                                         utfall = null,
                                         vedtaksFilUrl = vedtaksFilUrl,
                                         dato = dato,
@@ -136,14 +136,14 @@ internal class BrevServiceTest {
                                 mutableListOf(
                                     Vedtak(
                                         referanse = "vedtaksreferanse",
-                                        filreferanseId = "v1",
+                                        vedtakId = "v1",
                                         utfall = null,
                                         vedtaksFilUrl = "https://nav.no/vedtak/1",
                                         dato = LocalDate.of(2024, 1, 15),
                                     ),
                                     Vedtak(
                                         referanse = "vedtaksreferanse",
-                                        filreferanseId = "v2",
+                                        vedtakId = "v2",
                                         utfall = null,
                                         vedtaksFilUrl = "https://nav.no/vedtak/2",
                                         dato = LocalDate.of(2024, 1, 15),
@@ -159,7 +159,7 @@ internal class BrevServiceTest {
                                 mutableListOf(
                                     Vedtak(
                                         referanse = "vedtaksreferanse",
-                                        filreferanseId = "v3",
+                                        vedtakId = "v3",
                                         utfall = null,
                                         vedtaksFilUrl = "https://nav.no/vedtak/3",
                                         dato = LocalDate.of(2024, 1, 15),
@@ -291,7 +291,7 @@ internal class BrevServiceTest {
                                 mutableListOf(
                                     Vedtak(
                                         referanse = "vedtaksreferanse",
-                                        filreferanseId = "v1",
+                                        vedtakId = "v1",
                                         utfall = null,
                                         vedtaksFilUrl = "https://nav.no/vedtak",
                                         dato = oldest,

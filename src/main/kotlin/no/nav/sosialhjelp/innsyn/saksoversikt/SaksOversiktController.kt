@@ -87,7 +87,7 @@ class SaksOversiktController(
                 model.saker.map { sak ->
                     SaksDetaljerResponse.Sak(
                         sak.vedtak.size,
-                        sak.vedtak.map { VedtakDto(it.filreferanseId, it.utfall, it.vedtaksFilUrl, it.dato) },
+                        sak.vedtak.map { VedtakDto(it.vedtakId, it.utfall, it.vedtaksFilUrl, it.dato) },
                         if (sak.vedtak.isEmpty()) {
                             sak.saksStatus ?: SaksStatus.UNDER_BEHANDLING
                         } else {

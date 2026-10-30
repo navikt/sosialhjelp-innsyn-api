@@ -122,19 +122,19 @@ data class DocumentForKlage(
 
 data class KlageInput(
     val klageId: UUID,
-    val vedtakFilreferanseId: UUID,
+    val vedtakId: UUID,
     val tekst: String,
 )
 
 data class KlageRef(
     val klageId: UUID,
-    val vedtakFilreferanseId: UUID,
+    val vedtakId: UUID,
 )
 
 data class KlageDto(
     val digisosId: UUID,
     val klageId: UUID,
-    val vedtakFilreferanseId: UUID,
+    val vedtakId: UUID,
     val klagePdf: VedleggResponse,
     val opplastedeVedlegg: List<VedleggResponse> = emptyList(),
     val ettersendelser: List<KlageEttersendelseDto> = emptyList(),
@@ -142,7 +142,7 @@ data class KlageDto(
 )
 
 data class KlageEttersendelseDto(
-    val klageId: UUID,
+    val navEksternRefId: UUID,
     val vedlegg: List<VedleggResponse> = emptyList(),
     val timestampSendt: Long,
 )

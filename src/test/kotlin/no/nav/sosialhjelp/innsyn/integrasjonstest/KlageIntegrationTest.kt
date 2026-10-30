@@ -3,6 +3,8 @@ package no.nav.sosialhjelp.innsyn.integrasjonstest
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkSpyBean
+import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -42,7 +44,9 @@ import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
 import no.nav.sosialhjelp.innsyn.upload.UploadClient
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
@@ -59,6 +63,14 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 class KlageIntegrationTest : AbstractIntegrationTest() {
+    @Autowired
+    private lateinit var unleash: Unleash
+
+    @BeforeEach
+    fun enableKlageToggle() {
+        (unleash as FakeUnleash).enable("sosialhjelp.innsyn.klage")
+    }
+
     @MockkBean
     private lateinit var mellomlagerClient: MellomlagerClient
 
@@ -239,6 +251,31 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                 assertThat(docRef.documentId).isInstanceOf(UUID::class.java)
             }
             ?: error("Forventet dokumentreferanser tilbake")
+    }
+
+    @Test
+    fun `innsending av klage gir 403 nar toggle er av`() {
+        val digisosId = UUID.randomUUID()
+        (unleash as FakeUnleash).disable("sosialhjelp.innsyn.klage")
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = true,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
+
+        doPostFullResponse(
+            uri = POST_KLAGE,
+            digisosId = digisosId,
+            body = KlageInput(klageId = UUID.randomUUID(), vedtakId = UUID.randomUUID(), tekst = "Dette er en testklage"),
+        ).expectStatus().isEqualTo(HttpStatus.FORBIDDEN)
     }
 
     @Test

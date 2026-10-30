@@ -4,6 +4,8 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksClientException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
+import no.nav.sosialhjelp.innsyn.klage.KlageIkkeTilgjengeligException
+import no.nav.sosialhjelp.innsyn.klage.KlageMottakerManglerException
 import no.nav.sosialhjelp.innsyn.kommuneinfo.MottakUtilgjengeligException
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.http.HttpHeaders
@@ -133,6 +135,18 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         )
     }
 
+    @ExceptionHandler(KlageIkkeTilgjengeligException::class)
+    fun handleKlageIkkeTilgjengelig(e: KlageIkkeTilgjengeligException): ResponseEntity<FrontendErrorMessage> {
+        log.warn(e.message)
+        return ResponseEntity(FrontendErrorMessage(KLAGE_IKKE_TILGJENGELIG, "Klage er ikke tilgjengelig"), HttpStatus.FORBIDDEN)
+    }
+
+    @ExceptionHandler(KlageMottakerManglerException::class)
+    fun handleKlageMottakerMangler(e: KlageMottakerManglerException): ResponseEntity<FrontendErrorMessage> {
+        log.error(e.message, e)
+        return ResponseEntity(FrontendErrorMessage(KLAGE_MOTTAKER_ERROR, NOE_UVENTET_FEILET), HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
     companion object {
         private val log by logger()
 
@@ -146,5 +160,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         private const val TILGANG_ERROR = "tilgang_error"
         private const val NOT_FOUND_ERROR = "not_found_error"
         private const val UNAVAILABLE_ERROR = "unavailable_error"
+        private const val KLAGE_IKKE_TILGJENGELIG = "klage_ikke_tilgjengelig"
+        private const val KLAGE_MOTTAKER_ERROR = "klage_mottaker_error"
     }
 }

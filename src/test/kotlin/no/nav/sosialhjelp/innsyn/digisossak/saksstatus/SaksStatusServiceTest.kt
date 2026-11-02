@@ -88,6 +88,7 @@ internal class SaksStatusServiceTest {
                     vedtak =
                         mutableListOf(
                             Vedtak(
+                                referanse = "vedtaksreferanse",
                                 utfall = UtfallVedtak.INNVILGET,
                                 vedtaksFilUrl = vedtaksfilUrl,
                                 dato = LocalDate.now(),
@@ -124,6 +125,7 @@ internal class SaksStatusServiceTest {
                     vedtak =
                         mutableListOf(
                             Vedtak(
+                                referanse = "vedtaksreferanse",
                                 utfall = UtfallVedtak.INNVILGET,
                                 vedtaksFilUrl = vedtaksfilUrl,
                                 dato = LocalDate.now(),
@@ -162,12 +164,14 @@ internal class SaksStatusServiceTest {
                         vedtak =
                             mutableListOf(
                                 Vedtak(
+                                    referanse = "vedtaksreferanse",
                                     utfall = UtfallVedtak.INNVILGET,
                                     vedtaksFilUrl = vedtaksfilUrl,
                                     dato = LocalDate.now(),
                                     id = id,
                                 ),
                                 Vedtak(
+                                    referanse = "vedtaksreferanse",
                                     utfall = UtfallVedtak.INNVILGET,
                                     vedtaksFilUrl = vedtaksfilUrl,
                                     dato = LocalDate.now(),
@@ -207,6 +211,7 @@ internal class SaksStatusServiceTest {
         runTest(timeout = 5.seconds) {
             val vedtak1 =
                 Vedtak(
+                    referanse = "vedtaksreferanse",
                     utfall = UtfallVedtak.INNVILGET,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
@@ -214,6 +219,7 @@ internal class SaksStatusServiceTest {
                 )
             val vedtak2 =
                 Vedtak(
+                    referanse = "vedtaksreferanse",
                     utfall = UtfallVedtak.DELVIS_INNVILGET,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
@@ -221,6 +227,7 @@ internal class SaksStatusServiceTest {
                 )
             val vedtak3 =
                 Vedtak(
+                    referanse = "vedtaksreferanse",
                     utfall = UtfallVedtak.AVVIST,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
@@ -228,6 +235,7 @@ internal class SaksStatusServiceTest {
                 )
             val vedtak4 =
                 Vedtak(
+                    referanse = "vedtaksreferanse",
                     utfall = UtfallVedtak.AVSLATT,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
@@ -235,6 +243,7 @@ internal class SaksStatusServiceTest {
                 )
             val vedtak5 =
                 Vedtak(
+                    referanse = "vedtaksreferanse",
                     utfall = null,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),

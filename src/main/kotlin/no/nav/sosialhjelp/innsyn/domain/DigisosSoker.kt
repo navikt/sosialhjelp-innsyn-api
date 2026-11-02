@@ -63,7 +63,9 @@ data class Sak(
 )
 
 data class Vedtak(
+    // referanse til vedtaksbrevfil
     val id: String,
+    val referanse: String,
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,
     var dato: LocalDate,

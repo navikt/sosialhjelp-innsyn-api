@@ -131,8 +131,6 @@ data class KlageRef(
     val vedtakId: UUID,
 )
 
-// TODO Hva skal legges ved i denne? Kun json, pdf,?
-// TODO Denne trenger URL til klage.pdf
 data class KlageDto(
     val digisosId: UUID,
     val klageId: UUID,

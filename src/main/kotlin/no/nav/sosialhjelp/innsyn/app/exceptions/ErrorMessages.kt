@@ -1,13 +1,24 @@
 package no.nav.sosialhjelp.innsyn.app.exceptions
 
-open class FrontendErrorMessage(
-    val type: String?,
+import com.fasterxml.jackson.annotation.JsonValue
+
+enum class FrontendErrorType(
+    @get:JsonValue val value: String,
+) {
+    UNEXPECTED_ERROR("unexpected_error"),
+    FIKS_ERROR("fiks_error"),
+    NORG_ERROR("norg_error"),
+    FILOPPLASTING_ERROR("FILOPPLASTING_ERROR"),
+    PDL_ERROR("pdl_error"),
+    TILGANG_ERROR("tilgang_error"),
+    NOT_FOUND_ERROR("not_found_error"),
+    UNAVAILABLE_ERROR("unavailable_error"),
+    KLAGE_IKKE_TILGJENGELIG("klage_ikke_tilgjengelig"),
+    KLAGE_MOTTAKER_ERROR("klage_mottaker_error"),
+    TOKEN_UTLOPT("Token utløpt"),
+}
+
+class FrontendErrorMessage(
+    val type: FrontendErrorType,
     val message: String?,
 )
-
-class FrontendUnauthorizedMessage(
-    val id: String,
-    type: String,
-    message: String,
-    val loginUrl: String,
-) : FrontendErrorMessage(type, message)

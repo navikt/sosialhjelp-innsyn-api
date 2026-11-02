@@ -8,6 +8,7 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
 import no.nav.sbl.soknadsosialhjelp.soknad.common.JsonKildeBruker
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils.getUserIdFromToken
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Sak
@@ -51,7 +52,7 @@ class JsonKlageGenerator(
             begrunnelse = input.createKlageBegrunnelse(),
             personIdentifikator = createJsonPersonIdentifikator(),
             navn = createJsonSokernavn(),
-            mottaker = innsynfilModel.soknadsmottaker.createSoknadsmottaker(digisosSak.kommunenummer),
+            mottaker = innsynfilModel.soknadsmottaker.createSoknadsmottaker(digisosSak.kommunenummer()),
             autentisering = createJsonAutentisering(),
         )
     }
@@ -69,10 +70,16 @@ class JsonKlageGenerator(
             }
 }
 
+private fun DigisosSak.kommunenummer(): String {
+    if (this.kommunenummer.isBlank()) throw KlageMottakerManglerException("Kommunenummer for mottaker mangler")
+    return this.kommunenummer
+}
+
 private fun Soknadsmottaker?.createSoknadsmottaker(kommunenummer: String): JsonSoknadsmottaker =
     JsonSoknadsmottaker(
         navEnhetsnavn = this?.navEnhetsnavn,
-        enhetsnummer = this?.navEnhetsnummer,
+        enhetsnummer =
+            this?.navEnhetsnummer.also { if (it.isNullOrBlank()) throw KlageMottakerManglerException("Enhetsnummer for mottaker mangler") },
         kommunenummer = kommunenummer,
     )
 

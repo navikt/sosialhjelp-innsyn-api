@@ -68,10 +68,10 @@ class KlageJsonGeneratorTest {
     @Test
     suspend fun `Mangler enhetsnummer gir exception`() {
         val id = UUID.randomUUID()
-        coEvery { eventService.createModel(any()) } returns createModel(id, enhetsnummer = " ")
+        coEvery { eventService.createModel(any()) } returns createModel(vedtakFilreferanseId = id, enhetsnummer = " ")
 
         assertThrows<KlageMottakerManglerException> {
-            jsonKlageGenerator.generateJsonKlage(KlageInput(UUID.randomUUID(), UUID.randomUUID(), "tekst"), id)
+            jsonKlageGenerator.generateJsonKlage(KlageInput(UUID.randomUUID(), id, "tekst"), id)
         }
     }
 
@@ -94,8 +94,9 @@ class KlageJsonGeneratorTest {
 }
 
 private fun createModel(
-    digisosId: UUID,
-    vedtakFilreferanseId: UUID,
+    digisosId: UUID = UUID.randomUUID(),
+    vedtakFilreferanseId: UUID = UUID.randomUUID(),
+    enhetsnummer: String = " ",
 ): InternalDigisosSoker =
     InternalDigisosSoker(
         fiksDigisosId = digisosId.toString(),

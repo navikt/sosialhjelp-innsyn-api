@@ -55,7 +55,6 @@ class KlageController(
     suspend fun kanSendeKlage(
         @PathVariable fiksDigisosId: UUID,
     ): KlageTilgjengeligDto {
-        validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
         return KlageTilgjengeligDto(klageUseCaseHandler.kanSendeKlage(fiksDigisosId))

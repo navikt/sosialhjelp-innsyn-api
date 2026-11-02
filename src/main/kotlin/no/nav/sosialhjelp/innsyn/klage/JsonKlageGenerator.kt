@@ -73,10 +73,14 @@ class JsonKlageGenerator(
         return eventService
             .createModel(internalSoknad)
             .let {
+                val enhetsnummer = it.soknadsmottaker?.navEnhetsnummer
+                val kommunenummer = internalSoknad.kommunenummer
+                if (enhetsnummer.isNullOrBlank()) throw KlageMottakerManglerException("Mangler enhetsnummer for $fiksDigisosId")
+                if (kommunenummer.isNullOrBlank()) throw KlageMottakerManglerException("Mangler kommunenummer for $fiksDigisosId")
                 JsonSoknadsmottaker(
                     navEnhetsnavn = it.soknadsmottaker?.navEnhetsnavn,
-                    enhetsnummer = it.soknadsmottaker?.navEnhetsnummer,
-                    kommunenummer = internalSoknad.kommunenummer,
+                    enhetsnummer = enhetsnummer,
+                    kommunenummer = kommunenummer,
                 )
             }
     }

@@ -12,6 +12,7 @@ class KlageUseCaseHandler(
     private val klageService: KlageService,
     private val jsonKlageGenerator: JsonKlageGenerator,
     private val kommuneService: KommuneService,
+    private val klageTilgangService: KlageTilgangService,
     meterRegistry: MeterRegistry,
 ) {
     private val klageMetricsService = KlageMetricsService(meterRegistry)
@@ -20,8 +21,10 @@ class KlageUseCaseHandler(
         digisosId: UUID,
         input: KlageInput,
     ): KlageDto {
-        // TODO Trengs det å validere at kommune har innsyn, etc?!
         kommuneService.validerMottakOgInnsynForKommune(digisosId)
+        if (!klageTilgangService.kanSendeKlage(digisosId)) {
+            throw KlageIkkeTilgjengeligException("Klage er ikke tilgjengelig for denne Nav-enheten")
+        }
 
         val jsonKlage =
             jsonKlageGenerator.generateJsonKlage(
@@ -38,6 +41,8 @@ class KlageUseCaseHandler(
 
         return hentKlage(digisosId, input.klageId) ?: error("Fant ikke innsendt klage")
     }
+
+    suspend fun kanSendeKlage(digisosId: UUID): Boolean = klageTilgangService.kanSendeKlage(digisosId)
 
     suspend fun hentAlleKlager(digisosId: UUID): List<KlageRef> = klageService.hentKlager(digisosId)
 

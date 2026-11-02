@@ -25,7 +25,7 @@ data class FiksEttersendtInfoNAVDto(
 )
 
 data class FiksEttersendelseDto(
-    val klageId: UUID,
+    val navEksternRefId: UUID,
     val vedleggMetadata: UUID,
     val vedlegg: List<DokumentInfoDto>,
     val timestampSendt: Long,
@@ -38,7 +38,7 @@ data class DokumentInfoDto(
 )
 
 data class TrekkKlageInfoDto(
-    val klageId: UUID,
+    val navEksternRefId: UUID,
     val trekkPdfMetadata: UUID,
     val vedleggMetadata: UUID,
     val trekkKlageDokument: DokumentInfoDto,

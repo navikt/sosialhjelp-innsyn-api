@@ -160,7 +160,7 @@ class KlageServiceImpl(
 
     private fun FiksEttersendelseDto.toEttersendelseDto() =
         KlageEttersendelseDto(
-            navEksternRefId = klageId,
+            navEksternRefId = navEksternRefId,
             vedlegg =
                 vedlegg
                     .filter { it.filnavn != "ettersendelse.pdf" }

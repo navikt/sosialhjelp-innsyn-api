@@ -24,10 +24,10 @@ class KlageController(
     private val klageUseCaseHandler: KlageUseCaseHandler,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
-    @PostMapping("/{fiksDigisosId}/{klageId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{fiksDigisosId}/{navEksternRefId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun uploadDocuments(
         @PathVariable fiksDigisosId: UUID,
-        @PathVariable klageId: UUID,
+        @PathVariable navEksternRefId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): DocumentsForKlage {
         // TODO En eller annen form for sjekk av fiksDigisosId ?
@@ -36,7 +36,7 @@ class KlageController(
 
         return klageUseCaseHandler.lastOppVedlegg(
             digisosId = fiksDigisosId,
-            navEksternRefId = klageId,
+            navEksternRefId = navEksternRefId,
             rawFiles = rawFiles,
         )
     }
@@ -137,11 +137,11 @@ data class KlageDto(
     val vedtakId: UUID,
     val klagePdf: VedleggResponse,
     val opplastedeVedlegg: List<VedleggResponse> = emptyList(),
-    val ettersendelser: List<KlageEttersendelseDto> = emptyList(),
+    val ettersendelser: List<EttersendelseDto> = emptyList(),
     val timestampSendt: Long,
 )
 
-data class KlageEttersendelseDto(
+data class EttersendelseDto(
     val navEksternRefId: UUID,
     val vedlegg: List<VedleggResponse> = emptyList(),
     val timestampSendt: Long,

@@ -159,7 +159,7 @@ class KlageServiceImpl(
         )
 
     private fun FiksEttersendelseDto.toEttersendelseDto() =
-        KlageEttersendelseDto(
+        EttersendelseDto(
             navEksternRefId = navEksternRefId,
             vedlegg =
                 vedlegg

@@ -19,7 +19,6 @@ import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
-import no.nav.sosialhjelp.digisos.hendelser.domain.DokumentRef
 import no.nav.sosialhjelp.digisos.hendelser.fold.FoldResult
 import no.nav.sosialhjelp.digisos.hendelser.fold.SoknadMetadata
 import no.nav.sosialhjelp.filformat.digisos.soker.DigisosSoker
@@ -212,20 +211,16 @@ class HendelseFoldService(
                 }
                 if ((oldSak.tittel ?: DEFAULT_SAK_TITTEL) != (foldedSak.tittel ?: DEFAULT_SAK_TITTEL)) add("saker.tittel")
             }
-            if (oldModel.saker.flatMap { it.vedtak }.map { Triple(it.id, it.utfall?.name, it.dato.toString()) } !=
-                (soknad.saker.flatMap { it.vedtak } + soknad.vedtakUtenSak).map {
-                    Triple(
-                        when (val dokument = it.dokument) {
-                            is DokumentRef.Dokumentlager -> dokument.id
-                            is DokumentRef.SvarUt -> dokument.id
-                        },
-                        it.utfall?.name,
-                        it.dato.toString(),
-                    )
-                }
-            ) {
-                add("vedtak")
-            }
+            val oldVedtak =
+                oldModel.saker
+                    .flatMap { it.vedtak }
+                    .map { Triple(it.id.lowercase(), it.utfall?.name, it.dato.toString()) }
+                    .sortedWith(compareBy({ it.first }, { it.third }))
+            val foldedVedtak =
+                (soknad.saker.flatMap { it.vedtak } + soknad.vedtakUtenSak)
+                    .map { Triple(it.dokument.id.toString(), it.utfall?.name, it.dato.toString()) }
+                    .sortedWith(compareBy({ it.first }, { it.third }))
+            if (oldVedtak != foldedVedtak) add("vedtak")
             if (oldModel.utbetalinger.map { it.referanse to it.status.name }.sortedBy { it.first } !=
                 (soknad.utbetalingerUtenSak + soknad.saker.flatMap { it.utbetalinger })
                     .map { it.referanse to it.status.name }

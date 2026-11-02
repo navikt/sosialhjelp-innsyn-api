@@ -12,9 +12,12 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonAvsender
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.filreferanse.JsonDokumentlagerFilreferanse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtakFattet
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVedtaksfil
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonVilkar
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DokumentInfo
@@ -27,10 +30,13 @@ import no.nav.sosialhjelp.innsyn.domain.Sak
 import no.nav.sosialhjelp.innsyn.domain.SaksStatus
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
+import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
+import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class HendelseFoldServiceTest {
@@ -303,6 +309,92 @@ internal class HendelseFoldServiceTest {
             assertThat(fieldDifferenceCount("dokumentasjonkrav")).isEqualTo(1.0)
         }
 
+    @Test
+    fun `does not report vedtak difference when vedtak match`() =
+        runTest {
+            val soker = vedtakSoker(vedtakFattet("sak-1", VEDTAK_ID_1, "2026-01-01T12:02:00Z", JsonVedtakFattet.Utfall.INNVILGET))
+            val oldModel =
+                InternalDigisosSoker(
+                    fagsystem = Fagsystem("test", "1"),
+                    saker = mutableListOf(oldSak("sak-1", oldVedtak(VEDTAK_ID_1.uppercase(), UtfallVedtak.INNVILGET))),
+                )
+
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
+
+            assertThat(fieldDifferenceCount("vedtak")).isZero()
+        }
+
+    @Test
+    fun `does not report vedtak difference when vedtak are grouped by sak in a different order`() =
+        runTest {
+            val soker =
+                vedtakSoker(
+                    vedtakFattet("sak-1", VEDTAK_ID_1, "2026-01-01T12:02:00Z", JsonVedtakFattet.Utfall.INNVILGET),
+                    vedtakFattet("sak-2", VEDTAK_ID_2, "2026-01-01T12:03:00Z", JsonVedtakFattet.Utfall.AVSLATT),
+                )
+            val oldModel =
+                InternalDigisosSoker(
+                    fagsystem = Fagsystem("test", "1"),
+                    saker =
+                        mutableListOf(
+                            oldSak("sak-2", oldVedtak(VEDTAK_ID_2, UtfallVedtak.AVSLATT)),
+                            oldSak("sak-1", oldVedtak(VEDTAK_ID_1, UtfallVedtak.INNVILGET)),
+                        ),
+                )
+
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
+
+            assertThat(fieldDifferenceCount("vedtak")).isZero()
+        }
+
+    @Test
+    fun `reports vedtak difference when utfall differs`() =
+        runTest {
+            val soker = vedtakSoker(vedtakFattet("sak-1", VEDTAK_ID_1, "2026-01-01T12:02:00Z", JsonVedtakFattet.Utfall.AVSLATT))
+            val oldModel =
+                InternalDigisosSoker(
+                    fagsystem = Fagsystem("test", "1"),
+                    saker = mutableListOf(oldSak("sak-1", oldVedtak(VEDTAK_ID_1, UtfallVedtak.INNVILGET))),
+                )
+
+            service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
+
+            assertThat(fieldDifferenceCount("vedtak")).isEqualTo(1.0)
+        }
+
+    private fun vedtakSoker(vararg vedtak: JsonVedtakFattet) =
+        JsonDigisosSoker(
+            version = "1",
+            avsender = JsonAvsender("test", "1"),
+            hendelser =
+                listOf(
+                    JsonSaksStatus("sak-1", "2026-01-01T12:00:00Z", null, JsonSaksStatus.Status.UNDER_BEHANDLING),
+                    JsonSaksStatus("sak-2", "2026-01-01T12:01:00Z", null, JsonSaksStatus.Status.UNDER_BEHANDLING),
+                ) + vedtak,
+        )
+
+    private fun vedtakFattet(
+        saksreferanse: String,
+        id: String,
+        tidspunkt: String,
+        utfall: JsonVedtakFattet.Utfall,
+    ) = JsonVedtakFattet(
+        saksreferanse = saksreferanse,
+        vedtaksfil = JsonVedtaksfil(JsonDokumentlagerFilreferanse(id)),
+        hendelsestidspunkt = tidspunkt,
+        utfall = utfall,
+    )
+
+    private fun oldSak(
+        referanse: String,
+        vararg vedtak: Vedtak,
+    ) = Sak(referanse, SaksStatus.UNDER_BEHANDLING, null, vedtak.toMutableList(), mutableListOf())
+
+    private fun oldVedtak(
+        id: String,
+        utfall: UtfallVedtak,
+    ) = Vedtak(id, utfall, "https://example.com/$id", LocalDate.of(2026, 1, 1))
+
     private fun resultCount(result: String): Double =
         meterRegistry
             .find("hendelser_fold_total")
@@ -395,4 +487,9 @@ internal class HendelseFoldServiceTest {
         frist = null,
         saksreferanse = saksreferanse,
     )
+
+    private companion object {
+        const val VEDTAK_ID_1 = "0be7aa9c-5de0-450e-b8dc-75720c8053ae"
+        const val VEDTAK_ID_2 = "1a2b3c4d-5de0-450e-b8dc-75720c8053af"
+    }
 }

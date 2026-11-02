@@ -92,7 +92,7 @@ internal class SaksStatusServiceTest {
                                 utfall = UtfallVedtak.INNVILGET,
                                 vedtaksFilUrl = vedtaksfilUrl,
                                 dato = LocalDate.now(),
-                                vedtakId = "",
+                                id = "",
                             ),
                         ),
                     utbetalinger = mutableListOf(),
@@ -129,7 +129,7 @@ internal class SaksStatusServiceTest {
                                 utfall = UtfallVedtak.INNVILGET,
                                 vedtaksFilUrl = vedtaksfilUrl,
                                 dato = LocalDate.now(),
-                                vedtakId = id,
+                                id = id,
                             ),
                         ),
                     utbetalinger = mutableListOf(),
@@ -168,14 +168,14 @@ internal class SaksStatusServiceTest {
                                     utfall = UtfallVedtak.INNVILGET,
                                     vedtaksFilUrl = vedtaksfilUrl,
                                     dato = LocalDate.now(),
-                                    vedtakId = id,
+                                    id = id,
                                 ),
                                 Vedtak(
                                     referanse = "vedtaksreferanse",
                                     utfall = UtfallVedtak.INNVILGET,
                                     vedtaksFilUrl = vedtaksfilUrl,
                                     dato = LocalDate.now(),
-                                    vedtakId = id,
+                                    id = id,
                                 ),
                             ),
                         utbetalinger = mutableListOf(),
@@ -215,7 +215,7 @@ internal class SaksStatusServiceTest {
                     utfall = UtfallVedtak.INNVILGET,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    vedtakId = id,
+                    id = id,
                 )
             val vedtak2 =
                 Vedtak(
@@ -223,7 +223,7 @@ internal class SaksStatusServiceTest {
                     utfall = UtfallVedtak.DELVIS_INNVILGET,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    vedtakId = id,
+                    id = id,
                 )
             val vedtak3 =
                 Vedtak(
@@ -231,7 +231,7 @@ internal class SaksStatusServiceTest {
                     utfall = UtfallVedtak.AVVIST,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    vedtakId = id,
+                    id = id,
                 )
             val vedtak4 =
                 Vedtak(
@@ -239,7 +239,7 @@ internal class SaksStatusServiceTest {
                     utfall = UtfallVedtak.AVSLATT,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    vedtakId = id,
+                    id = id,
                 )
             val vedtak5 =
                 Vedtak(
@@ -247,7 +247,7 @@ internal class SaksStatusServiceTest {
                     utfall = null,
                     vedtaksFilUrl = "en link til noe",
                     dato = LocalDate.of(2024, 1, 15),
-                    vedtakId = id,
+                    id = id,
                 )
             val sakSomSkalGiTrue =
                 Sak(

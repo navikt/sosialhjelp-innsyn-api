@@ -41,7 +41,7 @@ class SaksStatusService(
         val vedtakfilUrlList =
             sak.vedtak
                 .map {
-                    FilUrl(it.dato, it.vedtaksFilUrl, it.vedtakId)
+                    FilUrl(it.dato, it.vedtaksFilUrl, it.id)
                 }.ifEmpty { null }
         val skalViseVedtakInfoPanel = getSkalViseVedtakInfoPanel(sak)
         val utfallVedtak = sak.vedtak.lastOrNull()?.utfall
@@ -62,7 +62,7 @@ class SaksStatusService(
 
 private fun Vedtak.toVedtakDto(): VedtakDto =
     VedtakDto(
-        id = vedtakId,
+        id = id,
         utfall = utfall,
         vedtaksFilUrl = vedtaksFilUrl,
         dato = dato,

@@ -43,7 +43,7 @@ class JsonKlageGenerator(
             klageId = input.klageId.toString(),
             vedtakReferanse =
                 JsonVedtakReferanse(
-                    filreferanseId = vedtak.vedtakId,
+                    filreferanseId = vedtak.id,
                     referanse = vedtak.referanse,
                 ),
             digisosId = fiksDigisosId.toString(),
@@ -92,7 +92,7 @@ private fun createJsonAutentisering() =
 private fun createInnsendingstidspunktString(): String = convertToOffsetDateTimeUTCString(nowWithMillis())
 
 private fun MutableList<Sak>.findVedtakForReferanse(vedtakFilreferanseId: UUID): Vedtak =
-    flatMap { it.vedtak }.find { it.vedtakId == vedtakFilreferanseId.toString() }
+    flatMap { it.vedtak }.find { it.id == vedtakFilreferanseId.toString() }
         ?: throw VedtakNotValidException("Fant ikke vedtak med vedtaksreferanse $vedtakFilreferanseId")
 
 private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = tekst)

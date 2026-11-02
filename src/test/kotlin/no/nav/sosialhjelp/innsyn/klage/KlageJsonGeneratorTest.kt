@@ -46,7 +46,7 @@ class KlageJsonGeneratorTest {
         val fiksDigisosId = UUID.randomUUID()
         val vedtakFilreferanseId = UUID.randomUUID()
 
-        coEvery { eventService.createModel(any()) } returns createModel(fiksDigisosId, vedtakFilreferanseId)
+        coEvery { eventService.createModel(any()) } returns createModel(fiksDigisosId, vedtakFilreferanseId, enhetsnummer = "1234")
 
         val input =
             KlageInput(

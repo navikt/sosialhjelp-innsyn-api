@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.digisossak.utbetalinger2
 
 import io.getunleash.Unleash
+import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -34,6 +35,7 @@ class UtbetalingerService(
     private val fiksService: FiksService,
     private val eventService: EventService,
     private val unleash: Unleash,
+    private val meterRegistry: MeterRegistry,
 ) {
     private val log by logger()
 
@@ -87,15 +89,27 @@ class UtbetalingerService(
                 .groupBy({ it.first }, { it.second })
                 .mapValues { (_, list) -> list.distinctBy { it.fiksDigisosId } }
 
-        return soknader
-            .flatMap { soknad ->
-                soknad.utbetalinger.map { utbetaling ->
-                    UtbetalingMedSoknader(
-                        utbetaling = utbetaling,
-                        tilknyttedeSoknader =
-                            soknaderPerReferanse[utbetaling.referanse] ?: listOf(soknad.soknadRef),
-                    )
-                }
-            }.distinctBy { it.utbetaling.referanse }
+        val result =
+            soknader
+                .flatMap { soknad ->
+                    soknad.utbetalinger.map { utbetaling ->
+                        UtbetalingMedSoknader(
+                            utbetaling = utbetaling,
+                            tilknyttedeSoknader =
+                                soknaderPerReferanse[utbetaling.referanse] ?: listOf(soknad.soknadRef),
+                        )
+                    }
+                }.distinctBy { it.utbetaling.referanse }
+
+        val kommunePerSak = digisosSaker.associate { it.fiksDigisosId to it.kommunenummer }
+        result
+            .groupingBy { kommunePerSak[it.tilknyttedeSoknader.first().fiksDigisosId] ?: "ukjent" }
+            .eachCount()
+            .forEach { (kommunenummer, antall) ->
+                meterRegistry
+                    .counter("innsyn_utbetalinger_hentet_total", "kommunenummer", kommunenummer)
+                    .increment(antall.toDouble())
+            }
+        return result
     }
 }

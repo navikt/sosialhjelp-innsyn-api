@@ -393,7 +393,7 @@ internal class HendelseFoldServiceTest {
     private fun oldVedtak(
         id: String,
         utfall: UtfallVedtak,
-    ) = Vedtak(id, utfall, "https://example.com/$id", LocalDate.of(2026, 1, 1))
+    ) = Vedtak(id, "ref-$id", utfall, "https://example.com/$id", LocalDate.of(2026, 1, 1))
 
     private fun resultCount(result: String): Double =
         meterRegistry

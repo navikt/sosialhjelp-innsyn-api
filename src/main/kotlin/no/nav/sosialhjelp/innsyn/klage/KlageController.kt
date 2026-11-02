@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.app.MiljoUtils
+import no.nav.sosialhjelp.innsyn.app.exceptions.NotFoundException
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
@@ -91,7 +92,6 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
     ): KlageDto? {
-        validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler.hentKlage(fiksDigisosId, klageId)
@@ -101,7 +101,6 @@ class KlageController(
     suspend fun hentKlager(
         @PathVariable fiksDigisosId: UUID,
     ): List<KlageRef> {
-        validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler.hentAlleKlager(fiksDigisosId)

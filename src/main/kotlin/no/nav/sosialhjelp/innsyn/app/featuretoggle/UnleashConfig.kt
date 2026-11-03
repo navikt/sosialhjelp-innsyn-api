@@ -5,7 +5,6 @@ import io.getunleash.FakeUnleash
 import io.getunleash.Unleash
 import io.getunleash.util.UnleashConfig
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.app.featuretoggle.strategy.ByInstanceIdStrategy
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -17,7 +16,6 @@ class UnleashConfig(
 ) {
     @Bean
     fun unleashClient(): Unleash {
-        val byInstanceIdStrategy = ByInstanceIdStrategy(clientProperties.unleashEnv)
         val config =
             UnleashConfig
                 .builder()
@@ -29,7 +27,6 @@ class UnleashConfig(
 
         return DefaultUnleash(
             config,
-            byInstanceIdStrategy,
         )
     }
 }

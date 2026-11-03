@@ -25,6 +25,7 @@ class KlageTilgangServiceTest {
     private val service = KlageTilgangService(fiksService, eventService, unleash)
 
     private fun mottaker(enhetsnummer: String?) {
+        every { unleash.more().featureToggleNames } returns listOf(KlageTilgangService.KLAGE_TOGGLE)
         coEvery { fiksService.getSoknad(any()) } returns sosialhjelpJsonMapper.readValue(ok_digisossak_response)
         coEvery { eventService.createModel(any()) } returns
             InternalDigisosSoker(soknadsmottaker = Soknadsmottaker(enhetsnummer, "Enhet"))

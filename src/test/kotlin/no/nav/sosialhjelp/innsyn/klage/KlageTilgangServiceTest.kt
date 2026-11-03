@@ -6,7 +6,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
@@ -33,7 +32,7 @@ class KlageTilgangServiceTest {
 
     @Test
     fun `sender enhetsnummer og kommunenummer i context og returnerer true`() =
-        runBlocking {
+        runBlocking<Unit> {
             mottaker("1234")
             val ctx = slot<UnleashContext>()
             every { unleash.isEnabled(KlageTilgangService.KLAGE_TOGGLE, capture(ctx)) } returns true
@@ -45,7 +44,7 @@ class KlageTilgangServiceTest {
 
     @Test
     fun `toggle av gir false`() =
-        runBlocking {
+        runBlocking<Unit> {
             mottaker("1234")
             every { unleash.isEnabled(any<String>(), any<UnleashContext>()) } returns false
 
@@ -53,11 +52,14 @@ class KlageTilgangServiceTest {
         }
 
     @Test
-    fun `manglende enhetsnummer gir false uten kall til unleash`() =
-        runBlocking {
+    fun `manglende enhetsnummer sendes ikke i context`() =
+        runBlocking<Unit> {
             mottaker(null)
+            val ctx = slot<UnleashContext>()
+            every { unleash.isEnabled(KlageTilgangService.KLAGE_TOGGLE, capture(ctx)) } returns false
 
             assertThat(service.kanSendeKlage(UUID.randomUUID())).isFalse()
-            verify(exactly = 0) { unleash.isEnabled(any<String>(), any<UnleashContext>()) }
+            assertThat(ctx.captured.properties).doesNotContainKey("enhetsnummer")
+            assertThat(ctx.captured.properties).containsKey("kommunenummer")
         }
 }

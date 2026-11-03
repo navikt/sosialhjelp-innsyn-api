@@ -19,14 +19,13 @@ class KlageTilgangService(
     suspend fun kanSendeKlage(digisosId: UUID): Boolean {
         val soknad = fiksService.getSoknad(digisosId.toString())
         val enhetsnummer = eventService.createModel(soknad).soknadsmottaker?.navEnhetsnummer
-        if (enhetsnummer.isNullOrBlank()) return false
-
         val context =
             UnleashContext
                 .builder()
-                .addProperty("enhetsnummer", enhetsnummer)
-                .apply { soknad.kommunenummer.takeIf { it.isNotBlank() }?.let { addProperty("kommunenummer", it) } }
-                .build()
+                .apply {
+                    soknad.kommunenummer.takeIf { it.isNotBlank() }?.let { addProperty("kommunenummer", it) }
+                    enhetsnummer?.takeIf { it.isNotBlank() }?.let { addProperty("enhetsnummer", it) }
+                }.build()
 
         return unleash.isEnabled(KLAGE_TOGGLE, context)
     }

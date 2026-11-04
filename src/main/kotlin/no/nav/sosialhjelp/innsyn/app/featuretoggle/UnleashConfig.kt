@@ -35,5 +35,5 @@ class UnleashConfig(
 @Configuration
 class UnleashMockConfig {
     @Bean
-    fun unleashClient(): Unleash = FakeUnleash()
+    fun unleashClient(): Unleash = FakeUnleash().apply { enableAll() }
 }

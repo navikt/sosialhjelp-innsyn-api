@@ -37,6 +37,7 @@ import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import no.nav.sosialhjelp.innsyn.klage.KlageMetricsService
 import no.nav.sosialhjelp.innsyn.klage.KlageRef
+import no.nav.sosialhjelp.innsyn.klage.KlageTilgangService
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
 import no.nav.sosialhjelp.innsyn.klage.fiks.DokumentInfoDto
@@ -59,6 +60,7 @@ import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
 import no.nav.sosialhjelp.innsyn.upload.UploadClient
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -84,7 +86,12 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
     @BeforeEach
     fun enableKlageToggle() {
-        (unleash as FakeUnleash).enable("sosialhjelp.innsyn.klage")
+        (unleash as FakeUnleash).enableAll()
+    }
+
+    @AfterEach
+    fun resetToggles() {
+        (unleash as FakeUnleash).enableAll()
     }
 
     @MockkBean
@@ -277,7 +284,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     @Test
     fun `innsending av klage gir 403 nar toggle er av`() {
         val digisosId = UUID.randomUUID()
-        (unleash as FakeUnleash).disable("sosialhjelp.innsyn.klage")
+        (unleash as FakeUnleash).enableAllExcept(KlageTilgangService.KLAGE_TOGGLE)
         coEvery { eventService.createModel(any()) } returns createModel(digisosId)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(

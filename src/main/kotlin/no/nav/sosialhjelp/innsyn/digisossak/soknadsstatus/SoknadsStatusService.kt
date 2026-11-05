@@ -11,9 +11,9 @@ import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
-import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Component
 class SoknadsStatusService(
@@ -26,6 +26,15 @@ class SoknadsStatusService(
         val digisosSak = fiksService.getSoknad(fiksDigisosId)
         return digisosSak.originalSoknadNAV
     }
+
+    /*
+        DSOS-649: Søknader opprettet mellom 28.04.26 14:15 og 29.04.26 12:45 kan ha fått feil telefonnummer.
+        Vi kjenner ikke opprettelsestidspunktet i søknad-api, men vi vet at utkast lagres i opptil 14 dager, så vi skjuler
+        originalsøknader sendt fra starten av dette tidsrommet til 14 dager etter slutten.
+        Dette gir også noen false positives.
+     */
+    fun skalSkjuleOriginalSoknad(timestampSendt: Long): Boolean =
+        timestampSendt == 0L || (timestampSendt in (skjulingStart + 1)..<skjulingSlutt)
 
     suspend fun hentSoknadsStatus(fiksDigisosId: String): UtvidetSoknadsStatus {
         val digisosSak = fiksService.getSoknad(fiksDigisosId)
@@ -72,6 +81,8 @@ class SoknadsStatusService(
     )
 
     companion object {
-        private val log by logger()
+        private val skjulingStart = LocalDateTime.of(2026, 4, 28, 14, 15).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
+        private val skjulingSlutt =
+            LocalDateTime.of(2026, 4, 29, 12, 45).plusDays(14).atZone(ZoneId.of("Europe/Oslo")).toInstant().toEpochMilli()
     }
 }

@@ -6,6 +6,7 @@ import no.nav.sosialhjelp.api.fiks.exceptions.FiksNotFoundException
 import no.nav.sosialhjelp.api.fiks.exceptions.FiksServerException
 import no.nav.sosialhjelp.innsyn.klage.KlageIkkeTilgjengeligException
 import no.nav.sosialhjelp.innsyn.klage.KlageMottakerManglerException
+import no.nav.sosialhjelp.innsyn.klage.KlageValidationException
 import no.nav.sosialhjelp.innsyn.klage.VedtakNotValidException
 import no.nav.sosialhjelp.innsyn.kommuneinfo.MottakUtilgjengeligException
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -160,6 +161,20 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(
             FrontendErrorMessage(FrontendErrorType.KLAGE_MOTTAKER_ERROR, NOE_UVENTET_FEILET),
             HttpStatus.INTERNAL_SERVER_ERROR,
+        )
+    }
+
+    @ExceptionHandler(KlageValidationException::class)
+    fun handleKlageValidationException(e: KlageValidationException): ResponseEntity<FrontendErrorMessage> {
+        log.warn(e.message, e)
+        val type =
+            when (e.reason) {
+                KlageValidationException.Reason.TEKST_FOR_LANG -> FrontendErrorType.KLAGE_FOR_LANG_TEKST
+                KlageValidationException.Reason.MANGLER_TEKST_OG_VEDLEGG -> FrontendErrorType.KLAGE_MANGLER_TEKST_OG_VEDLEGG
+            }
+        return ResponseEntity(
+            FrontendErrorMessage(type, e.message),
+            HttpStatus.BAD_REQUEST,
         )
     }
 

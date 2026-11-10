@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
+import no.nav.sosialhjelp.innsyn.app.texas.TexasClient
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.UUID
 
@@ -34,11 +36,17 @@ interface FiksKlageClient {
     )
 
     suspend fun hentKlager(digisosId: UUID?): List<FiksKlageDto>
+
+    suspend fun hentKlageStatus(
+        antallDager: Int,
+        sporingsId: String,
+    ): List<KlageForsendelseStatus>
 }
 
 @Component
 class FiksKlageClientImpl(
     private val fiksWebClient: WebClient,
+    private val texasClient: TexasClient,
 ) : FiksKlageClient {
     override suspend fun sendKlage(
         digisosId: UUID,
@@ -126,6 +134,24 @@ class FiksKlageClientImpl(
         return doHentKlager(uri)
     }
 
+    override suspend fun hentKlageStatus(
+        antallDager: Int,
+        sporingsId: String,
+    ): List<KlageForsendelseStatus> =
+        fiksWebClient
+            .get()
+            .uri {
+                it
+                    .path(GET_KLAGE_STATUS_PATH)
+                    .queryParam("antallDager", antallDager)
+                    .queryParam("sporingsId", sporingsId)
+                    .build()
+            }.accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
+            .retrieve()
+            .awaitBody<KlageForsendelseStatusListe>()
+            .statusListe
+
     private suspend fun doHentKlager(uri: String): List<FiksKlageDto> =
         fiksWebClient
             .get()
@@ -141,6 +167,7 @@ class FiksKlageClientImpl(
     companion object {
         private const val SEND_INN_KLAGE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/{vedtakId}"
         private const val GET_KLAGER_PATH = "/digisos/klage/api/v1/klager"
+        private const val GET_KLAGE_STATUS_PATH = "/digisos/klage/api/v1/status"
         private const val ETTERSENDELSE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/vedlegg"
 
         private fun getKlagerQueryParam(digisosId: UUID) = "?digisosId=$digisosId"

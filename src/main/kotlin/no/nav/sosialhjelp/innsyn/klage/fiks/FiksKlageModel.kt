@@ -20,6 +20,16 @@ data class FiksKlageDto(
     val trukket: Boolean,
 )
 
+data class KlageForsendelseStatusListe(
+    val statusListe: List<KlageForsendelseStatus>,
+)
+
+data class KlageForsendelseStatus(
+    val digisosId: UUID,
+    val klageId: UUID,
+    val levertFagsystem: Boolean,
+)
+
 data class FiksEttersendtInfoNAVDto(
     val ettersendelser: List<FiksEttersendelseDto>,
 )

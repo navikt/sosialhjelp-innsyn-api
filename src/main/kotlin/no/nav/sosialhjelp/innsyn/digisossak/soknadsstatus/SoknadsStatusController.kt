@@ -1,7 +1,6 @@
 package no.nav.sosialhjelp.innsyn.digisossak.soknadsstatus
 
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
-import no.nav.sosialhjelp.innsyn.soknad.api.SoknadApiService
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
@@ -17,7 +16,6 @@ import java.util.UUID
 class SoknadsStatusController(
     private val soknadsStatusService: SoknadsStatusService,
     private val tilgangskontroll: TilgangskontrollService,
-    private val soknadApiService: SoknadApiService,
     private val clientProperties: ClientProperties,
 ) {
     @GetMapping("{fiksDigisosId}/originalSoknad")
@@ -28,7 +26,7 @@ class SoknadsStatusController(
 
         val originalSoknad = soknadsStatusService.hentOriginalSoknad(fiksDigisosId.toString())
         return originalSoknad?.let {
-            if (soknadApiService.skalSkjuleOriginalSoknad(fiksDigisosId)) {
+            if (soknadsStatusService.skalSkjuleOriginalSoknad(it.timestampSendt)) {
                 return OriginalSoknadDto("", skjult = true)
             }
             val soknadDokument = it.soknadDokument

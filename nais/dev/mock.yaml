@@ -42,7 +42,6 @@ spec:
         - host: test.idporten.no
       rules:
         - application: sosialhjelp-mock-alt-api-mock
-        - application: sosialhjelp-soknad-api-mock
         - application: sosialhjelp-idporten-mock
         - application: sosialhjelp-texas-mock
         - application: sosialhjelp-upload-mock
@@ -81,8 +80,6 @@ spec:
       value: "mock"
     - name: VILKAR_DOKKRAV_FAGSYSTEM_VERSJONER
       value: "Socio;10.1.16,mock-alt;1.0-MOCKVERSJON,Testsystemet;1.0.0"
-    - name: SOKNAD_API_URL
-      value: "http://sosialhjelp-soknad-api-mock/sosialhjelp/soknad-api"
     - name: FIKS_KLAGE_ENDPOINT_URL
       value: http://sosialhjelp-mock-alt-api-mock/sosialhjelp/mock-alt-api/klage
     - name: IDPORTEN_ISSUER

@@ -24,6 +24,8 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DigisosSoker
 import no.nav.sosialhjelp.api.fiks.KommuneInfo
+import no.nav.sosialhjelp.innsyn.app.exceptions.FrontendErrorMessage
+import no.nav.sosialhjelp.innsyn.app.exceptions.FrontendErrorType
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Sak
@@ -72,6 +74,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.util.MultiValueMap
 import java.io.File
 import java.time.LocalDate
@@ -369,6 +372,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
         coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+        coEvery { uploadClient.getVedleggJson(any(), any()) } returns JsonVedleggSpesifikasjon()
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -392,6 +396,76 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
                 ),
         ).expectStatus()
             .isEqualTo(HttpStatus.BAD_REQUEST)
+    }
+
+    @Test
+    fun `Klage-input med for mange tegn i tekst kaster feil`() {
+        val digisosId = UUID.randomUUID()
+
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = true,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
+
+        doPostFullResponse(
+            uri = POST_KLAGE,
+            digisosId = digisosId,
+            body =
+                KlageInput(
+                    klageId = UUID.randomUUID(),
+                    vedtakId = UUID.randomUUID(),
+                    tekst = "Dette er en testklage".repeat(1000),
+                ),
+        ).expectStatus()
+            .isEqualTo(HttpStatus.BAD_REQUEST)
+            .expectBody<FrontendErrorMessage>()
+            .value {
+                assertThat(it).isNotNull()
+                assertThat(it?.type).isEqualTo(FrontendErrorType.KLAGE_FOR_LANG_TEKST)
+            }
+    }
+
+    @Test
+    fun `Klage uten tekst og vedlegg gir 400`() {
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val vedtakId = UUID.randomUUID()
+
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId, vedtakId)
+        coEvery { pdlClient.getPerson(any()) } returns createPdlPerson()
+        coEvery { uploadClient.getVedleggJson(klageId, klageId) } returns JsonVedleggSpesifikasjon()
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = true,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
+
+        doPostFullResponse(
+            uri = POST_KLAGE,
+            digisosId = digisosId,
+            body = KlageInput(klageId = klageId, vedtakId = vedtakId, tekst = ""),
+        ).expectStatus()
+            .isEqualTo(HttpStatus.BAD_REQUEST)
+            .expectBody<FrontendErrorMessage>()
+            .value { assertThat(it?.type).isEqualTo(FrontendErrorType.KLAGE_MANGLER_TEKST_OG_VEDLEGG) }
+
+        coVerify(exactly = 0) { fiksKlageClient.sendKlage(any(), any(), any(), any()) }
     }
 
     private fun getFile(filename: String = "sample_pdf.pdf"): File {

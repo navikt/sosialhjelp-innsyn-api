@@ -68,6 +68,10 @@ class KlageController(
         validateNotProd()
         tilgangskontroll.sjekkTilgang()
 
+        if (input.tekst.length > 2000) {
+            throw KlageValidationException("Klage-tekst kan ikke være lengre enn 2000 tegn", KlageValidationException.Reason.TEKST_FOR_LANG)
+        }
+
         klageUseCaseHandler.sendKlage(
             digisosId = fiksDigisosId,
             input = input,

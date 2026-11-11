@@ -26,15 +26,23 @@ class KlageUseCaseHandler(
             throw KlageIkkeTilgjengeligException("Klage er ikke tilgjengelig for denne Nav-enheten")
         }
 
+        val vedleggJson =
+            runCatching { klageService.fetchJsonVedleggSpec(input.klageId) }
+                .onFailure { klageMetricsService.registerSendError() }
+                .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
+
+        if (input.tekst.isBlank() && vedleggJson.hasNoFiles()) {
+            throw KlageValidationException("Klage mangler både tekst og vedlegg", KlageValidationException.Reason.MANGLER_TEKST_OG_VEDLEGG)
+        }
+
         val jsonKlage =
             jsonKlageGenerator.generateJsonKlage(
                 fiksDigisosId = digisosId,
                 input = input,
             )
-
         val klagePdf = KlagePdfGenerator.generatePdf(jsonKlage)
 
-        runCatching { klageService.sendKlage(jsonKlage, klagePdf) }
+        runCatching { klageService.sendKlage(jsonKlage, klagePdf, vedleggJson) }
             .onSuccess { klageMetricsService.registerSent() }
             .onFailure { klageMetricsService.registerSendError() }
             .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
@@ -71,3 +79,13 @@ class KlageIkkeSentException(
     message: String,
     cause: Throwable,
 ) : RuntimeException(message, cause)
+
+class KlageValidationException(
+    message: String,
+    val reason: Reason,
+) : RuntimeException(message) {
+    enum class Reason {
+        TEKST_FOR_LANG,
+        MANGLER_TEKST_OG_VEDLEGG,
+    }
+}

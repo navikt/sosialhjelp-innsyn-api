@@ -32,6 +32,7 @@ interface KlageService {
     suspend fun sendKlage(
         jsonKlage: JsonKlage,
         klagePdf: FilForOpplasting,
+        vedleggJson: JsonVedleggSpesifikasjon,
     )
 
     suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef>
@@ -52,6 +53,11 @@ interface KlageService {
         klageId: UUID,
         ettersendelseId: UUID,
     )
+
+    suspend fun fetchJsonVedleggSpec(
+        navEksternRefId: UUID,
+        klageId: UUID = navEksternRefId,
+    ): JsonVedleggSpesifikasjon
 }
 
 @Service
@@ -67,6 +73,7 @@ class KlageServiceImpl(
     override suspend fun sendKlage(
         jsonKlage: JsonKlage,
         klagePdf: FilForOpplasting,
+        vedleggJson: JsonVedleggSpesifikasjon,
     ) {
         withContext(Dispatchers.Default) {
             withTimeout(60.seconds) {
@@ -82,7 +89,7 @@ class KlageServiceImpl(
                     MandatoryFilesForKlage(
                         klageJson = objectMapper.writeValueAsString(jsonKlage),
                         klagePdf = encryptedPdf,
-                        vedleggJson = fetchJsonVedleggSpec(UUID.fromString(jsonKlage.klageId)),
+                        vedleggJson = vedleggJson,
                     ),
                 )
             }
@@ -143,9 +150,9 @@ class KlageServiceImpl(
         return mellomlagerService.processDocumentUpload(navEksternRefId, allFiles)
     }
 
-    private suspend fun fetchJsonVedleggSpec(
+    override suspend fun fetchJsonVedleggSpec(
         navEksternRefId: UUID,
-        klageId: UUID = navEksternRefId,
+        klageId: UUID,
     ): JsonVedleggSpesifikasjon = uploadClient.getVedleggJson(navEksternRefId, klageId)
 
     private fun DokumentInfoDto.toVedleggResponse(tidspunktSendt: LocalDateTime) =
@@ -169,7 +176,7 @@ class KlageServiceImpl(
         )
 }
 
-private fun JsonVedleggSpesifikasjon.hasNoFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()
+fun JsonVedleggSpesifikasjon.hasNoFiles(): Boolean = vedlegg.flatMap { it.filer }.isEmpty()
 
 private fun FiksKlageDto.getTidspunktSendt() =
     sendtKvittering.sendtStatus?.timestamp?.let { unixToLocalDateTime(it) }

@@ -59,6 +59,11 @@ class KlageUseCaseHandler(
         klageId: UUID,
     ): KlageDto? = klageService.hentKlage(digisosId, klageId)
 
+    suspend fun hentKlageForVedtak(
+        digisosId: UUID,
+        vedtakId: UUID,
+    ): KlageDto? = klageService.hentKlageForVedtak(digisosId, vedtakId)
+
     suspend fun lastOppVedlegg(
         digisosId: UUID,
         navEksternRefId: UUID,

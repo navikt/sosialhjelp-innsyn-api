@@ -59,7 +59,12 @@ class KlageUseCaseHandler(
         klageId: UUID,
     ): KlageDto? = klageService.hentKlage(digisosId, klageId)
 
-    suspend fun lastOppVedlegg(
+    suspend fun hentKlageForVedtak(
+        digisosId: UUID,
+        vedtakId: UUID,
+    ): KlageDto? = klageService.hentKlageForVedtak(digisosId, vedtakId)
+
+    suspend fun lastOpp3433Vedlegg(
         digisosId: UUID,
         navEksternRefId: UUID,
         rawFiles: Flux<FilePart>,

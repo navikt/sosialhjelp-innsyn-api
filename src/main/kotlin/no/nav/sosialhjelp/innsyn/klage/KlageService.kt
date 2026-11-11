@@ -54,6 +54,11 @@ interface KlageService {
         ettersendelseId: UUID,
     )
 
+    suspend fun hentKlageForVedtak(
+        fiksDigisosId: UUID,
+        vedtakId: UUID,
+    ): KlageDto?
+
     suspend fun fetchJsonVedleggSpec(
         navEksternRefId: UUID,
         klageId: UUID = navEksternRefId,
@@ -154,6 +159,27 @@ class KlageServiceImpl(
         navEksternRefId: UUID,
         klageId: UUID,
     ): JsonVedleggSpesifikasjon = uploadClient.getVedleggJson(navEksternRefId, klageId)
+
+    override suspend fun hentKlageForVedtak(
+        fiksDigisosId: UUID,
+        vedtakId: UUID,
+    ): KlageDto? {
+        val fiksKlage =
+            klageClient.hentKlager(fiksDigisosId).find { it.vedtakId == vedtakId } ?: return null
+
+        val klagePdf = fiksKlage.klageDokument.toVedleggResponse(fiksKlage.getTidspunktSendt())
+        val opplastedeVedlegg = fiksKlage.vedlegg.map { it.toVedleggResponse(fiksKlage.getTidspunktSendt()) }
+
+        return KlageDto(
+            digisosId = fiksDigisosId,
+            klageId = fiksKlage.klageId,
+            vedtakId = fiksKlage.vedtakId,
+            klagePdf = klagePdf,
+            opplastedeVedlegg = opplastedeVedlegg,
+            ettersendelser = fiksKlage.ettersendtInfoNAV?.ettersendelser?.map { it.toEttersendelseDto() } ?: emptyList(),
+            timestampSendt = fiksKlage.sendtKvittering.sendtStatus?.timestamp ?: 0L,
+        )
+    }
 
     private fun DokumentInfoDto.toVedleggResponse(tidspunktSendt: LocalDateTime) =
         VedleggResponse(

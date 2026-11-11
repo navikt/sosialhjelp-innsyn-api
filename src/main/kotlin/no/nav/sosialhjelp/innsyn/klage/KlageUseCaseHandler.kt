@@ -26,10 +26,6 @@ class KlageUseCaseHandler(
             throw KlageIkkeTilgjengeligException("Klage er ikke tilgjengelig for denne Nav-enheten")
         }
 
-        if (input.tekst.length > 2000) {
-            throw KlageValidationException("Klage-tekst kan ikke være lengre enn 2000 tegn", KlageValidationException.Reason.TEKST_FOR_LANG)
-        }
-
         val vedleggJson =
             runCatching { klageService.fetchJsonVedleggSpec(input.klageId) }
                 .onFailure { klageMetricsService.registerSendError() }

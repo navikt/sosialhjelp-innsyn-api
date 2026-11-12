@@ -12,7 +12,6 @@ import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UrlResponse
-import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
@@ -20,8 +19,6 @@ import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
@@ -221,64 +218,16 @@ internal class HendelseServiceTest {
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
 
+            // Grupperingen leser nå utbetalingshendelser fra historikken (lagt til per statusendring
+            // i event/Utbetaling.kt), ikke fra model.utbetalinger. Samme tidspunkter og forventninger som før.
             val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
-            model.utbetalinger =
-                mutableListOf(
-                    Utbetaling(
-                        referanse = "utbetalref",
-                        status = UtbetalingsStatus.UTBETALT,
-                        belop = BigDecimal.valueOf(1337.0),
-                        beskrivelse = "beskrivelse",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.now(),
-                        stoppetDato = null,
-                        fom = null,
-                        tom = null,
-                        mottaker = "mottaker",
-                        annenMottaker = false,
-                        kontonummer = "kontonummer",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = time,
-                    ),
-                    Utbetaling(
-                        referanse = "utbetalref",
-                        status = UtbetalingsStatus.UTBETALT,
-                        belop = BigDecimal.valueOf(1337.0),
-                        beskrivelse = "beskrivelse",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.now(),
-                        stoppetDato = null,
-                        fom = null,
-                        tom = null,
-                        mottaker = "mottaker",
-                        annenMottaker = false,
-                        kontonummer = "kontonummer",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = time.plusMinutes(4).plusSeconds(59),
-                    ),
-                    Utbetaling(
-                        referanse = "utbetalref",
-                        status = UtbetalingsStatus.UTBETALT,
-                        belop = BigDecimal.valueOf(1337.0),
-                        beskrivelse = "beskrivelse",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.now(),
-                        stoppetDato = null,
-                        fom = null,
-                        tom = null,
-                        mottaker = "mottaker",
-                        annenMottaker = false,
-                        kontonummer = "kontonummer",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = time.plusMinutes(5),
-                    ),
-                )
+            model.historikk.addAll(
+                listOf(
+                    utbetalingshendelse(time, UtbetalingsStatus.UTBETALT),
+                    utbetalingshendelse(time.plusMinutes(4).plusSeconds(59), UtbetalingsStatus.UTBETALT),
+                    utbetalingshendelse(time.plusMinutes(5), UtbetalingsStatus.UTBETALT),
+                ),
+            )
 
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
@@ -286,103 +235,65 @@ internal class HendelseServiceTest {
             val hendelser = service.hentHendelser("123").hendelser
 
             assertThat(hendelser).hasSize(2)
-            val first = hendelser[0]
-            assertThat(first.tidspunkt).isEqualTo(time)
-
-            val second = hendelser[1]
-            assertThat(second.tidspunkt).isEqualTo(time.plusMinutes(5))
+            assertThat(hendelser[0].tidspunkt).isEqualTo(time)
+            assertThat(hendelser[1].tidspunkt).isEqualTo(time.plusMinutes(5))
         }
 
     @Test
-    internal fun `hendelser for utbetalinger - utbetalinger med annen status enn ANNULERT blir filtrert bort`() =
+    internal fun `hendelser for utbetalinger - ulike statuser i samme 5-minuttersvindu grupperes ikke`() =
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
 
             val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
-            model.utbetalinger =
-                mutableListOf(
-                    Utbetaling(
-                        referanse = "utbetalref",
-                        status = UtbetalingsStatus.PLANLAGT_UTBETALING,
-                        belop = BigDecimal.valueOf(1337.0),
-                        beskrivelse = "beskrivelse",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.now(),
-                        stoppetDato = null,
-                        fom = null,
-                        tom = null,
-                        mottaker = "mottaker",
-                        annenMottaker = false,
-                        kontonummer = "kontonummer",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = time,
-                    ),
-                    Utbetaling(
-                        referanse = "utbetalref",
-                        status = UtbetalingsStatus.ANNULLERT,
-                        belop = BigDecimal.valueOf(1337.0),
-                        beskrivelse = "beskrivelse",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.now(),
-                        stoppetDato = null,
-                        fom = null,
-                        tom = null,
-                        mottaker = "mottaker",
-                        annenMottaker = false,
-                        kontonummer = "kontonummer",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = time.plusMinutes(10),
-                    ),
-                    Utbetaling(
-                        referanse = "utbetalref",
-                        status = UtbetalingsStatus.STOPPET,
-                        belop = BigDecimal.valueOf(1337.0),
-                        beskrivelse = "beskrivelse",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.now(),
-                        stoppetDato = null,
-                        fom = null,
-                        tom = null,
-                        mottaker = "mottaker",
-                        annenMottaker = false,
-                        kontonummer = "kontonummer",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = time.plusMinutes(20),
-                    ),
-                    Utbetaling(
-                        referanse = "utbetalref",
-                        status = UtbetalingsStatus.UTBETALT,
-                        belop = BigDecimal.valueOf(1337.0),
-                        beskrivelse = "utbetalt utbetaling",
-                        forfallsDato = null,
-                        utbetalingsDato = LocalDate.now(),
-                        stoppetDato = null,
-                        fom = null,
-                        tom = null,
-                        mottaker = "mottaker",
-                        annenMottaker = false,
-                        kontonummer = "kontonummer",
-                        utbetalingsmetode = "utbetalingsmetode",
-                        vilkar = mutableListOf(),
-                        dokumentasjonkrav = mutableListOf(),
-                        datoHendelse = time.plusMinutes(30),
-                    ),
-                )
+            model.historikk.addAll(
+                listOf(
+                    utbetalingshendelse(time, UtbetalingsStatus.PLANLAGT_UTBETALING),
+                    utbetalingshendelse(time.plusMinutes(1), UtbetalingsStatus.STOPPET),
+                ),
+            )
 
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
             val hendelser = service.hentHendelser("123").hendelser
 
-            assertThat(hendelser).hasSize(3)
-            assertThat(hendelser[0].tidspunkt).isEqualTo(time)
-            assertThat(hendelser[1].tidspunkt).isEqualTo(time.plusMinutes(20))
-            assertThat(hendelser[2].tidspunkt).isEqualTo(time.plusMinutes(30))
+            assertThat(hendelser.map { it.utbetalingsStatus })
+                .containsExactly(UtbetalingsStatus.PLANLAGT_UTBETALING, UtbetalingsStatus.STOPPET)
         }
+
+    @Test
+    internal fun `hendelser for utbetalinger - alle statusendringer beholdes, inkludert ANNULLERT`() =
+        runTest(timeout = 5.seconds) {
+            val model = InternalDigisosSoker()
+
+            val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
+            model.historikk.addAll(
+                listOf(
+                    utbetalingshendelse(time, UtbetalingsStatus.PLANLAGT_UTBETALING),
+                    utbetalingshendelse(time.plusMinutes(10), UtbetalingsStatus.UTBETALT),
+                    utbetalingshendelse(time.plusMinutes(20), UtbetalingsStatus.STOPPET),
+                    utbetalingshendelse(time.plusMinutes(30), UtbetalingsStatus.ANNULLERT),
+                ),
+            )
+
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
+
+            val hendelser = service.hentHendelser("123").hendelser
+
+            assertThat(hendelser).hasSize(4)
+            assertThat(hendelser.map { it.tidspunkt })
+                .containsExactly(time, time.plusMinutes(10), time.plusMinutes(20), time.plusMinutes(30))
+            assertThat(hendelser.map { it.utbetalingsStatus }).containsExactly(
+                UtbetalingsStatus.PLANLAGT_UTBETALING,
+                UtbetalingsStatus.UTBETALT,
+                UtbetalingsStatus.STOPPET,
+                UtbetalingsStatus.ANNULLERT,
+            )
+        }
+
+    private fun utbetalingshendelse(
+        tidspunkt: LocalDateTime,
+        status: UtbetalingsStatus,
+    ) = Hendelse(HendelseTekstType.UTBETALINGER_OPPDATERT, tidspunkt, utbetalingsStatus = status)
 }

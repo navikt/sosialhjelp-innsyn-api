@@ -147,6 +147,7 @@ data class Hendelse(
     val type: HistorikkType? = null,
     val tekstArgument: String? = null,
     val saksReferanse: String? = null,
+    val utbetalingsStatus: UtbetalingsStatus? = null,
 )
 
 data class UrlResponse(
@@ -335,7 +336,11 @@ enum class HendelseTekstType : HendelseDtoMapper {
         override fun mapTilHendelseDto(
             hendelse: Hendelse,
             enhetNavn: String?,
-        ): HendelseDto = HendelseDto.UtbetalingerOppdatert(hendelse.tidspunkt)
+        ): HendelseDto =
+            HendelseDto.UtbetalingerOppdatert(
+                hendelse.tidspunkt,
+                hendelse.utbetalingsStatus ?: UtbetalingsStatus.PLANLAGT_UTBETALING,
+            )
     },
     BREV_OM_SAKSBEANDLINGSTID {
         override fun mapTilHendelseDto(

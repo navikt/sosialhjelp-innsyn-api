@@ -89,6 +89,10 @@ class PdfGenerator internal constructor(
         addCenteredParagraph(text, fontBold, FONT_H4_SIZE, LEADING_PERCENTAGE)
     }
 
+    fun addTextH4Bold(text: String) {
+        addParagraph(text, fontBold, FONT_H4_SIZE, MARGIN)
+    }
+
     fun addText(text: String) {
         addParagraph(text, fontPlain, FONT_PLAIN_SIZE, MARGIN)
     }

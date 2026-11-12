@@ -32,9 +32,11 @@ class KlageUseCaseHandler(
                 input = input,
             )
 
-        val klagePdf = KlagePdfGenerator.generatePdf(jsonKlage)
-
-        runCatching { klageService.sendKlage(jsonKlage, klagePdf) }
+        runCatching {
+            klageService.sendKlage(jsonKlage) { vedleggSpesifikasjon ->
+                KlagePdfGenerator.generatePdf(jsonKlage, vedleggSpesifikasjon)
+            }
+        }
             .onSuccess { klageMetricsService.registerSent() }
             .onFailure { klageMetricsService.registerSendError() }
             .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }

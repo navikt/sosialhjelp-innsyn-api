@@ -17,6 +17,7 @@ import org.apache.pdfbox.text.PDFTextStripper
 import org.apache.pdfbox.text.TextPosition
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -92,7 +93,7 @@ internal class KlagePdfGeneratorTest {
     }
 
     @Test
-//    @EnabledIfEnvironmentVariable(named = "GENERATE_KLAGE_PDF", matches = "true")
+    @EnabledIfEnvironmentVariable(named = "GENERATE_KLAGE_PDF", matches = "true")
     fun `manuell test lagrer PDF lokalt for inspeksjon`() {
         val klageTekst = "Jeg er ekstremt misfornøyd med vedtaket og ønsker å klage på det. Jeg mener at saksbehandlingen " +
             "har vært mangelfull og at min situasjon ikke har blitt vurdert korrekt."

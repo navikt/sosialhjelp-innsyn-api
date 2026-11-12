@@ -148,7 +148,9 @@ class PdfGenerator internal constructor(
             currentStream.showText(lines[i])
         }
         currentStream.endText()
-        y -= lines.size * fontSize
+        if (lines.isNotEmpty()) {
+            y -= ((lines.size - 1) * leadingPercentage + 1) * fontSize
+        }
     }
 
     private fun continueOnNewPage() {
@@ -163,10 +165,29 @@ class PdfGenerator internal constructor(
         font: PDFont,
         fontSize: Float,
     ): List<String> {
-        var text: String? = inputText
         val lines: MutableList<String> = ArrayList()
+        if (inputText.isEmpty()) return lines
+
+        inputText.lines().forEach { line ->
+            val text = line.replace(CONTROL_CHARACTERS, " ")
+            if (text.isEmpty()) {
+                lines.add("")
+            } else {
+                wrapLine(text, font, fontSize, lines)
+            }
+        }
+        return lines
+    }
+
+    private fun wrapLine(
+        inputText: String,
+        font: PDFont,
+        fontSize: Float,
+        lines: MutableList<String>,
+    ) {
+        var text = inputText
         var lastSpace = -1
-        while (text != null && text.isNotEmpty()) {
+        while (text.isNotEmpty()) {
             var spaceIndex = text.indexOf(' ', lastSpace + 1)
             if (spaceIndex < 0) spaceIndex = text.length
             var subString = text.substring(0, spaceIndex)
@@ -186,7 +207,6 @@ class PdfGenerator internal constructor(
                 lastSpace = spaceIndex
             }
         }
-        return lines
     }
 
     private fun addLogo() {
@@ -217,6 +237,7 @@ class PdfGenerator internal constructor(
 
         private const val S_RGB_IEC61966_2_1 = "sRGB IEC61966-2.1"
 
+        private val CONTROL_CHARACTERS = Regex("\\p{Cc}")
         private val WIDTH_OF_CONTENT_COLUMN = PDPage(PDRectangle.A4).mediaBox.width - (MARGIN * 2)
         private val MEDIA_BOX = PDPage(PDRectangle.A4).mediaBox
     }

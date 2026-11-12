@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.klage
 
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
@@ -13,10 +12,8 @@ class KlageUseCaseHandler(
     private val jsonKlageGenerator: JsonKlageGenerator,
     private val kommuneService: KommuneService,
     private val klageTilgangService: KlageTilgangService,
-    meterRegistry: MeterRegistry,
+    private val klageMetricsService: KlageMetricsService,
 ) {
-    private val klageMetricsService = KlageMetricsService(meterRegistry)
-
     suspend fun sendKlage(
         digisosId: UUID,
         input: KlageInput,
@@ -28,7 +25,7 @@ class KlageUseCaseHandler(
 
         val vedleggJson =
             runCatching { klageService.fetchJsonVedleggSpec(input.klageId) }
-                .onFailure { klageMetricsService.registerSendError() }
+                .onFailure { klageMetricsService.registerKlageSent(kommunenummer = null, success = false) }
                 .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
 
         if (input.tekst.isBlank() && vedleggJson.hasNoFiles()) {
@@ -43,8 +40,8 @@ class KlageUseCaseHandler(
         val klagePdf = KlagePdfGenerator.generatePdf(jsonKlage)
 
         runCatching { klageService.sendKlage(jsonKlage, klagePdf, vedleggJson) }
-            .onSuccess { klageMetricsService.registerSent() }
-            .onFailure { klageMetricsService.registerSendError() }
+            .onSuccess { klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = true) }
+            .onFailure { klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = false) }
             .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
 
         return hentKlage(digisosId, input.klageId) ?: error("Fant ikke innsendt klage")
@@ -76,7 +73,10 @@ class KlageUseCaseHandler(
         ettersendelseId: UUID,
     ) {
         kommuneService.validerMottakOgInnsynForKommune(digisosId)
-        klageService.sendEttersendelse(digisosId, klageId, ettersendelseId)
+        runCatching { klageService.sendEttersendelse(digisosId, klageId, ettersendelseId) }
+            .onSuccess { klageMetricsService.registerEttersendelseSent(success = true) }
+            .onFailure { klageMetricsService.registerEttersendelseSent(success = false) }
+            .getOrThrow()
     }
 }
 

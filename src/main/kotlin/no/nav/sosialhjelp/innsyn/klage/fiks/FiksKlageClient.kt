@@ -133,7 +133,7 @@ class FiksKlageClientImpl(
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
             .retrieve()
-            .bodyToMono(Array<FiksKlageDto>::class.java)
+            .bodyToMono<Array<FiksKlageDto>>()
             .awaitSingleOrNull()
             ?.toList()
             ?: emptyList()

@@ -11,6 +11,7 @@ import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.event.InnsynService
+import no.nav.sosialhjelp.innsyn.klage.KlageService
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
@@ -28,6 +29,9 @@ import org.springframework.test.web.reactive.server.expectBodyList
 class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     @MockkBean
     private lateinit var fiksService: FiksService
+
+    @MockkBean
+    private lateinit var klageService: KlageService
 
     @MockkBean
     private lateinit var kommuneService: KommuneService
@@ -51,6 +55,7 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
     fun `skal hente liste med saker`() {
         val digisosSakOk = sosialhjelpJsonMapper.readValue(ok_digisossak_response, DigisosSak::class.java)
         coEvery { fiksService.getAllSoknader() } returns listOf(digisosSakOk)
+        coEvery { klageService.hentKlager() } returns emptyList()
 
         doGet(uri = "/api/v1/innsyn/saker", emptyList())
             .expectBodyList<SaksListeResponse>()
@@ -70,6 +75,7 @@ class SaksOversiktIntegrasjonsTest : AbstractIntegrationTest() {
         coEvery { kommuneService.hentKommuneInfo(any()) } returns IntegrasjonstestStubber.lagKommuneInfoStub()
         coEvery { kommuneService.erInnsynDeaktivertForKommune(any()) } returns false
         coEvery { fiksService.getDocument(any<String>(), any<String>(), JsonDigisosSoker::class.java, any()) } returns soker
+        coEvery { klageService.hentKlager() } returns emptyList()
         coEvery { norgClient.hentNavEnhet(any()) } returns navEnhet
         every { navEnhet.navn } returns "testNavKontor"
         coEvery { fiksService.getDocument(any<String>(), any<String>(), JsonSoknad::class.java, any()) } returns soknad

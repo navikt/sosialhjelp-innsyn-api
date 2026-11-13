@@ -153,6 +153,7 @@ data class KlageInput(
 data class KlageRef(
     val klageId: UUID,
     val vedtakId: UUID,
+    val fiksDigisosId: UUID,
 )
 
 data class KlageDto(

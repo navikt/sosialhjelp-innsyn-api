@@ -1,6 +1,8 @@
 package no.nav.sosialhjelp.innsyn.event
 
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
+import no.nav.sosialhjelp.innsyn.domain.Hendelse
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
@@ -47,6 +49,18 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     sakForReferanse?.utbetalinger?.add(utbetaling)
     utbetalinger.removeIf { t -> t.referanse == utbetaling.referanse }
     utbetalinger.add(utbetaling)
+
+    // Én historikk-hendelse per statusendring, slik at tidligere endringer (og annullering) ikke overskrives.
+    // Endringer uten ny status (f.eks. nytt beløp eller ny dato) gir ingen ny hendelse.
+    if (gammelUtbetaling == null || gammelUtbetaling.status != utbetaling.status) {
+        historikk.add(
+            Hendelse(
+                hendelseType = HendelseTekstType.UTBETALINGER_OPPDATERT,
+                tidspunkt = utbetaling.datoHendelse,
+                utbetalingsStatus = utbetaling.status,
+            ),
+        )
+    }
 }
 
 private fun isAnnenMottaker(hendelse: JsonUtbetaling) = hendelse.annenMottaker == true

@@ -6,13 +6,16 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonDigisosSoker
+import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonUtbetaling
 import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknad
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.app.ClientProperties
+import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
+import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
@@ -74,7 +77,7 @@ internal class UtbetalingTest {
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
             assertThat(model.saker).hasSize(1)
-            assertThat(model.historikk).hasSize(6)
+            assertThat(model.historikk).hasSize(7) // inkl. hendelse for utbetaling
 
             // tittel for sak fra saksstatus-hendelse
             assertThat(model.saker[0].tittel).isEqualTo(TITTEL_1)
@@ -141,5 +144,45 @@ internal class UtbetalingTest {
             assertThat(model.utbetalinger[0].belop).isEqualTo("1234.56")
             assertThat(model.utbetalinger[0].kontonummer).isNull()
             assertThat(model.utbetalinger[0].mottaker).isEqualTo("utleier")
+        }
+
+    @Test
+    fun `historikk - ny hendelse ved hver statusendring, ingen ved uendret status`() =
+        runTest(timeout = 5.seconds) {
+            coEvery { innsynService.hentJsonDigisosSoker(any()) } returns
+                JSON_DIGISOS_SOKER.copy(
+                    hendelser =
+                        listOf(
+                            UTBETALING.copy(hendelsestidspunkt = tidspunkt_1, status = JsonUtbetaling.Status.PLANLAGT_UTBETALING),
+                            // Samme status, nytt beløp: skal ikke gi ny hendelse
+                            UTBETALING.copy(
+                                hendelsestidspunkt = tidspunkt_2,
+                                status = JsonUtbetaling.Status.PLANLAGT_UTBETALING,
+                                belop = 999.0,
+                            ),
+                            UTBETALING.copy(hendelsestidspunkt = tidspunkt_3, status = JsonUtbetaling.Status.UTBETALT),
+                            UTBETALING.copy(hendelsestidspunkt = tidspunkt_4, status = JsonUtbetaling.Status.STOPPET),
+                            UTBETALING.copy(hendelsestidspunkt = tidspunkt_5, status = JsonUtbetaling.Status.ANNULLERT),
+                        ),
+                )
+            coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, any()) } returns emptyList()
+
+            val model = service.createModel(mockDigisosSak)
+
+            val utbetalingshendelser = model.historikk.filter { it.hendelseType == HendelseTekstType.UTBETALINGER_OPPDATERT }
+            assertThat(utbetalingshendelser.map { it.utbetalingsStatus }).containsExactly(
+                UtbetalingsStatus.PLANLAGT_UTBETALING,
+                UtbetalingsStatus.UTBETALT,
+                UtbetalingsStatus.STOPPET,
+                UtbetalingsStatus.ANNULLERT,
+            )
+            assertThat(utbetalingshendelser.map { it.tidspunkt }).containsExactly(
+                tidspunkt_1.toLocalDateTime(),
+                tidspunkt_3.toLocalDateTime(),
+                tidspunkt_4.toLocalDateTime(),
+                tidspunkt_5.toLocalDateTime(),
+            )
+            assertThat(model.utbetalinger).hasSize(1)
+            assertThat(model.utbetalinger[0].status).isEqualTo(UtbetalingsStatus.ANNULLERT)
         }
 }

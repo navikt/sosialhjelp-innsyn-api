@@ -4,7 +4,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
@@ -35,7 +34,7 @@ class HendelseService(
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(digisosSak, model)
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
-        model.leggTilHendelserForUtbetalinger()
+        model.grupperHendelserForUtbetalinger()
         return HendelseInfo(
             model.historikk.sortedBy { it.tidspunkt },
             digisosSak.kommunenummer,
@@ -60,15 +59,21 @@ class HendelseService(
             }
     }
 
-    private fun InternalDigisosSoker.leggTilHendelserForUtbetalinger() {
-        utbetalinger
-            .filter { it.status != UtbetalingsStatus.ANNULLERT }
-            .groupBy { it.datoHendelse.rundNedTilNaermeste5Minutt() }
-            .forEach { (_, grupperteVilkar) ->
-                historikk.add(
-                    Hendelse(HendelseTekstType.UTBETALINGER_OPPDATERT, grupperteVilkar[0].datoHendelse),
-                )
-            }
+    /**
+     * Utbetalingshendelser legges i historikken ved hver statusendring (se event/Utbetaling.kt).
+     * Her slås hendelser med samme status innenfor samme 5-minuttersvindu sammen til én,
+     * slik at en batch med mange utbetalinger gir én linje. Ulike statuser holdes adskilt.
+     */
+    private fun InternalDigisosSoker.grupperHendelserForUtbetalinger() {
+        val (utbetalingshendelser, andreHendelser) =
+            historikk.partition { it.hendelseType == HendelseTekstType.UTBETALINGER_OPPDATERT }
+
+        val grupperteUtbetalingshendelser =
+            utbetalingshendelser
+                .groupBy { it.tidspunkt.rundNedTilNaermeste5Minutt() to it.utbetalingsStatus }
+                .map { (_, hendelserIGruppe) -> hendelserIGruppe.minBy { it.tidspunkt } }
+
+        historikk = (andreHendelser + grupperteUtbetalingshendelser).toMutableList()
     }
 
     private fun LocalDateTime.rundNedTilNaermeste5Minutt(): LocalDateTime =

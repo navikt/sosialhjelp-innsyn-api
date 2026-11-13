@@ -19,6 +19,9 @@ import no.nav.sosialhjelp.innsyn.utils.soknadsalderIMinutter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import java.time.Instant
 import java.time.LocalDateTime
 
 internal class SoknadsStatusServiceTest {
@@ -34,6 +37,31 @@ internal class SoknadsStatusServiceTest {
 
     private val dokumentlagerId = "dokumentlagerId"
     private val navEnhet = "Nav Test"
+
+    @ParameterizedTest
+    @CsvSource(
+        "2026-04-28T12:14:59.999Z, false",
+        "2026-04-28T12:15:00Z, false",
+        "2026-04-28T12:15:00.001Z, true",
+        "2026-04-29T10:44:59.999Z, true",
+        "2026-05-10T10:00:00Z, true",
+        "2026-05-13T10:44:59.999Z, true",
+        "2026-05-13T10:45:00Z, false",
+        "2026-05-13T10:45:00.001Z, false",
+        "2026-04-01T10:00:00Z, false",
+        "2026-06-01T10:00:00Z, false",
+    )
+    fun `Skjuler originalsoknad i utvidet innsendingsvindu`(
+        sendt: String,
+        skjult: Boolean,
+    ) {
+        assertThat(service.skalSkjuleOriginalSoknad(Instant.parse(sendt).toEpochMilli())).isEqualTo(skjult)
+    }
+
+    @Test
+    fun `Skjuler originalsoknad med ukjent innsendingstidspunkt`() {
+        assertThat(service.skalSkjuleOriginalSoknad(0L)).isTrue()
+    }
 
     @BeforeEach
     fun init() {

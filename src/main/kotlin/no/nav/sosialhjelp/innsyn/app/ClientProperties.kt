@@ -33,7 +33,4 @@ class ClientProperties {
 
     lateinit var uploadEndpointUrl: String
     lateinit var uploadAudience: String
-
-    var soknadApiUrl: String? = null
-    var soknadApiAudience: String? = null
 }

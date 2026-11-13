@@ -28,6 +28,8 @@ data class KlageForsendelseStatus(
     val digisosId: UUID,
     val klageId: UUID,
     val levertFagsystem: Boolean,
+    val tidspunkt: Long,
+    val kommunenr: String,
 )
 
 data class FiksEttersendtInfoNAVDto(

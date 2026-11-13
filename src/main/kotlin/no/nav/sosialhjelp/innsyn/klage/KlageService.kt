@@ -120,8 +120,13 @@ class KlageServiceImpl(
     }
 
     override suspend fun hentKlager(fiksDigisosId: UUID?): List<KlageRef> =
-        klageClient.hentKlager(fiksDigisosId).map {
-            KlageRef(it.klageId, it.vedtakId, it.digisosId)
+        klageClient.hentKlager(fiksDigisosId).map { klage ->
+            KlageRef(
+                klage.klageId,
+                klage.vedtakId,
+                klage.digisosId,
+                klage.sendtKvittering.sendtStatus?.timestamp,
+            )
         }
 
     override suspend fun hentKlage(

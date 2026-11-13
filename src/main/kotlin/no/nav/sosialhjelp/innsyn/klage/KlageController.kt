@@ -154,6 +154,7 @@ data class KlageRef(
     val klageId: UUID,
     val vedtakId: UUID,
     val fiksDigisosId: UUID,
+    val timestampSendt: Long? = null,
 )
 
 data class KlageDto(

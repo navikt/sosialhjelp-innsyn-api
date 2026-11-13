@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.UUID
 
@@ -149,8 +148,10 @@ class FiksKlageClientImpl(
             }.accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, texasClient.getMaskinportenToken().withBearer())
             .retrieve()
-            .awaitBody<KlageForsendelseStatusListe>()
-            .statusListe
+            .bodyToMono<KlageForsendelseStatusListe>()
+            .awaitSingleOrNull()
+            ?.statusListe
+            ?: emptyList()
 
     private suspend fun doHentKlager(uri: String): List<FiksKlageDto> =
         fiksWebClient
@@ -159,7 +160,7 @@ class FiksKlageClientImpl(
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
             .retrieve()
-            .bodyToMono(Array<FiksKlageDto>::class.java)
+            .bodyToMono<Array<FiksKlageDto>>()
             .awaitSingleOrNull()
             ?.toList()
             ?: emptyList()

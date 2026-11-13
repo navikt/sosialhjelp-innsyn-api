@@ -83,6 +83,11 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         (unleash as FakeUnleash).enableAll()
     }
 
+    @AfterEach
+    fun resetToggles() {
+        (unleash as FakeUnleash).enableAll()
+    }
+
     @MockkBean
     private lateinit var fiksService: FiksService
 

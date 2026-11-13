@@ -12,7 +12,8 @@ import java.util.UUID
 class CheckStatusKlagerSendtJob(
     private val fiksKlageClient: FiksKlageClient,
 ) {
-    @Scheduled(cron = "0 0 4 * * *", zone = "Europe/Oslo")
+    // TODO Litt roligere schedule
+    @Scheduled(cron = "0 /5 * * * *", zone = "Europe/Oslo")
     suspend fun checkStatus() {
         val sporingsId = UUID.randomUUID().toString()
         val statuser =

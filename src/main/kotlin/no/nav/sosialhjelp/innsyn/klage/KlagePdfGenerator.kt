@@ -49,16 +49,13 @@ object KlagePdfGenerator {
         val boldFont = loadFont(document, "SourceSansPro-Bold.ttf")
         val pdf = PdfGenerator(document)
 
-        repeat(3) { pdf.addBlankLine() }
-        pdf.addCenteredH1Bold("Klage på vedtak om økonomisk sosialhjelp")
-        addCenteredText(pdf, boldFont, "Vedtaksreferanse: ${jsonKlage.vedtakReferanse.referanse}")
+        pdf.addCenteredH3Bold("Klage på vedtak om økonomisk sosialhjelp")
         addCenteredText(pdf, boldFont, jsonKlage.getFullName().uppercase())
         addCenteredText(pdf, boldFont, "PersonId: ${jsonKlage.personIdentifikator.verdi}")
         pdf.addDividerLine()
         pdf.addBlankLine()
 
-        addBodyHeading(pdf, boldFont, "Mottaker: ${jsonKlage.getMottakerInfo()}")
-        addBodyHeading(pdf, boldFont, "Sendt: ${jsonKlage.innsendingstidspunkt.toOsloDisplayTime()}")
+        addBodyHeading(pdf, boldFont, "Vedtaksreferanse: ${jsonKlage.vedtakReferanse.referanse}")
         pdf.addBlankLine()
 
         addBodyText(pdf, regularFont, jsonKlage.begrunnelse?.klageTekst ?: "<Begrunnelse ikke oppgitt>")
@@ -71,6 +68,12 @@ object KlagePdfGenerator {
         } else {
             filenames.forEach { filename -> addBodyText(pdf, regularFont, filename ?: "") }
         }
+
+        pdf.addBlankLine()
+        pdf.addBlankLine()
+
+        addBodyText(pdf, boldFont, "Klagen er sendt: ${jsonKlage.innsendingstidspunkt.toOsloDisplayTime()}")
+        addBodyText(pdf, boldFont, "Sendt til: ${jsonKlage.getMottakerInfo()}")
 
         pdf.addBlankLine()
         addBodyText(pdf, regularFont, "Klagen er elektronisk autentisert med ID-porten.")

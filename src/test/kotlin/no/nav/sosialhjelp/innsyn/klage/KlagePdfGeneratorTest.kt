@@ -95,18 +95,22 @@ internal class KlagePdfGeneratorTest {
     @Test
     @EnabledIfEnvironmentVariable(named = "GENERATE_KLAGE_PDF", matches = "true")
     fun `manuell test lagrer PDF lokalt for inspeksjon`() {
-        val klageTekst = "Jeg er ekstremt misfornøyd med vedtaket og ønsker å klage på det. Jeg mener at saksbehandlingen " +
-            "har vært mangelfull og at min situasjon ikke har blitt vurdert korrekt."
+        val klageTekst =
+            "Jeg er ekstremt misfornøyd med vedtaket og ønsker å klage på det. Jeg mener at saksbehandlingen " +
+                "har vært mangelfull og at min situasjon ikke har blitt vurdert korrekt."
 
-
-        val pdf = KlagePdfGenerator.generatePdf(
-            testKlage(tekst = klageTekst),
-            vedleggSpec(
-                "vedlegg-rapport.pdf",
-                "utskrift_bankkonto.pdf",
-                "tannlegeregning.pdf",
+        val pdf =
+            KlagePdfGenerator.generatePdf(
+                testKlage(tekst = klageTekst),
+                vedleggSpec(
+                    "vedlegg-rapport.pdf",
+                    "utskrift_bankkonto.pdf",
+                    "tannlegeregning.pdf",
+                    "vedlegg-rapport.pdf",
+                    "utskrift_bankkonto.pdf",
+                    "tannlegeregning.pdf",
+                ),
             )
-        )
         val output = Path.of("build", "klage-preview${LocalDateTime.now().nano}.pdf")
 
         Files.createDirectories(output.parent)

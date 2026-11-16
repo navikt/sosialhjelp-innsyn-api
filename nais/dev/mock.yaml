@@ -10,6 +10,7 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  leaderElection: true
   liveness:
     path: /sosialhjelp/innsyn-api/internal/isAlive
     initialDelay: 45

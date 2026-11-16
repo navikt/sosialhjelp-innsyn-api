@@ -80,12 +80,12 @@ internal class CheckStatusKlagerSendtJobTest {
 
         job.checkStatus()
 
-        assertThat(meterRegistry.get("klage.ikke.mottatt").gauge().value()).isEqualTo(forventetAntall)
+        assertThat(meterRegistry.get("sosialhjelp.klage.ikke.mottatt").gauge().value()).isEqualTo(forventetAntall)
 
         coEvery { fiksKlageClient.hentKlageStatus(10, any()) } returns emptyList()
 
         job.checkStatus()
 
-        assertThat(meterRegistry.get("klage.ikke.mottatt").gauge().value()).isZero()
+        assertThat(meterRegistry.get("sosialhjelp.klage.ikke.mottatt").gauge().value()).isZero()
     }
 }

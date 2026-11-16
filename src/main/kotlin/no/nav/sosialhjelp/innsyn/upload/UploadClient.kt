@@ -57,8 +57,7 @@ class UploadClient(
                 }.awaitSingle()
         return JsonVedleggSpesifikasjon(
             vedlegg =
-                spec.vedlegg.mapNotNull { vedlegg ->
-                    if (vedlegg.kategori == null) return@mapNotNull null
+                spec.vedlegg.map { vedlegg ->
 
                     JsonVedlegg(
                         type = resolveType(id, klageId),

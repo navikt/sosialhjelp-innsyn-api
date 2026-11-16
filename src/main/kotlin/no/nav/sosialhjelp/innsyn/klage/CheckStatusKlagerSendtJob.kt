@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import kotlinx.coroutines.time.withTimeout
+import no.nav.sosialhjelp.innsyn.app.LeaderElection
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
@@ -11,10 +12,20 @@ import java.util.UUID
 @Component
 class CheckStatusKlagerSendtJob(
     private val fiksKlageClient: FiksKlageClient,
+    private val leaderElection: LeaderElection,
 ) {
     // TODO Litt roligere schedule
     @Scheduled(cron = "0 */5 * * * *", zone = "Europe/Oslo")
     suspend fun checkStatus() {
+        if (leaderElection.isLeader()) {
+            log.info("Pod er leader")
+            doCheckStatus()
+        } else {
+            log.info("Ikke leder, sjekker ikke status for klager sendt til fagsystem")
+        }
+    }
+
+    private suspend fun doCheckStatus() {
         val sporingsId = UUID.randomUUID().toString()
         val statuser =
             withTimeout(Duration.ofSeconds(30)) {

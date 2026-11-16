@@ -20,8 +20,6 @@ class CheckStatusKlagerSendtJob(
         if (leaderElection.isLeader()) {
             log.info("Pod er leader")
             doCheckStatus()
-        } else {
-            log.info("Ikke leder, sjekker ikke status for klager sendt til fagsystem")
         }
     }
 

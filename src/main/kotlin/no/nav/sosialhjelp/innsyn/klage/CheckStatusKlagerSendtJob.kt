@@ -13,7 +13,7 @@ class CheckStatusKlagerSendtJob(
     private val fiksKlageClient: FiksKlageClient,
 ) {
     // TODO Litt roligere schedule
-    @Scheduled(cron = "0 /5 * * * *", zone = "Europe/Oslo")
+    @Scheduled(cron = "0 */5 * * * *", zone = "Europe/Oslo")
     suspend fun checkStatus() {
         val sporingsId = UUID.randomUUID().toString()
         val statuser =

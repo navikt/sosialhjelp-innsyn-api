@@ -35,18 +35,18 @@ internal class KlagePdfGeneratorTest {
 
         assertThat(summer).contains(
             "Klage på vedtak om økonomisk sosialhjelp",
-            "Navn: Ada Nordmann",
-            "Fødselsnummer: 00000000000",
-            "Vedtaksreferanse: vedtak-123",
+            "FLYKTIG SKINNFELL",
+            "PersonId: 14120623132",
+            "Vedtaksreferanse: 20260110-72",
             "Sendt til: Nav Testenhet (12345678)",
-            "Sendt: 14.07.2026 12:15",
+            "Klagen er sendt: 14.07.2026 12:15",
             "Første linje",
             "Andre linje",
             "Tredje linje",
             "vedlegg-rapport.pdf",
             "Klagen er elektronisk autentisert med ID-porten.",
         )
-        assertThat(winter).contains("Sendt: 14.01.2026 11:15")
+        assertThat(winter).contains("Klagen er sendt: 14.01.2026 11:15")
         assertThat(summer).doesNotContain("DigisosId", "KlageId", klage.digisosId, klage.klageId)
         assertThat(extractText(KlagePdfGenerator.generatePdf(klage.copy(begrunnelse = null), vedlegg)))
             .contains("<Begrunnelse ikke oppgitt>")

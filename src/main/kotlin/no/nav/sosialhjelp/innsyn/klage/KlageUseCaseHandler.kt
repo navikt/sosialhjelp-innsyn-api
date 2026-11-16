@@ -92,5 +92,6 @@ class KlageValidationException(
     enum class Reason {
         TEKST_FOR_LANG,
         MANGLER_TEKST_OG_VEDLEGG,
+        KLAGEFRIST_UTLOPT,
     }
 }

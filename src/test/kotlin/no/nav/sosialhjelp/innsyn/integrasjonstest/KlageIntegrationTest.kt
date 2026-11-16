@@ -468,6 +468,42 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coVerify(exactly = 0) { fiksKlageClient.sendKlage(any(), any(), any(), any()) }
     }
 
+    @Test
+    fun `Klage etter fristen gir 400 og sendes ikke`() {
+        val digisosId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val vedtakId = UUID.randomUUID()
+        val model = createModel(digisosId, vedtakId)
+        model.saker.first().vedtak.first().dato = LocalDate.of(2000, 1, 1)
+
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
+        coEvery { eventService.createModel(any()) } returns model
+        coEvery { uploadClient.getVedleggJson(klageId, klageId) } returns JsonVedleggSpesifikasjon()
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+            KommuneInfo(
+                kommunenummer = "1234",
+                kanMottaSoknader = true,
+                kanOppdatereStatus = true,
+                harMidlertidigDeaktivertMottak = false,
+                harMidlertidigDeaktivertOppdateringer = false,
+                kontaktpersoner = null,
+                harNksTilgang = true,
+                behandlingsansvarlig = null,
+            )
+
+        doPostFullResponse(
+            uri = POST_KLAGE,
+            digisosId = digisosId,
+            body = KlageInput(klageId = klageId, vedtakId = vedtakId, tekst = "Dette er en testklage"),
+        ).expectStatus()
+            .isEqualTo(HttpStatus.BAD_REQUEST)
+            .expectBody()
+            .jsonPath("$.type")
+            .isEqualTo("klagefrist_utlopt")
+
+        coVerify(exactly = 0) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakId, any()) }
+    }
+
     private fun getFile(filename: String = "sample_pdf.pdf"): File {
         val url = this.javaClass.classLoader.getResource(filename)?.file
         return File(url!!)

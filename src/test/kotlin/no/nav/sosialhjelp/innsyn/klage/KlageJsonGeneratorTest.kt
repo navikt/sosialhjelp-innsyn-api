@@ -91,6 +91,29 @@ class KlageJsonGeneratorTest {
 
         assertThrows<VedtakNotValidException> { jsonKlageGenerator.generateJsonKlage(input, fiksDigisosId) }
     }
+
+    @Test
+    fun `Klagefrist inkluderer hele dagen fire uker etter vedtaksdato`() {
+        val vedtaksdato = LocalDate.of(2024, 2, 15)
+
+        assertThat(erInnenforKlagefrist(vedtaksdato, vedtaksdato)).isTrue()
+        assertThat(erInnenforKlagefrist(vedtaksdato, LocalDate.of(2024, 3, 14))).isTrue()
+        assertThat(erInnenforKlagefrist(vedtaksdato, LocalDate.of(2024, 3, 15))).isFalse()
+    }
+
+    @Test
+    suspend fun `Utløpt klagefrist gir validation exception`() {
+        val id = UUID.randomUUID()
+        val model = createModel(vedtakFilreferanseId = id)
+        model.saker.first().vedtak.first().dato = LocalDate.of(2000, 1, 1)
+        coEvery { eventService.createModel(any()) } returns model
+
+        val exception =
+            assertThrows<KlageValidationException> {
+                jsonKlageGenerator.generateJsonKlage(KlageInput(UUID.randomUUID(), id, "tekst"), UUID.randomUUID())
+            }
+        assertThat(exception.reason).isEqualTo(KlageValidationException.Reason.KLAGEFRIST_UTLOPT)
+    }
 }
 
 private fun createModel(

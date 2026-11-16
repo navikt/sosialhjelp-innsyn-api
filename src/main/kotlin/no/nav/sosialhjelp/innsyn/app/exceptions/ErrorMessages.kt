@@ -17,6 +17,7 @@ enum class FrontendErrorType(
     KLAGE_MOTTAKER_ERROR("klage_mottaker_error"),
     KLAGE_FOR_LANG_TEKST("klage_for_lang_tekst"),
     KLAGE_MANGLER_TEKST_OG_VEDLEGG("klage_mangler_tekst_og_vedlegg"),
+    KLAGEFRIST_UTLOPT("klagefrist_utlopt"),
     TOKEN_UTLOPT("Token utløpt"),
 }
 

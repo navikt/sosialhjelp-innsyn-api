@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.app
 
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -10,7 +11,7 @@ import java.net.InetAddress.getLocalHost
 import java.time.LocalDateTime
 
 interface LeaderElection {
-    fun isLeader(): Boolean
+    suspend fun isLeader(): Boolean
 }
 
 @Component
@@ -27,7 +28,7 @@ class LeaderElectionImpl(
     private var leader: String? = null
     private var lastCallTime = LocalDateTime.MIN
 
-    override fun isLeader(): Boolean {
+    override suspend fun isLeader(): Boolean {
         if (electorPath == null) {
             log.warn("LeaderElection - manglende systemvariabel=$ELECTOR_PATH.")
             return true
@@ -40,7 +41,7 @@ class LeaderElectionImpl(
                         .get()
                         .retrieve()
                         .bodyToMono<String>()
-                        .block()
+                        .awaitSingleOrNull()
                 leader = jacksonObjectMapper().readTree(response).get("name").asString()
                 lastCallTime = now
             } catch (e: Exception) {

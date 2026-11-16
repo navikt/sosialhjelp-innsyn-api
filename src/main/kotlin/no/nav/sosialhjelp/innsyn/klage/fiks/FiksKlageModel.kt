@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage.fiks
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = false)
@@ -28,7 +29,8 @@ data class KlageForsendelseStatus(
     val digisosId: UUID,
     val klageId: UUID,
     val levertFagsystem: Boolean,
-    val tidspunkt: Long,
+    @param:JsonProperty("tidspunkt")
+    val tidspunktEpochMillis: Long,
     val kommunenr: String,
 )
 

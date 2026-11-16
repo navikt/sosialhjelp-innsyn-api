@@ -2,17 +2,23 @@ package no.nav.sosialhjelp.innsyn.klage
 
 import kotlinx.coroutines.time.withTimeout
 import no.nav.sosialhjelp.innsyn.app.LeaderElection
+import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.epochMillisToLocalDateTime
+import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
+import no.nav.sosialhjelp.innsyn.klage.fiks.KlageForsendelseStatus
 import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.time.DayOfWeek
 import java.time.Duration
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Component
 class CheckStatusKlagerSendtJob(
     private val fiksKlageClient: FiksKlageClient,
     private val leaderElection: LeaderElection,
+    private val klageMetricsService: KlageMetricsService,
 ) {
     // TODO Litt roligere schedule
     @Scheduled(cron = "0 */5 * * * *", zone = "Europe/Oslo")
@@ -33,16 +39,39 @@ class CheckStatusKlagerSendtJob(
                 )
             }
         val levertTilFagsystem = statuser.count { it.levertFagsystem }
-        val ikkeLevertTilFagsystem = statuser.size - levertTilFagsystem
+        val ikkeLevert = statuser.size - levertTilFagsystem
 
         log.info(
             "Hentet status for {} klager siste {} dager. Levert til fagsystem: {}, ikke levert: {}. SporingsId: {}",
             statuser.size,
             ANTALL_DAGER_LIMIT,
             levertTilFagsystem,
-            ikkeLevertTilFagsystem,
+            ikkeLevert,
             sporingsId,
         )
+
+        setIkkeMottatte(statuser.filter { !it.levertFagsystem })
+    }
+
+    private fun setIkkeMottatte(statusIkkeLevert: List<KlageForsendelseStatus>) {
+        val now = nowWithMillis()
+        val antallIkkeMottatt = statusIkkeLevert.count { erEldreEnnToArbeidsdager(it.tidspunktEpochMillis, now) }
+        log.info("Antall klager som ikke er mottatt av FS innen frist: $antallIkkeMottatt")
+        klageMetricsService.setKlagerIkkeMottattGauge(antallIkkeMottatt)
+    }
+
+    private fun erEldreEnnToArbeidsdager(
+        tidspunktEpochMillis: Long,
+        now: LocalDateTime,
+    ): Boolean {
+        val tidspunkt = epochMillisToLocalDateTime(tidspunktEpochMillis)
+        var frist = tidspunkt
+        repeat(ANTALL_DAGER_LIMIT) {
+            do {
+                frist = frist.plusDays(1)
+            } while (frist.dayOfWeek == DayOfWeek.SATURDAY || frist.dayOfWeek == DayOfWeek.SUNDAY)
+        }
+        return now.isAfter(frist)
     }
 
     companion object {

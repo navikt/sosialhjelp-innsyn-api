@@ -20,6 +20,7 @@ import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -123,6 +124,10 @@ object TimestampUtil {
     fun nowWithMillis(): LocalDateTime = ZonedDateTime.now(ZoneId.of(ZONE_STRING)).toLocalDateTime().truncatedTo(ChronoUnit.MILLIS)
 
     fun convertToOffsetDateTimeUTCString(localDateTime: LocalDateTime) = localDateTime.toUTCTimestampStringWithMillis()
+
+    fun epochMillisToLocalDateTime(epochMillis: Long): LocalDateTime = convertInstantToLocalDateTime(Instant.ofEpochMilli(epochMillis))
+
+    fun convertInstantToLocalDateTime(instant: Instant): LocalDateTime = LocalDateTime.ofInstant(instant, ZoneId.of(ZONE_STRING))
 
     private fun validateTimestamp(timestampString: String) {
         if (!Regex(TIMESTAMP_REGEX).matches(timestampString)) error("Tidspunkt $timestampString matcher ikke formatet")

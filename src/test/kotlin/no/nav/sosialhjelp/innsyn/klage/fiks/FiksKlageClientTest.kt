@@ -56,7 +56,7 @@ internal class FiksKlageClientTest {
                     digisosId = UUID.fromString("11111111-1111-1111-1111-111111111111"),
                     klageId = UUID.fromString("22222222-2222-2222-2222-222222222222"),
                     levertFagsystem = true,
-                    tidspunkt = 1794564000000L,
+                    tidspunktEpochMillis = 1794564000000L,
                     kommunenr = "0301",
                 ),
             )

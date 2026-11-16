@@ -34,23 +34,26 @@ class LeaderElectionImpl(
             return true
         }
         val now = LocalDateTime.now()
+
         if (leader == null || lastCallTime.isBefore(now.minusMinutes(2))) {
-            try {
-                val response =
-                    webClient
-                        .get()
-                        .retrieve()
-                        .bodyToMono<String>()
-                        .awaitSingleOrNull()
+            runCatching {
+                val response = getLeader()
                 leader = jacksonObjectMapper().readTree(response).get("name").asString()
                 lastCallTime = now
-            } catch (e: Exception) {
-                log.warn("LeaderElection - kunne ikke bestemme lederpod. ${e.message}", e)
+            }.getOrElse {
+                log.warn("LeaderElection - kunne ikke bestemme lederpod. ${it.message}", it)
                 return true
             }
         }
         return hostname == leader
     }
+
+    private suspend fun getLeader() =
+        webClient
+            .get()
+            .retrieve()
+            .bodyToMono<String>()
+            .awaitSingleOrNull()
 
     companion object {
         private const val ELECTOR_PATH = "ELECTOR_PATH"

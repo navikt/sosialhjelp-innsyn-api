@@ -82,7 +82,6 @@ class KlageServiceImpl(
     ) {
         withContext(Dispatchers.Default) {
             withTimeout(60.seconds) {
-                val vedleggJson = fetchJsonVedleggSpec(UUID.fromString(jsonKlage.klageId))
                 val encryptedPdf =
                     krypteringService
                         .krypter(klagePdf.data, this@withContext)

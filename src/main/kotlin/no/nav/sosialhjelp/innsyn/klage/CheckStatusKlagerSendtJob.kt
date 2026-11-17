@@ -38,15 +38,11 @@ class CheckStatusKlagerSendtJob(
                     sporingsId = sporingsId,
                 )
             }
-        val levertTilFagsystem = statuser.count { it.levertFagsystem }
-        val ikkeLevert = statuser.size - levertTilFagsystem
 
         log.info(
-            "Hentet status for {} klager siste {} dager. Levert til fagsystem: {}, ikke levert: {}. SporingsId: {}",
+            "Hentet status for {} klager siste {} dager. SporingsId: {}",
             statuser.size,
-            ANTALL_DAGER_LIMIT,
-            levertTilFagsystem,
-            ikkeLevert,
+            ANTALL_DAGER_QUERY,
             sporingsId,
         )
 
@@ -55,9 +51,16 @@ class CheckStatusKlagerSendtJob(
 
     private fun setIkkeMottatte(statusIkkeLevert: List<KlageForsendelseStatus>) {
         val now = nowWithMillis()
-        val antallIkkeMottatt = statusIkkeLevert.count { erEldreEnnToArbeidsdager(it.tidspunktEpochMillis, now) }
-        log.info("Antall klager som ikke er mottatt av FS innen frist: $antallIkkeMottatt")
-        klageMetricsService.setKlagerIkkeMottattGauge(antallIkkeMottatt)
+        val antallIkkeMotattInnenFrist = statusIkkeLevert.count { erEldreEnnToArbeidsdager(it.tidspunktEpochMillis, now) }
+
+        if (antallIkkeMotattInnenFrist > 0) {
+            log.warn(
+                "Antall klager som ikke er mottatt av FS innen {} dager: {}",
+                ANTALL_DAGER_LIMIT,
+                antallIkkeMotattInnenFrist,
+            )
+        }
+        klageMetricsService.setKlagerIkkeMottattGauge(antallIkkeMotattInnenFrist)
     }
 
     private fun erEldreEnnToArbeidsdager(

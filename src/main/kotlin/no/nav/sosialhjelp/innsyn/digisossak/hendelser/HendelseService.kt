@@ -6,6 +6,7 @@ import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.klage.KlageService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
@@ -13,6 +14,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 import kotlin.math.floor
 
 data class HendelseInfo(
@@ -27,6 +29,7 @@ class HendelseService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksService: FiksService,
+    private val klageService: KlageService,
 ) {
     suspend fun hentHendelser(fiksDigisosId: String): HendelseInfo {
         val digisosSak = fiksService.getSoknad(fiksDigisosId)
@@ -36,6 +39,9 @@ class HendelseService(
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
         model.leggTilHendelserForUtbetalinger()
+
+        model.leggTilHendelserForKlage()
+
         return HendelseInfo(
             model.historikk.sortedBy { it.tidspunkt },
             digisosSak.kommunenummer,
@@ -67,6 +73,19 @@ class HendelseService(
             .forEach { (_, grupperteVilkar) ->
                 historikk.add(
                     Hendelse(HendelseTekstType.UTBETALINGER_OPPDATERT, grupperteVilkar[0].datoHendelse),
+                )
+            }
+    }
+
+    private suspend fun InternalDigisosSoker.leggTilHendelserForKlage() {
+
+        klageService.hentKlager(UUID.fromString(fiksDigisosId))
+            .forEach { klage ->
+                historikk.add(
+                    Hendelse(
+                        HendelseTekstType.KLAGE_SENDT,
+                        unixToLocalDateTime(klage.timestampSendt ?: error("Klage mangler timestampSendt")),
+                    ),
                 )
             }
     }

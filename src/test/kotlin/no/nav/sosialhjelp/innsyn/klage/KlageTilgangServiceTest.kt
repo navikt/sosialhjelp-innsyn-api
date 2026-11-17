@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
@@ -25,10 +26,11 @@ class KlageTilgangServiceTest {
     private val service = KlageTilgangService(fiksService, eventService, unleash)
 
     private fun mottaker(enhetsnummer: String?) {
+        val digisosSak = sosialhjelpJsonMapper.readValue<DigisosSak>(ok_digisossak_response)
         every { unleash.more().featureToggleNames } returns listOf(KlageTilgangService.KLAGE_TOGGLE)
-        coEvery { fiksService.getSoknad(any()) } returns sosialhjelpJsonMapper.readValue(ok_digisossak_response)
+        coEvery { fiksService.getSoknad(any()) } returns digisosSak
         coEvery { eventService.createModel(any()) } returns
-            InternalDigisosSoker(soknadsmottaker = Soknadsmottaker(enhetsnummer, "Enhet"))
+            InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId, soknadsmottaker = Soknadsmottaker(enhetsnummer, "Enhet"))
     }
 
     @Test

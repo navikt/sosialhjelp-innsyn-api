@@ -8,9 +8,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class InternalDigisosSoker(
+    val fiksDigisosId: String,
     var fagsystem: Fagsystem? = null,
     var referanse: String? = null,
-    var fiksDigisosId: String? = null,
     var status: SoknadsStatus = SoknadsStatus.SENDT,
     var saker: MutableList<Sak> = mutableListOf(),
     var utbetalinger: MutableList<Utbetaling> = mutableListOf(),
@@ -373,4 +373,10 @@ enum class HendelseTekstType : HendelseDtoMapper {
             enhetNavn: String?,
         ): HendelseDto? = null
     },
+    KLAGE_SENDT {
+        override fun mapTilHendelseDto(
+            hendelse: Hendelse,
+            enhetNavn: String?,
+        ): HendelseDto = HendelseDto.KlageSendt(hendelse.tidspunkt)
+    }
 }

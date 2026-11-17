@@ -15,6 +15,7 @@ import no.nav.sosialhjelp.innsyn.domain.UrlResponse
 import no.nav.sosialhjelp.innsyn.domain.Utbetaling
 import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.klage.KlageService
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
@@ -25,15 +26,18 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 internal class HendelseServiceTest {
     private val eventService: EventService = mockk()
     private val vedleggService: VedleggService = mockk()
     private val fiksService: FiksService = mockk()
-    private val service = HendelseService(eventService, vedleggService, fiksService)
+    private val klageService: KlageService = mockk()
+    private val service = HendelseService(eventService, vedleggService, fiksService, klageService)
 
     private val mockDigisosSak: DigisosSak = mockk()
+    private val fiksDigisosId = UUID.randomUUID()
 
     companion object {
         private val tidspunkt_sendt = LocalDateTime.now().minusDays(1)
@@ -59,6 +63,7 @@ internal class HendelseServiceTest {
         clearAllMocks()
 
         coEvery { fiksService.getSoknad(any()) } returns mockDigisosSak
+        coEvery { klageService.hentKlager(fiksDigisosId) } returns emptyList()
         every { mockDigisosSak.ettersendtInfoNAV } returns mockk()
         every { mockDigisosSak.originalSoknadNAV?.timestampSendt } returns tidspunkt_sendt.toInstant(ZoneOffset.UTC).toEpochMilli()
         every { mockDigisosSak.kommunenummer } returns "123"
@@ -67,7 +72,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Skal returnere respons med 1 hendelse`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
             model.historikk.add(
                 Hendelse(
                     HendelseTekstType.SOKNAD_SEND_TIL_KONTOR,
@@ -79,7 +84,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(1)
             assertThat(hendelser[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR)
@@ -90,7 +95,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Skal returnere respons med flere hendelser`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
             model.historikk.addAll(
                 listOf(
                     Hendelse(
@@ -114,7 +119,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(3)
         }
@@ -122,14 +127,14 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg`() =
         runTest(timeout = 5.seconds) {
-            coEvery { eventService.createModel(any()) } returns InternalDigisosSoker()
+            coEvery { eventService.createModel(any()) } returns InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 listOf(
                     InternalVedlegg(DOKUMENTTYPE_1, null, null, null, mutableListOf(DOK_1), tidspunkt4, null),
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2, DOK_3), tidspunkt5, null),
                 )
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(2)
 
@@ -143,13 +148,13 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg - tom fil-liste skal ikke resultere i hendelse`() =
         runTest(timeout = 5.seconds) {
-            coEvery { eventService.createModel(any()) } returns InternalDigisosSoker()
+            coEvery { eventService.createModel(any()) } returns InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
                 listOf(
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(), tidspunkt5, null),
                 )
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(0)
         }
@@ -157,7 +162,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg - samme dokument tilknyttet to saker`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
 
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
@@ -166,7 +171,7 @@ internal class HendelseServiceTest {
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2, DOK_3), tidspunkt5, null),
                 )
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(2)
 
@@ -181,7 +186,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg - grupperer opplastinger som har samme tidspunkt`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
 
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
@@ -190,7 +195,7 @@ internal class HendelseServiceTest {
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2), tidspunkt4, null),
                 )
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(1)
 
@@ -202,7 +207,7 @@ internal class HendelseServiceTest {
     @Test
     fun `Hendelse for opplastet vedlegg - grupperer ikke ved millisekund-avvik`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
 
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns
@@ -211,7 +216,7 @@ internal class HendelseServiceTest {
                     InternalVedlegg(DOKUMENTTYPE_2, null, null, null, mutableListOf(DOK_2), tidspunkt4.plus(1, ChronoUnit.MILLIS), null),
                 )
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(2)
         }
@@ -219,7 +224,7 @@ internal class HendelseServiceTest {
     @Test
     internal fun `hendelser for utbetalinger - grupper utbetalinger`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
 
             val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
             model.utbetalinger =
@@ -283,7 +288,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(2)
             val first = hendelser[0]
@@ -296,7 +301,7 @@ internal class HendelseServiceTest {
     @Test
     internal fun `hendelser for utbetalinger - utbetalinger med annen status enn ANNULERT blir filtrert bort`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
 
             val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
             model.utbetalinger =
@@ -378,7 +383,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(3)
             assertThat(hendelser[0].tidspunkt).isEqualTo(time)

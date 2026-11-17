@@ -11,13 +11,18 @@ import no.nav.sosialhjelp.innsyn.digisossak.hendelser.HendelseDto
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.HendelseFoldService
 import no.nav.sosialhjelp.innsyn.event.InnsynService
+import no.nav.sosialhjelp.innsyn.klage.KlageRef
+import no.nav.sosialhjelp.innsyn.klage.KlageService
 import no.nav.sosialhjelp.innsyn.navenhet.NavEnhet
 import no.nav.sosialhjelp.innsyn.navenhet.NorgClient
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.VEDLEGG_KREVES_STATUS
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.core.io.ClassPathResource
 import org.springframework.test.web.reactive.server.expectBodyList
 import java.time.Instant
@@ -39,9 +44,13 @@ class HendelseIntegrationTest : AbstractIntegrationTest() {
     @MockkBean(relaxed = true)
     private lateinit var hendelseFoldService: HendelseFoldService
 
-    @Test
-    fun `sendt-hendelsen skal beholde Sagene som mottaker etter videresending til Alna`() {
-        val digisosId = UUID.randomUUID()
+    @MockkBean
+    private lateinit var klageService: KlageService
+
+    private val digisosId = UUID.randomUUID()
+
+    @BeforeEach
+    fun settOppHendelser() {
         val digisosSak = createDigisosSak(digisosId, "0301")
         every { digisosSak.originalSoknadNAV?.timestampSendt } returns Instant.parse("2026-10-14T08:00:00Z").toEpochMilli()
         every { digisosSak.originalSoknadNAV?.navEksternRefId } returns UUID.randomUUID().toString()
@@ -70,7 +79,11 @@ class HendelseIntegrationTest : AbstractIntegrationTest() {
         coEvery { norgClient.hentNavEnhet("0326") } returns alna
         coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak) } returns emptyList()
         coEvery { vedleggService.hentEttersendteVedlegg(digisosSak, any<InternalDigisosSoker>()) } returns emptyList()
+        coEvery { klageService.hentKlager(digisosId) } returns emptyList()
+    }
 
+    @Test
+    fun `sendt-hendelsen skal beholde Sagene som mottaker etter videresending til Alna`() {
         val hendelser: List<HendelseDto> =
             doGet("/api/v1/innsyn/{digisosId}/hendelser/beta", listOf(digisosId))
                 .expectStatus()
@@ -93,5 +106,34 @@ class HendelseIntegrationTest : AbstractIntegrationTest() {
 
         val sendt = hendelser.filterIsInstance<HendelseDto.Sendt>().single()
         assertThat(sendt.navKontor).isEqualTo("Nav Sagene")
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [1, 2])
+    fun `sendte klager skal komme med i responsen fra hendelser beta`(antallKlager: Int) {
+        coEvery { klageService.hentKlager(digisosId) } returns
+            List(antallKlager) {
+                KlageRef(
+                    klageId = UUID.randomUUID(),
+                    vedtakId = UUID.randomUUID(),
+                    fiksDigisosId = digisosId,
+                    timestampSendt = Instant.parse("2026-10-15T08:00:00Z").toEpochMilli(),
+                )
+            }
+
+        val hendelser =
+            doGet("/api/v1/innsyn/{digisosId}/hendelser/beta", listOf(digisosId))
+                .expectStatus()
+                .isOk
+                .expectBodyList<HendelseDto>()
+                .returnResult()
+                .responseBody
+                ?: error("Forventet hendelser i responsen")
+
+        assertThat(hendelser).hasSize(3 + antallKlager)
+        assertThat(hendelser.filterIsInstance<HendelseDto.KlageSendt>()).hasSize(antallKlager)
+        assertThat(hendelser.filterIsInstance<HendelseDto.Sendt>()).hasSize(1)
+        assertThat(hendelser.filterIsInstance<HendelseDto.Mottatt>()).hasSize(1)
+        assertThat(hendelser.filterIsInstance<HendelseDto.Videresendt>()).hasSize(1)
     }
 }

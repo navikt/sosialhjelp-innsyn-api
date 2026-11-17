@@ -14,12 +14,10 @@ import no.nav.sosialhjelp.innsyn.domain.Dokumentasjonkrav
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.Oppgave
 import no.nav.sosialhjelp.innsyn.domain.Oppgavestatus
 import no.nav.sosialhjelp.innsyn.domain.SoknadsStatus
 import no.nav.sosialhjelp.innsyn.domain.Vilkar
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
 import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -67,7 +65,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return vilkar with tittel`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             val tittel = "VILKAR1"
             val beskrivelse = "mer vilkarer2"
             model.vilkar.addAll(
@@ -103,7 +101,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should not return Vilkar with status ANNULLERT`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.vilkar.addAll(
                 listOf(
                     Vilkar("vilkar1", "tittel", null, Oppgavestatus.ANNULLERT, null, LocalDateTime.now(), LocalDateTime.now(), null),
@@ -123,7 +121,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should not return Dokumentasjonkrav with status ANNULERT or LEVERT_TIDLIGERE`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.dokumentasjonkrav.addAll(
                 listOf(
                     Dokumentasjonkrav(
@@ -178,7 +176,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should return dokumentasjonkrav with tittel and filter out empty dokumentasjonkrav`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.dokumentasjonkrav.addAll(
                 listOf(
                     Dokumentasjonkrav(
@@ -248,7 +246,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should not include statuses OPPFYLT or IKKE_OPPFYLT for Dokumentasjonkrav`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.dokumentasjonkrav.addAll(
                 listOf(
                     Dokumentasjonkrav(
@@ -303,7 +301,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should not include statuses OPPFYLT or IKKE_OPPFYLT for Vilkar`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.vilkar.addAll(
                 listOf(
                     Vilkar("vilkar1", "tittel", null, Oppgavestatus.OPPFYLT, null, LocalDateTime.now(), LocalDateTime.now(), null),
@@ -325,7 +323,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should sort Dokumentasjonkrav by date and group by date`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
 
             model.dokumentasjonkrav.addAll(
                 listOf(
@@ -402,7 +400,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Should group Dokumentasjonkrav without frist together`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
 
             model.dokumentasjonkrav.addAll(
                 listOf(
@@ -472,7 +470,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `should return true if soknad har mottat-status og ikke har hatt SENDT-status`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.status = SoknadsStatus.MOTTATT
             model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_UNDER_BEHANDLING, LocalDateTime.now(), null))
             coEvery { eventService.createModel(any()) } returns model
@@ -484,7 +482,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `should return false if soknad har mottat-status og har hatt SENDT-status`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.status = SoknadsStatus.MOTTATT
             model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_VIDERESENDT_MED_NORG_ENHET, LocalDateTime.now(), null))
             model.historikk.add(Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, LocalDateTime.now(), null))

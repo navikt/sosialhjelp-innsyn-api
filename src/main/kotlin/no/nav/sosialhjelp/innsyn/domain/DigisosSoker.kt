@@ -378,5 +378,5 @@ enum class HendelseTekstType : HendelseDtoMapper {
             hendelse: Hendelse,
             enhetNavn: String?,
         ): HendelseDto = HendelseDto.KlageSendt(hendelse.tidspunkt)
-    }
+    },
 }

@@ -168,6 +168,6 @@ sealed class HendelseDto(
     ) : HendelseDto(tidspunkt)
 
     class KlageSendt(
-        tidspunkt: LocalDateTime
+        tidspunkt: LocalDateTime,
     ) : HendelseDto(tidspunkt)
 }

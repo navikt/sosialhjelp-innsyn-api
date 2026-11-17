@@ -78,15 +78,18 @@ class HendelseService(
     }
 
     private suspend fun InternalDigisosSoker.leggTilHendelserForKlage() {
-
-        klageService.hentKlager(UUID.fromString(fiksDigisosId))
+        klageService
+            .hentKlager(UUID.fromString(fiksDigisosId))
             .forEach { klage ->
-                historikk.add(
-                    Hendelse(
-                        HendelseTekstType.KLAGE_SENDT,
-                        unixToLocalDateTime(klage.timestampSendt ?: error("Klage mangler timestampSendt")),
-                    ),
-                )
+                klage.timestampSendt
+                    ?.also {
+                        historikk.add(
+                            Hendelse(
+                                HendelseTekstType.KLAGE_SENDT,
+                                unixToLocalDateTime(it),
+                            ),
+                        )
+                    }
             }
     }
 

@@ -13,10 +13,6 @@ class KlageMetricsService(
     private val klageIkkeMottattGauge =
         IntegerGauge(meterRegistry, "sosialhjelp.klage.ikke.mottatt", "Antall klager som ikke er mottatt")
 
-    fun registerSent() {
-        meterRegistry.counter("sosialhjelp.klage.send.success").increment()
-    }
-
     fun registerKlageSent(
         kommunenummer: String?,
         success: Boolean,
@@ -35,20 +31,15 @@ class KlageMetricsService(
         meterRegistry.counter(ETTERSENDELSE_SENDT, "result", result(success)).increment()
     }
 
-    fun registerSendError() {
-        meterRegistry.counter("sosialhjelp.klage.send.error").increment()
-    }
-
     fun setKlagerIkkeMottattGauge(value: Int) {
         klageIkkeMottattGauge.set(value)
     }
 
     private fun result(success: Boolean) = if (success) "success" else "error"
 
-
     companion object {
-        const val KLAGE_SENDT = "klage_sendt_total"
-        const val ETTERSENDELSE_SENDT = "klage_ettersendelse_sendt_total"
+        const val KLAGE_SENDT = "sosialhjelp.klage.innsending"
+        const val ETTERSENDELSE_SENDT = "sosialhjelp.klage.ettersendelse.innsending"
         const val UKJENT = "ukjent"
     }
 }

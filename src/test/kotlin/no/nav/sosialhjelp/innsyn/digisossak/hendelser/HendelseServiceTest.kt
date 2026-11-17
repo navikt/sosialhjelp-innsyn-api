@@ -292,6 +292,33 @@ internal class HendelseServiceTest {
             )
         }
 
+    @Test
+    internal fun `hendelser for utbetalinger - tilbake til tidligere status i samme 5-minuttersvindu beholdes`() =
+        runTest(timeout = 5.seconds) {
+            val model = InternalDigisosSoker()
+
+            val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
+            model.historikk.addAll(
+                listOf(
+                    utbetalingshendelse(time, UtbetalingsStatus.PLANLAGT_UTBETALING),
+                    utbetalingshendelse(time.plusMinutes(1), UtbetalingsStatus.STOPPET),
+                    utbetalingshendelse(time.plusMinutes(2), UtbetalingsStatus.PLANLAGT_UTBETALING),
+                ),
+            )
+
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
+
+            val hendelser = service.hentHendelser("123").hendelser
+
+            assertThat(hendelser.map { it.utbetalingsStatus }).containsExactly(
+                UtbetalingsStatus.PLANLAGT_UTBETALING,
+                UtbetalingsStatus.STOPPET,
+                UtbetalingsStatus.PLANLAGT_UTBETALING,
+            )
+            assertThat(hendelser.last().tidspunkt).isEqualTo(time.plusMinutes(2))
+        }
+
     private fun utbetalingshendelse(
         tidspunkt: LocalDateTime,
         status: UtbetalingsStatus,

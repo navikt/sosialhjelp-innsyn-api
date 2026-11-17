@@ -61,8 +61,9 @@ class HendelseService(
 
     /**
      * Utbetalingshendelser legges i historikken ved hver statusendring (se event/Utbetaling.kt).
-     * Her slås hendelser med samme status innenfor samme 5-minuttersvindu sammen til én,
-     * slik at en batch med mange utbetalinger gir én linje. Ulike statuser holdes adskilt.
+     * Her slås påfølgende hendelser med samme status innenfor samme 5-minuttersvindu sammen til én,
+     * slik at en batch med mange utbetalinger gir én linje. Bare påfølgende hendelser slås sammen,
+     * slik at f.eks. planlagt → stoppet → planlagt gir tre linjer og historikken ender på riktig status.
      */
     private fun InternalDigisosSoker.grupperHendelserForUtbetalinger() {
         val (utbetalingshendelser, andreHendelser) =
@@ -70,8 +71,16 @@ class HendelseService(
 
         val grupperteUtbetalingshendelser =
             utbetalingshendelser
-                .groupBy { it.tidspunkt.rundNedTilNaermeste5Minutt() to it.utbetalingsStatus }
-                .map { (_, hendelserIGruppe) -> hendelserIGruppe.minBy { it.tidspunkt } }
+                .sortedBy { it.tidspunkt }
+                .fold(mutableListOf<Hendelse>()) { grupperte, hendelse ->
+                    val forrige = grupperte.lastOrNull()
+                    val sammeGruppe =
+                        forrige != null &&
+                            forrige.utbetalingsStatus == hendelse.utbetalingsStatus &&
+                            forrige.tidspunkt.rundNedTilNaermeste5Minutt() == hendelse.tidspunkt.rundNedTilNaermeste5Minutt()
+                    if (!sammeGruppe) grupperte.add(hendelse)
+                    grupperte
+                }
 
         historikk = (andreHendelser + grupperteUtbetalingshendelser).toMutableList()
     }

@@ -64,10 +64,7 @@ internal class KlageServiceTest {
             coEvery { krypteringService.krypter(any(), any<CoroutineScope>()) } coAnswers { firstArg() }
             coEvery { fiksKlageClient.sendKlage(digisosId, klageId, vedtakId, capture(filesSlot)) } just runs
 
-            service.sendKlage(jsonKlage) { spec ->
-                pdfVedleggSpesifikasjon = spec
-                pdf
-            }
+            service.sendKlage(jsonKlage, pdf, pdfVedleggSpesifikasjon)
 
             assertThat(pdfVedleggSpesifikasjon).isSameAs(vedleggSpesifikasjon)
             assertThat(filesSlot.captured.vedleggJson).isSameAs(vedleggSpesifikasjon)

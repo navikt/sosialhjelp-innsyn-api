@@ -31,7 +31,7 @@ import kotlin.time.Duration.Companion.seconds
 interface KlageService {
     suspend fun sendKlage(
         jsonKlage: JsonKlage,
-        generateKlagePdf: (JsonVedleggSpesifikasjon) -> FilForOpplasting,
+        klagePdf: FilForOpplasting,
         vedleggJson: JsonVedleggSpesifikasjon,
     )
 
@@ -77,13 +77,12 @@ class KlageServiceImpl(
 
     override suspend fun sendKlage(
         jsonKlage: JsonKlage,
-        generateKlagePdf: (JsonVedleggSpesifikasjon) -> FilForOpplasting,
+        klagePdf: FilForOpplasting,
         vedleggJson: JsonVedleggSpesifikasjon,
     ) {
         withContext(Dispatchers.Default) {
             withTimeout(60.seconds) {
                 val vedleggJson = fetchJsonVedleggSpec(UUID.fromString(jsonKlage.klageId))
-                val klagePdf = generateKlagePdf(vedleggJson)
                 val encryptedPdf =
                     krypteringService
                         .krypter(klagePdf.data, this@withContext)

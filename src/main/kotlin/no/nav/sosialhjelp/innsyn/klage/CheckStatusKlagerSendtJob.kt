@@ -20,8 +20,7 @@ class CheckStatusKlagerSendtJob(
     private val leaderElection: LeaderElection,
     private val klageMetricsService: KlageMetricsService,
 ) {
-    // TODO Litt roligere schedule
-    @Scheduled(cron = "0 */5 * * * *", zone = "Europe/Oslo")
+    @Scheduled(cron = "0 0 */1 * * *", zone = "Europe/Oslo")
     suspend fun checkStatus() {
         if (leaderElection.isLeader()) {
             log.info("Pod er leader")
@@ -51,7 +50,9 @@ class CheckStatusKlagerSendtJob(
 
     private fun setIkkeMottatte(statusIkkeLevert: List<KlageForsendelseStatus>) {
         val now = nowWithMillis()
+
         val antallIkkeMotattInnenFrist = statusIkkeLevert.count { erEldreEnnToArbeidsdager(it.tidspunktEpochMillis, now) }
+        klageMetricsService.setKlagerIkkeMottattGauge(antallIkkeMotattInnenFrist)
 
         if (antallIkkeMotattInnenFrist > 0) {
             log.warn(
@@ -60,7 +61,6 @@ class CheckStatusKlagerSendtJob(
                 antallIkkeMotattInnenFrist,
             )
         }
-        klageMetricsService.setKlagerIkkeMottattGauge(antallIkkeMotattInnenFrist)
     }
 
     private fun erEldreEnnToArbeidsdager(

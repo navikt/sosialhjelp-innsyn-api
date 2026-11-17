@@ -33,21 +33,22 @@ internal class KlagePdfGeneratorTest {
         val summer = extractText(KlagePdfGenerator.generatePdf(summerKlage, vedlegg))
         val winter = extractText(KlagePdfGenerator.generatePdf(winterKlage, vedlegg))
 
-        assertThat(summer).contains(
+        assertThat(summer).containsSubsequence(
             "Klage på vedtak om økonomisk sosialhjelp",
             "FLYKTIG SKINNFELL",
-            "PersonId: 14120623132",
+            "14120623132",
             "Vedtaksreferanse: 20260110-72",
-            "Sendt til: Nav Testenhet (12345678)",
-            "Klagen er sendt: 14.07.2026 12:15",
             "Første linje",
             "Andre linje",
             "Tredje linje",
+            "Vedlegg",
             "vedlegg-rapport.pdf",
+            "Klagen er sendt: 14.07.2026 12:15",
+            "Sendt til: Nav Testenhet (12345678)",
             "Klagen er elektronisk autentisert med ID-porten.",
         )
         assertThat(winter).contains("Klagen er sendt: 14.01.2026 11:15")
-        assertThat(summer).doesNotContain("DigisosId", "KlageId", klage.digisosId, klage.klageId)
+        assertThat(summer).doesNotContain("PersonId:", "DigisosId", "KlageId", klage.digisosId, klage.klageId)
         assertThat(extractText(KlagePdfGenerator.generatePdf(klage.copy(begrunnelse = null), vedlegg)))
             .contains("<Begrunnelse ikke oppgitt>")
     }

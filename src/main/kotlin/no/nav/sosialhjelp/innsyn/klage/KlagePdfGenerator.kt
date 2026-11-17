@@ -51,7 +51,7 @@ object KlagePdfGenerator {
 
         pdf.addCenteredH3Bold("Klage på vedtak om økonomisk sosialhjelp")
         addCenteredText(pdf, boldFont, jsonKlage.getFullName().uppercase())
-        addCenteredText(pdf, boldFont, "PersonId: ${jsonKlage.personIdentifikator.verdi}")
+        addCenteredText(pdf, boldFont, jsonKlage.personIdentifikator.verdi)
         pdf.addDividerLine()
         pdf.addBlankLine()
 

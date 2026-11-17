@@ -5,6 +5,7 @@ import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.innsyn.app.token.TokenUtils
 import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
+import org.slf4j.LoggerFactory
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpEntity
@@ -126,19 +127,24 @@ class FiksKlageClientImpl(
         return doHentKlager(uri)
     }
 
-    private suspend fun doHentKlager(uri: String): List<FiksKlageDto> =
-        fiksWebClient
-            .get()
-            .uri(uri)
-            .accept(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
-            .retrieve()
-            .bodyToMono<Array<FiksKlageDto>>()
-            .awaitSingleOrNull()
-            ?.toList()
-            ?: emptyList()
+    private suspend fun doHentKlager(uri: String): List<FiksKlageDto> {
+        val body =
+            fiksWebClient
+                .get()
+                .uri(uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
+                .retrieve()
+                .bodyToMono<String>()
+                .awaitSingleOrNull()
+                ?: return emptyList()
+
+        log.info("Hentet klager fra Fiks: $body")
+        return sosialhjelpJsonMapper.readValue(body, Array<FiksKlageDto>::class.java).toList()
+    }
 
     companion object {
+        private val log = LoggerFactory.getLogger(FiksKlageClientImpl::class.java)
         private const val SEND_INN_KLAGE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/{vedtakId}"
         private const val GET_KLAGER_PATH = "/digisos/klage/api/v1/klager"
         private const val ETTERSENDELSE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/vedlegg"

@@ -37,7 +37,7 @@ class KlageUseCaseHandler(
                 fiksDigisosId = digisosId,
                 input = input,
             )
-        val klagePdf = KlagePdfGenerator.generatePdf(jsonKlage)
+        val klagePdf = KlagePdfGenerator.generatePdf(jsonKlage, vedleggJson)
 
         runCatching { klageService.sendKlage(jsonKlage, klagePdf, vedleggJson) }.onSuccess { klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = true) }
             .onFailure { klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = false) }

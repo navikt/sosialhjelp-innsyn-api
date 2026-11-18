@@ -3,7 +3,6 @@ package no.nav.sosialhjelp.innsyn.klage
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import no.nav.sosialhjelp.innsyn.app.MiljoUtils
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
@@ -33,8 +32,8 @@ class KlageController(
         @PathVariable navEksternRefId: UUID,
         @RequestPart("files") rawFiles: Flux<FilePart>,
     ): DocumentsForKlage {
-        // TODO En eller annen form for sjekk av fiksDigisosId ?
-        validateNotProd()
+        validateKlageTilgjengelig(fiksDigisosId)
+
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler.lastOppVedlegg(
@@ -50,8 +49,6 @@ class KlageController(
         @PathVariable klageId: UUID,
     ) {
         TODO("Implementer avbrytKlage i KlageController")
-
-        // TODO Slette eventuelle vedlegg i mellomlageret?
     }
 
     @GetMapping("/{fiksDigisosId}/klage/tilgjengelig")
@@ -68,7 +65,8 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @RequestBody input: KlageInput,
     ) {
-        validateNotProd()
+        validateKlageTilgjengelig(fiksDigisosId)
+
         tilgangskontroll.sjekkTilgang()
 
         if (input.tekst.length > 2000) {
@@ -87,7 +85,8 @@ class KlageController(
         @PathVariable klageId: UUID,
         @PathVariable ettersendelseId: UUID,
     ) {
-        validateNotProd()
+        validateKlageTilgjengelig(fiksDigisosId)
+
         tilgangskontroll.sjekkTilgang()
 
         klageUseCaseHandler.sendEttersendelse(fiksDigisosId, klageId, ettersendelseId)
@@ -98,6 +97,8 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
     ): KlageDto? {
+        validateKlageTilgjengelig(fiksDigisosId)
+
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler.hentKlage(fiksDigisosId, klageId)
@@ -112,6 +113,8 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable vedtakId: UUID,
     ): ResponseEntity<KlageDto> {
+        validateKlageTilgjengelig(fiksDigisosId)
+
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler
@@ -124,13 +127,17 @@ class KlageController(
     suspend fun hentKlager(
         @PathVariable fiksDigisosId: UUID,
     ): List<KlageRef> {
+        validateKlageTilgjengelig(fiksDigisosId)
+
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler.hentAlleKlager(fiksDigisosId)
     }
 
-    private fun validateNotProd() {
-        if (MiljoUtils.isRunningInProd()) throw IllegalStateException("KlageController should not be used in production environment")
+    private suspend fun validateKlageTilgjengelig(fiksDigisosId: UUID) {
+        if (klageUseCaseHandler.kanSendeKlage(fiksDigisosId).not()) {
+            throw KlageIkkeTilgjengeligException("Klage er ikke tilgjengelig for denne Nav-enheten")
+        }
     }
 }
 

@@ -173,6 +173,9 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val klageId = UUID.randomUUID()
         val vedtakFilreferanseId = UUID.randomUUID()
 
+        coEvery { fiksService.getSoknad(digisosId.toString()) } returns createDigisosSak(digisosId)
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
+
         val fiksKlageDto = createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId)
         coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(fiksKlageDto)
         coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonKlage::class.java, any()) } returns
@@ -193,23 +196,25 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .returnResult()
             .responseBody
             ?.also { dto ->
-                assertThat { dto.klageId == klageId }
-                assertThat { dto.vedtakId == vedtakFilreferanseId }
+                assertThat(dto.digisosId).isEqualTo(digisosId)
+                assertThat(dto.klageId).isEqualTo(klageId)
+                assertThat(dto.vedtakId).isEqualTo(vedtakFilreferanseId)
             }
             ?: error("Forventet klage tilbake")
     }
 
     @Test
-    fun `Hente klage som ikke eksisterer returnerer 404`() {
+    fun `Hente klage som ikke eksisterer returnerer tom respons`() {
+        val digisosId = UUID.randomUUID()
+        coEvery { fiksService.getSoknad(digisosId.toString()) } returns createDigisosSak(digisosId)
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
-        doGet(GET_KLAGE, listOf(UUID.randomUUID(), UUID.randomUUID()))
+        doGet(GET_KLAGE, listOf(digisosId, UUID.randomUUID()))
             .expectStatus()
             .isOk
-            .expectBodyList(KlageDto::class.java)
-            .returnResult()
-            .responseBody
-            .also { klager -> assertThat(klager).isEmpty() }
+            .expectBody()
+            .isEmpty
     }
 
     @Test
@@ -218,27 +223,38 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val vedtakFilreferanseId = UUID.randomUUID()
         val digisosId = UUID.randomUUID()
 
+        coEvery { fiksService.getSoknad(digisosId.toString()) } returns createDigisosSak(digisosId)
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
         coEvery { fiksKlageClient.hentKlager(any()) } returns
             listOf(createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId))
 
         doGet(GET_KLAGER, listOf(digisosId))
+            .expectStatus()
+            .isOk
             .expectBodyList(KlageRef::class.java)
+            .hasSize(1)
             .returnResult()
             .responseBody
             .also { klager ->
                 klager!!.forEach { klage ->
                     assertThat(klage.klageId).isEqualTo(klageId)
                     assertThat(klage.vedtakId).isEqualTo(vedtakFilreferanseId)
+                    assertThat(klage.fiksDigisosId).isEqualTo(digisosId)
                 }
             }
     }
 
     @Test
     fun `Digisos-sak uten klager returnerer tom liste`() {
+        val digisosId = UUID.randomUUID()
+        coEvery { fiksService.getSoknad(digisosId.toString()) } returns createDigisosSak(digisosId)
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
-        doGet(GET_KLAGER, listOf(UUID.randomUUID()))
-            .expectBodyList(KlageDto::class.java)
+        doGet(GET_KLAGER, listOf(digisosId))
+            .expectStatus()
+            .isOk
+            .expectBodyList(KlageRef::class.java)
             .returnResult()
             .responseBody
             .also { klager -> assertThat(klager).isEmpty() }
@@ -246,10 +262,13 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `Last opp vedlegg skal ikke gi feil`() {
+        val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
         val pdfUuidFilename = UUID.randomUUID()
         val pdfFile = getFile()
 
+        coEvery { fiksService.getSoknad(digisosId.toString()) } returns createDigisosSak(digisosId)
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
         coEvery { mellomlagerClient.uploadDocuments(any(), any()) } returns
             MellomlagerResponse.MellomlagringDto(
                 navEksternRefId = klageId,
@@ -268,7 +287,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val body = createBody(pdfFile, pdfUuidFilename)
 
         doPostFiles(
-            uri = "/api/v1/innsyn/${UUID.randomUUID()}/${UUID.randomUUID()}/vedlegg",
+            uri = "/api/v1/innsyn/$digisosId/$klageId/vedlegg",
             body = body,
         ).expectStatus()
             .isOk
@@ -311,6 +330,8 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `innsending av klage gir 503 nar kommune har deaktivert mottak`() {
+        val digisosId = UUID.randomUUID()
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -327,7 +348,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         doPostFullResponse(
             uri = POST_KLAGE,
-            digisosId = UUID.randomUUID(),
+            digisosId = digisosId,
             body =
                 KlageInput(
                     klageId = UUID.randomUUID(),
@@ -343,6 +364,7 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         val klageId = UUID.randomUUID()
         val ettersendelseId = UUID.randomUUID()
 
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",

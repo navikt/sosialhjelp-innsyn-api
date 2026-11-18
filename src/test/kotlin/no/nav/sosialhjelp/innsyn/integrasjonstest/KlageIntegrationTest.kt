@@ -689,6 +689,7 @@ private fun createModel(
                         Vedtak(
                             filreferanseId.toString(),
                             "vedtaksreferanse",
+                            null,
                             UtfallVedtak.DELVIS_INNVILGET,
                             vedtaksFilUrl = "",
                             dato = LocalDate.now(),

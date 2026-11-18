@@ -36,8 +36,6 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @RequestBody input: KlageInput,
     ) {
-        validateKlageTilgjengelig(fiksDigisosId)
-
         tilgangskontroll.sjekkTilgang()
 
         if (input.tekst.length > 2000) {

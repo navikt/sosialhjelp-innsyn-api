@@ -83,12 +83,6 @@ class KlageController(
 
         return klageUseCaseHandler.hentAlleKlager(fiksDigisosId)
     }
-
-    private suspend fun validateKlageTilgjengelig(fiksDigisosId: UUID) {
-        if (klageUseCaseHandler.kanSendeKlage(fiksDigisosId).not()) {
-            throw KlageIkkeTilgjengeligException("Klage er ikke tilgjengelig for denne Nav-enheten")
-        }
-    }
 }
 
 data class DocumentsForKlage(

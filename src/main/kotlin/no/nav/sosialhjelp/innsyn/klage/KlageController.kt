@@ -6,17 +6,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import no.nav.sosialhjelp.innsyn.tilgang.TilgangskontrollService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Flux
 import java.util.UUID
 
 @RestController
@@ -26,31 +22,6 @@ class KlageController(
     private val klageUseCaseHandler: KlageUseCaseHandler,
     private val tilgangskontroll: TilgangskontrollService,
 ) {
-    @PostMapping("/{fiksDigisosId}/{navEksternRefId}/vedlegg", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    suspend fun uploadDocuments(
-        @PathVariable fiksDigisosId: UUID,
-        @PathVariable navEksternRefId: UUID,
-        @RequestPart("files") rawFiles: Flux<FilePart>,
-    ): DocumentsForKlage {
-        validateKlageTilgjengelig(fiksDigisosId)
-
-        tilgangskontroll.sjekkTilgang()
-
-        return klageUseCaseHandler.lastOppVedlegg(
-            digisosId = fiksDigisosId,
-            navEksternRefId = navEksternRefId,
-            rawFiles = rawFiles,
-        )
-    }
-
-    @GetMapping("/{fiksDigisosId}/klage/{klageId}/avbryt")
-    suspend fun cancelKlage(
-        @PathVariable fiksDigisosId: UUID,
-        @PathVariable klageId: UUID,
-    ) {
-        TODO("Implementer avbrytKlage i KlageController")
-    }
-
     @GetMapping("/{fiksDigisosId}/klage/tilgjengelig")
     suspend fun kanSendeKlage(
         @PathVariable fiksDigisosId: UUID,
@@ -79,26 +50,11 @@ class KlageController(
         )
     }
 
-    @PostMapping("/{fiksDigisosId}/klage/{klageId}/ettersendelse/{ettersendelseId}")
-    suspend fun sendEttersendelse(
-        @PathVariable fiksDigisosId: UUID,
-        @PathVariable klageId: UUID,
-        @PathVariable ettersendelseId: UUID,
-    ) {
-        validateKlageTilgjengelig(fiksDigisosId)
-
-        tilgangskontroll.sjekkTilgang()
-
-        klageUseCaseHandler.sendEttersendelse(fiksDigisosId, klageId, ettersendelseId)
-    }
-
     @GetMapping("/{fiksDigisosId}/klage/{klageId}")
     suspend fun hentKlage(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable klageId: UUID,
     ): KlageDto? {
-        validateKlageTilgjengelig(fiksDigisosId)
-
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler.hentKlage(fiksDigisosId, klageId)
@@ -113,8 +69,6 @@ class KlageController(
         @PathVariable fiksDigisosId: UUID,
         @PathVariable vedtakId: UUID,
     ): ResponseEntity<KlageDto> {
-        validateKlageTilgjengelig(fiksDigisosId)
-
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler
@@ -127,8 +81,6 @@ class KlageController(
     suspend fun hentKlager(
         @PathVariable fiksDigisosId: UUID,
     ): List<KlageRef> {
-        validateKlageTilgjengelig(fiksDigisosId)
-
         tilgangskontroll.sjekkTilgang()
 
         return klageUseCaseHandler.hentAlleKlager(fiksDigisosId)

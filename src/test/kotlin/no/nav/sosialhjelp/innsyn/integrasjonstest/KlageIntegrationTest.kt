@@ -1,6 +1,5 @@
 package no.nav.sosialhjelp.innsyn.integrasjonstest
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkSpyBean
 import io.getunleash.FakeUnleash
@@ -19,7 +18,6 @@ import no.nav.sbl.soknadsosialhjelp.soknad.JsonSoknadsmottaker
 import no.nav.sbl.soknadsosialhjelp.soknad.common.JsonKildeBruker
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonPersonIdentifikator
 import no.nav.sbl.soknadsosialhjelp.soknad.personalia.JsonSokernavn
-import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedlegg
 import no.nav.sbl.soknadsosialhjelp.vedlegg.JsonVedleggSpesifikasjon
 import no.nav.sosialhjelp.api.fiks.DigisosSak
 import no.nav.sosialhjelp.api.fiks.DigisosSoker
@@ -34,7 +32,6 @@ import no.nav.sosialhjelp.innsyn.domain.Soknadsmottaker
 import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.klage.DocumentsForKlage
 import no.nav.sosialhjelp.innsyn.klage.KlageDto
 import no.nav.sosialhjelp.innsyn.klage.KlageInput
 import no.nav.sosialhjelp.innsyn.klage.KlageMetricsService
@@ -47,9 +44,6 @@ import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendtInfoNAVDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksProtokoll
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerClient
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerResponse
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagringDokumentInfo
 import no.nav.sosialhjelp.innsyn.klage.fiks.SendtKvitteringDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatus
 import no.nav.sosialhjelp.innsyn.klage.fiks.SendtStatusDto
@@ -60,23 +54,15 @@ import no.nav.sosialhjelp.innsyn.pdl.dto.PdlGradering
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlNavn
 import no.nav.sosialhjelp.innsyn.pdl.dto.PdlPerson
 import no.nav.sosialhjelp.innsyn.upload.UploadClient
-import no.nav.sosialhjelp.innsyn.utils.sosialhjelpJsonMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.InputStreamResource
-import org.springframework.http.ContentDisposition
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.MediaType.APPLICATION_OCTET_STREAM
-import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.test.web.reactive.server.expectBody
-import org.springframework.util.MultiValueMap
-import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -96,9 +82,6 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     fun resetToggles() {
         (unleash as FakeUnleash).enableAll()
     }
-
-    @MockkBean
-    private lateinit var mellomlagerClient: MellomlagerClient
 
     @MockkBean
     private lateinit var fiksService: FiksService
@@ -167,25 +150,19 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coVerify(exactly = 1) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakFilreferanseId, any()) }
     }
 
-    @Test
-    fun `Hente lagret klage skal returnere riktig klage`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `Hente lagret klage skal returnere riktig klage uavhengig av toggle`(klageAktivert: Boolean) {
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
         val vedtakFilreferanseId = UUID.randomUUID()
 
+        if (!klageAktivert) {
+            (unleash as FakeUnleash).enableAllExcept(KlageTilgangService.KLAGE_TOGGLE)
+        }
+
         val fiksKlageDto = createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId)
         coEvery { fiksKlageClient.hentKlager(digisosId) } returns listOf(fiksKlageDto)
-        coEvery { fiksService.getDocument(any<UUID>(), any<UUID>(), JsonKlage::class.java, any()) } returns
-            createKlageJson(fiksKlageDto)
-        coEvery {
-            fiksService.getDocument(
-                any<String>(),
-                any<String>(),
-                JsonVedleggSpesifikasjon::class.java,
-                any(),
-            )
-        } returns JsonVedleggSpesifikasjon()
-
         doGet(GET_KLAGE, listOf(digisosId, klageId))
             .expectStatus()
             .isOk
@@ -193,95 +170,102 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
             .returnResult()
             .responseBody
             ?.also { dto ->
-                assertThat { dto.klageId == klageId }
-                assertThat { dto.vedtakId == vedtakFilreferanseId }
+                assertThat(dto.digisosId).isEqualTo(digisosId)
+                assertThat(dto.klageId).isEqualTo(klageId)
+                assertThat(dto.vedtakId).isEqualTo(vedtakFilreferanseId)
             }
             ?: error("Forventet klage tilbake")
     }
 
     @Test
-    fun `Hente klage som ikke eksisterer returnerer 404`() {
+    fun `Hente klage som ikke eksisterer returnerer tom respons`() {
+        val digisosId = UUID.randomUUID()
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
-        doGet(GET_KLAGE, listOf(UUID.randomUUID(), UUID.randomUUID()))
+        doGet(GET_KLAGE, listOf(digisosId, UUID.randomUUID()))
             .expectStatus()
             .isOk
-            .expectBodyList(KlageDto::class.java)
-            .returnResult()
-            .responseBody
-            .also { klager -> assertThat(klager).isEmpty() }
+            .expectBody()
+            .isEmpty
     }
 
-    @Test
-    fun `Hente alle klager skal returnere alle klager for digisosId`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `Hente alle klager skal returnere alle klager for digisosId uavhengig av toggle`(klageAktivert: Boolean) {
         val klageId = UUID.randomUUID()
         val vedtakFilreferanseId = UUID.randomUUID()
         val digisosId = UUID.randomUUID()
 
+        if (!klageAktivert) {
+            (unleash as FakeUnleash).enableAllExcept(KlageTilgangService.KLAGE_TOGGLE)
+        }
         coEvery { fiksKlageClient.hentKlager(any()) } returns
             listOf(createFiksKlageDto(klageId, vedtakFilreferanseId, digisosId))
 
         doGet(GET_KLAGER, listOf(digisosId))
+            .expectStatus()
+            .isOk
             .expectBodyList(KlageRef::class.java)
+            .hasSize(1)
             .returnResult()
             .responseBody
             .also { klager ->
                 klager!!.forEach { klage ->
                     assertThat(klage.klageId).isEqualTo(klageId)
                     assertThat(klage.vedtakId).isEqualTo(vedtakFilreferanseId)
+                    assertThat(klage.fiksDigisosId).isEqualTo(digisosId)
                 }
             }
     }
 
     @Test
     fun `Digisos-sak uten klager returnerer tom liste`() {
+        val digisosId = UUID.randomUUID()
         coEvery { fiksKlageClient.hentKlager(any()) } returns emptyList()
 
-        doGet(GET_KLAGER, listOf(UUID.randomUUID()))
-            .expectBodyList(KlageDto::class.java)
+        doGet(GET_KLAGER, listOf(digisosId))
+            .expectStatus()
+            .isOk
+            .expectBodyList(KlageRef::class.java)
             .returnResult()
             .responseBody
             .also { klager -> assertThat(klager).isEmpty() }
     }
 
-    @Test
-    fun `Last opp vedlegg skal ikke gi feil`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `Hente klage for vedtak skal returnere riktig klage uavhengig av toggle`(klageAktivert: Boolean) {
+        val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
-        val pdfUuidFilename = UUID.randomUUID()
-        val pdfFile = getFile()
+        val vedtakId = UUID.randomUUID()
+        if (!klageAktivert) {
+            (unleash as FakeUnleash).enableAllExcept(KlageTilgangService.KLAGE_TOGGLE)
+        }
+        coEvery { fiksKlageClient.hentKlager(digisosId) } returns
+            listOf(createFiksKlageDto(klageId, vedtakId, digisosId))
 
-        coEvery { mellomlagerClient.uploadDocuments(any(), any()) } returns
-            MellomlagerResponse.MellomlagringDto(
-                navEksternRefId = klageId,
-                mellomlagringMetadataList =
-                    listOf(
-                        element =
-                            MellomlagringDokumentInfo(
-                                filnavn = "$pdfUuidFilename.pdf",
-                                filId = UUID.randomUUID(),
-                                storrelse = pdfFile.length(),
-                                mimetype = "application/pdf",
-                            ),
-                    ),
-            )
-
-        val body = createBody(pdfFile, pdfUuidFilename)
-
-        doPostFiles(
-            uri = "/api/v1/innsyn/${UUID.randomUUID()}/${UUID.randomUUID()}/vedlegg",
-            body = body,
-        ).expectStatus()
+        doGet(GET_KLAGE_FOR_VEDTAK, listOf(digisosId, vedtakId))
+            .expectStatus()
             .isOk
-            .expectBody(DocumentsForKlage::class.java)
-            .returnResult()
-            .responseBody
-            ?.documents
-            ?.firstOrNull()
-            ?.also { docRef ->
-                assertThat(docRef.filename).contains(pdfUuidFilename.toString())
-                assertThat(docRef.documentId).isInstanceOf(UUID::class.java)
+            .expectBody<KlageDto>()
+            .value { response ->
+                val dto = requireNotNull(response) { "Forventet klage tilbake" }
+                assertThat(dto.digisosId).isEqualTo(digisosId)
+                assertThat(dto.klageId).isEqualTo(klageId)
+                assertThat(dto.vedtakId).isEqualTo(vedtakId)
             }
-            ?: error("Forventet dokumentreferanser tilbake")
+    }
+
+    @Test
+    fun `Hente klage for vedtak uten klage returnerer 404`() {
+        val digisosId = UUID.randomUUID()
+        coEvery { fiksKlageClient.hentKlager(digisosId) } returns emptyList()
+
+        doGet(GET_KLAGE_FOR_VEDTAK, listOf(digisosId, UUID.randomUUID()))
+            .expectStatus()
+            .isNotFound
+            .expectBody()
+            .isEmpty
     }
 
     @Test
@@ -311,6 +295,8 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
     @Test
     fun `innsending av klage gir 503 nar kommune har deaktivert mottak`() {
+        val digisosId = UUID.randomUUID()
+        coEvery { eventService.createModel(any()) } returns createModel(digisosId)
         coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
             KommuneInfo(
                 kommunenummer = "1234",
@@ -327,42 +313,13 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
 
         doPostFullResponse(
             uri = POST_KLAGE,
-            digisosId = UUID.randomUUID(),
+            digisosId = digisosId,
             body =
                 KlageInput(
                     klageId = UUID.randomUUID(),
                     vedtakId = UUID.randomUUID(),
                     tekst = "Dette er en testklage",
                 ),
-        ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
-    }
-
-    @Test
-    fun `innsending av ettersendelse gir 503 nar kommune har deaktivert mottak`() {
-        val digisosId = UUID.randomUUID()
-        val klageId = UUID.randomUUID()
-        val ettersendelseId = UUID.randomUUID()
-
-        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
-            KommuneInfo(
-                kommunenummer = "1234",
-                kanMottaSoknader = false,
-                kanOppdatereStatus = true,
-                harMidlertidigDeaktivertMottak = false,
-                harMidlertidigDeaktivertOppdateringer = false,
-                kontaktpersoner = null,
-                harNksTilgang = true,
-                behandlingsansvarlig = null,
-            )
-
-        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
-
-        val path = "/api/v1/innsyn/{digisosId}/klage/$klageId/ettersendelse/$ettersendelseId"
-
-        doPostFullResponse(
-            uri = path,
-            digisosId = digisosId,
-            body = "{}",
         ).expectStatus().isEqualTo(HttpStatus.SERVICE_UNAVAILABLE)
     }
 
@@ -504,81 +461,13 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
         coVerify(exactly = 0) { fiksKlageClient.sendKlage(digisosId, klageId, vedtakId, any()) }
     }
 
-    private fun getFile(filename: String = "sample_pdf.pdf"): File {
-        val url = this.javaClass.classLoader.getResource(filename)?.file
-        return File(url!!)
-    }
-
     companion object {
         private const val POST_KLAGE = "/api/v1/innsyn/{digisosId}/klage/send"
         private const val GET_KLAGE = "/api/v1/innsyn/{digisosId}/klage/{klageId}"
         private const val GET_KLAGER = "/api/v1/innsyn/{digisosId}/klager"
+        private const val GET_KLAGE_FOR_VEDTAK = "/api/v1/innsyn/{digisosId}/{vedtakId}/klage"
     }
 }
-
-private fun createBody(
-    pdfFile: File,
-    pdfUuidFilename: UUID,
-): MultiValueMap<String, HttpEntity<*>> =
-    MultipartBodyBuilder()
-        .apply {
-            part("files", InputStreamResource(pdfFile.inputStream()))
-                .headers {
-                    it.contentType = APPLICATION_OCTET_STREAM
-                    it.contentDisposition =
-                        ContentDisposition
-                            .builder("form-data")
-                            .name("files")
-                            .filename("$pdfUuidFilename.pdf")
-                            .build()
-                }
-
-            val metadataJson = createMetadataJson(listOf(pdfUuidFilename))
-
-            part("files", ByteArrayResource(metadataJson.toByteArray()))
-                .headers {
-                    it.contentType = MediaType.APPLICATION_JSON
-                    it.contentDisposition =
-                        ContentDisposition
-                            .builder("form-data")
-                            .name("files")
-                            .filename("metadata.json")
-                            .build()
-                }
-        }.build()
-
-private fun createMetadataJson(uuids: List<UUID>): String =
-    listOf(
-        OpplastetVedleggMetadataRequest(
-            type = "klage",
-            tilleggsinfo = null,
-            hendelsetype = null,
-            hendelsereferanse = null,
-            filer =
-                uuids.map { uuid ->
-                    OpplastetFilMetadata(
-                        filnavn = "$uuid.pdf",
-                        uuid = uuid,
-                    )
-                },
-            innsendelsesfrist = null,
-        ),
-    ).let { sosialhjelpJsonMapper.writeValueAsString(it) }
-
-data class OpplastetVedleggMetadataRequest(
-    val type: String,
-    val tilleggsinfo: String?,
-    val hendelsetype: JsonVedlegg.HendelseType?,
-    val hendelsereferanse: String?,
-    val filer: List<OpplastetFilMetadata>,
-    @param:JsonFormat(pattern = "yyyy-MM-dd")
-    val innsendelsesfrist: LocalDate?,
-)
-
-data class OpplastetFilMetadata(
-    val filnavn: String,
-    val uuid: UUID,
-)
 
 private fun createFiksKlageDto(
     klageId: UUID,

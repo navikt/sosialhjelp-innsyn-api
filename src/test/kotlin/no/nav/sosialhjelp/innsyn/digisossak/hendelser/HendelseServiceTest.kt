@@ -2,6 +2,7 @@ package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -90,6 +91,24 @@ internal class HendelseServiceTest {
             assertThat(hendelser[0].hendelseType).isEqualTo(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR)
             assertThat(hendelser[0].tidspunkt).isEqualTo(tidspunkt_sendt)
             assertThat(hendelser[0].url?.link).isEqualTo(URL)
+        }
+
+    @Test
+    fun `Skal returnere historikk selv om henting av klager feiler`() =
+        runTest(timeout = 5.seconds) {
+            val sendt = Hendelse(HendelseTekstType.SOKNAD_SEND_TIL_KONTOR, tidspunkt_sendt)
+            val mottatt = Hendelse(HendelseTekstType.SOKNAD_MOTTATT_MED_KOMMUNENAVN, tidspunkt_mottatt)
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
+            model.historikk.addAll(listOf(mottatt, sendt))
+
+            coEvery { eventService.createModel(any()) } returns model
+            coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
+            coEvery { klageService.hentKlager(fiksDigisosId) } throws IllegalStateException("Feil ved henting av klager")
+
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
+
+            assertThat(hendelser).containsExactly(sendt, mottatt)
+            coVerify(exactly = 1) { klageService.hentKlager(fiksDigisosId) }
         }
 
     @Test

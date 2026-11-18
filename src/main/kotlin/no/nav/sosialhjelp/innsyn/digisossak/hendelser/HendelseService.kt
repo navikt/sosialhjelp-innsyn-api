@@ -1,5 +1,8 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
@@ -78,19 +81,23 @@ class HendelseService(
     }
 
     private suspend fun InternalDigisosSoker.leggTilHendelserForKlage() {
-        klageService
-            .hentKlager(UUID.fromString(fiksDigisosId))
-            .forEach { klage ->
-                klage.timestampSendt
-                    ?.also {
+        runCatching {
+            klageService
+                .hentKlager(UUID.fromString(fiksDigisosId))
+                .forEach { klage ->
+                    klage.timestampSendt?.also {
                         historikk.add(
                             Hendelse(
                                 HendelseTekstType.KLAGE_SENDT,
                                 unixToLocalDateTime(it),
                             ),
                         )
-                    }
-            }
+                    } ?: logger.error("Klage har ikke timestampSendt")
+                }
+        }.onFailure {
+            logger.error("Feil ved innhenting av klager for historikk/hendelser")
+            if (it is CancellationException) currentCoroutineContext().ensureActive()
+        }
     }
 
     private fun LocalDateTime.rundNedTilNaermeste5Minutt(): LocalDateTime =
@@ -98,6 +105,6 @@ class HendelseService(
             .truncatedTo(ChronoUnit.MINUTES)
 
     companion object {
-        private val log by logger()
+        private val logger by logger()
     }
 }

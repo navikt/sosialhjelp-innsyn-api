@@ -15,6 +15,9 @@ import no.nav.sosialhjelp.innsyn.domain.UtfallVedtak
 import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.utils.hentUrlFraFilreferanse
 import no.nav.sosialhjelp.innsyn.utils.toLocalDateTime
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("VedtakFattet")
 
 fun InternalDigisosSoker.apply(
     hendelse: JsonVedtakFattet,
@@ -50,6 +53,9 @@ fun InternalDigisosSoker.apply(
             )
         saker.add(sakForReferanse)
     }
+
+    log.info("VedtakFattet: $vedtakFattet på sak $sakForReferanse")
+
     sakForReferanse.vedtak.add(vedtakFattet)
 
     if (sakForReferanse.tittel != null) {

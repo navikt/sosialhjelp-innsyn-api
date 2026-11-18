@@ -2,11 +2,9 @@ package no.nav.sosialhjelp.innsyn.klage
 
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
 @Service
-@Component
 class KlageMetricsService(
     private val meterRegistry: MeterRegistry,
 ) {

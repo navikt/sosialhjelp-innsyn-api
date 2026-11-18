@@ -23,7 +23,6 @@ class CheckStatusKlagerSendtJob(
     @Scheduled(cron = "0 0 */1 * * *", zone = "Europe/Oslo")
     suspend fun checkStatus() {
         if (leaderElection.isLeader()) {
-            log.info("Pod er leader")
             doCheckStatus()
         }
     }

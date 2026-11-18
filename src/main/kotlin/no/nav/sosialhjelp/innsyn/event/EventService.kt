@@ -6,7 +6,6 @@ import no.nav.sbl.soknadsosialhjelp.digisos.soker.JsonHendelse
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonEtterspurt
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonDokumentasjonkrav
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonForelopigSvar
-import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonRammevedtak
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSaksStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonSoknadsStatus
 import no.nav.sbl.soknadsosialhjelp.digisos.soker.hendelse.JsonTildeltNavKontor
@@ -51,7 +50,7 @@ class EventService(
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
         val dokumentlagerDokumentId: String? = digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId
 
-        val model = InternalDigisosSoker()
+        val model = InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)
 
         if (jsonDigisosSoker?.avsender != null) {
             model.fagsystem = Fagsystem(jsonDigisosSoker.avsender.systemnavn, jsonDigisosSoker.avsender.systemversjon)
@@ -61,7 +60,6 @@ class EventService(
         if (originalSoknadNAV?.timestampSendt != null) {
             setTidspunktSendtIfNotZero(model, originalSoknadNAV.timestampSendt)
             model.referanse = digisosSak.originalSoknadNAV?.navEksternRefId
-            model.fiksDigisosId = digisosSak.fiksDigisosId
 
             if (jsonSoknad != null) {
                 model.soknadsmottaker = Soknadsmottaker(jsonSoknad.mottaker.enhetsnummer, jsonSoknad.mottaker.navEnhetsnavn)
@@ -104,7 +102,7 @@ class EventService(
         val jsonDigisosSoker: JsonDigisosSoker? = innsynService.hentJsonDigisosSoker(digisosSak)
         val originalSoknadNAV: OriginalSoknadNAV? = digisosSak.originalSoknadNAV
 
-        val model = InternalDigisosSoker()
+        val model = InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)
 
         if (originalSoknadNAV?.timestampSendt != null) {
             model.status = SoknadsStatus.SENDT

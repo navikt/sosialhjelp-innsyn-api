@@ -35,7 +35,7 @@ internal class BrevServiceTest {
 
     @Test
     suspend fun `Skal returnere tom liste når modellen er tom`() {
-        coEvery { eventService.createModel(any()) } returns InternalDigisosSoker()
+        coEvery { eventService.createModel(any()) } returns InternalDigisosSoker(fiksDigisosId = "123")
 
         val result = service.getBrev("123")
 
@@ -48,6 +48,7 @@ internal class BrevServiceTest {
         val timestamp = LocalDateTime.now()
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 forelopigSvar = ForelopigSvar(harMottattForelopigSvar = true, link = link, timestamp = timestamp),
             )
         coEvery { eventService.createModel(any()) } returns model
@@ -64,6 +65,7 @@ internal class BrevServiceTest {
     suspend fun `Skal ikke returnere forelopigSvar-brev når harMottattForelopigSvar er false`() {
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 forelopigSvar = ForelopigSvar(harMottattForelopigSvar = false, link = "https://nav.no/brev/forelopig"),
             )
         coEvery { eventService.createModel(any()) } returns model
@@ -77,6 +79,7 @@ internal class BrevServiceTest {
     suspend fun `Skal ikke returnere forelopigSvar-brev når link er null`() {
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 forelopigSvar = ForelopigSvar(harMottattForelopigSvar = true, link = null),
             )
         coEvery { eventService.createModel(any()) } returns model
@@ -92,6 +95,7 @@ internal class BrevServiceTest {
         val dato = LocalDate.of(2024, 1, 15)
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 saker =
                     mutableListOf(
                         Sak(
@@ -126,6 +130,7 @@ internal class BrevServiceTest {
     suspend fun `Skal returnere vedtaksbrev fra alle vedtak på tvers av saker`() {
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 saker =
                     mutableListOf(
                         Sak(
@@ -183,6 +188,7 @@ internal class BrevServiceTest {
         val timestamp = LocalDateTime.now()
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 oppgaver =
                     mutableListOf(
                         Oppgave(
@@ -212,6 +218,7 @@ internal class BrevServiceTest {
     suspend fun `Skal ignorere oppgaver uten forvaltningsbrev`() {
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 oppgaver =
                     mutableListOf(
                         Oppgave(
@@ -240,6 +247,7 @@ internal class BrevServiceTest {
         val timestamp = LocalDateTime.now()
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 oppgaver =
                     mutableListOf(
                         Oppgave(
@@ -280,6 +288,7 @@ internal class BrevServiceTest {
         val newest = LocalDateTime.of(2025, 3, 1, 9, 0)
         val model =
             InternalDigisosSoker(
+                fiksDigisosId = "123",
                 forelopigSvar = ForelopigSvar(harMottattForelopigSvar = true, link = "https://nav.no/forelopig", timestamp = middle),
                 saker =
                     mutableListOf(

@@ -41,7 +41,7 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere emptyList når model_saker er null`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             coEvery { eventService.createModel(any()) } returns model
 
             val response: List<SaksStatusResponse> = service.hentSaksStatuser("123")
@@ -52,7 +52,7 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere response med status = UNDER_BEHANDLING`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.saker.add(
                 Sak(
                     referanse = referanse,
@@ -79,7 +79,7 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere response med status = FERDIGBEHANDLET ved vedtakFattet uavhengig av utfallet til vedtakFattet`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.saker.add(
                 Sak(
                     referanse = referanse,
@@ -116,7 +116,7 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere response med status = FERDIGBEHANDLET og vedtaksfilUrl og DEFAULT_TITTEL`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.saker.add(
                 Sak(
                     referanse = referanse,
@@ -154,7 +154,7 @@ internal class SaksStatusServiceTest {
     @Test
     fun `Skal returnere response med 2 elementer ved 2 Saker`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
             model.saker.addAll(
                 listOf(
                     Sak(
@@ -277,10 +277,10 @@ internal class SaksStatusServiceTest {
 
             coEvery {
                 eventService.createModel(digisosSak1)
-            } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiTrue))
+            } returns InternalDigisosSoker(fiksDigisosId = digisosSak1.fiksDigisosId, saker = mutableListOf(sakSomSkalGiTrue))
             coEvery {
                 eventService.createModel(digisosSak2)
-            } returns InternalDigisosSoker(saker = mutableListOf(sakSomSkalGiFalse))
+            } returns InternalDigisosSoker(fiksDigisosId = digisosSak2.fiksDigisosId, saker = mutableListOf(sakSomSkalGiFalse))
 
             assertThat(service.hentSaksStatuser("id1").first().skalViseVedtakInfoPanel).isEqualTo(true)
             assertThat(service.hentSaksStatuser("id2").first().skalViseVedtakInfoPanel).isEqualTo(false)

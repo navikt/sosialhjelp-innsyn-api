@@ -52,7 +52,7 @@ class JsonKlageGenerator(
             vedtakReferanse =
                 JsonVedtakReferanse(
                     filreferanseId = vedtak.id,
-                    referanse = vedtak.referanse,
+                    referanse = vedtak.nySakReferanse ?: vedtak.originalSakReferanse,
                 ),
             digisosId = fiksDigisosId.toString(),
             innsendingstidspunkt = createInnsendingstidspunktString(),

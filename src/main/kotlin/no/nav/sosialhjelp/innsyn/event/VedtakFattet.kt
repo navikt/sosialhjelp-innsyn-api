@@ -29,7 +29,8 @@ fun InternalDigisosSoker.apply(
     val vedtakFattet =
         Vedtak(
             filreferanseId,
-            hendelse.vedtaksreferanse ?: hendelse.saksreferanse,
+            hendelse.saksreferanse,
+            hendelse.vedtaksreferanse,
             utfall,
             vedtaksfilUrl,
             hendelse.hendelsestidspunkt.toLocalDateTime().toLocalDate(),

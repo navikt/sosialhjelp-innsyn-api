@@ -50,6 +50,7 @@ class InnsynsfilBuilder {
         saksreferanse: String = defaultSaksreferanse,
         vedtaksreferanse: String? = null,
         utfall: JsonVedtakFattet.Utfall = JsonVedtakFattet.Utfall.INNVILGET,
+        vedtaksfilId: String = UUID.randomUUID().toString(),
     ): InnsynsfilBuilder {
         hendelser.add(
             JsonVedtakFattet(
@@ -58,7 +59,7 @@ class InnsynsfilBuilder {
                 hendelsestidspunkt = convertToOffsetDateTimeUTCString(now.minusMinutes(antallHendelserCounter--)),
                 utfall = utfall,
                 vedtaksfil =
-                    JsonVedtaksfil(referanse = JsonDokumentlagerFilreferanse(UUID.randomUUID().toString())),
+                    JsonVedtaksfil(referanse = JsonDokumentlagerFilreferanse(vedtaksfilId)),
             ),
         )
         return this

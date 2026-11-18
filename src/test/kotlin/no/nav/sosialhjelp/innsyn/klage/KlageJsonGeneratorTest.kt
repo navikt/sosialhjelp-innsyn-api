@@ -60,9 +60,22 @@ class KlageJsonGeneratorTest {
             .also { jsonKlage ->
                 assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
                 assertThat(jsonKlage.vedtakReferanse.filreferanseId).isEqualTo(input.vedtakId.toString())
+                assertThat(jsonKlage.vedtakReferanse.referanse).isEqualTo("saksreferanse")
                 assertThat(jsonKlage.digisosId).isEqualTo(fiksDigisosId.toString())
                 assertThat(jsonKlage.begrunnelse?.klageTekst).isEqualTo(input.tekst)
             }
+    }
+
+    @Test
+    suspend fun `Ny saksreferanse brukes i klagen når den finnes`() {
+        val fiksDigisosId = UUID.randomUUID()
+        val vedtakId = UUID.randomUUID()
+        coEvery { eventService.createModel(any()) } returns
+            createModel(fiksDigisosId, vedtakId, enhetsnummer = "1234", nySakReferanse = "ny-saksreferanse")
+
+        val jsonKlage = jsonKlageGenerator.generateJsonKlage(KlageInput(UUID.randomUUID(), vedtakId, "tekst"), fiksDigisosId)
+
+        assertThat(jsonKlage.vedtakReferanse.referanse).isEqualTo("ny-saksreferanse")
     }
 
     @Test
@@ -120,6 +133,7 @@ private fun createModel(
     digisosId: UUID = UUID.randomUUID(),
     vedtakFilreferanseId: UUID = UUID.randomUUID(),
     enhetsnummer: String = " ",
+    nySakReferanse: String? = null,
 ): InternalDigisosSoker =
     InternalDigisosSoker(
         fiksDigisosId = digisosId.toString(),
@@ -139,6 +153,7 @@ private fun createModel(
                         Vedtak(
                             vedtakFilreferanseId.toString(),
                             "saksreferanse",
+                            nySakReferanse,
                             UtfallVedtak.DELVIS_INNVILGET,
                             vedtaksFilUrl = "",
                             dato = LocalDate.now(),
@@ -146,6 +161,7 @@ private fun createModel(
                         Vedtak(
                             UUID.randomUUID().toString(),
                             "vedtaksreferanse",
+                            null,
                             UtfallVedtak.DELVIS_INNVILGET,
                             vedtaksFilUrl = "",
                             dato = LocalDate.now(),

@@ -25,10 +25,6 @@ class KlageMetricsService(
             ).increment()
     }
 
-    fun registerEttersendelseSent(success: Boolean) {
-        meterRegistry.counter(ETTERSENDELSE_SENDT, "result", result(success)).increment()
-    }
-
     fun setKlagerIkkeMottattGauge(value: Int) {
         klageIkkeMottattGauge.set(value)
     }
@@ -37,7 +33,6 @@ class KlageMetricsService(
 
     companion object {
         const val KLAGE_SENDT = "sosialhjelp.klage.innsending"
-        const val ETTERSENDELSE_SENDT = "sosialhjelp.klage.ettersendelse.innsending"
         const val UKJENT = "ukjent"
     }
 }

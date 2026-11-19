@@ -1,8 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import no.nav.sbl.soknadsosialhjelp.json.JsonSosialhjelpObjectMapper
@@ -14,16 +12,13 @@ import no.nav.sosialhjelp.innsyn.klage.fiks.FiksEttersendelseDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageClient
 import no.nav.sosialhjelp.innsyn.klage.fiks.FiksKlageDto
 import no.nav.sosialhjelp.innsyn.klage.fiks.MandatoryFilesForKlage
-import no.nav.sosialhjelp.innsyn.klage.fiks.MellomlagerService
 import no.nav.sosialhjelp.innsyn.upload.UploadClient
 import no.nav.sosialhjelp.innsyn.utils.hentDokumentlagerUrl
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
 import no.nav.sosialhjelp.innsyn.vedlegg.KrypteringService
 import no.nav.sosialhjelp.innsyn.vedlegg.dto.VedleggResponse
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
@@ -42,18 +37,6 @@ interface KlageService {
         klageId: UUID,
     ): KlageDto?
 
-    suspend fun lastOppVedlegg(
-        fiksDigisosId: UUID,
-        navEksternRefId: UUID,
-        rawFiles: Flux<FilePart>,
-    ): DocumentsForKlage
-
-    suspend fun sendEttersendelse(
-        fiksDigisosId: UUID,
-        klageId: UUID,
-        ettersendelseId: UUID,
-    )
-
     suspend fun hentKlageForVedtak(
         fiksDigisosId: UUID,
         vedtakId: UUID,
@@ -68,7 +51,6 @@ interface KlageService {
 @Service
 class KlageServiceImpl(
     private val klageClient: FiksKlageClient,
-    private val mellomlagerService: MellomlagerService,
     private val clientProperties: ClientProperties,
     private val krypteringService: KrypteringService,
     private val uploadClient: UploadClient,
@@ -101,24 +83,6 @@ class KlageServiceImpl(
         }
     }
 
-    override suspend fun sendEttersendelse(
-        fiksDigisosId: UUID,
-        klageId: UUID,
-        ettersendelseId: UUID,
-    ) {
-        fetchJsonVedleggSpec(ettersendelseId, klageId)
-            .also {
-                if (it.hasNoFiles()) error("Ingen vedlegg for ettersendelse av Klage")
-
-                klageClient.sendEttersendelse(
-                    digisosId = fiksDigisosId,
-                    klageId = klageId,
-                    ettersendelseId = ettersendelseId,
-                    vedleggJson = it,
-                )
-            }
-    }
-
     override suspend fun hentKlager(fiksDigisosId: UUID?): List<KlageRef> =
         klageClient.hentKlager(fiksDigisosId).map { klage ->
             KlageRef(
@@ -148,16 +112,6 @@ class KlageServiceImpl(
             ettersendelser = fiksKlage.ettersendtInfoNAV?.ettersendelser?.map { it.toEttersendelseDto() } ?: emptyList(),
             timestampSendt = fiksKlage.sendtKvittering.sendtStatus?.timestamp ?: 0L,
         )
-    }
-
-    override suspend fun lastOppVedlegg(
-        fiksDigisosId: UUID,
-        navEksternRefId: UUID,
-        rawFiles: Flux<FilePart>,
-    ): DocumentsForKlage {
-        val allFiles = rawFiles.asFlow().toList()
-
-        return mellomlagerService.processDocumentUpload(navEksternRefId, allFiles)
     }
 
     override suspend fun fetchJsonVedleggSpec(

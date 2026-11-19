@@ -1,9 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Flux
 import java.util.UUID
 
 @Component
@@ -61,24 +59,6 @@ class KlageUseCaseHandler(
         digisosId: UUID,
         vedtakId: UUID,
     ): KlageDto? = klageService.hentKlageForVedtak(digisosId, vedtakId)
-
-    suspend fun lastOppVedlegg(
-        digisosId: UUID,
-        navEksternRefId: UUID,
-        rawFiles: Flux<FilePart>,
-    ): DocumentsForKlage = klageService.lastOppVedlegg(digisosId, navEksternRefId, rawFiles)
-
-    suspend fun sendEttersendelse(
-        digisosId: UUID,
-        klageId: UUID,
-        ettersendelseId: UUID,
-    ) {
-        kommuneService.validerMottakOgInnsynForKommune(digisosId)
-        runCatching { klageService.sendEttersendelse(digisosId, klageId, ettersendelseId) }
-            .onSuccess { klageMetricsService.registerEttersendelseSent(success = true) }
-            .onFailure { klageMetricsService.registerEttersendelseSent(success = false) }
-            .getOrThrow()
-    }
 }
 
 class KlageIkkeSentException(

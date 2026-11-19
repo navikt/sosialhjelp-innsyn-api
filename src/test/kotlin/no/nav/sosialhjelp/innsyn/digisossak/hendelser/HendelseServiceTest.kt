@@ -286,7 +286,7 @@ internal class HendelseServiceTest {
     @Test
     internal fun `hendelser for utbetalinger - alle statusendringer beholdes, inkludert ANNULLERT`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
 
             val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
             model.historikk.addAll(
@@ -301,7 +301,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser).hasSize(4)
             assertThat(hendelser.map { it.tidspunkt })
@@ -317,7 +317,7 @@ internal class HendelseServiceTest {
     @Test
     internal fun `hendelser for utbetalinger - tilbake til tidligere status i samme 5-minuttersvindu beholdes`() =
         runTest(timeout = 5.seconds) {
-            val model = InternalDigisosSoker()
+            val model = InternalDigisosSoker(fiksDigisosId = fiksDigisosId.toString())
 
             val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
             model.historikk.addAll(
@@ -331,7 +331,7 @@ internal class HendelseServiceTest {
             coEvery { eventService.createModel(any()) } returns model
             coEvery { vedleggService.hentEttersendteVedlegg(any(), any<InternalDigisosSoker>()) } returns emptyList()
 
-            val hendelser = service.hentHendelser("123").hendelser
+            val hendelser = service.hentHendelser(fiksDigisosId.toString()).hendelser
 
             assertThat(hendelser.map { it.utbetalingsStatus }).containsExactly(
                 UtbetalingsStatus.PLANLAGT_UTBETALING,

@@ -87,41 +87,7 @@ internal class VedtakFattetTest {
             ?.also { sak ->
                 assertThat(sak.referanse).isEqualTo(saksReferanse)
                 assertThat(sak.vedtak).hasSize(1)
-                assertThat(sak.vedtak).allMatch { it.referanse == sak.referanse }
-            }
-            ?: error("Forventet at det finnes en sak i innsynsfilen")
-    }
-
-    @Test
-    suspend fun `For vedtakFattet med vedtaksreferanse skal denne brukes for Vedtak`() {
-        val digisosId = UUID.randomUUID()
-        val digisosSak = createDigisosSak(digisosId, "0301")
-        every { digisosSak.originalSoknadNAV?.timestampSendt } returns Instant.parse("2026-10-14T08:00:00Z").toEpochMilli()
-        every { digisosSak.originalSoknadNAV?.navEksternRefId } returns UUID.randomUUID().toString()
-        every { digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
-
-        val saksreferanse = "enSaksreferanse"
-        val vedtaksreferanse = "enVedtaksreferanse"
-
-        val jsonDigisosSoker =
-            InnsynsfilBuilder()
-                .addSaksstatus(status = JsonSaksStatus.Status.UNDER_BEHANDLING, saksreferanse = saksreferanse)
-                .addVedtakFattetHendelse(saksreferanse = saksreferanse)
-                .addVedtakFattetHendelse(saksreferanse = saksreferanse, vedtaksreferanse = vedtaksreferanse)
-                .build()
-
-        coEvery { innsynService.hentJsonDigisosSoker(digisosSak) } returns jsonDigisosSoker
-        coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak) } returns emptyList()
-
-        val innsynsfilModel = eventService.createModel(digisosSak)
-
-        innsynsfilModel.saker
-            .firstOrNull()
-            ?.also { sak ->
-                assertThat(sak.referanse).isEqualTo(saksreferanse)
-                assertThat(sak.vedtak).hasSize(2)
-                assertThat(sak.vedtak).anyMatch { it.referanse == sak.referanse }
-                assertThat(sak.vedtak).anyMatch { it.referanse == vedtaksreferanse }
+                assertThat(sak.vedtak).allMatch { it.originalSakReferanse == sak.referanse }
             }
             ?: error("Forventet at det finnes en sak i innsynsfilen")
     }
@@ -150,10 +116,50 @@ internal class VedtakFattetTest {
         val innsynsfilModel = eventService.createModel(digisosSak)
 
         assertThat(innsynsfilModel.saker).hasSize(2)
-        assertThat(innsynsfilModel.saker).anyMatch { it.referanse == saksreferanse2 }
+        assertThat(innsynsfilModel.saker).anyMatch { it.referanse == saksreferanse }
         assertThat(innsynsfilModel.saker).anyMatch { it.referanse == saksreferanse2 }
         assertThat(innsynsfilModel.saker.flatMap { it.vedtak }).hasSize(2)
-        assertThat(innsynsfilModel.saker.flatMap { it.vedtak }).anyMatch { it.referanse == saksreferanse }
-        assertThat(innsynsfilModel.saker.flatMap { it.vedtak }).anyMatch { it.referanse == saksreferanse2 }
+        assertThat(innsynsfilModel.saker.flatMap { it.vedtak }).anyMatch { it.originalSakReferanse == saksreferanse }
+        assertThat(innsynsfilModel.saker.flatMap { it.vedtak }).anyMatch { it.originalSakReferanse == saksreferanse2 }
+    }
+
+    @Test
+    suspend fun `Vedtak med samme saksreferanse grupperes under eksisterende sak selv med ulike vedtaksreferanser`() {
+        assertVedtakGrupperesUnderOriginalSak(medSaksstatus = true)
+    }
+
+    @Test
+    suspend fun `Vedtak med samme saksreferanse oppretter en sak selv med ulike vedtaksreferanser`() {
+        assertVedtakGrupperesUnderOriginalSak(medSaksstatus = false)
+    }
+
+    private suspend fun assertVedtakGrupperesUnderOriginalSak(medSaksstatus: Boolean) {
+        val digisosSak = createDigisosSak(UUID.randomUUID(), "0301")
+        every { digisosSak.originalSoknadNAV?.timestampSendt } returns Instant.parse("2026-10-14T08:00:00Z").toEpochMilli()
+        every { digisosSak.originalSoknadNAV?.navEksternRefId } returns UUID.randomUUID().toString()
+        every { digisosSak.originalSoknadNAV?.soknadDokument?.dokumentlagerDokumentId } returns null
+
+        val original = "originalSaksreferanse"
+        val ny1 = "nySaksreferanse1"
+        val ny2 = "nySaksreferanse2"
+        val builder = InnsynsfilBuilder()
+        if (medSaksstatus) {
+            builder.addSaksstatus(status = JsonSaksStatus.Status.UNDER_BEHANDLING, saksreferanse = original)
+        }
+        val jsonDigisosSoker =
+            builder
+                .addVedtakFattetHendelse(saksreferanse = original, vedtaksreferanse = ny1)
+                .addVedtakFattetHendelse(saksreferanse = original, vedtaksreferanse = ny2)
+                .build()
+
+        coEvery { innsynService.hentJsonDigisosSoker(digisosSak) } returns jsonDigisosSoker
+        coEvery { vedleggService.hentSoknadVedleggMedStatus(VEDLEGG_KREVES_STATUS, digisosSak) } returns emptyList()
+
+        val saker = eventService.createModel(digisosSak).saker
+        assertThat(saker).hasSize(1)
+        val sak = saker.single()
+        assertThat(sak.referanse).isEqualTo(original)
+        assertThat(sak.vedtak).hasSize(2).allMatch { it.originalSakReferanse == original }
+        assertThat(sak.vedtak.map { it.nySakReferanse }).containsExactlyInAnyOrder(ny1, ny2)
     }
 }

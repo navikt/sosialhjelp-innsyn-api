@@ -171,6 +171,7 @@ class InnsynExceptionHandler : ResponseEntityExceptionHandler() {
             when (e.reason) {
                 KlageValidationException.Reason.TEKST_FOR_LANG -> FrontendErrorType.KLAGE_FOR_LANG_TEKST
                 KlageValidationException.Reason.MANGLER_TEKST_OG_VEDLEGG -> FrontendErrorType.KLAGE_MANGLER_TEKST_OG_VEDLEGG
+                KlageValidationException.Reason.KLAGEFRIST_UTLOPT -> FrontendErrorType.KLAGEFRIST_UTLOPT
             }
         return ResponseEntity(
             FrontendErrorMessage(type, e.message),

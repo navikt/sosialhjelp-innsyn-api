@@ -30,7 +30,7 @@ internal class VedleggServiceTest {
 
     private val mockDigisosSak: DigisosSak = mockk()
     private val mockJsonVedleggSpesifikasjon: JsonVedleggSpesifikasjon = mockk()
-    private val model = InternalDigisosSoker()
+    private val model = InternalDigisosSoker(fiksDigisosId = "fiksDigisosId")
 
     @BeforeEach
     internal fun setUp() {
@@ -190,7 +190,7 @@ internal class VedleggServiceTest {
 
     @Test
     suspend fun `Verifisere at antall JsonVedlegg ender i riktig antall internalVedlegg og at de opprinnelige filene finnes`() {
-        val model = InternalDigisosSoker()
+        val model = InternalDigisosSoker(fiksDigisosId = mockDigisosSak.fiksDigisosId)
 
         coEvery { eventService.createModel(any()) } returns model
         coEvery {

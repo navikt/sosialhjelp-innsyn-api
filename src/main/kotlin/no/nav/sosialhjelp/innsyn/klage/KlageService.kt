@@ -35,7 +35,7 @@ interface KlageService {
         vedleggJson: JsonVedleggSpesifikasjon,
     )
 
-    suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef>
+    suspend fun hentKlager(fiksDigisosId: UUID? = null): List<KlageRef>
 
     suspend fun hentKlage(
         fiksDigisosId: UUID,
@@ -119,9 +119,14 @@ class KlageServiceImpl(
             }
     }
 
-    override suspend fun hentKlager(fiksDigisosId: UUID): List<KlageRef> =
-        klageClient.hentKlager(fiksDigisosId).map {
-            KlageRef(it.klageId, it.vedtakId)
+    override suspend fun hentKlager(fiksDigisosId: UUID?): List<KlageRef> =
+        klageClient.hentKlager(fiksDigisosId).map { klage ->
+            KlageRef(
+                klage.klageId,
+                klage.vedtakId,
+                klage.digisosId,
+                klage.sendtKvittering.sendtStatus?.timestamp,
+            )
         }
 
     override suspend fun hentKlage(

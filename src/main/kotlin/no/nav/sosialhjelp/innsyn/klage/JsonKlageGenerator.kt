@@ -19,12 +19,17 @@ import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.convertToOffsetDateTimeUTCS
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+
+private const val ZONE_STRING = "Europe/Oslo"
+private const val KLAGEFRIST_UKER = 4L
 
 @Component
 class JsonKlageGenerator(
@@ -39,13 +44,16 @@ class JsonKlageGenerator(
         val digisosSak = fiksService.getSoknad(fiksDigisosId.toString())
         val innsynfilModel = eventService.createModel(digisosSak)
         val vedtak = innsynfilModel.saker.findVedtakForReferanse(input.vedtakId)
+        if (!erInnenforKlagefrist(vedtak.dato, LocalDate.now(ZoneId.of(ZONE_STRING)))) {
+            throw KlageValidationException("Klagefristen for vedtaket er utløpt", KlageValidationException.Reason.KLAGEFRIST_UTLOPT)
+        }
 
         return JsonKlage(
             klageId = input.klageId.toString(),
             vedtakReferanse =
                 JsonVedtakReferanse(
                     filreferanseId = vedtak.id,
-                    referanse = vedtak.referanse,
+                    referanse = vedtak.nySakReferanse ?: vedtak.originalSakReferanse,
                 ),
             digisosId = fiksDigisosId.toString(),
             innsendingstidspunkt = createInnsendingstidspunktString(),
@@ -98,6 +106,11 @@ private fun createJsonAutentisering() =
 
 private fun createInnsendingstidspunktString(): String = convertToOffsetDateTimeUTCString(nowWithMillis())
 
+internal fun erInnenforKlagefrist(
+    vedtaksdato: LocalDate,
+    idag: LocalDate,
+): Boolean = !idag.isAfter(vedtaksdato.plusWeeks(KLAGEFRIST_UKER))
+
 private fun MutableList<Sak>.findVedtakForReferanse(vedtakFilreferanseId: UUID): Vedtak =
     flatMap { it.vedtak }.find { it.id == vedtakFilreferanseId.toString() }
         ?: throw VedtakNotValidException("Fant ikke vedtak med vedtaksreferanse $vedtakFilreferanseId")
@@ -105,13 +118,16 @@ private fun MutableList<Sak>.findVedtakForReferanse(vedtakFilreferanseId: UUID):
 private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = tekst)
 
 object TimestampUtil {
-    private const val ZONE_STRING = "Europe/Oslo"
     private const val TIMESTAMP_REGEX = "^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9]*Z$"
     private const val MILLISECOND = 1000000L
 
     fun nowWithMillis(): LocalDateTime = ZonedDateTime.now(ZoneId.of(ZONE_STRING)).toLocalDateTime().truncatedTo(ChronoUnit.MILLIS)
 
     fun convertToOffsetDateTimeUTCString(localDateTime: LocalDateTime) = localDateTime.toUTCTimestampStringWithMillis()
+
+    fun epochMillisToLocalDateTime(epochMillis: Long): LocalDateTime = convertInstantToLocalDateTime(Instant.ofEpochMilli(epochMillis))
+
+    fun convertInstantToLocalDateTime(instant: Instant): LocalDateTime = LocalDateTime.ofInstant(instant, ZoneId.of(ZONE_STRING))
 
     private fun validateTimestamp(timestampString: String) {
         if (!Regex(TIMESTAMP_REGEX).matches(timestampString)) error("Tidspunkt $timestampString matcher ikke formatet")

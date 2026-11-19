@@ -9,4 +9,5 @@ data class SaksListeResponse(
     val kommunenummer: String?,
     val soknadOpprettet: LocalDateTime?,
     val isPapirSoknad: Boolean,
+    val hasKlage: Boolean,
 )

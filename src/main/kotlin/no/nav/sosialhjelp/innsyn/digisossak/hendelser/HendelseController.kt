@@ -46,6 +46,7 @@ class HendelseController(
     JsonSubTypes.Type(name = "SoknadKanIkkeViseStatus", value = HendelseDto.SoknadKanIkkeViseStatus::class),
     JsonSubTypes.Type(name = "SakKanIkkeViseStatus", value = HendelseDto.SakKanIkkeViseStatus::class),
     JsonSubTypes.Type(name = "UtbetalingerOppdatert", value = HendelseDto.UtbetalingerOppdatert::class),
+    JsonSubTypes.Type(name = "KlageSendt", value = HendelseDto.KlageSendt::class),
 )
 @Schema(
     discriminatorProperty = "type",
@@ -65,6 +66,7 @@ class HendelseController(
         DiscriminatorMapping(value = "SoknadKanIkkeViseStatus", schema = HendelseDto.SoknadKanIkkeViseStatus::class),
         DiscriminatorMapping(value = "SakKanIkkeViseStatus", schema = HendelseDto.SakKanIkkeViseStatus::class),
         DiscriminatorMapping(value = "UtbetalingerOppdatert", schema = HendelseDto.UtbetalingerOppdatert::class),
+        DiscriminatorMapping(value = "KlageSendt", schema = HendelseDto.KlageSendt::class),
     ],
     subTypes = [
         HendelseDto.Sendt::class,
@@ -82,6 +84,7 @@ class HendelseController(
         HendelseDto.SoknadKanIkkeViseStatus::class,
         HendelseDto.SakKanIkkeViseStatus::class,
         HendelseDto.UtbetalingerOppdatert::class,
+        HendelseDto.KlageSendt::class,
     ],
 )
 sealed class HendelseDto(
@@ -164,5 +167,9 @@ sealed class HendelseDto(
     class UtbetalingerOppdatert(
         tidspunkt: LocalDateTime,
         val status: UtbetalingsStatus,
+    ) : HendelseDto(tidspunkt)
+
+    class KlageSendt(
+        tidspunkt: LocalDateTime,
     ) : HendelseDto(tidspunkt)
 }

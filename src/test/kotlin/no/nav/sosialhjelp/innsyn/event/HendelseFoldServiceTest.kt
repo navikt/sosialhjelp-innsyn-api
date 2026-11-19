@@ -57,7 +57,7 @@ internal class HendelseFoldServiceTest {
         runTest {
             var fetched = false
             service()
-                .launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker()) {
+                .launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)) {
                     fetched = true
                     emptyList()
                 }.join()
@@ -69,7 +69,11 @@ internal class HendelseFoldServiceTest {
     @Test
     fun `records error when vedlegg fetch fails`() =
         runTest {
-            service().launchFoldAndDiff(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) { error("Fiks failed") }.join()
+            val digisosSak = recentDigitalDigisosSak()
+            service()
+                .launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)) {
+                    error("Fiks failed")
+                }.join()
 
             assertThat(resultCount("error")).isEqualTo(1.0)
             assertThat(resultCount("match")).isEqualTo(0.0)
@@ -78,7 +82,11 @@ internal class HendelseFoldServiceTest {
     @Test
     fun `records timeout when vedlegg fetch is slow`() =
         runTest {
-            service().launchFoldAndDiff(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) { awaitCancellation() }.join()
+            val digisosSak = recentDigitalDigisosSak()
+            service()
+                .launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)) {
+                    awaitCancellation()
+                }.join()
 
             assertThat(resultCount("timeout")).isEqualTo(1.0)
         }
@@ -87,9 +95,10 @@ internal class HendelseFoldServiceTest {
     fun `propagates caller context to the background fold`() =
         runTest {
             var observedName: String? = null
+            val digisosSak = recentDigitalDigisosSak()
             withContext(CoroutineName("caller")) {
                 service()
-                    .launchFoldAndDiff(recentDigitalDigisosSak(), null, null, InternalDigisosSoker()) {
+                    .launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)) {
                         observedName = currentCoroutineContext()[CoroutineName]?.name
                         emptyList()
                     }
@@ -118,7 +127,10 @@ internal class HendelseFoldServiceTest {
         runTest {
             val job =
                 withContext(CoroutineName("request")) {
-                    service().launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker()) { emptyList() }
+                    service()
+                        .launchFoldAndDiff(digisosSak, null, null, InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId)) {
+                            emptyList()
+                        }
                 }
 
             job.join()
@@ -131,6 +143,7 @@ internal class HendelseFoldServiceTest {
         runTest {
             val oldModel =
                 InternalDigisosSoker(
+                    fiksDigisosId = digisosSak.fiksDigisosId,
                     fagsystem = Fagsystem("test", "1"),
                     saker =
                         mutableListOf(
@@ -175,6 +188,7 @@ internal class HendelseFoldServiceTest {
                 )
             val oldModel =
                 InternalDigisosSoker(
+                    fiksDigisosId = digisosSak.fiksDigisosId,
                     fagsystem = Fagsystem("test", "1"),
                     saker =
                         mutableListOf(
@@ -210,6 +224,7 @@ internal class HendelseFoldServiceTest {
                 )
             val oldModel =
                 InternalDigisosSoker(
+                    fiksDigisosId = digisosSak.fiksDigisosId,
                     fagsystem = Fagsystem("test", "1"),
                     vilkar = mutableListOf(oldVilkar("vilkar-1", "ukjent-sak")),
                 )
@@ -239,6 +254,7 @@ internal class HendelseFoldServiceTest {
                 )
             val oldModel =
                 InternalDigisosSoker(
+                    fiksDigisosId = digisosSak.fiksDigisosId,
                     dokumentasjonkrav =
                         mutableListOf(
                             Dokumentasjonkrav(
@@ -278,7 +294,8 @@ internal class HendelseFoldServiceTest {
                             ),
                         ),
                 )
-            val oldModel = InternalDigisosSoker(vilkar = mutableListOf(oldVilkar("vilkar-1", "sak-1")))
+            val oldModel =
+                InternalDigisosSoker(fiksDigisosId = digisosSak.fiksDigisosId, vilkar = mutableListOf(oldVilkar("vilkar-1", "sak-1")))
 
             service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
@@ -302,7 +319,11 @@ internal class HendelseFoldServiceTest {
                             ),
                         ),
                 )
-            val oldModel = InternalDigisosSoker(dokumentasjonkrav = mutableListOf(oldDokumentasjonkrav("krav-1", "sak-1")))
+            val oldModel =
+                InternalDigisosSoker(
+                    fiksDigisosId = digisosSak.fiksDigisosId,
+                    dokumentasjonkrav = mutableListOf(oldDokumentasjonkrav("krav-1", "sak-1")),
+                )
 
             service().launchFoldAndDiff(digisosSak, soker, null, oldModel) { emptyList() }.join()
 
@@ -315,6 +336,7 @@ internal class HendelseFoldServiceTest {
             val soker = vedtakSoker(vedtakFattet("sak-1", VEDTAK_ID_1, "2026-01-01T12:02:00Z", JsonVedtakFattet.Utfall.INNVILGET))
             val oldModel =
                 InternalDigisosSoker(
+                    fiksDigisosId = digisosSak.fiksDigisosId,
                     fagsystem = Fagsystem("test", "1"),
                     saker = mutableListOf(oldSak("sak-1", oldVedtak(VEDTAK_ID_1.uppercase(), UtfallVedtak.INNVILGET))),
                 )
@@ -334,6 +356,7 @@ internal class HendelseFoldServiceTest {
                 )
             val oldModel =
                 InternalDigisosSoker(
+                    fiksDigisosId = digisosSak.fiksDigisosId,
                     fagsystem = Fagsystem("test", "1"),
                     saker =
                         mutableListOf(
@@ -353,6 +376,7 @@ internal class HendelseFoldServiceTest {
             val soker = vedtakSoker(vedtakFattet("sak-1", VEDTAK_ID_1, "2026-01-01T12:02:00Z", JsonVedtakFattet.Utfall.AVSLATT))
             val oldModel =
                 InternalDigisosSoker(
+                    fiksDigisosId = digisosSak.fiksDigisosId,
                     fagsystem = Fagsystem("test", "1"),
                     saker = mutableListOf(oldSak("sak-1", oldVedtak(VEDTAK_ID_1, UtfallVedtak.INNVILGET))),
                 )
@@ -393,7 +417,7 @@ internal class HendelseFoldServiceTest {
     private fun oldVedtak(
         id: String,
         utfall: UtfallVedtak,
-    ) = Vedtak(id, "ref-$id", utfall, "https://example.com/$id", LocalDate.of(2026, 1, 1))
+    ) = Vedtak(id, "ref-$id", null, utfall, "https://example.com/$id", LocalDate.of(2026, 1, 1))
 
     private fun resultCount(result: String): Double =
         meterRegistry

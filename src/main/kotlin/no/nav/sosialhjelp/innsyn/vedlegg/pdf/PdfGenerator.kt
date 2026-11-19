@@ -85,8 +85,20 @@ class PdfGenerator internal constructor(
         addCenteredParagraph(text, fontBold, FONT_H1_SIZE, LEADING_PERCENTAGE)
     }
 
+    fun addCenteredH2Bold(text: String) {
+        addCenteredParagraph(text, fontBold, FONT_H2_SIZE, LEADING_PERCENTAGE)
+    }
+
+    fun addCenteredH3Bold(text: String) {
+        addCenteredParagraph(text, fontBold, FONT_H3_SIZE, LEADING_PERCENTAGE)
+    }
+
     fun addCenteredH4Bold(text: String) {
         addCenteredParagraph(text, fontBold, FONT_H4_SIZE, LEADING_PERCENTAGE)
+    }
+
+    fun addTextH4Bold(text: String) {
+        addParagraph(text, fontBold, FONT_H4_SIZE, MARGIN)
     }
 
     fun addText(text: String) {
@@ -231,6 +243,8 @@ class PdfGenerator internal constructor(
 
         private const val FONT_PLAIN_SIZE = 12F
         private const val FONT_H1_SIZE = 20F
+        private const val FONT_H2_SIZE = 18F
+        private const val FONT_H3_SIZE = 16F
         private const val FONT_H4_SIZE = 14F
 
         private const val LEADING_PERCENTAGE = 1.5F

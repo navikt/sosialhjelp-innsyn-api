@@ -1,10 +1,14 @@
 package no.nav.sosialhjelp.innsyn.digisossak.hendelser
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
 import no.nav.sosialhjelp.innsyn.event.EventService
+import no.nav.sosialhjelp.innsyn.klage.KlageService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.utils.unixToLocalDateTime
 import no.nav.sosialhjelp.innsyn.vedlegg.InternalVedlegg
@@ -12,6 +16,7 @@ import no.nav.sosialhjelp.innsyn.vedlegg.VedleggService
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 import kotlin.math.floor
 
 data class HendelseInfo(
@@ -26,6 +31,7 @@ class HendelseService(
     private val eventService: EventService,
     private val vedleggService: VedleggService,
     private val fiksService: FiksService,
+    private val klageService: KlageService,
 ) {
     suspend fun hentHendelser(fiksDigisosId: String): HendelseInfo {
         val digisosSak = fiksService.getSoknad(fiksDigisosId)
@@ -35,6 +41,9 @@ class HendelseService(
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
         model.grupperHendelserForUtbetalinger()
+
+        model.leggTilHendelserForKlage()
+
         return HendelseInfo(
             model.historikk.sortedBy { it.tidspunkt },
             digisosSak.kommunenummer,
@@ -83,11 +92,31 @@ class HendelseService(
         historikk = (andreHendelser + grupperteUtbetalingshendelser).toMutableList()
     }
 
+    private suspend fun InternalDigisosSoker.leggTilHendelserForKlage() {
+        runCatching {
+            klageService
+                .hentKlager(UUID.fromString(fiksDigisosId))
+                .forEach { klage ->
+                    klage.timestampSendt?.also {
+                        historikk.add(
+                            Hendelse(
+                                HendelseTekstType.KLAGE_SENDT,
+                                unixToLocalDateTime(it),
+                            ),
+                        )
+                    } ?: logger.error("Klage har ikke timestampSendt")
+                }
+        }.onFailure {
+            logger.error("Feil ved innhenting av klager for historikk/hendelser")
+            if (it is CancellationException) currentCoroutineContext().ensureActive()
+        }
+    }
+
     private fun LocalDateTime.rundNedTilNaermeste5Minutt(): LocalDateTime =
         withMinute((floor(this.minute / 5.0) * 5.0).toInt())
             .truncatedTo(ChronoUnit.MINUTES)
 
     companion object {
-        private val log by logger()
+        private val logger by logger()
     }
 }

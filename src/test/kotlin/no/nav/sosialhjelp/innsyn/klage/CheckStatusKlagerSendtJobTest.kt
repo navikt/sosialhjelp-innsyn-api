@@ -1,7 +1,9 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import io.getunleash.Unleash
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -23,18 +25,41 @@ internal class CheckStatusKlagerSendtJobTest {
     private val fiksKlageClient: FiksKlageClient = mockk()
     private val leaderElection: LeaderElection = mockk()
     private val meterRegistry = SimpleMeterRegistry()
-    private val job = CheckStatusKlagerSendtJob(fiksKlageClient, leaderElection, KlageMetricsService(meterRegistry))
+    private val klageMetricsService = KlageMetricsService(meterRegistry)
+    private val unleash: Unleash = mockk()
+    private val job = CheckStatusKlagerSendtJob(fiksKlageClient, leaderElection, klageMetricsService, unleash)
 
     @BeforeEach
     fun setUp() {
         mockkObject(TimestampUtil)
         coEvery { leaderElection.isLeader() } returns true
+        every { unleash.isEnabled("sosialhjelp.innsyn.klage.sjekkmottatt") } returns true
     }
 
     @AfterEach
     fun tearDown() {
         unmockkObject(TimestampUtil)
         meterRegistry.close()
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "true, false",
+        "false, true",
+        "false, false",
+    )
+    fun `henter ikke status og beholder maaleverdien naar toggle er av eller instansen ikke er leder`(
+        erLeder: Boolean,
+        toggleAktivert: Boolean,
+    ) = runTest {
+        coEvery { leaderElection.isLeader() } returns erLeder
+        every { unleash.isEnabled("sosialhjelp.innsyn.klage.sjekkmottatt") } returns toggleAktivert
+        klageMetricsService.setKlagerIkkeMottattGauge(3)
+
+        job.checkStatus()
+
+        coVerify(exactly = 0) { fiksKlageClient.hentKlageStatus(any(), any()) }
+        assertThat(meterRegistry.get("sosialhjelp.klage.ikke.mottatt").gauge().value()).isEqualTo(3.0)
     }
 
     @ParameterizedTest

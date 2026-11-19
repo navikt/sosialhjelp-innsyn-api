@@ -1,5 +1,6 @@
 package no.nav.sosialhjelp.innsyn.klage
 
+import io.getunleash.Unleash
 import kotlinx.coroutines.time.withTimeout
 import no.nav.sosialhjelp.innsyn.app.LeaderElection
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.epochMillisToLocalDateTime
@@ -19,10 +20,11 @@ class CheckStatusKlagerSendtJob(
     private val fiksKlageClient: FiksKlageClient,
     private val leaderElection: LeaderElection,
     private val klageMetricsService: KlageMetricsService,
+    private val unleash: Unleash,
 ) {
     @Scheduled(cron = "0 0 */1 * * *", zone = "Europe/Oslo")
     suspend fun checkStatus() {
-        if (leaderElection.isLeader()) {
+        if (leaderElection.isLeader() && unleash.isEnabled(SJEKK_TOGGLE)) {
             doCheckStatus()
         }
     }
@@ -79,6 +81,7 @@ class CheckStatusKlagerSendtJob(
     companion object {
         private const val ANTALL_DAGER_QUERY = 10
         private const val ANTALL_DAGER_LIMIT = 2
+        private const val SJEKK_TOGGLE = "sosialhjelp.innsyn.klage.sjekkmottatt"
         private val log by logger()
     }
 }

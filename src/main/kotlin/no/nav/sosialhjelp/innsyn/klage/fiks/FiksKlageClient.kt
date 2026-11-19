@@ -14,7 +14,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.UUID
@@ -25,13 +24,6 @@ interface FiksKlageClient {
         klageId: UUID,
         vedtakId: UUID,
         files: MandatoryFilesForKlage,
-    )
-
-    suspend fun sendEttersendelse(
-        digisosId: UUID,
-        klageId: UUID,
-        ettersendelseId: UUID,
-        vedleggJson: JsonVedleggSpesifikasjon,
     )
 
     suspend fun hentKlager(digisosId: UUID?): List<FiksKlageDto>
@@ -88,45 +80,6 @@ class FiksKlageClientImpl(
             .awaitSingleOrNull()
     }
 
-    override suspend fun sendEttersendelse(
-        digisosId: UUID,
-        klageId: UUID,
-        ettersendelseId: UUID,
-        vedleggJson: JsonVedleggSpesifikasjon,
-    ) {
-        MultipartBodyBuilder()
-            .apply {
-                buildPart(
-                    "vedlegg.json",
-                    "vedlegg.json",
-                    MediaType.APPLICATION_JSON,
-                    vedleggJson.toJson(),
-                )
-            }.build()
-            .also { body -> doSendEttersendelse(digisosId, klageId, ettersendelseId, body) }
-    }
-
-    private suspend fun doSendEttersendelse(
-        digisosId: UUID,
-        klageId: UUID,
-        ettersendelseId: UUID,
-        body: MultiValueMap<String, HttpEntity<*>>,
-    ) {
-        fiksWebClient
-            .post()
-            .uri(ETTERSENDELSE_PATH, digisosId, ettersendelseId, klageId)
-            .header(HttpHeaders.AUTHORIZATION, TokenUtils.getToken().withBearer())
-            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(BodyInserters.fromMultipartData(body))
-            .retrieve()
-            .onStatus({ !it.is2xxSuccessful }) { clientResponse ->
-                clientResponse.bodyToMono(String::class.java).map { errorBody ->
-                    RuntimeException("Failed to send ettersendelse: ${clientResponse.statusCode()} - $errorBody")
-                }
-            }.toBodilessEntity()
-            .awaitSingleOrNull()
-    }
-
     // Uten query param vil alle klager for alle digisosIds for person returneres
     override suspend fun hentKlager(digisosId: UUID?): List<FiksKlageDto> {
         val uri = GET_KLAGER_PATH + if (digisosId != null) getKlagerQueryParam(digisosId) else ""
@@ -169,7 +122,6 @@ class FiksKlageClientImpl(
         private const val SEND_INN_KLAGE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/{vedtakId}"
         private const val GET_KLAGER_PATH = "/digisos/klage/api/v1/klager"
         private const val GET_KLAGE_STATUS_PATH = "/digisos/klage/api/v1/status"
-        private const val ETTERSENDELSE_PATH = "/digisos/klage/api/v1/{digisosId}/{navEksternRefId}/{klageId}/vedlegg"
 
         private fun getKlagerQueryParam(digisosId: UUID) = "?digisosId=$digisosId"
     }
@@ -244,5 +196,3 @@ data class MandatoryFilesForKlage(
     val vedleggJson: JsonVedleggSpesifikasjon,
     val klagePdf: FilForOpplasting,
 )
-
-private fun JsonVedleggSpesifikasjon.toJson(): String = sosialhjelpJsonMapper.writeValueAsString(this)

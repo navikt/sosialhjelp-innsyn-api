@@ -25,16 +25,6 @@ class KlageMetricsServiceTest {
         assertThat(count(KlageMetricsService.KLAGE_SENDT, "result", "error", "kommunenummer", "ukjent")).isEqualTo(2.0)
     }
 
-    @Test
-    fun `registrerer ettersendelse med result`() {
-        service.registerEttersendelseSent(success = true)
-        service.registerEttersendelseSent(success = false)
-        service.registerEttersendelseSent(success = false)
-
-        assertThat(count(KlageMetricsService.ETTERSENDELSE_SENDT, "result", "success")).isEqualTo(1.0)
-        assertThat(count(KlageMetricsService.ETTERSENDELSE_SENDT, "result", "error")).isEqualTo(2.0)
-    }
-
     private fun count(
         name: String,
         vararg tags: String,

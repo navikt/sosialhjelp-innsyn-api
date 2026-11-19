@@ -60,10 +60,8 @@ class HendelseService(
     }
 
     /**
-     * Utbetalingshendelser legges i historikken ved hver statusendring (se event/Utbetaling.kt).
-     * Her slås påfølgende hendelser med samme status innenfor samme 5-minuttersvindu sammen til én,
-     * slik at en batch med mange utbetalinger gir én linje. Bare påfølgende hendelser slås sammen,
-     * slik at f.eks. planlagt → stoppet → planlagt gir tre linjer og historikken ender på riktig status.
+     * Slår sammen påfølgende utbetalingshendelser med samme status i samme 5-minuttersvindu.
+     * Bare påfølgende, så planlagt → stoppet → planlagt gir tre linjer.
      */
     private fun InternalDigisosSoker.grupperHendelserForUtbetalinger() {
         val (utbetalingshendelser, andreHendelser) =

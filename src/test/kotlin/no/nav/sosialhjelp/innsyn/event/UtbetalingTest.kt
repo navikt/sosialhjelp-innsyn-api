@@ -77,7 +77,7 @@ internal class UtbetalingTest {
             assertThat(model).isNotNull
             assertThat(model.status).isEqualTo(SoknadsStatus.FERDIGBEHANDLET)
             assertThat(model.saker).hasSize(1)
-            assertThat(model.historikk).hasSize(7) // inkl. hendelse for utbetaling
+            assertThat(model.historikk).hasSize(7)
 
             // tittel for sak fra saksstatus-hendelse
             assertThat(model.saker[0].tittel).isEqualTo(TITTEL_1)

@@ -218,8 +218,6 @@ internal class HendelseServiceTest {
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker()
 
-            // Grupperingen leser nå utbetalingshendelser fra historikken (lagt til per statusendring
-            // i event/Utbetaling.kt), ikke fra model.utbetalinger. Samme tidspunkter og forventninger som før.
             val time = LocalDateTime.of(2020, 3, 1, 12, 30, 0)
             model.historikk.addAll(
                 listOf(

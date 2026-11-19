@@ -50,8 +50,7 @@ fun InternalDigisosSoker.apply(hendelse: JsonUtbetaling) {
     utbetalinger.removeIf { t -> t.referanse == utbetaling.referanse }
     utbetalinger.add(utbetaling)
 
-    // Én historikk-hendelse per statusendring, slik at tidligere endringer (og annullering) ikke overskrives.
-    // Endringer uten ny status (f.eks. nytt beløp eller ny dato) gir ingen ny hendelse.
+    // Hendelse per statusendring, så tidligere endringer ikke overskrives. Uendret status gir ingen hendelse.
     if (gammelUtbetaling == null || gammelUtbetaling.status != utbetaling.status) {
         historikk.add(
             Hendelse(

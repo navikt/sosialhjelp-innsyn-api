@@ -1,9 +1,8 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
-import org.springframework.http.codec.multipart.FilePart
+import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Flux
 import java.util.UUID
 
 @Component
@@ -14,6 +13,8 @@ class KlageUseCaseHandler(
     private val klageTilgangService: KlageTilgangService,
     private val klageMetricsService: KlageMetricsService,
 ) {
+    private val log by logger()
+
     suspend fun sendKlage(
         digisosId: UUID,
         input: KlageInput,
@@ -25,7 +26,7 @@ class KlageUseCaseHandler(
 
         val vedleggJson =
             runCatching { klageService.fetchJsonVedleggSpec(input.klageId) }
-                .onFailure { klageMetricsService.registerKlageSent(kommunenummer = null, success = false) }
+                .onFailure { klageMetricsService.registerKlageSent(success = false) }
                 .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
 
         if (input.tekst.isBlank() && vedleggJson.hasNoFiles()) {
@@ -41,9 +42,15 @@ class KlageUseCaseHandler(
 
         runCatching {
             klageService.sendKlage(jsonKlage, klagePdf, vedleggJson)
-        }.onSuccess { klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = true) }
-            .onFailure { klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = false) }
-            .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
+        }.onSuccess {
+            log.info("Klage sendt til kommunenummer=${jsonKlage.mottaker.kommunenummer}, enhetsnummer=${jsonKlage.mottaker.enhetsnummer}")
+            klageMetricsService.registerKlageSent(success = true)
+        }.onFailure {
+            log.warn("Kunne ikke sende klage for digisosId=$digisosId, klageId=${input.klageId}", it)
+            klageMetricsService.registerKlageSent(success = false)
+        }.getOrElse {
+            throw KlageIkkeSentException("Kunne ikke sende klage", it)
+        }
 
         return hentKlage(digisosId, input.klageId) ?: error("Fant ikke innsendt klage")
     }
@@ -61,24 +68,6 @@ class KlageUseCaseHandler(
         digisosId: UUID,
         vedtakId: UUID,
     ): KlageDto? = klageService.hentKlageForVedtak(digisosId, vedtakId)
-
-    suspend fun lastOppVedlegg(
-        digisosId: UUID,
-        navEksternRefId: UUID,
-        rawFiles: Flux<FilePart>,
-    ): DocumentsForKlage = klageService.lastOppVedlegg(digisosId, navEksternRefId, rawFiles)
-
-    suspend fun sendEttersendelse(
-        digisosId: UUID,
-        klageId: UUID,
-        ettersendelseId: UUID,
-    ) {
-        kommuneService.validerMottakOgInnsynForKommune(digisosId)
-        runCatching { klageService.sendEttersendelse(digisosId, klageId, ettersendelseId) }
-            .onSuccess { klageMetricsService.registerEttersendelseSent(success = true) }
-            .onFailure { klageMetricsService.registerEttersendelseSent(success = false) }
-            .getOrThrow()
-    }
 }
 
 class KlageIkkeSentException(

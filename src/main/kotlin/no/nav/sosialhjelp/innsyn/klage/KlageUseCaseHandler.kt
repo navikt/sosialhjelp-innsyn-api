@@ -1,6 +1,7 @@
 package no.nav.sosialhjelp.innsyn.klage
 
 import no.nav.sosialhjelp.innsyn.kommuneinfo.KommuneService
+import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import java.util.UUID
 
@@ -12,6 +13,8 @@ class KlageUseCaseHandler(
     private val klageTilgangService: KlageTilgangService,
     private val klageMetricsService: KlageMetricsService,
 ) {
+    private val log by logger()
+
     suspend fun sendKlage(
         digisosId: UUID,
         input: KlageInput,
@@ -39,9 +42,15 @@ class KlageUseCaseHandler(
 
         runCatching {
             klageService.sendKlage(jsonKlage, klagePdf, vedleggJson)
-        }.onSuccess { klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = true) }
-            .onFailure { klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = false) }
-            .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
+        }.onSuccess {
+            log.info("Klage sendt til kommunenummer=${jsonKlage.mottaker.kommunenummer}, enhetsnummer=${jsonKlage.mottaker.enhetsnummer}")
+            klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = true)
+        }.onFailure {
+            log.warn("Kunne ikke sende klage for digisosId=$digisosId, klageId=${input.klageId}", it)
+            klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = false)
+        }.getOrElse {
+            throw KlageIkkeSentException("Kunne ikke sende klage", it)
+        }
 
         return hentKlage(digisosId, input.klageId) ?: error("Fant ikke innsendt klage")
     }

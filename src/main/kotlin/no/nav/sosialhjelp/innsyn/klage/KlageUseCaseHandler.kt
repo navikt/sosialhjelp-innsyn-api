@@ -26,7 +26,7 @@ class KlageUseCaseHandler(
 
         val vedleggJson =
             runCatching { klageService.fetchJsonVedleggSpec(input.klageId) }
-                .onFailure { klageMetricsService.registerKlageSent(kommunenummer = null, success = false) }
+                .onFailure { klageMetricsService.registerKlageSent(success = false) }
                 .getOrElse { throw KlageIkkeSentException("Kunne ikke sende klage", it) }
 
         if (input.tekst.isBlank() && vedleggJson.hasNoFiles()) {
@@ -44,10 +44,10 @@ class KlageUseCaseHandler(
             klageService.sendKlage(jsonKlage, klagePdf, vedleggJson)
         }.onSuccess {
             log.info("Klage sendt til kommunenummer=${jsonKlage.mottaker.kommunenummer}, enhetsnummer=${jsonKlage.mottaker.enhetsnummer}")
-            klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = true)
+            klageMetricsService.registerKlageSent(success = true)
         }.onFailure {
             log.warn("Kunne ikke sende klage for digisosId=$digisosId, klageId=${input.klageId}", it)
-            klageMetricsService.registerKlageSent(jsonKlage.mottaker.kommunenummer, success = false)
+            klageMetricsService.registerKlageSent(success = false)
         }.getOrElse {
             throw KlageIkkeSentException("Kunne ikke sende klage", it)
         }

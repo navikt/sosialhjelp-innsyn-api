@@ -7,7 +7,6 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.domain.Hendelse
 import no.nav.sosialhjelp.innsyn.domain.HendelseTekstType
 import no.nav.sosialhjelp.innsyn.domain.InternalDigisosSoker
-import no.nav.sosialhjelp.innsyn.domain.UtbetalingsStatus
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.klage.KlageService
 import no.nav.sosialhjelp.innsyn.utils.logger
@@ -41,7 +40,7 @@ class HendelseService(
         val vedlegg: List<InternalVedlegg> = vedleggService.hentEttersendteVedlegg(digisosSak, model)
         digisosSak.originalSoknadNAV?.timestampSendt?.let { model.leggTilHendelserForOpplastinger(it, vedlegg) }
 
-        model.leggTilHendelserForUtbetalinger()
+        model.grupperHendelserForUtbetalinger()
 
         model.leggTilHendelserForKlage()
 
@@ -69,15 +68,28 @@ class HendelseService(
             }
     }
 
-    private fun InternalDigisosSoker.leggTilHendelserForUtbetalinger() {
-        utbetalinger
-            .filter { it.status != UtbetalingsStatus.ANNULLERT }
-            .groupBy { it.datoHendelse.rundNedTilNaermeste5Minutt() }
-            .forEach { (_, grupperteVilkar) ->
-                historikk.add(
-                    Hendelse(HendelseTekstType.UTBETALINGER_OPPDATERT, grupperteVilkar[0].datoHendelse),
-                )
-            }
+    /**
+     * Slår sammen påfølgende utbetalingshendelser med samme status i samme 5-minuttersvindu.
+     * Bare påfølgende, så planlagt → stoppet → planlagt gir tre linjer.
+     */
+    private fun InternalDigisosSoker.grupperHendelserForUtbetalinger() {
+        val (utbetalingshendelser, andreHendelser) =
+            historikk.partition { it.hendelseType == HendelseTekstType.UTBETALINGER_OPPDATERT }
+
+        val grupperteUtbetalingshendelser =
+            utbetalingshendelser
+                .sortedBy { it.tidspunkt }
+                .fold(mutableListOf<Hendelse>()) { grupperte, hendelse ->
+                    val forrige = grupperte.lastOrNull()
+                    val sammeGruppe =
+                        forrige != null &&
+                            forrige.utbetalingsStatus == hendelse.utbetalingsStatus &&
+                            forrige.tidspunkt.rundNedTilNaermeste5Minutt() == hendelse.tidspunkt.rundNedTilNaermeste5Minutt()
+                    if (!sammeGruppe) grupperte.add(hendelse)
+                    grupperte
+                }
+
+        historikk = (andreHendelser + grupperteUtbetalingshendelser).toMutableList()
     }
 
     private suspend fun InternalDigisosSoker.leggTilHendelserForKlage() {

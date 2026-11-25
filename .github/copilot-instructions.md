@@ -26,7 +26,9 @@ Backend API (Spring Boot WebFlux + Kotlin) that lets Norwegian citizens view the
 
 ## Architecture
 
-The app is a **stateless REST API** — no persistent database. Data lives in external systems fetched on each request; Valkey (Redis-compatible) is used only for caching.
+The app is a **stateless REST API**. Data lives in external systems fetched on each request; Valkey (Redis-compatible) is used only for caching.
+
+A Nais Postgres database is being introduced, so far only in the mock environment (`nais/dev/postgres_mock.yaml`). Flyway migrations live in `src/main/resources/db/migration` and run at startup when the `mock-alt` profile is active (configured in `application-mock-alt.yml`). In Nais, Flyway connects via `PGJDBCURL` (admin role). Locally it defaults to `localhost:5432`. Only `spring-boot-flyway` is on the classpath (no Hikari/starter-jdbc), so no runtime `DataSource` is created.
 
 ### Core data flow
 
@@ -146,7 +148,7 @@ class MyIntegrationTest : AbstractIntegrationTest() {
 
 | Profile combination | Use case |
 |---|---|
-| `mock-alt,log-console` | Run `Application` — no real FIKS/PDL, all stubbed via mock-alt |
+| `mock-alt,log-console` | Run `Application` — no real FIKS/PDL, all stubbed via mock-alt. Requires local Postgres on `localhost:5432` (Flyway runs at startup) |
 | `local,log-console` | Run `TestApplication` — real FIKS integration; needs `INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS`, `TESTBRUKER_NATALIE` env vars |
 | Add `mock-redis` | Skip real Valkey/Redis when running locally |
 

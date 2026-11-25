@@ -47,7 +47,7 @@ Vi bruker Valkey som cache. Se [https://doc.nais.io/persistence/valkey/](https:/
 #### *uten* integrasjon til Fiks og login-api, dvs mot mock-alt
 `Application` og profile=`mock-alt,log-console`
 
-Profilen krever en Postgres-database. Flyway kjører migreringene ved oppstart. Som standard kobler appen til
+Profilen krever en Postgres-database. Flyway tømmer databasen og kjører migreringene på nytt ved hver oppstart. Som standard kobler appen til
 `jdbc:postgresql://localhost:5432/sosialhjelp-innsyn-api` med brukeren `postgres` og passordet `postgres`.
 Bruk miljøvariabelen `PGJDBCURL` for å peke mot en annen database. Slik starter du en lokal database:
 

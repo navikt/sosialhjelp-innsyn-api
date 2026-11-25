@@ -1,0 +1,32 @@
+name: 'Deploy Postgres to Mock'
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'nais/dev/postgres_mock.yaml'
+      - '.github/workflows/deploy_postgres_mock.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# beskytter kjørende apply hvis det skulle komme flere endringer samtidig
+concurrency:
+  group: deploy-postgres-mock
+  cancel-in-progress: false
+
+jobs:
+  apply-postgres:
+    name: 'Apply Postgres to dev-gcp'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: nais/setup@cc4e4226c3c8e819ded324ecd8608fd905347428 # v1.0.4
+        with:
+          team: teamdigisos
+      - name: Apply Postgres
+        run: nais apply nais/dev/postgres_mock.yaml --environment dev-gcp --wait

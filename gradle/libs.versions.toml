@@ -6,6 +6,7 @@ fiks_kryptering = "2.5.0"
 file_upload = "1.6.0"
 filformat = "1.20261029.69"
 filformat_kmp = "1.20261029.69"
+flyway = "12.11.0"
 jackson = "3.3.0"
 jackson2 = "2.23.0"
 kotlin_time = "0.8.0"
@@ -21,6 +22,7 @@ okhttp3 = "5.5.1"
 opentelemetry = "1.68.0"
 opentelemetry-instrumentation = "2.34.0"
 pdf_box = "3.0.8"
+postgresql = "42.7.14"
 prometheus = "0.16.0"
 sosialhjelp_common = "3.0.1"
 sosialhjelp_hendelser = "3.0.1"
@@ -45,6 +47,7 @@ commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons
 commons-fileupload = { module = "commons-fileupload:commons-fileupload", version.ref = "file_upload" }
 commons-io = { module = "commons-io:commons-io", version.ref = "commons_io" }
 fiks-kryptering = { module = "no.ks.fiks:kryptering", version.ref = "fiks_kryptering" }
+flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 jackson-module-kotlin2 = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson2" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -63,12 +66,14 @@ mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "
 netty-bom = { module = "io.netty:netty-bom", version.ref = "netty" }
 opentelemetry-annotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations", version.ref = "opentelemetry-instrumentation" }
 opentelemetry-bom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetry" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 prometheus-simpleclient-hotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus" }
 promotheus-simpleclient-common = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus" }
 sosialhjelp-common-api = { module = "no.nav.sosialhjelp:sosialhjelp-common-api", version.ref = "sosialhjelp_common" }
 sosialhjelp-digisos-hendelser = { module = "no.nav.sosialhjelp:digisos-hendelser", version.ref = "sosialhjelp_hendelser" }
 sosialhjelp-filformat-kmp = { module = "no.nav.sosialhjelp.filformat:soknadsosialhjelp-filformat-kmp", version.ref = "filformat_kmp" }
 sosialhjelp-filformat = { module = "no.nav.sbl.dialogarena:soknadsosialhjelp-filformat", version.ref = "filformat" }
+spring-boot-flyway = { module = "org.springframework.boot:spring-boot-flyway", version.ref = "spring-boot" }
 spring-boot-security-test = { module = "org.springframework.security:spring-security-test", version.ref = "spring_security_test" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
 spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "spring-boot" }

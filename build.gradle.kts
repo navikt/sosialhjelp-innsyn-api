@@ -38,6 +38,11 @@ dependencies {
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.spring.boot)
 
+    // Database
+    implementation(libs.spring.boot.flyway)
+    implementation(libs.flyway.database.postgresql)
+    runtimeOnly(libs.postgresql)
+
     // Sosialhjelp-common
     implementation(libs.sosialhjelp.common.api)
     implementation(libs.sosialhjelp.digisos.hendelser)

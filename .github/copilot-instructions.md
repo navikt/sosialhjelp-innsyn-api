@@ -28,7 +28,7 @@ Backend API (Spring Boot WebFlux + Kotlin) that lets Norwegian citizens view the
 
 The app is a **stateless REST API**. Data lives in external systems fetched on each request; Valkey (Redis-compatible) is used only for caching.
 
-A Nais Postgres database is being introduced, so far only in the mock environment (`nais/dev/postgres_mock.yaml`). Flyway migrations live in `src/main/resources/db/migration` and run at startup when the `mock-alt` profile is active (configured in `application-mock-alt.yml`). In Nais, Flyway connects via `PGJDBCURL` (admin role). Locally it defaults to `localhost:5432`. Only `spring-boot-flyway` is on the classpath (no Hikari/starter-jdbc), so no runtime `DataSource` is created.
+A Nais Postgres database is being introduced, so far only in the mock environment (`nais/dev/postgres_mock.yaml`). Flyway migrations live in `src/main/resources/db/migration` and run at startup when the `mock-alt` profile is active (configured in `application-mock-alt.yml`). In Nais, Flyway connects via `PGJDBCURL` (admin role). Locally it defaults to `localhost:5432`. Only `spring-boot-flyway` is on the classpath (no Hikari/starter-jdbc), so no runtime `DataSource` is created. With the `mock-alt` profile (Nais mock and local), `FlywayCleanConfig` wipes the schema and re-runs all migrations on every startup, so migrations may be edited while only mock has a database. Never point `mock-alt` at a database with data that must be kept.
 
 ### Core data flow
 

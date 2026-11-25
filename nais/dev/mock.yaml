@@ -11,6 +11,9 @@ spec:
   image: {{image}}
   port: 8080
   leaderElection: true
+  uses:
+    postgres:
+      - name: sosialhjelp-innsyn-api-db-mock
   liveness:
     path: /sosialhjelp/innsyn-api/internal/isAlive
     initialDelay: 45

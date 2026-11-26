@@ -4,7 +4,6 @@ import io.getunleash.Unleash
 import io.getunleash.UnleashContext
 import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.event.EventService
-import no.nav.sosialhjelp.innsyn.utils.logger
 import org.springframework.stereotype.Component
 import java.util.UUID
 
@@ -28,19 +27,10 @@ class KlageTilgangService(
                     enhetsnummer?.takeIf { it.isNotBlank() }?.let { addProperty("enhetsnummer", it) }
                 }.build()
 
-        val enabled = unleash.isEnabled(KLAGE_TOGGLE, context)
-        // TODO: Midlertidig feilsøkingslogg, fjernes når klage-togglen virker i dev
-        logger.info(
-            "Klage-toggle: enabled=$enabled, " +
-                "toggleKnown=${unleash.more().featureToggleNames.contains(KLAGE_TOGGLE)}, " +
-                "contextKeys=${context.properties.keys}",
-        )
-        return enabled
+        return unleash.isEnabled(KLAGE_TOGGLE, context)
     }
 
     companion object {
-        private val logger by logger()
-
         const val KLAGE_TOGGLE = "sosialhjelp.innsyn.klage"
     }
 }

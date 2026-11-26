@@ -39,6 +39,21 @@ internal class SaksStatusServiceTest {
     }
 
     @Test
+    fun `vedtak viser om vedtaksreferanse finnes`() =
+        runTest {
+            val model = InternalDigisosSoker(fiksDigisosId = "123")
+            val vedtak =
+                listOf("ref", null, "  ").mapIndexed { index, ref ->
+                    Vedtak(index.toString(), "sak", ref, null, "url", LocalDate.now())
+                }
+            model.saker.add(Sak("sak", SaksStatus.FERDIGBEHANDLET, tittel, vedtak.toMutableList(), mutableListOf()))
+            coEvery { eventService.createModel(any()) } returns model
+
+            assertThat(service.hentSaksStatuser("123").single().vedtak.map { it.kanKlage })
+                .containsExactly(true, false, false)
+        }
+
+    @Test
     fun `Skal returnere emptyList når model_saker er null`() =
         runTest(timeout = 5.seconds) {
             val model = InternalDigisosSoker(fiksDigisosId = "123")

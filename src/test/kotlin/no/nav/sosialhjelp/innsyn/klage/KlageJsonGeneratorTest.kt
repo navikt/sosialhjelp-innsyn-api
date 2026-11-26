@@ -60,7 +60,7 @@ class KlageJsonGeneratorTest {
             .also { jsonKlage ->
                 assertThat(jsonKlage.klageId).isEqualTo(input.klageId.toString())
                 assertThat(jsonKlage.vedtakReferanse.filreferanseId).isEqualTo(input.vedtakId.toString())
-                assertThat(jsonKlage.vedtakReferanse.referanse).isEqualTo("saksreferanse")
+                assertThat(jsonKlage.vedtakReferanse.referanse).isEqualTo("vedtaksreferanse")
                 assertThat(jsonKlage.digisosId).isEqualTo(fiksDigisosId.toString())
                 assertThat(jsonKlage.begrunnelse?.klageTekst).isEqualTo(input.tekst)
             }
@@ -76,6 +76,17 @@ class KlageJsonGeneratorTest {
         val jsonKlage = jsonKlageGenerator.generateJsonKlage(KlageInput(UUID.randomUUID(), vedtakId, "tekst"), fiksDigisosId)
 
         assertThat(jsonKlage.vedtakReferanse.referanse).isEqualTo("ny-saksreferanse")
+    }
+
+    @Test
+    suspend fun `Klage avvises når vedtaksreferansen mangler eller er blank`() {
+        val vedtakId = UUID.randomUUID()
+        for (referanse in listOf(null, "", "  ")) {
+            coEvery { eventService.createModel(any()) } returns createModel(vedtakFilreferanseId = vedtakId, nySakReferanse = referanse)
+            assertThrows<KlageIkkeTilgjengeligException> {
+                jsonKlageGenerator.generateJsonKlage(KlageInput(UUID.randomUUID(), vedtakId, "tekst"), UUID.randomUUID())
+            }
+        }
     }
 
     @Test
@@ -133,7 +144,7 @@ private fun createModel(
     digisosId: UUID = UUID.randomUUID(),
     vedtakFilreferanseId: UUID = UUID.randomUUID(),
     enhetsnummer: String = " ",
-    nySakReferanse: String? = null,
+    nySakReferanse: String? = "vedtaksreferanse",
 ): InternalDigisosSoker =
     InternalDigisosSoker(
         fiksDigisosId = digisosId.toString(),

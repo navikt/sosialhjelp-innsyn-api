@@ -18,7 +18,8 @@ class KlageTilgangService(
 ) {
     suspend fun kanSendeKlage(digisosId: UUID): Boolean {
         val soknad = fiksService.getSoknad(digisosId.toString())
-        val enhetsnummer = eventService.createModel(soknad).soknadsmottaker?.navEnhetsnummer
+        val model = eventService.createModel(soknad)
+        val enhetsnummer = model.soknadsmottaker?.navEnhetsnummer
         val context =
             UnleashContext
                 .builder()

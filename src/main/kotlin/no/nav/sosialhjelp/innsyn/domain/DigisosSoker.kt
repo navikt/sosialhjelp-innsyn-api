@@ -70,7 +70,9 @@ data class Vedtak(
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,
     var dato: LocalDate,
-)
+) {
+    val kanKlage: Boolean get() = !nySakReferanse.isNullOrBlank()
+}
 
 data class Utbetaling(
     var referanse: String,

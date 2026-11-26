@@ -29,4 +29,5 @@ data class VedtakDto(
     var utfall: UtfallVedtak?,
     var vedtaksFilUrl: String,
     var dato: LocalDate,
+    val kanKlage: Boolean,
 )

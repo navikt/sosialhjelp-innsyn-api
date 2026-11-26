@@ -105,6 +105,28 @@ class KlageIntegrationTest : AbstractIntegrationTest() {
     private lateinit var klageMetricsService: KlageMetricsService
 
     @Test
+    fun `Klage på vedtak uten vedtaksreferanse avvises før sending`() {
+        val digisosId = UUID.randomUUID()
+        val vedtakId = UUID.randomUUID()
+        val klageId = UUID.randomUUID()
+        val model = createModel(digisosId, vedtakId)
+        val vedtak = model.saker.single().vedtak.single()
+        model.saker.single().vedtak[0] = vedtak.copy(nySakReferanse = null)
+        coEvery { eventService.createModel(any()) } returns model
+        coEvery { fiksService.getSoknad(any()) } returns createDigisosSak()
+        coEvery { uploadClient.getVedleggJson(klageId, klageId) } returns JsonVedleggSpesifikasjon()
+        coEvery { kommuneInfoClient.getKommuneInfo(any()) } returns
+            KommuneInfo("1234", true, true, false, false, null, true, null)
+
+        doPostFullResponse(POST_KLAGE, digisosId, KlageInput(klageId, vedtakId, "Klage"))
+            .expectStatus()
+            .isForbidden
+            .expectBody<FrontendErrorMessage>()
+            .value { assertThat(it?.type).isEqualTo(FrontendErrorType.KLAGE_IKKE_TILGJENGELIG) }
+        coVerify(exactly = 0) { fiksKlageClient.sendKlage(any(), any(), any(), any()) }
+    }
+
+    @Test
     fun `Sende klage skal lagres`() {
         val digisosId = UUID.randomUUID()
         val klageId = UUID.randomUUID()
@@ -578,7 +600,7 @@ private fun createModel(
                         Vedtak(
                             filreferanseId.toString(),
                             "vedtaksreferanse",
-                            null,
+                            "vedtaksreferanse",
                             UtfallVedtak.DELVIS_INNVILGET,
                             vedtaksFilUrl = "",
                             dato = LocalDate.now(),

@@ -44,6 +44,9 @@ class JsonKlageGenerator(
         val digisosSak = fiksService.getSoknad(fiksDigisosId.toString())
         val innsynfilModel = eventService.createModel(digisosSak)
         val vedtak = innsynfilModel.saker.findVedtakForReferanse(input.vedtakId)
+        val vedtaksreferanse =
+            vedtak.nySakReferanse?.takeIf { it.isNotBlank() }
+                ?: throw KlageIkkeTilgjengeligException("Vedtak mangler vedtaksreferanse")
         if (!erInnenforKlagefrist(vedtak.dato, LocalDate.now(ZoneId.of(ZONE_STRING)))) {
             throw KlageValidationException("Klagefristen for vedtaket er utløpt", KlageValidationException.Reason.KLAGEFRIST_UTLOPT)
         }
@@ -53,7 +56,7 @@ class JsonKlageGenerator(
             vedtakReferanse =
                 JsonVedtakReferanse(
                     filreferanseId = vedtak.id,
-                    referanse = vedtak.nySakReferanse ?: vedtak.originalSakReferanse,
+                    referanse = vedtaksreferanse,
                 ),
             digisosId = fiksDigisosId.toString(),
             innsendingstidspunkt = createInnsendingstidspunktString(),

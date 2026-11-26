@@ -60,10 +60,11 @@ class SaksStatusService(
         sak.vedtak.lastOrNull()?.let { it.utfall in listOf(UtfallVedtak.DELVIS_INNVILGET, UtfallVedtak.INNVILGET) } ?: false
 }
 
-private fun Vedtak.toVedtakDto(): VedtakDto =
+internal fun Vedtak.toVedtakDto(): VedtakDto =
     VedtakDto(
         id = id,
         utfall = utfall,
         vedtaksFilUrl = vedtaksFilUrl,
         dato = dato,
+        kanKlage = kanKlage,
     )

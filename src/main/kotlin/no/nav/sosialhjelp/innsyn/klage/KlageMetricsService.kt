@@ -5,7 +5,9 @@ import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Service
 
 @Service
-class KlageMetricsService(meterRegistry: MeterRegistry,) {
+class KlageMetricsService(
+    meterRegistry: MeterRegistry,
+) {
     private val klageIkkeMottattGauge =
         IntegerGauge(
             meterRegistry,

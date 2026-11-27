@@ -20,7 +20,7 @@ import java.util.UUID
 
 @AutoConfigureWebTestClient(timeout = "PT36000S")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash"])
+@ActiveProfiles(profiles = ["mock-redis", "test", "local_unleash", "test-containers"])
 abstract class AbstractIntegrationTest {
     @Autowired
     private lateinit var webClient: WebTestClient

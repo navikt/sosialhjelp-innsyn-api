@@ -1,4 +1,7 @@
 spring:
+  datasource:
+    # READWRITE_PGJDBCURL settes av Nais (uses.postgres, readwrite-rollen). Lokalt brukes en Postgres på localhost.
+    url: ${READWRITE_PGJDBCURL:jdbc:postgresql://localhost:5432/sosialhjelp-innsyn-api?user=postgres&password=postgres}
   flyway:
     # PGJDBCURL settes av Nais (uses.postgres, admin-rollen). Lokalt brukes en Postgres på localhost.
     url: ${PGJDBCURL:jdbc:postgresql://localhost:5432/sosialhjelp-innsyn-api?user=postgres&password=postgres}

@@ -6,24 +6,41 @@ import org.springframework.stereotype.Service
 
 @Service
 class KlageMetricsService(
-    private val meterRegistry: MeterRegistry,
+    meterRegistry: MeterRegistry,
 ) {
     private val klageIkkeMottattGauge =
-        IntegerGauge(meterRegistry, "sosialhjelp.klage.ikke.mottatt", "Antall klager som ikke er mottatt")
+        IntegerGauge(
+            meterRegistry,
+            "sosialhjelp.klage.ikke.mottatt",
+            "Antall klager som ikke er mottatt",
+        )
 
-    private val klageSendtSuccess = meterRegistry.counter(KLAGE_SENDT, "result", "success")
-    private val klageSendtError = meterRegistry.counter(KLAGE_SENDT, "result", "error")
+    private val klageInnsendingError = meterRegistry.counter(KLAGE_INNSENDING, "result", "error")
+    private val klageInnsendingSuccess = meterRegistry.counter(KLAGE_INNSENDING, "result", "success")
+    private val klageOpprettetSuksess = meterRegistry.counter(KLAGE_OPPRETT, "result", "success")
+    private val klageOpprettetError = meterRegistry.counter(KLAGE_OPPRETT, "result", "error")
+    private val klageAvbrutt = meterRegistry.counter(KLAGE_AVBRUTT)
 
     fun registerKlageSent(success: Boolean) {
-        (if (success) klageSendtSuccess else klageSendtError).increment()
+        (if (success) klageInnsendingSuccess else klageInnsendingError).increment()
+    }
+
+    fun registerKlageOpprettet(success: Boolean) {
+        (if (success) klageOpprettetSuksess else klageOpprettetError).increment()
     }
 
     fun setKlagerIkkeMottattGauge(value: Int) {
         klageIkkeMottattGauge.set(value)
     }
 
+    fun registerKlageAvbrutt() {
+        klageAvbrutt.increment()
+    }
+
     companion object {
-        const val KLAGE_SENDT = "sosialhjelp.klage.innsending"
+        const val KLAGE_INNSENDING = "sosialhjelp.klage.innsending"
+        const val KLAGE_OPPRETT = "sosialhjelp.klage.opprett"
+        const val KLAGE_AVBRUTT = "sosialhjelp.klage.avbrutt"
     }
 }
 

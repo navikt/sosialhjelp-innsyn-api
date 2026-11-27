@@ -6,7 +6,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = ["mock-redis", "test"])
+@ActiveProfiles(profiles = ["mock-redis", "test", "test-containers"])
 class ApplicationContextTest {
     @Test
     @WithMockUser

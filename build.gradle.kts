@@ -95,6 +95,7 @@ dependencies {
     // testcontainers
     testImplementation(libs.testcontainers.junit)
     testImplementation(libs.testcontainers)
+    testImplementation(libs.testcontainers.postgresql)
 }
 
 // override spring managed dependencies

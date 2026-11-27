@@ -20,6 +20,7 @@ Interne henvendelser kan sendes via slack i kanalen #team_digisos.
 
 ### Krav
 - JDK 21
+- Docker for Spring Boot-testene, som starter Postgres med Testcontainers.
 
 ### Manuell deploy til dev
 Gjøres via Github Actions, se: https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_dev.yml
@@ -47,20 +48,40 @@ Vi bruker Valkey som cache. Se [https://doc.nais.io/persistence/valkey/](https:/
 #### *uten* integrasjon til Fiks og login-api, dvs mot mock-alt
 `Application` og profile=`mock-alt,log-console`
 
-Profilen krever en Postgres-database. Flyway tømmer databasen og kjører migreringene på nytt ved hver oppstart. Som standard kobler appen til
-`jdbc:postgresql://localhost:5432/sosialhjelp-innsyn-api` med brukeren `postgres` og passordet `postgres`.
-Bruk miljøvariabelen `PGJDBCURL` for å peke mot en annen database. Slik starter du en lokal database:
+Profilen krever en Postgres-database. Flyway kjører migreringene ved oppstart, og appen bruker databasen til klager.
+Som standard kobler appen til `jdbc:postgresql://localhost:5432/sosialhjelp-innsyn-api` med brukeren `postgres` og
+passordet `postgres`. Bruk miljøvariablene `PGJDBCURL` (Flyway) og `READWRITE_PGJDBCURL` (appen) for å peke mot en
+annen database. Slik starter du en lokal database:
 
 ```bash
 docker run -d --name innsyn-postgres -p 5432:5432 \
   -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=sosialhjelp-innsyn-api postgres:18
 ```
 
+Med profilen `test-containers` starter Testcontainers databasen automatisk (krever Docker). Profilen finnes bare i
+testkoden, så du må starte `TestApplication`:
+
+```bash
+./gradlew bootTestRun --args='--spring.profiles.active=mock-alt,test-containers,mock-redis,log-console'
+```
+
+Databasen slettes når appen stopper. `test-containers` er ikke det samme som den eldre profilen `testcontainers`.
+
 #### *med* integrasjon til Fiks og login-api
 `TestApplication` og profile=`local,log-console` (`,mock-redis`)
 
 Da må følgende env-variabler settes (hentes fra kubernetes secrets): \
 `INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS` og `TESTBRUKER_NATALIE`.
+
+Sett også `PGJDBCURL` for Flyway og `READWRITE_PGJDBCURL` for appens databasetilkobling.
+Alle kjøremiljøer krever nå Postgres. Profilen `mock-alt` beholder standardverdiene for lokal database.
+Ikke deploy til andre miljøer før databasen og begge tilkoblingsvariablene er på plass.
+
+## Tester
+
+Kjør alle tester med `./gradlew test`. Spring Boot-testene bruker profilen `test-containers` via
+`AbstractIntegrationTest` eller `ApplicationContextTest`. Docker må kjøre; du trenger ikke starte Postgres selv.
+Rene enhetstester krever ikke database.
 
 ## Hvordan komme i gang
 ### [Felles dokumentasjon for våre backend apper](https://github.com/navikt/digisos/blob/main/oppsett-devmiljo.md#backend-gradle)

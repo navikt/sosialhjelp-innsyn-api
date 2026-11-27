@@ -1,0 +1,11 @@
+# Starter Postgres i Testcontainers via JDBC-URL-en (krever Docker).
+# TC_DAEMON=true holder containeren i live når Flyway lukker sin tilkobling, slik at appen bruker samme database.
+# PGJDBCURL/READWRITE_PGJDBCURL overstyrer standardverdiene i application-mock-alt.yml uavhengig av profilrekkefølge.
+PGJDBCURL: jdbc:tc:postgresql:18:///sosialhjelp-innsyn-api?TC_DAEMON=true
+READWRITE_PGJDBCURL: ${PGJDBCURL}
+
+spring:
+  datasource:
+    url: ${READWRITE_PGJDBCURL}
+  flyway:
+    url: ${PGJDBCURL}

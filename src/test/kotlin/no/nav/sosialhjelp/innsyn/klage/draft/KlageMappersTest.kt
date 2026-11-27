@@ -18,17 +18,18 @@ internal class KlageMappersTest {
         val digisosId = UUID.randomUUID()
         val vedtakFilreferanseId = UUID.randomUUID()
         val opprettet = LocalDateTime.of(2026, 1, 2, 3, 4, 5)
+        val sendt = opprettet.plusMinutes(1).takeIf { status == KlageStatus.SENDT || status == KlageStatus.MOTTATT_FSL }
         val rs = mockk<ResultSet>()
         every { rs.getObject("klage_id", UUID::class.java) } returns klageId
         every { rs.getObject("digisos_id", UUID::class.java) } returns digisosId
         every { rs.getObject("vedtak_filreferanse_id", UUID::class.java) } returns vedtakFilreferanseId
         every { rs.getObject("opprettet", LocalDateTime::class.java) } returns opprettet
-        every { rs.getObject("sendt", LocalDateTime::class.java) } returns null
+        every { rs.getObject("sendt", LocalDateTime::class.java) } returns sendt
         every { rs.getString("status") } returns status.name
 
         val metadata = KlageMetadataRowMapper.mapRow(rs, 0)
 
-        assertThat(metadata).isEqualTo(KlageMetadata(klageId, digisosId, vedtakFilreferanseId, opprettet, null, status))
+        assertThat(metadata).isEqualTo(KlageMetadata(klageId, digisosId, vedtakFilreferanseId, opprettet, sendt, status))
     }
 
     @Test
@@ -44,11 +45,14 @@ internal class KlageMappersTest {
     @ParameterizedTest
     @EnumSource(KlageStatus::class)
     fun `lager sql-parametre med samme navn som i sporringene`(status: KlageStatus) {
-        val metadata = KlageMetadata(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), LocalDateTime.now(), null, status)
+        val opprettet = LocalDateTime.of(2026, 1, 2, 3, 4, 5)
+        val sendt = opprettet.plusMinutes(1).takeIf { status == KlageStatus.SENDT || status == KlageStatus.MOTTATT_FSL }
+        val metadata = KlageMetadata(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), opprettet, sendt, status)
 
         assertThat(metadata.toSqlParams().keys)
             .containsExactlyInAnyOrder("klageId", "digisosId", "vedtakFilreferanseId", "opprettet", "sendt", "status")
         assertThat(metadata.toSqlParams()["status"]).isEqualTo(status.name)
+        assertThat(metadata.toSqlParams()["sendt"]).isEqualTo(sendt)
         assertThat(Klage(metadata.klageId, null).toSqlParams().keys).containsExactlyInAnyOrder("id", "begrunnelse")
     }
 }

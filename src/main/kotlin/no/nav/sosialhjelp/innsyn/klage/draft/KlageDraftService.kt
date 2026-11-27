@@ -6,13 +6,11 @@ import no.nav.sosialhjelp.innsyn.digisosapi.FiksService
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil
 import no.nav.sosialhjelp.innsyn.klage.VedtakNotValidException
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.UUID
 
 @Service
-@ConditionalOnProperty(prefix = "spring.datasource", name = ["url"])
 class KlageDraftService(
     private val fiksService: FiksService,
     private val eventService: EventService,

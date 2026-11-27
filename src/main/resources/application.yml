@@ -3,6 +3,10 @@ spring:
     banner-mode: 'off'
   application:
     name: "sosialhjelp-innsyn-api"
+  datasource:
+    url: ${READWRITE_PGJDBCURL}
+  flyway:
+    url: ${PGJDBCURL}
   data:
     redis:
       host: localhost

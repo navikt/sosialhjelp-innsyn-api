@@ -1,14 +1,12 @@
 package no.nav.sosialhjelp.innsyn.klage.draft
 
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
-@ConditionalOnProperty(prefix = "spring.datasource", name = ["url"])
 class KlageRepository(
     private val jdbcClient: JdbcClient,
 ) {

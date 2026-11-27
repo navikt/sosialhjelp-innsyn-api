@@ -6,12 +6,10 @@ import no.nav.sosialhjelp.innsyn.klage.draft.Klage
 import no.nav.sosialhjelp.innsyn.klage.draft.KlageDraftService
 import no.nav.sosialhjelp.innsyn.utils.logger
 import no.nav.sosialhjelp.innsyn.vedlegg.FilForOpplasting
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import java.util.UUID
 
 @Component
-@ConditionalOnProperty(prefix = "spring.datasource", name = ["url"])
 class SendKlageUseCaseHandler(
     private val klageDraftService: KlageDraftService,
     private val metricsService: KlageMetricsService,

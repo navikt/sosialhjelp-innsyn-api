@@ -8,11 +8,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.simple.JdbcClient
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 import java.util.UUID
 
-@ActiveProfiles("test-containers")
 class KlageRepositoryTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var klageRepository: KlageRepository
@@ -70,6 +68,8 @@ class KlageRepositoryTest : AbstractIntegrationTest() {
     @Test
     fun `lagrer og oppdaterer begrunnelse paa nytt utkast`() {
         val klageId = klageRepository.createKlageMetadata(UUID.randomUUID(), UUID.randomUUID())
+        klageRepository.createKlage(klageId)
+        assertThat(klageRepository.getKlage(klageId)).isEqualTo(Klage(klageId, null))
 
         klageRepository.updateKlage(klageId, "Ny begrunnelse")
         assertThat(klageRepository.getKlage(klageId)).isEqualTo(Klage(klageId, "Ny begrunnelse"))
@@ -94,7 +94,7 @@ class KlageRepositoryTest : AbstractIntegrationTest() {
     }
 
     @ParameterizedTest
-    @EnumSource(KlageStatus::class)
+    @EnumSource(KlageStatus::class, names = ["SENDT", "MOTTATT_FSL"], mode = EnumSource.Mode.EXCLUDE)
     fun `oppdaterer bare status til valgt klage`(status: KlageStatus) {
         val klageId = klageRepository.createKlageMetadata(UUID.randomUUID(), UUID.randomUUID())
         val annenKlageId = klageRepository.createKlageMetadata(UUID.randomUUID(), UUID.randomUUID())
@@ -102,31 +102,48 @@ class KlageRepositoryTest : AbstractIntegrationTest() {
         val metadata = requireNotNull(klageRepository.getMetadata(klageId))
         val annenMetadata = klageRepository.getMetadata(annenKlageId)
 
-        val forOppdatering = TimestampUtil.nowWithMillis()
         klageRepository.updateStatus(klageId, status)
 
         val oppdatert = requireNotNull(klageRepository.getMetadata(klageId))
-        if (status == KlageStatus.SENDT || status == KlageStatus.MOTTATT_FSL) {
-            assertThat(oppdatert.sendt).isBetween(forOppdatering, TimestampUtil.nowWithMillis())
-        } else {
-            assertThat(oppdatert.sendt).isNull()
-        }
-        assertThat(oppdatert).isEqualTo(metadata.copy(status = status, sendt = oppdatert.sendt))
+        assertThat(oppdatert).isEqualTo(metadata.copy(status = status))
         assertThat(klageRepository.getMetadata(annenKlageId)).isEqualTo(annenMetadata)
         assertThat(klageRepository.getKlage(klageId)).isEqualTo(Klage(klageId, "Uenig i vedtaket"))
     }
 
     @Test
-    fun `markerer klage sendt og sletter begrunnelse atomisk`() {
+    fun `markerer klage sendt og sletter bare dens begrunnelse`() {
         val klageId = klageRepository.createKlageMetadata(UUID.randomUUID(), UUID.randomUUID())
+        val annenKlageId = klageRepository.createKlageMetadata(UUID.randomUUID(), UUID.randomUUID())
+        klageRepository.createKlage(klageId)
         klageRepository.updateKlage(klageId, "Uenig i vedtaket")
+        lagreBegrunnelse(annenKlageId)
+        val metadata = requireNotNull(klageRepository.getMetadata(klageId))
+        val annenMetadata = klageRepository.getMetadata(annenKlageId)
         val sendt = TimestampUtil.nowWithMillis()
+        assertThat(klageRepository.getKlage(klageId)).isEqualTo(Klage(klageId, "Uenig i vedtaket"))
 
         klageRepository.markAsSent(klageId, sendt)
 
+        assertThat(klageRepository.getMetadata(klageId)).isEqualTo(metadata.copy(status = KlageStatus.SENDT, sendt = sendt))
+        assertThat(klageRepository.getKlage(klageId)).isNull()
+        assertThat(klageRepository.getMetadata(annenKlageId)).isEqualTo(annenMetadata)
+        assertThat(klageRepository.getKlage(annenKlageId)).isEqualTo(Klage(annenKlageId, "Uenig i vedtaket"))
+    }
+
+    @Test
+    fun `oppdaterer sendt klage til mottatt og beholder opprinnelig sendetidspunkt`() {
+        val klageId = klageRepository.createKlageMetadata(UUID.randomUUID(), UUID.randomUUID())
+        val annenKlageId = klageRepository.createKlageMetadata(UUID.randomUUID(), UUID.randomUUID())
+        klageRepository.createKlage(klageId)
+        val sendt = LocalDateTime.of(2026, 1, 2, 3, 4, 5)
+        klageRepository.markAsSent(klageId, sendt)
         val metadata = requireNotNull(klageRepository.getMetadata(klageId))
-        assertThat(metadata.status).isEqualTo(KlageStatus.SENDT)
-        assertThat(metadata.sendt).isEqualTo(sendt)
+        val annenMetadata = klageRepository.getMetadata(annenKlageId)
+
+        klageRepository.updateStatus(klageId, KlageStatus.MOTTATT_FSL)
+
+        assertThat(klageRepository.getMetadata(klageId)).isEqualTo(metadata.copy(status = KlageStatus.MOTTATT_FSL))
+        assertThat(klageRepository.getMetadata(annenKlageId)).isEqualTo(annenMetadata)
         assertThat(klageRepository.getKlage(klageId)).isNull()
     }
 

@@ -20,6 +20,7 @@ Interne henvendelser kan sendes via slack i kanalen #team_digisos.
 
 ### Krav
 - JDK 21
+- Docker for Spring Boot-testene, som starter Postgres med Testcontainers.
 
 ### Manuell deploy til dev
 Gjøres via Github Actions, se: https://github.com/navikt/sosialhjelp-innsyn-api/actions/workflows/deploy_dev.yml
@@ -71,6 +72,16 @@ Databasen slettes når appen stopper. `test-containers` er ikke det samme som de
 
 Da må følgende env-variabler settes (hentes fra kubernetes secrets): \
 `INTEGRASJONPASSORD_FIKS`, `INTEGRASJONSID_FIKS` og `TESTBRUKER_NATALIE`.
+
+Sett også `PGJDBCURL` for Flyway og `READWRITE_PGJDBCURL` for appens databasetilkobling.
+Alle kjøremiljøer krever nå Postgres. Profilen `mock-alt` beholder standardverdiene for lokal database.
+Ikke deploy til andre miljøer før databasen og begge tilkoblingsvariablene er på plass.
+
+## Tester
+
+Kjør alle tester med `./gradlew test`. Spring Boot-testene bruker profilen `test-containers` via
+`AbstractIntegrationTest` eller `ApplicationContextTest`. Docker må kjøre; du trenger ikke starte Postgres selv.
+Rene enhetstester krever ikke database.
 
 ## Hvordan komme i gang
 ### [Felles dokumentasjon for våre backend apper](https://github.com/navikt/digisos/blob/main/oppsett-devmiljo.md#backend-gradle)

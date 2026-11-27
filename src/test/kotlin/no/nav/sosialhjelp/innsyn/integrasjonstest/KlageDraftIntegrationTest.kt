@@ -35,14 +35,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.simple.JdbcClient
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 
-@ActiveProfiles("test-containers")
 class KlageDraftIntegrationTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var jdbcClient: JdbcClient

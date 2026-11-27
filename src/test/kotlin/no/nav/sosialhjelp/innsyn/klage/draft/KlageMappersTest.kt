@@ -1,29 +1,34 @@
-package no.nav.sosialhjelp.innsyn.klage.database
+package no.nav.sosialhjelp.innsyn.klage.draft
 
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal class KlageMappersTest {
-    @Test
-    fun `mapper klage_metadata-rad til domeneobjekt`() {
+    @ParameterizedTest
+    @EnumSource(KlageStatus::class)
+    fun `mapper klage_metadata-rad til domeneobjekt`(status: KlageStatus) {
         val klageId = UUID.randomUUID()
+        val digisosId = UUID.randomUUID()
+        val vedtakFilreferanseId = UUID.randomUUID()
         val opprettet = LocalDateTime.of(2026, 1, 2, 3, 4, 5)
         val rs = mockk<ResultSet>()
         every { rs.getObject("klage_id", UUID::class.java) } returns klageId
-        every { rs.getString("digisos_id") } returns "digisos-123"
-        every { rs.getString("vedtak_filreferanse_id") } returns "vedtak-456"
+        every { rs.getObject("digisos_id", UUID::class.java) } returns digisosId
+        every { rs.getObject("vedtak_filreferanse_id", UUID::class.java) } returns vedtakFilreferanseId
         every { rs.getObject("opprettet", LocalDateTime::class.java) } returns opprettet
         every { rs.getObject("sendt", LocalDateTime::class.java) } returns null
-        every { rs.getString("status") } returns "OPPRETTET"
+        every { rs.getString("status") } returns status.name
 
         val metadata = KlageMetadataRowMapper.mapRow(rs, 0)
 
-        assertThat(metadata).isEqualTo(KlageMetadata(klageId, "digisos-123", "vedtak-456", opprettet, null, "OPPRETTET"))
+        assertThat(metadata).isEqualTo(KlageMetadata(klageId, digisosId, vedtakFilreferanseId, opprettet, null, status))
     }
 
     @Test
@@ -36,12 +41,14 @@ internal class KlageMappersTest {
         assertThat(KlageRowMapper.mapRow(rs, 0)).isEqualTo(Klage(id, "Uenig i vedtaket"))
     }
 
-    @Test
-    fun `lager sql-parametre med samme navn som i sporringene`() {
-        val metadata = KlageMetadata(UUID.randomUUID(), "d", "v", LocalDateTime.now(), null, "OPPRETTET")
+    @ParameterizedTest
+    @EnumSource(KlageStatus::class)
+    fun `lager sql-parametre med samme navn som i sporringene`(status: KlageStatus) {
+        val metadata = KlageMetadata(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), LocalDateTime.now(), null, status)
 
         assertThat(metadata.toSqlParams().keys)
             .containsExactlyInAnyOrder("klageId", "digisosId", "vedtakFilreferanseId", "opprettet", "sendt", "status")
+        assertThat(metadata.toSqlParams()["status"]).isEqualTo(status.name)
         assertThat(Klage(metadata.klageId, null).toSqlParams().keys).containsExactlyInAnyOrder("id", "begrunnelse")
     }
 }

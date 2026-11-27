@@ -1,4 +1,4 @@
-package no.nav.sosialhjelp.innsyn.klage.database
+package no.nav.sosialhjelp.innsyn.klage.draft
 
 import org.springframework.jdbc.core.RowMapper
 import java.sql.ResultSet
@@ -12,11 +12,11 @@ object KlageMetadataRowMapper : RowMapper<KlageMetadata> {
     ): KlageMetadata =
         KlageMetadata(
             klageId = rs.getObject("klage_id", UUID::class.java),
-            digisosId = rs.getString("digisos_id"),
-            vedtakFilreferanseId = rs.getString("vedtak_filreferanse_id"),
+            digisosId = rs.getObject("digisos_id", UUID::class.java),
+            vedtakFilreferanseId = rs.getObject("vedtak_filreferanse_id", UUID::class.java),
             opprettet = rs.getObject("opprettet", LocalDateTime::class.java),
             sendt = rs.getObject("sendt", LocalDateTime::class.java),
-            status = rs.getString("status"),
+            status = KlageStatus.valueOf(rs.getString("status")),
         )
 }
 
@@ -38,7 +38,7 @@ fun KlageMetadata.toSqlParams(): Map<String, Any?> =
         "vedtakFilreferanseId" to vedtakFilreferanseId,
         "opprettet" to opprettet,
         "sendt" to sendt,
-        "status" to status,
+        "status" to status.name,
     )
 
 fun Klage.toSqlParams(): Map<String, Any?> =

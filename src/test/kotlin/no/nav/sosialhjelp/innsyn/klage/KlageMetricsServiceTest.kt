@@ -23,5 +23,5 @@ class KlageMetricsServiceTest {
         assertThat(count("error")).isEqualTo(1.0)
     }
 
-    private fun count(result: String) = registry.get(KlageMetricsService.KLAGE_SENDT).tag("result", result).counter().count()
+    private fun count(result: String) = registry.get(KlageMetricsService.KLAGE_INNSENDING).tag("result", result).counter().count()
 }

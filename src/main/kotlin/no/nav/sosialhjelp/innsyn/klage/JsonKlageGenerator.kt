@@ -17,6 +17,7 @@ import no.nav.sosialhjelp.innsyn.domain.Vedtak
 import no.nav.sosialhjelp.innsyn.event.EventService
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.convertToOffsetDateTimeUTCString
 import no.nav.sosialhjelp.innsyn.klage.TimestampUtil.nowWithMillis
+import no.nav.sosialhjelp.innsyn.klage.draft.Klage
 import no.nav.sosialhjelp.innsyn.pdl.PdlService
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -37,6 +38,7 @@ class JsonKlageGenerator(
     private val eventService: EventService,
     private val pdlService: PdlService,
 ) {
+    @Deprecated("Bruk generateJsonKlage med Klage og VedtakId i stedet")
     suspend fun generateJsonKlage(
         input: KlageInput,
         fiksDigisosId: UUID,
@@ -57,7 +59,36 @@ class JsonKlageGenerator(
                 ),
             digisosId = fiksDigisosId.toString(),
             innsendingstidspunkt = createInnsendingstidspunktString(),
-            begrunnelse = input.createKlageBegrunnelse(),
+            begrunnelse = input.toJsonBegrunnelse(),
+            personIdentifikator = createJsonPersonIdentifikator(),
+            navn = createJsonSokernavn(),
+            mottaker = innsynfilModel.soknadsmottaker.createSoknadsmottaker(digisosSak.kommunenummer()),
+            autentisering = createJsonAutentisering(),
+        )
+    }
+
+    suspend fun generateJsonKlage(
+        klage: Klage,
+        vedtakId: UUID,
+        fiksDigisosId: UUID,
+    ): JsonKlage {
+        val digisosSak = fiksService.getSoknad(fiksDigisosId.toString())
+        val innsynfilModel = eventService.createModel(digisosSak)
+        val vedtak = innsynfilModel.saker.findVedtakForReferanse(vedtakId)
+        if (!erInnenforKlagefrist(vedtak.dato, LocalDate.now(ZoneId.of(ZONE_STRING)))) {
+            throw KlageValidationException("Klagefristen for vedtaket er utløpt", KlageValidationException.Reason.KLAGEFRIST_UTLOPT)
+        }
+
+        return JsonKlage(
+            klageId = klage.id.toString(),
+            vedtakReferanse =
+                JsonVedtakReferanse(
+                    filreferanseId = vedtak.id,
+                    referanse = vedtak.nySakReferanse ?: vedtak.originalSakReferanse,
+                ),
+            digisosId = fiksDigisosId.toString(),
+            innsendingstidspunkt = createInnsendingstidspunktString(),
+            begrunnelse = klage.toJsonBegrunnelse(),
             personIdentifikator = createJsonPersonIdentifikator(),
             navn = createJsonSokernavn(),
             mottaker = innsynfilModel.soknadsmottaker.createSoknadsmottaker(digisosSak.kommunenummer()),
@@ -115,7 +146,9 @@ private fun MutableList<Sak>.findVedtakForReferanse(vedtakFilreferanseId: UUID):
     flatMap { it.vedtak }.find { it.id == vedtakFilreferanseId.toString() }
         ?: throw VedtakNotValidException("Fant ikke vedtak med vedtaksreferanse $vedtakFilreferanseId")
 
-private fun KlageInput.createKlageBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = tekst)
+private fun Klage.toJsonBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = begrunnelse ?: "")
+
+private fun KlageInput.toJsonBegrunnelse(): JsonBegrunnelse = JsonBegrunnelse(kilde = JsonKildeBruker.BRUKER, klageTekst = tekst)
 
 object TimestampUtil {
     private const val TIMESTAMP_REGEX = "^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9]*Z$"
